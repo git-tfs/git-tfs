@@ -1,0 +1,34 @@
+git-svn has these commands:
+  create/pull:
+    clone (init + fetch)
+    init
+    fetch
+    rebase
+  commit:
+    dcommit
+    set-tree (lower-level form of dcommit)
+    commit-diff (pushes diff of git revs to svn, does not require init)
+  history:
+    blame
+    find-rev
+    info
+    log
+  svn features:
+    create-ignore
+    propget
+    proplist
+    show-externals
+    show-ignore
+  internals:
+    migrate (upgrade from one version of git-svn to another)
+
+The commands I plan to implement, in order of priority:
+  init
+  fetch
+  clone (init+fetch)
+  rebase
+  (d)commit
+  find-rev
+  log
+  commit-diff ?
+  migrate ?
