@@ -1,0 +1,4 @@
+.*.swp
+*.suo
+bin
+_ReSharper.*
