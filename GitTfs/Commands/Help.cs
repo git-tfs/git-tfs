@@ -1,10 +1,23 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using CommandLine.OptParse;
+using StructureMap;
+
 namespace Sep.Git.Tfs.Commands
 {
-    [GitTfsCommand("-h")]
-    [GitTfsCommand("--help")]
-    [GitTfsCommand("help")]
+    [Pluggable("help")]
     public class Help : GitTfsCommand
     {
+        private TextWriter output;
+
+        public Help(TextWriter output)
+        {
+            this.output = output;
+        }
+
         /// <summary>
         /// Figures out whether it should show help for git-tfs or for
         /// a particular command, and then does that.
@@ -13,8 +26,8 @@ namespace Sep.Git.Tfs.Commands
         {
             foreach(var arg in args)
             {
-                var command = container.GetByName(arg);
-                if(command is GitTfsCommand)
+                var command = ObjectFactory.TryGetInstance<GitTfsCommand>(arg);
+                if(command != null)
                 {
                     return Run(command);
                 }
@@ -27,28 +40,54 @@ namespace Sep.Git.Tfs.Commands
         /// </summary>
         private int Run()
         {
-            foreach(var commandName in GetCommandNames().Sort())
+            output.WriteLine("Usage: git-tfs [command] [options]");
+            foreach(var commandName in GetCommandNames().OrderBy(s => s))
             {
                 output.WriteLine("    " + commandName);
             }
+            output.WriteLine(" (use 'git-tfs help [command]' for more information)");
+            return 1;
         }
 
         private IEnumerable<string> GetCommandNames()
         {
             foreach(var commandType in GetCommandTypes())
             {
-                foreach(var commandName in GitTfsCommandAttribute.GetCommandNames(commandType))
-                {
-                    yield return commandName;
-                }
+                yield return GetCommandName(commandType);
             }
+        }
+
+        private string GetCommandName(Type commandType)
+        {
+            var attribute = (PluggableAttribute) commandType.GetCustomAttributes(typeof (PluggableAttribute), false).FirstOrDefault();
+            return attribute == null ? "n/a" : attribute.ConcreteKey;
+        }
+
+        private string GetCommandName(object obj)
+        {
+            return GetCommandName(obj.GetType());
+        }
+
+        private IEnumerable<Type> GetCommandTypes()
+        {
+            var commandType = typeof (GitTfsCommand);
+            return from t in GetType().Assembly.GetTypes()
+                   where commandType.IsAssignableFrom(t)
+                   select t;
         }
 
         /// <summary>
         /// Shows help for a specific command.
         /// </summary>
-        public int Run(GitTfsCommand command)
+        private int Run(GitTfsCommand command)
         {
+            var usage = new UsageBuilder();
+            usage.BeginSection("where options are:");
+            usage.AddOptions(new PropertyFieldParserHelper(command));
+            usage.EndSection();
+            output.WriteLine("Usage: git-tfs " + GetCommandName(command) + " [options]");
+            usage.ToText(output, OptStyle.Unix, true);
+            return 2;
         }
     }
 }

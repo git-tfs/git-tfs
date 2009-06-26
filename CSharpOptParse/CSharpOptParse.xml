@@ -1,0 +1,2370 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CSharpOptParse</name>
+    </assembly>
+    <members>
+        <member name="T:CommandLine.ConsoleUtils.ConsolePoint">
+            <summary>
+            Position in the console
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsolePoint.X">
+            <summary>
+            X coordinate
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsolePoint.Y">
+            <summary>
+            Y coordinate
+            </summary>
+        </member>
+        <member name="M:CommandLine.ConsoleUtils.ConsolePoint.#ctor(System.Int16,System.Int16)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="T:CommandLine.ConsoleUtils.ConsoleRect">
+            <summary>
+            Rectangle in the console
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsoleRect.Left">
+            <summary>
+            Left edge
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsoleRect.Top">
+            <summary>
+            Top edge
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsoleRect.Right">
+            <summary>
+            Right edge
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsoleRect.Bottom">
+            <summary>
+            Bottom edge
+            </summary>
+        </member>
+        <member name="T:CommandLine.ConsoleUtils.ConsoleScreenBufferInfo">
+            <summary>
+            Information on the current screen buffer
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsoleScreenBufferInfo.Size">
+            <summary>
+            Size of the screen buffer
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsoleScreenBufferInfo.CursorPosition">
+            <summary>
+            Position of the cursor on the screen
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsoleScreenBufferInfo.Attributes">
+            <summary>
+            Attributes
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsoleScreenBufferInfo.Window">
+            <summary>
+            Bounds of the window
+            </summary>
+        </member>
+        <member name="F:CommandLine.ConsoleUtils.ConsoleScreenBufferInfo.MaximumWindowSize">
+            <summary>
+            Maximum window size
+            </summary>
+        </member>
+        <member name="T:CommandLine.ConsoleUtils.ConsoleHelper">
+            <summary>
+            Class to help with more advanced console functions
+            </summary>
+        </member>
+        <member name="M:CommandLine.ConsoleUtils.ConsoleHelper.#ctor">
+            <summary>Cosntructor</summary>
+        </member>
+        <member name="M:CommandLine.ConsoleUtils.ConsoleHelper.SetCursorPos(System.Int16,System.Int16)">
+            <summary>
+            Set the cursor position
+            </summary>
+        </member>
+        <member name="M:CommandLine.ConsoleUtils.ConsoleHelper.GetScreenInfo">
+            <summary>
+            Get the current screen information
+            </summary>
+        </member>
+        <member name="M:CommandLine.ConsoleUtils.ConsoleHelper.GetCursorPos">
+            <summary>
+            Get the cursor position
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.OptDefAttribute">
+            <summary>
+            Define that a property or field can be given as an option
+            <seealso cref="T:CommandLine.OptParse.Parser"/>
+            </summary>
+            <remarks>
+            For <see cref="F:CommandLine.OptParse.OptValType.Flag"/> the property or field must have be type of bool 
+            <para>
+            For <see cref="F:CommandLine.OptParse.OptValType.IncrementalFlag"/> the property or field must be a integer
+            </para>
+            <para>
+            For <see cref="F:CommandLine.OptParse.OptValType.ValueReq"/> or <see cref="F:CommandLine.OptParse.OptValType.ValueOpt"/> the
+            property or field must be the type of the <see cref="P:CommandLine.OptParse.OptDefAttribute.ValueType"/> property.
+            </para>
+            <para>
+            For <see cref="F:CommandLine.OptParse.OptValType.MultValue"/> the property or field must be 
+            an <see cref="T:System.Collections.IList"/> of values of the type defined by the
+            <see cref="P:CommandLine.OptParse.OptDefAttribute.ValueType"/> property (IList cannot be null).
+            </para>
+            </remarks>
+            <example>
+			Example class implementing options via attributes:
+			<code>
+// Example class defining properties
+class Properties
+{
+	#region Enumerations
+	internal enum ExamplePropertyEnum
+	{
+		First,
+		Second
+	}
+	#endregion Enumerations
+
+	#region Members
+	private ExamplePropertyEnum _exampleEnumProp;
+	#endregion Members
+
+	#region Accessed by code properties
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	public ExamplePropertyEnum ExampleEnumProp 
+	{
+		get { return _exampleEnumProp; }
+		set { _exampleEnumProp = value; }
+	}
+	#endregion Accessed by code properties
+
+	#region Options
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	// The EditorBrowsableAttribute is used to hide this 
+	// property from code
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("example-enum-prop")]
+	[UseNameAsLongOption(false)]
+	[Description("Show how to perform complex type option parsing")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public string ExampleEnumPropAsString
+	{
+		get { return _exampleEnumProp.ToString(); }
+		set 
+		{ 
+			switch (value.ToLower())
+			{
+				case "first": _exampleEnumProp = ExamplePropertyEnum.First; break;
+				case "second": _exampleEnumProp = ExamplePropertyEnum.Second; break;
+				default:
+					throw new ArgumentException(
+						"Invalid value for the example-enum-prop option");
+			}
+		}
+	}
+
+
+	// Example of how to reverse flag-option values
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("no-debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Disable debug output")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public bool NoDebug
+	{
+		get { return !this.Debug; }
+		set { this.Debug = !value; }
+	}
+
+
+	[ShortOptionName('b')]
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Enable debug output")]
+	public bool Debug = false;
+
+	[OptDef(OptValType.ValueReq)]
+	[ShortOptionName('d')]
+	[LongOptionName("directory")]
+	[UseNameAsLongOption(false)]
+	[Description("Output directory")]
+	[DefaultValue(".")]
+	public string Directory = ".";
+
+	[OptDef(OptValType.ValueOpt)]
+	[ShortOptionName('f')]
+	[LongOptionName("file")]
+	[UseNameAsLongOption(false)]
+	[Description("Input file")]
+	public string File = null;
+
+	[OptDef(OptValType.IncrementalFlag)]
+	[ShortOptionName('v')]
+	[LongOptionName("verbose")]
+	[UseNameAsLongOption(false)]
+	[Description("Set level of vebosity for debug printing")]
+	public int Verbose = 0;
+
+	[OptDef(OptValType.MultValue, ValueType=typeof(string))]
+	[ShortOptionName('s')]
+	[LongOptionName("strings")]
+	[UseNameAsLongOption(false)]
+	[Description("Test option that takes multiple values")]
+	public StringCollection Strings = new StringCollection();
+	#endregion Options
+}
+			</code>
+		</example>
+        </member>
+        <member name="M:CommandLine.OptParse.OptDefAttribute.#ctor(CommandLine.OptParse.OptValType)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="optionValueType">The type of value the option takes or null to use
+            the type of the property/field</param>
+        </member>
+        <member name="P:CommandLine.OptParse.OptDefAttribute.ValueType">
+            <summary>
+            Get or set the type of value to support
+            </summary>
+            <remarks>
+            For most properties and fields, this is optional (can be left null), but for
+            IList types of properties that take multiple values, this property needs to be
+            set to know how to convert the command-line values to the type the list expects
+            </remarks>
+        </member>
+        <member name="P:CommandLine.OptParse.OptDefAttribute.OptionValueType">
+            <summary>
+            Get the type of value the option takes
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.UseNameAsLongOptionAttribute">
+            <summary>
+            Gives the ability to stop the name of a field or property being used
+            to be used as an option name
+            </summary>
+            <remarks>
+            By default, the name of a property or field is used as a option name
+            when defined as an option (see <see cref="T:CommandLine.OptParse.OptDefAttribute"/>). This
+            attribute allows only names to be given using <see cref="T:CommandLine.OptParse.LongOptionNameAttribute"/>
+            and <see cref="T:CommandLine.OptParse.ShortOptionNameAttribute"/> attributes. If this attribute value
+            is false, one of the above attributes must be given for the property
+            </remarks>
+            <example>
+			Example class implementing options via attributes:
+			<code>
+// Example class defining properties
+class Properties
+{
+	#region Enumerations
+	internal enum ExamplePropertyEnum
+	{
+		First,
+		Second
+	}
+	#endregion Enumerations
+
+	#region Members
+	private ExamplePropertyEnum _exampleEnumProp;
+	#endregion Members
+
+	#region Accessed by code properties
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	public ExamplePropertyEnum ExampleEnumProp 
+	{
+		get { return _exampleEnumProp; }
+		set { _exampleEnumProp = value; }
+	}
+	#endregion Accessed by code properties
+
+	#region Options
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	// The EditorBrowsableAttribute is used to hide this 
+	// property from code
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("example-enum-prop")]
+	[UseNameAsLongOption(false)]
+	[Description("Show how to perform complex type option parsing")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public string ExampleEnumPropAsString
+	{
+		get { return _exampleEnumProp.ToString(); }
+		set 
+		{ 
+			switch (value.ToLower())
+			{
+				case "first": _exampleEnumProp = ExamplePropertyEnum.First; break;
+				case "second": _exampleEnumProp = ExamplePropertyEnum.Second; break;
+				default:
+					throw new ArgumentException(
+						"Invalid value for the example-enum-prop option");
+			}
+		}
+	}
+
+
+	// Example of how to reverse flag-option values
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("no-debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Disable debug output")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public bool NoDebug
+	{
+		get { return !this.Debug; }
+		set { this.Debug = !value; }
+	}
+
+
+	[ShortOptionName('b')]
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Enable debug output")]
+	public bool Debug = false;
+
+	[OptDef(OptValType.ValueReq)]
+	[ShortOptionName('d')]
+	[LongOptionName("directory")]
+	[UseNameAsLongOption(false)]
+	[Description("Output directory")]
+	[DefaultValue(".")]
+	public string Directory = ".";
+
+	[OptDef(OptValType.ValueOpt)]
+	[ShortOptionName('f')]
+	[LongOptionName("file")]
+	[UseNameAsLongOption(false)]
+	[Description("Input file")]
+	public string File = null;
+
+	[OptDef(OptValType.IncrementalFlag)]
+	[ShortOptionName('v')]
+	[LongOptionName("verbose")]
+	[UseNameAsLongOption(false)]
+	[Description("Set level of vebosity for debug printing")]
+	public int Verbose = 0;
+
+	[OptDef(OptValType.MultValue, ValueType=typeof(string))]
+	[ShortOptionName('s')]
+	[LongOptionName("strings")]
+	[UseNameAsLongOption(false)]
+	[Description("Test option that takes multiple values")]
+	public StringCollection Strings = new StringCollection();
+	#endregion Options
+}
+			</code>
+		</example>
+        </member>
+        <member name="M:CommandLine.OptParse.UseNameAsLongOptionAttribute.#ctor(System.Boolean)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="useName">Set to false to not use this field or property as
+            a possible option name</param>
+        </member>
+        <member name="P:CommandLine.OptParse.UseNameAsLongOptionAttribute.UseName">
+            <summary>
+            Get if the name should be used as an option
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.LongOptionNameAttribute">
+            <summary>
+            Defines a long option for a field or property
+            </summary>
+            <remarks>This is only applicable if the field or property is marked as an option
+            using <see cref="T:CommandLine.OptParse.OptDefAttribute"/></remarks>
+            <example>
+			Example class implementing options via attributes:
+			<code>
+// Example class defining properties
+class Properties
+{
+	#region Enumerations
+	internal enum ExamplePropertyEnum
+	{
+		First,
+		Second
+	}
+	#endregion Enumerations
+
+	#region Members
+	private ExamplePropertyEnum _exampleEnumProp;
+	#endregion Members
+
+	#region Accessed by code properties
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	public ExamplePropertyEnum ExampleEnumProp 
+	{
+		get { return _exampleEnumProp; }
+		set { _exampleEnumProp = value; }
+	}
+	#endregion Accessed by code properties
+
+	#region Options
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	// The EditorBrowsableAttribute is used to hide this 
+	// property from code
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("example-enum-prop")]
+	[UseNameAsLongOption(false)]
+	[Description("Show how to perform complex type option parsing")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public string ExampleEnumPropAsString
+	{
+		get { return _exampleEnumProp.ToString(); }
+		set 
+		{ 
+			switch (value.ToLower())
+			{
+				case "first": _exampleEnumProp = ExamplePropertyEnum.First; break;
+				case "second": _exampleEnumProp = ExamplePropertyEnum.Second; break;
+				default:
+					throw new ArgumentException(
+						"Invalid value for the example-enum-prop option");
+			}
+		}
+	}
+
+
+	// Example of how to reverse flag-option values
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("no-debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Disable debug output")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public bool NoDebug
+	{
+		get { return !this.Debug; }
+		set { this.Debug = !value; }
+	}
+
+
+	[ShortOptionName('b')]
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Enable debug output")]
+	public bool Debug = false;
+
+	[OptDef(OptValType.ValueReq)]
+	[ShortOptionName('d')]
+	[LongOptionName("directory")]
+	[UseNameAsLongOption(false)]
+	[Description("Output directory")]
+	[DefaultValue(".")]
+	public string Directory = ".";
+
+	[OptDef(OptValType.ValueOpt)]
+	[ShortOptionName('f')]
+	[LongOptionName("file")]
+	[UseNameAsLongOption(false)]
+	[Description("Input file")]
+	public string File = null;
+
+	[OptDef(OptValType.IncrementalFlag)]
+	[ShortOptionName('v')]
+	[LongOptionName("verbose")]
+	[UseNameAsLongOption(false)]
+	[Description("Set level of vebosity for debug printing")]
+	public int Verbose = 0;
+
+	[OptDef(OptValType.MultValue, ValueType=typeof(string))]
+	[ShortOptionName('s')]
+	[LongOptionName("strings")]
+	[UseNameAsLongOption(false)]
+	[Description("Test option that takes multiple values")]
+	public StringCollection Strings = new StringCollection();
+	#endregion Options
+}
+			</code>
+		</example>
+        </member>
+        <member name="M:CommandLine.OptParse.LongOptionNameAttribute.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="name">Name of the option</param>
+        </member>
+        <member name="P:CommandLine.OptParse.LongOptionNameAttribute.Name">
+            <summary>
+            Get the name of the option
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.ShortOptionNameAttribute">
+            <summary>
+            Defines a short option name for a field or property
+            </summary>
+            <remarks>This is only applicable if the field or property is marked as an option
+            using <see cref="T:CommandLine.OptParse.OptDefAttribute"/></remarks>
+            <example>
+			Example class implementing options via attributes:
+			<code>
+// Example class defining properties
+class Properties
+{
+	#region Enumerations
+	internal enum ExamplePropertyEnum
+	{
+		First,
+		Second
+	}
+	#endregion Enumerations
+
+	#region Members
+	private ExamplePropertyEnum _exampleEnumProp;
+	#endregion Members
+
+	#region Accessed by code properties
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	public ExamplePropertyEnum ExampleEnumProp 
+	{
+		get { return _exampleEnumProp; }
+		set { _exampleEnumProp = value; }
+	}
+	#endregion Accessed by code properties
+
+	#region Options
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	// The EditorBrowsableAttribute is used to hide this 
+	// property from code
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("example-enum-prop")]
+	[UseNameAsLongOption(false)]
+	[Description("Show how to perform complex type option parsing")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public string ExampleEnumPropAsString
+	{
+		get { return _exampleEnumProp.ToString(); }
+		set 
+		{ 
+			switch (value.ToLower())
+			{
+				case "first": _exampleEnumProp = ExamplePropertyEnum.First; break;
+				case "second": _exampleEnumProp = ExamplePropertyEnum.Second; break;
+				default:
+					throw new ArgumentException(
+						"Invalid value for the example-enum-prop option");
+			}
+		}
+	}
+
+
+	// Example of how to reverse flag-option values
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("no-debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Disable debug output")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public bool NoDebug
+	{
+		get { return !this.Debug; }
+		set { this.Debug = !value; }
+	}
+
+
+	[ShortOptionName('b')]
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Enable debug output")]
+	public bool Debug = false;
+
+	[OptDef(OptValType.ValueReq)]
+	[ShortOptionName('d')]
+	[LongOptionName("directory")]
+	[UseNameAsLongOption(false)]
+	[Description("Output directory")]
+	[DefaultValue(".")]
+	public string Directory = ".";
+
+	[OptDef(OptValType.ValueOpt)]
+	[ShortOptionName('f')]
+	[LongOptionName("file")]
+	[UseNameAsLongOption(false)]
+	[Description("Input file")]
+	public string File = null;
+
+	[OptDef(OptValType.IncrementalFlag)]
+	[ShortOptionName('v')]
+	[LongOptionName("verbose")]
+	[UseNameAsLongOption(false)]
+	[Description("Set level of vebosity for debug printing")]
+	public int Verbose = 0;
+
+	[OptDef(OptValType.MultValue, ValueType=typeof(string))]
+	[ShortOptionName('s')]
+	[LongOptionName("strings")]
+	[UseNameAsLongOption(false)]
+	[Description("Test option that takes multiple values")]
+	public StringCollection Strings = new StringCollection();
+	#endregion Options
+}
+			</code>
+		</example>
+        </member>
+        <member name="M:CommandLine.OptParse.ShortOptionNameAttribute.#ctor(System.Char)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="name">Name of the option</param>
+        </member>
+        <member name="P:CommandLine.OptParse.ShortOptionNameAttribute.Name">
+            <summary>
+            Get the name of the option
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.DefaultUsageInfo">
+            <summary>
+            A simple, default implementation of <see cref="T:CommandLine.OptParse.IProgUsageInfo"/> that
+            is fairly easy to use
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.IProgUsageInfo">
+            <summary>
+            Interface for the parser to use to be able to print usage information
+            for the given program.
+            </summary>
+            <remarks>
+            The usage structure is similar to the Perl POD structure, of headers with
+            description blocks. The implementation however is not as robust.
+            </remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.IProgUsageInfo.IsOptionHeader(System.String)">
+            <summary>
+            Check if a given header should contain the usage of the options
+            </summary>
+            <param name="header">The header to check</param>
+            <returns>True if the contents of this header is the options description
+            </returns>
+        </member>
+        <member name="M:CommandLine.OptParse.IProgUsageInfo.GetContents(System.String)">
+            <summary>
+            Get the contents of a non-option header
+            </summary>
+            <param name="header">The header to get the contents for</param>
+            <returns>The contents for the header</returns>
+        </member>
+        <member name="P:CommandLine.OptParse.IProgUsageInfo.Headers">
+            <summary>
+            Get a list of all the "topic" headers for the usage
+            </summary>
+            <remarks>
+            Each header is similar to a header in a Unix man page. The header is a title
+            block for the contents to follow. The usage information is broken up
+            into sections, each started with a header. Typical headers are 
+            "Description", "Synopsis", "Options", "Arguments"
+            </remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.DefaultUsageInfo.#ctor(System.String,System.String,System.Boolean,System.String[])">
+            <summary>
+            Constructor to make argument description construction easier
+            </summary>
+            <remarks>
+            The <c>argumentDescriptions</c> array should be an even length. The
+            event indexes (0, 2, 4, etc.) should be the argument names, and
+            the odd indexes are the descriptions of the names (1, 3, etc. where 1 is
+            the description of 0, 3 of 2, etc.).
+            <para>Example:
+            <code>
+            new DefaultUsageInfo("HelloWorld.exe", "Says hello world with the arguments",
+            "Additional text", "Text to print after saying hello world");
+            </code>
+            </para>
+            </remarks>
+            <param name="programName">The name of the program (something.exe)</param>
+            <param name="description">Description of the program</param>
+            <param name="upperCase">True to use all-upper case headers, or 
+            false for title cased headers</param>
+            <param name="argumentDescription">list of descriptions in the format of
+            { "Argument", "Description" [, "Argument", "Description"] ...}</param>
+        </member>
+        <member name="M:CommandLine.OptParse.DefaultUsageInfo.#ctor(System.String,System.String,System.Boolean,System.Collections.Specialized.NameValueCollection)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="programName">The name of the program (something.exe)</param>
+            <param name="description">Description of the program</param>
+            <param name="upperCase">True to use all-upper case headers, or 
+            false for title cased headers</param>
+            <param name="argumentDescription">Argument name, argument description
+            pairs to describe the arguments the program takes or null if none</param>
+        </member>
+        <member name="M:CommandLine.OptParse.DefaultUsageInfo.IsOptionHeader(System.String)">
+            <summary>
+            Get if the given header should hold the option description
+            </summary>
+            <param name="header">The header</param>
+            <returns>True if the options header</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.DefaultUsageInfo.GetContents(System.String)">
+            <summary>
+            Get the contents of the given header
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.DefaultUsageInfo.Headers">
+            <summary>
+            Get the headers for the usage
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.WarningEventHandler">
+            <summary>
+            Delegate to receive warning events from a parser
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.UnknownOptHandleType">
+            <summary>
+            Define the behavior of the parser if an option is given that is not reconginzed
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.UnknownOptHandleType.NoAction">
+            <summary>
+            Do not do anything, the option will be considered an argument
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.UnknownOptHandleType.Warning">
+            <summary>
+            A warning will be sent back to the caller of the parser (see 
+            the <see cref="E:CommandLine.OptParse.Parser.OptionWarning"/> event)
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.UnknownOptHandleType.Error">
+            <summary>
+            Stop parsing, throwing a <see cref="T:CommandLine.OptParse.ParseException"/>
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.DupOptHandleType">
+            <summary>
+            Define the behavior of the parser if an option is duplicated
+            </summary>
+            <remarks>
+            If the option is not defined as a option that allows multiple values, then
+            this enumeration specifies the action to take when a duplicate option is given
+            at the command-line.
+            </remarks>
+        </member>
+        <member name="F:CommandLine.OptParse.DupOptHandleType.Allow">
+            <summary>
+            Allow the duplicate declaration, using the last declaration to specify
+            the value
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.DupOptHandleType.Warning">
+            <summary>
+            Allow the duplicate declaration, using the last declaration to specify
+            the value, but send a warning back to the caller of the parser (see 
+            the <see cref="E:CommandLine.OptParse.Parser.OptionWarning"/> event)
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.DupOptHandleType.Error">
+            <summary>
+            Deny the duplicate declaration, throwing a <see cref="T:CommandLine.OptParse.ParseException"/>
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.OptStyle">
+            <summary>
+            The platform style of option
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.OptStyle.Windows">
+            <summary>
+            Windows style of options (/opt)
+            </summary>
+            <remarks>
+            Use options in the standard Windows format.
+            Example:
+            <code>
+            program.exe /opt1:"Option 1 Value" /opt2:Opt2Value /opt3
+            </code>
+            <para>
+            Windows arguments do not differentiate between short an long formats like Unix
+            arguments.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:CommandLine.OptParse.OptStyle.Unix">
+            <summary>
+            Unix style of options (--opt, -o)
+            </summary>
+            <remarks>
+            Use options in the standard Unix format.
+            Example:
+            <code>
+            program --opt1="Option 1 Value" --opt2 Opt2Value -o
+            </code>
+            <para>
+            Long argument values may be separated from the option by a space or by an
+            equal sign. Short option values are separated from the option by a space
+            </para>
+            </remarks>
+        </member>
+        <member name="T:CommandLine.OptParse.UnixShortOption">
+            <summary>
+            Specify how short options may be given for Unix-style arguments
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.UnixShortOption.CollapseShort">
+            <summary>
+            Allow short arguments to be collapsed.
+            </summary>
+            <remarks>
+            Example:
+            <code>
+            Program -abcd 0 "This is d's value"
+            </code>
+            <para>
+            If the options require a value (See <see cref="T:CommandLine.OptParse.OptValType"/> enum), then
+            the the values after the arguments will be applied in order. Optional
+            arguments that precede required arguments become required, meaning that
+            if 3 values are given for 4 values (i.e. <c>program -abcd val1 val2 val3</c>), 
+            and the first two arguments have optional values, and the 3rd is required, and the fourth
+            takes an optional value, then per the example, the value of 'val1' will be
+            assigned to 'a', 'val2' to 'b', and 'val3' to 'c' with 'd' not having a value.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:CommandLine.OptParse.UnixShortOption.ShortSeparated">
+            <summary>
+            Short options must be separated, and values do not need a space after the name
+            </summary>
+            <remarks>
+            Example: <c>program -a -b -c0 -d"This is d's value"</c>
+            </remarks>
+        </member>
+        <member name="T:CommandLine.OptParse.OptValType">
+            <summary>
+            Type of value that the option permits
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.OptValType.Flag">
+            <summary>
+            The option does not accept a value
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.OptValType.IncrementalFlag">
+            <summary>
+            The option does not accept a value, but may be declared multiple times
+            </summary>
+            <remarks>
+            This type of argument supports multiple declaration. For example,
+            <c>--verbose --verbose --verbose</c>, could be used to allow a 3rd level
+            of verbose information to be printed by a program.
+            </remarks>
+        </member>
+        <member name="F:CommandLine.OptParse.OptValType.ValueReq">
+            <summary>
+            The option requires a value. If a value is not supplied, an error will be thrown
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.OptValType.ValueOpt">
+            <summary>
+            The option optional takes a value
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.OptValType.MultValue">
+            <summary>
+            The option allows 0 to many values
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.EnumDescriptorReader">
+            <summary>
+            Class that assists with reading <see cref="T:System.ComponentModel.DescriptionAttribute"/> values for enumeration values
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.EnumDescriptorReader.GetEnumFieldDescription(System.Enum)">
+            <summary>
+            Get the field description for the enumeration value
+            </summary>
+            <example>
+            Enumeration:
+            <code>
+            public enum ExampleEnum
+            {
+            [EnumDescription("This is the first value")]
+            FirstValue = 1,
+            [EnumDescription("This is the second value")]
+            SecondValue = 2
+            }
+            </code>
+            Usage:
+            <code>
+            string desc = EnumDescriptorReader.GetEnumFieldDescription(ExampleEnum.FirstValue);
+            </code>
+            </example>
+            <param name="val">The enumeration value to get the description of</param>
+            <returns>The description, or if it has none, the name</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.EnumDescriptorReader.GetEnumFieldDescriptions(System.Type)">
+            <summary>
+            Gets all of the descriptions for the values in the given enumeration type.
+            </summary>
+            <remarks>
+            If a description attribute is not found, the enumeration field name will
+            be returned as the description instead
+            </remarks>
+            <param name="enumType">The enumeration type</param>
+            <returns>An array of the descriptions.</returns>
+        </member>
+        <member name="T:CommandLine.OptParse.ParseException">
+            <summary>
+            Exception thrown if the parser encounters an error
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.ParseException.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="errMsg">Description of the error that occurred while parsing</param>
+        </member>
+        <member name="M:CommandLine.OptParse.ParseException.#ctor(System.Exception)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="rootCause">Exception that was thrown during parsing</param>
+        </member>
+        <member name="M:CommandLine.OptParse.ParseException.#ctor(System.String,System.Exception)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="errMsg">Description of the error that occurred while parsing</param>
+            <param name="rootCause">Exception that was thrown during parsing</param>
+        </member>
+        <member name="M:CommandLine.OptParse.ParseException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Constructor for serialization. See 
+            <see cref="M:System.ApplicationException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)"/>
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.InvalidValueException">
+            <summary>
+            Parsing exception that is thrown if a value is given that is not of the expected type
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.InvalidValueException.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="errMsg">Description of the error that occurred while parsing</param>
+        </member>
+        <member name="M:CommandLine.OptParse.InvalidValueException.#ctor(System.Exception)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="rootCause">Exception that was thrown during parsing</param>
+        </member>
+        <member name="M:CommandLine.OptParse.InvalidValueException.#ctor(System.String,System.Exception)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="errMsg">Description of the error that occurred while parsing</param>
+            <param name="rootCause">Exception that was thrown during parsing</param>
+        </member>
+        <member name="M:CommandLine.OptParse.InvalidValueException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Constructor for serialization. See 
+            <see cref="M:System.ApplicationException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)"/>
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.IOptionContainer">
+            <summary>
+            Interface that describes an object that contains option definitions
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.IOptionContainer.GetOptions">
+            <summary>
+            Get all of the options
+            </summary>
+            <returns>Array of option definitions</returns>
+        </member>
+        <member name="T:CommandLine.OptParse.IOptionResults">
+            <summary>
+            Interface for interacting with the results of parsing the options
+            </summary>
+            <remarks>
+            This interface allows for storing option results in different formats. The 
+            <see cref="T:CommandLine.OptParse.Parser"/> class uses this interface.
+            <para>
+            The implementation of this interface should be able to index the option definitions
+            in both a case sensitive and case insensitive format. The parser's settings will
+            determine the case sesitivity that will be used.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.IOptionResults.GetOptionDefinition(System.Char,System.Boolean)">
+            <summary>
+            Get the ID of the option for the provided short name
+            </summary>
+            <param name="optionName">The short name of the option to get the ID of</param>
+            <param name="caseSensitive">If the option name's case should be considered</param>
+            <returns>The definition of the option or null if there is no option defined for the
+            given name</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.IOptionResults.GetOptionDefinition(System.String,System.Boolean)">
+            <summary>
+            Get the ID of the option for the provided name
+            </summary>
+            <param name="optionName">The long name of the option to get the ID of</param>
+            <param name="caseSensitive">If the option name's case should be considered</param>
+            <returns>The definition of the option or null if there is no option defined for the
+            given name</returns>
+        </member>
+        <member name="P:CommandLine.OptParse.IOptionResults.Item(CommandLine.OptParse.OptionDefinition)">
+            <summary>
+            Get or set the result of an option by its definition
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.OptionDefinition">
+            <summary>
+            Definition of an option
+            </summary>
+            <remarks>
+            Use this class to define possible options for a command-line. This is an alternative
+            to using a class with fields and properties defined as options.
+            </remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.CreateDefinitions(System.String[])">
+            <summary>
+            Helper method to create <c>OptionDefinition</c> instances 
+            for each <c>string</c> in <c>definitions</c>
+            </summary>
+            <param name="definitions">Definitions (See <see cref="M:CommandLine.OptParse.OptionDefinition.#ctor(System.String)"/>)</param>
+            <returns><c>OptionDefinition</c> instances</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.#ctor(System.String)">
+            <summary>
+            Build an option from a Perl-like string syntax
+            </summary>
+            <remarks>
+            The definition must match the following regular expression syntax:
+            <c>^[\w|]+([:=+][sifd]?)?$</c>.
+            <para>
+            Explanation:
+            <list type="table">
+            	<listheader>
+            		<term>Part</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>[\w|]+</term>
+            		<description>A series of one or more word or character names separated
+            		by pipe ('|') characters. 
+            		Example: <c>help|h|?</c>. In this example, for Unix-style options, the valid
+            		option variations would be: <c>--help, -h or -?</c>
+            		</description>
+            	</item>
+            	<item>
+            		<term>[:=+]</term>
+            		<description>A character to define the type of value expected. This is optional,
+            		and if not given, the option will be considered a flag. So a definition of 
+            		<c>help</c> can be given at the command-line like: <c>Program --help</c>.
+            		The ':' and '=' requires the type of value (see below). The '+' can be used
+            		in two ways. First, it can mean that a flag can be given multiple times (to
+            		be counted for example). This usage: <c>verbose+</c> can be given like:
+            		<c>Program --verbose --verbose --verbose</c> to result in a verbosity of 3.
+            		With a type of value (see below), it means that the option can have many values.
+            		A value of ':' means the option may take a value, and '=' means that
+            		a value is required for this option.
+            		</description>
+            	</item>
+            	<item>
+            		<term>[sifd]?</term>
+            		<description>A character to define the type of data to accept. This is 
+            		optional if the preceding character is '+' (see above). If given, the
+            		values map to the following .NET types: s - String, i - Int32, d - Double and 
+            		f - Float</description>
+            	</item>
+            </list>
+            </para>
+            Examples:
+            <code>
+            Flag:
+            	Example show help: help|h|?
+            Flag that gets counted:
+            	Example to set level of verbosity:	verbose|v+
+            Option with a required string value (Example: set an output directory):
+            	Example to set an output directory: directory|dir|d=s
+            Option with an optional integer value:
+            	Example to count value that defaults to 0: count|c:i
+            Option that accepts multiple string values:
+            	Example to specify include patters: include|i+s
+            </code>
+            </remarks>
+            <param name="definition">The option definition</param>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.#ctor(System.Object,CommandLine.OptParse.OptValType,System.Type,System.String,System.Char)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="ID">ID of the option</param>
+            <param name="type">Option value type</param>
+            <param name="description">User-friendly description of the option</param>
+            <param name="shortName">The short name to map to this option</param>
+            <param name="valueType">the type of value that the option supports 
+            (if values are supported, ignored otherwise)</param>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.#ctor(System.Object,CommandLine.OptParse.OptValType,System.Type,System.String,System.Char[])">
+            <summary>
+            Constructor
+            </summary>
+            <param name="ID">ID of the option</param>
+            <param name="type">Option value type</param>
+            <param name="description">User-friendly description of the option</param>
+            <param name="shortNames">The short names to map to this option</param>
+            <param name="valueType">the type of value that the option supports 
+            (if values are supported, ignored otherwise)</param>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.#ctor(System.Object,CommandLine.OptParse.OptValType,System.Type,System.String,System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="ID">ID of the option</param>
+            <param name="type">Option value type</param>
+            <param name="valueType">the type of value that the option supports 
+            (if values are supported, ignored otherwise)</param>
+            <param name="description">User-friendly description of the option</param>
+            <param name="longName">The long name to map to this option</param>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.#ctor(System.Object,CommandLine.OptParse.OptValType,System.Type,System.String,System.String[])">
+            <summary>
+            Constructor
+            </summary>
+            <param name="ID">ID of the option</param>
+            <param name="type">Option value type</param>
+            <param name="valueType">the type of value that the option supports 
+            (if values are supported, ignored otherwise)</param>
+            <param name="description">User-friendly description of the option</param>
+            <param name="longNames">The long names to map to this option</param>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.#ctor(System.Object,CommandLine.OptParse.OptValType,System.Type,System.String,System.Char[],System.String[])">
+            <summary>
+            Constructor
+            </summary>
+            <param name="ID">ID of the option</param>
+            <param name="type">Option value type</param>
+            <param name="valueType">the type of value that the option supports 
+            (if values are supported, ignored otherwise)</param>
+            <param name="description">User-friendly description of the option</param>
+            <param name="longNames">The long names to map to this option</param>
+            <param name="shortNames">The short names to map to this option</param>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.#ctor(System.Object,CommandLine.OptParse.OptValType,System.Type,System.String,System.String,System.Char[],System.String[])">
+            <summary>
+            Constructor
+            </summary>
+            <param name="ID">ID of the option</param>
+            <param name="type">Option value type</param>
+            <param name="valueType">the type of value that the option supports 
+            (if values are supported, ignored otherwise)</param>
+            <param name="category">Category to use to group options when printing</param>
+            <param name="description">User-friendly description of the option</param>
+            <param name="longNames">The long names to map to this option</param>
+            <param name="shortNames">The short names to map to this option</param>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.ConvertValue(System.String)">
+            <summary>
+            Try to convert a given value to the value that this option supports
+            </summary>
+            <param name="value">The value given</param>
+            <exception cref="T:CommandLine.OptParse.InvalidValueException">Thrown if the value could not 
+            be converted</exception>
+            <returns>The converted value or null if the value could not be converted</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.Equals(System.Object)">
+            <summary>
+            See <see cref="M:System.Object.Equals(System.Object)"/>
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.GetHashCode">
+            <summary>
+            See <see cref="M:System.Object.GetHashCode"/>
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionDefinition.ToString">
+            <summary>
+            Produce a string version of this variable
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionDefinition.DefaultValue">
+            <summary>
+            Default value of the option
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionDefinition.Category">
+            <summary>
+            Get or set the category of the option
+            </summary>
+            <remarks>
+            Categories can be used to group the options when the usage is printed
+            using the <see cref="T:CommandLine.OptParse.UsageBuilder"/>
+            </remarks>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionDefinition.ValueType">
+            <summary>
+            Get the type of value that the option supports (if values are supported)
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionDefinition.Type">
+            <summary>
+            Get the type of value the option takes
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionDefinition.ShortNames">
+            <summary>
+            Get the short names for this option
+            </summary>
+            <remarks>
+            Null if short names are not supported by this option
+            </remarks>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionDefinition.ID">
+            <summary>
+            Get the ID for this option
+            </summary>
+            <remarks>
+            Allows an option to be identified if multiple names are used to define this option
+            </remarks>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionDefinition.Description">
+            <summary>
+            Get the user-friendly description of this option
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionDefinition.LongNames">
+            <summary>
+            Get the long names for this option
+            </summary>
+            <remarks>
+            Null if long names are not supported by this option
+            </remarks>
+        </member>
+        <member name="T:CommandLine.OptParse.OptionResult">
+            <summary>
+            Stores the information on the result of parsing an option
+            <seealso cref="T:CommandLine.OptParse.Parser"/>
+            <seealso cref="T:CommandLine.OptParse.IOptionResults"/>
+            <seealso cref="T:CommandLine.OptParse.OptionResultsDictionary"/>
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionResult.#ctor(CommandLine.OptParse.OptionDefinition)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="def">Definition of the option this result if for</param>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionResult.AddValue(System.Object)">
+            <summary>
+            Add a value
+            </summary>
+            <remarks>The value should already be converted to the correct type</remarks>
+            <param name="value">The value to add</param>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionResult.Defintion">
+            <summary>
+            Get the definition for this result
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionResult.NumDefinitions">
+            <summary>
+            Get or set the number of times this option was defined
+            </summary>
+            <remarks>
+            If the type of the option supports multiple definitions or multiple values, then
+            this property specifies how many times the option was defined
+            </remarks>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionResult.IsDefined">
+            <summary>
+            Get if this property has been defined
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionResult.Value">
+            <summary>
+            Get or set the value of the option
+            </summary>
+            <remarks>
+            This value will always be null for <see cref="F:CommandLine.OptParse.OptValType.Flag"/> style arguments and
+            may be null for <see cref="F:CommandLine.OptParse.OptValType.ValueOpt"/> and 
+            <see cref="F:CommandLine.OptParse.OptValType.MultValue"/> options.
+            <para>
+            If the option is defined multiple times, this will get or set the first value given
+            </para>
+            </remarks>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionResult.Values">
+            <summary>
+            Get or set all the values given for this option
+            <seealso cref="M:CommandLine.OptParse.OptionResult.AddValue(System.Object)"/>
+            </summary>
+            <remarks>
+            This property allows access to all the values of the option for use with 
+            <see cref="F:CommandLine.OptParse.OptValType.MultValue"/> type of options
+            </remarks>
+        </member>
+        <member name="T:CommandLine.OptParse.OptionResultsDictionary">
+            <summary>
+            Dictionary of option results
+            <seealso cref="T:CommandLine.OptParse.DictionaryParserHelper"/>
+            <seealso cref="M:CommandLine.OptParse.ParserFactory.BuildParser(CommandLine.OptParse.OptionDefinition[],CommandLine.OptParse.OptionResultsDictionary)"/>
+            </summary>
+            <remarks>
+            When using the <see cref="T:CommandLine.OptParse.DictionaryParserHelper"/>, the helper will
+            use this class to store the results of option parsing in an instance
+            of this class.
+            </remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionResultsDictionary.Add(CommandLine.OptParse.OptionDefinition,CommandLine.OptParse.OptionResult)">
+            <summary>
+            Add a result
+            </summary>
+            <param name="key">Option definition</param>
+            <param name="value">Result value</param>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionResultsDictionary.OnValidate(System.Object,System.Object)">
+            <summary>
+            Validate the type of the key and value
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionResultsDictionary.OnClearComplete">
+            <summary>
+            Update the inner index hashtables
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionResultsDictionary.OnInsertComplete(System.Object,System.Object)">
+            <summary>
+            Update the inner index hashtables
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionResultsDictionary.OnRemoveComplete(System.Object,System.Object)">
+            <summary>
+            Update the inner index hashtables
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionResultsDictionary.OnSetComplete(System.Object,System.Object,System.Object)">
+            <summary>
+            Update the inner index hashtables
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionResultsDictionary.Item(CommandLine.OptParse.OptionDefinition)">
+            <summary>
+            Get or set result by definition
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionResultsDictionary.Item(System.Object)">
+            <summary>
+            Get the result by the ID of a definition
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.DictionaryParserHelper">
+            <summary>
+            Class that parses option results into a dictionary interface
+            <seealso cref="T:CommandLine.OptParse.Parser"/>
+            <seealso cref="T:CommandLine.OptParse.ParserFactory"/>
+            </summary>
+            <remarks>
+            The results are populated as {Key:[OptionDefinition] Value:[OptionResult]} pairs
+            </remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.DictionaryParserHelper.#ctor(CommandLine.OptParse.OptionDefinition[],System.Collections.IDictionary)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="optDefs">The supported options</param>
+            <param name="valuesDictionary">The dictionary that will be used to store
+            the values of the options</param>
+        </member>
+        <member name="M:CommandLine.OptParse.DictionaryParserHelper.GetOptions">
+            <summary>
+            See <see cref="M:CommandLine.OptParse.IOptionContainer.GetOptions"/>
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.DictionaryParserHelper.GetOptionDefinition(System.Char,System.Boolean)">
+            <summary>
+            See <see cref="M:CommandLine.OptParse.IOptionResults.GetOptionDefinition(System.Char,System.Boolean)"/>
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.DictionaryParserHelper.GetOptionDefinition(System.String,System.Boolean)">
+            <summary>
+            See <see cref="M:CommandLine.OptParse.IOptionResults.GetOptionDefinition(System.String,System.Boolean)"/>
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.DictionaryParserHelper.Item(CommandLine.OptParse.OptionDefinition)">
+            <summary>
+            See <see cref="P:IOptionResults.Item(OptionDefinition)"/>
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.PropertyFieldParserHelper">
+            <summary>
+            Helper class for the parser that stores values into properties and fields
+            of a class.
+            <seealso cref="T:CommandLine.OptParse.Parser"/>
+            <seealso cref="T:CommandLine.OptParse.ParserFactory"/>
+            <seealso cref="T:CommandLine.OptParse.OptDefAttribute"/>
+            <seealso cref="T:CommandLine.OptParse.UseNameAsLongOptionAttribute"/>
+            <seealso cref="T:CommandLine.OptParse.LongOptionNameAttribute"/>
+            <seealso cref="T:CommandLine.OptParse.ShortOptionNameAttribute"/>
+            <seealso cref="T:System.ComponentModel.DefaultValueAttribute"/>
+            <seealso cref="T:System.ComponentModel.CategoryAttribute"/>
+            <seealso cref="T:System.ComponentModel.DescriptionAttribute"/>
+            </summary>
+            <remarks>
+            Used to create option definitions from properties and fields of an object.
+            Options are defined using <see cref="T:CommandLine.OptParse.OptDefAttribute"/>, 
+            <see cref="T:CommandLine.OptParse.UseNameAsLongOptionAttribute"/>,
+            <see cref="T:CommandLine.OptParse.LongOptionNameAttribute"/>, 
+            <see cref="T:CommandLine.OptParse.ShortOptionNameAttribute"/>,
+            <see cref="T:System.ComponentModel.DefaultValueAttribute"/>,
+            <see cref="T:System.ComponentModel.CategoryAttribute"/>,
+            and <see cref="T:System.ComponentModel.DescriptionAttribute"/> attributes.
+            </remarks>
+            <example>
+			Example class implementing options via attributes:
+			<code>
+// Example class defining properties
+class Properties
+{
+	#region Enumerations
+	internal enum ExamplePropertyEnum
+	{
+		First,
+		Second
+	}
+	#endregion Enumerations
+
+	#region Members
+	private ExamplePropertyEnum _exampleEnumProp;
+	#endregion Members
+
+	#region Accessed by code properties
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	public ExamplePropertyEnum ExampleEnumProp 
+	{
+		get { return _exampleEnumProp; }
+		set { _exampleEnumProp = value; }
+	}
+	#endregion Accessed by code properties
+
+	#region Options
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	// The EditorBrowsableAttribute is used to hide this 
+	// property from code
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("example-enum-prop")]
+	[UseNameAsLongOption(false)]
+	[Description("Show how to perform complex type option parsing")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public string ExampleEnumPropAsString
+	{
+		get { return _exampleEnumProp.ToString(); }
+		set 
+		{ 
+			switch (value.ToLower())
+			{
+				case "first": _exampleEnumProp = ExamplePropertyEnum.First; break;
+				case "second": _exampleEnumProp = ExamplePropertyEnum.Second; break;
+				default:
+					throw new ArgumentException(
+						"Invalid value for the example-enum-prop option");
+			}
+		}
+	}
+
+
+	// Example of how to reverse flag-option values
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("no-debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Disable debug output")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public bool NoDebug
+	{
+		get { return !this.Debug; }
+		set { this.Debug = !value; }
+	}
+
+
+	[ShortOptionName('b')]
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Enable debug output")]
+	public bool Debug = false;
+
+	[OptDef(OptValType.ValueReq)]
+	[ShortOptionName('d')]
+	[LongOptionName("directory")]
+	[UseNameAsLongOption(false)]
+	[Description("Output directory")]
+	[DefaultValue(".")]
+	public string Directory = ".";
+
+	[OptDef(OptValType.ValueOpt)]
+	[ShortOptionName('f')]
+	[LongOptionName("file")]
+	[UseNameAsLongOption(false)]
+	[Description("Input file")]
+	public string File = null;
+
+	[OptDef(OptValType.IncrementalFlag)]
+	[ShortOptionName('v')]
+	[LongOptionName("verbose")]
+	[UseNameAsLongOption(false)]
+	[Description("Set level of vebosity for debug printing")]
+	public int Verbose = 0;
+
+	[OptDef(OptValType.MultValue, ValueType=typeof(string))]
+	[ShortOptionName('s')]
+	[LongOptionName("strings")]
+	[UseNameAsLongOption(false)]
+	[Description("Test option that takes multiple values")]
+	public StringCollection Strings = new StringCollection();
+	#endregion Options
+}
+			</code>
+		</example>
+        </member>
+        <member name="M:CommandLine.OptParse.PropertyFieldParserHelper.#ctor(System.Object)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="value">The object with the properties and fields defined as
+            options</param>
+        </member>
+        <member name="M:CommandLine.OptParse.PropertyFieldParserHelper.GetOptions">
+            <summary>
+            See <see cref="M:CommandLine.OptParse.IOptionContainer.GetOptions"/>
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.PropertyFieldParserHelper.GetOptionDefinition(System.Char,System.Boolean)">
+            <summary>
+            See <see cref="M:CommandLine.OptParse.IOptionResults.GetOptionDefinition(System.Char,System.Boolean)"/>
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.PropertyFieldParserHelper.GetOptionDefinition(System.String,System.Boolean)">
+            <summary>
+            See <see cref="M:CommandLine.OptParse.IOptionResults.GetOptionDefinition(System.String,System.Boolean)"/>
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.PropertyFieldParserHelper.Item(CommandLine.OptParse.OptionDefinition)">
+            <summary>
+            See <see cref="P:IOptionResults.Item(OptionDefinition)"/>
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.Parser">
+            <summary>
+            Class that parses the command line options. Use the <see cref="T:CommandLine.OptParse.ParserFactory"/>
+            to construct an instance of a parser
+            <seealso cref="T:CommandLine.OptParse.UsageBuilder"/>
+            <seealso cref="T:CommandLine.OptParse.PropertyFieldParserHelper"/>
+            <seealso cref="T:CommandLine.OptParse.DictionaryParserHelper"/>
+            <seealso cref="T:CommandLine.OptParse.IOptionResults"/>
+            <seealso cref="T:CommandLine.OptParse.ParserFactory"/>
+            </summary>
+            <remarks>
+            Class that
+            </remarks>
+            <example>
+			Example class implementing options via attributes:
+			<code>
+// Example class defining properties
+class Properties
+{
+	#region Enumerations
+	internal enum ExamplePropertyEnum
+	{
+		First,
+		Second
+	}
+	#endregion Enumerations
+
+	#region Members
+	private ExamplePropertyEnum _exampleEnumProp;
+	#endregion Members
+
+	#region Accessed by code properties
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	public ExamplePropertyEnum ExampleEnumProp 
+	{
+		get { return _exampleEnumProp; }
+		set { _exampleEnumProp = value; }
+	}
+	#endregion Accessed by code properties
+
+	#region Options
+	// Cannot be used by the parser easily, but can be used
+	// by code
+	// The EditorBrowsableAttribute is used to hide this 
+	// property from code
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("example-enum-prop")]
+	[UseNameAsLongOption(false)]
+	[Description("Show how to perform complex type option parsing")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public string ExampleEnumPropAsString
+	{
+		get { return _exampleEnumProp.ToString(); }
+		set 
+		{ 
+			switch (value.ToLower())
+			{
+				case "first": _exampleEnumProp = ExamplePropertyEnum.First; break;
+				case "second": _exampleEnumProp = ExamplePropertyEnum.Second; break;
+				default:
+					throw new ArgumentException(
+						"Invalid value for the example-enum-prop option");
+			}
+		}
+	}
+
+
+	// Example of how to reverse flag-option values
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("no-debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Disable debug output")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public bool NoDebug
+	{
+		get { return !this.Debug; }
+		set { this.Debug = !value; }
+	}
+
+
+	[ShortOptionName('b')]
+	[OptDef(OptValType.Flag)]
+	[LongOptionName("debug")]
+	[UseNameAsLongOption(false)]
+	[Description("Enable debug output")]
+	public bool Debug = false;
+
+	[OptDef(OptValType.ValueReq)]
+	[ShortOptionName('d')]
+	[LongOptionName("directory")]
+	[UseNameAsLongOption(false)]
+	[Description("Output directory")]
+	[DefaultValue(".")]
+	public string Directory = ".";
+
+	[OptDef(OptValType.ValueOpt)]
+	[ShortOptionName('f')]
+	[LongOptionName("file")]
+	[UseNameAsLongOption(false)]
+	[Description("Input file")]
+	public string File = null;
+
+	[OptDef(OptValType.IncrementalFlag)]
+	[ShortOptionName('v')]
+	[LongOptionName("verbose")]
+	[UseNameAsLongOption(false)]
+	[Description("Set level of vebosity for debug printing")]
+	public int Verbose = 0;
+
+	[OptDef(OptValType.MultValue, ValueType=typeof(string))]
+	[ShortOptionName('s')]
+	[LongOptionName("strings")]
+	[UseNameAsLongOption(false)]
+	[Description("Test option that takes multiple values")]
+	public StringCollection Strings = new StringCollection();
+	#endregion Options
+}
+			</code>
+		</example>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.#ctor(CommandLine.OptParse.IOptionResults)">
+            <summary>
+            Constructor
+            <seealso cref="T:CommandLine.OptParse.ParserFactory"/>
+            </summary>
+            <remarks>
+            <para>The <paramref name="resultsHandler"/> object is resposible for
+            maintaining the option definitions and stores the results of parsing.
+            </para>
+            <para>The <see cref="T:CommandLine.OptParse.ParserFactory"/> class can assist with constructing
+            instances of the parser (handles <see cref="T:CommandLine.OptParse.IOptionResults"/> object
+            creating). If the factory is not used, the 
+            <see cref="T:CommandLine.OptParse.PropertyFieldParserHelper"/> and
+            <see cref="T:CommandLine.OptParse.DictionaryParserHelper"/> classes can be used.</para>
+            </remarks>
+            <param name="resultsHandler">The interface containing the option
+            definitions and handles the results of parsing.</param>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.GetOptionDefinitions">
+            <summary>
+            Get all of the option definitions that have been declared
+            </summary>
+            <returns>Array of option definitions</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.GetOptionDescriptions(CommandLine.OptParse.OptStyle)">
+            <summary>
+            Get a collection of option value, option description pairs
+            </summary>
+            <remarks>
+            Used to help print the usage of the application. This function concatinates
+            the options together into one string that is used as the key of the
+            collection, and then sets the value as the description of the option.
+            <para>
+            Example result:
+            <code>
+            Key  : -h, --help
+            Value: Print the usage of this application
+            </code>
+            Here, the key is a comma concatination of the options and the value
+            is the description of that option.
+            </para>
+            <para>
+            Short names will precede the long options in the key.
+            </para>
+            </remarks>
+            <param name="style">The style of options. During concatination, the
+            appropriate prefix ('/', '-' or '--') will be added to each option
+            name</param>
+            <returns>Collection of the options and their descriptions</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.PrintUsage(CommandLine.OptParse.OptStyle,CommandLine.OptParse.IProgUsageInfo,System.Int32)">
+            <summary>
+            Prints out the usage of this program to the given text writer
+            <seealso cref="T:CommandLine.OptParse.IProgUsageInfo"/>
+            <seealso cref="T:CommandLine.OptParse.DefaultUsageInfo"/>
+            <seealso cref="M:CommandLine.OptParse.Parser.GetOptionDescriptions(CommandLine.OptParse.OptStyle)"/>
+            </summary>
+            <remarks>
+            Prints the usage to the standard output. See <see cref="T:CommandLine.OptParse.IProgUsageInfo"/>
+            and <see cref="M:CommandLine.OptParse.Parser.GetOptionDescriptions(CommandLine.OptParse.OptStyle)"/>
+            for more information on how the usage is printed. 
+            <para>At this time, wrapping is not done at word boundries</para>
+            </remarks>
+            <param name="optStyle">The style of the options to have printed
+            in the usage</param>
+            <param name="usageInfo"></param>
+            <param name="columns">The number of columns to print before wrapping
+            the text. Used to correctly format the indenting</param>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.PrintUsage(CommandLine.OptParse.OptStyle,CommandLine.OptParse.IProgUsageInfo,System.IO.TextWriter,System.Int32)">
+            <summary>
+            Prints out the usage of this program to the given text writer
+            <seealso cref="T:CommandLine.OptParse.IProgUsageInfo"/>
+            <seealso cref="T:CommandLine.OptParse.DefaultUsageInfo"/>
+            <seealso cref="M:CommandLine.OptParse.Parser.GetOptionDescriptions(CommandLine.OptParse.OptStyle)"/>
+            </summary>
+            <remarks>
+            Prints the usage to the given writer. See <see cref="T:CommandLine.OptParse.IProgUsageInfo"/>
+            and <see cref="M:CommandLine.OptParse.Parser.GetOptionDescriptions(CommandLine.OptParse.OptStyle)"/>
+            for more information on how the usage is printed. 
+            <para>At this time, wrapping is not done at word boundries</para>
+            </remarks>
+            <param name="optStyle">The style of the options to have printed
+            in the usage</param>
+            <param name="writer">The writer to print the usage to</param>
+            <param name="usageInfo"></param>
+            <param name="columns">The number of columns to print before wrapping
+            the text. Used to correctly format the indenting</param>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.Parse">
+            <summary>
+            Parse the <see cref="M:System.Environment.GetCommandLineArgs"/> 
+            for options using the parser settings
+            </summary>
+            <returns>Arguments from the command-line that were not options</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.Parse(System.String[])">
+            <summary>
+            Parse the arguments for options using the parser settings
+            </summary>
+            <param name="args">The command-line arguments to parse</param>
+            <returns>Arguments from the command-line that were not options</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.Parse(CommandLine.OptParse.OptStyle,CommandLine.OptParse.UnixShortOption,CommandLine.OptParse.DupOptHandleType,CommandLine.OptParse.UnknownOptHandleType,System.Boolean,System.String[])">
+            <summary>
+            Parse the arguments for options using the given settings
+            </summary>
+            <param name="optStyle">What type of options to parse</param>
+            <param name="unixShortOption">How to parse unix short options (ignored
+            if not unix style parsing)</param>
+            <param name="dupOptHandleType">How to handle un-expected duplicate option
+            definitions</param>
+            <param name="unknownOptHandleType">How to handle options that were not
+            defined</param>
+            <param name="caseSesitive">If the parsing of options 
+            should consider the case of the options</param>
+            <param name="args">The command-line arguments to parse</param>
+            <returns>Arguments from the command-line that were not options</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.PrintWithIndent(System.Int32,System.String,System.Int32,System.IO.TextWriter)">
+            <summary>
+            Prints text to the given writer with the given indent
+            </summary>
+            <remarks>At this time wrapping is not done at a word boundry</remarks>
+            <param name="indent">The indent to add to the text in terms of number
+            of spaces</param>
+            <param name="text">The text to print</param>
+            <param name="maxColumns">The number of columns to wrap at</param>
+            <param name="writer">The writer to print to</param>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.ParseShortOptions(System.String[],System.Char[],System.Boolean,System.Int32@,CommandLine.OptParse.DupOptHandleType,CommandLine.OptParse.UnknownOptHandleType,System.Collections.ArrayList,System.Char[]@)">
+            <summary>
+            Parse a concatinated list of short options
+            </summary>
+            <param name="args">All the arguments</param>
+            <param name="options">The options found</param>
+            <param name="index">The current index in the arguments which can be incremented
+            by this function</param>
+            <param name="dupOptHandleType">How to handle un-expected duplicate option
+            definitions</param>
+            <param name="unknownOptHandleType">How to handle options that were not
+            defined</param>
+            <param name="caseSesitive">True if parsing is case-sensitive</param>
+            <param name="foundDefinitions">The option definitions already found</param>
+            <param name="unknownChars">An array of all unknown option characters or null
+            if all were known</param>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.ParseShortOption(System.String[],System.Char,System.String,System.Boolean,System.Int32@,CommandLine.OptParse.DupOptHandleType,CommandLine.OptParse.UnknownOptHandleType,System.Collections.ArrayList,System.Boolean@)">
+            <summary>
+            Parse a short option
+            </summary>
+            <param name="args">All the arguments</param>
+            <param name="option">The option name found</param>
+            <param name="value">The value immediately following the option (no space)</param>
+            <param name="index">The current index in the arguments which can be incremented
+            by this function</param>
+            <param name="dupOptHandleType">How to handle un-expected duplicate option
+            definitions</param>
+            <param name="unknownOptHandleType">How to handle options that were not
+            defined</param>
+            <param name="caseSesitive">True if parsing is case-sensitive</param>
+            <param name="foundDefinitions">The option definitions already found</param>
+            <param name="wasUnknown">If the option was unknown and the handle type was not
+            error, this will be true so that the "option" can be added to the arguments</param>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.ParseLongOption(System.String[],System.String,System.String,System.Boolean,System.Int32@,CommandLine.OptParse.DupOptHandleType,CommandLine.OptParse.UnknownOptHandleType,System.Collections.ArrayList,System.Boolean@)">
+            <summary>
+            Parse a long option
+            </summary>
+            <param name="args">All the arguments</param>
+            <param name="option">The option name found</param>
+            <param name="value">The value immediately following the option ([=:]value syntax)</param>
+            <param name="index">The current index in the arguments which can be incremented
+            by this function</param>
+            <param name="dupOptHandleType">How to handle un-expected duplicate option
+            definitions</param>
+            <param name="unknownOptHandleType">How to handle options that were not
+            defined</param>
+            <param name="caseSesitive">True if parsing is case-sensitive</param>
+            <param name="foundDefinitions">The option definitions already found</param>
+            <param name="wasUnknown">If the option was unknown and the handle type was not
+            error, this will be true so that the "option" can be added to the arguments</param>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.ParseOption(System.String[],System.Object,CommandLine.OptParse.OptionDefinition,System.String,System.Int32@,CommandLine.OptParse.DupOptHandleType,CommandLine.OptParse.UnknownOptHandleType,System.Collections.ArrayList,System.Boolean@)">
+            <summary>
+            Parse an option
+            </summary>
+            <param name="args">All the arguments</param>
+            <param name="optName">The char or string that the option was identified with</param>
+            <param name="optDef">The option found</param>
+            <param name="value">The value immediately following the option ([=:]value syntax)</param>
+            <param name="index">The current index in the arguments which can be incremented
+            by this function</param>
+            <param name="dupOptHandleType">How to handle un-expected duplicate option
+            definitions</param>
+            <param name="unknownOptHandleType">How to handle options that were not
+            defined</param>
+            <param name="foundDefinitions">The option definitions already found</param>
+            <param name="wasUnknown">If the option was unknown and the handle type was not
+            error, this will be true so that the "option" can be added to the arguments</param>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.CheckIfDup(CommandLine.OptParse.OptionDefinition,System.Collections.ArrayList,CommandLine.OptParse.DupOptHandleType)">
+            <summary>
+            Check if the option is a duplicate (2nd, 3rd, etc. declaration) and the option
+            does not support multiple values/declarations
+            </summary>
+            <param name="optDef">The option found</param>
+            <param name="foundDefinitions">All of the found definitions so far</param>
+            <param name="dupOptHandleType">How to handle duplicates</param>
+            <returns>True if the option has already been found, and the type
+            does not support duplicates</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.CheckIfValueless(CommandLine.OptParse.OptionDefinition,System.String)">
+            <summary>
+            Check if the option definition does not allow a value and if a value was given
+            </summary>
+            <param name="optDef">The option definition</param>
+            <param name="value">The value given or null if one was not given</param>
+            <exception cref="T:CommandLine.OptParse.ParseException">Thrown if value was given to a type
+            that doesn't support a value</exception>
+        </member>
+        <member name="M:CommandLine.OptParse.Parser.GetOptions">
+            <summary>
+            Get the options defined for this parser
+            </summary>
+            <returns>All of the defined options</returns>
+        </member>
+        <member name="E:CommandLine.OptParse.Parser.OptionWarning">
+            <summary>
+            Event fired when a warning event occurs
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.Parser.SearchEnvironment">
+            <summary>
+            Get or set to search the environment names for values to the options
+            </summary>
+            <remarks>
+            If set to true, environment variable values will be used if found
+            and the options are not given on the command line. The prefixes
+            (--, -, or /) are not used, only the names of the options when
+            searching the environment.
+            </remarks>
+        </member>
+        <member name="P:CommandLine.OptParse.Parser.CaseSensitive">
+            <summary>
+            Get or set if the parsing of options should consider the case of the options
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.Parser.DupOptHandleType">
+            <summary>
+            Get or set how the parser should handle un-expected duplicate option declarations
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.Parser.ResultsHandler">
+            <summary>
+            Get the handler for the parser
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.Parser.OptStyle">
+            <summary>
+            Get or set the option style to parse
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.Parser.UnknownOptHandleType">
+            <summary>
+            Get or set how to handle unknown options
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.Parser.UnixShortOption">
+            <summary>
+            Get how to handle short unix options (with or without bundling)
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.OptionWarningEventArgs">
+            <summary>
+            Event args for parse warnings
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.OptionWarningEventArgs.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="warningMessage">The warning message</param>
+        </member>
+        <member name="P:CommandLine.OptParse.OptionWarningEventArgs.WarningMessage">
+            <summary>
+            Get the warning message
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.ParserFactory">
+            <summary>
+            Factory to build parser instances
+            <seealso cref="T:CommandLine.OptParse.Parser"/>
+            <seealso cref="T:CommandLine.OptParse.ParserFactory"/>
+            <seealso cref="T:CommandLine.OptParse.UsageBuilder"/>
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.ParserFactory.BuildParser(System.Object)">
+            <summary>
+            Build a parser
+            </summary>
+            <param name="propertiesObject">Object containing fields and properties
+            that represent option definitions</param>
+            <returns>Parser instance</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.ParserFactory.BuildParser(CommandLine.OptParse.OptionDefinition[],System.Collections.IDictionary)">
+            <summary>
+            Build a parser
+            </summary>
+            <param name="optDefs">The supported options</param>
+            <param name="valuesDictionary">Dictionary to recieve parsed option values</param>
+            <returns>Parser instance</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.ParserFactory.BuildParser(CommandLine.OptParse.OptionDefinition[],CommandLine.OptParse.OptionResultsDictionary)">
+            <summary>
+            Build a parser
+            </summary>
+            <param name="optDefs">The supported options</param>
+            <param name="valuesDictionary">The dictionary to store the option results in</param>
+            <returns>Parser instance</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.ParserFactory.BuildParser(CommandLine.OptParse.IOptionResults)">
+            <summary>
+            Build a parser using a custom <see cref="T:CommandLine.OptParse.IOptionResults"/> handler.
+            </summary>
+            <param name="resultsHandler">Custom handler</param>
+            <returns>Parser instance</returns>
+        </member>
+        <member name="T:CommandLine.OptParse.ListType">
+            <summary>
+            Type of list to create in the usage
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.ListType.Ordered">
+            <summary>
+            Numbered/ordered list
+            </summary>
+        </member>
+        <member name="F:CommandLine.OptParse.ListType.Unordered">
+            <summary>
+            Unordered list
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.UsageBuilder">
+            <summary>
+            Class to assist the building of program usage information
+            </summary>
+            <remarks>
+            The API of this class is similar to that of an 
+            <see cref="T:System.Xml.XmlTextWriter"/>. The output of the usage
+            is an <see cref="T:System.Xml.XmlDocument"/>. The using the 
+            <see cref="M:CommandLine.OptParse.UsageBuilder.ToHtml(System.IO.TextWriter,CommandLine.OptParse.OptStyle,System.Uri,System.Boolean,System.String)"/>, <see cref="M:CommandLine.OptParse.UsageBuilder.ToText(System.IO.TextWriter,CommandLine.OptParse.OptStyle,System.Boolean)"/> and <see cref="M:CommandLine.OptParse.UsageBuilder.Transform(System.IO.TextWriter,System.Xml.XmlReader,System.Xml.Xsl.XsltArgumentList)"/> methods
+            the XML can be transformed into the desired output format for the usage.
+            </remarks>
+            <example>
+			Example code printing different usage outputs:
+			<code>
+UsageBuilder usage = new UsageBuilder();
+usage.GroupOptionsByCategory = false;
+
+usage.BeginSection("Name");
+usage.AddParagraph("Tester.exe");
+usage.EndSection();
+
+usage.BeginSection("Synopsis");
+usage.AddParagraph("Tester.exe [options] [arguments]");
+usage.EndSection();
+
+usage.BeginSection("Description");
+usage.AddParagraph("Program to test the CSharpOptParse library");
+
+// List of bullets
+usage.BeginList(ListType.Unordered);
+usage.AddListItem("First");
+usage.AddListItem("Second");
+usage.EndList();
+
+// Example of creating nested lists:
+usage.AddParagraph("Test");
+usage.BeginList(ListType.Ordered);
+usage.AddListItem("First");
+usage.BeginList(ListType.Ordered);
+usage.AddListItem("Item");
+usage.BeginList(ListType.Ordered);
+usage.AddListItem("Item");
+usage.BeginList(ListType.Ordered);
+usage.AddListItem("Item");
+usage.EndList();
+usage.EndList();
+usage.EndList();
+usage.AddListItem("Second");
+usage.EndList();
+
+usage.EndSection();
+
+usage.BeginSection("Options");
+usage.AddOptions(parser); // parser is an instance of Parser
+usage.EndSection();
+
+usage.BeginSection("Arguments");
+usage.AddParagraph("Before arguments");
+usage.BeginArguments();
+usage.AddArgument("Arguments to pass through", 
+	"Arguments to check if the parsing is returning the correct number of arguments",
+	typeof(string), true);
+usage.EndArguments();
+usage.AddParagraph("After arguments");
+usage.EndSection();
+
+using (StreamWriter sw = new StreamWriter("Usage.html"))
+{
+	usage.ToHtml(sw, OptStyle.Unix, null, true, "Tester.exe");
+}
+
+Console.WriteLine("Usage:");
+usage.ToText(Console.Out, OptStyle.Unix, true);			
+			</code>
+		</example>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.Transform(System.IO.TextWriter,System.Xml.XmlReader,System.Xml.Xsl.XsltArgumentList)">
+            <summary>
+            Convenience method for transforming the XML using a custom XSLT
+            </summary>
+            <param name="writer">TextWriter to write the output to</param>
+            <param name="xsltSource">Xslt content to use to transform with</param>
+            <param name="arguments">Xslt arguments to pass to the <see cref="T:System.Xml.Xsl.XslTransform"/></param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.ToHtml(System.IO.TextWriter,CommandLine.OptParse.OptStyle,System.Uri,System.Boolean,System.String)">
+            <summary>
+            Convert the usage to HTML
+            </summary>
+            <param name="writer">TextWriter to write the output to</param>
+            <param name="optStyle">The style to use when printing possible option names</param>
+            <param name="cssStyleSheet">Stylesheet URI to apply to the HTML content</param>
+            <param name="includeDefaultValues">True to include the default option values in the output</param>
+            <param name="title">Title to use for the HTML page</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.ToText(System.IO.TextWriter,CommandLine.OptParse.OptStyle,System.Boolean)">
+            <summary>
+            Convert the usage to Text
+            </summary>
+            <param name="writer">TextWriter to write the output to</param>
+            <param name="optStyle">The style to use when printing possible option names</param>
+            <param name="includeDefaultValues">True to include the default option values in the output</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.ToText(System.IO.TextWriter,CommandLine.OptParse.OptStyle,System.Boolean,System.Int32)">
+            <summary>
+            Convert the usage to Text
+            </summary>
+            <remarks>if <paramref name="maxColumns"/> is -1, the width of the console will be used
+            on windows machines, and the text will not be wrapped on non-windows machines</remarks>
+            <param name="writer">TextWriter to write the output to</param>
+            <param name="optStyle">The style to use when printing possible option names</param>
+            <param name="includeDefaultValues">True to include the default option values in the output</param>
+            <param name="maxColumns">Wrap text at the given column (attempts to wrap at '-' or ' ')</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.BeginSection(System.String)">
+            <summary>
+            Begin a new section tag
+            </summary>
+            <remarks>
+            May only be under a "usage" or "section" tag. <see cref="M:CommandLine.OptParse.UsageBuilder.EndSection"/> must be called
+            to close this tag
+            </remarks>
+            <param name="header">Name of the section</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.EndSection">
+            <summary>
+            Close the section
+            </summary>
+            <remarks>Section tag must be active</remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.AddParagraph(System.String)">
+            <summary>
+            Add a paragraph to the usage
+            </summary>
+            <remarks>
+            May only be inside of "section" or "description" tags
+            </remarks>
+            <param name="body">The body of the paragraph</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.BeginParagraph">
+            <summary>
+            Add a paragraph to the usage
+            </summary>
+            <remarks>
+            May only be inside of "section" or "description" tags. <see cref="M:CommandLine.OptParse.UsageBuilder.EndParagraph"/> must be called
+            to close this tag. Use <see cref="M:CommandLine.OptParse.UsageBuilder.AddParagraphContent(System.String)"/> to add text to the paragraph body.
+            </remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.AddParagraphContent(System.String)">
+            <summary>
+            Add content to the current paragraph node
+            </summary>
+            <remarks>May only be called when a "para" tag is active.</remarks>
+            <param name="text">Text to add</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.EndParagraph">
+            <summary>
+            Close the active "para" tag
+            </summary>
+            <remarks>May only be called when a "para" tag is active.</remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.BeginList(CommandLine.OptParse.ListType)">
+            <summary>
+            Open a list tag
+            </summary>
+            <remarks>Sets the active tag to a new "list" tag. May only be called when
+            one of the following tags are active: "section", "paragraph", "list", "description".
+            <see cref="M:CommandLine.OptParse.UsageBuilder.EndList"/> must be called to close this tag</remarks>
+            <param name="type">The type of list</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.AddListItem(System.String)">
+            <summary>
+            Add a list item tag to the current list
+            </summary>
+            <remarks>May only be called when a "list" tag is active.</remarks>
+            <param name="body">Body of the list item to add</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.EndList">
+            <summary>
+            Close the active "list" tag
+            </summary>
+            <remarks>May only be called when a "list" tag is active.</remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.BeginOptions">
+            <summary>
+            Begin an active "options" tag
+            <seealso cref="P:CommandLine.OptParse.UsageBuilder.GroupOptionsByCategory"/>
+            <seealso cref="P:CommandLine.OptParse.UsageBuilder.DefaultOptionCategory"/>
+            </summary>
+            <remarks>May only be called when a "header" tag is active.</remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.EndOptions">
+            <summary>
+            Close the active "options" tag
+            </summary>
+            <remarks>May only be called when a "options" tag is active.</remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.BeginOption(CommandLine.OptParse.OptionDefinition)">
+            <summary>
+            Method to start adding an option to the usage.
+            <seealso cref="M:CommandLine.OptParse.UsageBuilder.AddOption(CommandLine.OptParse.OptionDefinition)"/>
+            </summary>
+            <remarks>Leaves the "description" tag as the active tag. Allows paragraph
+            and list content to be added to the description of an option beyond
+            the normal description. Does not include the description body from
+            the <paramref name="opt"/> (must be added manually). Call 
+            <see cref="M:CommandLine.OptParse.UsageBuilder.EndOption"/> to close this tag.</remarks>
+            <param name="opt">Option to start</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.EndOption">
+            <summary>
+            Close the active "description" tag and "option" tags
+            </summary>
+            <remarks>May only be called when a "description" tag is active below an
+            "option" tag.</remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.AddOptions(CommandLine.OptParse.IOptionContainer)">
+            <summary>
+            Add multiple options to the output
+            </summary>
+            <remarks>Can only be called if the active tag is "section"</remarks>
+            <param name="optionContainer">Container with all the options 
+            for the program to document</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.AddOptions(CommandLine.OptParse.OptionDefinition[])">
+            <summary>
+            Add multiple options to the output
+            </summary>
+            <remarks>Can only be called if the active tag is "section"</remarks>
+            <param name="options">All the options for the program</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.AddOption(CommandLine.OptParse.OptionDefinition)">
+            <summary>
+            Adds an option to the output
+            </summary>
+            <remarks>Like <see cref="M:CommandLine.OptParse.UsageBuilder.BeginOption(CommandLine.OptParse.OptionDefinition)"/>, but uses the desription from the
+            option as the body of the "description" tag. Does not open a new active tag</remarks>
+            <param name="opt">Option to add</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.BeginArguments">
+            <summary>
+            Begin an active "arguments" tag
+            </summary>
+            <remarks>May only be called when a "header" tag is active.</remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.EndArguments">
+            <summary>
+            Close the active "arguments" tag
+            </summary>
+            <remarks>May only be called when an "arguments" tag is active.</remarks>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.AddArgument(System.String,System.String,System.Type,System.Boolean)">
+            <summary>
+            Add an argument overview to the usage
+            </summary>
+            <remarks>Can only be called when a "section" tag is active. Does not leave a new
+            active tag open.</remarks>
+            <param name="name">Short name description of the argument</param>
+            <param name="description">Description of the argument</param>
+            <param name="type">Supported data type for the argument (<c>typeof(string)</c> is
+            usually the best choice).</param>
+            <param name="optional">True if the argument should be marked as optional</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.BeginArgument(System.String,System.Type,System.Boolean)">
+            <summary>
+            Add an argument overview to the usage
+            </summary>
+            <remarks>Can only be called when an "arguments" tag is active. Leaves the "description" tag
+            active under the "argument" tag.</remarks>
+            <param name="name">Short name description of the argument</param>
+            <param name="type">Supported data type for the argument (<c>typeof(string)</c> is
+            usually the best choice).</param>
+            <param name="optional">True if the argument should be marked as optional</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.EndArgument">
+            <summary>
+            Close the active "description" tag and "argument" tags
+            </summary>
+            <remarks>May only be called when a "description" tag is active below an
+            "argument" tag.</remarks>
+        </member>
+        <member name="P:CommandLine.OptParse.UsageBuilder.Usage">
+            <summary>
+            Get the <see cref="T:System.Xml.XmlDocument"/> containing the usage content
+            </summary>
+        </member>
+        <member name="P:CommandLine.OptParse.UsageBuilder.DefaultOptionCategory">
+            <summary>
+            Get or set the category to use for options when an option is missing a category
+            <seealso cref="P:CommandLine.OptParse.UsageBuilder.GroupOptionsByCategory"/>
+            </summary>
+            <remarks>Cannot be set to null or an empty string, if so, the default value will
+            be used</remarks>
+        </member>
+        <member name="P:CommandLine.OptParse.UsageBuilder.GroupOptionsByCategory">
+            <summary>
+            Get or set to group options by their categories
+            <seealso cref="P:CommandLine.OptParse.UsageBuilder.DefaultOptionCategory"/>
+            </summary>
+        </member>
+        <member name="T:CommandLine.OptParse.UsageBuilder.TextTransformHelper">
+            <summary>
+            Class to help with Text transformation
+            </summary>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.TextTransformHelper.#ctor(System.Int32)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="maxColumns">Column to wrap at</param>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.TextTransformHelper.CreateSpaces(System.Int32)">
+            <summary>
+            Create a string of spaces
+            </summary>
+            <param name="length">Length of the string to create</param>
+            <returns>The string</returns>
+        </member>
+        <member name="M:CommandLine.OptParse.UsageBuilder.TextTransformHelper.FormatText(System.String,System.Int32,System.Int32)">
+            <summary>
+            Formats text, adding indent and wrapping lines
+            </summary>
+            <param name="text">Text to format</param>
+            <param name="indent">Indent to add to each line</param>
+            <param name="hangingIndent">Additional indent to add to lines after the first</param>
+            <returns>Formatted text</returns>
+        </member>
+    </members>
+</doc>

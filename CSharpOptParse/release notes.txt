@@ -1,0 +1,44 @@
+Release 1.0
+	Includes robust impelementation of usage printing. UsageBuilder
+	class includes an API to build an XML usage document. This
+	document can be transformed into HTML or text. 
+
+	This release also has much improved API documentation
+
+	Change Log:
+	
+	1.0.1:
+		02-09-2005: 
+		- Fixed a bug that caused an error to be thrown if text 
+		  was wrapped during the transformation of the usage into text
+		- Added support for non-word characters for short options
+		  (-? for example)
+		
+		Initial:
+		- Added support for taking option values from the environment
+		- Default css style added to the Html.xslt for usage
+		- Fixed a bug with the category not being set by the
+		  constructor of the OptionDefinition class when provided
+		- Changed the way options are grouped by category in the
+		  html usage output.
+		- Created Usage.xsd to document the structure of the generated
+		  usage XML document
+
+	1.0.0:
+		02-07-2005: Feature #1109701 implemented
+		02-07-2005: Release date
+
+Release 0.8
+	Includes first implementation of usage printing
+
+	Note: usage code is obsolete and is replaced in the next
+	version
+
+	Upcoming: Functionality in this release is complete
+	
+	Change Log:
+	02-07-2005: Fixed bug with the usage printing and long lines
+	01-19-2005: Added strong name signing to the assembly
+
+Release 0.5
+	First release, contains no usage yet, just parses the options	
