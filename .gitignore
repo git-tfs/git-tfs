@@ -2,3 +2,7 @@
 *.suo
 bin
 _ReSharper.*
+obj
+*.gpState
+*.user
+TestResults
