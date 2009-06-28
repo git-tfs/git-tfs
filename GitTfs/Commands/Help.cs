@@ -9,6 +9,7 @@ using StructureMap;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("help")]
+    [Description("help [command-name]")]
     public class Help : GitTfsCommand
     {
         private TextWriter output;
@@ -76,6 +77,19 @@ namespace Sep.Git.Tfs.Commands
                    select t;
         }
 
+        private string GetCommandUsage(GitTfsCommand command)
+        {
+            var descriptionAttribute = command.GetType().GetCustomAttributes(typeof (DescriptionAttribute), false).FirstOrDefault();
+            if(descriptionAttribute != null)
+            {
+                return descriptionAttribute.Description;
+            }
+            else
+            {
+                return GetCommandName(command) + " [options]";
+            }
+        }
+
         /// <summary>
         /// Shows help for a specific command.
         /// </summary>
@@ -85,7 +99,7 @@ namespace Sep.Git.Tfs.Commands
             usage.BeginSection("where options are:");
             usage.AddOptions(new PropertyFieldParserHelper(command));
             usage.EndSection();
-            output.WriteLine("Usage: git-tfs " + GetCommandName(command) + " [options]");
+            output.WriteLine("Usage: git-tfs " + GetCommandUsage(command))
             usage.ToText(output, OptStyle.Unix, true);
             return 2;
         }
