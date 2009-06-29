@@ -12,51 +12,22 @@ namespace Sep.Git.Tfs.Commands
     [Description("init [options] tfs-url repository-path [git-repository]")]
     public class Init : GitTfsCommand
     {
-        [OptDef(OptValType.ValueReq)]
-        [Description("The --template option to pass to git-init.")]
-        public string template { get; set; }
-
-        [OptDef(OptValType.ValueOpt)]
-        [Description("The --shared option to pass to git-init.")]
-        public object shared { get; set; }
-//
-//        [OptDef(OptValType.ValueReq)]
-//        [ShortOptionName('u')]
-//        [Description("The URL or alias of the TFS server to use.")]
-//        public string tfs { get; set; }
-//
-//        [OptDef(OptValType.ValueReq)]
-//        [ShortOptionName('r')]
-//        [LongOptionName("repo-path")]
-//        [UseNameAsLongOption(false)]
-//        [Description("The repository path in TFS that this git repository will be a mirror of.")]
-//        public string RepositoryPath { get; set; }
-
-        [OptDef(OptValType.Flag)]
-        [LongOptionName("no-metadata")]
-        [UseNameAsLongOption(false)]
-        [Description("If specified, git-tfs will leave out the git-tfs-id: lines at the end of every commit.")]
-        public bool NoMetaData { get; set; }
-
-        [OptDef(OptValType.Flag)]
-        [LongOptionName("ignore-regex")]
-        [UseNameAsLongOption(false)]
-        [Description("If specified, git-tfs will not sync any paths that match this regular expression.")]
-        public bool IgnoreRegex { get; set; }
-
-        [OptDef(OptValType.ValueReq)]
-        [Description("Your TFS username, including domain.")]
-        public string username { get; set; }
-
-        [OptDef(OptValType.ValueReq)]
-        [Description("An optional remote ID, useful if this repository will track multiple TFS repositories.")]
-        public string id { get; set; }
-
         //private GitTfs gitTfs;
+        private InitOptions initOptions;
+        private RemoteOptions remoteOptions;
+
+        public IEnumerable<ParseHelper> ExtraOptions
+        {
+            get
+            {
+                return from options in new [] { initOptions, remoteOptions }
+                       select new PropertySomethingParseHelper(options);
+            }
+        }
 
         public Init()
         {
-            id = "tfs"; // The default TFS remote id
+            id = GitTfsConstants.DefaultRemoteId;
         }
 
         public int Run(IEnumerable<string> args)

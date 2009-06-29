@@ -27,7 +27,7 @@ The commands I plan to implement, in order of priority:
   fetch
   clone (init+fetch)
   rebase
-  (d)commit
+  checkin (dcommit)
   find-rev
   log
   commit-diff ?

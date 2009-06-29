@@ -97,7 +97,8 @@ namespace Sep.Git.Tfs.Commands
         {
             var usage = new UsageBuilder();
             usage.BeginSection("where options are:");
-            usage.AddOptions(new PropertyFieldParserHelper(command));
+            foreach(var parseHelper in Program.GetOptionParseHelpers(command))
+                usage.AddOptions(parseHelper);
             usage.EndSection();
             output.WriteLine("Usage: git-tfs " + GetCommandUsage(command))
             usage.ToText(output, OptStyle.Unix, true);
