@@ -53,7 +53,7 @@ namespace Sep.Git.Tfs.Test.Commands
             [ShortOptionName('s')]
             public bool Flag { get; set; }
 
-            public int Run(IEnumerable<string> args)
+            public int Run(IList<string> args)
             {
                 throw new System.NotImplementedException();
             }

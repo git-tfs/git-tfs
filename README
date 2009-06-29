@@ -1,0 +1,12 @@
+git-tfs is an two-way bridge between TFS and git, similar to git-svn.
+
+git-tfs is a more tfs-ish derivative of git-svn.
+
+Configuration-wise, here is what git-tfs should be doing:
+
+[tfs-remote "<repository-id>"]
+  url = <tfs server url>
+  repository = <tfs repository path>
+  fetch = refs/remotes/<repository-id>/master
+  
+In .git/tfs/, meta-data, especially the revision mapping, will be stored.

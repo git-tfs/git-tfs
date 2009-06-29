@@ -18,5 +18,7 @@ namespace Sep.Git.Tfs.Commands
                        select new PropertyThingParseHelper(options);
             }
         }
+
+        public bool RequiresValidGitRepository { get { return true; } }
     }
 }

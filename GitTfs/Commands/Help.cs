@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using CommandLine.OptParse;
@@ -23,7 +24,7 @@ namespace Sep.Git.Tfs.Commands
         /// Figures out whether it should show help for git-tfs or for
         /// a particular command, and then does that.
         /// </summary>
-        public int Run(IEnumerable<string> args)
+        public int Run(IList<string> args)
         {
             foreach(var arg in args)
             {
@@ -47,7 +48,7 @@ namespace Sep.Git.Tfs.Commands
                 output.WriteLine("    " + commandName);
             }
             output.WriteLine(" (use 'git-tfs help [command]' for more information)");
-            return 1;
+            return GitTfsExitCodes.Help;
         }
 
         private IEnumerable<string> GetCommandNames()
@@ -79,7 +80,9 @@ namespace Sep.Git.Tfs.Commands
 
         private string GetCommandUsage(GitTfsCommand command)
         {
-            var descriptionAttribute = command.GetType().GetCustomAttributes(typeof (DescriptionAttribute), false).FirstOrDefault();
+            var descriptionAttribute =
+                command.GetType().GetCustomAttributes(typeof (DescriptionAttribute), false).FirstOrDefault() as
+                DescriptionAttribute;
             if(descriptionAttribute != null)
             {
                 return descriptionAttribute.Description;
@@ -93,16 +96,19 @@ namespace Sep.Git.Tfs.Commands
         /// <summary>
         /// Shows help for a specific command.
         /// </summary>
-        private int Run(GitTfsCommand command)
+        public int Run(GitTfsCommand command)
         {
+            if(command is Help)
+                return Run();
+
             var usage = new UsageBuilder();
             usage.BeginSection("where options are:");
             foreach(var parseHelper in Program.GetOptionParseHelpers(command))
                 usage.AddOptions(parseHelper);
             usage.EndSection();
-            output.WriteLine("Usage: git-tfs " + GetCommandUsage(command))
+            output.WriteLine("Usage: git-tfs " + GetCommandUsage(command));
             usage.ToText(output, OptStyle.Unix, true);
-            return 2;
+            return GitTfsExitCodes.Help;
         }
     }
 }

@@ -54,11 +54,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Base.cs" />
+    <Compile Include="Commands\CommitOptions.cs" />
+    <Compile Include="Commands\FcOptions.cs" />
     <Compile Include="Commands\Help.cs" />
     <Compile Include="Commands\Init.cs" />
+    <Compile Include="Commands\InitOptions.cs" />
+    <Compile Include="Commands\RemoteOptions.cs" />
+    <Compile Include="Core\IGitHelpers.cs" />
     <Compile Include="GitTfsCommand.cs" />
+    <Compile Include="GitTfsConstants.cs" />
+    <Compile Include="GitTfsExitCodes.cs" />
+    <Compile Include="Globals.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tfs\ITfsHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
