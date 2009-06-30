@@ -47,9 +47,8 @@ namespace Sep.Git.Tfs.Commands
                     GitTfsInit(args[0], args[1]);
                     return 0;
                 default:
-                    output.WriteLine("Invalid arguments to init.");
-                    Help help = ObjectFactory.GetInstance<Help>();
-                    help.Run(this);
+                    output.WriteLine("ERROR: Invalid arguments to init.");
+                    ObjectFactory.GetInstance<Help>().Run(this);
                     return GitTfsExitCodes.InvalidArguments;
                     
             }

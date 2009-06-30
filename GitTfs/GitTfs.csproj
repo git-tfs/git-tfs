@@ -60,6 +60,7 @@
     <Compile Include="Commands\InitOptions.cs" />
     <Compile Include="Commands\RemoteOptions.cs" />
     <Compile Include="ConfiguresStructureMap.cs" />
+    <Compile Include="Core\GitCommandException.cs" />
     <Compile Include="Core\GitHelpers.cs" />
     <Compile Include="Core\IGitHelpers.cs" />
     <Compile Include="Core\IGitRepository.cs" />

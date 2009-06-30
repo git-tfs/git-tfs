@@ -38,7 +38,7 @@ namespace Sep.Git.Tfs
             var globals = ObjectFactory.GetInstance<Globals>();
             if(globals.ShowHelp)
             {
-                Environment.ExitCode = ((Help)ObjectFactory.GetNamedInstance<GitTfsCommand>("help")).Run(command);
+                Environment.ExitCode = ObjectFactory.GetInstance<Help>().Run(command);
             }
             else if(globals.ShowVersion)
             {
@@ -76,7 +76,14 @@ namespace Sep.Git.Tfs
         {
             var git = ObjectFactory.GetInstance<IGitHelpers>();
             var globals = ObjectFactory.GetInstance<Globals>();
-            globals.StartingRepositorySubDir = git.TryCommandOneline("rev-parse", "--show-prefix") ?? "";
+            try
+            {
+                globals.StartingRepositorySubDir = git.CommandOneline("rev-parse", "--show-prefix");
+            }
+            catch (Exception)
+            {
+                globals.StartingRepositorySubDir = "";
+            }
             if(globals.GitDir != null)
             {
                 globals.GitDirSetByUser = true;
@@ -101,7 +108,7 @@ namespace Sep.Git.Tfs
                 var gitDir = globals.GitDir;
                 globals.GitDir = null;
                 string cdUp = null;
-                git.Try("Already at toplevel, but " + gitDir + " not found.",
+                git.WrapGitCommandErrors("Already at toplevel, but " + gitDir + " not found.",
                         () =>
                             {
                                 cdUp = git.CommandOneline("rev-parse", "--show-cdup");
