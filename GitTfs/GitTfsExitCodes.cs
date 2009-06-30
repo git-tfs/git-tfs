@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Sep.Git.Tfs
+﻿namespace Sep.Git.Tfs
 {
     public static class GitTfsExitCodes
     {

@@ -12,7 +12,11 @@ namespace Sep.Git.Tfs.Commands
         [Description("The --template option to pass to git-init.")]
         public string GitInitTemplate { get; set; }
 
-        [OptDef(OptValType.ValueOpt)]
+        // It would be better if this were an optional value, but there's no way
+        // to tell the difference between an optional value that was not provided,
+        // and one that was set but with no argument.
+        //[OptDef(OptValType.ValueOpt)]
+        [OptDef(OptValType.ValueReq)]
         [LongOptionName("shared")]
         [UseNameAsLongOption(false)]
         [Description("The --shared option to pass to git-init.")]

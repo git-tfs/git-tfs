@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using CommandLine.OptParse;
+
 namespace Sep.Git.Tfs.Commands
 {
     [StructureMapSingleton]

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -13,11 +12,16 @@ namespace Sep.Git.Tfs.Commands
     [Description("help [command-name]")]
     public class Help : GitTfsCommand
     {
-        private TextWriter output;
+        private readonly TextWriter output;
 
         public Help(TextWriter output)
         {
             this.output = output;
+        }
+
+        public IEnumerable<IOptionResults> ExtraOptions
+        {
+            get { return null; }
         }
 
         /// <summary>
@@ -55,14 +59,16 @@ namespace Sep.Git.Tfs.Commands
         {
             foreach(var commandType in GetCommandTypes())
             {
-                yield return GetCommandName(commandType);
+                var name = GetCommandName(commandType);
+                if(name != null)
+                    yield return name;
             }
         }
 
         private string GetCommandName(Type commandType)
         {
             var attribute = (PluggableAttribute) commandType.GetCustomAttributes(typeof (PluggableAttribute), false).FirstOrDefault();
-            return attribute == null ? "n/a" : attribute.ConcreteKey;
+            return attribute == null ? null : attribute.ConcreteKey;
         }
 
         private string GetCommandName(object obj)
@@ -83,14 +89,9 @@ namespace Sep.Git.Tfs.Commands
             var descriptionAttribute =
                 command.GetType().GetCustomAttributes(typeof (DescriptionAttribute), false).FirstOrDefault() as
                 DescriptionAttribute;
-            if(descriptionAttribute != null)
-            {
-                return descriptionAttribute.Description;
-            }
-            else
-            {
-                return GetCommandName(command) + " [options]";
-            }
+            return (descriptionAttribute != null)
+                       ? descriptionAttribute.Description
+                       : GetCommandName(command) + " [options]";
         }
 
         /// <summary>

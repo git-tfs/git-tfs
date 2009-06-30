@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using CommandLine.OptParse;
+
 namespace Sep.Git.Tfs.Commands
 {
     [StructureMapSingleton]
@@ -37,7 +40,7 @@ namespace Sep.Git.Tfs.Commands
 //        public int LogWindowSize { get; set; }
 //        public bool NoCheckout { get; set; }
         
-        [OptDef(OptValueType.Incrementing)]
+        [OptDef(OptValType.IncrementalFlag)]
         [ShortOptionName('q')]
         [LongOptionName("quiet")]
         [UseNameAsLongOption(false)]

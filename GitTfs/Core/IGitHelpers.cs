@@ -1,12 +1,15 @@
 ﻿using System;
+using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
     public interface IGitHelpers
     {
-        string TryCommandOneline(string gitCommand, params string [] args);
-        string CommandOneline(string gitCommand, params string [] args);
+        string TryCommandOneline(params string[] command);
+        string CommandOneline(params string[] command);
+        void CommandNoisy(params string[] command);
         void Try(string exceptionMessage, Action action);
-        IGit MakeRepository(string dir);
+        [Obsolete("Can this be replaced with a call to structuremap?")]
+        IGitRepository MakeRepository(string dir);
     }
 }

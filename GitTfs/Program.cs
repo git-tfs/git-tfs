@@ -28,11 +28,11 @@ namespace Sep.Git.Tfs
             }
         }
 
-        private static void Main(List<string> args)
+        private static void Main(IList<string> args)
         {
             InitializeGlobals();
             var command = ExtractCommand(args);
-            if(command.RequiresValidGitRepository) AssertValidGitRepository();
+            if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             ReadRepositoryConfig(command);
             var unparsedArgs = ParseOptions(command, args);
             var globals = ObjectFactory.GetInstance<Globals>();
@@ -42,11 +42,10 @@ namespace Sep.Git.Tfs
             }
             else if(globals.ShowVersion)
             {
-                ObjectFactory.GetInstance<TextWriter>().WriteLine("git-tfs version " +
-                                                                  typeof (Program).Assembly.GetName().Version +
-                                                                  " (TFS client library " +
-                                                                  ObjectFactory.GetInstance<ITfsHelper>().
-                                                                      TfsClientLibraryVersion + ")");
+                ObjectFactory.GetInstance<TextWriter>()
+                    .WriteLine("git-tfs version " + typeof (Program).Assembly.GetName().Version +
+                               " (TFS client library " + ObjectFactory.GetInstance<ITfsHelper>().TfsClientLibraryVersion +
+                               ")");
                 Environment.ExitCode = GitTfsExitCodes.OK;
             }
             else
@@ -57,6 +56,12 @@ namespace Sep.Git.Tfs
                 Environment.ExitCode = command.Run(unparsedArgs);
                 //PostFetchCheckout();
             }
+        }
+
+        private static bool RequiresValidGitRepository(GitTfsCommand command)
+        {
+            return 0 !=
+                   command.GetType().GetCustomAttributes(typeof (RequiresValidGitRepositoryAttribute), false).Length;
         }
 
         private static void ReadRepositoryConfig(GitTfsCommand command)
@@ -80,8 +85,7 @@ namespace Sep.Git.Tfs
             {
                 globals.GitDir = ".git";
             }
-            globals.RefId = "default";
-            globals.RepositoryIdOption = "default";
+            globals.RepositoryId = "default";
         }
 
         private static void AssertValidGitRepository()
@@ -96,18 +100,18 @@ namespace Sep.Git.Tfs
                 }
                 var gitDir = globals.GitDir;
                 globals.GitDir = null;
-                string cdUp;
-                git.Try("Already at toplevel, but " + gitDir + " not found.", () =>
-                                                                                  {
-                                                                                      cdUp = git.CommandOneline(
-                                                                                          "rev-parse", "--show-cdup");
-                                                                                      if (String.IsNullOrEmpty(cdUp))
-                                                                                          gitDir = ".";
-                                                                                      else
-                                                                                          cdUp = cdUp.TrimEnd();
-                                                                                      if (String.IsNullOrEmpty(cdUp))
-                                                                                          cdUp = ".";
-                                                                                  });
+                string cdUp = null;
+                git.Try("Already at toplevel, but " + gitDir + " not found.",
+                        () =>
+                            {
+                                cdUp = git.CommandOneline("rev-parse", "--show-cdup");
+                                if (String.IsNullOrEmpty(cdUp))
+                                    gitDir = ".";
+                                else
+                                    cdUp = cdUp.TrimEnd();
+                                if (String.IsNullOrEmpty(cdUp))
+                                    cdUp = ".";
+                            });
                 Environment.CurrentDirectory = cdUp;
                 if (!Directory.Exists(gitDir))
                 {
@@ -139,8 +143,20 @@ namespace Sep.Git.Tfs
 
         private static void Initialize(IInitializationExpression initializer)
         {
-            initializer.Scan(scanner => scanner.TheCallingAssembly());
+            initializer.Scan(scan => { scan.WithDefaultConventions(); scan.TheCallingAssembly(); });
             initializer.ForRequestedType<TextWriter>().TheDefault.Is.ConstructedBy(() => Console.Out);
+            DoCustomConfiguration(initializer);
+        }
+
+        private static void DoCustomConfiguration(IInitializationExpression initializer)
+        {
+            foreach(var type in typeof(Program).Assembly.GetTypes())
+            {
+                foreach(ConfiguresStructureMap attribute in type.GetCustomAttributes(typeof(ConfiguresStructureMap), false))
+                {
+                    attribute.Initialize(initializer, type);
+                }
+            }
         }
 
         private static IList<string> ParseOptions(GitTfsCommand command, IList<string> args)

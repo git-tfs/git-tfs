@@ -53,6 +53,13 @@ namespace Sep.Git.Tfs.Test.Commands
             [ShortOptionName('s')]
             public bool Flag { get; set; }
 
+            public static IEnumerable<IOptionResults> TestOptions = new List<IOptionResults>();
+
+            public IEnumerable<IOptionResults> ExtraOptions
+            {
+                get { return TestOptions; }
+            }
+
             public int Run(IList<string> args)
             {
                 throw new System.NotImplementedException();
