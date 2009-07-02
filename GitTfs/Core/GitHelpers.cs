@@ -8,12 +8,25 @@ namespace Sep.Git.Tfs.Core
         public string CommandOneline(params string[] command)
         {
             AssertValidCommand(command);
-            // TODO - sub command_oneline
-            // 1. start the child process and capture stdout (stderr?)
-            // 2. Get the first line of output (if it's available) and trimend it.
-            // 3. If _cmd_close (?) fails, add the output line and rethrow.
-            // 4. Return the trimmed line.
-            throw new NotImplementedException();
+            var process = CreateProcess(command, RedirectStdout);
+            Execute(process);
+            var returnValue = process.StandardOutput.ReadLine();
+            process.WaitForExit();
+            return returnValue;
+        }
+
+        private void RedirectStdout(ProcessStartInfo startInfo)
+        {
+            startInfo.RedirectStandardOutput = true;
+        }
+
+        protected virtual Process CreateProcess(string [] command, Action<ProcessStartInfo> initialize)
+        {
+            var startInfo = new ProcessStartInfo();
+            startInfo.Program = "git";
+            startInfo.Arguments = command.ToArguments();
+            initialize(startInfo);
+            return Process.Start(startInfo);
         }
 
         public void CommandNoisy(params string[] command)

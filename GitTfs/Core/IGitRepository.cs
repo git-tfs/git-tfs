@@ -1,6 +1,6 @@
 ﻿namespace Sep.Git.Tfs.Core
 {
-    public interface IGitRepository
+    public interface IGitRepository : IGitHelpers
     {
     }
 }
