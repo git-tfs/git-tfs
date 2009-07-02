@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CommandLine.OptParse;
 
 namespace Sep.Git.Tfs.Core
 {

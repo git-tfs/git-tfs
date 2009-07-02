@@ -17,6 +17,7 @@ namespace Sep.Git.Tfs
         {
             try
             {
+                Trace.Listeners.Add(new ConsoleTraceListener());
                 Initialize();
                 Main(new List<string>(args));
             }
@@ -92,7 +93,7 @@ namespace Sep.Git.Tfs
             {
                 globals.GitDir = ".git";
             }
-            globals.RepositoryId = "default";
+            globals.RepositoryId = GitTfsConstants.DefaultRepositoryId;
         }
 
         private static void AssertValidGitRepository()

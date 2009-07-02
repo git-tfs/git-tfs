@@ -31,7 +31,7 @@ namespace Sep.Git.Tfs.Commands
         {
             get
             {
-                return Helpers.MakeOptionResults(initOptions, remoteOptions);
+                return this.MakeOptionResults(initOptions, remoteOptions);
             }
         }
 
