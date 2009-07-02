@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace Sep.Git.Tfs.Core
@@ -8,11 +9,18 @@ namespace Sep.Git.Tfs.Core
         public string CommandOneline(params string[] command)
         {
             AssertValidCommand(command);
-            var process = CreateProcess(command, RedirectStdout);
-            Execute(process);
+            var process = Start(command, RedirectStdout);
             var returnValue = process.StandardOutput.ReadLine();
-            process.WaitForExit();
+            Close(process);
             return returnValue;
+        }
+
+        private void Close(Process process)
+        {
+            if (!process.WaitForExit((int)TimeSpan.FromSeconds(10).TotalMilliseconds))
+                throw new GitCommandException("Command did not terminate.", process);
+            if(process.ExitCode != 0)
+                throw new GitCommandException("Command exited with error code.", process);
         }
 
         private void RedirectStdout(ProcessStartInfo startInfo)
@@ -20,22 +28,27 @@ namespace Sep.Git.Tfs.Core
             startInfo.RedirectStandardOutput = true;
         }
 
-        protected virtual Process CreateProcess(string [] command, Action<ProcessStartInfo> initialize)
+        private Process Start(string[] command)
+        {
+            return Start(command, null);
+        }
+
+        protected virtual Process Start(string [] command, Action<ProcessStartInfo> initialize)
         {
             var startInfo = new ProcessStartInfo();
-            startInfo.Program = "git";
-            startInfo.Arguments = command.ToArguments();
-            initialize(startInfo);
+            startInfo.FileName = "git";
+            startInfo.SetArguments(command);
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            if(initialize != null) initialize(startInfo);
+            Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments);
             return Process.Start(startInfo);
         }
 
         public void CommandNoisy(params string[] command)
         {
             AssertValidCommand(command);
-            // TODO - sub command_noisy
-            // 1. start the child process
-            // 2. check the exit status, throw GitCommandException if (exitcode >> 8) != 0
-            throw new NotImplementedException();
+            Close(Start(command));
         }
 
         /// <summary>
@@ -51,7 +64,7 @@ namespace Sep.Git.Tfs.Core
             }
             catch (GitCommandException e)
             {
-                throw new Exception(String.Format(exceptionMessage, e.CommandLine, e.ExitCode), e);
+                throw new Exception(String.Format(exceptionMessage, e.Process.StartInfo.FileName + " " + e.Process.StartInfo.Arguments, e.Process.ExitCode), e);
             }
         }
 

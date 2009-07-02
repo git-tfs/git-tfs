@@ -1,8 +1,16 @@
-namespace Sep.Git.Tfs.Core
+using System;
+using System.Collections;
+using System.Diagnostics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Sep.Git.Tfs.Core;
+
+namespace Sep.Git.Tfs.Test.Core
 {
     [TestClass]
     public class ExtTests
     {
+        #region Action.And()
+
         [TestMethod]
         public void ShouldCombineActionsInOne_And_Call()
         {
@@ -30,5 +38,27 @@ namespace Sep.Git.Tfs.Core
             Assert.AreEqual(true, record["action2"], "action2 should have been executed.");
             Assert.AreEqual(true, record["action3"], "action3 should have been executed.");
         }
+
+        #endregion
+
+        #region ProcessStartInfo.SetArguments()
+
+        [TestMethod]
+        public void ShouldSetProcessStartInfoArguments()
+        {
+            var info = new ProcessStartInfo();
+            info.SetArguments("a", "b", "c");
+            Assert.AreEqual("a b c", info.Arguments);
+        }
+
+        [TestMethod]
+        public void ShouldQuoteSpacesInProcessStartInfoArguments()
+        {
+            var info = new ProcessStartInfo();
+            info.SetArguments("a", "b c");
+            Assert.AreEqual("a \"b c\"", info.Arguments);
+        }
+
+        #endregion
     }
 }
