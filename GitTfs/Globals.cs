@@ -8,11 +8,6 @@ namespace Sep.Git.Tfs
     [StructureMapSingleton]
     public class Globals
     {
-        public Globals()
-        {
-            System.Diagnostics.Trace.WriteLine("GLOBALS CONSTRUCTED!");
-        }
-
         public string GitDir
         {
             get { return Environment.GetEnvironmentVariable("GIT_DIR"); }
@@ -59,6 +54,6 @@ namespace Sep.Git.Tfs
         [UseNameAsLongOption(false)]
         public bool ShowVersion { get; set; }
 
-        public IGitRepository Repository { get; set; }
+        public IGitRepository CurrentRepository { get; set; }
     }
 }

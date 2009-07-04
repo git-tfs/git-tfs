@@ -28,5 +28,16 @@ namespace Sep.Git.Tfs.Core
         {
             return arg.Contains(" ") ? ("\"" + arg + "\"") : arg;
         }
+
+        public static string CombinePaths(params string [] pathParts)
+        {
+            if(pathParts == null || pathParts.Count == 0) return null;
+            var path = pathParts[0];
+            for(int i = 1; i < pathParts.Count; i++)
+            {
+                path = Path.Combine(path, pathParts[i]);
+            }
+            return path;
+        }
     }
 }
