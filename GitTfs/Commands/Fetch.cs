@@ -101,24 +101,15 @@ namespace Sep.Git.Tfs.Commands
             public long ChangesetId { get; set; }
             public GitTfsRemote Remote { get; set; } // Need to expand this to do a dynamic lookup & cache
 
-            // e.g. git-tfs-id: [http://team:8080/]$/sandbox;C123
-            private static readonly Regex tfsInfoRegex =
-                new Regex("^\\s*" +
-                          "git-tfs-id:\\s+" +
-                          "\\[(.+)\\]" +
-                          "(.+);" +
-                          "C(\\d+)" +
-                          "\\s*$");
-
             public static TfsCommitMetaInfo TryParse(string gitTfsMetaInfo)
             {
-                match = tfsInfoRegex.Match(line);
+                match = GitTfsConstants.TfsCommitInfoRegex.Match(line);
                 if(match.IsMatch)
                 {
                     var commitInfo = ObjectFactory.GetInstance<TfsCommitMetaInfo>();
-                    commitInfo.TfsUrl = match.Groups[1].Value;
-                    commitInfo.TfsSourcePath = match.Groups[2].Value;
-                    commitInfo.ChangesetId = Convert.ToInt32(match.Groups[3].Value);
+                    commitInfo.TfsUrl = match.Groups["url"].Value;
+                    commitInfo.TfsSourcePath = match.Groups["repository"].Value;
+                    commitInfo.ChangesetId = Convert.ToInt32(match.Groups["changeset"].Value);
                     return commitInfo;
                 }
                 return null;

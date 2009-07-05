@@ -28,9 +28,14 @@ namespace Sep.Git.Tfs.Core
             startInfo.RedirectStandardOutput = true;
         }
 
+        private void RedirectStdin(ProcessStartInfo startInfo)
+        {
+            startInfo.RedirectStandardInput = true;
+        }
+
         private Process Start(string[] command)
         {
-            return Start(command, null);
+            return Start(command, x => {});
         }
 
         protected virtual Process Start(string [] command, Action<ProcessStartInfo> initialize)
@@ -40,7 +45,7 @@ namespace Sep.Git.Tfs.Core
             startInfo.SetArguments(command);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
-            if(initialize != null) initialize(startInfo);
+            initialize(startInfo);
             Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments);
             return Process.Start(startInfo);
         }
@@ -49,6 +54,14 @@ namespace Sep.Git.Tfs.Core
         {
             AssertValidCommand(command);
             Close(Start(command));
+        }
+
+        public void CommandInteractive(Action<Stream, Stream> interact, params string [] command)
+        {
+            AssertValidCommand(command);
+            var process = Start(command, RedirectStdout.And(RedirectStdin));
+            interact(process.StandardInput, process.StandardOutput);
+            Close(process);
         }
 
         /// <summary>

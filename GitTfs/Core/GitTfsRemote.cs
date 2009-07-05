@@ -83,6 +83,7 @@ namespace Sep.Git.Tfs.Commands
 
         private string Commit(TBDLogEntry logEntry)
         {
+            CommitInfo commitInfo = null;
             WithCommitHeaderEnv(logEntry, () => {
                 var tree = logEntry.Tree;
                 if(tree == null)
@@ -96,11 +97,18 @@ namespace Sep.Git.Tfs.Commands
                     commitCommand.Add(parent);
                 }
                 // encode logEntry.Log according to 'git config --get i18n.commitencoding', if specified
-                Repository.Open3(
-                    stderr -> Console.Err,
-                    stdin  <- logEntry.Log, metadata (git-tfs-id: ...),
-                    stdout -> var commitInfo,
-                    commitCommand.ToArray());
+                var commitEncoding = Repository.CommandOneline("config", "i18n.commitencoding");
+                var encoding = LookupEncoding(commitEncoding) ?? DefaultEncoding /* UTF-8 ? */;
+                Repository.CommandInteractive((stdin, stdout) => {
+                        using(var stdinWriter = new StreamWriter(stdin, encoding))
+                        {
+                            // turn off auto-flush to get rid of the 'using'?
+                            stdinWriter.WriteLine(logEntry.Log);
+                            stdinWriter.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl, TfsRepository, logEntry.ChangesetId);
+                        }
+                        using(var stdoutReader = new StreamReader(stdout))
+                            commitInfo = ParseCommitInfo(stdoutReader.ReadToEnd());
+                    }, commitCommand.ToArray());
             });
             // TODO: StoreChangesetMetadata(commitInfo);
             return commitInfo.Sha1;
