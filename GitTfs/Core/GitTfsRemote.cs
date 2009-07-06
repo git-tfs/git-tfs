@@ -13,10 +13,11 @@ namespace Sep.Git.Tfs.Core
         private readonly Globals globals;
         private readonly RemoteOptions remoteOptions;
 
-        public GitTfsRemote(RemoteOptions remoteOptions, Globals globals)
+        public GitTfsRemote(RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
+            Tfs = tfsHelper;
         }
 
         public string Id { get; set; }

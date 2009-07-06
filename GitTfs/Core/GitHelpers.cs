@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -97,7 +98,7 @@ namespace Sep.Git.Tfs.Core
 
         public IGitRepository MakeRepository(string dir)
         {
-            return null;
+            return ObjectFactory.With("gitDir").EqualTo(dir).GetInstance<IGitRepository>();
         }
 
         private static readonly Regex ValidCommandName = new Regex("^[a-z0-9A-Z_-]+$");

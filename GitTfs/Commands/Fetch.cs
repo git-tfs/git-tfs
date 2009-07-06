@@ -11,6 +11,7 @@ namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("fetch")]
     [Description("fetch [options] [tfs-remote-id]...")]
+    [RequiresValidGitRepository]
     public class Fetch : GitTfsCommand
     {
         private readonly FcOptions fcOptions;
