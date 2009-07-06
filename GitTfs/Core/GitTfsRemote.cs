@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Tfs;
+using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -21,10 +21,8 @@ namespace Sep.Git.Tfs.Core
         }
 
         public string Id { get; set; }
-        public string TfsUrl { get; set; }
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegex { get; set; }
-        public string Username { get; set; }
         public long MaxChangesetId { get; set; }
         public string MaxCommitHash { get; set; }
         public IGitRepository Repository { get; set; }
@@ -52,7 +50,7 @@ namespace Sep.Git.Tfs.Core
         {
             //var ignoreRegexPattern = remoteOptions.IgnoreRegex ?? IgnoreRegex;
             //var ignoreRegex = ignoreRegexPattern == null ? null : new Regex(ignoreRegexPattern);
-            foreach(var changeset in Tfs.GetChangesets(MaxChangesetId + 1))
+            foreach(var changeset in Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1))
             {
                 AssertIndexClean(MaxCommitHash);
                 var log = Apply(changeset);
@@ -122,7 +120,7 @@ namespace Sep.Git.Tfs.Core
                                                     Repository.CommandInputOutputPipe((stdin, stdout) => {
                                                                                                              // turn off auto-flush to get rid of the 'using'?
                                                                                                              stdin.WriteLine(logEntry.Log);
-                                                                                                             stdin.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl, TfsRepositoryPath, logEntry.ChangesetId);
+                                                                                                             stdin.WriteLine(GitTfsConstants.TfsCommitInfoFormat, Tfs.Url, TfsRepositoryPath, logEntry.ChangesetId);
                                                                                                              commitInfo = ParseCommitInfo(stdout.ReadToEnd());
                                                     }, commitCommand.ToArray());
             });

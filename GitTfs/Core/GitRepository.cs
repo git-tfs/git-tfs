@@ -70,7 +70,10 @@ namespace Sep.Git.Tfs.Core
                     switch(key)
                     {
                         case "url":
-                            remote.TfsUrl = value;
+                            remote.Tfs.Url = value;
+                            break;
+                        case "username":
+                            remote.Tfs.Username = value;
                             break;
                         case "repository":
                             remote.TfsRepositoryPath = value;
