@@ -60,5 +60,38 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         #endregion
+
+        #region CombinePaths()
+
+        [TestMethod]
+        public void ShouldReturnSingleArgumentWhenProvided()
+        {
+            Assert.AreEqual("a", Ext.CombinePaths("a"));
+        }
+
+        [TestMethod]
+        public void ShouldCombineSeveralPaths()
+        {
+            Assert.AreEqual("a\\b\\c", Ext.CombinePaths("a", "b", "c"));
+        }
+
+        [TestMethod]
+        public void ShouldIgnorePathPartsBeforeAbsolute()
+        {
+            Assert.AreEqual("c:\\x\\y", Ext.CombinePaths("a", "b", "c:\\x", "y"));
+        }
+
+        #endregion
+
+        #region FormatForGit()
+
+        [TestMethod]
+        public void ShouldFormatDateForGit()
+        {
+            var date = new DateTime(2000, 1, 2, 12, 34, 56);
+            Assert.AreEqual("TODO: What can git parse?", date.FormatForGit());
+        }
+
+        #endregion
     }
 }

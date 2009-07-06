@@ -66,9 +66,12 @@
     <Compile Include="Core\GitCommandException.cs" />
     <Compile Include="Core\GitHelpers.cs" />
     <Compile Include="Core\GitRepository.cs" />
+    <Compile Include="Core\GitTfsRemote.cs" />
     <Compile Include="Core\IGitHelpers.cs" />
     <Compile Include="Core\IGitRepository.cs" />
+    <Compile Include="Core\LogEntry.cs" />
     <Compile Include="Core\RequiresValidGitRepositoryAttribute.cs" />
+    <Compile Include="Core\TfsChangeset.cs" />
     <Compile Include="GitTfsCommand.cs" />
     <Compile Include="GitTfsConstants.cs" />
     <Compile Include="GitTfsExitCodes.cs" />

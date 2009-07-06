@@ -86,7 +86,7 @@ namespace Sep.Git.Tfs.Commands
             // TODO - check that there's not already a repository configured with this ID.
             SetConfig("url", tfsUrl);
             SetConfig("repository", tfsRepositoryPath);
-            SetConfig("fetch", "refs/remotes/" + globals.RepositoryId + "/master");
+            SetConfig("fetch", "refs/remotes/" + globals.RemoteId + "/master");
             if (initOptions.NoMetaData) SetConfig("no-meta-data", 1);
             if (remoteOptions.Username != null) SetConfig("username", remoteOptions.Username);
             if (remoteOptions.IgnoreRegex != null) SetConfig("ignore-paths", remoteOptions.IgnoreRegex);
@@ -96,7 +96,7 @@ namespace Sep.Git.Tfs.Commands
 
         private void SetConfig(string subkey, object value)
         {
-            gitHelper.CommandNoisy("config", globals.RepositoryConfigKey(subkey), value.ToString());
+            gitHelper.CommandNoisy("config", globals.RemoteConfigKey(subkey), value.ToString());
         }
     }
 }

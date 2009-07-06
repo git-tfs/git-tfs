@@ -1,15 +1,30 @@
-namespace Sep.Git.Tfs.Commands
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using Sep.Git.Tfs.Commands;
+using Sep.Git.Tfs.Tfs;
+
+namespace Sep.Git.Tfs.Core
 {
     public class GitTfsRemote
     {
-        private RemoteOptions remoteOptions;
+        private readonly Globals globals;
+        private readonly RemoteOptions remoteOptions;
+
+        public GitTfsRemote(RemoteOptions remoteOptions, Globals globals)
+        {
+            this.remoteOptions = remoteOptions;
+            this.globals = globals;
+        }
 
         public string Id { get; set; }
         public string TfsUrl { get; set; }
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegex { get; set; }
         public string Username { get; set; }
-        public int MaxChangesetId { get; set; }
+        public long MaxChangesetId { get; set; }
         public string MaxCommitHash { get; set; }
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
@@ -18,7 +33,7 @@ namespace Sep.Git.Tfs.Commands
         {
             get
             {
-                return Ext.CombinePaths(Repository.GitDir, "tfs", Id);
+                return Ext.CombinePaths(globals.GitDir, "tfs", Id);
             }
         }
 
@@ -34,14 +49,14 @@ namespace Sep.Git.Tfs.Commands
 
         public void Fetch()
         {
-            var ignoreRegexPattern = remoteOptions.IgnoreRegex ?? IgnoreRegex;
-            var ignoreRegex = ignoreRegexPattern == null ? null : new Regex(ignoreRegexPattern);
+            //var ignoreRegexPattern = remoteOptions.IgnoreRegex ?? IgnoreRegex;
+            //var ignoreRegex = ignoreRegexPattern == null ? null : new Regex(ignoreRegexPattern);
             foreach(var changeset in Tfs.GetChangesets(MaxChangesetId + 1))
             {
                 AssertIndexClean(MaxCommitHash);
                 var log = Apply(changeset);
                 MaxCommitHash = Commit(log);
-                MaxChangesetId = changeset.Id;
+                MaxChangesetId = changeset.ChangesetId;
                 DoGcIfNeeded();
             }
         }
@@ -57,81 +72,95 @@ namespace Sep.Git.Tfs.Commands
 
         private void AssertIndexClean(string treeish)
         {
-            WithTemporaryIndex(() => {
-                if(!File.Exists(IndexFile)) Repository.CommandNoisy("read-tree", treeish);
-                var currentTree = Repository.CommandOneline("write-tree");
-                var expectedCommitInfo = Repository.Command("cat-file", "commit", treeish);
-                var expectedCommitTree = expectedCommitInfo.Match(new Regex("^tree (" + GitTfsConstants.Sha1 + ")")).Groups[1].Value;
-                if(expectedCommitTree != currentTree)
-                {
-                    // warn "Index mismatch: $y != $x\nrereading $treeish\n";
-                    File.Delete(IndexFile);
-                    Repository.CommandNoisy("read-tree", treeish);
-                    currentTree = Repository.CommandOneline("write-tree");
-                    if(expectedCommitTree != currentTree)
-                    {
-                        throw new Exception("Unable to create a clean temporary index: trees (" + treeish + ") " + expectedCommitTree + " != " + currentTree);
-                    }
-                }
+            var treeShaRegex = new Regex("^tree (" + GitTfsConstants.Sha1 + ")");
+            WithTemporaryIndex(() =>
+            {
+                                         if(!File.Exists(IndexFile)) Repository.CommandNoisy("read-tree", treeish);
+                                         var currentTree = Repository.CommandOneline("write-tree");
+                                         var expectedCommitInfo = Repository.Command("cat-file", "commit", treeish);
+                                         var expectedCommitTree = treeShaRegex.Match(expectedCommitInfo).Groups[1].Value;
+                                         if(expectedCommitTree != currentTree)
+                                         {
+                                             // warn "Index mismatch: $y != $x\nrereading $treeish\n";
+                                             File.Delete(IndexFile);
+                                             Repository.CommandNoisy("read-tree", treeish);
+                                             currentTree = Repository.CommandOneline("write-tree");
+                                             if(expectedCommitTree != currentTree)
+                                             {
+                                                 throw new Exception("Unable to create a clean temporary index: trees (" + treeish + ") " + expectedCommitTree + " != " + currentTree);
+                                             }
+                                         }
             });
         }
 
-        private TBDLogEntry Apply(TfsChangeset changeset)
+        private LogEntry Apply(TfsChangeset changeset)
         {
+            throw new NotImplementedException();
             //TODO: see SVN::Git::Fetcher (3320) and Git::IndexInfo (5323)
         }
 
-        private string Commit(TBDLogEntry logEntry)
+        private string Commit(LogEntry logEntry)
         {
-            CommitInfo commitInfo = null;
+            TfsChangeset commitInfo = null;
+            var sha1OnlyRegex = new Regex("^" + GitTfsConstants.Sha1 + "$");
             WithCommitHeaderEnv(logEntry, () => {
-                var tree = logEntry.Tree;
-                if(tree == null)
-                    WithTemporaryIndex(() => tree = Repository.CommandOneline("write-tree"));
-                if(!tree.IsMatch(new Regex("^" + GitTfsConstants.Sha1 + "$"))
-                    throw new "Tree is not a valid sha1: " + tree;
-                var commitCommand = new List<string> { "commit-tree", tree };
-                foreach(var parent in logEntry.CommitParents)
-                {
-                    commitCommand.Add("-p");
-                    commitCommand.Add(parent);
-                }
-                // encode logEntry.Log according to 'git config --get i18n.commitencoding', if specified
-                var commitEncoding = Repository.CommandOneline("config", "i18n.commitencoding");
-                var encoding = LookupEncoding(commitEncoding) ?? DefaultEncoding /* UTF-8 ? */;
-                Repository.CommandInteractive((stdin, stdout) => {
-                        using(var stdinWriter = new StreamWriter(stdin, encoding))
-                        {
-                            // turn off auto-flush to get rid of the 'using'?
-                            stdinWriter.WriteLine(logEntry.Log);
-                            stdinWriter.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl, TfsRepository, logEntry.ChangesetId);
-                        }
-                        using(var stdoutReader = new StreamReader(stdout))
-                            commitInfo = ParseCommitInfo(stdoutReader.ReadToEnd());
-                    }, commitCommand.ToArray());
+                                                    var tree = logEntry.Tree;
+                                                    if(tree == null)
+                                                        WithTemporaryIndex(() => tree = Repository.CommandOneline("write-tree"));
+                                                    if (!sha1OnlyRegex.IsMatch(tree))
+                                                        throw new Exception("Tree is not a valid sha1: " + tree);
+                                                    var commitCommand = new List<string> { "commit-tree", tree };
+                                                    foreach(var parent in logEntry.CommitParents)
+                                                    {
+                                                        commitCommand.Add("-p");
+                                                        commitCommand.Add(parent);
+                                                    }
+                                                    // encode logEntry.Log according to 'git config --get i18n.commitencoding', if specified
+                                                    //var commitEncoding = Repository.CommandOneline("config", "i18n.commitencoding");
+                                                    //var encoding = LookupEncoding(commitEncoding) ?? Encoding.UTF8;
+                                                    Repository.CommandInputOutputPipe((stdin, stdout) => {
+                                                                                                             // turn off auto-flush to get rid of the 'using'?
+                                                                                                             stdin.WriteLine(logEntry.Log);
+                                                                                                             stdin.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl, TfsRepositoryPath, logEntry.ChangesetId);
+                                                                                                             commitInfo = ParseCommitInfo(stdout.ReadToEnd());
+                                                    }, commitCommand.ToArray());
             });
             // TODO: StoreChangesetMetadata(commitInfo);
-            return commitInfo.Sha1;
+            return commitInfo.GitCommit;
         }
 
-        private void WithCommitHeaderEnv(TBDLogEntry logEntry, Action action)
+        private TfsChangeset ParseCommitInfo(string commitTreeOutput)
         {
-            WithTemporaryEnvironment(action, new Dictionary<string,string> {
-                "GIT_AUTHOR_NAME" => logEntry.Name,
-                "GIT_AUTHOR_EMAIL" => logEntry.Email,
-                "GIT_AUTHOR_DATE" => logEntry.Date,
-                "GIT_COMMITTER_DATE" => logEntry.Date,
-                "GIT_COMMITTER_NAME" => logEntry.CommitterName ?? logEntry.Name,
-                "GIT_COMMITTER_EMAIL" => logEntry.CommitterEmail ?? logEntry.Email
-            });
+            throw new NotImplementedException();
+        }
+
+        //private Encoding LookupEncoding(string encoding)
+        //{
+        //    if(encoding == null)
+        //        return null;
+        //    throw new NotImplementedException("Need to implement encoding lookup for " + encoding);
+        //}
+
+        private void WithCommitHeaderEnv(LogEntry logEntry, Action action)
+        {
+            WithTemporaryEnvironment(action, new Dictionary<string, string>
+                                                 {
+                                                     {"GIT_AUTHOR_NAME", logEntry.AuthorName},
+                                                     {"GIT_AUTHOR_EMAIL", logEntry.AuthorEmail},
+                                                     {"GIT_AUTHOR_DATE", logEntry.Date.FormatForGit()},
+                                                     {"GIT_COMMITTER_DATE", logEntry.Date.FormatForGit()},
+                                                     {"GIT_COMMITTER_NAME", logEntry.CommitterName ?? logEntry.AuthorName},
+                                                     {"GIT_COMMITTER_EMAIL", logEntry.CommitterEmail ?? logEntry.AuthorEmail}
+                                                 });
         }
 
         private void WithTemporaryIndex(Action action)
         {
-            WithTemporaryEnvironment(() => {
-                Directory.CreateDirectory(Path.GetDirectoryName(IndexFile));
-                action();
-            }, new Dictionary<string,string> { "GIT_INDEX_FILE" => IndexFile });
+            WithTemporaryEnvironment(() =>
+                                         {
+                                             Directory.CreateDirectory(Path.GetDirectoryName(IndexFile));
+                                             action();
+                                         }, new Dictionary<string, string> {{"GIT_INDEX_FILE", IndexFile}});
         }
 
         private void WithTemporaryEnvironment(Action action, IDictionary<string, string> newEnvironment)

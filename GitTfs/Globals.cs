@@ -25,20 +25,20 @@ namespace Sep.Git.Tfs
         [LongOptionName("id")]
         [UseNameAsLongOption(false)]
         [Description("An optional remote ID, useful if this repository will track multiple TFS repositories.")]
-        public string RepositoryId { get; set; }
+        public string RemoteId { get; set; }
 
-        public string RepositoryConfigPrefix
+        public string RemoteConfigPrefix
         {
             get
             {
-                if (RepositoryId == null) return null;
-                return "tfs-remote." + RepositoryId;
+                if (RemoteId == null) return null;
+                return "tfs-remote." + RemoteId;
             }
         }
 
-        public string RepositoryConfigKey(string parameter)
+        public string RemoteConfigKey(string parameter)
         {
-            return RepositoryConfigPrefix + "." + parameter;
+            return RemoteConfigPrefix + "." + parameter;
         }
 
         [OptDef(OptValType.Flag)]
@@ -54,6 +54,13 @@ namespace Sep.Git.Tfs
         [UseNameAsLongOption(false)]
         public bool ShowVersion { get; set; }
 
-        public IGitRepository CurrentRepository { get; set; }
+        public IGitRepository Repository { get; set; }
+
+        public int GcCountdown { get; set; }
+
+        public int GcPeriod
+        {
+            get { return 1000; }
+        }
     }
 }

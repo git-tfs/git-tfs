@@ -1,18 +1,46 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Sep.Git.Tfs.Core
 {
     public class GitHelpers : IGitHelpers
     {
+        public string Command(params string[] command)
+        {
+            string retVal = null;
+            CommandOutputPipe(stdout => retVal = stdout.ReadToEnd(), command);
+            return retVal;
+        }
+
         public string CommandOneline(params string[] command)
+        {
+            string retVal = null;
+            CommandOutputPipe(stdout => retVal = stdout.ReadLine(), command);
+            return retVal;
+        }
+
+        public void CommandNoisy(params string[] command)
+        {
+            AssertValidCommand(command);
+            Close(Start(command));
+        }
+
+        public void CommandOutputPipe(Action<TextReader> handleOutput, params string[] command)
         {
             AssertValidCommand(command);
             var process = Start(command, RedirectStdout);
-            var returnValue = process.StandardOutput.ReadLine();
+            handleOutput(process.StandardOutput);
             Close(process);
-            return returnValue;
+        }
+
+        public void CommandInputOutputPipe(Action<TextWriter, TextReader> interact, params string[] command)
+        {
+            AssertValidCommand(command);
+            var process = Start(command, Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
+            interact(process.StandardInput, process.StandardOutput);
+            Close(process);
         }
 
         private void Close(Process process)
@@ -48,20 +76,6 @@ namespace Sep.Git.Tfs.Core
             initialize(startInfo);
             Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments);
             return Process.Start(startInfo);
-        }
-
-        public void CommandNoisy(params string[] command)
-        {
-            AssertValidCommand(command);
-            Close(Start(command));
-        }
-
-        public void CommandInteractive(Action<Stream, Stream> interact, params string [] command)
-        {
-            AssertValidCommand(command);
-            var process = Start(command, RedirectStdout.And(RedirectStdin));
-            interact(process.StandardInput, process.StandardOutput);
-            Close(process);
         }
 
         /// <summary>

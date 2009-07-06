@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using CommandLine.OptParse;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -29,15 +28,19 @@ namespace Sep.Git.Tfs.Core
             return arg.Contains(" ") ? ("\"" + arg + "\"") : arg;
         }
 
-        public static string CombinePaths(params string [] pathParts)
+        public static string CombinePaths(string basePath, params string [] pathParts)
         {
-            if(pathParts == null || pathParts.Count == 0) return null;
-            var path = pathParts[0];
-            for(int i = 1; i < pathParts.Count; i++)
+            foreach(var part in pathParts)
             {
-                path = Path.Combine(path, pathParts[i]);
+                basePath = Path.Combine(basePath, part);
             }
-            return path;
+            return basePath;
+        }
+
+        public static string FormatForGit(this DateTime date)
+        {
+            // TODO
+            return date.ToString();
         }
     }
 }

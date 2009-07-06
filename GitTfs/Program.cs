@@ -93,7 +93,7 @@ namespace Sep.Git.Tfs
             {
                 globals.GitDir = ".git";
             }
-            globals.RepositoryId = GitTfsConstants.DefaultRepositoryId;
+            globals.RemoteId = GitTfsConstants.DefaultRepositoryId;
         }
 
         private static void AssertValidGitRepository()

@@ -30,6 +30,16 @@ namespace Sep.Git.Tfs.Core
         {
             throw new System.NotImplementedException();
         }
+
+        public IEnumerable<GitTfsRemote> ReadAllTfsRemotes()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public GitTfsRemote ReadTfsRemote(string remoteId)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
 }

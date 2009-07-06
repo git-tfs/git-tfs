@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
-using System.Text;
+using System.Text.RegularExpressions;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -17,9 +17,10 @@ namespace Sep.Git.Tfs.Commands
         private readonly RemoteOptions remoteOptions;
         private readonly Globals globals;
 
-        public Fetch(FcOptions fcOptions, Globals globals)
+        public Fetch(Globals globals, RemoteOptions remoteOptions, FcOptions fcOptions)
         {
             this.fcOptions = fcOptions;
+            this.remoteOptions = remoteOptions;
             this.globals = globals;
         }
 
@@ -44,13 +45,13 @@ namespace Sep.Git.Tfs.Commands
         {
             IEnumerable<GitTfsRemote> remotesToFetch;
             if (parent)
-                remotesToFetch = new[] {WorkingHeadInfo("HEAD").GitTfsRemote};
+                remotesToFetch = new[] {WorkingHeadInfo("HEAD").Remote};
             else if (all)
-                remotesToFetch = globals.CurrentRepository.ReadAllTfsRemotes();
+                remotesToFetch = globals.Repository.ReadAllTfsRemotes();
             else
             {
                 if(args.Count == 0) args = new[] {globals.RemoteId};
-                remotesToFetch = args.Select(arg => globals.CurrentRepository.ReadTfsRemote(arg));
+                remotesToFetch = args.Select(arg => globals.Repository.ReadTfsRemote(arg));
             }
 
             foreach(var remote in remotesToFetch)
@@ -60,20 +61,25 @@ namespace Sep.Git.Tfs.Commands
             return 0;
         }
 
-        private TfsCommitMetaInfo WorkingHeadInfo(string head)
+        private TfsChangeset WorkingHeadInfo(string head)
         {
             return WorkingHeadInfo(head, new List<string>());
         }
 
-        private TfsCommitMetaInfo WorkingHeadInfo(string head, IList<string> localCommits)
+        private TfsChangeset WorkingHeadInfo(string head, ICollection<string> localCommits)
         {
-            TfsCommitMetaInfo retVal = null;
-            globals.CurrentRepository.CommandOutputPipe(stdout => retVal = ParseFirstTfsCommit(stdout),
+            TfsChangeset retVal = null;
+            globals.Repository.CommandOutputPipe(stdout => retVal = ParseFirstTfsCommit(stdout, localCommits),
               "log", "--no-color", "--first-parent", "--pretty=medium", head);
             return retVal;
         }
 
-        private TfsCommitMetaInfo ParseFirstTfsCommit(TextReader stdout, IList<string> localCommits)
+        private TfsChangeset ParseFirstTfsCommit(Stream stdout, ICollection<string> localCommits)
+        {
+            return ParseFirstTfsCommit(new StreamReader(stdout), localCommits);
+        }
+
+        private TfsChangeset ParseFirstTfsCommit(TextReader stdout, ICollection<string> localCommits)
         {
             string currentCommit = null;
             string line;
@@ -81,39 +87,17 @@ namespace Sep.Git.Tfs.Commands
             while(null != (line = stdout.ReadLine()))
             {
                 var match = commitRegex.Match(line);
-                if(match.IsMatch)
+                if(match.Success)
                 {
                     if(currentCommit != null) localCommits.Add(currentCommit);
                     currentCommit = match.Groups[1].Value;
                     continue;
                 }
-                var commitInfo = TfsCommitMetaInfo.TryParse(match.Groups[1].Value);
+                var commitInfo = TfsChangeset.TryParse(match.Groups[1].Value);
                 if(commitInfo != null && currentCommit == commitInfo.Remote.MaxCommitHash)
                     return commitInfo;
             }
             return null;
-        }
-
-        class TfsCommitMetaInfo
-        {
-            public string TfsUrl { get; set; }
-            public string TfsSourcePath { get; set; }
-            public long ChangesetId { get; set; }
-            public GitTfsRemote Remote { get; set; } // Need to expand this to do a dynamic lookup & cache
-
-            public static TfsCommitMetaInfo TryParse(string gitTfsMetaInfo)
-            {
-                match = GitTfsConstants.TfsCommitInfoRegex.Match(line);
-                if(match.IsMatch)
-                {
-                    var commitInfo = ObjectFactory.GetInstance<TfsCommitMetaInfo>();
-                    commitInfo.TfsUrl = match.Groups["url"].Value;
-                    commitInfo.TfsSourcePath = match.Groups["repository"].Value;
-                    commitInfo.ChangesetId = Convert.ToInt32(match.Groups["changeset"].Value);
-                    return commitInfo;
-                }
-                return null;
-            }
         }
     }
 }
