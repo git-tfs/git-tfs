@@ -39,8 +39,7 @@ namespace Sep.Git.Tfs.Core
 
         public static string FormatForGit(this DateTime date)
         {
-            // TODO
-            return date.ToString();
+            return date.ToUniversalTime().ToString("s") + "Z";
         }
     }
 }

@@ -89,7 +89,7 @@ namespace Sep.Git.Tfs.Test.Core
         public void ShouldFormatDateForGit()
         {
             var date = new DateTime(2000, 1, 2, 12, 34, 56);
-            Assert.AreEqual("TODO: What can git parse?", date.FormatForGit());
+            Assert.AreEqual("2000-01-02T12:34:56Z", date.ToLocalTime().FormatForGit());
         }
 
         #endregion
