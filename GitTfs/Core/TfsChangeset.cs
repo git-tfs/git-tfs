@@ -1,28 +1,21 @@
 ﻿using System;
-using StructureMap;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace Sep.Git.Tfs.Core
 {
-    public class TfsChangeset
+    class TfsChangeset : ITfsChangeset
     {
-        public string TfsUrl { get; set; }
-        public string TfsSourcePath { get; set; }
-        public long ChangesetId { get; set; }
-        public GitTfsRemote Remote { get; set; }
-        public string GitCommit { get; set; }
+        private readonly TfsHelper tfs;
+        private readonly Changeset changeset;
+        public TfsChangesetInfo Summary { get; set; }
 
-        public static TfsChangeset TryParse(string gitTfsMetaInfo)
+        public TfsChangeset(TfsHelper tfs, Changeset changeset)
         {
-            var match = GitTfsConstants.TfsCommitInfoRegex.Match(gitTfsMetaInfo);
-            if (match.Success)
-            {
-                var commitInfo = ObjectFactory.GetInstance<TfsChangeset>();
-                commitInfo.TfsUrl = match.Groups["url"].Value;
-                commitInfo.TfsSourcePath = match.Groups["repository"].Value;
-                commitInfo.ChangesetId = Convert.ToInt32(match.Groups["changeset"].Value);
-                return commitInfo;
-            }
-            return null;
+            this.tfs = tfs;
+            this.changeset = changeset;
         }
     }
 }

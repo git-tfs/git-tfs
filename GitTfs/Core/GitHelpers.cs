@@ -36,6 +36,14 @@ namespace Sep.Git.Tfs.Core
             Close(process);
         }
 
+        public void CommandInputPipe(Action<TextWriter> action, params string[] command)
+        {
+            AssertValidCommand(command);
+            var process = Start(command, RedirectStdin);
+            action(process.StandardInput);
+            Close(process);
+        }
+
         public void CommandInputOutputPipe(Action<TextWriter, TextReader> interact, params string[] command)
         {
             AssertValidCommand(command);

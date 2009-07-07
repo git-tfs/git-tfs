@@ -150,7 +150,7 @@ namespace Sep.Git.Tfs
 
         private static void Initialize(IInitializationExpression initializer)
         {
-            initializer.Scan(scan => { scan.WithDefaultConventions(); scan.TheCallingAssembly(); });
+            initializer.Scan(scan => { scan.WithDefaultConventions(); scan.TheCallingAssembly(); scan.AssemblyContainingType(typeof(Microsoft.TeamFoundation.Client.TeamFoundationServer)); });
             initializer.ForRequestedType<TextWriter>().TheDefault.Is.ConstructedBy(() => Console.Out);
             DoCustomConfiguration(initializer);
         }

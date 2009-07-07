@@ -62,25 +62,25 @@ namespace Sep.Git.Tfs.Commands
             return 0;
         }
 
-        private TfsChangeset WorkingHeadInfo(string head)
+        private TfsChangesetInfo WorkingHeadInfo(string head)
         {
             return WorkingHeadInfo(head, new List<string>());
         }
 
-        private TfsChangeset WorkingHeadInfo(string head, ICollection<string> localCommits)
+        private TfsChangesetInfo WorkingHeadInfo(string head, ICollection<string> localCommits)
         {
-            TfsChangeset retVal = null;
+            TfsChangesetInfo retVal = null;
             globals.Repository.CommandOutputPipe(stdout => retVal = ParseFirstTfsCommit(stdout, localCommits),
               "log", "--no-color", "--first-parent", "--pretty=medium", head);
             return retVal;
         }
 
-        private TfsChangeset ParseFirstTfsCommit(Stream stdout, ICollection<string> localCommits)
+        private TfsChangesetInfo ParseFirstTfsCommit(Stream stdout, ICollection<string> localCommits)
         {
             return ParseFirstTfsCommit(new StreamReader(stdout), localCommits);
         }
 
-        private TfsChangeset ParseFirstTfsCommit(TextReader stdout, ICollection<string> localCommits)
+        private TfsChangesetInfo ParseFirstTfsCommit(TextReader stdout, ICollection<string> localCommits)
         {
             string currentCommit = null;
             string line;
@@ -94,7 +94,7 @@ namespace Sep.Git.Tfs.Commands
                     currentCommit = match.Groups[1].Value;
                     continue;
                 }
-                var commitInfo = TfsChangeset.TryParse(match.Groups[1].Value);
+                var commitInfo = TfsChangesetInfo.TryParse(match.Groups[1].Value);
                 if(commitInfo != null && currentCommit == commitInfo.Remote.MaxCommitHash)
                     return commitInfo;
             }

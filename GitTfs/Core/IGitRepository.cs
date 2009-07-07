@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -6,5 +8,6 @@ namespace Sep.Git.Tfs.Core
     {
         IEnumerable<GitTfsRemote> ReadAllTfsRemotes();
         GitTfsRemote ReadTfsRemote(string remoteId);
+        string HashAndInsertObject(string filename);
     }
 }

@@ -7,6 +7,6 @@ namespace Sep.Git.Tfs.Core
         string TfsClientLibraryVersion { get; }
         string Url { get; set; }
         string Username { get; set; }
-        IEnumerable<TfsChangeset> GetChangesets(string basePath, long firstChangeset);
+        IEnumerable<ITfsChangeset> GetChangesets(string basePath, long firstChangeset);
     }
 }

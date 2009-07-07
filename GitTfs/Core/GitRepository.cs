@@ -52,22 +52,22 @@ namespace Sep.Git.Tfs.Core
             return remotes;
         }
 
-        private void ParseRemoteConfig(TextReader stdout, Dictionary<string, GitTfsRemote> remotes)
+        private void ParseRemoteConfig(TextReader stdout, IDictionary<string, GitTfsRemote> remotes)
         {
             var configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
             string line;
-            while((line = stdout.ReadLine()) != null)
+            while ((line = stdout.ReadLine()) != null)
             {
                 var match = configLineRegex.Match(line);
-                if(match.Success)
+                if (match.Success)
                 {
                     var remoteId = match.Groups["id"].Value;
                     var key = match.Groups["key"].Value;
                     var value = match.Groups["value"].Value;
                     var remote = remotes.ContainsKey(remoteId)
                                      ? remotes[remoteId]
-                                     : (remotes[remoteId] = ObjectFactory.GetInstance<GitTfsRemote>());
-                    switch(key)
+                                     : (remotes[remoteId] = CreateRemote(remoteId));
+                    switch (key)
                     {
                         case "url":
                             remote.Tfs.Url = value;
@@ -78,13 +78,50 @@ namespace Sep.Git.Tfs.Core
                         case "repository":
                             remote.TfsRepositoryPath = value;
                             break;
-                            //case "fetch":
-                            //    remote.??? = value;
-                            //    break;
+                        //case "fetch":
+                        //    remote.??? = value;
+                        //    break;
                     }
                 }
             }
         }
-    }
 
+        private GitTfsRemote CreateRemote(string id)
+        {
+            var remote = ObjectFactory.GetInstance<GitTfsRemote>();
+            remote.Repository = this;
+            remote.Id = id;
+            return remote;
+        }
+
+        // This is attractive, but I'm wary of encoding/buffering issues due
+        // to pulling BaseStream out of stdin. It also breaks my abstraction of
+        // using TextWriter for stdin.
+        //public string HashAndInsertObject(Stream file)
+        //{
+        //    string newHash = null;
+        //    CommandInputOutputPipe((stdin, stdout) => newHash = HashAndInsertObject(stdin, stdout, file),
+        //        "has-object", "-w", "--stdin");
+        //    return newHash;
+        //}
+        //private string HashAndInsertObject(StreamWriter stdin, TextReader stdout, Stream file)
+        //{
+        //    file.CopyTo(stdin.BaseStream);
+        //    return stdout.ReadLine().Trim();
+        //}
+
+        public string HashAndInsertObject(string filename)
+        {
+            string newHash = null;
+            CommandInputOutputPipe((stdin, stdout) => newHash = HashAndInsertObject(stdin, stdout, filename),
+                "has-object", "-w", "--stdin-paths");
+            return newHash;
+        }
+
+        private string HashAndInsertObject(TextWriter stdin, TextReader stdout, string filename)
+        {
+            stdin.WriteLine(filename);
+            return stdout.ReadLine().Trim();
+        }
+    }
 }

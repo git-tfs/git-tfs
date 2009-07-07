@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -34,19 +36,26 @@ namespace Sep.Git.Tfs.Core
 
         private void SetServer(string url, string username)
         {
-            if(!string.IsNullOrEmpty(url))
+            if(string.IsNullOrEmpty(url))
             {
                 server = null;
             }
-            if(!string.IsNullOrEmpty(username))
-            {
-                throw new NotImplementedException("TODO: Using a non-default username is not yet supported.");
-                //server = new TeamFoundationServer(url, new NetworkCredentials(username));
-            }
             else
             {
-                server = new TeamFoundationServer(url);
+                if(string.IsNullOrEmpty(username))
+                {
+                    server = new TeamFoundationServer(url);
+                }
+                else
+                {
+                    server = new TeamFoundationServer(url, MakeCredentials(username));
+                }
             }
+        }
+
+        private ICredentials MakeCredentials(string username)
+        {
+            throw new NotImplementedException("TODO: Using a non-default username is not yet supported.");
         }
 
         private TeamFoundationServer Server
@@ -61,16 +70,21 @@ namespace Sep.Git.Tfs.Core
             get { return (VersionControlServer)Server.GetService(typeof(VersionControlServer)); }
         }
 
-        public IEnumerable<TfsChangeset> GetChangesets(string basePath, long firstChangeset)
+        public IEnumerable<ITfsChangeset> GetChangesets(string basePath, long firstChangeset)
         {
-            var changes = VersionControl.QueryHistory(basePath, VersionSpec.Latest, 0, RecursionType.Full,
-                                        null, new ChangesetVersionSpec((int) firstChangeset), VersionSpec.Latest, 0, true,
+            var changesets = VersionControl.QueryHistory(basePath, VersionSpec.Latest, 0, RecursionType.Full,
+                                        null, new ChangesetVersionSpec((int) firstChangeset), VersionSpec.Latest, int.MaxValue, true,
                                         true, true);
-            foreach(var change in changes)
+            foreach (Changeset changeset in changesets)
             {
-                System.Diagnostics.Trace.WriteLine("CHANGE: " + change.GetType());
+                yield return
+                    new TfsChangeset(this, changeset)
+                        {
+                            Summary =
+                                new TfsChangesetInfo()
+                                    {ChangesetId = changeset.ChangesetId, TfsSourcePath = basePath, TfsUrl = Url}
+                        };
             }
-            throw new System.NotImplementedException();
         }
     }
 }

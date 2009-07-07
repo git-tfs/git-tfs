@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -23,6 +24,7 @@ namespace Sep.Git.Tfs.Core
         public string Id { get; set; }
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegex { get; set; }
+        // TODO: Initialize MaxChangesetId and MaxCommitHash
         public long MaxChangesetId { get; set; }
         public string MaxCommitHash { get; set; }
         public IGitRepository Repository { get; set; }
@@ -36,8 +38,6 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        // This may need to be initialized like this:
-        // git-svn.perl:5330: command_input_pipe(qw/update-index -z --index-info/)
         private string IndexFile
         {
             get
@@ -55,7 +55,7 @@ namespace Sep.Git.Tfs.Core
                 AssertIndexClean(MaxCommitHash);
                 var log = Apply(changeset);
                 MaxCommitHash = Commit(log);
-                MaxChangesetId = changeset.ChangesetId;
+                MaxChangesetId = changeset.Summary.ChangesetId;
                 DoGcIfNeeded();
             }
         }
@@ -71,36 +71,44 @@ namespace Sep.Git.Tfs.Core
 
         private void AssertIndexClean(string treeish)
         {
+            if(string.IsNullOrEmpty(treeish)) throw new ArgumentNullException("treeish");
             var treeShaRegex = new Regex("^tree (" + GitTfsConstants.Sha1 + ")");
             WithTemporaryIndex(() =>
             {
-                                         if(!File.Exists(IndexFile)) Repository.CommandNoisy("read-tree", treeish);
-                                         var currentTree = Repository.CommandOneline("write-tree");
-                                         var expectedCommitInfo = Repository.Command("cat-file", "commit", treeish);
-                                         var expectedCommitTree = treeShaRegex.Match(expectedCommitInfo).Groups[1].Value;
-                                         if(expectedCommitTree != currentTree)
-                                         {
-                                             // warn "Index mismatch: $y != $x\nrereading $treeish\n";
-                                             File.Delete(IndexFile);
-                                             Repository.CommandNoisy("read-tree", treeish);
-                                             currentTree = Repository.CommandOneline("write-tree");
-                                             if(expectedCommitTree != currentTree)
-                                             {
-                                                 throw new Exception("Unable to create a clean temporary index: trees (" + treeish + ") " + expectedCommitTree + " != " + currentTree);
-                                             }
-                                         }
+                if (!File.Exists(IndexFile)) Repository.CommandNoisy("read-tree", treeish);
+                var currentTree = Repository.CommandOneline("write-tree");
+                var expectedCommitInfo = Repository.Command("cat-file", "commit", treeish);
+                var expectedCommitTree = treeShaRegex.Match(expectedCommitInfo).Groups[1].Value;
+                if (expectedCommitTree != currentTree)
+                {
+                    Trace.WriteLine("Index mismatch: " + expectedCommitTree + " != " + currentTree);
+                    Trace.WriteLine("rereading " + treeish);
+                    File.Delete(IndexFile);
+                    Repository.CommandNoisy("read-tree", treeish);
+                    currentTree = Repository.CommandOneline("write-tree");
+                    if (expectedCommitTree != currentTree)
+                    {
+                        throw new Exception("Unable to create a clean temporary index: trees (" + treeish + ") " + expectedCommitTree + " != " + currentTree);
+                    }
+                }
             });
         }
 
-        private LogEntry Apply(TfsChangeset changeset)
+        private LogEntry Apply(ITfsChangeset changeset)
         {
-            throw new NotImplementedException();
-            //TODO: see SVN::Git::Fetcher (3320) and Git::IndexInfo (5323)
+            LogEntry result = null;
+            WithTemporaryIndex(() => GitIndexInfo.Do(Repository, index => result = Apply(changeset, index)));
+            return result;
+        }
+
+        private LogEntry Apply(ITfsChangeset changeset, GitIndexInfo index)
+        {
+            throw new NotImplementedException("TODO: GitTfsRemote.Apply(changeset, index)");
         }
 
         private string Commit(LogEntry logEntry)
         {
-            TfsChangeset commitInfo = null;
+            TfsChangesetInfo commitInfo = null;
             var sha1OnlyRegex = new Regex("^" + GitTfsConstants.Sha1 + "$");
             WithCommitHeaderEnv(logEntry, () => {
                                                     var tree = logEntry.Tree;
@@ -128,7 +136,7 @@ namespace Sep.Git.Tfs.Core
             return commitInfo.GitCommit;
         }
 
-        private TfsChangeset ParseCommitInfo(string commitTreeOutput)
+        private TfsChangesetInfo ParseCommitInfo(string commitTreeOutput)
         {
             throw new NotImplementedException();
         }
