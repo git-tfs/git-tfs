@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Sep.Git.Tfs.Core
 {
-    class GitIndexInfo : IDisposable
+    public class GitIndexInfo : IDisposable
     {
         public static int Do(IGitHelpers repository, Action<GitIndexInfo> indexAction)
         {

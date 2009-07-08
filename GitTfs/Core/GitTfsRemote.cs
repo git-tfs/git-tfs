@@ -52,7 +52,8 @@ namespace Sep.Git.Tfs.Core
             //var ignoreRegex = ignoreRegexPattern == null ? null : new Regex(ignoreRegexPattern);
             foreach(var changeset in Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1))
             {
-                AssertIndexClean(MaxCommitHash);
+                if (MaxCommitHash != null)
+                    AssertIndexClean(MaxCommitHash);
                 var log = Apply(changeset);
                 MaxCommitHash = Commit(log);
                 MaxChangesetId = changeset.Summary.ChangesetId;
@@ -97,13 +98,8 @@ namespace Sep.Git.Tfs.Core
         private LogEntry Apply(ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(() => GitIndexInfo.Do(Repository, index => result = Apply(changeset, index)));
+            WithTemporaryIndex(() => GitIndexInfo.Do(Repository, index => result = changeset.Apply(index)));
             return result;
-        }
-
-        private LogEntry Apply(ITfsChangeset changeset, GitIndexInfo index)
-        {
-            throw new NotImplementedException("TODO: GitTfsRemote.Apply(changeset, index)");
         }
 
         private string Commit(LogEntry logEntry)
