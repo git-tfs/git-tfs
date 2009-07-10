@@ -14,8 +14,7 @@ namespace Sep.Git.Tfs.Core
 
         public string TfsClientLibraryVersion
         {
-            // TODO -- fill this in.
-            get { return "TODO"; }
+            get { typeof(TeamFoundationServer).Assembly.Version; }
         }
 
         public string Url
