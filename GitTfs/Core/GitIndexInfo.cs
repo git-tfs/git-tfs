@@ -5,17 +5,17 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitIndexInfo : IDisposable
     {
-        public static int Do(IGitHelpers repository, Action<GitIndexInfo> indexAction)
+        public static int Do(IGitRepository repository, Action<GitIndexInfo> indexAction)
         {
             int nr = 0;
-            repository.CommandInputPipe(stdin => nr = Do(stdin, indexAction),
+            repository.CommandInputPipe(stdin => nr = Do(stdin, repository, indexAction),
                 "update-index", "-z", "--index-info");
             return nr;
         }
 
-        private static int Do(TextWriter stdin, Action<GitIndexInfo> action)
+        private static int Do(TextWriter stdin, IGitRepository repository, Action<GitIndexInfo> action)
         {
-            using (var indexInfo = new GitIndexInfo(stdin))
+            using (var indexInfo = new GitIndexInfo(stdin, repository))
             {
                 action(indexInfo);
                 return indexInfo.nr;
@@ -23,11 +23,13 @@ namespace Sep.Git.Tfs.Core
         }
 
         private readonly TextWriter stdin;
+        private readonly IGitRepository repository;
         private int nr = 0;
 
-        private GitIndexInfo(TextWriter stdin)
+        private GitIndexInfo(TextWriter stdin, IGitRepository repository)
         {
             this.stdin = stdin;
+            this.repository = repository;
         }
 
         public int Remove(string path)
@@ -40,8 +42,9 @@ namespace Sep.Git.Tfs.Core
             return ++nr;
         }
 
-        public int Update(string mode, string hash, string path)
+        public int Update(string mode, string path, Stream data)
         {
+            var hash = repository.HashAndInsertObject(data);
             stdin.Write(mode);
             stdin.Write(' ');
             stdin.Write(hash);

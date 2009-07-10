@@ -9,5 +9,6 @@ namespace Sep.Git.Tfs.Core
         IEnumerable<GitTfsRemote> ReadAllTfsRemotes();
         GitTfsRemote ReadTfsRemote(string remoteId);
         string HashAndInsertObject(string filename);
+        string HashAndInsertObject(Stream data);
     }
 }

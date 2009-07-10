@@ -78,7 +78,7 @@ namespace Sep.Git.Tfs.Core
             foreach (Changeset changeset in changesets)
             {
                 yield return
-                    new TfsChangeset(this, changeset)
+                    new TfsChangeset(this, changeset, basePath)
                         {
                             Summary =
                                 new TfsChangesetInfo()

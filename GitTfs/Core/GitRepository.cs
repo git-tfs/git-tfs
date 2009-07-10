@@ -97,18 +97,20 @@ namespace Sep.Git.Tfs.Core
         // This is attractive, but I'm wary of encoding/buffering issues due
         // to pulling BaseStream out of stdin. It also breaks my abstraction of
         // using TextWriter for stdin.
-        //public string HashAndInsertObject(Stream file)
-        //{
-        //    string newHash = null;
-        //    CommandInputOutputPipe((stdin, stdout) => newHash = HashAndInsertObject(stdin, stdout, file),
-        //        "has-object", "-w", "--stdin");
-        //    return newHash;
-        //}
-        //private string HashAndInsertObject(StreamWriter stdin, TextReader stdout, Stream file)
-        //{
-        //    file.CopyTo(stdin.BaseStream);
-        //    return stdout.ReadLine().Trim();
-        //}
+        // An alternative is to write the stream to a temp file, and call the
+        // string-based HAIO.
+        public string HashAndInsertObject(Stream file)
+        {
+            string newHash = null;
+            CommandInputOutputPipe((stdin, stdout) => newHash = HashAndInsertObject(stdin, stdout, file),
+                "has-object", "-w", "--stdin");
+            return newHash;
+        }
+        private string HashAndInsertObject(TextWriter stdin, TextReader stdout, Stream file)
+        {
+            file.CopyTo(((StreamWriter) stdin).BaseStream);
+            return stdout.ReadLine().Trim();
+        }
 
         public string HashAndInsertObject(string filename)
         {

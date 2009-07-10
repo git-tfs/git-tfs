@@ -46,6 +46,19 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public bool IsIgnored(string path)
+        {
+            var inDotGit = new Regex("?:^|/)\\.git(?:/|$)");
+            if(inDotGit.IsMatch(path)) return true;
+            if(IgnoreRegex != null && new Regex(IgnoreRegex).IsMatch(path)) return true;
+            if(remoteOptions.IgnoreRegex != null && new Regex(remoteOptions.IgnoreRegex).IsMatch(path)) return true;
+            return false;
+        }
+
+        public string GetPathInGitRepo(string tfsPath)
+        {
+        }
+
         public void Fetch()
         {
             //var ignoreRegexPattern = remoteOptions.IgnoreRegex ?? IgnoreRegex;

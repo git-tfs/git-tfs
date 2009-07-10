@@ -10,21 +10,28 @@ namespace Sep.Git.Tfs.Core
         private readonly Changeset changeset;
         public TfsChangesetInfo Summary { get; set; }
 
-        public LogEntry Apply(GitIndexInfo index)
+        public LogEntry Apply(GitTfsRemote remote, GitIndexInfo index)
         {
             foreach(var change in changeset.Changes)
             {
-                if (change.ChangeType.IncludesOneOf(ChangeType.Add, ChangeType.Edit, ChangeType.Undelete, ChangeType.Branch, ChangeType.Merge))
+                var pathInGitRepo = remote.GetPathInGitRepo(change.Item.ServerItem);
+                if(pathInGitRepo == null || remote.IsIgnored(pathInGitRepo))
+                    continue;
+                if (change.ChangeType.IncludesOneOf(ChangeType.Add, ChangeType.Edit, ChangeType.Rename, ChangeType.Undelete, ChangeType.Branch, ChangeType.Merge))
                 {
-                    throw new NotImplementedException("TODO: add/edit");
-                }
-                else if(change.ChangeType.IncludesOneOf(ChangeType.Rename))
-                {
-                    throw new NotImplementedException("TODO: rename");
+                    if(change.ChangeType.IncludesOneOf(ChangeType.Rename))
+                    {
+                        var oldPath = GetPathBeforeRename(change);
+                        if(oldPath != null) index.Remove(oldPath);
+                    }
+                    using(var changeStream = GetStream(change))
+                    {
+                      index.Update(GetMode(change), pathInGitRepo, changeStream);
+                    }
                 }
                 else if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
                 {
-                    throw new NotImplementedException("TODO: delete");
+                    index.Remove(pathInGitRepo);
                 }
                 else
                 {
@@ -32,8 +39,20 @@ namespace Sep.Git.Tfs.Core
                                     change.Item.ServerItem + " of type " + change.ChangeType + ".");
                 }
             }
-            //throw new System.NotImplementedException();
-            return new LogEntry();
+            return MakeNewLogEntry();
+        }
+
+        private string GetMode(Change change)
+        {
+        }
+
+        private LogEntry MakeNewLogEntry()
+        {
+            var log = new LogEntry();
+            log.CommitterName = log.AuthorName = GetAuthorName();
+            log.CommitterEmail = log.AuthorEmail = GetAuthorEmail();
+            log.Date = changeset.Date;
+            log.Log = changeset.Description + Environment.NewLine;
         }
 
         public TfsChangeset(TfsHelper tfs, Changeset changeset)
