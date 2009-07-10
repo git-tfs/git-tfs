@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace Sep.Git.Tfs.Core
@@ -42,8 +43,19 @@ namespace Sep.Git.Tfs.Core
             return MakeNewLogEntry();
         }
 
+        private Stream GetStream(Change change)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GetPathBeforeRename(Change change)
+        {
+            throw new NotImplementedException();
+        }
+
         private string GetMode(Change change)
         {
+            throw new NotImplementedException();
         }
 
         private LogEntry MakeNewLogEntry()
@@ -51,8 +63,19 @@ namespace Sep.Git.Tfs.Core
             var log = new LogEntry();
             log.CommitterName = log.AuthorName = GetAuthorName();
             log.CommitterEmail = log.AuthorEmail = GetAuthorEmail();
-            log.Date = changeset.Date;
-            log.Log = changeset.Description + Environment.NewLine;
+            log.Date = changeset.CreationDate;
+            log.Log = changeset.Comment + Environment.NewLine;
+            return log;
+        }
+
+        private string GetAuthorEmail()
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GetAuthorName()
+        {
+            throw new NotImplementedException();
         }
 
         public TfsChangeset(TfsHelper tfs, Changeset changeset)

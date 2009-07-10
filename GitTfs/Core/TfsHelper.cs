@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Core
 
         public string TfsClientLibraryVersion
         {
-            get { typeof(TeamFoundationServer).Assembly.Version; }
+            get { return typeof(TeamFoundationServer).Assembly.GetName().Version.ToString(); }
         }
 
         public string Url
@@ -77,7 +77,7 @@ namespace Sep.Git.Tfs.Core
             foreach (Changeset changeset in changesets)
             {
                 yield return
-                    new TfsChangeset(this, changeset, basePath)
+                    new TfsChangeset(this, changeset)
                         {
                             Summary =
                                 new TfsChangesetInfo()

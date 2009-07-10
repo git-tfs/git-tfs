@@ -57,6 +57,7 @@ namespace Sep.Git.Tfs.Core
 
         public string GetPathInGitRepo(string tfsPath)
         {
+            throw new NotImplementedException();
         }
 
         public void Fetch()
@@ -111,7 +112,7 @@ namespace Sep.Git.Tfs.Core
         private LogEntry Apply(ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(() => GitIndexInfo.Do(Repository, index => result = changeset.Apply(index)));
+            WithTemporaryIndex(() => GitIndexInfo.Do(Repository, index => result = changeset.Apply(this, index)));
             return result;
         }
 

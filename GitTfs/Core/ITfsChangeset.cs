@@ -3,6 +3,6 @@
     public interface ITfsChangeset
     {
         TfsChangesetInfo Summary { get; }
-        LogEntry Apply(GitIndexInfo index);
+        LogEntry Apply(GitTfsRemote remote, GitIndexInfo index);
     }
 }
