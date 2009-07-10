@@ -48,7 +48,7 @@ namespace Sep.Git.Tfs.Core
 
         public bool IsIgnored(string path)
         {
-            var inDotGit = new Regex("?:^|/)\\.git(?:/|$)");
+            var inDotGit = new Regex("(?:^|/)\\.git(?:/|$)");
             if(inDotGit.IsMatch(path)) return true;
             if(IgnoreRegex != null && new Regex(IgnoreRegex).IsMatch(path)) return true;
             if(remoteOptions.IgnoreRegex != null && new Regex(remoteOptions.IgnoreRegex).IsMatch(path)) return true;
@@ -57,7 +57,11 @@ namespace Sep.Git.Tfs.Core
 
         public string GetPathInGitRepo(string tfsPath)
         {
-            throw new NotImplementedException();
+            if(!tfsPath.StartsWith(TfsRepositoryPath)) return null;
+            tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
+            while (tfsPath.StartsWith("/"))
+                tfsPath = tfsPath.Substring(1);
+            return tfsPath;
         }
 
         public void Fetch()
@@ -68,7 +72,7 @@ namespace Sep.Git.Tfs.Core
             {
                 if (MaxCommitHash != null)
                     AssertIndexClean(MaxCommitHash);
-                var log = Apply(changeset);
+                var log = Apply(MaxCommitHash, changeset);
                 MaxCommitHash = Commit(log);
                 MaxChangesetId = changeset.Summary.ChangesetId;
                 DoGcIfNeeded();
@@ -109,10 +113,10 @@ namespace Sep.Git.Tfs.Core
             });
         }
 
-        private LogEntry Apply(ITfsChangeset changeset)
+        private LogEntry Apply(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(() => GitIndexInfo.Do(Repository, index => result = changeset.Apply(this, index)));
+            WithTemporaryIndex(() => GitIndexInfo.Do(Repository, index => result = changeset.Apply(this, lastCommit, index)));
             return result;
         }
 

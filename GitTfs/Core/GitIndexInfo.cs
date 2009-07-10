@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Sep.Git.Tfs.Core
@@ -34,6 +35,7 @@ namespace Sep.Git.Tfs.Core
 
         public int Remove(string path)
         {
+            Trace.WriteLine("   D " + path);
             stdin.Write("0 ");
             stdin.Write(new string('0', 40));
             stdin.Write('\t');
@@ -45,6 +47,7 @@ namespace Sep.Git.Tfs.Core
         public int Update(string mode, string path, Stream data)
         {
             var hash = repository.HashAndInsertObject(data);
+            Trace.WriteLine("   U " + hash + " = " + path);
             stdin.Write(mode);
             stdin.Write(' ');
             stdin.Write(hash);
