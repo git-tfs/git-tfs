@@ -77,8 +77,14 @@ namespace Sep.Git.Tfs.Core
                 MaxCommitHash = Commit(log);
                 Trace.WriteLine("C" + changeset.Summary.ChangesetId + " = " + MaxCommitHash);
                 MaxChangesetId = changeset.Summary.ChangesetId;
+                Repository.CommandNoisy("update-ref", RemoteRef, MaxCommitHash);
                 DoGcIfNeeded();
             }
+        }
+
+        private string RemoteRef
+        {
+            get { return "remotes/tfs/" + Id; }
         }
 
         private void DoGcIfNeeded()
