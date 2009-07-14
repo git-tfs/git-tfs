@@ -7,6 +7,7 @@ namespace Sep.Git.Tfs.Core
     {
         public string TfsUrl { get; set; }
         public string TfsSourcePath { get; set; }
+        public DateTime TfsCheckinDate { get; set; }
         public long ChangesetId { get; set; }
         public GitTfsRemote Remote { get; set; }
         public string GitCommit { get; set; }

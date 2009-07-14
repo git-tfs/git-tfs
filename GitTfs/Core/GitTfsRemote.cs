@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
@@ -68,12 +69,13 @@ namespace Sep.Git.Tfs.Core
         {
             //var ignoreRegexPattern = remoteOptions.IgnoreRegex ?? IgnoreRegex;
             //var ignoreRegex = ignoreRegexPattern == null ? null : new Regex(ignoreRegexPattern);
-            foreach(var changeset in Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1))
+            foreach(var changeset in Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1).OrderBy(cs => cs.Summary.TfsCheckinDate))
             {
                 if (MaxCommitHash != null)
                     AssertIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
                 MaxCommitHash = Commit(log);
+                Trace.WriteLine("C" + changeset.Summary.ChangesetId + " = " + MaxCommitHash);
                 MaxChangesetId = changeset.Summary.ChangesetId;
                 DoGcIfNeeded();
             }
@@ -116,13 +118,17 @@ namespace Sep.Git.Tfs.Core
         private LogEntry Apply(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(() => GitIndexInfo.Do(Repository, index => result = changeset.Apply(this, lastCommit, index)));
+            WithTemporaryIndex(
+                () => GitIndexInfo.Do(Repository, index => result = changeset.Apply(this, lastCommit, index)));
+            WithTemporaryIndex(
+                () => result.Tree = Repository.CommandOneline("write-tree"));
+            if(!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
             return result;
         }
 
         private string Commit(LogEntry logEntry)
         {
-            TfsChangesetInfo commitInfo = null;
+            string commitHash = null;
             var sha1OnlyRegex = new Regex("^" + GitTfsConstants.Sha1 + "$");
             WithCommitHeaderEnv(logEntry, () => {
                                                     var tree = logEntry.Tree;
@@ -143,16 +149,17 @@ namespace Sep.Git.Tfs.Core
                                                                                                              // turn off auto-flush to get rid of the 'using'?
                                                                                                              stdin.WriteLine(logEntry.Log);
                                                                                                              stdin.WriteLine(GitTfsConstants.TfsCommitInfoFormat, Tfs.Url, TfsRepositoryPath, logEntry.ChangesetId);
-                                                                                                             commitInfo = ParseCommitInfo(stdout.ReadToEnd());
+                                                                                                             stdin.Close();
+                                                                                                             commitHash = ParseCommitInfo(stdout.ReadToEnd());
                                                     }, commitCommand.ToArray());
             });
             // TODO: StoreChangesetMetadata(commitInfo);
-            return commitInfo.GitCommit;
+            return commitHash;
         }
 
-        private TfsChangesetInfo ParseCommitInfo(string commitTreeOutput)
+        private string ParseCommitInfo(string commitTreeOutput)
         {
-            throw new NotImplementedException();
+            return commitTreeOutput.Trim();
         }
 
         //private Encoding LookupEncoding(string encoding)

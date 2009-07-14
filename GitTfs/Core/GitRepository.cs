@@ -103,12 +103,14 @@ namespace Sep.Git.Tfs.Core
         {
             string newHash = null;
             CommandInputOutputPipe((stdin, stdout) => newHash = HashAndInsertObject(stdin, stdout, file),
-                "has-object", "-w", "--stdin");
+                "hash-object", "-w", "--stdin");
             return newHash;
         }
         private string HashAndInsertObject(TextWriter stdin, TextReader stdout, Stream file)
         {
-            file.CopyTo(((StreamWriter) stdin).BaseStream);
+            var stdinStream = ((StreamWriter) stdin).BaseStream;
+            file.CopyTo(stdinStream);
+            stdinStream.Close();
             return stdout.ReadLine().Trim();
         }
 

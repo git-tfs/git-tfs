@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using Microsoft.TeamFoundation.Client;
+using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using StructureMap;
 
@@ -68,6 +69,10 @@ namespace Sep.Git.Tfs.Core
         {
             get { return (VersionControlServer)Server.GetService(typeof(VersionControlServer)); }
         }
+        private IGroupSecurityService GroupSecurityService
+        {
+            get { return (IGroupSecurityService) Server.GetService(typeof(IGroupSecurityService)); }
+        }
 
         public IEnumerable<ITfsChangeset> GetChangesets(string basePath, long firstChangeset)
         {
@@ -81,9 +86,14 @@ namespace Sep.Git.Tfs.Core
                         {
                             Summary =
                                 new TfsChangesetInfo()
-                                    {ChangesetId = changeset.ChangesetId, TfsSourcePath = basePath, TfsUrl = Url}
+                                    {ChangesetId = changeset.ChangesetId, TfsSourcePath = basePath, TfsUrl = Url, TfsCheckinDate = changeset.CreationDate}
                         };
             }
+        }
+
+        public ITfsIdentity GetIdentity(string username)
+        {
+            return new TfsIdentity(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
         }
     }
 }

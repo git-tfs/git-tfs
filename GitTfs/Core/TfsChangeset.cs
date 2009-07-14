@@ -21,12 +21,15 @@ namespace Sep.Git.Tfs.Core
                     continue;
                 if (change.ChangeType.IncludesOneOf(ChangeType.Add, ChangeType.Edit, ChangeType.Rename, ChangeType.Undelete, ChangeType.Branch, ChangeType.Merge))
                 {
-                    /////////////////
-                    // just add is implemented right now:
-                    var mode = change.ChangeType.IncludesOneOf(ChangeType.Add)
-                                   ? "100644"
-                                   : GetCurrentMode(remote.Repository, lastChangeset, pathInGitRepo);
-                    index.Update(mode, pathInGitRepo, change.Item.DownloadFile());
+                    if (change.Item.ItemType == ItemType.File)
+                    {
+                        /////////////////
+                        // just add is implemented right now:
+                        var mode = GetCurrentMode(remote.Repository, lastChangeset, pathInGitRepo);
+                        if (mode == null || change.ChangeType.IncludesOneOf(ChangeType.Add))
+                            mode = "100644";
+                        index.Update(mode, pathInGitRepo, change.Item.DownloadFile());
+                    }
                     /////////////////
                     //if(change.ChangeType.IncludesOneOf(ChangeType.Rename))
                     //{
@@ -76,18 +79,15 @@ namespace Sep.Git.Tfs.Core
 
         private string GetCurrentMode(IGitRepository repository, string lastChangeset, string item)
         {
+            if(String.IsNullOrEmpty(lastChangeset)) return null;
             var treeInfo = repository.Command("ls-tree", "-z", lastChangeset, "./" + item);
             var treeRegex =
-                new Regex("\\A(?<mode>\\d{6}) blob (?<blob>" + GitTfsConstants.Sha1 + ")\t\\Q" + item + "\\E\0");
-            return treeRegex.Match(treeInfo).Groups["mode"].Value;
+                new Regex("\\A(?<mode>\\d{6}) blob (?<blob>" + GitTfsConstants.Sha1 + ")\\t" + Regex.Escape(item) + "\0");
+            var match = treeRegex.Match(treeInfo);
+            return !match.Success ? null : match.Groups["mode"].Value;
         }
 
         private string GetPathBeforeRename(Change change)
-        {
-            throw new NotImplementedException();
-        }
-
-        private string GetMode(Change change)
         {
             throw new NotImplementedException();
         }
@@ -104,12 +104,14 @@ namespace Sep.Git.Tfs.Core
 
         private string GetAuthorEmail()
         {
-            throw new NotImplementedException();
+            var identity = tfs.GetIdentity(changeset.Committer);
+            return identity.MailAddress;
         }
 
         private string GetAuthorName()
         {
-            throw new NotImplementedException();
+            var identity = tfs.GetIdentity(changeset.Committer);
+            return identity.DisplayName;
         }
 
         public TfsChangeset(TfsHelper tfs, Changeset changeset)
