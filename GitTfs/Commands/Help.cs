@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using CommandLine.OptParse;
+using Sep.Git.Tfs.Core;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Commands
@@ -104,7 +105,7 @@ namespace Sep.Git.Tfs.Commands
 
             var usage = new UsageBuilder();
             usage.BeginSection("where options are:");
-            foreach(var parseHelper in Program.GetOptionParseHelpers(command))
+            foreach(var parseHelper in command.GetOptionParseHelpers())
                 usage.AddOptions(parseHelper);
             usage.EndSection();
             output.WriteLine("Usage: git-tfs " + GetCommandUsage(command));

@@ -1,8 +1,12 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using CommandLine.OptParse;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -61,6 +65,24 @@ namespace Sep.Git.Tfs.Core
             while(0 != (n = source.Read(buffer, 0, blockSize)))
             {
                 destination.Write(buffer, 0, n);
+            }
+        }
+
+        public static bool IsEmpty(this ICollection c)
+        {
+            return c == null || c.Count == 0;
+        }
+
+        public static IEnumerable<IOptionResults> GetOptionParseHelpers(this GitTfsCommand command)
+        {
+            yield return new PropertyFieldParserHelper(ObjectFactory.GetInstance<Globals>());
+            yield return new PropertyFieldParserHelper(command);
+            if(command.ExtraOptions != null)
+            {
+                foreach(var parseHelper in command.ExtraOptions)
+                {
+                    yield return parseHelper;
+                }
             }
         }
     }
