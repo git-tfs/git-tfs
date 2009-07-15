@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
-using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -69,7 +67,7 @@ namespace Sep.Git.Tfs.Core
         {
             //var ignoreRegexPattern = remoteOptions.IgnoreRegex ?? IgnoreRegex;
             //var ignoreRegex = ignoreRegexPattern == null ? null : new Regex(ignoreRegexPattern);
-            foreach(var changeset in Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1).OrderBy(cs => cs.Summary.TfsCheckinDate))
+            foreach (var changeset in Tfs.GetChangesets(this).OrderBy(cs => cs.Summary.ChangesetId))
             {
                 if (MaxCommitHash != null)
                     AssertIndexClean(MaxCommitHash);
@@ -77,14 +75,14 @@ namespace Sep.Git.Tfs.Core
                 MaxCommitHash = Commit(log);
                 Trace.WriteLine("C" + changeset.Summary.ChangesetId + " = " + MaxCommitHash);
                 MaxChangesetId = changeset.Summary.ChangesetId;
-                Repository.CommandNoisy("update-ref", RemoteRef, MaxCommitHash);
+                Repository.CommandNoisy("update-ref", "-m", "C" + MaxChangesetId, RemoteRef, MaxCommitHash);
                 DoGcIfNeeded();
             }
         }
 
         private string RemoteRef
         {
-            get { return "remotes/tfs/" + Id; }
+            get { return "refs/remotes/tfs/" + Id; }
         }
 
         private void DoGcIfNeeded()

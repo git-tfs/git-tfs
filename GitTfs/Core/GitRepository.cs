@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using StructureMap;
 
@@ -42,6 +43,22 @@ namespace Sep.Git.Tfs.Core
             catch(Exception e)
             {
                 throw new Exception("Unable to locate git-tfs remote with id = " + remoteId, e);
+            }
+        }
+
+        public GitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath)
+        {
+            try
+            {
+                var allRemotes = ReadTfsRemotes();
+                return
+                    allRemotes.Values.First(
+                        remote => remote.Tfs.Url == tfsUrl && remote.TfsRepositoryPath == tfsRepositoryPath);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Unable to locate git-tfs remote with url = " + tfsUrl + ", repo = " +
+                                    tfsRepositoryPath, e);
             }
         }
 

@@ -1,7 +1,7 @@
 using System;
 using StructureMap;
 
-namespace Sep.Git.Tfs
+namespace Sep.Git.Tfs.Util
 {
     public interface ConfiguresStructureMap
     {

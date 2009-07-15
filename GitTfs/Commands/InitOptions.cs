@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using CommandLine.OptParse;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
 {

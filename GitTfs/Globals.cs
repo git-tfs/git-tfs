@@ -2,20 +2,25 @@ using System;
 using System.ComponentModel;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs
 {
     [StructureMapSingleton]
     public class Globals
     {
-        public string GitDir
-        {
-            get { return Environment.GetEnvironmentVariable("GIT_DIR"); }
-            set { Environment.SetEnvironmentVariable("GIT_DIR", value); }
-        }
+        [OptDef(OptValType.Flag)]
+        [ShortOptionName('h')]
+        [ShortOptionName('H')]
+        [LongOptionName("help")]
+        [UseNameAsLongOption(false)]
+        public bool ShowHelp { get; set; }
 
-        public bool GitDirSetByUser { get; set; }
-        public string StartingRepositorySubDir { get; set; }
+        [OptDef(OptValType.Flag)]
+        [ShortOptionName('V')]
+        [LongOptionName("version")]
+        [UseNameAsLongOption(false)]
+        public bool ShowVersion { get; set; }
 
         // This is a merger of the SVN "remote id" and "ref id". Is there a reason for them to be separate?
         [OptDef(OptValType.ValueReq)]
@@ -41,18 +46,15 @@ namespace Sep.Git.Tfs
             return RemoteConfigPrefix + "." + parameter;
         }
 
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('h')]
-        [ShortOptionName('H')]
-        [LongOptionName("help")]
-        [UseNameAsLongOption(false)]
-        public bool ShowHelp { get; set; }
+        public string GitDir
+        {
+            get { return Environment.GetEnvironmentVariable("GIT_DIR"); }
+            set { Environment.SetEnvironmentVariable("GIT_DIR", value); }
+        }
 
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('V')]
-        [LongOptionName("version")]
-        [UseNameAsLongOption(false)]
-        public bool ShowVersion { get; set; }
+        public bool GitDirSetByUser { get; set; }
+
+        public string StartingRepositorySubDir { get; set; }
 
         public IGitRepository Repository { get; set; }
 

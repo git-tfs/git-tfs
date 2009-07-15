@@ -2,7 +2,7 @@
 using StructureMap;
 using StructureMap.Attributes;
 
-namespace Sep.Git.Tfs
+namespace Sep.Git.Tfs.Util
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class StructureMapSingletonAttribute : Attribute, ConfiguresStructureMap

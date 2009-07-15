@@ -70,17 +70,12 @@ namespace Sep.Git.Tfs.Commands
         private TfsChangesetInfo WorkingHeadInfo(string head, ICollection<string> localCommits)
         {
             TfsChangesetInfo retVal = null;
-            globals.Repository.CommandOutputPipe(stdout => retVal = ParseFirstTfsCommit(stdout, localCommits),
+            globals.Repository.CommandOutputPipe(stdout => retVal = ParseFirstTfsCommit(stdout, localCommits, globals.Repository),
               "log", "--no-color", "--first-parent", "--pretty=medium", head);
             return retVal;
         }
 
-        private TfsChangesetInfo ParseFirstTfsCommit(Stream stdout, ICollection<string> localCommits)
-        {
-            return ParseFirstTfsCommit(new StreamReader(stdout), localCommits);
-        }
-
-        private TfsChangesetInfo ParseFirstTfsCommit(TextReader stdout, ICollection<string> localCommits)
+        private TfsChangesetInfo ParseFirstTfsCommit(TextReader stdout, ICollection<string> localCommits, IGitRepository repository)
         {
             string currentCommit = null;
             string line;
@@ -94,7 +89,7 @@ namespace Sep.Git.Tfs.Commands
                     currentCommit = match.Groups[1].Value;
                     continue;
                 }
-                var commitInfo = TfsChangesetInfo.TryParse(match.Groups[1].Value);
+                var commitInfo = TfsChangesetInfo.TryParse(match.Groups[1].Value, repository, currentCommit);
                 if(commitInfo != null && currentCommit == commitInfo.Remote.MaxCommitHash)
                     return commitInfo;
             }

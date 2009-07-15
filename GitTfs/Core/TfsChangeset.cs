@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
@@ -31,6 +30,7 @@ namespace Sep.Git.Tfs.Core
                         index.Update(mode, pathInGitRepo, change.Item.DownloadFile());
                     }
                     /////////////////
+                    // TODO:
                     //if(change.ChangeType.IncludesOneOf(ChangeType.Rename))
                     //{
                     //    var oldPath = GetPathBeforeRename(change);
@@ -45,7 +45,7 @@ namespace Sep.Git.Tfs.Core
                 {
                     var treeInfo = remote.Repository.Command("ls-tree", "-z", lastChangeset, "./" + pathInGitRepo);
                     var treeRegex =
-                        new Regex("\\A040000 tree (?<tree>" + GitTfsConstants.Sha1 + ") \\t\\Q" + pathInGitRepo + "\\E\0");
+                        new Regex("\\A040000 tree (?<tree>" + GitTfsConstants.Sha1 + ") \\t" + Regex.Escape(pathInGitRepo) + "\0");
                     var match = treeRegex.Match(treeInfo);
                     if(match.Success)
                     {

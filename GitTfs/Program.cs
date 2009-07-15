@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Sep.Git.Tfs.Util;
 using StructureMap;
+using StructureMap.Graph;
 
 namespace Sep.Git.Tfs
 {
@@ -12,7 +14,7 @@ namespace Sep.Git.Tfs
         {
             try
             {
-                Trace.Listeners.Add(new ConsoleTraceListener());
+                //Trace.Listeners.Add(new ConsoleTraceListener());
                 Initialize();
                 new GitTfs().Run(new List<string>(args));
             }
@@ -31,9 +33,16 @@ namespace Sep.Git.Tfs
 
         private static void Initialize(IInitializationExpression initializer)
         {
-            initializer.Scan(scan => { scan.WithDefaultConventions(); scan.TheCallingAssembly(); scan.AssemblyContainingType(typeof(Microsoft.TeamFoundation.Client.TeamFoundationServer)); });
+            initializer.Scan(Initialize);
             initializer.ForRequestedType<TextWriter>().TheDefault.Is.ConstructedBy(() => Console.Out);
             DoCustomConfiguration(initializer);
+        }
+
+        private static void Initialize(IAssemblyScanner scan)
+        {
+            scan.WithDefaultConventions();
+            scan.TheCallingAssembly();
+            scan.AssemblyContainingType(typeof(Microsoft.TeamFoundation.Client.TeamFoundationServer));
         }
 
         private static void DoCustomConfiguration(IInitializationExpression initializer)
