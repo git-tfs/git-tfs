@@ -73,6 +73,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Clone.cs" />
     <Compile Include="Commands\CommitOptions.cs" />
     <Compile Include="Commands\FcOptions.cs" />
     <Compile Include="Commands\Fetch.cs" />

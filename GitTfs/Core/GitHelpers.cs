@@ -8,6 +8,13 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitHelpers : IGitHelpers
     {
+        private readonly TextWriter realStdout;
+
+        public GitHelpers(TextWriter stdout)
+        {
+            realStdout = stdout;
+        }
+
         public string Command(params string[] command)
         {
             string retVal = null;
@@ -24,8 +31,7 @@ namespace Sep.Git.Tfs.Core
 
         public void CommandNoisy(params string[] command)
         {
-            AssertValidCommand(command);
-            Close(Start(command));
+            CommandOutputPipe(stdout => realStdout.Write(stdout.ReadToEnd()), command);
         }
 
         public void CommandOutputPipe(Action<TextReader> handleOutput, params string[] command)

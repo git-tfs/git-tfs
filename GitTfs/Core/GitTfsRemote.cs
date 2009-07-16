@@ -91,7 +91,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private string RemoteRef
+        public string RemoteRef
         {
             get { return "refs/remotes/tfs/" + Id; }
         }

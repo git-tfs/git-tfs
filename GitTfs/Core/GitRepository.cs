@@ -11,6 +11,10 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitRepository : GitHelpers, IGitRepository
     {
+        public GitRepository(TextWriter stdout) : base(stdout)
+        {
+        }
+
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
