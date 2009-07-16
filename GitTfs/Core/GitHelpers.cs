@@ -86,11 +86,7 @@ namespace Sep.Git.Tfs.Core
             initialize(startInfo);
             Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments, "git command");
             var process = Process.Start(startInfo);
-            process.ErrorDataReceived += (sender, e) =>
-                                             {
-                                                 Console.Error.Write(e.Data);
-                                                 Trace.WriteLine(e.Data, "git stderr");
-                                             };
+            process.ErrorDataReceived += (sender, e) => Trace.WriteLine(e.Data, "git stderr");
             process.BeginErrorReadLine();
             return process;
         }

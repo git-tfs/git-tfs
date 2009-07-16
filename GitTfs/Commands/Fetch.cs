@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -46,7 +47,7 @@ namespace Sep.Git.Tfs.Commands
         {
             IEnumerable<GitTfsRemote> remotesToFetch;
             if (parent)
-                remotesToFetch = new[] {WorkingHeadInfo("HEAD").Remote};
+                remotesToFetch = new[] {globals.Repository.WorkingHeadInfo("HEAD").Remote};
             else if (all)
                 remotesToFetch = globals.Repository.ReadAllTfsRemotes();
             else
@@ -60,40 +61,6 @@ namespace Sep.Git.Tfs.Commands
                 remote.Fetch();
             }
             return 0;
-        }
-
-        private TfsChangesetInfo WorkingHeadInfo(string head)
-        {
-            return WorkingHeadInfo(head, new List<string>());
-        }
-
-        private TfsChangesetInfo WorkingHeadInfo(string head, ICollection<string> localCommits)
-        {
-            TfsChangesetInfo retVal = null;
-            globals.Repository.CommandOutputPipe(stdout => retVal = ParseFirstTfsCommit(stdout, localCommits, globals.Repository),
-              "log", "--no-color", "--first-parent", "--pretty=medium", head);
-            return retVal;
-        }
-
-        private TfsChangesetInfo ParseFirstTfsCommit(TextReader stdout, ICollection<string> localCommits, IGitRepository repository)
-        {
-            string currentCommit = null;
-            string line;
-            var commitRegex = new Regex("commit (" + GitTfsConstants.Sha1 + ")");
-            while(null != (line = stdout.ReadLine()))
-            {
-                var match = commitRegex.Match(line);
-                if(match.Success)
-                {
-                    if(currentCommit != null) localCommits.Add(currentCommit);
-                    currentCommit = match.Groups[1].Value;
-                    continue;
-                }
-                var commitInfo = TfsChangesetInfo.TryParse(match.Groups[1].Value, repository, currentCommit);
-                if(commitInfo != null && currentCommit == commitInfo.Remote.MaxCommitHash)
-                    return commitInfo;
-            }
-            return null;
         }
     }
 }

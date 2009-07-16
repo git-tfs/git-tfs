@@ -112,6 +112,61 @@ namespace Sep.Git.Tfs.Core
             return remote;
         }
 
+        public TfsChangesetInfo WorkingHeadInfo(string head)
+        {
+            return WorkingHeadInfo(head, new List<string>());
+        }
+
+        public TfsChangesetInfo WorkingHeadInfo(string head, ICollection<string> localCommits)
+        {
+            try
+            {
+                TfsChangesetInfo retVal = null;
+                CommandOutputPipe(stdout => retVal = ParseFirstTfsCommit(stdout, localCommits),
+                  "log", "--no-color", "--first-parent", "--pretty=medium", head);
+                return retVal;
+            }
+            catch (GitCommandException e)
+            {
+                return null;
+            }
+        }
+
+        private TfsChangesetInfo ParseFirstTfsCommit(TextReader stdout, ICollection<string> localCommits)
+        {
+            string currentCommit = null;
+            string line;
+            var commitRegex = new Regex("commit (" + GitTfsConstants.Sha1 + ")");
+            while (null != (line = stdout.ReadLine()))
+            {
+                var match = commitRegex.Match(line);
+                if (match.Success)
+                {
+                    if (currentCommit != null) localCommits.Add(currentCommit);
+                    currentCommit = match.Groups[1].Value;
+                    continue;
+                }
+                var commitInfo = TryParseChangesetInfo(line, currentCommit);
+                if (commitInfo != null)
+                    return commitInfo;
+            }
+            return null;
+        }
+
+        private TfsChangesetInfo TryParseChangesetInfo(string gitTfsMetaInfo, string commit)
+        {
+            var match = GitTfsConstants.TfsCommitInfoRegex.Match(gitTfsMetaInfo);
+            if (match.Success)
+            {
+                var commitInfo = ObjectFactory.GetInstance<TfsChangesetInfo>();
+                commitInfo.Remote = ReadTfsRemote(match.Groups["url"].Value, match.Groups["repository"].Value);
+                commitInfo.ChangesetId = Convert.ToInt32(match.Groups["changeset"].Value);
+                commitInfo.GitCommit = commit;
+                return commitInfo;
+            }
+            return null;
+        }
+
         // This is attractive, but I'm wary of encoding/buffering issues due
         // to pulling BaseStream out of stdin. It also breaks my abstraction of
         // using TextWriter for stdin.

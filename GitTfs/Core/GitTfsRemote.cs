@@ -69,6 +69,15 @@ namespace Sep.Git.Tfs.Core
         {
             //var ignoreRegexPattern = remoteOptions.IgnoreRegex ?? IgnoreRegex;
             //var ignoreRegex = ignoreRegexPattern == null ? null : new Regex(ignoreRegexPattern);
+            if(MaxChangesetId == 0)
+            {
+                var mostRecentUpdate = Repository.WorkingHeadInfo(RemoteRef);
+                if(mostRecentUpdate != null)
+                {
+                    MaxCommitHash = mostRecentUpdate.GitCommit;
+                    MaxChangesetId = mostRecentUpdate.ChangesetId;
+                }
+            }
             foreach (var changeset in Tfs.GetChangesets(this).OrderBy(cs => cs.Summary.ChangesetId))
             {
                 if (MaxCommitHash != null)
