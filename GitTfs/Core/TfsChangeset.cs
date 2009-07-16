@@ -27,7 +27,10 @@ namespace Sep.Git.Tfs.Core
                     continue;
                 if (change.ChangeType.IncludesOneOf(ChangeType.Add, ChangeType.Edit, ChangeType.Rename, ChangeType.Undelete, ChangeType.Branch, ChangeType.Merge))
                 {
+                    if (change.Item.DeletionId == 0)
+                    {
                         Update(change, pathInGitRepo, lastCommit, index);
+                    }
                 }
                 else if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
                 {
