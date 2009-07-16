@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Core
@@ -118,31 +119,22 @@ namespace Sep.Git.Tfs.Core
         // string-based HAIO.
         public string HashAndInsertObject(Stream file)
         {
-            string newHash = null;
-            CommandInputOutputPipe((stdin, stdout) => newHash = HashAndInsertObject(stdin, stdout, file),
-                "hash-object", "-w", "--stdin");
-            return newHash;
-        }
-        private string HashAndInsertObject(TextWriter stdin, TextReader stdout, Stream file)
-        {
-            var stdinStream = ((StreamWriter) stdin).BaseStream;
-            file.CopyTo(stdinStream);
-            stdinStream.Close();
-            return stdout.ReadLine().Trim();
+            using(var tempFile = new TemporaryFile())
+            {
+                using(var tempStream = File.Create(tempFile))
+                {
+                    file.CopyTo(tempStream);
+                }
+                return HashAndInsertObject(tempFile);
+            }
         }
 
         public string HashAndInsertObject(string filename)
         {
             string newHash = null;
-            CommandInputOutputPipe((stdin, stdout) => newHash = HashAndInsertObject(stdin, stdout, filename),
-                "has-object", "-w", "--stdin-paths");
+            CommandOutputPipe(stdout => newHash = stdout.ReadLine().Trim(),
+                "hash-object", "-w", filename);
             return newHash;
-        }
-
-        private string HashAndInsertObject(TextWriter stdin, TextReader stdout, string filename)
-        {
-            stdin.WriteLine(filename);
-            return stdout.ReadLine().Trim();
         }
     }
 }

@@ -108,6 +108,7 @@
     <Compile Include="Util\StructureMapSingletonAttribute.cs" />
     <Compile Include="Core\ITfsHelper.cs" />
     <Compile Include="Core\TfsHelper.cs" />
+    <Compile Include="Util\TemporaryFile.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

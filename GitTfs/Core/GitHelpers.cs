@@ -82,9 +82,17 @@ namespace Sep.Git.Tfs.Core
             startInfo.SetArguments(command);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardError = true;
             initialize(startInfo);
-            Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments);
-            return Process.Start(startInfo);
+            Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments, "git command");
+            var process = Process.Start(startInfo);
+            process.ErrorDataReceived += (sender, e) =>
+                                             {
+                                                 Console.Error.Write(e.Data);
+                                                 Trace.WriteLine(e.Data, "git stderr");
+                                             };
+            process.BeginErrorReadLine();
+            return process;
         }
 
         /// <summary>
