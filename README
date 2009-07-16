@@ -1,12 +1,21 @@
 git-tfs is an two-way bridge between TFS and git, similar to git-svn.
 
-git-tfs is a more tfs-ish derivative of git-svn.
+Right now, only fetching works, and it's pretty dumb (it refetches everything
+every time and doesn't do any branch tracking at all). Eventually, it will do
+the tracking thing (or at least set up the master branch when you do a clone or
+the first fetch), and it will be able to commit to TFS, etc.
 
-Configuration-wise, here is what git-tfs should be doing:
+Also, I've only tried it out with the TFS 2008 client libraries. I intend to
+make this work transparently with TFS 2005 or the codeplex client libs at
+some point.
 
-[tfs-remote "<repository-id>"]
-  url = <tfs server url>
-  repository = <tfs repository path>
-  fetch = refs/remotes/<repository-id>/master
-  
-In .git/tfs/, meta-data, especially the revision mapping, will be stored.
+Here's how to use it:
+
+# git init
+# git tfs init http://tfs:8080 $/some_project
+# git tfs fetch
+(This will take a while, and currently doesn't output anything.)
+# git tfs merge tfs/default
+
+Like I said, eventually fetch will be better, there will be rebase, and there
+will be commit.
