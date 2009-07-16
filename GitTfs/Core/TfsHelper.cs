@@ -64,10 +64,12 @@ namespace Sep.Git.Tfs.Core
                 return server;
             }
         }
-        private VersionControlServer VersionControl
+
+        public VersionControlServer VersionControl
         {
             get { return (VersionControlServer)Server.GetService(typeof(VersionControlServer)); }
         }
+
         private IGroupSecurityService GroupSecurityService
         {
             get { return (IGroupSecurityService) Server.GetService(typeof(IGroupSecurityService)); }

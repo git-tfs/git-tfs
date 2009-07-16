@@ -134,7 +134,7 @@ namespace Sep.Git.Tfs.Core
         {
             LogEntry result = null;
             WithTemporaryIndex(
-                () => GitIndexInfo.Do(Repository, index => result = changeset.Apply(this, lastCommit, index)));
+                () => GitIndexInfo.Do(Repository, index => result = changeset.Apply(lastCommit, index)));
             WithTemporaryIndex(
                 () => result.Tree = Repository.CommandOneline("write-tree"));
             if(!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);

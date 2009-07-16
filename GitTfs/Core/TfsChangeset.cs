@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
@@ -11,62 +12,26 @@ namespace Sep.Git.Tfs.Core
         private readonly Changeset changeset;
         public TfsChangesetInfo Summary { get; set; }
 
-        public LogEntry Apply(GitTfsRemote remote, string lastChangeset, GitIndexInfo index)
+        public TfsChangeset(TfsHelper tfs, Changeset changeset)
+        {
+            this.tfs = tfs;
+            this.changeset = changeset;
+        }
+
+        public LogEntry Apply(string lastCommit, GitIndexInfo index)
         {
             foreach(var change in changeset.Changes)
             {
-                var pathInGitRepo = remote.GetPathInGitRepo(change.Item.ServerItem);
-                if(pathInGitRepo == null || remote.IsIgnored(pathInGitRepo))
+                var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
+                if(pathInGitRepo == null || Summary.Remote.IsIgnored(pathInGitRepo))
                     continue;
                 if (change.ChangeType.IncludesOneOf(ChangeType.Add, ChangeType.Edit, ChangeType.Rename, ChangeType.Undelete, ChangeType.Branch, ChangeType.Merge))
                 {
-                    if (change.Item.ItemType == ItemType.File)
-                    {
-                        /////////////////
-                        // just add is implemented right now:
-                        var mode = GetCurrentMode(remote.Repository, lastChangeset, pathInGitRepo);
-                        if (mode == null || change.ChangeType.IncludesOneOf(ChangeType.Add))
-                            mode = "100644";
-                        index.Update(mode, pathInGitRepo, change.Item.DownloadFile());
-                    }
-                    /////////////////
-                    // TODO:
-                    //if(change.ChangeType.IncludesOneOf(ChangeType.Rename))
-                    //{
-                    //    var oldPath = GetPathBeforeRename(change);
-                    //    if(oldPath != null) index.Remove(oldPath);
-                    //}
-                    //using(var changeStream = change.Item.DownloadFile())
-                    //{
-                    //    index.Update(GetMode(change), pathInGitRepo, changeStream);
-                    //}
+                        Update(change, pathInGitRepo, lastCommit, index);
                 }
                 else if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
                 {
-                    var treeInfo = remote.Repository.Command("ls-tree", "-z", lastChangeset, "./" + pathInGitRepo);
-                    var treeRegex =
-                        new Regex("\\A040000 tree (?<tree>" + GitTfsConstants.Sha1 + ") \\t" + Regex.Escape(pathInGitRepo) + "\0");
-                    var match = treeRegex.Match(treeInfo);
-                    if(match.Success)
-                    {
-                        remote.Repository.CommandOutputPipe(stdout =>
-                                                                {
-                                                                    var reader = new DelimitedReader(stdout);
-                                                                    string fileInDir;
-                                                                    while((fileInDir = reader.Read()) != null)
-                                                                    {
-                                                                        var pathToRemove = pathInGitRepo + "/" +
-                                                                                           fileInDir;
-                                                                        index.Remove(pathToRemove);
-                                                                        Trace.WriteLine("\tD\t" + pathToRemove);
-                                                                    }
-                                                                }, "ls-tree", "-r", "--name-only", "-z", match.Groups["tree"].Value);
-                    }
-                    else
-                    {
-                        index.Remove(pathInGitRepo);
-                    }
-                    Trace.WriteLine("\tD\t" + pathInGitRepo);
+                    Delete(pathInGitRepo, index, lastCommit);
                 }
                 else
                 {
@@ -77,19 +42,76 @@ namespace Sep.Git.Tfs.Core
             return MakeNewLogEntry();
         }
 
-        private string GetCurrentMode(IGitRepository repository, string lastChangeset, string item)
+        private string GetPathBeforeRename(Item item)
+        {
+            return item.VersionControlServer.GetItem(item.ItemId, item.ChangesetId - 1).ServerItem;
+        }
+
+        private void Update(Change change, string pathInGitRepo, string lastCommit, GitIndexInfo index)
+        {
+            if (change.Item.ItemType == ItemType.File)
+            {
+                string mode = null;
+
+                // It's VERY convenient that TFS renames every file in the tree, not just the dir.
+                // If it didn't, then doing directory renames would be much more involved.
+                // Instead, we can just handle each file's change.
+                if (change.ChangeType.IncludesOneOf(ChangeType.Rename))
+                {
+                    var oldPath = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
+                    if (oldPath != null)
+                    {
+                        mode = GetCurrentMode(lastCommit, oldPath);
+                        index.Remove(oldPath);
+                    }
+                }
+                else
+                {
+                    mode = GetCurrentMode(lastCommit, pathInGitRepo);
+                }
+
+                if (mode == null || change.ChangeType.IncludesOneOf(ChangeType.Add))
+                    mode = "100644";
+                index.Update(mode, pathInGitRepo, change.Item.DownloadFile());
+            }
+        }
+
+        private void Delete(string pathInGitRepo, GitIndexInfo index, string lastChangeset)
+        {
+            var treeInfo = Summary.Remote.Repository.Command("ls-tree", "-z", lastChangeset, "./" + pathInGitRepo);
+            var treeRegex =
+                new Regex("\\A040000 tree (?<tree>" + GitTfsConstants.Sha1 + ") \\t" + Regex.Escape(pathInGitRepo) + "\0");
+            var match = treeRegex.Match(treeInfo);
+            if(match.Success)
+            {
+                Summary.Remote.Repository.CommandOutputPipe(stdout =>
+                                                        {
+                                                            var reader = new DelimitedReader(stdout);
+                                                            string fileInDir;
+                                                            while((fileInDir = reader.Read()) != null)
+                                                            {
+                                                                var pathToRemove = pathInGitRepo + "/" +
+                                                                                   fileInDir;
+                                                                index.Remove(pathToRemove);
+                                                                Trace.WriteLine("\tD\t" + pathToRemove);
+                                                            }
+                                                        }, "ls-tree", "-r", "--name-only", "-z", match.Groups["tree"].Value);
+            }
+            else
+            {
+                index.Remove(pathInGitRepo);
+            }
+            Trace.WriteLine("\tD\t" + pathInGitRepo);
+        }
+
+        private string GetCurrentMode(string lastChangeset, string item)
         {
             if(String.IsNullOrEmpty(lastChangeset)) return null;
-            var treeInfo = repository.Command("ls-tree", "-z", lastChangeset, "./" + item);
+            var treeInfo = Summary.Remote.Repository.Command("ls-tree", "-z", lastChangeset, "./" + item);
             var treeRegex =
                 new Regex("\\A(?<mode>\\d{6}) blob (?<blob>" + GitTfsConstants.Sha1 + ")\\t" + Regex.Escape(item) + "\0");
             var match = treeRegex.Match(treeInfo);
             return !match.Success ? null : match.Groups["mode"].Value;
-        }
-
-        private string GetPathBeforeRename(Change change)
-        {
-            throw new NotImplementedException();
         }
 
         private LogEntry MakeNewLogEntry()
@@ -113,12 +135,6 @@ namespace Sep.Git.Tfs.Core
         {
             var identity = tfs.GetIdentity(changeset.Committer);
             return identity.DisplayName;
-        }
-
-        public TfsChangeset(TfsHelper tfs, Changeset changeset)
-        {
-            this.tfs = tfs;
-            this.changeset = changeset;
         }
     }
 }
