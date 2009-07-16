@@ -99,6 +99,7 @@ namespace Sep.Git.Tfs.Core
             log.CommitterEmail = log.AuthorEmail = GetAuthorEmail();
             log.Date = changeset.CreationDate;
             log.Log = changeset.Comment + Environment.NewLine;
+            log.ChangesetId = changeset.ChangesetId;
             return log;
         }
 

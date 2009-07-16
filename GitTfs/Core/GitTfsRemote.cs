@@ -11,12 +11,14 @@ namespace Sep.Git.Tfs.Core
     public class GitTfsRemote
     {
         private readonly Globals globals;
+        private readonly TextWriter stdout;
         private readonly RemoteOptions remoteOptions;
 
-        public GitTfsRemote(RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper)
+        public GitTfsRemote(RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
+            this.stdout = stdout;
             Tfs = tfsHelper;
         }
 
@@ -73,7 +75,7 @@ namespace Sep.Git.Tfs.Core
                     AssertIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
                 MaxCommitHash = Commit(log);
-                Trace.WriteLine("C" + changeset.Summary.ChangesetId + " = " + MaxCommitHash);
+                stdout.WriteLine("C" + changeset.Summary.ChangesetId + " = " + MaxCommitHash);
                 MaxChangesetId = changeset.Summary.ChangesetId;
                 Repository.CommandNoisy("update-ref", "-m", "C" + MaxChangesetId, RemoteRef, MaxCommitHash);
                 DoGcIfNeeded();
