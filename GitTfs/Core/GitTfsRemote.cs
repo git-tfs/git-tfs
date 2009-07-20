@@ -25,11 +25,39 @@ namespace Sep.Git.Tfs.Core
         public string Id { get; set; }
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegex { get; set; }
-        // TODO: Initialize MaxChangesetId and MaxCommitHash
-        public long MaxChangesetId { get; set; }
-        public string MaxCommitHash { get; set; }
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
+
+        private long? maxChangesetId;
+        public long MaxChangesetId
+        {
+            get { InitHistory(); return maxChangesetId.Value; }
+            set { maxChangesetId = value; }
+        }
+
+        private string maxCommitHash;
+        public string MaxCommitHash
+        {
+            get { InitHistory(); return maxCommitHash; }
+            set { maxCommitHash = value; }
+        }
+
+        private void InitHistory()
+        {
+            if (maxChangesetId == null)
+            {
+                var mostRecentUpdate = Repository.WorkingHeadInfo(RemoteRef);
+                if (mostRecentUpdate != null)
+                {
+                    MaxCommitHash = mostRecentUpdate.GitCommit;
+                    MaxChangesetId = mostRecentUpdate.ChangesetId;
+                }
+                else
+                {
+                    MaxChangesetId = 0;
+                }
+            }
+        }
 
         private string Dir
         {
@@ -67,21 +95,9 @@ namespace Sep.Git.Tfs.Core
 
         public void Fetch()
         {
-            //var ignoreRegexPattern = remoteOptions.IgnoreRegex ?? IgnoreRegex;
-            //var ignoreRegex = ignoreRegexPattern == null ? null : new Regex(ignoreRegexPattern);
-            if(MaxChangesetId == 0)
-            {
-                var mostRecentUpdate = Repository.WorkingHeadInfo(RemoteRef);
-                if(mostRecentUpdate != null)
-                {
-                    MaxCommitHash = mostRecentUpdate.GitCommit;
-                    MaxChangesetId = mostRecentUpdate.ChangesetId;
-                }
-            }
             foreach (var changeset in Tfs.GetChangesets(this).OrderBy(cs => cs.Summary.ChangesetId))
             {
-                if (MaxCommitHash != null)
-                    AssertIndexClean(MaxCommitHash);
+                AssertIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
                 MaxCommitHash = Commit(log);
                 stdout.WriteLine("C" + changeset.Summary.ChangesetId + " = " + MaxCommitHash);
@@ -107,7 +123,11 @@ namespace Sep.Git.Tfs.Core
 
         private void AssertIndexClean(string treeish)
         {
-            if(string.IsNullOrEmpty(treeish)) throw new ArgumentNullException("treeish");
+            if(string.IsNullOrEmpty(treeish))
+            {
+                if (File.Exists(IndexFile)) File.Delete(IndexFile);
+                return;
+            }
             var treeShaRegex = new Regex("^tree (" + GitTfsConstants.Sha1 + ")");
             WithTemporaryIndex(() =>
             {
