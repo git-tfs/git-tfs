@@ -25,16 +25,20 @@ namespace Sep.Git.Tfs.Core
                 var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
                 if(pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
                     continue;
-                if (change.ChangeType.IncludesOneOf(ChangeType.Add, ChangeType.Edit, ChangeType.Rename, ChangeType.Undelete, ChangeType.Branch, ChangeType.Merge))
+                if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
+                {
+                    if(change.ChangeType.IncludesOneOf(ChangeType.Rename))
+                    {
+                        pathInGitRepo = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
+                    }
+                    Delete(pathInGitRepo, index, lastCommit);
+                }
+                else if (change.ChangeType.IncludesOneOf(ChangeType.Add, ChangeType.Edit, ChangeType.Rename, ChangeType.Undelete, ChangeType.Branch, ChangeType.Merge))
                 {
                     if (change.Item.DeletionId == 0)
                     {
                         Update(change, pathInGitRepo, lastCommit, index);
                     }
-                }
-                else if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
-                {
-                    Delete(pathInGitRepo, index, lastCommit);
                 }
                 else
                 {
