@@ -23,7 +23,7 @@ namespace Sep.Git.Tfs.Core
             foreach(var change in changeset.Changes)
             {
                 var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
-                if(pathInGitRepo == null || Summary.Remote.IsIgnored(pathInGitRepo))
+                if(pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
                     continue;
                 if (change.ChangeType.IncludesOneOf(ChangeType.Add, ChangeType.Edit, ChangeType.Rename, ChangeType.Undelete, ChangeType.Branch, ChangeType.Merge))
                 {

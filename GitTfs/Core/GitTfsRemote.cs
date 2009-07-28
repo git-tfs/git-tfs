@@ -10,9 +10,14 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitTfsRemote
     {
+        private static readonly Regex isInDotGit = new Regex("(?:^|/)\\.git(?:/|$)");
+        private static readonly Regex treeShaRegex = new Regex("^tree (" + GitTfsConstants.Sha1 + ")");
+
         private readonly Globals globals;
         private readonly TextWriter stdout;
         private readonly RemoteOptions remoteOptions;
+        private long? maxChangesetId;
+        private string maxCommitHash;
 
         public GitTfsRemote(RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
         {
@@ -24,18 +29,16 @@ namespace Sep.Git.Tfs.Core
 
         public string Id { get; set; }
         public string TfsRepositoryPath { get; set; }
-        public string IgnoreRegex { get; set; }
+        public string IgnoreRegexExpression { get; set; }
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
 
-        private long? maxChangesetId;
         public long MaxChangesetId
         {
             get { InitHistory(); return maxChangesetId.Value; }
             set { maxChangesetId = value; }
         }
 
-        private string maxCommitHash;
         public string MaxCommitHash
         {
             get { InitHistory(); return maxCommitHash; }
@@ -75,13 +78,21 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public bool IsIgnored(string path)
+        public bool ShouldSkip(string path)
         {
-            var inDotGit = new Regex("(?:^|/)\\.git(?:/|$)");
-            if(inDotGit.IsMatch(path)) return true;
-            if(IgnoreRegex != null && new Regex(IgnoreRegex).IsMatch(path)) return true;
-            if(remoteOptions.IgnoreRegex != null && new Regex(remoteOptions.IgnoreRegex).IsMatch(path)) return true;
-            return false;
+            return IsInDotGit(path) ||
+                   IsIgnored(path, IgnoreRegexExpression) ||
+                   IsIgnored(path, remoteOptions.IgnoreRegex);
+        }
+
+        private bool IsIgnored(string path, string expression)
+        {
+            return expression != null && new Regex(expression).IsMatch(path);
+        }
+
+        private bool IsInDotGit(string path)
+        {
+            return isInDotGit.IsMatch(path);
         }
 
         public string GetPathInGitRepo(string tfsPath)
@@ -97,7 +108,7 @@ namespace Sep.Git.Tfs.Core
         {
             foreach (var changeset in Tfs.GetChangesets(this).OrderBy(cs => cs.Summary.ChangesetId))
             {
-                AssertIndexClean(MaxCommitHash);
+                AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
                 MaxCommitHash = Commit(log);
                 stdout.WriteLine("C" + changeset.Summary.ChangesetId + " = " + MaxCommitHash);
@@ -121,33 +132,34 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void AssertIndexClean(string treeish)
+        private void AssertTemporaryIndexClean(string treeish)
         {
             if(string.IsNullOrEmpty(treeish))
             {
                 if (File.Exists(IndexFile)) File.Delete(IndexFile);
                 return;
             }
-            var treeShaRegex = new Regex("^tree (" + GitTfsConstants.Sha1 + ")");
-            WithTemporaryIndex(() =>
+            WithTemporaryIndex(() => AssertIndexClean(treeish));
+        }
+
+        private void AssertIndexClean(string treeish)
+        {
+            if (!File.Exists(IndexFile)) Repository.CommandNoisy("read-tree", treeish);
+            var currentTree = Repository.CommandOneline("write-tree");
+            var expectedCommitInfo = Repository.Command("cat-file", "commit", treeish);
+            var expectedCommitTree = GitTfsRemote.treeShaRegex.Match(expectedCommitInfo).Groups[1].Value;
+            if (expectedCommitTree != currentTree)
             {
-                if (!File.Exists(IndexFile)) Repository.CommandNoisy("read-tree", treeish);
-                var currentTree = Repository.CommandOneline("write-tree");
-                var expectedCommitInfo = Repository.Command("cat-file", "commit", treeish);
-                var expectedCommitTree = treeShaRegex.Match(expectedCommitInfo).Groups[1].Value;
+                Trace.WriteLine("Index mismatch: " + expectedCommitTree + " != " + currentTree);
+                Trace.WriteLine("rereading " + treeish);
+                File.Delete(IndexFile);
+                Repository.CommandNoisy("read-tree", treeish);
+                currentTree = Repository.CommandOneline("write-tree");
                 if (expectedCommitTree != currentTree)
                 {
-                    Trace.WriteLine("Index mismatch: " + expectedCommitTree + " != " + currentTree);
-                    Trace.WriteLine("rereading " + treeish);
-                    File.Delete(IndexFile);
-                    Repository.CommandNoisy("read-tree", treeish);
-                    currentTree = Repository.CommandOneline("write-tree");
-                    if (expectedCommitTree != currentTree)
-                    {
-                        throw new Exception("Unable to create a clean temporary index: trees (" + treeish + ") " + expectedCommitTree + " != " + currentTree);
-                    }
+                    throw new Exception("Unable to create a clean temporary index: trees (" + treeish + ") " + expectedCommitTree + " != " + currentTree);
                 }
-            });
+            }
         }
 
         private LogEntry Apply(string lastCommit, ITfsChangeset changeset)

@@ -132,6 +132,8 @@ namespace Sep.Git.Tfs.Core
             }
             catch (GitCommandException e)
             {
+                Trace.WriteLine("No head named " + head + " was found: " + e);
+                // There is no head.
                 return null;
             }
         }

@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Core
 
         public string TfsClientLibraryVersion
         {
-            get { return typeof(TeamFoundationServer).Assembly.GetName().Version.ToString(); }
+            get { return typeof(TeamFoundationServer).Assembly.GetName().Version.ToString() + " (MS)"; }
         }
 
         public string Url
