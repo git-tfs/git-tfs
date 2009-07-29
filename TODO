@@ -40,3 +40,4 @@ See commits fc6d19..., 56d7d1... for changes that weren't tracked right (files t
    C13354
  * problem 2: a file was not downloaded, but should have been.
    git show 56d7d1
+   old version of the file?? 

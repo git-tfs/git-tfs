@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -20,33 +22,55 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index)
         {
-            foreach(var change in changeset.Changes)
+            foreach(var change in Sort(changeset.Changes))
             {
-                var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
-                if(pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
-                    continue;
-                if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
+                // If you make updates to a dir in TF, the changeset includes changes for all the children also,
+                // and git doesn't really care if you add or delete empty dirs.
+                if (change.Item.ItemType == ItemType.File)
                 {
+                    var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
+                    if(pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
+                        continue;
                     if(change.ChangeType.IncludesOneOf(ChangeType.Rename))
                     {
-                        pathInGitRepo = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
+                        var oldPath = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
+                        if (oldPath != null)
+                        {
+                            index.Remove(oldPath);
+                        }
+                        if (change.Item.DeletionId == 0 && !change.ChangeType.IncludesOneOf(ChangeType.Delete))
+                        {
+                            Update(change, pathInGitRepo, lastCommit, index);
+                        }
                     }
-                    Delete(pathInGitRepo, index, lastCommit);
-                }
-                else if (change.ChangeType.IncludesOneOf(ChangeType.Add, ChangeType.Edit, ChangeType.Rename, ChangeType.Undelete, ChangeType.Branch, ChangeType.Merge))
-                {
-                    if (change.Item.DeletionId == 0)
+                    else if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
                     {
-                        Update(change, pathInGitRepo, lastCommit, index);
+                        Delete(pathInGitRepo, lastCommit, index);
                     }
-                }
-                else
-                {
-                    Trace.WriteLine("Skipping changeset " + changeset.ChangesetId + " change to " +
-                                    change.Item.ServerItem + " of type " + change.ChangeType + ".");
+                    else
+                    {
+                        if (change.Item.DeletionId == 0)
+                        {
+                            Update(change, pathInGitRepo, lastCommit, index);
+                        }
+                    }
                 }
             }
             return MakeNewLogEntry();
+        }
+
+        private IEnumerable<Change> Sort(IEnumerable<Change> changes)
+        {
+            return changes.OrderBy(change => Rank(change.ChangeType));
+        }
+
+        private int Rank(ChangeType type)
+        {
+            if (type.IncludesOneOf(ChangeType.Delete))
+                return 0;
+            if (type.IncludesOneOf(ChangeType.Rename))
+                return 1;
+            return 2;
         }
 
         private string GetPathBeforeRename(Item item)
@@ -83,13 +107,10 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void Delete(string pathInGitRepo, GitIndexInfo index, string lastChangeset)
+        private void Delete(string pathInGitRepo, string lastCommit, GitIndexInfo index)
         {
-            var treeInfo = Summary.Remote.Repository.Command("ls-tree", "-z", lastChangeset, "./" + pathInGitRepo);
-            var treeRegex =
-                new Regex("\\A040000 tree (?<tree>" + GitTfsConstants.Sha1 + ") \\t" + Regex.Escape(pathInGitRepo) + "\0");
-            var match = treeRegex.Match(treeInfo);
-            if(match.Success)
+            var gitObject = Summary.Remote.Repository.GetObjectInfo(lastCommit, pathInGitRepo);
+            if(gitObject != null)
             {
                 Summary.Remote.Repository.CommandOutputPipe(stdout =>
                                                         {
@@ -102,7 +123,7 @@ namespace Sep.Git.Tfs.Core
                                                                 index.Remove(pathToRemove);
                                                                 Trace.WriteLine("\tD\t" + pathToRemove);
                                                             }
-                                                        }, "ls-tree", "-r", "--name-only", "-z", match.Groups["tree"].Value);
+                                                        }, "ls-tree", "-r", "--name-only", "-z", gitObject.Sha);
             }
             else
             {

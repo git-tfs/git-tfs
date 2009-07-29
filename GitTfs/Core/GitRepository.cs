@@ -173,13 +173,28 @@ namespace Sep.Git.Tfs.Core
             return null;
         }
 
-        // This is attractive, but I'm wary of encoding/buffering issues due
-        // to pulling BaseStream out of stdin. It also breaks my abstraction of
-        // using TextWriter for stdin.
-        // An alternative is to write the stream to a temp file, and call the
-        // string-based HAIO.
+        public GitObject GetObjectInfo(string commit, string path)
+        {
+            if (commit == null || path == null)
+                return null;
+            var treeInfo = Command("ls-tree", "-z", commit, "./" + path);
+            var treeRegex =
+                new Regex(@"\A(?<mode>\d{6}) (?<type>blob|tree) (?<sha>" + GitTfsConstants.Sha1 + ") \\t" + Regex.Escape(path) + "\0");
+            var match = treeRegex.Match(treeInfo);
+            return !match.Success ? null : new GitObject
+            {
+                Mode = match.Groups["mode"].Value,
+                Sha = match.Groups["sha"].Value,
+                ObjectType = match.Groups["type"].Value,
+                Path = path,
+                Commit = commit
+            };
+        }
+
         public string HashAndInsertObject(Stream file)
         {
+            // Write the data to a file and insert that, so that git will handle any
+            // EOL and encoding issues.
             using(var tempFile = new TemporaryFile())
             {
                 using(var tempStream = File.Create(tempFile))
