@@ -33,3 +33,11 @@ The commands I plan to implement, in order of priority:
   commit-diff ?
   migrate ?
 
+
+See commits fc6d19..., 56d7d1... for changes that weren't tracked right (files that were missing or present when they weren't supposed to be). 
+ * problem 1: files should have been deleted, but weren't. one of the files that should have been deleted:
+   git whatchanged -- app/help/notification/should_contact/enrollment_save_error_text.html
+   C13354
+ * problem 2: a file was not downloaded, but should have been.
+   git show 56d7d1
+   old version of the file?? 
