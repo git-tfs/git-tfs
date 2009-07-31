@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CommandLine.OptParse;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using StructureMap;
@@ -84,6 +85,13 @@ namespace Sep.Git.Tfs.Core
                     yield return parseHelper;
                 }
             }
+        }
+
+        private static readonly Regex sha1OnlyRegex = new Regex("^" + GitTfsConstants.Sha1 + "$");
+        public static void AssertValidSha(this String sha)
+        {
+            if (!sha1OnlyRegex.IsMatch(sha))
+                throw new Exception("Invalid sha1: " + sha);
         }
     }
 }

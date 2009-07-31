@@ -11,6 +11,8 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitRepository : GitHelpers, IGitRepository
     {
+        private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
+
         public GitRepository(TextWriter stdout) : base(stdout)
         {
         }
@@ -76,35 +78,44 @@ namespace Sep.Git.Tfs.Core
 
         private void ParseRemoteConfig(TextReader stdout, IDictionary<string, GitTfsRemote> remotes)
         {
-            var configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
             string line;
             while ((line = stdout.ReadLine()) != null)
             {
-                var match = configLineRegex.Match(line);
-                if (match.Success)
-                {
-                    var remoteId = match.Groups["id"].Value;
-                    var key = match.Groups["key"].Value;
-                    var value = match.Groups["value"].Value;
-                    var remote = remotes.ContainsKey(remoteId)
-                                     ? remotes[remoteId]
-                                     : (remotes[remoteId] = CreateRemote(remoteId));
-                    switch (key)
-                    {
-                        case "url":
-                            remote.Tfs.Url = value;
-                            break;
-                        case "username":
-                            remote.Tfs.Username = value;
-                            break;
-                        case "repository":
-                            remote.TfsRepositoryPath = value;
-                            break;
-                        //case "fetch":
-                        //    remote.??? = value;
-                        //    break;
-                    }
-                }
+                TryParseRemoteConfigLine(line, remotes);
+            }
+        }
+
+        private void TryParseRemoteConfigLine(string line, IDictionary<string, GitTfsRemote> remotes)
+        {
+            var match = configLineRegex.Match(line);
+            if (match.Success)
+            {
+                var key = match.Groups["key"].Value;
+                var value = match.Groups["value"].Value;
+                var remoteId = match.Groups["id"].Value;
+                var remote = remotes.ContainsKey(remoteId)
+                                 ? remotes[remoteId]
+                                 : (remotes[remoteId] = CreateRemote(remoteId));
+                SetRemoteConfigValue(remote, key, value);
+            }
+        }
+
+        private void SetRemoteConfigValue(GitTfsRemote remote, string key, string value)
+        {
+            switch (key)
+            {
+                case "url":
+                    remote.Tfs.Url = value;
+                    break;
+                case "username":
+                    remote.Tfs.Username = value;
+                    break;
+                case "repository":
+                    remote.TfsRepositoryPath = value;
+                    break;
+                    //case "fetch":
+                    //    remote.??? = value;
+                    //    break;
             }
         }
 
@@ -152,9 +163,9 @@ namespace Sep.Git.Tfs.Core
                     currentCommit = match.Groups[1].Value;
                     continue;
                 }
-                var commitInfo = TryParseChangesetInfo(line, currentCommit);
-                if (commitInfo != null)
-                    return commitInfo;
+                var changesetInfo = TryParseChangesetInfo(line, currentCommit);
+                if (changesetInfo != null)
+                    return changesetInfo;
             }
             return null;
         }

@@ -22,41 +22,49 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index)
         {
-            foreach(var change in Sort(changeset.Changes))
+            foreach (var change in Sort(changeset.Changes))
             {
-                // If you make updates to a dir in TF, the changeset includes changes for all the children also,
-                // and git doesn't really care if you add or delete empty dirs.
-                if (change.Item.ItemType == ItemType.File)
-                {
-                    var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
-                    if(pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
-                        continue;
-                    if(change.ChangeType.IncludesOneOf(ChangeType.Rename))
-                    {
-                        var oldPath = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
-                        if (oldPath != null)
-                        {
-                            index.Remove(oldPath);
-                        }
-                        if (change.Item.DeletionId == 0 && !change.ChangeType.IncludesOneOf(ChangeType.Delete))
-                        {
-                            Update(change, pathInGitRepo, lastCommit, index);
-                        }
-                    }
-                    else if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
-                    {
-                        Delete(pathInGitRepo, lastCommit, index);
-                    }
-                    else
-                    {
-                        if (change.Item.DeletionId == 0)
-                        {
-                            Update(change, pathInGitRepo, lastCommit, index);
-                        }
-                    }
-                }
+                Apply(change, index, lastCommit);
             }
             return MakeNewLogEntry();
+        }
+
+        private void Apply(Change change, GitIndexInfo index, string lastCommit)
+        {
+                // If you make updates to a dir in TF, the changeset includes changes for all the children also,
+                // and git doesn't really care if you add or delete empty dirs.
+            if (change.Item.ItemType == ItemType.File)
+            {
+                var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
+                if (pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
+                    return;
+                if (change.ChangeType.IncludesOneOf(ChangeType.Rename))
+                {
+                    Rename(change, pathInGitRepo, index, lastCommit);
+                }
+                else if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
+                {
+                    Delete(pathInGitRepo, lastCommit, index);
+                }
+                else
+                {
+                    Update(change, pathInGitRepo, lastCommit, index);
+                }
+            }
+        }
+
+        private void Rename(Change change, string pathInGitRepo, GitIndexInfo index, string lastCommit)
+        {
+            var oldPath = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
+            if (oldPath != null)
+            {
+                index.Remove(oldPath);
+            }
+            if (!change.ChangeType.IncludesOneOf(ChangeType.Delete))
+            {
+                var oldObject = Summary.Remote.Repository.GetObjectInfo(lastCommit, oldPath);
+                Update(change, pathInGitRepo, oldObject.Mode, lastCommit, index);
+            }
         }
 
         private IEnumerable<Change> Sort(IEnumerable<Change> changes)
@@ -80,27 +88,13 @@ namespace Sep.Git.Tfs.Core
 
         private void Update(Change change, string pathInGitRepo, string lastCommit, GitIndexInfo index)
         {
-            if (change.Item.ItemType == ItemType.File)
+            Update(change, pathInGitRepo, GetCurrentMode(lastCommit, pathInGitRepo), lastCommit, index);
+        }
+
+        private void Update(Change change, string pathInGitRepo, string mode, string lastCommit, GitIndexInfo index)
+        {
+            if (change.Item.DeletionId == 0)
             {
-                string mode = null;
-
-                // It's VERY convenient that TFS renames every file in the tree, not just the dir.
-                // If it didn't, then doing directory renames would be much more involved.
-                // Instead, we can just handle each file's change.
-                if (change.ChangeType.IncludesOneOf(ChangeType.Rename))
-                {
-                    var oldPath = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
-                    if (oldPath != null)
-                    {
-                        mode = GetCurrentMode(lastCommit, oldPath);
-                        index.Remove(oldPath);
-                    }
-                }
-                else
-                {
-                    mode = GetCurrentMode(lastCommit, pathInGitRepo);
-                }
-
                 if (mode == null || change.ChangeType.IncludesOneOf(ChangeType.Add))
                     mode = "100644";
                 index.Update(mode, pathInGitRepo, change.Item.DownloadFile());

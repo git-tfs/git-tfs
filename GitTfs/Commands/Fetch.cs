@@ -45,6 +45,15 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(IList<string> args)
         {
+            foreach(var remote in GetRemotesToFetch(args))
+            {
+                remote.Fetch();
+            }
+            return 0;
+        }
+
+        private IEnumerable<GitTfsRemote> GetRemotesToFetch(IList<string> args)
+        {
             IEnumerable<GitTfsRemote> remotesToFetch;
             if (parent)
                 remotesToFetch = new[] {globals.Repository.WorkingHeadInfo("HEAD").Remote};
@@ -55,12 +64,7 @@ namespace Sep.Git.Tfs.Commands
                 if(args.Count == 0) args = new[] {globals.RemoteId};
                 remotesToFetch = args.Select(arg => globals.Repository.ReadTfsRemote(arg));
             }
-
-            foreach(var remote in remotesToFetch)
-            {
-                remote.Fetch();
-            }
-            return 0;
+            return remotesToFetch;
         }
     }
 }

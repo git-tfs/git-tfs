@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
@@ -75,18 +76,17 @@ namespace Sep.Git.Tfs.Core
             get { return (IGroupSecurityService) Server.GetService(typeof(IGroupSecurityService)); }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(GitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion)
         {
-            var changesets = VersionControl.QueryHistory(remote.TfsRepositoryPath, VersionSpec.Latest, 0, RecursionType.Full,
-                                        null, new ChangesetVersionSpec((int) remote.MaxChangesetId + 1), VersionSpec.Latest, int.MaxValue, true,
+            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+                                        null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
                                         true, true);
             foreach (Changeset changeset in changesets)
             {
                 yield return
                     new TfsChangeset(this, changeset)
                         {
-                            Summary =
-                                new TfsChangesetInfo {ChangesetId = changeset.ChangesetId, Remote = remote}
+                            Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId}
                         };
             }
         }

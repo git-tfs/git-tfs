@@ -67,16 +67,21 @@ namespace Sep.Git.Tfs.Commands
         {
             if(!Directory.Exists(globals.GitDir))
             {
-                var initCommand = new List<string> {"init"};
-                if(initOptions.GitInitTemplate!= null)
-                    initCommand.Add("--template=" + initOptions.GitInitTemplate);
-                if(initOptions.GitInitShared is string)
-                    initCommand.Add("--shared=" + initOptions.GitInitShared);
-                else if(initOptions.GitInitShared != null)
-                    initCommand.Add("--shared");
-                gitHelper.CommandNoisy(initCommand.ToArray());
+                gitHelper.CommandNoisy(BuildInitCommand());
                 globals.Repository = gitHelper.MakeRepository(".git");
             }
+        }
+
+        private string[] BuildInitCommand()
+        {
+            var initCommand = new List<string> {"init"};
+            if(initOptions.GitInitTemplate!= null)
+                initCommand.Add("--template=" + initOptions.GitInitTemplate);
+            if(initOptions.GitInitShared is string)
+                initCommand.Add("--shared=" + initOptions.GitInitShared);
+            else if(initOptions.GitInitShared != null)
+                initCommand.Add("--shared");
+            return initCommand.ToArray();
         }
 
         private void GitTfsInit(string tfsUrl, string tfsRepositoryPath)
