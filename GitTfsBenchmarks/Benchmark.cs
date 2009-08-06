@@ -65,7 +65,7 @@ public class Benchmark
         // just makes it easier to read the code...
         BindingFlags publicStatic = BindingFlags.Public | BindingFlags.Static;
 
-        foreach (Type type in Assembly.GetCallingAssembly().GetTypes())
+        foreach (Type type in typeof(Benchmark).Assembly.GetTypes())
         {
             // Find an Init method taking string[], if any
             MethodInfo initMethod = type.GetMethod("Init", publicStatic, null,
@@ -76,6 +76,11 @@ public class Benchmark
             MethodInfo resetMethod = type.GetMethod("Reset", publicStatic,
                                                    null, new Type[0],
                                                    null);
+
+            // Find a parameterless Cleanup method, if any
+            MethodInfo cleanupMethod = type.GetMethod("Cleanup", publicStatic,
+                                                     null, new Type[0],
+                                                     null);
 
             // Find a parameterless Check method, if any
             MethodInfo checkMethod = type.GetMethod("Check", publicStatic,
@@ -160,6 +165,12 @@ public class Benchmark
                         if (checkMethod != null)
                         {
                             checkMethod.Invoke(null, null);
+                        }
+
+                        // Clean up (if appropriate)
+                        if (cleanupMethod != null)
+                        {
+                            cleanupMethod.Invoke(null, null);
                         }
 
                         // If everything's worked, report the time taken, 
