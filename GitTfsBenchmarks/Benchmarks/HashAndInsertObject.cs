@@ -97,7 +97,6 @@ namespace Sep.Git.Tfs.Benchmarks
         #region setup & teardown
 
         private static string originalCd;
-        private static string tempDir;
 
         public static void Reset()
         {

@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Sep.Git.Tfs.Util
 {
-    class TemporaryFile : IDisposable
+    public class TemporaryFile : IDisposable
     {
         private string tempFile;
 
