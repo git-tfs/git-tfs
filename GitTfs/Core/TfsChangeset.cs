@@ -63,7 +63,10 @@ namespace Sep.Git.Tfs.Core
             if (!change.ChangeType.IncludesOneOf(ChangeType.Delete))
             {
                 var oldObject = Summary.Remote.Repository.GetObjectInfo(lastCommit, oldPath);
-                Update(change, pathInGitRepo, oldObject.Mode, lastCommit, index);
+                if (oldObject == null)
+                    Update(change, pathInGitRepo, lastCommit, index);
+                else
+                    Update(change, pathInGitRepo, oldObject.Mode, lastCommit, index);
             }
         }
 

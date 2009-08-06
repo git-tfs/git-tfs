@@ -165,6 +165,7 @@ namespace Sep.Git.Tfs.Core
             if(string.IsNullOrEmpty(treeish))
             {
                 if (File.Exists(IndexFile)) File.Delete(IndexFile);
+                return;
             }
             WithTemporaryIndex(() => AssertIndexClean(treeish));
         }
