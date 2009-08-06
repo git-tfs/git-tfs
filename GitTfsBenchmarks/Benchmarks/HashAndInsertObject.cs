@@ -20,7 +20,7 @@ namespace Sep.Git.Tfs.Benchmarks
         [Benchmark]
         public static void WithPureDotNet()
         {
-            Run(HashWithDotNet);
+            Run("clr", HashWithDotNet);
         }
 
         private static string HashWithDotNet(Stream data)
@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Benchmarks
             bytes.AddRange(binaryReader.ReadBytes((int)data.Length));
 
             var byteArray = bytes.ToArray();
-            var sha1 = BitConverter.ToString(SHA1.Create().ComputeHash(byteArray)).Replace("-", "");
+            var sha1 = BitConverter.ToString(SHA1.Create().ComputeHash(byteArray)).Replace("-", "").ToLowerInvariant();
 
             var sha1_0 = sha1.Substring(0, 2);
             var sha1_1 = sha1.Substring(2);
@@ -67,7 +67,7 @@ namespace Sep.Git.Tfs.Benchmarks
         [Benchmark]
         public static void WithExecGit()
         {
-            Run(HashWithGit);
+            Run("git", HashWithGit);
         }
 
         public static string HashWithGit(Stream file)
@@ -102,19 +102,11 @@ namespace Sep.Git.Tfs.Benchmarks
         public static void Reset()
         {
             originalCd = Environment.CurrentDirectory;
-
-            tempDir = Path.GetTempFileName();
-            File.Delete(tempDir);
-            Directory.CreateDirectory(tempDir);
-            Environment.CurrentDirectory = tempDir;
-
-            gitHelper.CommandNoisy("init");
         }
 
         public static void Cleanup()
         {
             Environment.CurrentDirectory = originalCd;
-            try { Directory.Delete(tempDir, true); } catch { }
         }
 
         public static void Check()
@@ -131,21 +123,6 @@ namespace Sep.Git.Tfs.Benchmarks
         private static IEnumerable<string> GetExpectedFiles()
         {
             yield return ".git/objects/0e/44708cb3166a9f6c5c0a038bc7b2c0c2435e13";
-//            return Split(@".git/config
-//.git/description
-//.git/HEAD
-//.git/hooks/applypatch-msg.sample
-//.git/hooks/commit-msg.sample
-//.git/hooks/post-commit.sample
-//.git/hooks/post-receive.sample
-//.git/hooks/post-update.sample
-//.git/hooks/pre-applypatch.sample
-//.git/hooks/pre-commit.sample
-//.git/hooks/pre-rebase.sample
-//.git/hooks/prepare-commit-msg.sample
-//.git/hooks/update.sample
-//.git/info/exclude
-//.git/objects/b1/c9ce7741174a512bf18d409495b12f9b194c9b");
         }
 
         private static IEnumerable<string> Split(string files)
@@ -154,8 +131,12 @@ namespace Sep.Git.Tfs.Benchmarks
             return regex.Split(files);
         }
 
-        private static void Run(Func<Stream, string> hashAndStore)
+        private static void Run(string name, Func<Stream, string> hashAndStore)
         {
+            var dirName = "hash-object-" + name;
+            Directory.CreateDirectory(dirName);
+            Environment.CurrentDirectory = dirName;
+            gitHelper.CommandNoisy("init");
             for (int i = 0; i < 300; i++)
             {
                 hashAndStore(
