@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -22,17 +21,18 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index)
         {
+            var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
             foreach (var change in Sort(changeset.Changes))
             {
-                Apply(change, index, lastCommit);
+                Apply(change, index, initialTree);
             }
             return MakeNewLogEntry();
         }
 
-        private void Apply(Change change, GitIndexInfo index, string lastCommit)
+        private void Apply(Change change, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
         {
-                // If you make updates to a dir in TF, the changeset includes changes for all the children also,
-                // and git doesn't really care if you add or delete empty dirs.
+            // If you make updates to a dir in TF, the changeset includes changes for all the children also,
+            // and git doesn't really care if you add or delete empty dirs.
             if (change.Item.ItemType == ItemType.File)
             {
                 var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
@@ -40,33 +40,29 @@ namespace Sep.Git.Tfs.Core
                     return;
                 if (change.ChangeType.IncludesOneOf(ChangeType.Rename))
                 {
-                    Rename(change, pathInGitRepo, index, lastCommit);
+                    Rename(change, pathInGitRepo, index, initialTree);
                 }
                 else if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
                 {
-                    Delete(pathInGitRepo, lastCommit, index);
+                    Delete(pathInGitRepo, index, initialTree);
                 }
                 else
                 {
-                    Update(change, pathInGitRepo, lastCommit, index);
+                    Update(change, pathInGitRepo, index, initialTree);
                 }
             }
         }
 
-        private void Rename(Change change, string pathInGitRepo, GitIndexInfo index, string lastCommit)
+        private void Rename(Change change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
         {
             var oldPath = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
             if (oldPath != null)
             {
-                index.Remove(oldPath);
+                Delete(oldPath, index, initialTree);
             }
             if (!change.ChangeType.IncludesOneOf(ChangeType.Delete))
             {
-                var oldObject = Summary.Remote.Repository.GetObjectInfo(lastCommit, oldPath);
-                if (oldObject == null)
-                    Update(change, pathInGitRepo, lastCommit, index);
-                else
-                    Update(change, pathInGitRepo, oldObject.Mode, lastCommit, index);
+                Update(change, pathInGitRepo, index, initialTree);
             }
         }
 
@@ -89,54 +85,59 @@ namespace Sep.Git.Tfs.Core
             return item.VersionControlServer.GetItem(item.ItemId, item.ChangesetId - 1).ServerItem;
         }
 
-        private void Update(Change change, string pathInGitRepo, string lastCommit, GitIndexInfo index)
-        {
-            Update(change, pathInGitRepo, GetCurrentMode(lastCommit, pathInGitRepo), lastCommit, index);
-        }
-
-        private void Update(Change change, string pathInGitRepo, string mode, string lastCommit, GitIndexInfo index)
+        private void Update(Change change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
         {
             if (change.Item.DeletionId == 0)
             {
-                if (mode == null || change.ChangeType.IncludesOneOf(ChangeType.Add))
-                    mode = "100644";
-                index.Update(mode, pathInGitRepo, change.Item.DownloadFile());
+                index.Update(GetMode(change, initialTree, pathInGitRepo), UpdateDirectoryToMatchExtantCasing(pathInGitRepo, initialTree), change.Item.DownloadFile());
             }
         }
 
-        private void Delete(string pathInGitRepo, string lastCommit, GitIndexInfo index)
+        private string GetMode(Change change, IDictionary<string, GitObject> initialTree, string pathInGitRepo)
         {
-            var gitObject = Summary.Remote.Repository.GetObjectInfo(lastCommit, pathInGitRepo);
-            if(gitObject != null)
+            if(initialTree.ContainsKey(pathInGitRepo) && !change.ChangeType.IncludesOneOf(ChangeType.Add))
             {
-                Summary.Remote.Repository.CommandOutputPipe(stdout =>
-                                                        {
-                                                            var reader = new DelimitedReader(stdout);
-                                                            string fileInDir;
-                                                            while((fileInDir = reader.Read()) != null)
-                                                            {
-                                                                var pathToRemove = pathInGitRepo + "/" +
-                                                                                   fileInDir;
-                                                                index.Remove(pathToRemove);
-                                                                Trace.WriteLine("\tD\t" + pathToRemove);
-                                                            }
-                                                        }, "ls-tree", "-r", "--name-only", "-z", gitObject.Sha);
+                return initialTree[pathInGitRepo].Mode;
             }
-            else
-            {
-                index.Remove(pathInGitRepo);
-            }
-            Trace.WriteLine("\tD\t" + pathInGitRepo);
+            return "100644";
         }
 
-        private string GetCurrentMode(string lastChangeset, string item)
+        private static readonly Regex pathWithDirRegex = new Regex("(?<dir>.*)/(?<file>[^/]+)");
+
+        private string UpdateDirectoryToMatchExtantCasing(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
         {
-            if(String.IsNullOrEmpty(lastChangeset)) return null;
-            var treeInfo = Summary.Remote.Repository.Command("ls-tree", "-z", lastChangeset, "./" + item);
-            var treeRegex =
-                new Regex("\\A(?<mode>\\d{6}) blob (?<blob>" + GitTfsConstants.Sha1 + ")\\t" + Regex.Escape(item) + "\0");
-            var match = treeRegex.Match(treeInfo);
-            return !match.Success ? null : match.Groups["mode"].Value;
+            string newPathTail = null;
+            string newPathHead = pathInGitRepo;
+            while(true)
+            {
+                if(initialTree.ContainsKey(newPathHead))
+                {
+                    return MaybeAppendPath(initialTree[newPathHead].Path, newPathTail);
+                }
+                var pathWithDirMatch = pathWithDirRegex.Match(newPathHead);
+                if(!pathWithDirMatch.Success)
+                {
+                    return MaybeAppendPath(newPathHead, newPathTail);
+                }
+                newPathTail = MaybeAppendPath(pathWithDirMatch.Groups["file"].Value, newPathTail);
+                newPathHead = pathWithDirMatch.Groups["dir"].Value;
+            }
+        }
+
+        private string MaybeAppendPath(string path, object tail)
+        {
+            if(tail != null)
+                path = path + "/" + tail;
+            return path;
+        }
+
+        private void Delete(string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
+        {
+            if(initialTree.ContainsKey(pathInGitRepo))
+            {
+                index.Remove(initialTree[pathInGitRepo].Path);
+                Trace.WriteLine("\tD\t" + pathInGitRepo);
+            }
         }
 
         private LogEntry MakeNewLogEntry()

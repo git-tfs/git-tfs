@@ -10,7 +10,7 @@ namespace Sep.Git.Tfs.Core
         GitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath);
         TfsChangesetInfo WorkingHeadInfo(string head, ICollection<string> localCommits);
         TfsChangesetInfo WorkingHeadInfo(string head);
-        GitObject GetObjectInfo(string commit, string path);
+        IDictionary<string, GitObject> GetObjects(string commit);
         string HashAndInsertObject(string filename);
         string HashAndInsertObject(Stream data);
     }

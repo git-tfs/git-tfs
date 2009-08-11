@@ -34,5 +34,4 @@ The commands I plan to implement, in order of priority:
   migrate ?
 
 Known bugs:
- TF doesn't care about directory casing, but git does. So I need to make
- git-tfs add blah/a and BLAH/b to the same tree.
+ None right now.

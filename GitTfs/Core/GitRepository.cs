@@ -185,22 +185,42 @@ namespace Sep.Git.Tfs.Core
             return null;
         }
 
-        public GitObject GetObjectInfo(string commit, string path)
+        public IDictionary<string, GitObject> GetObjects(string commit)
         {
-            if (commit == null || path == null)
-                return null;
-            var treeInfo = Command("ls-tree", "-z", commit, "./" + path);
+            var entries = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
+            if (commit != null)
+            {
+                ParseEntries(entries, Command("ls-tree", "-r", "-z", commit), commit);
+                ParseEntries(entries, Command("ls-tree", "-r", "-d", "-z", commit), commit);
+            }
+            return entries;
+        }
+
+        private void ParseEntries(IDictionary<string, GitObject> entries, string treeInfo, string commit)
+        {
+            foreach (var treeEntry in treeInfo.Split('\0'))
+            {
+                var gitObject = MakeGitObject(commit, treeEntry);
+                if(gitObject != null)
+                {
+                    entries[gitObject.Path] = gitObject;
+                }
+            }
+        }
+
+        private GitObject MakeGitObject(string commit, string treeInfo)
+        {
             var treeRegex =
-                new Regex(@"\A(?<mode>\d{6}) (?<type>blob|tree) (?<sha>" + GitTfsConstants.Sha1 + ") \\t" + Regex.Escape(path) + "\0");
+                new Regex(@"\A(?<mode>\d{6}) (?<type>blob|tree) (?<sha>" + GitTfsConstants.Sha1 + @")\t(?<path>.*)");
             var match = treeRegex.Match(treeInfo);
             return !match.Success ? null : new GitObject
-            {
-                Mode = match.Groups["mode"].Value,
-                Sha = match.Groups["sha"].Value,
-                ObjectType = match.Groups["type"].Value,
-                Path = path,
-                Commit = commit
-            };
+                                               {
+                                                   Mode = match.Groups["mode"].Value,
+                                                   Sha = match.Groups["sha"].Value,
+                                                   ObjectType = match.Groups["type"].Value,
+                                                   Path = match.Groups["path"].Value,
+                                                   Commit = commit
+                                               };
         }
 
         public string HashAndInsertObject(Stream file)
