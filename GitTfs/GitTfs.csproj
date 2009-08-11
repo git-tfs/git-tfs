@@ -112,6 +112,12 @@
     <Compile Include="Core\TfsHelper.cs" />
     <Compile Include="Util\TemporaryFile.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="VersionInfo\HEAD" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="VersionInfo\heads\*" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -120,4 +126,9 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PreBuildEvent>mkdir $(ProjectDir)VersionInfo\heads
+copy /y $(ProjectDir)..\.git\HEAD $(ProjectDir)VersionInfo\HEAD
+copy /y $(ProjectDir)..\.git\refs\heads\* $(ProjectDir)VersionInfo\heads</PreBuildEvent>
+  </PropertyGroup>
 </Project>

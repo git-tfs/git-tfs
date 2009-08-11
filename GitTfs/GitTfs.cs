@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
@@ -29,10 +31,7 @@ namespace Sep.Git.Tfs
             }
             else if(globals.ShowVersion)
             {
-                ObjectFactory.GetInstance<TextWriter>()
-                    .WriteLine("git-tfs version " + typeof (Program).Assembly.GetName().Version +
-                               " (TFS client library " + ObjectFactory.GetInstance<ITfsHelper>().TfsClientLibraryVersion +
-                               ")");
+                ObjectFactory.GetInstance<TextWriter>().WriteLine(MakeVersionString());
                 Environment.ExitCode = GitTfsExitCodes.OK;
             }
             else
@@ -40,6 +39,57 @@ namespace Sep.Git.Tfs
                 Environment.ExitCode = command.Run(unparsedArgs);
                 //PostFetchCheckout();
             }
+        }
+
+        private string MakeVersionString()
+        {
+            var versionString = "git-tfs version";
+            //versionString += " " + GetType().Assembly.GetName().Version;
+            versionString += GetGitCommitForVersionString();
+            versionString += " (TFS client library " + ObjectFactory.GetInstance<ITfsHelper>().TfsClientLibraryVersion +
+                             ")";
+            return versionString;
+        }
+
+        private string GetGitCommitForVersionString()
+        {
+            try
+            {
+                return " (commit " + GetGitCommit().Substring(0, 8) + "...)";
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine("Unable to get git version: " + e);
+                return "";
+            }
+        }
+
+        private string GetGitCommit()
+        {
+            var gitTfsAssembly = GetType().Assembly;
+            using (var head = gitTfsAssembly.GetManifestResourceStream("Sep.Git.Tfs.VersionInfo.HEAD"))
+            {
+                var refForm = new Regex(@"ref: refs/heads/(?<ref>.*)");
+                var headRef = ReadAllText(head);
+                var refMatch = refForm.Match(headRef);
+                if (refMatch.Success)
+                {
+                    var refResourceName = "Sep.Git.Tfs.VersionInfo.heads." + refMatch.Groups["ref"].Value;
+                    if (gitTfsAssembly.GetManifestResourceNames().Any(resourceName => resourceName == refResourceName))
+                    {
+                        using (var refResource = gitTfsAssembly.GetManifestResourceStream(refResourceName))
+                        {
+                            return ReadAllText(refResource);
+                        }
+                    }
+                }
+                return headRef;
+            }
+        }
+
+        private string ReadAllText(Stream stream)
+        {
+            return new StreamReader(stream).ReadToEnd().Trim();
         }
 
         public bool RequiresValidGitRepository(GitTfsCommand command)
