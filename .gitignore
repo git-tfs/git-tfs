@@ -6,4 +6,4 @@ obj
 *.gpState
 *.user
 TestResults
-GitTfs/VersionInfo/
+GitTfs/GitVersionInfo

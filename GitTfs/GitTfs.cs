@@ -67,23 +67,10 @@ namespace Sep.Git.Tfs
         private string GetGitCommit()
         {
             var gitTfsAssembly = GetType().Assembly;
-            using (var head = gitTfsAssembly.GetManifestResourceStream("Sep.Git.Tfs.VersionInfo.HEAD"))
+            using (var head = gitTfsAssembly.GetManifestResourceStream("Sep.Git.Tfs.GitVersionInfo"))
             {
-                var refForm = new Regex(@"ref: refs/heads/(?<ref>.*)");
-                var headRef = ReadAllText(head);
-                var refMatch = refForm.Match(headRef);
-                if (refMatch.Success)
-                {
-                    var refResourceName = "Sep.Git.Tfs.VersionInfo.heads." + refMatch.Groups["ref"].Value;
-                    if (gitTfsAssembly.GetManifestResourceNames().Any(resourceName => resourceName == refResourceName))
-                    {
-                        using (var refResource = gitTfsAssembly.GetManifestResourceStream(refResourceName))
-                        {
-                            return ReadAllText(refResource);
-                        }
-                    }
-                }
-                return headRef;
+                var commitRegex = new Regex(@"commit (?<sha>[a-f0-9]{8})", RegexOptions.IgnoreCase);
+                return commitRegex.Match(ReadAllText(head)).Groups["sha"].Value;
             }
         }
 
