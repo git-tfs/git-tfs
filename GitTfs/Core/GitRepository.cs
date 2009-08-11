@@ -134,19 +134,17 @@ namespace Sep.Git.Tfs.Core
 
         public TfsChangesetInfo WorkingHeadInfo(string head, ICollection<string> localCommits)
         {
+            TfsChangesetInfo retVal = null;
             try
             {
-                TfsChangesetInfo retVal = null;
                 CommandOutputPipe(stdout => retVal = ParseFirstTfsCommit(stdout, localCommits),
                   "log", "--no-color", "--first-parent", "--pretty=medium", head);
-                return retVal;
             }
             catch (GitCommandException e)
             {
-                Trace.WriteLine("No head named " + head + " was found: " + e);
-                // There is no head.
-                return null;
+                Trace.WriteLine("An error occurred while loading head " + head + " (maybe it doesn't exist?): " + e);
             }
+            return retVal;
         }
 
         private TfsChangesetInfo ParseFirstTfsCommit(TextReader stdout, ICollection<string> localCommits)
@@ -165,7 +163,10 @@ namespace Sep.Git.Tfs.Core
                 }
                 var changesetInfo = TryParseChangesetInfo(line, currentCommit);
                 if (changesetInfo != null)
+                {
+                    stdout.Close();
                     return changesetInfo;
+                }
             }
             return null;
         }
