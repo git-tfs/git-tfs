@@ -36,26 +36,50 @@ namespace Sep.Git.Tfs.Core
 
         public void CommandOutputPipe(Action<TextReader> handleOutput, params string[] command)
         {
-            AssertValidCommand(command);
-            var process = Start(command, RedirectStdout);
-            handleOutput(process.StandardOutput);
-            Close(process);
+            Time(command, () =>
+                              {
+                                  AssertValidCommand(command);
+                                  var process = Start(command, RedirectStdout);
+                                  handleOutput(process.StandardOutput);
+                                  Close(process);
+                              });
         }
 
         public void CommandInputPipe(Action<TextWriter> action, params string[] command)
         {
-            AssertValidCommand(command);
-            var process = Start(command, RedirectStdin);
-            action(process.StandardInput);
-            Close(process);
+            Time(command, () =>
+                              {
+                                  AssertValidCommand(command);
+                                  var process = Start(command, RedirectStdin);
+                                  action(process.StandardInput);
+                                  Close(process);
+                              });
         }
 
         public void CommandInputOutputPipe(Action<TextWriter, TextReader> interact, params string[] command)
         {
-            AssertValidCommand(command);
-            var process = Start(command, Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
-            interact(process.StandardInput, process.StandardOutput);
-            Close(process);
+            Time(command, () =>
+                              {
+                                  AssertValidCommand(command);
+                                  var process = Start(command,
+                                                      Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
+                                  interact(process.StandardInput, process.StandardOutput);
+                                  Close(process);
+                              });
+        }
+
+        private void Time(string[] command, Action action)
+        {
+            var start = DateTime.Now;
+            try
+            {
+                action();
+            }
+            finally
+            {
+                var end = DateTime.Now;
+                Trace.WriteLine(String.Format("[{0}] {1}", end - start, String.Join(" ", command)), "git command time");
+            }
         }
 
         private void Close(Process process)
