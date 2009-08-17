@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Util;
 
@@ -40,13 +41,35 @@ namespace Sep.Git.Tfs.Commands
 // I don't know what this is
 //        public int LogWindowSize { get; set; }
 //        public bool NoCheckout { get; set; }
-        
-        [OptDef(OptValType.IncrementalFlag)]
-        [ShortOptionName('q')]
-        [LongOptionName("quiet")]
+
+        private int? _debugTraceListener;
+
+        [OptDef(OptValType.Flag)]
+        [ShortOptionName('d')]
+        [LongOptionName("debug")]
         [UseNameAsLongOption(false)]
-        [Description("Reduce the amount of logged information.")]
-        public int OutputLevel { get; set; }
+        [Description("Show lots of output.")]
+        public bool DebugOutput
+        {
+            get { return _debugTraceListener.HasValue; }
+            set
+            {
+                if (value)
+                {
+                    if (_debugTraceListener == null)
+                    {
+                        _debugTraceListener = Trace.Listeners.Add(new ConsoleTraceListener());
+                    }
+                }
+                else
+                {
+                    if (_debugTraceListener != null)
+                    {
+                        Trace.Listeners.RemoveAt(_debugTraceListener.Value);
+                    }
+                }
+            }
+        }
 
         // I think I'm going to make these the default. I may allow their disablement
         // later.
