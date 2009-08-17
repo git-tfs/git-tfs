@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -89,7 +90,13 @@ namespace Sep.Git.Tfs.Core
         {
             if (change.Item.DeletionId == 0)
             {
-                index.Update(GetMode(change, initialTree, pathInGitRepo), UpdateDirectoryToMatchExtantCasing(pathInGitRepo, initialTree), change.Item.DownloadFile());
+                using (var tempFile = new TemporaryFile())
+                {
+                    change.Item.DownloadFile(tempFile);
+                    index.Update(GetMode(change, initialTree, pathInGitRepo),
+                                 UpdateDirectoryToMatchExtantCasing(pathInGitRepo, initialTree),
+                                 tempFile);
+                }
             }
         }
 

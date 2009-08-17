@@ -44,14 +44,9 @@ namespace Sep.Git.Tfs.Core
             return ++nr;
         }
 
-        public int Update(string mode, string path, Stream data)
+        public int Update(string mode, string path, string localFile)
         {
-            var hash = repository.HashAndInsertObject(data);
-            return Update(mode, path, hash);
-        }
-
-        public int Update(string mode, string path, string sha)
-        {
+            var sha = repository.HashAndInsertObject(localFile);
             Trace.WriteLine("   U " + sha + " = " + path);
             stdin.Write(mode);
             stdin.Write(' ');
