@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
@@ -90,6 +88,11 @@ namespace Sep.Git.Tfs.Core
                             Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId}
                         };
             }
+        }
+
+        public ITfsWorkspace CreateWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch)
+        {
+            throw new NotImplementedException();
         }
 
         public ITfsIdentity GetIdentity(string username)

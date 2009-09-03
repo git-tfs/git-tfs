@@ -78,6 +78,14 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        private string WorkingDirectory
+        {
+            get
+            {
+                return Path.Combine(Dir, "workspace");
+            }
+        }
+
         public bool ShouldSkip(string path)
         {
             return IsInDotGit(path) ||
@@ -309,9 +317,17 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public void Shelve(string shelvesetName, string head)
+        public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset)
         {
-            throw new NotImplementedException();
+            using (var workspace = Tfs.CreateWorkspace(WorkingDirectory, this, parentChangeset))
+            {
+                foreach (var change in Repository.GetChangedFiles(RemoteRef, head))
+                {
+                    stdout.WriteLine("  " + change);
+                    change.Apply(workspace);
+                }
+                workspace.Shelve(shelvesetName);
+            }
         }
     }
 }

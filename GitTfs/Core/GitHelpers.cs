@@ -15,6 +15,9 @@ namespace Sep.Git.Tfs.Core
             realStdout = stdout;
         }
 
+        /// <summary>
+        /// Runs the given git command, and returns the contents of its STDOUT.
+        /// </summary>
         public string Command(params string[] command)
         {
             string retVal = null;
@@ -22,6 +25,9 @@ namespace Sep.Git.Tfs.Core
             return retVal;
         }
 
+        /// <summary>
+        /// Runs the given git command, and returns the first line of its STDOUT.
+        /// </summary>
         public string CommandOneline(params string[] command)
         {
             string retVal = null;
@@ -29,11 +35,17 @@ namespace Sep.Git.Tfs.Core
             return retVal;
         }
 
+        /// <summary>
+        /// Runs the given git command, and passes STDOUT through to the current process's STDOUT.
+        /// </summary>
         public void CommandNoisy(params string[] command)
         {
             CommandOutputPipe(stdout => realStdout.Write(stdout.ReadToEnd()), command);
         }
 
+        /// <summary>
+        /// Runs the given git command, and redirects STDOUT to the provided action.
+        /// </summary>
         public void CommandOutputPipe(Action<TextReader> handleOutput, params string[] command)
         {
             Time(command, () =>
@@ -43,6 +55,98 @@ namespace Sep.Git.Tfs.Core
                                   handleOutput(process.StandardOutput);
                                   Close(process);
                               });
+        }
+
+        /// <summary>
+        /// Runs the given git command, and returns a reader for STDOUT. NOTE: The returned value MUST be disposed!
+        /// </summary>
+        public TextReader CommandOutputPipe(params string[] command)
+        {
+            AssertValidCommand(command);
+            var process = Start(command, RedirectStdout);
+            return new ProcessStdoutReader(this, process);
+        }
+
+        public class ProcessStdoutReader : TextReader
+        {
+            private readonly Process process;
+            private readonly GitHelpers helper;
+
+            public ProcessStdoutReader(GitHelpers helper, Process process)
+            {
+                this.helper = helper;
+                this.process = process;
+            }
+
+            public override void Close()
+            {
+                process.StandardOutput.Close();
+                helper.Close(process);
+            }
+
+            public override System.Runtime.Remoting.ObjRef CreateObjRef(Type requestedType)
+            {
+                return process.StandardOutput.CreateObjRef(requestedType);
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if(disposing && process != null)
+                {
+                    helper.Close(process);
+                }
+                base.Dispose(disposing);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return process.StandardOutput.Equals(obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return process.StandardOutput.GetHashCode();
+            }
+
+            public override object InitializeLifetimeService()
+            {
+                return process.StandardOutput.InitializeLifetimeService();
+            }
+
+            public override int Peek()
+            {
+                return process.StandardOutput.Peek();
+            }
+
+            public override int Read()
+            {
+                return process.StandardOutput.Read();
+            }
+
+            public override int Read(char[] buffer, int index, int count)
+            {
+                return process.StandardOutput.Read(buffer, index, count);
+            }
+
+            public override int ReadBlock(char[] buffer, int index, int count)
+            {
+                return process.StandardOutput.ReadBlock(buffer, index, count);
+            }
+
+            public override string ReadLine()
+            {
+                return process.StandardOutput.ReadLine();
+            }
+
+            public override string ReadToEnd()
+            {
+                return process.StandardOutput.ReadToEnd();
+            }
+
+            public override string ToString()
+            {
+                return process.StandardOutput.ToString();
+            }
         }
 
         public void CommandInputPipe(Action<TextWriter> action, params string[] command)

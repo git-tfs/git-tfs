@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -8,15 +9,17 @@ using StructureMap;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("shelve")]
-    [Description("shelve [options] shelveset-name...")]
+    [Description("shelve [options] shelveset-name [ref-to-shelve]")]
     [RequiresValidGitRepository]
     public class Shelve : GitTfsCommand
     {
         private readonly Globals globals;
+        private readonly TextWriter stdout;
 
-        public Shelve(Globals globals)
+        public Shelve(Globals globals, TextWriter stdout)
         {
             this.globals = globals;
+            this.stdout = stdout;
         }
 
         public IEnumerable<IOptionResults> ExtraOptions
@@ -26,19 +29,30 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(IList<string> args)
         {
-            var remote = globals.Repository.ReadTfsRemote(globals.RemoteId);
-            switch(args.Count)
+            if (args.Count != 1 && args.Count != 2)
+                return Help.ShowHelpForInvalidArguments(this);
+            var shelvesetName = args[0];
+            var refToShelve = args.Count > 1 ? args[1] : "HEAD";
+            var tfsParents = globals.Repository.GetParentTfsCommits(refToShelve);
+            if (globals.UserSpecifiedRemoteId != null)
+                tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == globals.UserSpecifiedRemoteId);
+            switch (tfsParents.Count())
             {
                 case 1:
-                    remote.Shelve(args[0], "HEAD");
-                    break;
-                case 2:
-                    remote.Shelve(args[0], args[1]);
-                    break;
+                    var changeset = tfsParents.First();
+                    changeset.Remote.Shelve(shelvesetName, refToShelve, changeset);
+                    return GitTfsExitCodes.OK;
+                case 0:
+                    stdout.WriteLine("No TFS parents found!");
+                    return GitTfsExitCodes.InvalidArguments;
                 default:
-                    return Help.ShowHelpForInvalidArguments(this);
+                    stdout.WriteLine("More than one parent found! Use -i to choose the correct parent from: ");
+                    foreach (var parent in tfsParents)
+                    {
+                        stdout.WriteLine("  " + parent.Remote.Id);
+                    }
+                    return GitTfsExitCodes.InvalidArguments;
             }
-            return GitTfsExitCodes.OK;
         }
     }
 }

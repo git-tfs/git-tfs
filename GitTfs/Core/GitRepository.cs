@@ -246,6 +246,37 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
+        {
+            using (var diffOutput = CommandOutputPipe("diff-tree", "-r", from, to))
+            {
+                while (':' == diffOutput.Read())
+                {
+                    var builder = ObjectFactory.With("oldMode").EqualTo(diffOutput.Read(6));
+                    diffOutput.Read(1); // a space
+                    builder = builder.With("newMode").EqualTo(diffOutput.Read(6));
+                    diffOutput.Read(1); // a space
+                    builder = builder.With("oldSha").EqualTo(diffOutput.Read(40));
+                    diffOutput.Read(1); // a space
+                    builder = builder.With("newSha").EqualTo(diffOutput.Read(40));
+                    diffOutput.Read(1); // a space
+                    var changeType = diffOutput.Read(1);
+                    diffOutput.Read(6); // spaces
+                    builder = builder.With("name").EqualTo(diffOutput.ReadLine().Trim());
+
+                    yield return builder.GetInstance<IGitChangedFile>(changeType);
+                }
+            }
+        }
+
+        public string GetChangeSummary(string from, string to)
+        {
+            string summary = "";
+            CommandOutputPipe(stdout => summary = stdout.ReadToEnd(),
+                              "diff-tree", "--shortstat", from, to);
+            return summary;
+        }
+
         public string HashAndInsertObject(string filename)
         {
             string newHash = null;

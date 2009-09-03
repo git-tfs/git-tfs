@@ -13,6 +13,6 @@ namespace Sep.Git.Tfs.Core
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
         void Fetch();
-        void Shelve(string shelvesetName, string treeish);
+        void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset);
     }
 }

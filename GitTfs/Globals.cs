@@ -28,7 +28,6 @@ namespace Sep.Git.Tfs
         [LongOptionName("debug")]
         [UseNameAsLongOption(false)]
         [Description("Show lots of output.")]
-        private int? _debugTraceListener;
         public bool DebugOutput
         {
             get { return _debugTraceListener.HasValue; }
@@ -50,8 +49,8 @@ namespace Sep.Git.Tfs
                 }
             }
         }
+        private int? _debugTraceListener;
 
-        // This is a merger of the SVN "remote id" and "ref id". Is there a reason for them to be separate?
         [OptDef(OptValType.ValueReq)]
         [ShortOptionName('i')]
         [LongOptionName("tfs-remote")]
@@ -59,6 +58,13 @@ namespace Sep.Git.Tfs
         [LongOptionName("id")]
         [UseNameAsLongOption(false)]
         [Description("An optional remote ID, useful if this repository will track multiple TFS repositories.")]
+        public string UserSpecifiedRemoteId
+        {
+            get { return _userSpecifiedRemoteId; }
+            set { RemoteId = _userSpecifiedRemoteId = value; }
+        }
+        private string _userSpecifiedRemoteId;
+
         public string RemoteId { get; set; }
 
         public string RemoteConfigPrefix

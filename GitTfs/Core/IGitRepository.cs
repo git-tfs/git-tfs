@@ -13,5 +13,7 @@ namespace Sep.Git.Tfs.Core
         IDictionary<string, GitObject> GetObjects(string commit);
         string HashAndInsertObject(string filename);
         string HashAndInsertObject(Stream data);
+        IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to);
+        string GetChangeSummary(string from, string to);
     }
 }

@@ -93,5 +93,12 @@ namespace Sep.Git.Tfs.Core
             if (!sha1OnlyRegex.IsMatch(sha))
                 throw new Exception("Invalid sha1: " + sha);
         }
+
+        public static string Read(this TextReader reader, int length)
+        {
+            var chars = new char[length];
+            var charsRead = reader.Read(chars, 0, length);
+            return new string(chars, 0, charsRead);
+        }
     }
 }
