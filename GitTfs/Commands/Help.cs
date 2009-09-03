@@ -56,6 +56,24 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.Help;
         }
 
+        /// <summary>
+        /// Shows help for a specific command.
+        /// </summary>
+        public int Run(GitTfsCommand command)
+        {
+            if (command is Help)
+                return Run();
+
+            var usage = new UsageBuilder();
+            usage.BeginSection("where options are:");
+            foreach (var parseHelper in command.GetOptionParseHelpers())
+                usage.AddOptions(parseHelper);
+            usage.EndSection();
+            output.WriteLine("Usage: git-tfs " + GetCommandUsage(command));
+            usage.ToText(output, OptStyle.Unix, true);
+            return GitTfsExitCodes.Help;
+        }
+
         private IEnumerable<string> GetCommandNames()
         {
             foreach(var commandType in GetCommandTypes())
@@ -95,22 +113,15 @@ namespace Sep.Git.Tfs.Commands
                        : GetCommandName(command) + " [options]";
         }
 
-        /// <summary>
-        /// Shows help for a specific command.
-        /// </summary>
-        public int Run(GitTfsCommand command)
+        public static int ShowHelp(GitTfsCommand command)
         {
-            if(command is Help)
-                return Run();
+            return ObjectFactory.GetInstance<Help>().Run(command);
+        }
 
-            var usage = new UsageBuilder();
-            usage.BeginSection("where options are:");
-            foreach(var parseHelper in command.GetOptionParseHelpers())
-                usage.AddOptions(parseHelper);
-            usage.EndSection();
-            output.WriteLine("Usage: git-tfs " + GetCommandUsage(command));
-            usage.ToText(output, OptStyle.Unix, true);
-            return GitTfsExitCodes.Help;
+        public static int ShowHelpForInvalidArguments(GitTfsCommand command)
+        {
+            ShowHelp(command);
+            return GitTfsExitCodes.InvalidArguments;
         }
     }
 }

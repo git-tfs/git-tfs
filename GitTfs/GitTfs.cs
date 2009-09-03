@@ -27,7 +27,7 @@ namespace Sep.Git.Tfs
             var globals = ObjectFactory.GetInstance<Globals>();
             if(globals.ShowHelp)
             {
-                Environment.ExitCode = ObjectFactory.GetInstance<Help>().Run(command);
+                Environment.ExitCode = Help.ShowHelp(command);
             }
             else if(globals.ShowVersion)
             {
