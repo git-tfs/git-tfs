@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\HelpTest.cs" />
+    <Compile Include="Commands\ShelveTest.cs" />
     <Compile Include="Core\DelimitedReaderTests.cs" />
     <Compile Include="Core\ExtTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
