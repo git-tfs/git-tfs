@@ -26,12 +26,19 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(IList<string> args)
         {
-            if (args.Count != 1)
-                return Help.ShowHelpForInvalidArguments(this);
-
-            //var repo = globals.Repository;
-            //var mostRecentChangeset = repo.WorkingHeadInfo("HEAD", true);
-            return int.MinValue;
+            var remote = globals.Repository.ReadTfsRemote(globals.RemoteId);
+            switch(args.Count)
+            {
+                case 1:
+                    remote.Shelve(args[0], "HEAD");
+                    break;
+                case 2:
+                    remote.Shelve(args[0], args[1]);
+                    break;
+                default:
+                    return Help.ShowHelpForInvalidArguments(this);
+            }
+            return GitTfsExitCodes.OK;
         }
     }
 }

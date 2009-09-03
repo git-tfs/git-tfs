@@ -2,7 +2,7 @@
 {
     public class TfsChangesetInfo
     {
-        public GitTfsRemote Remote { get; set; }
+        public IGitTfsRemote Remote { get; set; }
         public long ChangesetId { get; set; }
         public string GitCommit { get; set; }
     }

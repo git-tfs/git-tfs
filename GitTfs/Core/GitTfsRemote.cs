@@ -8,7 +8,7 @@ using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
 {
-    public class GitTfsRemote
+    public class GitTfsRemote : IGitTfsRemote
     {
         private static readonly Regex isInDotGit = new Regex("(?:^|/)\\.git(?:/|$)");
         private static readonly Regex treeShaRegex = new Regex("^tree (" + GitTfsConstants.Sha1 + ")");
@@ -49,7 +49,7 @@ namespace Sep.Git.Tfs.Core
         {
             if (maxChangesetId == null)
             {
-                var mostRecentUpdate = Repository.WorkingHeadInfo(RemoteRef);
+                var mostRecentUpdate = Repository.GetParentTfsCommits(RemoteRef).FirstOrDefault();
                 if (mostRecentUpdate != null)
                 {
                     MaxCommitHash = mostRecentUpdate.GitCommit;
@@ -117,6 +117,7 @@ namespace Sep.Git.Tfs.Core
 
         private IEnumerable<ITfsChangeset> FetchChangesets()
         {
+            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
             var changesets = Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1);
             changesets = changesets.Select(changeset =>
                                                {
@@ -306,6 +307,11 @@ namespace Sep.Git.Tfs.Core
                 oldEnvironment[key] = Environment.GetEnvironmentVariable(key);
                 Environment.SetEnvironmentVariable(key, desiredEnvironment[key]);
             }
+        }
+
+        public void Shelve(string shelvesetName, string head)
+        {
+            throw new NotImplementedException();
         }
     }
 }

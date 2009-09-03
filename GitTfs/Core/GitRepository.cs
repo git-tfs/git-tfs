@@ -12,6 +12,7 @@ namespace Sep.Git.Tfs.Core
     public class GitRepository : GitHelpers, IGitRepository
     {
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
+        private IDictionary<string, IGitTfsRemote> _cachedRemotes;
 
         public GitRepository(TextWriter stdout) : base(stdout)
         {
@@ -36,16 +37,16 @@ namespace Sep.Git.Tfs.Core
                 gitCommand.WorkingDirectory = Path.Combine(gitCommand.WorkingDirectory, WorkingCopySubdir);
         }
 
-        public IEnumerable<GitTfsRemote> ReadAllTfsRemotes()
+        public IEnumerable<IGitTfsRemote> ReadAllTfsRemotes()
         {
-            return ReadTfsRemotes().Values;
+            return GetTfsRemotes().Values;
         }
 
-        public GitTfsRemote ReadTfsRemote(string remoteId)
+        public IGitTfsRemote ReadTfsRemote(string remoteId)
         {
             try
             {
-                return ReadTfsRemotes()[remoteId];
+                return GetTfsRemotes()[remoteId];
             }
             catch(Exception e)
             {
@@ -53,11 +54,11 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public GitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath)
+        public IGitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath)
         {
             try
             {
-                var allRemotes = ReadTfsRemotes();
+                var allRemotes = GetTfsRemotes();
                 return
                     allRemotes.Values.First(
                         remote => remote.Tfs.Url == tfsUrl && remote.TfsRepositoryPath == tfsRepositoryPath);
@@ -69,14 +70,19 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private IDictionary<string, GitTfsRemote> ReadTfsRemotes()
+        private IDictionary<string, IGitTfsRemote> GetTfsRemotes()
         {
-            var remotes = new Dictionary<string, GitTfsRemote>();
+            return _cachedRemotes ?? (_cachedRemotes = ReadTfsRemotes());
+        }
+
+        private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
+        {
+            var remotes = new Dictionary<string, IGitTfsRemote>();
             CommandOutputPipe(stdout => ParseRemoteConfig(stdout, remotes), "config", "-l");
             return remotes;
         }
 
-        private void ParseRemoteConfig(TextReader stdout, IDictionary<string, GitTfsRemote> remotes)
+        private void ParseRemoteConfig(TextReader stdout, IDictionary<string, IGitTfsRemote> remotes)
         {
             string line;
             while ((line = stdout.ReadLine()) != null)
@@ -85,7 +91,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void TryParseRemoteConfigLine(string line, IDictionary<string, GitTfsRemote> remotes)
+        private void TryParseRemoteConfigLine(string line, IDictionary<string, IGitTfsRemote> remotes)
         {
             var match = configLineRegex.Match(line);
             if (match.Success)
@@ -100,7 +106,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void SetRemoteConfigValue(GitTfsRemote remote, string key, string value)
+        private void SetRemoteConfigValue(IGitTfsRemote remote, string key, string value)
         {
             switch (key)
             {
@@ -119,35 +125,38 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private GitTfsRemote CreateRemote(string id)
+        private IGitTfsRemote CreateRemote(string id)
         {
-            var remote = ObjectFactory.GetInstance<GitTfsRemote>();
+            var remote = ObjectFactory.GetInstance<IGitTfsRemote>();
             remote.Repository = this;
             remote.Id = id;
             return remote;
         }
 
-        public TfsChangesetInfo WorkingHeadInfo(string head)
+        public IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head)
         {
-            return WorkingHeadInfo(head, new List<string>());
+            return GetParentTfsCommits(head, new List<string>());
         }
 
-        public TfsChangesetInfo WorkingHeadInfo(string head, ICollection<string> localCommits)
+        public IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head, ICollection<string> localCommits)
         {
-            TfsChangesetInfo retVal = null;
+            var tfsCommits = new List<TfsChangesetInfo>();
             try
             {
-                CommandOutputPipe(stdout => retVal = ParseFirstTfsCommit(stdout, localCommits),
-                  "log", "--no-color", "--first-parent", "--pretty=medium", head);
+                CommandOutputPipe(stdout => FindTfsCommits(stdout, tfsCommits, localCommits),
+                  "log", "--no-color", "--pretty=medium", head);
             }
             catch (GitCommandException e)
             {
                 Trace.WriteLine("An error occurred while loading head " + head + " (maybe it doesn't exist?): " + e);
             }
-            return retVal;
+            return from commit in tfsCommits
+                   group commit by commit.Remote
+                   into remotes
+                       select remotes.OrderBy(commit => -commit.ChangesetId).First();
         }
 
-        private TfsChangesetInfo ParseFirstTfsCommit(TextReader stdout, ICollection<string> localCommits)
+        private void FindTfsCommits(TextReader stdout, ICollection<TfsChangesetInfo> tfsCommits, ICollection<string> localCommits)
         {
             string currentCommit = null;
             string line;
@@ -164,11 +173,11 @@ namespace Sep.Git.Tfs.Core
                 var changesetInfo = TryParseChangesetInfo(line, currentCommit);
                 if (changesetInfo != null)
                 {
-                    stdout.Close();
-                    return changesetInfo;
+                    tfsCommits.Add(changesetInfo);
+                    currentCommit = null;
                 }
             }
-            return null;
+            //stdout.Close();
         }
 
         private TfsChangesetInfo TryParseChangesetInfo(string gitTfsMetaInfo, string commit)

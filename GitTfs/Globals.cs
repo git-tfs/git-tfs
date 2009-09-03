@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
@@ -21,6 +22,34 @@ namespace Sep.Git.Tfs
         [LongOptionName("version")]
         [UseNameAsLongOption(false)]
         public bool ShowVersion { get; set; }
+
+        [OptDef(OptValType.Flag)]
+        [ShortOptionName('d')]
+        [LongOptionName("debug")]
+        [UseNameAsLongOption(false)]
+        [Description("Show lots of output.")]
+        private int? _debugTraceListener;
+        public bool DebugOutput
+        {
+            get { return _debugTraceListener.HasValue; }
+            set
+            {
+                if (value)
+                {
+                    if (_debugTraceListener == null)
+                    {
+                        _debugTraceListener = Trace.Listeners.Add(new ConsoleTraceListener());
+                    }
+                }
+                else
+                {
+                    if (_debugTraceListener != null)
+                    {
+                        Trace.Listeners.RemoveAt(_debugTraceListener.Value);
+                    }
+                }
+            }
+        }
 
         // This is a merger of the SVN "remote id" and "ref id". Is there a reason for them to be separate?
         [OptDef(OptValType.ValueReq)]

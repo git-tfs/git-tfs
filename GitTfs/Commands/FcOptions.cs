@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Util;
 
@@ -8,23 +7,23 @@ namespace Sep.Git.Tfs.Commands
     [StructureMapSingleton]
     public class FcOptions
     {
-        [OptDef(OptValType.Flag)]
-        [LongOptionName("follow-parent")]
-        [LongOptionName("follow")]
-        [UseNameAsLongOption(false)]
-        [Description("Tracks the cloned element through renames outside of the specified repository path (enabled by default).")]
-        public bool FollowParent
-        {
-            get { return !NoFollowParent; }
-            set { NoFollowParent = !value; }
-        }
+        //[OptDef(OptValType.Flag)]
+        //[LongOptionName("follow-parent")]
+        //[LongOptionName("follow")]
+        //[UseNameAsLongOption(false)]
+        //[Description("Tracks the cloned element through renames outside of the specified repository path (enabled by default).")]
+        //public bool FollowParent
+        //{
+        //    get { return !NoFollowParent; }
+        //    set { NoFollowParent = !value; }
+        //}
 
-        [OptDef(OptValType.Flag)]
-        [LongOptionName("no-follow-parent")]
-        [LongOptionName("no-follow")]
-        [UseNameAsLongOption(false)]
-        [Description("Does not track the cloned element through renames outside of the specified repository path.")]
-        public bool NoFollowParent { get; set; }
+        //[OptDef(OptValType.Flag)]
+        //[LongOptionName("no-follow-parent")]
+        //[LongOptionName("no-follow")]
+        //[UseNameAsLongOption(false)]
+        //[Description("Does not track the cloned element through renames outside of the specified repository path.")]
+        //public bool NoFollowParent { get; set; }
 
 // probably not used
 //        [OptDef(OptValType.ValueReq)]
@@ -41,35 +40,6 @@ namespace Sep.Git.Tfs.Commands
 // I don't know what this is
 //        public int LogWindowSize { get; set; }
 //        public bool NoCheckout { get; set; }
-
-        private int? _debugTraceListener;
-
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('d')]
-        [LongOptionName("debug")]
-        [UseNameAsLongOption(false)]
-        [Description("Show lots of output.")]
-        public bool DebugOutput
-        {
-            get { return _debugTraceListener.HasValue; }
-            set
-            {
-                if (value)
-                {
-                    if (_debugTraceListener == null)
-                    {
-                        _debugTraceListener = Trace.Listeners.Add(new ConsoleTraceListener());
-                    }
-                }
-                else
-                {
-                    if (_debugTraceListener != null)
-                    {
-                        Trace.Listeners.RemoveAt(_debugTraceListener.Value);
-                    }
-                }
-            }
-        }
 
         // I think I'm going to make these the default. I may allow their disablement
         // later.

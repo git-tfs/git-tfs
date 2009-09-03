@@ -79,7 +79,6 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion)
         {
-            Trace.WriteLine("Getting changesets from " + startVersion + " to current ...", "tfs");
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                                         null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
                                         true, true);

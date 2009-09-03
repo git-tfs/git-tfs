@@ -87,6 +87,7 @@
     <Compile Include="Commands\RemoteOptions.cs" />
     <Compile Include="Commands\Shelve.cs" />
     <Compile Include="Core\GitObject.cs" />
+    <Compile Include="Core\IGitTfsRemote.cs" />
     <Compile Include="Util\ConfiguresStructureMap.cs" />
     <Compile Include="Core\DelimitedReader.cs" />
     <Compile Include="Core\Ext.cs" />

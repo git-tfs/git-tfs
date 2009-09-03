@@ -22,7 +22,12 @@ namespace Sep.Git.Tfs.Test.TestHelpers
             return command.Run(args);
         }
 
-        public static void WithFixForHelpColumnWidth(this object o, Action a)
+        /// <summary>
+        /// CSharpOptParse tries to wrap the help text to zero columns when
+        /// it writes it during tests, which is not desired. This closure tricks
+        /// it into not wrapping the text at all.
+        /// </summary>
+        public static void FixHelpFormatter(this object o, Action a)
         {
             var originalOS = Environment.GetEnvironmentVariable("OS");
             Environment.SetEnvironmentVariable("OS", "was: " + originalOS);

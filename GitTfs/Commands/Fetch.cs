@@ -36,7 +36,7 @@ namespace Sep.Git.Tfs.Commands
 
         [OptDef(OptValType.Flag)]
         [ShortOptionName('p')]
-        public bool parent { get; set; }
+        public bool parents { get; set; }
 
         public IEnumerable<IOptionResults> ExtraOptions
         {
@@ -52,11 +52,11 @@ namespace Sep.Git.Tfs.Commands
             return 0;
         }
 
-        private IEnumerable<GitTfsRemote> GetRemotesToFetch(IList<string> args)
+        private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)
         {
-            IEnumerable<GitTfsRemote> remotesToFetch;
-            if (parent)
-                remotesToFetch = new[] {globals.Repository.WorkingHeadInfo("HEAD").Remote};
+            IEnumerable<IGitTfsRemote> remotesToFetch;
+            if (parents)
+                remotesToFetch = globals.Repository.GetParentTfsCommits("HEAD").Select(commit => commit.Remote);
             else if (all)
                 remotesToFetch = globals.Repository.ReadAllTfsRemotes();
             else
