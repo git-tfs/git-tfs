@@ -35,21 +35,21 @@ namespace Sep.Git.Tfs.Core
         {
             _stdout.WriteLine(" add " + path);
             var added = _workspace.PendAdd(GetLocalPath(path));
-            Debug.Assert(added == 1, "one item should have been added, but actually added " + added + " items.");
+            Trace.WriteLineIf(added != 1, "one item should have been added, but actually added " + added + " items.");
         }
 
         public void Edit(string path)
         {
             _stdout.WriteLine(" edit " + path);
             var edited = _workspace.PendEdit(GetLocalPath(path));
-            Debug.Assert(edited == 1, "one item should have been edited, but actually edited " + edited + " items.");
+            Trace.WriteLineIf(edited != 1, "one item should have been edited, but actually edited " + edited + " items.");
         }
 
         public void Delete(string path)
         {
             _stdout.WriteLine(" delete " + path);
             var deleted = _workspace.PendDelete(GetLocalPath(path));
-            Debug.Assert(deleted == 1, "one item should have been deleted, but actually deleted " + deleted + " items.");
+            Trace.WriteLineIf(deleted != 1, "one item should have been deleted, but actually deleted " + deleted + " items.");
         }
     }
 }

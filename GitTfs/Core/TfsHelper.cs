@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
@@ -12,8 +13,14 @@ namespace Sep.Git.Tfs.Core
 {
     public class TfsHelper : ITfsHelper
     {
+        private readonly TextWriter _stdout;
         private TeamFoundationServer server;
         private string username;
+
+        public TfsHelper(TextWriter stdout)
+        {
+            _stdout = stdout;
+        }
 
         public string TfsClientLibraryVersion
         {
@@ -70,7 +77,19 @@ namespace Sep.Git.Tfs.Core
 
         public VersionControlServer VersionControl
         {
-            get { return (VersionControlServer)Server.GetService(typeof(VersionControlServer)); }
+            get
+            {
+                var versionControlServer = (VersionControlServer)Server.GetService(typeof(VersionControlServer));
+                versionControlServer.NonFatalError += NonFatalError;
+                return versionControlServer;
+            }
+        }
+
+        private void NonFatalError(object sender, ExceptionEventArgs e)
+        {
+            _stdout.WriteLine(e.Failure.Message);
+            Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
+            Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
         }
 
         private IGroupSecurityService GroupSecurityService
