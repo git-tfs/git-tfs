@@ -86,10 +86,14 @@
     <Compile Include="Commands\InitOptions.cs" />
     <Compile Include="Commands\RemoteOptions.cs" />
     <Compile Include="Commands\Shelve.cs" />
+    <Compile Include="Core\Changes\Git\Add.cs" />
+    <Compile Include="Core\Changes\Git\Delete.cs" />
+    <Compile Include="Core\Changes\Git\Modify.cs" />
     <Compile Include="Core\GitObject.cs" />
     <Compile Include="Core\IGitChangedFile.cs" />
     <Compile Include="Core\IGitTfsRemote.cs" />
     <Compile Include="Core\ITfsWorkspace.cs" />
+    <Compile Include="Core\TfsWorkspace.cs" />
     <Compile Include="Util\ConfiguresStructureMap.cs" />
     <Compile Include="Core\DelimitedReader.cs" />
     <Compile Include="Core\Ext.cs" />
@@ -114,6 +118,7 @@
     <Compile Include="Globals.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\InspectExtensions.cs" />
     <Compile Include="Util\StructureMapSingletonAttribute.cs" />
     <Compile Include="Core\ITfsHelper.cs" />
     <Compile Include="Core\TfsHelper.cs" />

@@ -319,15 +319,17 @@ namespace Sep.Git.Tfs.Core
 
         public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset)
         {
-            using (var workspace = Tfs.CreateWorkspace(WorkingDirectory, this, parentChangeset))
+            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
+                              workspace => Shelve(shelvesetName, head, parentChangeset, workspace));
+        }
+
+        private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        {
+            foreach (var change in Repository.GetChangedFiles(RemoteRef, head))
             {
-                foreach (var change in Repository.GetChangedFiles(RemoteRef, head))
-                {
-                    stdout.WriteLine("  " + change);
-                    change.Apply(workspace);
-                }
-                workspace.Shelve(shelvesetName);
+                change.Apply(workspace);
             }
+            workspace.Shelve(shelvesetName);
         }
     }
 }

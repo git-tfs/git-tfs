@@ -15,5 +15,6 @@ namespace Sep.Git.Tfs.Core
         string HashAndInsertObject(Stream data);
         IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to);
         string GetChangeSummary(string from, string to);
+        void GetBlob(string sha, string outputFile);
     }
 }

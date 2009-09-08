@@ -252,7 +252,8 @@ namespace Sep.Git.Tfs.Core
             {
                 while (':' == diffOutput.Read())
                 {
-                    var builder = ObjectFactory.With("oldMode").EqualTo(diffOutput.Read(6));
+                    var builder = ObjectFactory.With("repository").EqualTo(this);
+                    builder = builder.With("oldMode").EqualTo(diffOutput.Read(6));
                     diffOutput.Read(1); // a space
                     builder = builder.With("newMode").EqualTo(diffOutput.Read(6));
                     diffOutput.Read(1); // a space
@@ -261,10 +262,19 @@ namespace Sep.Git.Tfs.Core
                     builder = builder.With("newSha").EqualTo(diffOutput.Read(40));
                     diffOutput.Read(1); // a space
                     var changeType = diffOutput.Read(1);
-                    diffOutput.Read(6); // spaces
-                    builder = builder.With("name").EqualTo(diffOutput.ReadLine().Trim());
+                    diffOutput.Read(1); // tab
+                    builder = builder.With("path").EqualTo(diffOutput.ReadLine().Trim());
 
-                    yield return builder.GetInstance<IGitChangedFile>(changeType);
+                    IGitChangedFile change;
+                    try
+                    {
+                        change = builder.GetInstance<IGitChangedFile>(changeType);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Unable to handle change type " + changeType + ".", e);
+                    }
+                    yield return change;
                 }
             }
         }
@@ -275,6 +285,21 @@ namespace Sep.Git.Tfs.Core
             CommandOutputPipe(stdout => summary = stdout.ReadToEnd(),
                               "diff-tree", "--shortstat", from, to);
             return summary;
+        }
+
+        public void GetBlob(string sha, string outputFile)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+            CommandOutputPipe(stdout => Copy(stdout, outputFile), "cat-file", "-p", sha);
+        }
+
+        private void Copy(TextReader stdout, string file)
+        {
+            var stdoutStream = ((StreamReader) stdout).BaseStream;
+            using(var destination = File.Create(file))
+            {
+                stdoutStream.CopyTo(destination);
+            }
         }
 
         public string HashAndInsertObject(string filename)

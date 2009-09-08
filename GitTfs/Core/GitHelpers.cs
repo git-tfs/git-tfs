@@ -93,7 +93,7 @@ namespace Sep.Git.Tfs.Core
             {
                 if(disposing && process != null)
                 {
-                    helper.Close(process);
+                    Close();
                 }
                 base.Dispose(disposing);
             }

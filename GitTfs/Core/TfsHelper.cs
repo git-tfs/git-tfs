@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using SEP.Extensions;
+using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -90,9 +93,34 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public ITfsWorkspace CreateWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch)
+        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            throw new NotImplementedException();
+            var workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath);
+            try
+            {
+                var tfsWorkspace = ObjectFactory.With("localDirectory").EqualTo(localDirectory)
+                    .With("remote").EqualTo(remote)
+                    .With("contextVersion").EqualTo(versionToFetch)
+                    .With("workspace").EqualTo(workspace)
+                    .GetInstance<TfsWorkspace>();
+                action(tfsWorkspace);
+            }
+            finally
+            {
+                workspace.Delete();
+            }
+        }
+
+        private Workspace GetWorkspace(string localDirectory, string repositoryPath)
+        {
+            var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
+            workspace.CreateMapping(new WorkingFolder(repositoryPath, localDirectory));
+            return workspace;
+        }
+
+        private string GenerateWorkspaceName()
+        {
+            return Guid.NewGuid().ToString();
         }
 
         public ITfsIdentity GetIdentity(string username)
