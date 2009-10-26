@@ -26,7 +26,7 @@ namespace Sep.Git.Tfs.Commands
 //        [UseNameAsLongOption(false)]
 //        public bool NoAuthCache { get; set; }
 
-        [OptDef(OptValType.Flag)]
+        [OptDef(OptValType.ValueReq)]
         [LongOptionName("ignore-regex")]
         [UseNameAsLongOption(false)]
         [Description("If specified, git-tfs will not sync any paths that match this regular expression.")]

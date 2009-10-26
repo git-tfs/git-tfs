@@ -119,6 +119,9 @@ namespace Sep.Git.Tfs.Core
                 case "repository":
                     remote.TfsRepositoryPath = value;
                     break;
+                case "ignore-paths":
+                    remote.IgnoreRegexExpression = value;
+                    break;
                     //case "fetch":
                     //    remote.??? = value;
                     //    break;
