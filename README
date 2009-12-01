@@ -1,13 +1,5 @@
 git-tfs is a two-way bridge between TFS and git, similar to git-svn.
 
-Right now, only fetching works. I've started trying to add a "shelve"
-feature, which should get most of the way (at least on the TFS side) to
-creating a commit.
-
-Also, I've only tried it out with the TFS 2008 client libraries. I intend to
-make this work transparently with TFS 2005 or the codeplex client libs at
-some point.
-
 To use, you need to get the source, build it, and then fetch from TFS to
 git.
 
@@ -17,12 +9,21 @@ From the root directory of the repository, you should be able to run this:
 > msbuild GitTfs.sln
 
 To fetch, you can do this:
-# git init
+# git init    (optional)
 # git tfs init http://tfs:8080 $/some_project
 # git tfs fetch
 
 If you do "git tfs clone" instead of "git tfs init", you won't need to do
 the initial fetch.
 
+The shelve command replicates your changes in a shelveset in TFS. By default,
+it will shelve the current HEAD.
+# git tfs shelve SOME_SHELVESET
+# git tfs shelve SOME_SHELVESET some-treeish
+
 Help is available on the command line. Use "-h" with any command to see a
 description of the relevant options.
+
+I've only tried it out with the TFS 2008 client libraries. I intend to
+make this work transparently with TFS 2005 or the codeplex client libs at
+some point.

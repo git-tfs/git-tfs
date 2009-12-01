@@ -22,12 +22,16 @@ git-svn has these commands:
   internals:
     migrate (upgrade from one version of git-svn to another)
 
-The commands I plan to implement, in order of priority:
+The commands that are implemented are:
   init
   fetch
   clone (init+fetch)
-  rebase
+  shelve
+  
+The commands I plan to implement, in approximate order of priority:
   checkin (dcommit)
+  unshelve
+  rebase
   find-rev
   log
   commit-diff ?
@@ -37,4 +41,5 @@ Known bugs:
   None right now.
 
 Potential enhancements:
-  Query history in chunks, either in a background thread or just with 100 changeset chunks, in order to speed up the initial output from a fetch.
+  * Query history in chunks, either in a background thread or just with 100 changeset chunks, in order to speed up the initial output from a fetch.
+  * Avoid pulling the entire source tree from TFS during shelve/commit.

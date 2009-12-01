@@ -18,7 +18,7 @@ namespace Sep.Git.Tfs.Core
             _contextVersion = contextVersion;
             _localDirectory = localDirectory;
             _stdout = stdout;
-            _workspace.Get(new ChangesetVersionSpec((int) contextVersion.ChangesetId), GetOptions.None);
+            _workspace.Get(new ChangesetVersionSpec((int) contextVersion.ChangesetId), GetOptions.GetAll | GetOptions.Overwrite);
         }
 
         public void Shelve(string shelvesetName)
@@ -35,21 +35,21 @@ namespace Sep.Git.Tfs.Core
         {
             _stdout.WriteLine(" add " + path);
             var added = _workspace.PendAdd(GetLocalPath(path));
-            Trace.WriteLineIf(added != 1, "one item should have been added, but actually added " + added + " items.");
+            if (added != 1) throw new Exception("One item should have been added, but actually added " + added + " items.");
         }
 
         public void Edit(string path)
         {
             _stdout.WriteLine(" edit " + path);
             var edited = _workspace.PendEdit(GetLocalPath(path));
-            Trace.WriteLineIf(edited != 1, "one item should have been edited, but actually edited " + edited + " items.");
+            if(edited != 1) throw new Exception("One item should have been edited, but actually edited " + edited + " items.");
         }
 
         public void Delete(string path)
         {
             _stdout.WriteLine(" delete " + path);
             var deleted = _workspace.PendDelete(GetLocalPath(path));
-            Trace.WriteLineIf(deleted != 1, "one item should have been deleted, but actually deleted " + deleted + " items.");
+            if (deleted != 1) throw new Exception("One item should have been deleted, but actually deleted " + deleted + " items.");
         }
     }
 }
