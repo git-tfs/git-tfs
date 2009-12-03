@@ -76,6 +76,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Checkin.cs" />
     <Compile Include="Commands\Clone.cs" />
     <Compile Include="Commands\CommitOptions.cs" />
     <Compile Include="Commands\FcOptions.cs" />
