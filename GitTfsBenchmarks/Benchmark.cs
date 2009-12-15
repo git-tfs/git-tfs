@@ -186,6 +186,12 @@ public class Benchmark
                             message = "(No message)";
                         }
                         Console.WriteLine("  {0}: Failed ({1})", method.Name, message);
+
+                        // Clean up (if appropriate)
+                        if (cleanupMethod != null)
+                        {
+                            cleanupMethod.Invoke(null, null);
+                        }
                     }
                 }
             }

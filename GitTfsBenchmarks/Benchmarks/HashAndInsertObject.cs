@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using GitSharp.Core;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
 
@@ -94,6 +95,23 @@ namespace Sep.Git.Tfs.Benchmarks
 
         #endregion
 
+        #region WithGitSharp
+
+        [Benchmark]
+        public static void WithGitSharp()
+        {
+            Run("gitsharp", HashWithGitSharp);
+        }
+
+        private static string HashWithGitSharp(Stream file)
+        {
+            var repository = new Repository(new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, ".git")));
+            var writer = new ObjectWriter(repository);
+            return writer.WriteBlob(file.Length, file).ToString();
+        }
+
+        #endregion
+
         #region setup & teardown
 
         private static string originalCd;
@@ -132,9 +150,11 @@ namespace Sep.Git.Tfs.Benchmarks
 
         private static void Run(string name, Func<Stream, string> hashAndStore)
         {
-            var dirName = "hash-object-" + name;
+            var dirName = Path.Combine(Environment.CurrentDirectory, "hash-object-" + name);
+            if(Directory.Exists(dirName)) Directory.Delete(dirName, true);
             Directory.CreateDirectory(dirName);
             Environment.CurrentDirectory = dirName;
+
             gitHelper.CommandNoisy("init");
             for (int i = 0; i < 300; i++)
             {
