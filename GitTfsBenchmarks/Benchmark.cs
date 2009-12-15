@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Collections;
 
@@ -64,6 +65,8 @@ public class Benchmark
         // We're only ever interested in public static methods. This variable
         // just makes it easier to read the code...
         BindingFlags publicStatic = BindingFlags.Public | BindingFlags.Static;
+
+        var exceptions = new List<Exception>();
 
         foreach (Type type in typeof(Benchmark).Assembly.GetTypes())
         {
@@ -141,6 +144,7 @@ public class Benchmark
 
                 foreach (MethodInfo method in benchmarkMethods)
                 {
+                    var shouldCleanUpOnFailure = true;
                     try
                     {
                         // Reset (if appropriate)
@@ -168,6 +172,7 @@ public class Benchmark
                         }
 
                         // Clean up (if appropriate)
+                        shouldCleanUpOnFailure = false;
                         if (cleanupMethod != null)
                         {
                             cleanupMethod.Invoke(null, null);
@@ -180,21 +185,27 @@ public class Benchmark
                     catch (TargetInvocationException e)
                     {
                         Exception inner = e.InnerException;
+                        exceptions.Add(inner ?? e);
                         string message = (inner == null ? null : inner.Message);
                         if (message == null)
                         {
                             message = "(No message)";
                         }
-                        Console.WriteLine("  {0}: Failed ({1})", method.Name, message);
+                        Console.WriteLine("  {0}: Failed ({1}) [{2}]", method.Name, message, exceptions.Count);
 
                         // Clean up (if appropriate)
-                        if (cleanupMethod != null)
+                        if (shouldCleanUpOnFailure && cleanupMethod != null)
                         {
                             cleanupMethod.Invoke(null, null);
                         }
                     }
                 }
             }
+        }
+        for (var i = 0; i < exceptions.Count; i++)
+        {
+            Console.WriteLine();
+            Console.WriteLine("[" + (i + 1) + "] " + exceptions[i]);
         }
     }
 

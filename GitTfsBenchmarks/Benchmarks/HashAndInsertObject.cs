@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 using GitSharp.Core;
+using SEP.Extensions;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
 
@@ -14,6 +13,21 @@ namespace Sep.Git.Tfs.Benchmarks
 {
     class HashAndInsertObject
     {
+        class TestGitObject
+        {
+            public string ObjectId { get; set; }
+            public string Contents { get; set; }
+            public string ObjectPath { get { return ".git/objects/" + ObjectId.Substring(0, 2) + "/" + ObjectId.Substring(2); } }
+        }
+
+        private static readonly List<TestGitObject> TestObjects = new List<TestGitObject>
+                                                                    {
+                                                                        new TestGitObject
+                                                                            {
+                                                                                ObjectId = "0e44708cb3166a9f6c5c0a038bc7b2c0c2435e13",
+                                                                                Contents = "teststring\r\nanother line\rafter just r\nafter just n"
+                                                                            }
+                                                                    };
         private static readonly GitHelpers gitHelper = new GitHelpers(TextWriter.Null);
 
         #region WithPureDotNet
@@ -128,24 +142,26 @@ namespace Sep.Git.Tfs.Benchmarks
 
         public static void Check()
         {
-            foreach (var file in GetExpectedFiles())
+            foreach (var testObject in TestObjects)
             {
-                if (!File.Exists(file))
+                if (!File.Exists(testObject.ObjectPath))
                 {
-                    throw new Exception("Expected file " + file + " was not found!");
+                    throw new Exception("Expected file " + testObject.ObjectPath + " was not found!");
+                }
+                try
+                {
+                    var objectContents = gitHelper.Command("show", testObject.ObjectId);
+                    if(objectContents != testObject.Contents)
+                    {
+                        throw new Exception("Expected object " + testObject.ObjectId + " to be " + testObject.Contents.Inspect() +
+                                            " but it was " + objectContents.Inspect());
+                    }
+                }
+                catch (GitCommandException e)
+                {
+                    throw new Exception("Unable to read object " + testObject.ObjectId + ".", e);
                 }
             }
-        }
-
-        private static IEnumerable<string> GetExpectedFiles()
-        {
-            yield return ".git/objects/0e/44708cb3166a9f6c5c0a038bc7b2c0c2435e13";
-        }
-
-        private static IEnumerable<string> Split(string files)
-        {
-            var regex = new Regex("\\s+");
-            return regex.Split(files);
         }
 
         private static void Run(string name, Func<Stream, string> hashAndStore)
@@ -156,10 +172,12 @@ namespace Sep.Git.Tfs.Benchmarks
             Environment.CurrentDirectory = dirName;
 
             gitHelper.CommandNoisy("init");
-            for (int i = 0; i < 300; i++)
+            foreach (var testObject in TestObjects)
             {
-                hashAndStore(
-                    MakeMemoryStream("teststring\r\nanother line\rafter just r\nafter just n"));
+                for (int i = 0; i < 300; i++)
+                {
+                    hashAndStore(MakeMemoryStream(testObject.Contents));
+                }
             }
         }
 
