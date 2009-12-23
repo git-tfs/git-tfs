@@ -13,15 +13,16 @@ namespace Sep.Git.Tfs.Core
     public class GitRepository : GitHelpers, IGitRepository
     {
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
-        private readonly string _gitDir;
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
+        private Repository _repository;
 
         public GitRepository(TextWriter stdout, string gitDir) : base(stdout)
         {
-            _gitDir = gitDir;
+            GitDir = gitDir;
+            _repository = new Repository(new DirectoryInfo(gitDir));
         }
 
-        private string GitDir { get { return _gitDir; } }
+        private string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
 
@@ -296,16 +297,14 @@ namespace Sep.Git.Tfs.Core
 
         public string HashAndInsertObject(string filename)
         {
-            var repository = new Repository(new DirectoryInfo(GitDir));
-            var writer = new ObjectWriter(repository);
+            var writer = new ObjectWriter(_repository);
             var objectId = writer.WriteBlob(new FileInfo(filename));
             return objectId.ToString();
         }
 
         public string HashAndInsertObject(Stream file)
         {
-            var repository = new Repository(new DirectoryInfo(GitDir));
-            var writer = new ObjectWriter(repository);
+            var writer = new ObjectWriter(_repository);
             var objectId = writer.WriteBlob(file.Length, file);
             return objectId.ToString();
         }
