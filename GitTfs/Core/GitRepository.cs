@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using GitSharp.Core;
 using Sep.Git.Tfs.Util;
 using StructureMap;
 
@@ -12,13 +13,15 @@ namespace Sep.Git.Tfs.Core
     public class GitRepository : GitHelpers, IGitRepository
     {
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
+        private readonly string _gitDir;
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
 
-        public GitRepository(TextWriter stdout) : base(stdout)
+        public GitRepository(TextWriter stdout, string gitDir) : base(stdout)
         {
+            _gitDir = gitDir;
         }
 
-        public string GitDir { get; set; }
+        private string GitDir { get { return _gitDir; } }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
 
@@ -235,20 +238,6 @@ namespace Sep.Git.Tfs.Core
                                                };
         }
 
-        public string HashAndInsertObject(Stream file)
-        {
-            // Write the data to a file and insert that, so that git will handle any
-            // EOL and encoding issues.
-            using(var tempFile = new TemporaryFile())
-            {
-                using(var tempStream = File.Create(tempFile))
-                {
-                    file.CopyTo(tempStream);
-                }
-                return HashAndInsertObject(tempFile);
-            }
-        }
-
         public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
         {
             using (var diffOutput = CommandOutputPipe("diff-tree", "-r", from, to))
@@ -307,10 +296,18 @@ namespace Sep.Git.Tfs.Core
 
         public string HashAndInsertObject(string filename)
         {
-            string newHash = null;
-            CommandOutputPipe(stdout => newHash = stdout.ReadLine().Trim(),
-                "hash-object", "-w", filename);
-            return newHash;
+            var repository = new Repository(new DirectoryInfo(GitDir));
+            var writer = new ObjectWriter(repository);
+            var objectId = writer.WriteBlob(new FileInfo(filename));
+            return objectId.ToString();
+        }
+
+        public string HashAndInsertObject(Stream file)
+        {
+            var repository = new Repository(new DirectoryInfo(GitDir));
+            var writer = new ObjectWriter(repository);
+            var objectId = writer.WriteBlob(file.Length, file);
+            return objectId.ToString();
         }
     }
 }

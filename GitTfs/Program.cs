@@ -38,6 +38,7 @@ namespace Sep.Git.Tfs
         {
             initializer.Scan(Initialize);
             initializer.ForRequestedType<TextWriter>().TheDefault.Is.ConstructedBy(() => Console.Out);
+            initializer.InstanceOf<IGitRepository>().Is.OfConcreteType<GitRepository>();
             AddGitChangeTypes(initializer);
             DoCustomConfiguration(initializer);
         }

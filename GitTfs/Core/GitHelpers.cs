@@ -252,7 +252,9 @@ namespace Sep.Git.Tfs.Core
 
         public IGitRepository MakeRepository(string dir)
         {
-            return ObjectFactory.With("gitDir").EqualTo(dir).GetInstance<IGitRepository>();
+            return ObjectFactory
+                .With("gitDir").EqualTo(dir)
+                .GetInstance<IGitRepository>();
         }
 
         private static readonly Regex ValidCommandName = new Regex("^[a-z0-9A-Z_-]+$");
