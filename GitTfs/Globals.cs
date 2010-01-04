@@ -97,7 +97,7 @@ namespace Sep.Git.Tfs
 
         public int GcPeriod
         {
-            get { return 1000; }
+            get { return 200; }
         }
     }
 }

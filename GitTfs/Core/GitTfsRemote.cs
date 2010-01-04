@@ -162,7 +162,8 @@ namespace Sep.Git.Tfs.Core
 
         private void DoGcIfNeeded()
         {
-            if(--globals.GcCountdown == 0)
+            Trace.WriteLine("GC Countdown: " + globals.GcCountdown);
+            if(--globals.GcCountdown < 0)
             {
                 globals.GcCountdown = globals.GcPeriod;
                 Repository.CommandNoisy("gc", "--auto");
