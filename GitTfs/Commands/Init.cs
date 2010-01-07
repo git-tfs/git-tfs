@@ -83,22 +83,26 @@ namespace Sep.Git.Tfs.Commands
 
         private void GitTfsInit(string tfsUrl, string tfsRepositoryPath)
         {
-            // git-svn does this, but I don't know if I want to or not.
-            //CommandNoisy("config", "core.autocrlf", "false");
+            SetConfig("core.autocrlf", "false");
             // TODO - check that there's not already a repository configured with this ID.
-            SetConfig("url", tfsUrl);
-            SetConfig("repository", tfsRepositoryPath);
-            SetConfig("fetch", "refs/remotes/" + globals.RemoteId + "/master");
-            if (initOptions.NoMetaData) SetConfig("no-meta-data", 1);
-            if (remoteOptions.Username != null) SetConfig("username", remoteOptions.Username);
-            if (remoteOptions.IgnoreRegex != null) SetConfig("ignore-paths", remoteOptions.IgnoreRegex);
+            SetTfsConfig("url", tfsUrl);
+            SetTfsConfig("repository", tfsRepositoryPath);
+            SetTfsConfig("fetch", "refs/remotes/" + globals.RemoteId + "/master");
+            if (initOptions.NoMetaData) SetTfsConfig("no-meta-data", 1);
+            if (remoteOptions.Username != null) SetTfsConfig("username", remoteOptions.Username);
+            if (remoteOptions.IgnoreRegex != null) SetTfsConfig("ignore-paths", remoteOptions.IgnoreRegex);
 
             Directory.CreateDirectory(Path.Combine(globals.GitDir, "tfs"));
         }
 
-        private void SetConfig(string subkey, object value)
+        private void SetTfsConfig(string subkey, object value)
         {
-            gitHelper.CommandNoisy("config", globals.RemoteConfigKey(subkey), value.ToString());
+            SetConfig(globals.RemoteConfigKey(subkey), value);
+        }
+
+        private void SetConfig(string configKey, object value)
+        {
+            gitHelper.CommandNoisy("config", configKey, value.ToString());
         }
     }
 }
