@@ -30,53 +30,6 @@ namespace Sep.Git.Tfs.Benchmarks
                                                                     };
         private static readonly GitHelpers gitHelper = new GitHelpers(TextWriter.Null);
 
-        #region WithPureDotNet
-
-        [Benchmark]
-        public static void WithPureDotNet()
-        {
-            Run("clr", HashWithDotNet);
-        }
-
-        private static string HashWithDotNet(Stream data)
-        {
-            var bytes = new List<byte>();
-            bytes.AddRange(Encoding.ASCII.GetBytes("blob " + data.Length));
-            bytes.Add(0);
-            var binaryReader = new BinaryReader(data);
-            bytes.AddRange(binaryReader.ReadBytes((int)data.Length));
-
-            var byteArray = bytes.ToArray();
-            var sha1 = BitConverter.ToString(SHA1.Create().ComputeHash(byteArray)).Replace("-", "").ToLowerInvariant();
-
-            var sha1_0 = sha1.Substring(0, 2);
-            var sha1_1 = sha1.Substring(2);
-            var objectFile = CombinePaths(".git", "objects", sha1_0, sha1_1);
-            if(!File.Exists(objectFile))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(objectFile));
-                using(var output = File.Create(objectFile))
-                {
-                    using(var deflater = new DeflateStream(output, CompressionMode.Compress))
-                    {
-                        deflater.Write(byteArray, 0, byteArray.Length);
-                    }
-                }
-            }
-            return sha1;
-        }
-
-        private static string CombinePaths(string part, params string [] parts)
-        {
-            foreach(var extraPart in parts)
-            {
-                part = Path.Combine(part, extraPart);
-            }
-            return part;
-        }
-
-        #endregion
-
         #region WithExecGit
 
         [Benchmark]
