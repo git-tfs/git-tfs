@@ -259,7 +259,7 @@ namespace Sep.Git.Tfs.Core
                     diffOutput.Read(1); // tab
                     builder = builder.With("path").EqualTo(diffOutput.ReadLine().Trim());
 
-                    if(newMode == Mode.Submodule)
+                    if(Mode.IsGitLink(newMode))
                         continue;
 
                     IGitChangedFile change;
