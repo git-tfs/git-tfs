@@ -38,6 +38,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CSharpOptParse\CSharpOptParse.dll</HintPath>
     </Reference>
+    <Reference Include="GitSharp.Core, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\GitSharp-0.2\GitSharp.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.TeamFoundation.VersionControl.Client, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\PrivateAssemblies\Microsoft.TeamFoundation.VersionControl.Client.dll</HintPath>
@@ -68,6 +72,7 @@
     <Compile Include="Core\DelimitedReaderTests.cs" />
     <Compile Include="Core\ExtTests.cs" />
     <Compile Include="Core\GitTfsRemoteTests.cs" />
+    <Compile Include="Core\ModeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHelpers\ExtensionMethods.cs" />
   </ItemGroup>

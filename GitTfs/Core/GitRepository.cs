@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using GitSharp.Core;
 using Sep.Git.Tfs.Util;
 using StructureMap;
+using FileMode=GitSharp.Core.FileMode;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -259,7 +260,7 @@ namespace Sep.Git.Tfs.Core
                     diffOutput.Read(1); // tab
                     builder = builder.With("path").EqualTo(diffOutput.ReadLine().Trim());
 
-                    if(Mode.IsGitLink(newMode))
+                    if(FileMode.GitLink == newMode.ToFileMode())
                         continue;
 
                     IGitChangedFile change;
