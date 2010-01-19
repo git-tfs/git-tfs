@@ -248,7 +248,8 @@ namespace Sep.Git.Tfs.Core
                     var builder = ObjectFactory.With("repository").EqualTo(this);
                     builder = builder.With("oldMode").EqualTo(diffOutput.Read(6));
                     diffOutput.Read(1); // a space
-                    builder = builder.With("newMode").EqualTo(diffOutput.Read(6));
+                    var newMode = diffOutput.Read(6);
+                    builder = builder.With("newMode").EqualTo(newMode);
                     diffOutput.Read(1); // a space
                     builder = builder.With("oldSha").EqualTo(diffOutput.Read(40));
                     diffOutput.Read(1); // a space
@@ -257,6 +258,9 @@ namespace Sep.Git.Tfs.Core
                     var changeType = diffOutput.Read(1);
                     diffOutput.Read(1); // tab
                     builder = builder.With("path").EqualTo(diffOutput.ReadLine().Trim());
+
+                    if(newMode == Mode.Submodule)
+                        continue;
 
                     IGitChangedFile change;
                     try

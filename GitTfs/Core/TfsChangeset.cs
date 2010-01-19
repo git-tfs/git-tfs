@@ -106,7 +106,7 @@ namespace Sep.Git.Tfs.Core
             {
                 return initialTree[pathInGitRepo].Mode;
             }
-            return "100644";
+            return Mode.NewFile;
         }
 
         private static readonly Regex pathWithDirRegex = new Regex("(?<dir>.*)/(?<file>[^/]+)");
