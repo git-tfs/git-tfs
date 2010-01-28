@@ -2,16 +2,8 @@
 <head>
 <title>A sample git-tfs session</title>
 <style>
-body
+.command .prompt
 {
-  font-weight: bold;
-  font-family: monospace;
-  background-color: black;
-  color: white;
-}
-.command:before
-{
-  content: '>>> ';
   color: yellow;
 }
 .command
@@ -25,10 +17,12 @@ body
 </style>
 </head>
 <body>
-<div class="run"><div class="command"> pwd</div>
+
+<div style="font-weight: bold; font-family: monospace; background-color: black; color: white; padding: 1em; overflow: scroll;">
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>pwd</div>
 <div class="output">/d/Projects
 </div></div>
-<div class="run"><div class="command"> git tfs clone</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>git tfs clone</div>
 <div class="output">Usage: git-tfs init [options] tfs-url repository-path [git-repository]
 where options are:
 
@@ -66,7 +60,7 @@ where options are:
         (Type: Value required, Value Type:[String])
         If specified, git-tfs will not sync any paths that match this regular expression.
 </div></div>
-<div class="run"><div class="command"> git tfs clone http://team:8080/ $/sandbox sample_for_git_tfs</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>git tfs clone http://team:8080/ $/sandbox sample_for_git_tfs</div>
 <div class="output">Initialized empty Git repository in d:/Projects/sample_for_git_tfs/.git/
 C4949 = 84cfc504fd85a826ede8d852e3a5e75fc8952bd2
 C69840 = fb10351a88a948d07b3eb6ef176b7e3bb1999ecb
@@ -80,9 +74,9 @@ C86167 = b3d7f12b3cf39b546cb19ddc37518be1080b86d8
 C86170 = 5df88af2597f219a7b4ccf979ff90ff1cc7ed05b
 C86209 = 46d814b83a5a75508e1584a8850d8bcb3c9d5a7d
 </div></div>
-<div class="run"><div class="command"> cd sample_for_git_tfs</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>cd sample_for_git_tfs</div>
 <div class="output"></div>
-<div class="run"><div class="command"> ls -R</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>ls -R</div>
 <div class="output">.:
 ANewDirectory
 
@@ -92,13 +86,13 @@ SomeDir
 ./ANewDirectory/SomeDir:
 readme.txt  sayhi.bat
 </div></div>
-<div class="run"><div class="command"> echo another line &gt;&gt; ANewDirectory/SomeDir/readme.txt</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>echo another line &gt;&gt; ANewDirectory/SomeDir/readme.txt</div>
 <div class="output"></div>
-<div class="run"><div class="command"> git commit -a -m "Contributed using git-tfs."</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>git commit -a -m "Contributed using git-tfs."</div>
 <div class="output">[master a72b561] Contributed using git-tfs.
  1 files changed, 1 insertions(+), 0 deletions(-)
 </div></div>
-<div class="run"><div class="command"> git tfs shelve</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>git tfs shelve</div>
 <div class="output">Usage: git-tfs shelve [options] shelveset-name [ref-to-shelve]
 where options are:
 
@@ -118,20 +112,20 @@ where options are:
         (Type: Flag, Value Type:[Boolean])
         Show lots of output.
 </div></div>
-<div class="run"><div class="command"> git tfs shelve GIT_TFS_SAMPLE</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>git tfs shelve GIT_TFS_SAMPLE</div>
  <div class="output">edit ANewDirectory/SomeDir/readme.txt
 </div></div>
-<div class="run"><div class="command"> mkdir ../sample_workspace</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>mkdir ../sample_workspace</div>
 <div class="output"></div>
-<div class="run"><div class="command"> cd ../sample_workspace</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>cd ../sample_workspace</div>
 <div class="output"></div>
-<div class="run"><div class="command"> tf workspace -new -noprompt sample_workspace</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>tf workspace -new -noprompt sample_workspace</div>
 <div class="output"></div>
-<div class="run"><div class="command"> tf unshelve -noprompt GIT_TFS_SAMPLE</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>tf unshelve -noprompt GIT_TFS_SAMPLE</div>
 <div class="output">sandbox\ANewDirectory\SomeDir:
 Unshelving edit: readme.txt
 </div></div>
-<div class="run"><div class="command"> tf diff -noprompt</div>
+<div class="run"><div class="command"><span class="prompt">&gt;&gt;&gt; </span>tf diff -noprompt</div>
 <div class="output">edit: d:\Projects\sample_workspace\sandbox\ANewDirectory\SomeDir\readme.txt
 File: sandbox\ANewDirectory\SomeDir\readme.txt
 ===================================================================
@@ -144,5 +138,7 @@ File: sandbox\ANewDirectory\SomeDir\readme.txt
 +another line
 ===================================================================
 </div></div>
+</div>
+
 </body>
 </html>
