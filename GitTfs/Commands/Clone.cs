@@ -30,7 +30,7 @@ namespace Sep.Git.Tfs.Commands
         public int Run(IList<string> args)
         {
             var retVal = 0;
-            if (retVal == 0) retVal = init.Run(DeriveRepositoryDirectory(args));
+            retVal = init.Run(DeriveRepositoryDirectory(args)); 
             if (retVal == 0) retVal = fetch.Run(new List<string>());
             if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadAllTfsRemotes().First().RemoteRef);
             return retVal;
