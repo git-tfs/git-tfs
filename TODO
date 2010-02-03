@@ -29,7 +29,7 @@ The commands that are implemented are:
   shelve
   
 The commands I plan to implement, in approximate order of priority:
-  checkin (dcommit)
+  checkin (dcommit?) - to rewrite commits, or not to rewrite them.
   unshelve
   rebase
   find-rev
@@ -40,6 +40,7 @@ The commands I plan to implement, in approximate order of priority:
 Known bugs:
   None right now.
 
-Potential enhancements:
+Other potential enhancements:
   * Query history in chunks, either in a background thread or just with 100 changeset chunks, in order to speed up the initial output from a fetch.
-  * Avoid pulling the entire source tree from TFS during shelve/commit.
+  * Support for TFS branches.
+  * Make tags for changesets off by default.
