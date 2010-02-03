@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
@@ -24,7 +23,16 @@ namespace Sep.Git.Tfs.Core
 
         public void Shelve(string shelvesetName)
         {
-            _workspace.Shelve(new Shelveset(_workspace.VersionControlServer, shelvesetName, _workspace.OwnerName), _workspace.GetPendingChanges(), ShelvingOptions.Replace);
+            var pendingChanges = _workspace.GetPendingChanges();
+
+            if (pendingChanges.Length == 0)
+            {
+                _stdout.WriteLine(" nothing to shelve");
+            }
+            else
+            {
+                _workspace.Shelve(new Shelveset(_workspace.VersionControlServer, shelvesetName, _workspace.OwnerName), _workspace.GetPendingChanges(), ShelvingOptions.Replace);
+            }
         }
 
         public string GetLocalPath(string path)
