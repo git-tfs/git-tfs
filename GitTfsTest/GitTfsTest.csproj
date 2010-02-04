@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{DDFB4746-2BCE-4B34-8E45-056324CF140D}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -36,7 +36,7 @@
   <ItemGroup>
     <Reference Include="CSharpOptParse, Version=1.0.1.0, Culture=neutral, PublicKeyToken=fc987de5fe9f6e83">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\CSharpOptParse\CSharpOptParse.dll</HintPath>
+      <HintPath>..\lib\CSharpOptParse\CSharpOptParse.dll</HintPath>
     </Reference>
     <Reference Include="GitSharp.Core, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -49,15 +49,15 @@
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Rhino.Mocks, Version=3.5.0.1337, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\StructureMap\Rhino.Mocks.dll</HintPath>
+      <HintPath>..\lib\StructureMap\Rhino.Mocks.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.5.3.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\StructureMap\StructureMap.dll</HintPath>
+      <HintPath>..\lib\StructureMap\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap.AutoMocking, Version=2.5.3.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\StructureMap\StructureMap.AutoMocking.dll</HintPath>
+      <HintPath>..\lib\StructureMap\StructureMap.AutoMocking.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
