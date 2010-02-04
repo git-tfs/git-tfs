@@ -23,6 +23,7 @@ namespace Sep.Git.Tfs.Commands
                     {
                         yield return option;
                     }
+                    yield return new PropertyFieldParserHelper(obj);
                 }
                 else if(obj is IOptionResults)
                 {
