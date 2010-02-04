@@ -66,8 +66,19 @@ namespace Sep.Git.Tfs.Commands
 
             var usage = new UsageBuilder();
             usage.BeginSection("where options are:");
+            var optionList = new List<OptionDefinition>();
             foreach (var parseHelper in command.GetOptionParseHelpers())
-                usage.AddOptions(parseHelper);
+            {
+                foreach (var option in parseHelper.GetOptions())
+                {
+                    var optionId = option.ID.ToString();
+                    if (!optionList.Exists(r => r.ID.ToString().Equals(optionId)))
+                    {
+                        optionList.Add(option);
+                    }
+                }
+            }
+            usage.AddOptions(optionList.ToArray());
             usage.EndSection();
             output.WriteLine("Usage: git-tfs " + GetCommandUsage(command));
             usage.ToText(output, OptStyle.Unix, true);
