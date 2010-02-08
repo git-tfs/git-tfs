@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -9,7 +7,7 @@ using StructureMap;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("pull")]
-    [Description("pull [options] tfs-url repository-path")]
+    [Description("pull [options]")]
     [RequiresValidGitRepository]
     public class Pull : GitTfsCommand
     {
