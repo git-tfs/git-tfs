@@ -11,14 +11,14 @@ namespace Sep.Git.Tfs.Commands
     [Description("clone [options] tfs-url repository-path <git-repository-path>")]
     public class Clone : GitTfsCommand
     {
-        private readonly GitTfsCommand fetch;
-        private readonly GitTfsCommand init;
+        private readonly Fetch fetch;
+        private readonly Init init;
         private readonly Globals globals;
 
-        public Clone(Globals globals)
+        public Clone(Globals globals, Fetch fetch, Init init)
         {
-            fetch = ObjectFactory.GetNamedInstance<GitTfsCommand>("fetch");
-            init = ObjectFactory.GetNamedInstance<GitTfsCommand>("init");
+            this.fetch = fetch;
+            this.init = init;
             this.globals = globals;
         }
 

@@ -12,7 +12,7 @@ namespace Sep.Git.Tfs.Commands
     public class Pull : GitTfsCommand
     {
         #region GitTfsCommand Members
-        private readonly GitTfsCommand fetch;
+        private readonly Fetch fetch;
         private readonly Globals globals;
 
         public IEnumerable<IOptionResults> ExtraOptions
@@ -20,9 +20,9 @@ namespace Sep.Git.Tfs.Commands
             get { return this.MakeNestedOptionResults(fetch); }
         }
 
-        public Pull(Globals globals)
+        public Pull(Globals globals, Fetch fetch)
         {
-            fetch = ObjectFactory.GetNamedInstance<GitTfsCommand>("fetch");
+            this.fetch = fetch;
             this.globals = globals;
         }
 
