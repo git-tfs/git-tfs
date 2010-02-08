@@ -1,0 +1,107 @@
+>>> pwd
+/d/Projects
+>>> git tfs clone
+Usage: git-tfs init [options] tfs-url repository-path [git-repository]
+where options are:
+
+    -V, --version
+        (Type: Flag, Value Type:[Boolean])
+        ShowVersion
+
+    -h, -H, --help
+        (Type: Flag, Value Type:[Boolean])
+        ShowHelp
+
+    -i, --tfs-remote, --remote, --id
+        (Type: Value required, Value Type:[String])
+        An optional remote ID, useful if this repository will track multiple TFS repositories.
+
+    -d, --debug
+        (Type: Flag, Value Type:[Boolean])
+        Show lots of output.
+    --shared
+        (Type: Value required, Value Type:[Object])
+        The --shared option to pass to git-init.
+
+    --no-metadata
+        (Type: Flag, Value Type:[Boolean])
+        If specified, git-tfs will leave out the git-tfs-id: lines at the end of every commit.
+
+    --template
+        (Type: Value required, Value Type:[String])
+        The --template option to pass to git-init.
+    --username
+        (Type: Value required, Value Type:[String])
+        Your TFS username, including domain (e.g. DOMAIN\user).
+
+    --ignore-regex
+        (Type: Value required, Value Type:[String])
+        If specified, git-tfs will not sync any paths that match this regular expression.
+>>> git tfs clone http://team:8080/ $/sandbox sample_for_git_tfs
+Initialized empty Git repository in d:/Projects/sample_for_git_tfs/.git/
+C4949 = 84cfc504fd85a826ede8d852e3a5e75fc8952bd2
+C69840 = fb10351a88a948d07b3eb6ef176b7e3bb1999ecb
+C69841 = 764abfc9995945cafce2e23a1d2735aec8d288bd
+C69842 = bb87001af0e93de25e13dab4602db2f84f4b1932
+C69843 = 664705c06790fbd1da066833e9e81da24c88ea61
+C86163 = 99d300275e87adedae65cd3c9a57c9f55c76eb94
+C86164 = 2d10de0deb9fe96e22b14eb2e65e2f95ef55c1d6
+C86165 = da9da4b79b2d9e16aa17f6a12317bfe3e29687de
+C86167 = b3d7f12b3cf39b546cb19ddc37518be1080b86d8
+C86170 = 5df88af2597f219a7b4ccf979ff90ff1cc7ed05b
+C86209 = 46d814b83a5a75508e1584a8850d8bcb3c9d5a7d
+>>> cd sample_for_git_tfs
+>>> ls -R
+.:
+ANewDirectory
+
+./ANewDirectory:
+SomeDir
+
+./ANewDirectory/SomeDir:
+readme.txt  sayhi.bat
+>>> echo another line >> ANewDirectory/SomeDir/readme.txt
+>>> git commit -a -m "Contributed using git-tfs."
+[master a72b561] Contributed using git-tfs.
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+>>> git tfs shelve
+Usage: git-tfs shelve [options] shelveset-name [ref-to-shelve]
+where options are:
+
+    -V, --version
+        (Type: Flag, Value Type:[Boolean])
+        ShowVersion
+
+    -h, -H, --help
+        (Type: Flag, Value Type:[Boolean])
+        ShowHelp
+
+    -i, --tfs-remote, --remote, --id
+        (Type: Value required, Value Type:[String])
+        An optional remote ID, useful if this repository will track multiple TFS repositories.
+
+    -d, --debug
+        (Type: Flag, Value Type:[Boolean])
+        Show lots of output.
+>>> git tfs shelve GIT_TFS_SAMPLE
+ edit ANewDirectory/SomeDir/readme.txt
+>>> mkdir ../sample_workspace
+>>> cd ../sample_workspace
+>>> tf workspace -new -noprompt sample_workspace
+>>> tf unshelve -noprompt GIT_TFS_SAMPLE
+sandbox\ANewDirectory\SomeDir:
+Unshelving edit: readme.txt
+>>> tf diff -noprompt
+edit: d:\Projects\sample_workspace\sandbox\ANewDirectory\SomeDir\readme.txt
+File: sandbox\ANewDirectory\SomeDir\readme.txt
+===================================================================
+--- sandbox\ANewDirectory\SomeDir\readme.txt;C69843  (server)    1/28/2010 1:02 PM
++++ sandbox\ANewDirectory\SomeDir\readme.txt  (local)    1/28/2010 1:02 PM
+@@ -4,3 +4,4 @@
+ ----
+ This line was added for the second checkin.
+ This line was added after the parent directory was nested inside a new top-level-directory.
++another line
+===================================================================
+>>>
+
