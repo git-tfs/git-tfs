@@ -11,8 +11,15 @@ using StructureMap;
 
 namespace Sep.Git.Tfs
 {
-    class GitTfs
+    public class GitTfs
     {
+        private ITfsHelper tfsHelper;
+
+        public GitTfs(ITfsHelper tfsHelper)
+        {
+            this.tfsHelper = tfsHelper;
+        }
+
         public void Run(IList<string> args)
         {
             InitializeGlobals();
@@ -44,10 +51,9 @@ namespace Sep.Git.Tfs
         private string MakeVersionString()
         {
             var versionString = "git-tfs version";
-            //versionString += " " + GetType().Assembly.GetName().Version;
+            versionString += " " + GetType().Assembly.GetName().Version;
             versionString += GetGitCommitForVersionString();
-            versionString += " (TFS client library " + ObjectFactory.GetInstance<ITfsHelper>().TfsClientLibraryVersion +
-                             ")";
+            versionString += " (TFS client library " + tfsHelper.TfsClientLibraryVersion + ")";
             return versionString;
         }
 
@@ -55,7 +61,7 @@ namespace Sep.Git.Tfs
         {
             try
             {
-                return " (commit " + GetGitCommit().Substring(0, 8) + "...)";
+                return " (" + GetGitCommit().Substring(0, 8) + ")";
             }
             catch (Exception e)
             {

@@ -19,7 +19,7 @@ namespace Sep.Git.Tfs
             {
                 //Trace.Listeners.Add(new ConsoleTraceListener());
                 Initialize();
-                new GitTfs().Run(new List<string>(args));
+                ObjectFactory.GetInstance<GitTfs>().Run(new List<string>(args));
             }
             catch (Exception e)
             {
