@@ -31,6 +31,8 @@ The commands that are implemented are:
 The commands I plan to implement, in approximate order of priority:
   checkin (dcommit?) - to rewrite commits, or not to rewrite them.
   unshelve
+
+These commands are in git-svn, but I'm not convinced git-tfs needs them.
   rebase
   find-rev
   log
@@ -44,3 +46,4 @@ Other potential enhancements:
   * Query history in chunks, either in a background thread or just with 100 changeset chunks, in order to speed up the initial output from a fetch.
   * Support for TFS branches.
   * Make tags for changesets off by default.
+  * More interesting workspace mappings, e.g. "$/Project1 -> Source; $/Project2/Libs -> Libs".
