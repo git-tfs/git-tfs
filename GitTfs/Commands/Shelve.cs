@@ -15,16 +15,18 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly Globals globals;
         private readonly TextWriter stdout;
+        private readonly CheckinOptions checkinOptions;
 
-        public Shelve(Globals globals, TextWriter stdout)
+        public Shelve(Globals globals, TextWriter stdout, CheckinOptions checkinOptions)
         {
             this.globals = globals;
             this.stdout = stdout;
+            this.checkinOptions = checkinOptions;
         }
 
         public IEnumerable<IOptionResults> ExtraOptions
         {
-            get { return this.MakeOptionResults(); }
+            get { return this.MakeOptionResults(checkinOptions); }
         }
 
         public int Run(IList<string> args)

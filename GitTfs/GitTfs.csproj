@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Checkin.cs" />
+    <Compile Include="Commands\CheckinOptions.cs" />
     <Compile Include="Commands\Clone.cs" />
     <Compile Include="Commands\CommitOptions.cs" />
     <Compile Include="Commands\Diagnostics.cs" />

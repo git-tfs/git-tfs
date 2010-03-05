@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using CheckinOptions=Sep.Git.Tfs.Commands.CheckinOptions;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -11,12 +12,14 @@ namespace Sep.Git.Tfs.Core
         private readonly TextWriter _stdout;
         private readonly TfsChangesetInfo _contextVersion;
         private readonly IGitTfsRemote _remote;
+        private readonly CheckinOptions _checkinOptions;
 
-        public TfsWorkspace(Workspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote)
+        public TfsWorkspace(Workspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions)
         {
             _workspace = workspace;
             _contextVersion = contextVersion;
             _remote = remote;
+            _checkinOptions = checkinOptions;
             _localDirectory = localDirectory;
             _stdout = stdout;
         }
@@ -31,7 +34,9 @@ namespace Sep.Git.Tfs.Core
             }
             else
             {
-                _workspace.Shelve(new Shelveset(_workspace.VersionControlServer, shelvesetName, _workspace.OwnerName), _workspace.GetPendingChanges(), ShelvingOptions.Replace);
+                var shelveset = new Shelveset(_workspace.VersionControlServer, shelvesetName, _workspace.OwnerName);
+                shelveset.Comment = _checkinOptions.CheckinComment;
+                _workspace.Shelve(shelveset, _workspace.GetPendingChanges(), ShelvingOptions.Replace);
             }
         }
 

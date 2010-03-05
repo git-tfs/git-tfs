@@ -326,7 +326,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
-            foreach (var change in Repository.GetChangedFiles(RemoteRef, head))
+            foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))
             {
                 change.Apply(workspace);
             }
