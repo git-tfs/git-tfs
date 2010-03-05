@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using CheckinOptions=Sep.Git.Tfs.Commands.CheckinOptions;
 
 namespace Sep.Git.Tfs.Core
@@ -36,6 +39,7 @@ namespace Sep.Git.Tfs.Core
             {
                 var shelveset = new Shelveset(_workspace.VersionControlServer, shelvesetName, _workspace.OwnerName);
                 shelveset.Comment = _checkinOptions.CheckinComment;
+                shelveset.WorkItemInfo = GetWorkItemInfos();
                 _workspace.Shelve(shelveset, _workspace.GetPendingChanges(), _checkinOptions.Force ? ShelvingOptions.Replace : ShelvingOptions.None);
             }
         }
@@ -73,6 +77,31 @@ namespace Sep.Git.Tfs.Core
             var item = new ItemSpec(_remote.TfsRepositoryPath + "/" + path, RecursionType.None);
             _workspace.Get(new GetRequest(item, (int) _contextVersion.ChangesetId),
                            GetOptions.Overwrite | GetOptions.GetAll);
+        }
+
+        private WorkItemCheckinInfo[] GetWorkItemInfos()
+        {
+            var workItemInfos = GetWorkItemInfos(_checkinOptions.WorkItemsToAssociate, WorkItemCheckinAction.Associate);
+            workItemInfos =
+                workItemInfos.Append(GetWorkItemInfos(_checkinOptions.WorkItemsToResolve, WorkItemCheckinAction.Resolve));
+            return workItemInfos.ToArray();
+        }
+
+        private IEnumerable<WorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, WorkItemCheckinAction checkinAction)
+        {
+            return workItems.Select(workItem => GetWorkItemInfo(workItem, checkinAction));
+        }
+
+        private WorkItemCheckinInfo GetWorkItemInfo(string workItem, WorkItemCheckinAction checkinAction)
+        {
+            return new WorkItemCheckinInfo(GetWorkItem(Convert.ToInt32(workItem)), checkinAction);
+        }
+
+        private WorkItem GetWorkItem(int workItem)
+        {
+            var tfs = _workspace.VersionControlServer.TeamFoundationServer;
+            var workItemStore = (WorkItemStore) tfs.GetService(typeof (WorkItemStore));
+            return workItemStore.GetWorkItem(workItem);
         }
     }
 }

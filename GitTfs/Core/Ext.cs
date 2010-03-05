@@ -24,6 +24,21 @@ namespace Sep.Git.Tfs.Core
             };
         }
 
+        public static IEnumerable<T> Append<T>(this IEnumerable<T> set1, params IEnumerable<T> [] moreSets)
+        {
+            foreach(var item in set1)
+            {
+                yield return item;
+            }
+            foreach(var set in moreSets)
+            {
+                foreach(var item in set)
+                {
+                    yield return item;
+                }
+            }
+        }
+
         public static void SetArguments(this ProcessStartInfo startInfo, params string [] args)
         {
             startInfo.Arguments = String.Join(" ", args.Select(arg => QuoteProcessArgument(arg)).ToArray());
