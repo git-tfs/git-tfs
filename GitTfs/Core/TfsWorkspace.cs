@@ -36,7 +36,7 @@ namespace Sep.Git.Tfs.Core
             {
                 var shelveset = new Shelveset(_workspace.VersionControlServer, shelvesetName, _workspace.OwnerName);
                 shelveset.Comment = _checkinOptions.CheckinComment;
-                _workspace.Shelve(shelveset, _workspace.GetPendingChanges(), ShelvingOptions.Replace);
+                _workspace.Shelve(shelveset, _workspace.GetPendingChanges(), _checkinOptions.Force ? ShelvingOptions.Replace : ShelvingOptions.None);
             }
         }
 
