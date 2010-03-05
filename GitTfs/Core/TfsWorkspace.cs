@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.Core
                 var shelveset = new Shelveset(_workspace.VersionControlServer, shelvesetName, _workspace.OwnerName);
                 shelveset.Comment = _checkinOptions.CheckinComment;
                 shelveset.WorkItemInfo = GetWorkItemInfos();
-                _workspace.Shelve(shelveset, _workspace.GetPendingChanges(), _checkinOptions.Force ? ShelvingOptions.Replace : ShelvingOptions.None);
+                _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? ShelvingOptions.Replace : ShelvingOptions.None);
             }
         }
 
