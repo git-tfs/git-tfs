@@ -150,24 +150,13 @@ namespace Sep.Git.Tfs.Core
         private LogEntry MakeNewLogEntry()
         {
             var log = new LogEntry();
-            log.CommitterName = log.AuthorName = GetAuthorName();
-            log.CommitterEmail = log.AuthorEmail = GetAuthorEmail();
+            var identity = tfs.GetIdentity(changeset.Committer);
+            log.CommitterName = log.AuthorName = identity.DisplayName ?? "Unknown TFS user";
+            log.CommitterEmail = log.AuthorEmail = identity.MailAddress ?? changeset.Committer;
             log.Date = changeset.CreationDate;
             log.Log = changeset.Comment + Environment.NewLine;
             log.ChangesetId = changeset.ChangesetId;
             return log;
-        }
-
-        private string GetAuthorEmail()
-        {
-            var identity = tfs.GetIdentity(changeset.Committer);
-            return identity.MailAddress;
-        }
-
-        private string GetAuthorName()
-        {
-            var identity = tfs.GetIdentity(changeset.Committer);
-            return identity.DisplayName;
         }
     }
 }

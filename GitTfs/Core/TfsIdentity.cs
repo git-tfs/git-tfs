@@ -14,12 +14,12 @@ namespace Sep.Git.Tfs.Core
 
         public string MailAddress
         {
-            get { return identity.MailAddress; }
+            get { return identity == null ? null : identity.MailAddress; }
         }
 
         public string DisplayName
         {
-            get { return identity.DisplayName; }
+            get { return identity == null ? null : identity.DisplayName; }
         }
     }
 }
