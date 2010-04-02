@@ -30,7 +30,7 @@ namespace Sep.Git.Tfs.Core
         public string Url
         {
             get { return server == null ? null : server.Uri.ToString(); }
-            set { SetServer(value); }
+            set { SetServer(value, Username); }
         }
 
         public string Username
@@ -39,20 +39,27 @@ namespace Sep.Git.Tfs.Core
             set
             {
                 username = value;
-                SetServer(Url);
+                SetServer(Url, value);
             }
         }
 
-        private void SetServer(string url)
+        private void SetServer(string url, string username)
         {
-            if (string.IsNullOrEmpty(url))
+            if(string.IsNullOrEmpty(url))
             {
                 server = null;
             }
             else
             {
-                server = new TfsTeamProjectCollection(new Uri(url), new UICredentialsProvider());
-                server.EnsureAuthenticated();
+                if(string.IsNullOrEmpty(username))
+                {
+                    server = new TfsTeamProjectCollection(new Uri(url));
+                }
+                else
+                {
+                    server = new TfsTeamProjectCollection(new Uri(url), new UICredentialsProvider());
+                    server.EnsureAuthenticated();
+                }
             }
         }
 
@@ -83,20 +90,20 @@ namespace Sep.Git.Tfs.Core
 
         private IGroupSecurityService GroupSecurityService
         {
-            get { return (IGroupSecurityService)Server.GetService(typeof(IGroupSecurityService)); }
+            get { return (IGroupSecurityService) Server.GetService(typeof(IGroupSecurityService)); }
         }
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                        null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true,
+                                        null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
                                         true, true);
             foreach (Changeset changeset in changesets)
             {
                 yield return
                     new TfsChangeset(this, changeset)
                         {
-                            Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId }
+                            Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId}
                         };
             }
         }
