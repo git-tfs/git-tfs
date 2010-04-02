@@ -54,7 +54,7 @@ namespace Sep.Git.Tfs
         {
             scan.WithDefaultConventions();
             scan.TheCallingAssembly();
-            scan.AssemblyContainingType(typeof(Microsoft.TeamFoundation.Client.TeamFoundationServer));
+            scan.AssemblyContainingType(typeof(Microsoft.TeamFoundation.Client.TfsTeamProjectCollection));
         }
 
         private static void DoCustomConfiguration(IInitializationExpression initializer)

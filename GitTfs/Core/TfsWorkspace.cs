@@ -99,7 +99,7 @@ namespace Sep.Git.Tfs.Core
 
         private WorkItem GetWorkItem(int workItem)
         {
-            var tfs = _workspace.VersionControlServer.TeamFoundationServer;
+            var tfs = _workspace.VersionControlServer.TeamProjectCollection.ConfigurationServer;
             var workItemStore = (WorkItemStore) tfs.GetService(typeof (WorkItemStore));
             return workItemStore.GetWorkItem(workItem);
         }

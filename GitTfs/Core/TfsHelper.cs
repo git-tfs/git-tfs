@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Core
     public class TfsHelper : ITfsHelper
     {
         private readonly TextWriter _stdout;
-        private TeamFoundationServer server;
+        private TfsTeamProjectCollection server;
         private string username;
 
         public TfsHelper(TextWriter stdout)
@@ -24,13 +24,13 @@ namespace Sep.Git.Tfs.Core
 
         public string TfsClientLibraryVersion
         {
-            get { return typeof(TeamFoundationServer).Assembly.GetName().Version.ToString() + " (MS)"; }
+            get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version.ToString() + " (MS)"; }
         }
 
         public string Url
         {
             get { return server == null ? null : server.Uri.ToString(); }
-            set { SetServer(value, Username); }
+            set { SetServer(value); }
         }
 
         public string Username
@@ -39,35 +39,24 @@ namespace Sep.Git.Tfs.Core
             set
             {
                 username = value;
-                SetServer(Url, value);
+                SetServer(Url);
             }
         }
 
-        private void SetServer(string url, string username)
+        private void SetServer(string url)
         {
-            if(string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(url))
             {
                 server = null;
             }
             else
             {
-                if(string.IsNullOrEmpty(username))
-                {
-                    server = new TeamFoundationServer(url);
-                }
-                else
-                {
-                    server = new TeamFoundationServer(url, MakeCredentials(username));
-                }
+                server = new TfsTeamProjectCollection(new Uri(url), new UICredentialsProvider());
+                server.EnsureAuthenticated();
             }
         }
 
-        private ICredentials MakeCredentials(string username)
-        {
-            throw new NotImplementedException("TODO: Using a non-default username is not yet supported.");
-        }
-
-        private TeamFoundationServer Server
+        private TfsTeamProjectCollection Server
         {
             get
             {
@@ -94,20 +83,20 @@ namespace Sep.Git.Tfs.Core
 
         private IGroupSecurityService GroupSecurityService
         {
-            get { return (IGroupSecurityService) Server.GetService(typeof(IGroupSecurityService)); }
+            get { return (IGroupSecurityService)Server.GetService(typeof(IGroupSecurityService)); }
         }
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                        null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
+                                        null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true,
                                         true, true);
             foreach (Changeset changeset in changesets)
             {
                 yield return
                     new TfsChangeset(this, changeset)
                         {
-                            Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId}
+                            Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId }
                         };
             }
         }
