@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CommandLine.OptParse;
-using Microsoft.TeamFoundation.VersionControl.Client;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Core
@@ -61,16 +60,6 @@ namespace Sep.Git.Tfs.Core
         public static string FormatForGit(this DateTime date)
         {
             return date.ToUniversalTime().ToString("s") + "Z";
-        }
-
-        public static bool IncludesOneOf(this ChangeType changeType, params ChangeType[] typesToMatch)
-        {
-            foreach(var ok in typesToMatch)
-            {
-                if((ok & changeType) == ok)
-                    return true;
-            }
-            return false;
         }
 
         public static void CopyTo(this Stream source, Stream destination)

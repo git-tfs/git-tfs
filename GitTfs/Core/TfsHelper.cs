@@ -7,6 +7,7 @@ using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using SEP.Extensions;
+using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Core
@@ -16,10 +17,12 @@ namespace Sep.Git.Tfs.Core
         private readonly TextWriter _stdout;
         private TeamFoundationServer server;
         private string username;
+        private readonly TfsApiBridge _bridge;
 
-        public TfsHelper(TextWriter stdout)
+        public TfsHelper(TextWriter stdout, TfsApiBridge bridge)
         {
             _stdout = stdout;
+            _bridge = bridge;
         }
 
         public string TfsClientLibraryVersion
@@ -105,7 +108,7 @@ namespace Sep.Git.Tfs.Core
             foreach (Changeset changeset in changesets)
             {
                 yield return
-                    new TfsChangeset(this, changeset)
+                    new TfsChangeset(this, _bridge.Wrap(changeset))
                         {
                             Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId}
                         };

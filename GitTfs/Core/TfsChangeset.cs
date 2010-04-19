@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.TeamFoundation.VersionControl.Client;
+using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
@@ -11,10 +11,10 @@ namespace Sep.Git.Tfs.Core
     class TfsChangeset : ITfsChangeset
     {
         private readonly TfsHelper tfs;
-        private readonly Changeset changeset;
+        private readonly IChangeset changeset;
         public TfsChangesetInfo Summary { get; set; }
 
-        public TfsChangeset(TfsHelper tfs, Changeset changeset)
+        public TfsChangeset(TfsHelper tfs, IChangeset changeset)
         {
             this.tfs = tfs;
             this.changeset = changeset;
@@ -30,20 +30,20 @@ namespace Sep.Git.Tfs.Core
             return MakeNewLogEntry();
         }
 
-        private void Apply(Change change, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
+        private void Apply(IChange change, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
         {
             // If you make updates to a dir in TF, the changeset includes changes for all the children also,
             // and git doesn't really care if you add or delete empty dirs.
-            if (change.Item.ItemType == ItemType.File)
+            if (change.Item.ItemType == TfsItemType.File)
             {
                 var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
                 if (pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
                     return;
-                if (change.ChangeType.IncludesOneOf(ChangeType.Rename))
+                if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
                 {
                     Rename(change, pathInGitRepo, index, initialTree);
                 }
-                else if (change.ChangeType.IncludesOneOf(ChangeType.Delete))
+                else if (change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
                 {
                     Delete(pathInGitRepo, index, initialTree);
                 }
@@ -54,39 +54,40 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void Rename(Change change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
+        private void Rename(IChange change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
         {
             var oldPath = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
             if (oldPath != null)
             {
                 Delete(oldPath, index, initialTree);
             }
-            if (!change.ChangeType.IncludesOneOf(ChangeType.Delete))
+            if (!change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
             {
                 Update(change, pathInGitRepo, index, initialTree);
             }
         }
 
-        private IEnumerable<Change> Sort(IEnumerable<Change> changes)
+        private IEnumerable<IChange> Sort(IEnumerable<IChange> changes)
         {
             return changes.OrderBy(change => Rank(change.ChangeType));
         }
 
-        private int Rank(ChangeType type)
+        private int Rank(TfsChangeType type)
         {
-            if (type.IncludesOneOf(ChangeType.Delete))
+            if (type.IncludesOneOf(TfsChangeType.Delete))
                 return 0;
-            if (type.IncludesOneOf(ChangeType.Rename))
+            if (type.IncludesOneOf(TfsChangeType.Rename))
                 return 1;
             return 2;
         }
 
-        private string GetPathBeforeRename(Item item)
+        private string GetPathBeforeRename(IItem item)
         {
-            return item.VersionControlServer.GetItem(item.ItemId, item.ChangesetId - 1).ServerItem;
+            return item.GetVersion(item.ChangesetId - 1).ServerItem;
+            //return item.VersionControlServer.GetItem(item.ItemId, item.ChangesetId - 1).ServerItem;
         }
 
-        private void Update(Change change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
+        private void Update(IChange change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
         {
             if (change.Item.DeletionId == 0)
             {
@@ -100,9 +101,9 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private string GetMode(Change change, IDictionary<string, GitObject> initialTree, string pathInGitRepo)
+        private string GetMode(IChange change, IDictionary<string, GitObject> initialTree, string pathInGitRepo)
         {
-            if(initialTree.ContainsKey(pathInGitRepo) && !change.ChangeType.IncludesOneOf(ChangeType.Add))
+            if(initialTree.ContainsKey(pathInGitRepo) && !change.ChangeType.IncludesOneOf(TfsChangeType.Add))
             {
                 return initialTree[pathInGitRepo].Mode;
             }
