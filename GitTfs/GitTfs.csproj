@@ -106,6 +106,7 @@
     <Compile Include="Core\IGitTfsRemote.cs" />
     <Compile Include="Core\ITfsWorkspace.cs" />
     <Compile Include="Core\Mode.cs" />
+    <Compile Include="Core\TfsInterop\IVersionControlServer.cs" />
     <Compile Include="Core\TfsInterop\TfsHelper.cs" />
     <Compile Include="Core\TfsInterop\WrapperFor.cs" />
     <Compile Include="Core\TfsInterop\IChange.cs" />

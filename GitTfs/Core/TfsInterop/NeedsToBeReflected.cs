@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.TeamFoundation.Server;
@@ -8,6 +7,23 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
     // These things should be auto-generated, or reflected, or duck-typed, or something to break the explicit dependence on the TF dlls.
+    class NeedsToBeReflectedVersionControlServer :WrapperFor<VersionControlServer>, IVersionControlServer
+    {
+        private readonly TfsApiBridge _bridge;
+        private readonly VersionControlServer _versionControlServer;
+
+        public NeedsToBeReflectedVersionControlServer(TfsApiBridge bridge, VersionControlServer versionControlServer) : base(versionControlServer)
+        {
+            _bridge = bridge;
+            _versionControlServer = versionControlServer;
+        }
+
+        public IItem GetItem(int itemId, int changesetNumber)
+        {
+            return _bridge.Wrap(_versionControlServer.GetItem(itemId, changesetNumber));
+        }
+    }
+
     class NeedsToBeReflectedChangeset : WrapperFor<Changeset>, IChangeset
     {
         private readonly TfsApiBridge _bridge;
@@ -19,9 +35,9 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             _changeset = changeset;
         }
 
-        public IEnumerable<IChange> Changes
+        public IChange [] Changes
         {
-            get { return _changeset.Changes.Select(c => _bridge.Wrap(c)); }
+            get { return _changeset.Changes.Select(c => _bridge.Wrap(c)).ToArray(); }
         }
 
         public string Committer
@@ -78,9 +94,9 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             _item = item;
         }
 
-        public IItem GetVersion(int changeset)
+        public IVersionControlServer VersionControlServer
         {
-            return _bridge.Wrap(_item.VersionControlServer.GetItem(_item.ItemId, _item.ChangesetId - 1));
+            get { return _bridge.Wrap(_item.VersionControlServer); }
         }
 
         public int ChangesetId
@@ -101,6 +117,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         public TfsItemType ItemType
         {
             get { return _bridge.Convert(_item.ItemType); }
+        }
+
+        public int ItemId
+        {
+            get { return _item.ItemId; }
         }
 
         public void DownloadFile(string file)
@@ -185,12 +206,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             _workspace = workspace;
         }
 
-        public IEnumerable<IPendingChange> GetPendingChanges()
+        public IPendingChange [] GetPendingChanges()
         {
-            return _workspace.GetPendingChanges().Select(c => _bridge.Wrap(c));
+            return _workspace.GetPendingChanges().Select(c => _bridge.Wrap(c)).ToArray();
         }
 
-        public void Shelve(IShelveset shelveset, IEnumerable<IPendingChange> changes, TfsShelvingOptions options)
+        public void Shelve(IShelveset shelveset, IPendingChange [] changes, TfsShelvingOptions options)
         {
             _workspace.Shelve(_bridge.Unwrap(shelveset), changes.Select(c => _bridge.Unwrap(c)).ToArray(), _bridge.Convert(options));
         }

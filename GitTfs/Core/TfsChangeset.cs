@@ -83,8 +83,7 @@ namespace Sep.Git.Tfs.Core
 
         private string GetPathBeforeRename(IItem item)
         {
-            return item.GetVersion(item.ChangesetId - 1).ServerItem;
-            //return item.VersionControlServer.GetItem(item.ItemId, item.ChangesetId - 1).ServerItem;
+            return item.VersionControlServer.GetItem(item.ItemId, item.ChangesetId - 1).ServerItem;
         }
 
         private void Update(IChange change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)

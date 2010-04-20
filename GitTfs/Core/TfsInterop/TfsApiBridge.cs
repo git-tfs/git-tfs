@@ -62,6 +62,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             return new NeedsToBeReflectedWorkItemCheckinInfo(workItemCheckinInfo);
         }
 
+        public IVersionControlServer Wrap(VersionControlServer versionControlServer)
+        {
+            return new NeedsToBeReflectedVersionControlServer(this, versionControlServer);
+        }
+
         public WorkItemCheckinInfo Unwrap(IWorkItemCheckinInfo info)
         {
             return WrapperFor<WorkItemCheckinInfo>.Unwrap(info);
