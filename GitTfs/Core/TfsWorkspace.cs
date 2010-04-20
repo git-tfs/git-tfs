@@ -2,27 +2,28 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.TeamFoundation.VersionControl.Client;
-using Microsoft.TeamFoundation.WorkItemTracking.Client;
-using CheckinOptions=Sep.Git.Tfs.Commands.CheckinOptions;
+using Sep.Git.Tfs.Commands;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Core
 {
     public class TfsWorkspace : ITfsWorkspace
     {
-        private readonly Workspace _workspace;
+        private readonly IWorkspace _workspace;
         private readonly string _localDirectory;
         private readonly TextWriter _stdout;
         private readonly TfsChangesetInfo _contextVersion;
         private readonly IGitTfsRemote _remote;
         private readonly CheckinOptions _checkinOptions;
+        private readonly ITfsHelper _tfsHelper;
 
-        public TfsWorkspace(Workspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions)
+        public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper)
         {
             _workspace = workspace;
             _contextVersion = contextVersion;
             _remote = remote;
             _checkinOptions = checkinOptions;
+            _tfsHelper = tfsHelper;
             _localDirectory = localDirectory;
             _stdout = stdout;
         }
@@ -31,16 +32,16 @@ namespace Sep.Git.Tfs.Core
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
-            if (pendingChanges.Length == 0)
+            if (pendingChanges.Count() == 0)
             {
                 _stdout.WriteLine(" nothing to shelve");
             }
             else
             {
-                var shelveset = new Shelveset(_workspace.VersionControlServer, shelvesetName, _workspace.OwnerName);
+                var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
                 shelveset.Comment = _checkinOptions.CheckinComment;
-                shelveset.WorkItemInfo = GetWorkItemInfos();
-                _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? ShelvingOptions.Replace : ShelvingOptions.None);
+                shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
+                _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
             }
         }
 
@@ -74,34 +75,15 @@ namespace Sep.Git.Tfs.Core
 
         private void GetFromTfs(string path)
         {
-            var item = new ItemSpec(_remote.TfsRepositoryPath + "/" + path, RecursionType.None);
-            _workspace.Get(new GetRequest(item, (int) _contextVersion.ChangesetId),
-                           GetOptions.Overwrite | GetOptions.GetAll);
+            _workspace.ForceGetFile(_remote.TfsRepositoryPath + "/" + path, (int) _contextVersion.ChangesetId);
         }
 
-        private WorkItemCheckinInfo[] GetWorkItemInfos()
+        private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos()
         {
-            var workItemInfos = GetWorkItemInfos(_checkinOptions.WorkItemsToAssociate, WorkItemCheckinAction.Associate);
+            var workItemInfos = _tfsHelper.GetWorkItemInfos(_checkinOptions.WorkItemsToAssociate, TfsWorkItemCheckinAction.Associate);
             workItemInfos =
-                workItemInfos.Append(GetWorkItemInfos(_checkinOptions.WorkItemsToResolve, WorkItemCheckinAction.Resolve));
-            return workItemInfos.ToArray();
-        }
-
-        private IEnumerable<WorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, WorkItemCheckinAction checkinAction)
-        {
-            return workItems.Select(workItem => GetWorkItemInfo(workItem, checkinAction));
-        }
-
-        private WorkItemCheckinInfo GetWorkItemInfo(string workItem, WorkItemCheckinAction checkinAction)
-        {
-            return new WorkItemCheckinInfo(GetWorkItem(Convert.ToInt32(workItem)), checkinAction);
-        }
-
-        private WorkItem GetWorkItem(int workItem)
-        {
-            var tfs = _workspace.VersionControlServer.TeamFoundationServer;
-            var workItemStore = (WorkItemStore) tfs.GetService(typeof (WorkItemStore));
-            return workItemStore.GetWorkItem(workItem);
+                workItemInfos.Append(_tfsHelper.GetWorkItemInfos(_checkinOptions.WorkItemsToResolve, TfsWorkItemCheckinAction.Resolve));
+            return workItemInfos;
         }
     }
 }

@@ -4,6 +4,7 @@ using Rhino.Mocks;
 using Rhino.Mocks.Constraints;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Test.TestHelpers;
 using StructureMap.AutoMocking;
 

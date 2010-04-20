@@ -8,12 +8,12 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
     // These things should be auto-generated, or reflected, or duck-typed, or something to break the explicit dependence on the TF dlls.
-    public class NeedsToBeReflectedChangeset : IChangeset
+    class NeedsToBeReflectedChangeset : WrapperFor<Changeset>, IChangeset
     {
         private readonly TfsApiBridge _bridge;
         private readonly Changeset _changeset;
 
-        public NeedsToBeReflectedChangeset(TfsApiBridge bridge, Changeset changeset)
+        public NeedsToBeReflectedChangeset(TfsApiBridge bridge, Changeset changeset) : base(changeset)
         {
             _bridge = bridge;
             _changeset = changeset;
@@ -45,12 +45,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         }
     }
 
-    public class NeedsToBeReflectedChange : IChange
+    class NeedsToBeReflectedChange : WrapperFor<Change>, IChange
     {
         private readonly TfsApiBridge _bridge;
         private readonly Change _change;
 
-        public NeedsToBeReflectedChange(TfsApiBridge bridge, Change change)
+        public NeedsToBeReflectedChange(TfsApiBridge bridge, Change change) : base(change)
         {
             _bridge = bridge;
             _change = change;
@@ -67,12 +67,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         }
     }
 
-    public class NeedsToBeReflectedItem : IItem
+    class NeedsToBeReflectedItem : WrapperFor<Item>, IItem
     {
         private readonly TfsApiBridge _bridge;
         private readonly Item _item;
 
-        public NeedsToBeReflectedItem(TfsApiBridge bridge, Item item)
+        public NeedsToBeReflectedItem(TfsApiBridge bridge, Item item) : base(item)
         {
             _bridge = bridge;
             _item = item;
@@ -109,11 +109,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         }
     }
 
-    class NeedsToBeReflectedIdentity : IIdentity
+    class NeedsToBeReflectedIdentity : WrapperFor<Identity>, IIdentity
     {
         private readonly Identity _identity;
 
-        public NeedsToBeReflectedIdentity(Identity identity)
+        public NeedsToBeReflectedIdentity(Identity identity) : base(identity)
         {
             Debug.Assert(identity != null, "wrapped property must not be null.");
             _identity = identity;
@@ -127,6 +127,98 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         public string DisplayName
         {
             get { return _identity.DisplayName; }
+        }
+    }
+
+    class NeedsToBeReflectedShelveset : WrapperFor<Shelveset>, IShelveset
+    {
+        private readonly Shelveset _shelveset;
+        private readonly TfsApiBridge _bridge;
+
+        public NeedsToBeReflectedShelveset(TfsApiBridge bridge, Shelveset shelveset) : base(shelveset)
+        {
+            _shelveset = shelveset;
+            _bridge = bridge;
+        }
+
+        public string Comment
+        {
+            get { return _shelveset.Comment; }
+            set { _shelveset.Comment = value; }
+        }
+
+        public IWorkItemCheckinInfo[] WorkItemInfo
+        {
+            get { return _shelveset.WorkItemInfo.Select(i => _bridge.Wrap(i)).ToArray(); }
+            set { _shelveset.WorkItemInfo = value.Select(i => _bridge.Unwrap(i)).ToArray(); }
+        }
+    }
+
+    class NeedsToBeReflectedWorkItemCheckinInfo : WrapperFor<WorkItemCheckinInfo>, IWorkItemCheckinInfo
+    {
+        private readonly WorkItemCheckinInfo _info;
+
+        public NeedsToBeReflectedWorkItemCheckinInfo(WorkItemCheckinInfo info) : base(info)
+        {
+            _info = info;
+        }
+    }
+
+    class NeedsToBeReflectedPendingChange : WrapperFor<PendingChange>, IPendingChange
+    {
+        private readonly PendingChange _pendingChange;
+
+        public NeedsToBeReflectedPendingChange(PendingChange pendingChange) : base(pendingChange)
+        {
+            _pendingChange = pendingChange;
+        }
+    }
+
+    class NeedsToBeReflectedWorkspace : WrapperFor<Workspace>, IWorkspace
+    {
+        private readonly TfsApiBridge _bridge;
+        private readonly Workspace _workspace;
+
+        public NeedsToBeReflectedWorkspace(TfsApiBridge bridge, Workspace workspace) : base(workspace)
+        {
+            _bridge = bridge;
+            _workspace = workspace;
+        }
+
+        public IEnumerable<IPendingChange> GetPendingChanges()
+        {
+            return _workspace.GetPendingChanges().Select(c => _bridge.Wrap(c));
+        }
+
+        public void Shelve(IShelveset shelveset, IEnumerable<IPendingChange> changes, TfsShelvingOptions options)
+        {
+            _workspace.Shelve(_bridge.Unwrap(shelveset), changes.Select(c => _bridge.Unwrap(c)).ToArray(), _bridge.Convert(options));
+        }
+
+        public int PendAdd(string path)
+        {
+            return _workspace.PendAdd(path);
+        }
+
+        public int PendEdit(string path)
+        {
+            return _workspace.PendEdit(path);
+        }
+
+        public int PendDelete(string path)
+        {
+            return _workspace.PendDelete(path);
+        }
+
+        public void ForceGetFile(string path, int changeset)
+        {
+            var item = new ItemSpec(path, RecursionType.None);
+            _workspace.Get(new GetRequest(item, changeset), GetOptions.Overwrite | GetOptions.GetAll);
+        }
+
+        public string OwnerName
+        {
+            get { return _workspace.OwnerName; }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Sep.Git.Tfs.Core.TfsInterop
+namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public interface IIdentity
     {

@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using SEP.Extensions;
-using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Core
+namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public class TfsHelper : ITfsHelper
     {
@@ -88,6 +89,14 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public WorkItemStore WorkItems
+        {
+            get
+            {
+                return (WorkItemStore) Server.GetService(typeof (WorkItemStore));
+            }
+        }
+
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
             _stdout.WriteLine(e.Failure.Message);
@@ -103,8 +112,8 @@ namespace Sep.Git.Tfs.Core
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                        null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
-                                        true, true);
+                                                         null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
+                                                         true, true);
             foreach (Changeset changeset in changesets)
             {
                 yield return
@@ -123,7 +132,7 @@ namespace Sep.Git.Tfs.Core
                 var tfsWorkspace = ObjectFactory.With("localDirectory").EqualTo(localDirectory)
                     .With("remote").EqualTo(remote)
                     .With("contextVersion").EqualTo(versionToFetch)
-                    .With("workspace").EqualTo(workspace)
+                    .With("workspace").EqualTo(_bridge.Wrap(workspace))
                     .GetInstance<TfsWorkspace>();
                 action(tfsWorkspace);
             }
@@ -131,6 +140,13 @@ namespace Sep.Git.Tfs.Core
             {
                 workspace.Delete();
             }
+        }
+
+        public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
+        {
+            return
+                _bridge.Wrap(new Shelveset(_bridge.Unwrap(workspace).VersionControlServer, shelvesetName,
+                                           workspace.OwnerName));
         }
 
         private Workspace GetWorkspace(string localDirectory, string repositoryPath)
@@ -148,6 +164,16 @@ namespace Sep.Git.Tfs.Core
         public IIdentity GetIdentity(string username)
         {
             return _bridge.Wrap(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
+        }
+
+        public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
+        {
+            return workItems.Select(workItem => _bridge.Wrap(GetWorkItemInfo(workItem, _bridge.Convert(checkinAction))));
+        }
+
+        private WorkItemCheckinInfo GetWorkItemInfo(string workItem, WorkItemCheckinAction checkinAction)
+        {
+            return new WorkItemCheckinInfo(WorkItems.GetWorkItem(Convert.ToInt32(workItem)), checkinAction);
         }
     }
 }

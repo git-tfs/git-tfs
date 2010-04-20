@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 
-namespace Sep.Git.Tfs.Core
+namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public interface ITfsHelper
     {
@@ -11,5 +10,7 @@ namespace Sep.Git.Tfs.Core
         string Username { get; set; }
         IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
+        IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);
+        IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
     }
 }
