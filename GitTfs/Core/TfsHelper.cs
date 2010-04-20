@@ -145,9 +145,9 @@ namespace Sep.Git.Tfs.Core
             return Guid.NewGuid().ToString();
         }
 
-        public ITfsIdentity GetIdentity(string username)
+        public IIdentity GetIdentity(string username)
         {
-            return new TfsIdentity(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
+            return _bridge.Wrap(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
         }
     }
 }

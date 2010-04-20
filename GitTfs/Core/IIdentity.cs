@@ -1,6 +1,6 @@
-﻿namespace Sep.Git.Tfs.Core
+﻿namespace Sep.Git.Tfs.Core.TfsInterop
 {
-    public interface ITfsIdentity
+    public interface IIdentity
     {
         string MailAddress { get; }
         string DisplayName { get; }

@@ -109,6 +109,7 @@
     <Compile Include="Core\TfsInterop\IChange.cs" />
     <Compile Include="Core\TfsInterop\IItem.cs" />
     <Compile Include="Core\TfsInterop\NeedsToBeReflected.cs" />
+    <Compile Include="Core\TfsInterop\NullIdentity.cs" />
     <Compile Include="Core\TfsInterop\TfsApiBridge.cs" />
     <Compile Include="Core\TfsInterop\TfsChangeType.cs" />
     <Compile Include="Core\TfsInterop\TfsExt.cs" />
@@ -126,12 +127,11 @@
     <Compile Include="Core\IGitHelpers.cs" />
     <Compile Include="Core\IGitRepository.cs" />
     <Compile Include="Core\ITfsChangeset.cs" />
-    <Compile Include="Core\ITfsIdentity.cs" />
+    <Compile Include="Core\IIdentity.cs" />
     <Compile Include="Core\LogEntry.cs" />
     <Compile Include="Core\RequiresValidGitRepositoryAttribute.cs" />
     <Compile Include="Core\TfsChangeset.cs" />
     <Compile Include="Core\TfsChangesetInfo.cs" />
-    <Compile Include="Core\TfsIdentity.cs" />
     <Compile Include="GitTfs.cs" />
     <Compile Include="GitTfsCommand.cs" />
     <Compile Include="GitTfsConstants.cs" />

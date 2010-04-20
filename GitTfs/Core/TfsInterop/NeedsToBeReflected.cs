@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace Sep.Git.Tfs.Core.TfsInterop
@@ -104,6 +106,27 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         public void DownloadFile(string file)
         {
             _item.DownloadFile(file);
+        }
+    }
+
+    class NeedsToBeReflectedIdentity : IIdentity
+    {
+        private readonly Identity _identity;
+
+        public NeedsToBeReflectedIdentity(Identity identity)
+        {
+            Debug.Assert(identity != null, "wrapped property must not be null.");
+            _identity = identity;
+        }
+
+        public string MailAddress
+        {
+            get { return _identity.MailAddress; }
+        }
+
+        public string DisplayName
+        {
+            get { return _identity.DisplayName; }
         }
     }
 }
