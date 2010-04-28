@@ -12,5 +12,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
         IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);
         IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
+        IIdentity GetIdentity(string username);
     }
 }

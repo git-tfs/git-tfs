@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.Changes.Git;
+using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using StructureMap;
-using StructureMap.Configuration.DSL;
 using StructureMap.Graph;
 
 namespace Sep.Git.Tfs
@@ -36,11 +36,13 @@ namespace Sep.Git.Tfs
 
         private static void Initialize(IInitializationExpression initializer)
         {
-            initializer.Scan(Initialize);
+            var tfsPlugin = TfsPlugin.Find();
+            initializer.Scan(x => { Initialize(x); tfsPlugin.Initialize(x); });
             initializer.ForRequestedType<TextWriter>().TheDefault.Is.ConstructedBy(() => Console.Out);
             initializer.InstanceOf<IGitRepository>().Is.OfConcreteType<GitRepository>();
             AddGitChangeTypes(initializer);
             DoCustomConfiguration(initializer);
+            tfsPlugin.Initialize(initializer);
         }
 
         private static void AddGitChangeTypes(IInitializationExpression initializer)
@@ -54,7 +56,6 @@ namespace Sep.Git.Tfs
         {
             scan.WithDefaultConventions();
             scan.TheCallingAssembly();
-            scan.AssemblyContainingType(typeof(Microsoft.TeamFoundation.Client.TeamFoundationServer));
         }
 
         private static void DoCustomConfiguration(IInitializationExpression initializer)

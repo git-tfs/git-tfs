@@ -8,13 +8,13 @@ using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
 {
-    class TfsChangeset : ITfsChangeset
+    public class TfsChangeset : ITfsChangeset
     {
-        private readonly TfsHelper tfs;
+        private readonly ITfsHelper tfs;
         private readonly IChangeset changeset;
         public TfsChangesetInfo Summary { get; set; }
 
-        public TfsChangeset(TfsHelper tfs, IChangeset changeset)
+        public TfsChangeset(ITfsHelper tfs, IChangeset changeset)
         {
             this.tfs = tfs;
             this.changeset = changeset;
