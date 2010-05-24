@@ -1,6 +1,6 @@
-using System;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Sep.Git.Tfs.Vs2008;
 using ChangeType=Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
 
 namespace Sep.Git.Tfs.Core.TfsInterop
@@ -9,27 +9,27 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     {
         public IChangeset Wrap(Changeset changeset)
         {
-            return new NeedsToBeReflectedChangeset(this, changeset);
+            return new WrapperForChangeset(this, changeset);
         }
 
         public IChange Wrap(Change change)
         {
-            return new NeedsToBeReflectedChange(this, change);
+            return new WrapperForChange(this, change);
         }
 
         public IItem Wrap(Item item)
         {
-            return new NeedsToBeReflectedItem(this, item);
+            return new WrapperForItem(this, item);
         }
 
         public IIdentity Wrap(Identity identity)
         {
-            return identity == null ? (IIdentity)new NullIdentity() : new NeedsToBeReflectedIdentity(identity);
+            return identity == null ? (IIdentity)new NullIdentity() : new WrapperForIdentity(identity);
         }
 
         public IWorkspace Wrap(Workspace workspace)
         {
-            return new NeedsToBeReflectedWorkspace(this, workspace);
+            return new WrapperForWorkspace(this, workspace);
         }
 
         public Workspace Unwrap(IWorkspace workspace)
@@ -39,7 +39,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
         public IShelveset Wrap(Shelveset shelveset)
         {
-            return new NeedsToBeReflectedShelveset(this, shelveset);
+            return new WrapperForShelveset(this, shelveset);
         }
 
         public Shelveset Unwrap(IShelveset shelveset)
@@ -49,7 +49,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
         public IPendingChange Wrap(PendingChange pendingChange)
         {
-            return new NeedsToBeReflectedPendingChange(pendingChange);
+            return new WrapperForPendingChange(pendingChange);
         }
 
         public PendingChange Unwrap(IPendingChange pendingChange)
@@ -59,12 +59,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
         public IWorkItemCheckinInfo Wrap(WorkItemCheckinInfo workItemCheckinInfo)
         {
-            return new NeedsToBeReflectedWorkItemCheckinInfo(workItemCheckinInfo);
+            return new WrapperForWorkItemCheckinInfo(workItemCheckinInfo);
         }
 
         public IVersionControlServer Wrap(VersionControlServer versionControlServer)
         {
-            return new NeedsToBeReflectedVersionControlServer(this, versionControlServer);
+            return new WrapperForVersionControlServer(this, versionControlServer);
         }
 
         public WorkItemCheckinInfo Unwrap(IWorkItemCheckinInfo info)

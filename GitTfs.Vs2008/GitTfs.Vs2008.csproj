@@ -76,7 +76,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NeedsToBeReflected.cs" />
+    <Compile Include="Wrappers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TfsApiBridge.cs" />
     <Compile Include="TfsHelper.cs" />

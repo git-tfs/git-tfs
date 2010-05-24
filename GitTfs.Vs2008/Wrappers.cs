@@ -3,16 +3,16 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Sep.Git.Tfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Core.TfsInterop
+namespace Sep.Git.Tfs.Vs2008
 {
-    // These things should be auto-generated, or reflected, or duck-typed, or something to break the explicit dependence on the TF dlls.
-    class NeedsToBeReflectedVersionControlServer :WrapperFor<VersionControlServer>, IVersionControlServer
+    class WrapperForVersionControlServer :WrapperFor<VersionControlServer>, IVersionControlServer
     {
         private readonly TfsApiBridge _bridge;
         private readonly VersionControlServer _versionControlServer;
 
-        public NeedsToBeReflectedVersionControlServer(TfsApiBridge bridge, VersionControlServer versionControlServer) : base(versionControlServer)
+        public WrapperForVersionControlServer(TfsApiBridge bridge, VersionControlServer versionControlServer) : base(versionControlServer)
         {
             _bridge = bridge;
             _versionControlServer = versionControlServer;
@@ -24,12 +24,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         }
     }
 
-    class NeedsToBeReflectedChangeset : WrapperFor<Changeset>, IChangeset
+    class WrapperForChangeset : WrapperFor<Changeset>, IChangeset
     {
         private readonly TfsApiBridge _bridge;
         private readonly Changeset _changeset;
 
-        public NeedsToBeReflectedChangeset(TfsApiBridge bridge, Changeset changeset) : base(changeset)
+        public WrapperForChangeset(TfsApiBridge bridge, Changeset changeset) : base(changeset)
         {
             _bridge = bridge;
             _changeset = changeset;
@@ -61,12 +61,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         }
     }
 
-    class NeedsToBeReflectedChange : WrapperFor<Change>, IChange
+    class WrapperForChange : WrapperFor<Change>, IChange
     {
         private readonly TfsApiBridge _bridge;
         private readonly Change _change;
 
-        public NeedsToBeReflectedChange(TfsApiBridge bridge, Change change) : base(change)
+        public WrapperForChange(TfsApiBridge bridge, Change change) : base(change)
         {
             _bridge = bridge;
             _change = change;
@@ -83,12 +83,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         }
     }
 
-    class NeedsToBeReflectedItem : WrapperFor<Item>, IItem
+    class WrapperForItem : WrapperFor<Item>, IItem
     {
         private readonly TfsApiBridge _bridge;
         private readonly Item _item;
 
-        public NeedsToBeReflectedItem(TfsApiBridge bridge, Item item) : base(item)
+        public WrapperForItem(TfsApiBridge bridge, Item item) : base(item)
         {
             _bridge = bridge;
             _item = item;
@@ -130,11 +130,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         }
     }
 
-    class NeedsToBeReflectedIdentity : WrapperFor<Identity>, IIdentity
+    class WrapperForIdentity : WrapperFor<Identity>, IIdentity
     {
         private readonly Identity _identity;
 
-        public NeedsToBeReflectedIdentity(Identity identity) : base(identity)
+        public WrapperForIdentity(Identity identity) : base(identity)
         {
             Debug.Assert(identity != null, "wrapped property must not be null.");
             _identity = identity;
@@ -151,12 +151,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         }
     }
 
-    class NeedsToBeReflectedShelveset : WrapperFor<Shelveset>, IShelveset
+    class WrapperForShelveset : WrapperFor<Shelveset>, IShelveset
     {
         private readonly Shelveset _shelveset;
         private readonly TfsApiBridge _bridge;
 
-        public NeedsToBeReflectedShelveset(TfsApiBridge bridge, Shelveset shelveset) : base(shelveset)
+        public WrapperForShelveset(TfsApiBridge bridge, Shelveset shelveset) : base(shelveset)
         {
             _shelveset = shelveset;
             _bridge = bridge;
@@ -175,32 +175,32 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         }
     }
 
-    class NeedsToBeReflectedWorkItemCheckinInfo : WrapperFor<WorkItemCheckinInfo>, IWorkItemCheckinInfo
+    class WrapperForWorkItemCheckinInfo : WrapperFor<WorkItemCheckinInfo>, IWorkItemCheckinInfo
     {
         private readonly WorkItemCheckinInfo _info;
 
-        public NeedsToBeReflectedWorkItemCheckinInfo(WorkItemCheckinInfo info) : base(info)
+        public WrapperForWorkItemCheckinInfo(WorkItemCheckinInfo info) : base(info)
         {
             _info = info;
         }
     }
 
-    class NeedsToBeReflectedPendingChange : WrapperFor<PendingChange>, IPendingChange
+    class WrapperForPendingChange : WrapperFor<PendingChange>, IPendingChange
     {
         private readonly PendingChange _pendingChange;
 
-        public NeedsToBeReflectedPendingChange(PendingChange pendingChange) : base(pendingChange)
+        public WrapperForPendingChange(PendingChange pendingChange) : base(pendingChange)
         {
             _pendingChange = pendingChange;
         }
     }
 
-    class NeedsToBeReflectedWorkspace : WrapperFor<Workspace>, IWorkspace
+    class WrapperForWorkspace : WrapperFor<Workspace>, IWorkspace
     {
         private readonly TfsApiBridge _bridge;
         private readonly Workspace _workspace;
 
-        public NeedsToBeReflectedWorkspace(TfsApiBridge bridge, Workspace workspace) : base(workspace)
+        public WrapperForWorkspace(TfsApiBridge bridge, Workspace workspace) : base(workspace)
         {
             _bridge = bridge;
             _workspace = workspace;
