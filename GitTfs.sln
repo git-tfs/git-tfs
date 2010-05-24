@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfsBenchmarks", "GitTfsB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2008", "GitTfs.Vs2008\GitTfs.Vs2008.csproj", "{09BF8124-19A8-45BE-896B-536CA0F3F0FC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2010", "GitTfs.Vs2010\GitTfs.Vs2010.csproj", "{C5A374D3-A2E1-407C-9D6D-541FDB53BD62}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = GitTfs1.vsmdi
@@ -43,6 +45,10 @@ Global
 		{09BF8124-19A8-45BE-896B-536CA0F3F0FC}.Debug|x86.Build.0 = Debug|x86
 		{09BF8124-19A8-45BE-896B-536CA0F3F0FC}.Release|x86.ActiveCfg = Release|x86
 		{09BF8124-19A8-45BE-896B-536CA0F3F0FC}.Release|x86.Build.0 = Release|x86
+		{C5A374D3-A2E1-407C-9D6D-541FDB53BD62}.Debug|x86.ActiveCfg = Debug|x86
+		{C5A374D3-A2E1-407C-9D6D-541FDB53BD62}.Debug|x86.Build.0 = Debug|x86
+		{C5A374D3-A2E1-407C-9D6D-541FDB53BD62}.Release|x86.ActiveCfg = Release|x86
+		{C5A374D3-A2E1-407C-9D6D-541FDB53BD62}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
