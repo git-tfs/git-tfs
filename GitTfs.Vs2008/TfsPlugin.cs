@@ -1,4 +1,6 @@
-﻿namespace Sep.Git.Tfs.Vs2008
+﻿using System;
+
+namespace Sep.Git.Tfs.Vs2008
 {
     class TfsPlugin : Sep.Git.Tfs.Core.TfsInterop.TfsPlugin
     {
@@ -10,6 +12,11 @@
 
         public override void Initialize(StructureMap.IInitializationExpression config)
         {
+        }
+
+        public override bool IsViable()
+        {
+            return null != typeof (Microsoft.TeamFoundation.Client.TeamFoundationServer).Assembly;
         }
     }
 }

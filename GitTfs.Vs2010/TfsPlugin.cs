@@ -11,5 +11,10 @@
         public override void Initialize(StructureMap.IInitializationExpression config)
         {
         }
+
+        public override bool IsViable()
+        {
+            return null != typeof(Microsoft.TeamFoundation.Client.TfsTeamProjectCollection).Assembly;
+        }
     }
 }
