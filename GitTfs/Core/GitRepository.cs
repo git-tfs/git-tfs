@@ -304,14 +304,14 @@ namespace Sep.Git.Tfs.Core
         {
             var writer = new ObjectWriter(_repository);
             var objectId = writer.WriteBlob(new FileInfo(filename));
-            return objectId.ToString();
+            return objectId.Name;
         }
 
         public string HashAndInsertObject(Stream file)
         {
             var writer = new ObjectWriter(_repository);
             var objectId = writer.WriteBlob(file.Length, file);
-            return objectId.ToString();
+            return objectId.Name;
         }
     }
 }
