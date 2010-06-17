@@ -1,0 +1,771 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GitSharp.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:GitSharp.Core.Tests.RepositoryTestCase">
+             Base class for most unit tests.
+            
+             Sets up a predefined test repository and has support for creating additional
+             repositories and destroying them when the tests are finished.
+        </member>
+        <member name="F:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.author">
+            A fake (but stable) identity for author fields in the test. 
+        </member>
+        <member name="F:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.committer">
+            A fake (but stable) identity for committer fields in the test. 
+        </member>
+        <member name="M:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.tick">
+            Increment the {@link #author} and {@link #committer} times. 
+        </member>
+        <member name="M:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.recursiveDelete(System.IO.FileSystemInfo)">
+             Recursively delete a directory, failing the test if the delete fails.
+            
+             @param dir
+                        the recursively directory to delete, if present.
+        </member>
+        <member name="M:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.createBareRepository">
+             Creates a new empty bare repository.
+            
+             @return the newly created repository, opened for access
+             @throws IOException
+                         the repository could not be created in the temporary area
+        </member>
+        <member name="M:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.createWorkRepository">
+             Creates a new empty repository within a new empty working directory.
+            
+             @return the newly created repository, opened for access
+             @throws IOException
+                         the repository could not be created in the temporary area
+        </member>
+        <member name="M:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.createRepository(System.Boolean)">
+             Creates a new empty repository.
+            
+             @param bare
+                        true to create a bare repository; false to make a repository
+                        within its working directory
+             @return the newly created repository, opened for access
+             @throws IOException
+                         the repository could not be created in the temporary area
+        </member>
+        <member name="M:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.runHook(GitSharp.Core.Repository,System.IO.FileInfo,System.String[])">
+             Run a hook script in the repository, returning the exit status.
+            
+             @param db
+                        repository the script should see in GIT_DIR environment
+             @param hook
+                        path of the hook script to execute, must be executable file
+                        type on this platform
+             @param args
+                        arguments to pass to the hook script
+             @return exit status code of the invoked hook
+             @throws IOException
+                         the hook could not be executed
+             @throws InterruptedException
+                         the caller was interrupted before the hook completed
+        </member>
+        <member name="M:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.write(System.String)">
+             Create a string to a UTF-8 temporary file and return the path.
+            
+             @param body
+                        complete content to write to the file. If the file should end
+                        with a trailing LF, the string should end with an LF.
+             @return path of the temporary file created within the trash area.
+             @throws IOException
+                         the file could not be written.
+        </member>
+        <member name="M:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.write(System.IO.FileInfo,System.String)">
+             Write a string as a UTF-8 file.
+            
+             @param f
+                        file to write the string to. Caller is responsible for making
+                        sure it is in the trash directory or will otherwise be cleaned
+                        up at the end of the test. If the parent directory does not
+                        exist, the missing parent directories are automatically
+                        created.
+             @param body
+                        content to write to the file.
+             @throws IOException
+                         the file could not be written.
+        </member>
+        <member name="M:GitSharp.Core.Tests.Util.LocalDiskRepositoryTestCase.read(System.IO.FileInfo)">
+             Fully read a UTF-8 file and return as a string.
+            
+             @param f
+                        file to read the content of.
+             @return UTF-8 decoded content of the file, empty string if the file
+                     exists but has no content.
+             @throws IOException
+                         the file does not exist, or could not be read.
+        </member>
+        <member name="F:GitSharp.Core.Tests.RepositoryTestCase.db">
+            Test repository, initialized for this test case. 
+        </member>
+        <member name="F:GitSharp.Core.Tests.RepositoryTestCase.userGitConfig">
+            <summary>
+            mock user's global configuration used instead ~/.gitconfig.
+            This configuration can be modified by the tests without any
+            effect for ~/.gitconfig.
+            </summary>
+        </member>
+        <member name="F:GitSharp.Core.Tests.RepositoryTestCase.trash">
+            Working directory of {@link #db}. 
+        </member>
+        <member name="M:GitSharp.API.Tests.IndexTest.Add_and_Commit_directly">
+            <summary>
+            This testcase shows how to interact with the index without a working directory
+            </summary>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.MergeTests.MergeStrategyRecursive_FastForwardOff">
+            <summary>
+            When not allowing a fast forward merge, a new commit is created the merged commits as parent.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Diff.MyersDiffPerformanceTest.test(System.Int32)">
+             Tests the performance of MyersDiff for texts which are similar (not
+             random data). The CPU time is measured and returned. Because of bad
+             accuracy of CPU time information the diffs are repeated. During each
+             repetition the interim CPU time is checked. The diff operation is
+             repeated until we have seen the CPU time clock changed its value at least
+             {@link #minCPUTimerTicks} times.
+            
+             @param characters
+                        the size of the diffed character sequences.
+             @return performance data
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.DirectoryCache.DirCacheTreeTest.testWriteReadTree">
+            <summary>
+            We had bugs related to buffer size in the DirCache. This test creates an
+            index larger than the default BufferedInputStream buffer size. This made
+            the DirCache unable to Read the extensions when index size exceeded the
+            buffer size (in some cases at least).
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.FnMatch.FileNameMatcherTest.testCombinedRangesInOneGroupCase1">
+            <summary>
+            The c belongs to the range a-c. "-e" is no valid range so d should not 	match.
+            </summary>
+            <exception cref="T:System.Exception">for some reasons </exception>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Merge.MergeAlgorithmTest.testTwoConflictingModifications">
+             Check for a conflict where the second text was changed similar to the
+             first one, but the second texts modification covers one more line.
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Merge.MergeAlgorithmTest.testOneAgainstTwoConflictingModifications">
+             Test a case where we have three consecutive chunks. The first text
+             modifies all three chunks. The second text modifies the first and the
+             last chunk. This should be reported as one conflicting region.
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Merge.MergeAlgorithmTest.testNoAgainstOneModification">
+             Test a merge where only the second text contains modifications. Expect as
+             merge result the second text.
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Merge.MergeAlgorithmTest.testTwoNonConflictingModifications">
+             Both texts contain modifications but not on the same chunks. Expect a
+             non-conflict merge result.
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Merge.MergeAlgorithmTest.testTwoComplicatedModifications">
+             Merge two complicated modifications. The merge algorithm has to extend
+             and combine conflicting regions to get to the expected merge result.
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Merge.MergeAlgorithmTest.testConflictAtStart">
+             Test a conflicting region at the very start of the text.
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Merge.MergeAlgorithmTest.testConflictAtEnd">
+             Test a conflicting region at the very end of the text.
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RevWalk.RevCommitParseTest.testParse_explicit_encoded">
+            <summary>
+            Test parsing of a commit whose encoding is given and works.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.RevWalk.RevCommitParseTest.testParse_explicit_bad_encoded">
+            <summary>
+            This is a twisted case, but show what we expect here. We can revise the
+            expectations provided this case is updated.
+            
+            What happens here is that an encoding us given, but data is not encoded
+            that way (and we can detect it), so we try other encodings.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.RevWalk.RevCommitParseTest.testParse_explicit_bad_encoded2">
+            <summary>
+            This is a twisted case too, but show what we expect here. We can revise the
+            expectations provided this case is updated.
+            
+            What happens here is that an encoding us given, but data is not encoded
+            that way (and we can detect it), so we try other encodings. Here data could
+            actually be decoded in the stated encoding, but we override using UTF-8.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.RevWalk.RevTagParseTest.testParse_explicit_encoded">
+             Test parsing of a commit whose encoding is given and works.
+            
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Core.Tests.RevWalk.RevTagParseTest.testParse_explicit_bad_encoded">
+             This is a twisted case, but show what we expect here. We can revise the
+             expectations provided this case is updated.
+            
+             What happens here is that an encoding us given, but data is not encoded
+             that way (and we can detect it), so we try other encodings.
+            
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Core.Tests.RevWalk.RevTagParseTest.testParse_explicit_bad_encoded2">
+             This is a twisted case too, but show what we expect here. We can revise
+             the expectations provided this case is updated.
+            
+             What happens here is that an encoding us given, but data is not encoded
+             that way (and we can detect it), so we try other encodings. Here data
+             could actually be decoded in the stated encoding, but we override using
+             UTF-8.
+            
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Core.Tests.Transport.BundleWriterTest.testWrite1">
+            Incremental bundle test
+            
+            @throws Exception
+        </member>
+        <member name="M:GitSharp.Core.Tests.Transport.IndexPackTest.test1">
+            <summary>
+            Test indexing one of the test packs in the egit repo. It has deltas.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.Transport.IndexPackTest.test2">
+            <summary>
+            This is just another pack. It so happens that we have two convenient pack to
+            test with in the repository.
+            </summary>
+        </member>
+        <member name="M:CPUTimeStopWatch.createInstance">
+             use this method instead of the constructor to be sure that the underlying
+             VM provides all features needed by this class.
+            
+             @return a new instance of {@link #CPUTimeStopWatch()} or
+                     <code>null</code> if the VM does not support getting CPU time
+                     information
+        </member>
+        <member name="M:CPUTimeStopWatch.start">
+            Starts the stopwatch. If the stopwatch is already started this will
+            restart the stopwatch.
+        </member>
+        <member name="M:CPUTimeStopWatch.stop">
+             Stops the stopwatch and return the elapsed CPU time in nanoseconds.
+             Should be called only on started stopwatches.
+            
+             @return the elapsed CPU time in nanoseconds. When called on non-started
+                     stopwatches (either because {@link #start()} was never called or
+                     {@link #stop()} was called after the last call to
+                     {@link #start()}) this method will return 0.
+        </member>
+        <member name="M:CPUTimeStopWatch.readout">
+             Return the elapsed CPU time in nanoseconds. In contrast to
+             {@link #stop()} the stopwatch will continue to run after this call.
+            
+             @return the elapsed CPU time in nanoseconds. When called on non-started
+                     stopwatches (either because {@link #start()} was never called or
+                     {@link #stop()} was called after the last call to
+                     {@link #start()}) this method will return 0.
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.#ctor(GitSharp.Core.Repository)">
+             Wrap a repository with test building tools.
+            
+             @param db
+                        the test repository to write into.
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.#ctor(GitSharp.Core.Repository,GitSharp.Core.RevWalk.RevWalk)">
+             Wrap a repository with test building tools.
+            
+             @param db
+                        the test repository to write into.
+             @param rw
+                        the RevObject pool to use for object lookup.
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.getRepository">
+            @return the repository this helper class operates against. 
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.getRevWalk">
+            @return get the RevWalk pool all objects are allocated through. 
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.getClock">
+            @return current time adjusted by {@link #tick(int)}. 
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.tick(System.Int32)">
+             Adjust the current time that will used by the next commit.
+            
+             @param secDelta
+                        number of seconds to add to the current time.
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.blob(System.String)">
+             Create a new blob object in the repository.
+            
+             @param content
+                        file content, will be UTF-8 encoded.
+             @return reference to the blob.
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.blob(System.Byte[])">
+             Create a new blob object in the repository.
+            
+             @param content
+                        binary file content.
+             @return reference to the blob.
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.file(System.String,GitSharp.Core.RevWalk.RevBlob)">
+             Construct a regular file mode tree entry.
+            
+             @param path
+                        path of the file.
+             @param blob
+                        a blob, previously constructed in the repository.
+             @return the entry.
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.tree(GitSharp.Core.DirectoryCache.DirCacheEntry[])">
+             Construct a tree from a specific listing of file entries.
+            
+             @param entries
+                        the files to include in the tree. The collection does not need
+                        to be sorted properly and may be empty.
+             @return reference to the tree specified by the entry list.
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.get(GitSharp.Core.RevWalk.RevTree,System.String)">
+             Lookup an entry stored in a tree, failing if not present.
+            
+             @param tree
+                        the tree to search.
+             @param path
+                        the path to find the entry of.
+             @return the parsed object entry at this path, never null.
+             @throws AssertionFailedError
+                         if the path does not exist in the given tree.
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.update(System.String,GitSharp.Tests.GitSharp.Core.Util.TestRepository.CommitBuilder)">
+             Update a reference to point to an object.
+            
+             @param ref
+                        the name of the reference to update to. If {@code ref} does
+                        not start with {@code refs/} and is not the magic names
+                        {@code HEAD} {@code FETCH_HEAD} or {@code MERGE_HEAD}, then
+                        {@code refs/heads/} will be prefixed in front of the given
+                        name, thereby assuming it is a branch.
+             @param to
+                        the target object.
+             @return the target object.
+             @throws Exception
+        </member>
+        <member name="T:GitSharp.Tests.GitSharp.Core.Util.TestRepository.BranchBuilder">
+            Helper to build a branch with one or more commits 
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.BranchBuilder.commit">
+            @return construct a new commit builder that updates this branch. If
+                    the branch already exists, the commit builder will have its
+                    first parent as the current commit and its tree will be
+                    initialized to the current files.
+            @throws Exception
+                        the commit builder can't read the current branch state
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.BranchBuilder.update(GitSharp.Tests.GitSharp.Core.Util.TestRepository.CommitBuilder)">
+             Forcefully update this branch to a particular commit.
+            
+             @param to
+                        the commit to update to.
+             @return {@code to}.
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.Util.TestRepository.BranchBuilder.update(GitSharp.Core.RevWalk.RevCommit)">
+             Forcefully update this branch to a particular commit.
+            
+             @param to
+                        the commit to update to.
+             @return {@code to}.
+             @throws Exception
+        </member>
+        <member name="T:GitSharp.Tests.GitSharp.Core.Util.TestRepository.CommitBuilder">
+            Helper to generate a commit. 
+        </member>
+        <member name="T:GitSharp.Core.Tests.Util.TestRng">
+            Toy RNG to ensure we get predictable numbers during unit tests. 
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.PackIndexTestCase.GetFileForPack34Be9032">
+            <summary>
+            Return File with appropriate index version for prepared pack.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.PackIndexTestCase.GetFileForPackdf2982F28">
+            <summary>
+            Return File with appropriate index version for prepared pack.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.PackIndexTestCase.testCRC32">
+            <summary>
+            Verify CRC32 support.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.PackIndexTestCase.testIteratorMethodsContract">
+            <summary>
+            Test contracts of Iterator methods and this implementation remove()
+            limitations.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.PackIndexTestCase.testIteratorReturnedValues1">
+            <summary>
+            Test results of iterator comparing to content of well-known (prepared)
+            small index.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.PackIndexTestCase.testCompareEntriesOffsetsWithFindOffsets">
+            <summary>
+            Compare offset from iterator entries with output of findOffset() method.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.PackIndexTestCase.testIteratorReturnedValues2">
+            <summary>
+            Test partial results of iterator comparing to content of well-known
+            (prepared) dense index, that may need multi-level indexing.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackIndexV1Test.testCRC32">
+            <summary>
+            Verify CRC32 - V1 should not index anything.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackIndexV2Tests.testCRC32">
+            <summary>
+            Verify CRC32 indexing.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackReverseIndexTest.setUp">
+            <summary>
+            Set up tested class instance, test constructor by the way.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackReverseIndexTest.testFindObject">
+            <summary>
+            Test findObject() for all index entries.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackReverseIndexTest.testFindObjectWrongOffset">
+            <summary>
+            Test findObject() with illegal argument.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackReverseIndexTest.testFindNextOffset">
+            <summary>
+            Test findNextOffset() for all index entries.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackReverseIndexTest.testFindNextOffsetWrongOffset">
+            <summary>
+            Test findNextOffset() with wrong illegal argument as offset.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testIgnoreNonExistingObjects">
+            <summary>
+            Try to pass non-existing object as uninteresting, with ignoring setting.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack1">
+            <summary>
+            Create pack basing on only interesting objects, then precisely verify
+            content. No delta reuse here.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2SizeOffsetsVsRefs">
+            <summary>
+            Compare sizes of packs created using
+            <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2DeltasReuseRefs"/> and
+            <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2DeltasReuseOffsets"/>. 
+            The pack with delta bases written as offsets should be smaller.
+            </summary>
+            <exception cref="T:System.Exception"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack4SizeThinVsNoThin">
+            <summary>
+            Compare sizes of packs created using <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack4"/> and
+            <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack4ThinPack"/>. 
+            Obviously, the thin pack should be smaller.
+            </summary>
+            <exception cref="T:System.Exception"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testContructor">
+             <summary>
+            Test constructor for exceptions, default settings, initialization.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testModifySettings">
+            <summary>
+            Change default settings and verify them.
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testNotIgnoreNonExistingObjects">
+            <summary>
+            Try to pass non-existing object as uninteresting, with non-ignoring
+            setting.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWriteEmptyPack1">
+            <summary>
+            Write empty pack by providing empty sets of interesting/uninteresting
+            objects and check for correct format.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWriteEmptyPack2">
+            <summary>
+            Write empty pack by providing empty iterator of objects to write and
+            check for correct format.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack1NoObjectReuse">
+            <summary>
+            Test writing pack without object reuse. Pack content/preparation as in
+            <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack1"/>.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2">
+            <summary>
+            Create pack basing on both interesting and uninteresting objects, then
+            precisely verify content. No delta reuse here.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2DeltasCRC32Copy">
+            <summary>
+            Test pack writing with delta reuse. Raw-data copy (reuse) is made on a
+            pack with CRC32 index. Pack configuration as in
+            <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2DeltasReuseRefs"/>.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2DeltasReuseOffsets">
+            <summary> 
+            Test pack writing with delta reuse. Delta bases referred as offsets. Pack
+            configuration as in <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2DeltasReuseRefs"/>.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2DeltasReuseRefs">
+            <summary>
+            Test pack writing with deltas reuse, delta-base first rule. Pack
+            content/preparation as in <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2"/>.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2SizeDeltasVsNoDeltas">
+            <summary>
+            Compare sizes of packs created using <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2"/> and
+            <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack2DeltasReuseRefs"/>. The pack using deltas should
+            be smaller.
+            </summary>
+            <exception cref="T:System.Exception"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack3">
+            <summary>
+            Create pack basing on fixed objects list, then precisely verify content.
+            No delta reuse here.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+            <exception cref="T:GitSharp.Core.Exceptions.MissingObjectException">
+            </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack4">
+            <summary>
+            Another pack creation: basing on both interesting and uninteresting
+            objects. No delta reuse possible here, as this is a specific case when we
+            write only 1 commit, associated with 1 tree, 1 blob.
+            </summary>
+             <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.PackWriterTest.testWritePack4ThinPack">
+            <summary>
+            Test thin pack writing: 1 blob delta base is on objects edge. Pack
+            configuration as in <seealso cref="M:GitSharp.Core.Tests.PackWriterTest.testWritePack4"/>.
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="T:GitSharp.Tests.GitSharp.Core.RefTest">
+            Misc tests for refs. A lot of things are tested elsewhere so not having a
+            test for a ref related method, does not mean it is untested.
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.RefTest.testReadLoosePackedRef">
+            <summary>
+            Let an "outsider" Create a loose ref with the same name as a packed one
+            </summary>
+        </member>
+        <member name="M:GitSharp.Tests.GitSharp.Core.RefTest.testReadSimplePackedRefSameRepo">
+            <summary>
+            Modify a packed ref using the API. This creates a loose ref too, ie. LOOSE_PACKED
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testDeleteHEADreferencedRef">
+             Delete a ref that is pointed to by HEAD
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testDeleteLooseAndItsDirectory">
+             Delete a loose ref and make sure the directory in refs is deleted too,
+             and the reflog dir too
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testUpdateRefForward">
+             Try modify a ref forward, fast forward
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testDeleteLoosePacked">
+             Delete a ref that exists both as packed and loose. Make sure the ref
+             cannot be resolved after delete.
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testUpdateRefNoChange">
+             Try modify a ref to same
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testRefsCacheAfterUpdate">
+             Test case originating from
+             <a href="http://bugs.eclipse.org/285991">bug 285991</a>
+            
+             Make sure the in memory cache is updated properly after
+             update of symref. This one did not fail because the
+             ref was packed due to implementation issues.
+            
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testRefsCacheAfterUpdateLooseOnly">
+             Test case originating from
+             <a href="http://bugs.eclipse.org/285991">bug 285991</a>
+            
+             Make sure the in memory cache is updated properly after
+             update of symref.
+            
+             @throws Exception
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testUpdateRefLockFailureWrongOldValue">
+             Try modify a ref, but get wrong expected old value
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testUpdateRefForwardWithCheck1">
+             Try modify a ref forward, fast forward, checking old value first
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testUpdateRefForwardWithCheck2">
+             Try modify a ref forward, fast forward, checking old commit first
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testUpdateRefLockFailureLocked">
+             Try modify a ref that is locked
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.RefUpdateTest.testDeleteLoosePackedRejected">
+             Try to delete a ref. Delete requires force.
+            
+             @throws IOException
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorLeafOnlyTest.testEmpty">
+            <summary>
+            Empty tree
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorLeafOnlyTest.testSimpleF1">
+            <summary>
+            One file
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorLeafOnlyTest.testSimpleF2">
+            <summary>
+            two files
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorLeafOnlyTest.testSimpleT">
+            <summary>
+            Empty tree
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorPostOrderTest.testEmpty">
+            <summary>
+            Empty tree
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorPostOrderTest.testSimpleF1">
+            <summary>
+            one file
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorPostOrderTest.testSimpleF2">
+            <summary>
+            two files
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorPostOrderTest.testSimpleT">
+            <summary>
+            Empty tree
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorPreOrderTest.testEmpty">
+            <summary>
+            Empty tree
+            </summary>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorPreOrderTest.testSimpleF1">
+            <summary>
+            one file
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorPreOrderTest.testSimpleF2">
+            <summary>
+            two files
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+        <member name="M:GitSharp.Core.Tests.TreeIteratorPreOrderTest.testSimpleT">
+            <summary>
+            Empty tree
+            </summary>
+            <exception cref="T:System.IO.IOException"> </exception>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,61 @@
+This how to adresses the problem of changing the indentation white space settings 
+on a per solution basis. The community choice for GitSharp was TABS so if you need
+spaces in other solutions then check this out.
+
+Short Summary:
+==========
+
+1) Your solutions need to have a solution item called Indentation.vssettings (see GitSharp 
+	solution's which sets *only* the indentation whitespace to tabs)
+2) You need to paste the following script at the end of your EnvironmentEvents makro that 
+	automatically loads Indentation.vssettings if it exists:
+
+    '''''''''''''
+    Private Sub SolutionEvents_Opened() Handles SolutionEvents.Opened
+        Dim item As ProjectItem = DTE.Solution.FindProjectItem("Indentation.vssettings")
+        If Not item Is Nothing Then
+            Dim name = item.FileNames(1)
+            DTE.ExecuteCommand("Tools.ImportandExportSettings", "/import:""" & name & """")
+        End If
+    End Sub
+    ''''''''''''' 
+
+Long Explanantion:
+============
+
+   (partially copied from http://geekswithblogs.net/sdorman/archive/2007/04/25/111981.aspx)
+   
+1) If you have multiple solutions with different white space settings you'll want to set the 
+	regarding setting (i.e. UseTabs) automatically. Add Indentation.vssettings to every of your 
+	solutions that is having conflicting settings and edit it to your needs. For example: GitSharp's 
+	Indentation.vssettings is only touching "InsertTabs" and nothing else.
+	
+	Note: As long as you don't add the following makro it won't affect your settings in any way. 
+	
+2) However, if you want to load the correct settings automatically when a new solution is loaded 
+	then follow the receipe:
+
+    1. Launch the Macros IDE (Alt+F11)
+    2. In the "Project Explorer" toolwindow, double-click on "MyMacros" to expand it
+    3. Double-click on "EnvironmentEvents" to show the source code
+    4. Add this code just above the "End Module" statement at the end of the file:
+
+    '''''''''''''
+        Private Sub SolutionEvents_Opened() Handles SolutionEvents.Opened
+            Dim item As ProjectItem = DTE.Solution.FindProjectItem("VsEditorFormatting.vssettings")
+            If Not item Is Nothing Then
+                Dim name = item.FileNames(1)
+                DTE.ExecuteCommand("Tools.ImportandExportSettings", "/import:""" & name & """")
+            End If
+        End Sub
+    '''''''''''''
+
+    What this does is hook up a handler for the "Solution.Opened" event. When it fires, the code looks for 
+    your "VsEditorFormatting.vssettings" file in the solution and, if it's found, it imports that file.
+
+    5. Close the Macros IDE
+    6. Close Visual Studio (you will get prompted to save "MyMacros")
+
+    Now, every time you open a solution containing a "VsEditorFormatting.vssettings" file, it will be automatically 
+    imported for you. You will can need to share this macro with your co-workers so that they can take 
+    advantage of it.

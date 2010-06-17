@@ -1,0 +1,1 @@
+Git# demo browser (Windows only) has been moved to http://github.com/henon/GitSharp.Demo/tree
