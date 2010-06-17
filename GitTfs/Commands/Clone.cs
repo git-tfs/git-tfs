@@ -36,7 +36,7 @@ namespace Sep.Git.Tfs.Commands
             return retVal;
         }
 
-        private IList<string> DeriveRepositoryDirectory(IList<string> args)
+        internal static IList<string> DeriveRepositoryDirectory(IList<string> args)
         {
             if (args.Count == 2)
             {

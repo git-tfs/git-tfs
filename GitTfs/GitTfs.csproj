@@ -72,6 +72,7 @@
     <Compile Include="Commands\Init.cs" />
     <Compile Include="Commands\InitOptions.cs" />
     <Compile Include="Commands\Pull.cs" />
+    <Compile Include="Commands\QuickClone.cs" />
     <Compile Include="Commands\RemoteOptions.cs" />
     <Compile Include="Commands\Shelve.cs" />
     <Compile Include="Core\Changes\Git\Add.cs" />

@@ -1,7 +1,7 @@
 #!/bin/sh -x
 
 rm -rf smoke-test || exit
-time git tfs clone http://team:8080 $/sandbox smoke-test || exit
+time git tfs quick-clone http://team:8080 $/sandbox smoke-test || exit
 cd smoke-test || exit
 git tfs fetch || exit
 git log --oneline --shortstat | cat
