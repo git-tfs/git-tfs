@@ -16,6 +16,12 @@ To fetch, you can do this:
 If you do "git tfs clone" instead of "git tfs init", you won't need to do
 the initial fetch.
 
+If you do "git tfs quick-clone" instead of "git tfs clone", git-tfs won't
+pull all the history from TFS. This is intended for developer private
+branches. "git tfs fetch" should still work, but you won't want to
+push/pull from other repositories that were independently cloned with
+git-tfs.
+
 The shelve command replicates your changes in a shelveset in TFS. By default,
 it will shelve the current HEAD.
 # git tfs shelve SOME_SHELVESET
