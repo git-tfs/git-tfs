@@ -126,7 +126,7 @@ namespace Sep.Git.Tfs.Core
 
         public void QuickFetch()
         {
-            var changeset = FetchChangesets().Last();
+            var changeset = Tfs.GetLatestChangeset(this);
             AssertTemporaryIndexEmpty();
             var log = CopyTree(MaxCommitHash, changeset);
             UpdateRef(Commit(log), changeset.Summary.ChangesetId);
@@ -136,12 +136,7 @@ namespace Sep.Git.Tfs.Core
         private IEnumerable<ITfsChangeset> FetchChangesets()
         {
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
-            var changesets = Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1);
-            changesets = changesets.Select(changeset =>
-                                               {
-                                                   changeset.Summary.Remote = this;
-                                                   return changeset;
-                                               });
+            var changesets = Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
             changesets = changesets.OrderBy(cs => cs.Summary.ChangesetId);
             return changesets;
         }

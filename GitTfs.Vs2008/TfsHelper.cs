@@ -111,19 +111,23 @@ namespace Sep.Git.Tfs.Vs2008
             get { return (IGroupSecurityService) Server.GetService(typeof(IGroupSecurityService)); }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                         null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
+                                                         null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true,
                                                          true, true);
             foreach (Changeset changeset in changesets)
             {
-                yield return
-                    new TfsChangeset(this, _bridge.Wrap(changeset))
-                        {
-                            Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId}
-                        };
+                yield return BuildTfsChangeset(changeset, remote);
             }
+        }
+
+        private TfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
+        {
+            return new TfsChangeset(this, _bridge.Wrap(changeset))
+            {
+                Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote }
+            };
         }
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
@@ -166,6 +170,11 @@ namespace Sep.Git.Tfs.Vs2008
         public IIdentity GetIdentity(string username)
         {
             return _bridge.Wrap(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
+        }
+
+        public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
+        {
+            return BuildTfsChangeset(VersionControl.GetChangeset(VersionControl.GetLatestChangesetId()), remote);
         }
 
         public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
