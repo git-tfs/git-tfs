@@ -102,22 +102,9 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry CopyTree(GitIndexInfo index)
         {
-            var itemsToVisit = new Queue<IItem>();
-            itemsToVisit.Enqueue(changeset.VersionControlServer.GetItem(Summary.Remote.TfsRepositoryPath, changeset.ChangesetId));
-            while (!itemsToVisit.IsEmpty())
+            foreach(var item in changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, changeset.ChangesetId, TfsRecursionType.Full))
             {
-                var item = itemsToVisit.Dequeue();
-                if (item.ItemType == TfsItemType.Folder)
-                {
-                    foreach (var itemInFolder in changeset.VersionControlServer.GetItems(item.ServerItem, changeset.ChangesetId, TfsRecursionType.OneLevel))
-                    {
-                        if (itemInFolder.ServerItem != item.ServerItem)
-                        {
-                            itemsToVisit.Enqueue(itemInFolder);
-                        }
-                    }
-                }
-                else
+                if (item.ItemType == TfsItemType.File)
                 {
                     var pathInGitRepo = Summary.Remote.GetPathInGitRepo(item.ServerItem);
                     if (pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo))
