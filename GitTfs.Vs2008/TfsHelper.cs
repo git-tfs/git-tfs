@@ -177,6 +177,11 @@ namespace Sep.Git.Tfs.Vs2008
             return BuildTfsChangeset(VersionControl.GetChangeset(VersionControl.GetLatestChangesetId()), remote);
         }
 
+        public IChangeset GetChangeset(int changesetId)
+        {
+            return _bridge.Wrap(VersionControl.GetChangeset(changesetId));
+        }
+
         public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
         {
             return workItems.Select(workItem => _bridge.Wrap(GetWorkItemInfo(workItem, _bridge.Convert(checkinAction))));

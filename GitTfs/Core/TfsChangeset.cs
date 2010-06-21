@@ -102,6 +102,7 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry CopyTree(GitIndexInfo index)
         {
+            var maxChangesetId = 0;
             foreach(var item in changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, changeset.ChangesetId, TfsRecursionType.Full))
             {
                 if (item.ItemType == TfsItemType.File)
@@ -110,15 +111,23 @@ namespace Sep.Git.Tfs.Core
                     if (pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo))
                     {
                         Add(item, pathInGitRepo, index);
+                        maxChangesetId = Math.Max(maxChangesetId, item.ChangesetId);
                     }
                 }
             }
-            throw new NotImplementedException("TODO - finish implementing this.");
+            return MakeNewLogEntry(tfs.GetChangeset(maxChangesetId));
         }
 
         private void Add(IItem item, string pathInGitRepo, GitIndexInfo index)
         {
-            Console.Out.WriteLine(item.ServerItem + " -> " + pathInGitRepo);
+            if(item.DeletionId == 0)
+            {
+                using(var tempFile = new TemporaryFile())
+                {
+                    item.DownloadFile(tempFile);
+                    index.Update(Mode.NewFile, pathInGitRepo, tempFile);
+                }
+            }
         }
 
         private string GetMode(IChange change, IDictionary<string, GitObject> initialTree, string pathInGitRepo)
@@ -170,13 +179,18 @@ namespace Sep.Git.Tfs.Core
 
         private LogEntry MakeNewLogEntry()
         {
+            return MakeNewLogEntry(changeset);
+        }
+
+        private LogEntry MakeNewLogEntry(IChangeset changesetToLog)
+        {
             var log = new LogEntry();
-            var identity = tfs.GetIdentity(changeset.Committer);
+            var identity = tfs.GetIdentity(changesetToLog.Committer);
             log.CommitterName = log.AuthorName = identity.DisplayName ?? "Unknown TFS user";
-            log.CommitterEmail = log.AuthorEmail = identity.MailAddress ?? changeset.Committer;
-            log.Date = changeset.CreationDate;
-            log.Log = changeset.Comment + Environment.NewLine;
-            log.ChangesetId = changeset.ChangesetId;
+            log.CommitterEmail = log.AuthorEmail = identity.MailAddress ?? changesetToLog.Committer;
+            log.Date = changesetToLog.CreationDate;
+            log.Log = changesetToLog.Comment + Environment.NewLine;
+            log.ChangesetId = changesetToLog.ChangesetId;
             return log;
         }
     }

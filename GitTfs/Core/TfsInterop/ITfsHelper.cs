@@ -14,5 +14,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
         IIdentity GetIdentity(string username);
         ITfsChangeset GetLatestChangeset(GitTfsRemote remote);
+        IChangeset GetChangeset(int changesetId);
     }
 }
