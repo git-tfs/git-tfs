@@ -22,6 +22,17 @@ namespace Sep.Git.Tfs.Vs2010
         {
             return _bridge.Wrap(_versionControlServer.GetItem(itemId, changesetNumber));
         }
+
+        public IItem GetItem(string itemPath, int changsetNumber)
+        {
+            return _bridge.Wrap(_versionControlServer.GetItem(itemPath, new ChangesetVersionSpec(changsetNumber)));
+        }
+
+        public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
+        {
+            return _versionControlServer.GetItems(itemPath, new ChangesetVersionSpec(changesetNumber), _bridge.Convert(recursionType))
+                .Items.Select(item => _bridge.Wrap(item)).ToArray();
+        }
     }
 
     class WrapperForChangeset : WrapperFor<Changeset>, IChangeset
@@ -58,6 +69,11 @@ namespace Sep.Git.Tfs.Vs2010
         public int ChangesetId
         {
             get { return _changeset.ChangesetId; }
+        }
+
+        public IVersionControlServer VersionControlServer
+        {
+            get { return _bridge.Wrap(_changeset.VersionControlServer); }
         }
     }
 

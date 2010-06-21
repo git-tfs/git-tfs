@@ -9,5 +9,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         DateTime CreationDate { get; }
         string Comment { get; }
         int ChangesetId { get; }
+        IVersionControlServer VersionControlServer { get; }
     }
 }

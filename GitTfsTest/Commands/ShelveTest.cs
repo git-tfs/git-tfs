@@ -150,6 +150,7 @@ namespace Sep.Git.Tfs.Test.Commands
             public bool ShouldSkip(string path){return false;}
             public string GetPathInGitRepo(string tfsPath){return tfsPath;}
             public void Fetch(){}
+            public void QuickFetch(){}
             public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset){}
         }
     }

@@ -91,5 +91,10 @@ namespace Sep.Git.Tfs.Vs2008
         {
             return (ShelvingOptions) (int) options;
         }
+
+        public RecursionType Convert(TfsRecursionType recursionType)
+        {
+            return (RecursionType) (int) recursionType;
+        }
     }
 }

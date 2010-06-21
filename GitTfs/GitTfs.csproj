@@ -73,6 +73,7 @@
     <Compile Include="Commands\InitOptions.cs" />
     <Compile Include="Commands\Pull.cs" />
     <Compile Include="Commands\QuickClone.cs" />
+    <Compile Include="Commands\QuickFetch.cs" />
     <Compile Include="Commands\RemoteOptions.cs" />
     <Compile Include="Commands\Shelve.cs" />
     <Compile Include="Core\Changes\Git\Add.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Core\TfsInterop\TfsExt.cs" />
     <Compile Include="Core\TfsInterop\TfsItemType.cs" />
     <Compile Include="Core\TfsInterop\TfsPlugin.cs" />
+    <Compile Include="Core\TfsInterop\TfsRecursionType.cs" />
     <Compile Include="Core\TfsInterop\TfsShelvingOptions.cs" />
     <Compile Include="Core\TfsInterop\TfsWorkItemCheckinAction.cs" />
     <Compile Include="Core\TfsInterop\WrapperFor.cs" />

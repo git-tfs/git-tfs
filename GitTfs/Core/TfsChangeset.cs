@@ -100,6 +100,40 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public LogEntry CopyTree(GitIndexInfo index)
+        {
+            var itemsToVisit = new Queue<IItem>();
+            itemsToVisit.Enqueue(changeset.VersionControlServer.GetItem(Summary.Remote.TfsRepositoryPath, changeset.ChangesetId));
+            while (!itemsToVisit.IsEmpty())
+            {
+                var item = itemsToVisit.Dequeue();
+                if (item.ItemType == TfsItemType.Folder)
+                {
+                    foreach (var itemInFolder in changeset.VersionControlServer.GetItems(item.ServerItem, changeset.ChangesetId, TfsRecursionType.OneLevel))
+                    {
+                        if (itemInFolder.ServerItem != item.ServerItem)
+                        {
+                            itemsToVisit.Enqueue(itemInFolder);
+                        }
+                    }
+                }
+                else
+                {
+                    var pathInGitRepo = Summary.Remote.GetPathInGitRepo(item.ServerItem);
+                    if (pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo))
+                    {
+                        Add(item, pathInGitRepo, index);
+                    }
+                }
+            }
+            throw new NotImplementedException("TODO - finish implementing this.");
+        }
+
+        private void Add(IItem item, string pathInGitRepo, GitIndexInfo index)
+        {
+            Console.Out.WriteLine(item.ServerItem + " -> " + pathInGitRepo);
+        }
+
         private string GetMode(IChange change, IDictionary<string, GitObject> initialTree, string pathInGitRepo)
         {
             if(initialTree.ContainsKey(pathInGitRepo) && !change.ChangeType.IncludesOneOf(TfsChangeType.Add))

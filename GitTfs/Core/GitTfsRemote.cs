@@ -124,6 +124,15 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public void QuickFetch()
+        {
+            var changeset = FetchChangesets().Last();
+            AssertTemporaryIndexEmpty();
+            var log = CopyTree(MaxCommitHash, changeset);
+            UpdateRef(Commit(log), changeset.Summary.ChangesetId);
+            DoGcIfNeeded();
+        }
+
         private IEnumerable<ITfsChangeset> FetchChangesets()
         {
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
@@ -175,10 +184,16 @@ namespace Sep.Git.Tfs.Core
         {
             if(string.IsNullOrEmpty(treeish))
             {
-                if (File.Exists(IndexFile)) File.Delete(IndexFile);
+                AssertTemporaryIndexEmpty();
                 return;
             }
             WithTemporaryIndex(() => AssertIndexClean(treeish));
+        }
+
+        private void AssertTemporaryIndexEmpty()
+        {
+            if (File.Exists(IndexFile))
+                File.Delete(IndexFile);
         }
 
         private void AssertIndexClean(string treeish)
@@ -209,6 +224,17 @@ namespace Sep.Git.Tfs.Core
             WithTemporaryIndex(
                 () => result.Tree = Repository.CommandOneline("write-tree"));
             if(!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
+            return result;
+        }
+
+        private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)
+        {
+            LogEntry result = null;
+            WithTemporaryIndex(
+                () => GitIndexInfo.Do(Repository, index => result = changeset.CopyTree(index)));
+            WithTemporaryIndex(
+                () => result.Tree = Repository.CommandOneline("write-tree"));
+            if (!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
             return result;
         }
 

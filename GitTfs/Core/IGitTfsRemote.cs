@@ -15,6 +15,7 @@ namespace Sep.Git.Tfs.Core
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
         void Fetch();
+        void QuickFetch();
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset);
     }
 }
