@@ -9,9 +9,11 @@ using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using SEP.Extensions;
+using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Core.TfsInterop
+namespace Sep.Git.Tfs.Vs2008
 {
     public class TfsHelper : ITfsHelper
     {

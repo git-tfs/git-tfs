@@ -1,9 +1,9 @@
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
-using Sep.Git.Tfs.Vs2008;
+using Sep.Git.Tfs.Core.TfsInterop;
 using ChangeType=Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
 
-namespace Sep.Git.Tfs.Core.TfsInterop
+namespace Sep.Git.Tfs.Vs2008
 {
     public class TfsApiBridge
     {
