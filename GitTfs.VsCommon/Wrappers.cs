@@ -5,7 +5,7 @@ using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Vs2010
+namespace Sep.Git.Tfs.VsCommon
 {
     class WrapperForVersionControlServer :WrapperFor<VersionControlServer>, IVersionControlServer
     {
@@ -31,7 +31,7 @@ namespace Sep.Git.Tfs.Vs2010
         public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
         {
             return _versionControlServer.GetItems(itemPath, new ChangesetVersionSpec(changesetNumber), _bridge.Convert(recursionType))
-                .Items.Select(item => _bridge.Wrap(item)).ToArray();
+                    .Items.Select(i => _bridge.Wrap(i)).ToArray();
         }
     }
 

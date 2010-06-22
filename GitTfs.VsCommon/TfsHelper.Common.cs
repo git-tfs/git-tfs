@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -13,12 +12,11 @@ using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Vs2008
+namespace Sep.Git.Tfs.VsCommon
 {
-    public class TfsHelper : ITfsHelper
+    public partial class TfsHelper : ITfsHelper
     {
         private readonly TextWriter _stdout;
-        private TeamFoundationServer server;
         private string username;
         private readonly TfsApiBridge _bridge;
 
@@ -26,11 +24,6 @@ namespace Sep.Git.Tfs.Vs2008
         {
             _stdout = stdout;
             _bridge = bridge;
-        }
-
-        public string TfsClientLibraryVersion
-        {
-            get { return typeof(TeamFoundationServer).Assembly.GetName().Version.ToString() + " (MS)"; }
         }
 
         public string Url
@@ -49,36 +42,9 @@ namespace Sep.Git.Tfs.Vs2008
             }
         }
 
-        private void SetServer(string url, string username)
-        {
-            if(string.IsNullOrEmpty(url))
-            {
-                server = null;
-            }
-            else
-            {
-                if(string.IsNullOrEmpty(username))
-                {
-                    server = new TeamFoundationServer(url);
-                }
-                else
-                {
-                    server = new TeamFoundationServer(url, MakeCredentials(username));
-                }
-            }
-        }
-
         private ICredentials MakeCredentials(string username)
         {
             throw new NotImplementedException("TODO: Using a non-default username is not yet supported.");
-        }
-
-        private TeamFoundationServer Server
-        {
-            get
-            {
-                return server;
-            }
         }
 
         public VersionControlServer VersionControl

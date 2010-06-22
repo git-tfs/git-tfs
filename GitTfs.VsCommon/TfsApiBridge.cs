@@ -3,7 +3,7 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 using ChangeType=Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
 
-namespace Sep.Git.Tfs.Vs2010
+namespace Sep.Git.Tfs.VsCommon
 {
     public class TfsApiBridge
     {
@@ -94,7 +94,7 @@ namespace Sep.Git.Tfs.Vs2010
 
         public RecursionType Convert(TfsRecursionType recursionType)
         {
-            return (RecursionType)(int)recursionType;
+            return (RecursionType) (int) recursionType;
         }
     }
 }
