@@ -140,7 +140,10 @@ namespace Sep.Git.Tfs.VsCommon
 
         public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
         {
-            return BuildTfsChangeset(VersionControl.GetChangeset(VersionControl.GetLatestChangesetId()), remote);
+            var history = VersionControl.QueryHistory(remote.TfsRepositoryPath, VersionSpec.Latest, 0,
+                                                      RecursionType.Full, null, null, VersionSpec.Latest, 1, true, false,
+                                                      false);
+            return BuildTfsChangeset(history.Cast<Changeset>().Single(), remote);
         }
 
         public IChangeset GetChangeset(int changesetId)
