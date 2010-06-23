@@ -4,6 +4,7 @@ using Rhino.Mocks;
 using Rhino.Mocks.Constraints;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Test.TestHelpers;
 using StructureMap.AutoMocking;
 
@@ -149,6 +150,7 @@ namespace Sep.Git.Tfs.Test.Commands
             public bool ShouldSkip(string path){return false;}
             public string GetPathInGitRepo(string tfsPath){return tfsPath;}
             public void Fetch(){}
+            public void QuickFetch(){}
             public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset){}
         }
     }

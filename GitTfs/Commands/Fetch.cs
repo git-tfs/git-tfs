@@ -47,9 +47,14 @@ namespace Sep.Git.Tfs.Commands
         {
             foreach(var remote in GetRemotesToFetch(args))
             {
-                remote.Fetch();
+                DoFetch(remote);
             }
             return 0;
+        }
+
+        protected virtual void DoFetch(IGitTfsRemote remote)
+        {
+            remote.Fetch();
         }
 
         private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)

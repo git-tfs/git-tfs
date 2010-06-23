@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 
 namespace Sep.Git.Tfs
