@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.TeamFoundation.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 
@@ -26,11 +27,12 @@ namespace Sep.Git.Tfs.VsCommon
                 }
                 else
                 {
-                    server = new TeamFoundationServer(url, MakeCredentials(username));
+                    server = new TeamFoundationServer(url, new UICredentialsProvider());
+					server.EnsureAuthenticated();
                 }
             }
         }
-
+	
         private TeamFoundationServer Server
         {
             get

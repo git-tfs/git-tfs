@@ -27,7 +27,8 @@ namespace Sep.Git.Tfs.VsCommon
                 }
                 else
                 {
-                    server = new TfsTeamProjectCollection(new Uri(url), MakeCredentials(username));
+                    server = new TfsTeamProjectCollection(new Uri(url), new UICredentialsProvider());
+					server.EnsureAuthenticated();
                 }
             }
         }
