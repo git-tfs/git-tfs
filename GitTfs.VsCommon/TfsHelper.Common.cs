@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -17,7 +18,7 @@ namespace Sep.Git.Tfs.VsCommon
     public partial class TfsHelper : ITfsHelper
     {
         private readonly TextWriter _stdout;
-        private string username;
+        private string _url;
         private readonly TfsApiBridge _bridge;
 
         public TfsHelper(TextWriter stdout, TfsApiBridge bridge)
@@ -28,26 +29,11 @@ namespace Sep.Git.Tfs.VsCommon
 
         public string Url
         {
-            get { return server == null ? null : server.Uri.ToString(); }
-            set { SetServer(value, Username); }
+            get { return _url; }
+            set { _url = value; UpdateServer(); }
         }
 
-        public string Username
-        {
-            get { return username; }
-            set
-            {
-                username = value;
-                SetServer(Url, value);
-            }
-        }
-
-        private ICredentials MakeCredentials(string username)
-        {
-            throw new NotImplementedException("TODO: Using a non-default username is not yet supported.");
-        }
-
-        public VersionControlServer VersionControl
+        private VersionControlServer VersionControl
         {
             get
             {
@@ -57,7 +43,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public WorkItemStore WorkItems
+        private WorkItemStore WorkItems
         {
             get
             {
@@ -82,13 +68,10 @@ namespace Sep.Git.Tfs.VsCommon
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                                                          null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true,
                                                          true, true);
-            foreach (Changeset changeset in changesets)
-            {
-                yield return BuildTfsChangeset(changeset, remote);
-            }
+            return changesets.Cast<Changeset>().Select(changeset => BuildTfsChangeset(changeset, remote));
         }
 
-        private TfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
+        private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
         {
             return new TfsChangeset(this, _bridge.Wrap(changeset))
             {
@@ -114,13 +97,6 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
-        {
-            return
-                _bridge.Wrap(new Shelveset(_bridge.Unwrap(workspace).VersionControlServer, shelvesetName,
-                                           workspace.OwnerName));
-        }
-
         private Workspace GetWorkspace(string localDirectory, string repositoryPath)
         {
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
@@ -131,6 +107,13 @@ namespace Sep.Git.Tfs.VsCommon
         private string GenerateWorkspaceName()
         {
             return Guid.NewGuid().ToString();
+        }
+
+        public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
+        {
+            return
+                _bridge.Wrap(new Shelveset(_bridge.Unwrap(workspace).VersionControlServer, shelvesetName,
+                                           workspace.OwnerName));
         }
 
         public IIdentity GetIdentity(string username)

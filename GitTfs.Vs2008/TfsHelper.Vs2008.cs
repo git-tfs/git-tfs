@@ -12,22 +12,16 @@ namespace Sep.Git.Tfs.VsCommon
             get { return typeof(TeamFoundationServer).Assembly.GetName().Version.ToString() + " (MS)"; }
         }
 
-        private void SetServer(string url, string username)
+        private void UpdateServer()
         {
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(Url))
             {
                 server = null;
             }
             else
             {
-                if (string.IsNullOrEmpty(username))
-                {
-                    server = new TeamFoundationServer(url);
-                }
-                else
-                {
-                    server = new TeamFoundationServer(url, MakeCredentials(username));
-                }
+                server = new TeamFoundationServer(Url, new UICredentialsProvider());
+                server.EnsureAuthenticated();
             }
         }
 
