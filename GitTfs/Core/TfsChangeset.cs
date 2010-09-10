@@ -83,7 +83,17 @@ namespace Sep.Git.Tfs.Core
 
         private string GetPathBeforeRename(IItem item)
         {
-            return item.VersionControlServer.GetItem(item.ItemId, item.ChangesetId - 1).ServerItem;
+            var previousChangeset = item.ChangesetId - 1;
+            var oldItem = item.VersionControlServer.GetItem(item.ItemId, previousChangeset);
+            if (null == oldItem)
+            {
+                var history = item.VersionControlServer.QueryHistory(item.ServerItem, item.ChangesetId, 0,
+                                                                     TfsRecursionType.None, null, 1, previousChangeset,
+                                                                     1, true, false, false);
+                var previousChange = history.First();
+                oldItem = previousChange.Changes[0].Item;
+            }
+            return oldItem.ServerItem;
         }
 
         private void Update(IChange change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
