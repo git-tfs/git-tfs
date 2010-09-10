@@ -19,7 +19,8 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IItem Wrap(Item item)
         {
-            return new WrapperForItem(this, item);
+            // TODO: or return a NullItem?
+            return null == item ? null : new WrapperForItem(this, item);
         }
 
         public IIdentity Wrap(Identity identity)
