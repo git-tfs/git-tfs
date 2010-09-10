@@ -98,6 +98,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y $(TargetDir)*.dll $(SolutionDir)GitTfs\$(OutDir)</PostBuildEvent>
+    <PostBuildEvent>xcopy /y "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

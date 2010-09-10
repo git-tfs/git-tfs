@@ -145,6 +145,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>$(ProjectDir)..\GetCurrentVersion "$(GitPath)" &gt; $(ProjectDir)GitVersionInfo</PreBuildEvent>
+    <PreBuildEvent>"$(ProjectDir)..\GetCurrentVersion" "$(GitPath)" &gt; "$(ProjectDir)GitVersionInfo"</PreBuildEvent>
   </PropertyGroup>
 </Project>
