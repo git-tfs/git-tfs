@@ -108,8 +108,8 @@ def commit opts
 end
 
 def clean_working_dir?
-  (`git ls-files          --deleted --modified --others --exclude=standard` == '') &&
-  (`git ls-files --cached --deleted --modified --others --exclude=standard` == '')
+  (`git ls-files          --deleted --modified --others --exclude-standard` == '') &&
+  (`git ls-files --cached --deleted --modified --others --exclude-standard` == '')
 end
 
 task :version do
