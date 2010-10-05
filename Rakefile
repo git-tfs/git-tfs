@@ -1,16 +1,7 @@
+require 'rubygems'
+require 'bundler/setup'
 require 'albacore'
 require 'rexml/document'
-
-module Rake
-  class MSBuildTask
-    def define
-      task name do
-        # This is in latest of albacore, so it can eventually be removed from here.
-        fail unless @msbuild.build
-      end
-    end
-  end
-end
 
 task :default => %W(
     build
@@ -20,15 +11,24 @@ task :default => %W(
 def build task_name, *targets
   build_properties = { :configuration => 'Debug', :platform => 'x86' }
   build_properties.merge!(targets.pop) if Hash === targets.last 
-  Rake::MSBuildTask.new(task_name) do |msb|
+  msbuild task_name do |msb|
     msb.properties build_properties
     msb.targets targets
     msb.solution = 'GitTfs.sln'
   end
 end
 
-desc 'Build the entire solution'
-build :build, 'Build'
+task :build => 'build:debug'
+namespace :build do
+  desc "Build in debug mode"
+  build :debug, 'Build'
+  task :debug
+
+  desc "Build in release mode"
+  build :release, 'Build', :configuration => 'Release'
+  task :release
+end
+
 
 desc 'Run the tests'
 task :runtests do 
