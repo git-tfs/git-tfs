@@ -106,7 +106,7 @@ namespace Sep.Git.Tfs.Core
 
         public string GetPathInGitRepo(string tfsPath)
         {
-            if(!tfsPath.StartsWith(TfsRepositoryPath)) return null;
+            if(!tfsPath.StartsWith(TfsRepositoryPath,StringComparison.InvariantCultureIgnoreCase)) return null;
             tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
             while (tfsPath.StartsWith("/"))
                 tfsPath = tfsPath.Substring(1);
