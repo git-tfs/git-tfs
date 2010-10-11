@@ -81,6 +81,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
     <Compile Include="Commands\Checkin.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
     <Compile Include="Commands\Clone.cs" />
@@ -166,6 +172,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>$(ProjectDir)..\GetCurrentVersion "$(GitPath)" &gt; $(ProjectDir)GitVersionInfo</PreBuildEvent>
+    <PreBuildEvent>"$(ProjectDir)..\GetCurrentVersion" "$(GitPath)" &gt; "$(ProjectDir)GitVersionInfo"</PreBuildEvent>
   </PropertyGroup>
 </Project>

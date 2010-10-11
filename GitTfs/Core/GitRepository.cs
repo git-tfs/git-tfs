@@ -118,9 +118,6 @@ namespace Sep.Git.Tfs.Core
                 case "url":
                     remote.Tfs.Url = value;
                     break;
-                case "username":
-                    remote.Tfs.Username = value;
-                    break;
                 case "repository":
                     remote.TfsRepositoryPath = value;
                     break;

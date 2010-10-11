@@ -43,6 +43,7 @@ Known bugs:
   None right now.
 
 Other potential enhancements:
+  * Use noodle for dependencies.
   * Query history in chunks, either in a background thread or just with 100 changeset chunks, in order to speed up the initial output from a fetch.
   * Support for TFS branches.
   * Make tags for changesets off by default.

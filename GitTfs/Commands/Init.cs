@@ -89,7 +89,6 @@ namespace Sep.Git.Tfs.Commands
             SetTfsConfig("repository", tfsRepositoryPath);
             SetTfsConfig("fetch", "refs/remotes/" + globals.RemoteId + "/master");
             if (initOptions.NoMetaData) SetTfsConfig("no-meta-data", 1);
-            if (remoteOptions.Username != null) SetTfsConfig("username", remoteOptions.Username);
             if (remoteOptions.IgnoreRegex != null) SetTfsConfig("ignore-paths", remoteOptions.IgnoreRegex);
 
             Directory.CreateDirectory(Path.Combine(globals.GitDir, "tfs"));

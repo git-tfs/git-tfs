@@ -13,23 +13,16 @@ namespace Sep.Git.Tfs.VsCommon
             get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version.ToString() + " (MS)"; }
         }
 
-        private void SetServer(string url, string username)
+        private void UpdateServer()
         {
-            if(string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(Url))
             {
                 server = null;
             }
             else
             {
-                if(string.IsNullOrEmpty(username))
-                {
-                    server = new TfsTeamProjectCollection(new Uri(url));
-                }
-                else
-                {
-                    server = new TfsTeamProjectCollection(new Uri(url), new UICredentialsProvider());
-					server.EnsureAuthenticated();
-                }
+                server = new TfsTeamProjectCollection(new Uri(Url), new UICredentialsProvider());
+                server.EnsureAuthenticated();
             }
         }
 

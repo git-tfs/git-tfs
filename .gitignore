@@ -7,3 +7,5 @@ obj
 *.user
 TestResults
 GitTfs/GitVersionInfo
+pkg
+GitTfs.sln.*

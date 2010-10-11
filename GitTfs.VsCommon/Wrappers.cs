@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
+using System.Collections.Generic;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -23,15 +24,24 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap(_versionControlServer.GetItem(itemId, changesetNumber));
         }
 
-        public IItem GetItem(string itemPath, int changsetNumber)
+        public IItem GetItem(string itemPath, int changesetNumber)
         {
-            return _bridge.Wrap(_versionControlServer.GetItem(itemPath, new ChangesetVersionSpec(changsetNumber)));
+            return _bridge.Wrap(_versionControlServer.GetItem(itemPath, new ChangesetVersionSpec(changesetNumber)));
         }
 
         public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
         {
             return _versionControlServer.GetItems(itemPath, new ChangesetVersionSpec(changesetNumber), _bridge.Convert(recursionType))
                     .Items.Select(i => _bridge.Wrap(i)).ToArray();
+        }
+
+        public IEnumerable<IChangeset> QueryHistory(string path, int version, int deletionId, 
+            TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, 
+            bool includeChanges, bool slotMode, bool includeDownloadInfo)
+        {
+            return _versionControlServer.QueryHistory(path, new ChangesetVersionSpec(version), deletionId,
+                _bridge.Convert(recursion), user, new ChangesetVersionSpec(versionFrom), new ChangesetVersionSpec(versionTo), maxCount, includeChanges, slotMode, includeDownloadInfo)
+                .Cast<Changeset>().Select(i => _bridge.Wrap(i));
         }
     }
 

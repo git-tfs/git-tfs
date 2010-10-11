@@ -1,0 +1,29 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    albacore (0.1.5)
+      net-sftp (>= 2.0.2)
+      net-ssh (>= 2.0.15)
+      rake (>= 0.8.7)
+      rubyzip (>= 0.9.1)
+    gemcutter (0.6.1)
+    git (1.2.5)
+    jeweler (1.4.0)
+      gemcutter (>= 0.1.0)
+      git (>= 1.2.5)
+      rubyforge (>= 2.0.0)
+    json_pure (1.4.6)
+    net-sftp (2.0.5)
+      net-ssh (>= 2.0.9)
+    net-ssh (2.0.23)
+    rake (0.8.7)
+    rubyforge (2.0.4)
+      json_pure (>= 1.1.7)
+    rubyzip (0.9.4)
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  albacore
+  jeweler
