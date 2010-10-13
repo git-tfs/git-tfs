@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using GitSharp.Core;
-using Sep.Git.Tfs.Util;
 using StructureMap;
 using FileMode=GitSharp.Core.FileMode;
 
@@ -13,12 +12,14 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitRepository : GitHelpers, IGitRepository
     {
+        private readonly IContainer _container;
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
 
-        public GitRepository(TextWriter stdout, string gitDir) : base(stdout)
+        public GitRepository(TextWriter stdout, string gitDir, IContainer container) : base(stdout)
         {
+            _container = container;
             GitDir = gitDir;
             _repository = new Repository(new DirectoryInfo(gitDir));
         }
@@ -132,7 +133,7 @@ namespace Sep.Git.Tfs.Core
 
         private IGitTfsRemote CreateRemote(string id)
         {
-            var remote = ObjectFactory.GetInstance<IGitTfsRemote>();
+            var remote = _container.GetInstance<IGitTfsRemote>();
             remote.Repository = this;
             remote.Id = id;
             return remote;
@@ -190,7 +191,7 @@ namespace Sep.Git.Tfs.Core
             var match = GitTfsConstants.TfsCommitInfoRegex.Match(gitTfsMetaInfo);
             if (match.Success)
             {
-                var commitInfo = ObjectFactory.GetInstance<TfsChangesetInfo>();
+                var commitInfo = _container.GetInstance<TfsChangesetInfo>();
                 commitInfo.Remote = ReadTfsRemote(match.Groups["url"].Value, match.Groups["repository"].Value);
                 commitInfo.ChangesetId = Convert.ToInt32(match.Groups["changeset"].Value);
                 commitInfo.GitCommit = commit;
@@ -243,7 +244,7 @@ namespace Sep.Git.Tfs.Core
             {
                 while (':' == diffOutput.Read())
                 {
-                    var builder = ObjectFactory.With("repository").EqualTo(this);
+                    var builder = _container.With("repository").EqualTo(this);
                     builder = builder.With("oldMode").EqualTo(diffOutput.Read(6));
                     diffOutput.Read(1); // a space
                     var newMode = diffOutput.Read(6);
