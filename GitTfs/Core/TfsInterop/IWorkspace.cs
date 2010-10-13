@@ -7,7 +7,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         int PendAdd(string path);
         int PendEdit(string path);
         int PendDelete(string path);
-		int PendRename(string pathFrom, string pathTo);
+        int PendRename(string pathFrom, string pathTo);
         void ForceGetFile(string path, int changeset);
         string OwnerName { get; }
     }

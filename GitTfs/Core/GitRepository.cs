@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using GitSharp.Core;
-using Sep.Git.Tfs.Util;
 using StructureMap;
 using FileMode=GitSharp.Core.FileMode;
 
@@ -13,12 +12,14 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitRepository : GitHelpers, IGitRepository
     {
+        private readonly IContainer _container;
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
 
-        public GitRepository(TextWriter stdout, string gitDir) : base(stdout)
+        public GitRepository(TextWriter stdout, string gitDir, IContainer container) : base(stdout)
         {
+            _container = container;
             GitDir = gitDir;
             _repository = new Repository(new DirectoryInfo(gitDir));
         }
@@ -132,7 +133,7 @@ namespace Sep.Git.Tfs.Core
 
         private IGitTfsRemote CreateRemote(string id)
         {
-            var remote = ObjectFactory.GetInstance<IGitTfsRemote>();
+            var remote = _container.GetInstance<IGitTfsRemote>();
             remote.Repository = this;
             remote.Id = id;
             return remote;
@@ -190,7 +191,7 @@ namespace Sep.Git.Tfs.Core
             var match = GitTfsConstants.TfsCommitInfoRegex.Match(gitTfsMetaInfo);
             if (match.Success)
             {
-                var commitInfo = ObjectFactory.GetInstance<TfsChangesetInfo>();
+                var commitInfo = _container.GetInstance<TfsChangesetInfo>();
                 commitInfo.Remote = ReadTfsRemote(match.Groups["url"].Value, match.Groups["repository"].Value);
                 commitInfo.ChangesetId = Convert.ToInt32(match.Groups["changeset"].Value);
                 commitInfo.GitCommit = commit;
@@ -239,58 +240,35 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
         {
-            using (var diffOutput = CommandOutputPipe("diff-tree","-r","-M", from, to))
+            using (var diffOutput = CommandOutputPipe("diff-tree", "-r", "-M", from, to))
             {
-                while (':' == diffOutput.Read())
+                string line;
+                while(null != (line = diffOutput.ReadLine()))
                 {
-                    var builder = ObjectFactory.With("repository").EqualTo(this);
-                    builder = builder.With("oldMode").EqualTo(diffOutput.Read(6));
-                    diffOutput.Read(1); // a space
-                    var newMode = diffOutput.Read(6);
-                    builder = builder.With("newMode").EqualTo(newMode);
-                    diffOutput.Read(1); // a space
-                    builder = builder.With("oldSha").EqualTo(diffOutput.Read(40));
-                    diffOutput.Read(1); // a space
-                    builder = builder.With("newSha").EqualTo(diffOutput.Read(40));
-                    diffOutput.Read(1); // a space
-                    var changeType = diffOutput.Read(1);
-					var score = ReadScore(changeType, diffOutput);
-                    diffOutput.Read(1); // tab
-					if (score == 0)
-						builder = builder.With("path").EqualTo(diffOutput.ReadLine().Trim());
-					else
-					{
-						var pathStrings = diffOutput.ReadLine().Trim().Split('\t');
-						builder = builder.With("path").EqualTo(pathStrings[0]);
-						builder = builder.With("pathTo").EqualTo(pathStrings[1]);
-					}
+                    var change = GitChangeInfo.Parse(line);
 
-                	if(FileMode.GitLink == newMode.ToFileMode())
+                    if (FileMode.GitLink == change.NewMode)
                         continue;
 
-                    IGitChangedFile change;
-                    try
-                    {
-                        change = builder.GetInstance<IGitChangedFile>(changeType);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new Exception("Unable to handle change type " + changeType + ".", e);
-                    }
-                    yield return change;
+                    yield return BuildGitChangedFile(change);
                 }
             }
         }
 
-    	private int ReadScore(string changeType, TextReader diffOutput)
-    	{
-			var score = 0;
-			if (changeType != "C" && changeType != "R")
-				return score;
-			var scoreString = diffOutput.Read(3);
-			int.TryParse(scoreString, out score);
-			return score;
-    	}
+        private IGitChangedFile BuildGitChangedFile(GitChangeInfo change)
+        {
+            var builder = change.Merge(_container.With("repository").EqualTo(this));
+            IGitChangedFile changeItem;
+            try
+            {
+                changeItem = builder.GetInstance<IGitChangedFile>(change.Status);
+            }
+            catch(Exception e)
+            {
+                throw new Exception("Unable to handle change type " + change.Status + ".", e);
+            }
+            return changeItem;
+        }
 
     	public string GetChangeSummary(string from, string to)
         {

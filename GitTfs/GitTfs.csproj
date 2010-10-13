@@ -107,6 +107,7 @@
     <Compile Include="Core\Changes\Git\Delete.cs" />
     <Compile Include="Core\Changes\Git\Modify.cs" />
     <Compile Include="Core\Changes\Git\RenameEdit.cs" />
+    <Compile Include="Core\GitChangeInfo.cs" />
     <Compile Include="Core\GitObject.cs" />
     <Compile Include="Core\IGitChangedFile.cs" />
     <Compile Include="Core\IGitTfsRemote.cs" />
