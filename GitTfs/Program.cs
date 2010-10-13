@@ -31,7 +31,6 @@ namespace Sep.Git.Tfs
 
         private static void Initialize()
         {
-			Console.Read();
             ObjectFactory.Initialize(Initialize);
         }
 

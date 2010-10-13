@@ -9,3 +9,4 @@ TestResults
 GitTfs/GitVersionInfo
 pkg
 GitTfs.sln.*
+*.orig
