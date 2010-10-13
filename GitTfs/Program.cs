@@ -31,6 +31,7 @@ namespace Sep.Git.Tfs
 
         private static void Initialize()
         {
+			Console.Read();
             ObjectFactory.Initialize(Initialize);
         }
 
@@ -50,6 +51,7 @@ namespace Sep.Git.Tfs
             initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Add>().WithName("A");
             initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Modify>().WithName("M");
             initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Delete>().WithName("D");
+            initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<RenameEdit>().WithName("R");
         }
 
         private static void Initialize(IAssemblyScanner scan)

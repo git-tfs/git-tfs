@@ -257,7 +257,12 @@ namespace Sep.Git.Tfs.VsCommon
             return _workspace.PendDelete(path);
         }
 
-        public void ForceGetFile(string path, int changeset)
+		public int PendRename(string pathFrom, string pathTo)
+		{
+			return _workspace.PendRename(pathFrom, pathTo);
+		}
+
+    	public void ForceGetFile(string path, int changeset)
         {
             var item = new ItemSpec(path, RecursionType.None);
             _workspace.Get(new GetRequest(item, changeset), GetOptions.Overwrite | GetOptions.GetAll);

@@ -73,7 +73,15 @@ namespace Sep.Git.Tfs.Core
             if (deleted != 1) throw new Exception("One item should have been deleted, but actually deleted " + deleted + " items.");
         }
 
-        private void GetFromTfs(string path)
+		public void Rename(string pathFrom, string pathTo)
+		{
+			_stdout.WriteLine(" rename " + pathFrom + " to " + pathTo);
+			GetFromTfs(pathFrom);
+			var result = _workspace.PendRename(GetLocalPath(pathFrom), GetLocalPath(pathTo));
+			if (result != 1) throw new ApplicationException("Unable to rename item from " + pathFrom + " to " + pathTo);
+		}
+
+    	private void GetFromTfs(string path)
         {
             _workspace.ForceGetFile(_remote.TfsRepositoryPath + "/" + path, (int) _contextVersion.ChangesetId);
         }
