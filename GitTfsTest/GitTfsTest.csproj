@@ -72,6 +72,7 @@
     <Compile Include="Commands\ShelveTest.cs" />
     <Compile Include="Core\DelimitedReaderTests.cs" />
     <Compile Include="Core\ExtTests.cs" />
+    <Compile Include="Core\GitChangeInfoTests.cs" />
     <Compile Include="Core\GitTfsRemoteTests.cs" />
     <Compile Include="Core\ModeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
