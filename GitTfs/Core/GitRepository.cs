@@ -239,7 +239,7 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
         {
-            using (var diffOutput = CommandOutputPipe("diff-tree", "-r", from, to))
+            using (var diffOutput = CommandOutputPipe("diff-tree", "-r", "-M", from, to))
             {
                 while (':' == diffOutput.Read())
                 {
@@ -254,8 +254,16 @@ namespace Sep.Git.Tfs.Core
                     builder = builder.With("newSha").EqualTo(diffOutput.Read(40));
                     diffOutput.Read(1); // a space
                     var changeType = diffOutput.Read(1);
+                    var score = ReadScore(changeType, diffOutput);
                     diffOutput.Read(1); // tab
-                    builder = builder.With("path").EqualTo(diffOutput.ReadLine().Trim());
+                    if (score == 0)
+                        builder = builder.With("path").EqualTo(diffOutput.ReadLine().Trim());
+                    else
+                    {
+                        var pathStrings = diffOutput.ReadLine().Trim().Split('\t');
+                        builder = builder.With("path").EqualTo(pathStrings[0]);
+                        builder = builder.With("pathTo").EqualTo(pathStrings[1]);
+                    }
 
                     if(FileMode.GitLink == newMode.ToFileMode())
                         continue;
@@ -274,11 +282,21 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        private int ReadScore(string changeType, TextReader diffOutput)
+        {
+            var score = 0;
+            if (changeType != "C" && changeType != "R")
+                return score;
+            var scoreString = diffOutput.Read(3);
+            int.TryParse(scoreString, out score);
+            return score;
+        }
+
         public string GetChangeSummary(string from, string to)
         {
             string summary = "";
             CommandOutputPipe(stdout => summary = stdout.ReadToEnd(),
-                              "diff-tree", "--shortstat", from, to);
+                              "diff-tree", "--shortstat", "-M", from, to);
             return summary;
         }
 
