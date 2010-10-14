@@ -71,9 +71,7 @@ namespace Sep.Git.Tfs.VsCommon
 														 true, true);
 			try
 			{
-				if (changesets.Cast<Changeset>().Count() == 0) // hopefully this causes the exception to be thrown
-					return new List<ITfsChangeset>();
-				else
+				if (changesets.Cast<Changeset>().Count() != 0) 
 					return changesets.Cast<Changeset>().Select(changeset => BuildTfsChangeset(changeset, remote));
 			}
 			catch (Exception)
