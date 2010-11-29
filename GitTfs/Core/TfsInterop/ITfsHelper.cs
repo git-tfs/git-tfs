@@ -7,6 +7,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     {
         string TfsClientLibraryVersion { get; }
         string Url { get; set; }
+        string[] LegacyUrls { get; set; }
         IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
         IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);
@@ -14,5 +15,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IIdentity GetIdentity(string username);
         ITfsChangeset GetLatestChangeset(GitTfsRemote remote);
         IChangeset GetChangeset(int changesetId);
+        bool MatchesUrl(string tfsUrl);
     }
 }

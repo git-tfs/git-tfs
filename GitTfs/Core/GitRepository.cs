@@ -67,7 +67,7 @@ namespace Sep.Git.Tfs.Core
                 var allRemotes = GetTfsRemotes();
                 return
                     allRemotes.Values.First(
-                        remote => remote.Tfs.Url == tfsUrl && remote.TfsRepositoryPath == tfsRepositoryPath);
+                        remote => remote.Tfs.MatchesUrl(tfsUrl) && remote.TfsRepositoryPath == tfsRepositoryPath);
             }
             catch (Exception e)
             {
@@ -118,6 +118,9 @@ namespace Sep.Git.Tfs.Core
             {
                 case "url":
                     remote.Tfs.Url = value;
+                    break;
+                case "legacy-urls":
+                    remote.Tfs.LegacyUrls = value.Split(',');
                     break;
                 case "repository":
                     remote.TfsRepositoryPath = value;

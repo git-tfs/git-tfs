@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -31,6 +29,13 @@ namespace Sep.Git.Tfs.VsCommon
         {
             get { return _url; }
             set { _url = value; UpdateServer(); }
+        }
+
+        private string[] _legacyUrls;
+        public string[] LegacyUrls
+        {
+            get { return _legacyUrls ?? (_legacyUrls = new string[0]); }
+            set { _legacyUrls = value; }
         }
 
         private VersionControlServer VersionControl
@@ -132,6 +137,11 @@ namespace Sep.Git.Tfs.VsCommon
         public IChangeset GetChangeset(int changesetId)
         {
             return _bridge.Wrap(VersionControl.GetChangeset(changesetId));
+        }
+
+        public bool MatchesUrl(string tfsUrl)
+        {
+            return Url == tfsUrl || LegacyUrls.Contains(tfsUrl);
         }
 
         public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
