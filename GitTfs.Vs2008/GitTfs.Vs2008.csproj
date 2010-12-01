@@ -49,6 +49,9 @@
     <Reference Include="Microsoft.TeamFoundation.VersionControl.Client, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\PrivateAssemblies\Microsoft.TeamFoundation.VersionControl.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.TeamFoundation.VersionControl.Controls, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86">
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\PrivateAssemblies\Microsoft.TeamFoundation.VersionControl.Controls.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.Client, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\PrivateAssemblies\Microsoft.TeamFoundation.WorkItemTracking.Client.dll</HintPath>
     </Reference>

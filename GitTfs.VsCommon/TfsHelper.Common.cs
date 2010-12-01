@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
+//using Microsoft.TeamFoundation.VersionControl.Controls;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using SEP.Extensions;
 using Sep.Git.Tfs.Core;
@@ -126,6 +127,14 @@ namespace Sep.Git.Tfs.VsCommon
                 _bridge.Wrap(new Shelveset(_bridge.Unwrap(workspace).VersionControlServer, shelvesetName,
                                            workspace.OwnerName));
         }
+
+        //public bool ShowShelveDialog(IWorkspace workspace, IShelveset shelveset, ref IPendingChange[] pendingChanges, ref TfsShelvingOptions shelvingOptions)
+        //{
+        //    using(var dialog = new DialogShelve(_bridge.Unwrap(workspace)))
+        //    {
+        //        return false;
+        //    }
+        //}
 
         public IIdentity GetIdentity(string username)
         {

@@ -17,5 +17,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IChangeset GetChangeset(int changesetId);
         bool MatchesUrl(string tfsUrl);
         bool HasShelveset(string shelvesetName);
+        //bool ShowShelveDialog(IWorkspace workspace, IShelveset shelveset, ref IPendingChange[] pendingChanges, ref TfsShelvingOptions shelvingOptions);
     }
 }

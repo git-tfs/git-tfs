@@ -41,7 +41,11 @@ namespace Sep.Git.Tfs.Core
                 var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
                 shelveset.Comment = _checkinOptions.CheckinComment;
                 shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
-                _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
+                var shelvingOptions = _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None;
+                //if(_checkinOptions.Interactive)
+                //    if(!_tfsHelper.ShowShelveDialog(_workspace, shelveset, ref pendingChanges, ref shelvingOptions))
+                //        return;
+                _workspace.Shelve(shelveset, pendingChanges, shelvingOptions);
             }
         }
 
