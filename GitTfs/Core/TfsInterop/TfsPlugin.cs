@@ -12,6 +12,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         public static TfsPlugin Find()
         {
             var x = new PluginLoader();
+            var explicitVersion = Environment.GetEnvironmentVariable("GIT_TFS_CLIENT");
+            if(!String.IsNullOrEmpty(explicitVersion))
+            {
+                return x.Try("GitTfs.Vs" + explicitVersion, "Sep.Git.Tfs.Vs" + explicitVersion + ".TfsPlugin") ??
+                       x.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");
+            }
             return x.Try("GitTfs.Vs2010", "Sep.Git.Tfs.Vs2010.TfsPlugin") ??
                    x.Try("GitTfs.Vs2008", "Sep.Git.Tfs.Vs2008.TfsPlugin") ??
                    x.Fail();
@@ -43,14 +49,22 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 throw new PluginLoaderException(_failures);
             }
 
+            public TfsPlugin Fail(string message)
+            {
+                throw new PluginLoaderException(message, _failures);
+            }
+
             class PluginLoaderException : Exception
             {
                 public IEnumerable<Exception> InnerExceptions { get; private set; }
 
-                public PluginLoaderException(IEnumerable<Exception> failures) : base("Unable to load any TFS assemblies!", failures.Last())
+                public PluginLoaderException(string message, IEnumerable<Exception> failures) : base(message, failures.Last())
                 {
                     InnerExceptions = failures;
                 }
+
+                public PluginLoaderException(IEnumerable<Exception> failures) : this("Unable to load any TFS assemblies!", failures)
+                {}
             }
         }
 
