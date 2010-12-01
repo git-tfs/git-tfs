@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhino.Mocks;
 using Rhino.Mocks.Constraints;
@@ -132,9 +133,57 @@ namespace Sep.Git.Tfs.Test.Commands
                                    y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("treeish"), Is.Anything()));
         }
 
+        [TestMethod]
+        public void FailureCodeWhenShelvesetExists()
+        {
+            WireUpMockRemote();
+            CreateShelveset("shelveset name");
+
+            var exitCode = mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
+            Assert.AreEqual(GitTfsExitCodes.ForceRequired, exitCode);
+        }
+
+        [TestMethod]
+        public void DoesNotTryToShelveIfShelvesetExists()
+        {
+            WireUpMockRemote();
+            CreateShelveset("shelveset name");
+
+            mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
+
+            mocks.Get<IGitTfsRemote>().AssertWasNotCalled(
+                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything));
+        }
+
+        [TestMethod]
+        public void DoesNotStopIfForceIsSpecified()
+        {
+            mocks.Get<CheckinOptions>().Force = true;
+            WireUpMockRemote();
+            CreateShelveset("shelveset name");
+
+            mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
+
+            mocks.Get<IGitTfsRemote>().AssertWasCalled(
+                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything));
+        }
+
         private TfsChangesetInfo ChangesetForRemote(string remoteId)
         {
             return new TfsChangesetInfo {Remote = new DummyRemote {Id = remoteId}};
+        }
+
+        private void WireUpMockRemote()
+        {
+            mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
+            var remote = mocks.Get<IGitTfsRemote>();
+            mocks.Get<IGitRepository>().Stub(x => x.GetParentTfsCommits(null)).IgnoreArguments()
+                .Return(new[] { new TfsChangesetInfo { Remote = remote } });
+        }
+
+        private void CreateShelveset(string shelvesetName)
+        {
+            mocks.Get<IGitTfsRemote>().Stub(x => x.HasShelveset(shelvesetName)).Return(true);
         }
 
         private class DummyRemote : IGitTfsRemote
@@ -152,6 +201,7 @@ namespace Sep.Git.Tfs.Test.Commands
             public void Fetch(){}
             public void QuickFetch(){}
             public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset){}
+            public bool HasShelveset(string shelvesetName) { return false; }
         }
     }
 }

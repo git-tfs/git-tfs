@@ -346,6 +346,11 @@ namespace Sep.Git.Tfs.Core
                               workspace => Shelve(shelvesetName, head, parentChangeset, workspace));
         }
 
+        public bool HasShelveset(string shelvesetName)
+        {
+            return Tfs.HasShelveset(shelvesetName);
+        }
+
         private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
             foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))

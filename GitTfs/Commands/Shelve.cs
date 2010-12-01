@@ -42,6 +42,11 @@ namespace Sep.Git.Tfs.Commands
             {
                 case 1:
                     var changeset = tfsParents.First();
+                    if (!checkinOptions.Force && changeset.Remote.HasShelveset(shelvesetName))
+                    {
+                        stdout.WriteLine("Shelveset \"" + shelvesetName + "\" already exists. Use -f to replace it.");
+                        return GitTfsExitCodes.ForceRequired;
+                    }
                     changeset.Remote.Shelve(shelvesetName, refToShelve, changeset);
                     return GitTfsExitCodes.OK;
                 case 0:

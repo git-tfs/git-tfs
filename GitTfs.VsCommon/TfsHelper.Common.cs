@@ -114,6 +114,12 @@ namespace Sep.Git.Tfs.VsCommon
             return Guid.NewGuid().ToString();
         }
 
+        public bool HasShelveset(string shelvesetName)
+        {
+            var matchingShelvesets = VersionControl.QueryShelvesets(shelvesetName, VersionControl.AuthenticatedUser);
+            return matchingShelvesets != null && matchingShelvesets.Length > 0;
+        }
+
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
             return
