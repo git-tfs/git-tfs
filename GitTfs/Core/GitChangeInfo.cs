@@ -62,7 +62,8 @@ namespace Sep.Git.Tfs.Core
                 .With("oldSha").EqualTo(_match.Groups["srcsha1"].Value)
                 .With("newSha").EqualTo(_match.Groups["dstsha1"].Value)
                 .With("path").EqualTo(_match.Groups["srcpath"].Value)
-                .With("pathTo").EqualTo(_match.Groups["dstpath"].Value);
+                .With("pathTo").EqualTo(_match.Groups["dstpath"].Value)
+                .With("score").EqualTo(_match.Groups["score"].Value);
         }
     }
 }
