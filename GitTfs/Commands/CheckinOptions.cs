@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Util;
@@ -12,7 +11,7 @@ namespace Sep.Git.Tfs.Commands
         private List<string> _workItemsToAssociate = new List<string>();
         private List<string> _workItemsToResolve = new List<string>();
 
-        [OptDef(OptValType.ValueReq)]
+        [OptDef(OptValType.ValueOpt)]
         [ShortOptionName('m')]
         [LongOptionName("comment")]
         [UseNameAsLongOption(false)]
@@ -35,11 +34,5 @@ namespace Sep.Git.Tfs.Commands
         [LongOptionName("resolved-work-item")]
         [UseNameAsLongOption(false)]
         public List<string> WorkItemsToResolve { get { return _workItemsToResolve; } }
-
-        //[OptDef(OptValType.Flag)]
-        //[LongOptionName("interactive")]
-        //[UseNameAsLongOption(false)]
-        //[Description("Show the TF shelve dialog.")]
-        //public bool Interactive { get; set; }
     }
 }
