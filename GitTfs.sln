@@ -1,10 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs", "GitTfs\GitTfs.csproj", "{55C169E0-93CC-488C-9885-1D4EAF4EA236}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfsTest", "GitTfsTest\GitTfsTest.csproj", "{DDFB4746-2BCE-4B34-8E45-056324CF140D}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1F1648A7-FD88-4016-82DB-35E25BCBB038}"
 	ProjectSection(SolutionItems) = preProject
 		GitTfs.vsmdi = GitTfs.vsmdi
@@ -13,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README = README
 		TODO = TODO
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs", "GitTfs\GitTfs.csproj", "{55C169E0-93CC-488C-9885-1D4EAF4EA236}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfsTest", "GitTfsTest\GitTfsTest.csproj", "{DDFB4746-2BCE-4B34-8E45-056324CF140D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfsBenchmarks", "GitTfsBenchmarks\GitTfsBenchmarks.csproj", "{7C7FEA7A-24A1-4834-9815-1DF980C340F3}"
 EndProject
