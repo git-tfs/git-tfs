@@ -45,12 +45,47 @@ namespace Sep.Git.Tfs.Core
                 shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
                 if(evaluateCheckinPolicies)
                 {
-                    foreach(var message in _policyEvaluator.EvaluateCheckin(_workspace, shelveset, pendingChanges))
+                    foreach(var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, shelveset.WorkItemInfo))
                     {
                         _stdout.WriteLine("[Checkin Policy] " + message);
                     }
                 }
                 _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
+            }
+        }
+
+        public void Checkin()
+        {
+            var pendingChanges = _workspace.GetPendingChanges();
+
+            if (pendingChanges.Count() == 0)
+            {
+                _stdout.WriteLine(" nothing to shelve");
+            }
+            else
+            {
+                var workItemInfos = GetWorkItemInfos();
+                var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, _checkinOptions.CheckinComment, workItemInfos);
+                if(checkinProblems.Any())
+                {
+                    foreach (var message in checkinProblems)
+                    {
+                        _stdout.WriteLine("[ERROR] " + message);
+                    }
+                    _stdout.WriteLine("No changes checked in.");
+                }
+                else
+                {
+                    var newChangeset = _workspace.Checkin(pendingChanges, _checkinOptions.CheckinComment, null, workItemInfos);
+                    if(newChangeset == 0)
+                    {
+                        _stdout.WriteLine("Checkin failed!");
+                    }
+                    else
+                    {
+                        _stdout.WriteLine("Checkin #" + newChangeset + " was created. Please remember to 'git tfs fetch'.");
+                    }
+                }
             }
         }
 

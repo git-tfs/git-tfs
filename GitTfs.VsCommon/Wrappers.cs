@@ -364,7 +364,17 @@ namespace Sep.Git.Tfs.VsCommon
             _workspace.Shelve(_bridge.Unwrap<Shelveset>(shelveset), _bridge.Unwrap<PendingChange>(changes), _bridge.Convert<ShelvingOptions>(options));
         }
 
-        public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IWorkItemCheckinInfo[] workItemChanges)
+        public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
+        {
+            return _workspace.CheckIn(
+                _bridge.Unwrap<PendingChange>(changes),
+                comment,
+                _bridge.Unwrap<CheckinNote>(checkinNote),
+                _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges),
+                null); // policy overrides
+        }
+
+        public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
         {
             return _bridge.Wrap<WrapperForCheckinEvaluationResult, CheckinEvaluationResult>(_workspace.EvaluateCheckin(
                 _bridge.Convert<CheckinEvaluationOptions>(options),

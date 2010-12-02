@@ -359,5 +359,20 @@ namespace Sep.Git.Tfs.Core
             }
             workspace.Shelve(shelvesetName, evaluateCheckinPolicies);
         }
+
+        public void Checkin(string head, TfsChangesetInfo parentChangeset)
+        {
+            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
+                              workspace => Checkin(head, parentChangeset, workspace));
+        }
+
+        private void Checkin(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        {
+            foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))
+            {
+                change.Apply(workspace);
+            }
+            workspace.Checkin();
+        }
     }
 }

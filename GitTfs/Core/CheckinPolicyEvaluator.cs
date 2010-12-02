@@ -5,11 +5,11 @@ namespace Sep.Git.Tfs.Core
 {
     public class CheckinPolicyEvaluator
     {
-        public IEnumerable<string> EvaluateCheckin(IWorkspace workspace, IShelveset shelveset, IPendingChange[] pendingChanges)
+        public IEnumerable<string> EvaluateCheckin(IWorkspace workspace, IPendingChange[] pendingChanges, string comment, IEnumerable<IWorkItemCheckinInfo> workItemInfo)
         {
             var result = workspace.EvaluateCheckin(TfsCheckinEvaluationOptions.All, pendingChanges,
-                                                   pendingChanges, shelveset.Comment, null,
-                                                   shelveset.WorkItemInfo);
+                                                   pendingChanges, comment, null,
+                                                   workItemInfo);
             return BuildMessages(result);
         }
 
