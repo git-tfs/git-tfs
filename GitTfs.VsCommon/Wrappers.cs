@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Sep.Git.Tfs.VsCommon
 {
-    class WrapperForVersionControlServer :WrapperFor<VersionControlServer>, IVersionControlServer
+    public class WrapperForVersionControlServer :WrapperFor<VersionControlServer>, IVersionControlServer
     {
         private readonly TfsApiBridge _bridge;
         private readonly VersionControlServer _versionControlServer;
@@ -43,7 +43,7 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
-    class WrapperForChangeset : WrapperFor<Changeset>, IChangeset
+    public class WrapperForChangeset : WrapperFor<Changeset>, IChangeset
     {
         private readonly TfsApiBridge _bridge;
         private readonly Changeset _changeset;
@@ -85,7 +85,7 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
-    class WrapperForChange : WrapperFor<Change>, IChange
+    public class WrapperForChange : WrapperFor<Change>, IChange
     {
         private readonly TfsApiBridge _bridge;
         private readonly Change _change;
@@ -107,7 +107,7 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
-    class WrapperForItem : WrapperFor<Item>, IItem
+    public class WrapperForItem : WrapperFor<Item>, IItem
     {
         private readonly TfsApiBridge _bridge;
         private readonly Item _item;
@@ -154,7 +154,7 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
-    class WrapperForIdentity : WrapperFor<Identity>, IIdentity
+    public class WrapperForIdentity : WrapperFor<Identity>, IIdentity
     {
         private readonly Identity _identity;
 
@@ -175,7 +175,7 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
-    class WrapperForShelveset : WrapperFor<Shelveset>, IShelveset
+    public class WrapperForShelveset : WrapperFor<Shelveset>, IShelveset
     {
         private readonly Shelveset _shelveset;
         private readonly TfsApiBridge _bridge;
@@ -199,21 +199,151 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
-    class WrapperForWorkItemCheckinInfo : WrapperFor<WorkItemCheckinInfo>, IWorkItemCheckinInfo
+    public class WrapperForWorkItemCheckinInfo : WrapperFor<WorkItemCheckinInfo>, IWorkItemCheckinInfo
     {
         public WrapperForWorkItemCheckinInfo(WorkItemCheckinInfo workItemCheckinInfo) : base(workItemCheckinInfo)
         {
         }
     }
 
-    class WrapperForPendingChange : WrapperFor<PendingChange>, IPendingChange
+    public class WrapperForPendingChange : WrapperFor<PendingChange>, IPendingChange
     {
         public WrapperForPendingChange(PendingChange pendingChange) : base(pendingChange)
         {
         }
     }
 
-    class WrapperForWorkspace : WrapperFor<Workspace>, IWorkspace
+    public class WrapperForCheckinNote : WrapperFor<CheckinNote>, ICheckinNote
+    {
+        public WrapperForCheckinNote(CheckinNote checkiNote) : base(checkiNote)
+        {}
+    }
+
+    public class WrapperForCheckinEvaluationResult : WrapperFor<CheckinEvaluationResult>, ICheckinEvaluationResult
+    {
+        private readonly TfsApiBridge _bridge;
+        private readonly CheckinEvaluationResult _result;
+
+        public WrapperForCheckinEvaluationResult(TfsApiBridge bridge, CheckinEvaluationResult result) : base(result)
+        {
+            _bridge = bridge;
+            _result = result;
+        }
+
+        public ICheckinConflict[] Conflicts
+        {
+            get { return _bridge.Wrap<WrapperForCheckinConflict, CheckinConflict>(_result.Conflicts); }
+        }
+
+        public ICheckinNoteFailure[] NoteFailures
+        {
+            get { return _bridge.Wrap<WrapperForCheckinNoteFailure, CheckinNoteFailure>(_result.NoteFailures); }
+        }
+
+        public IPolicyFailure[] PolicyFailures
+        {
+            get { return _bridge.Wrap<WrapperForPolicyFailure, PolicyFailure>(_result.PolicyFailures); }
+        }
+
+        public Exception PolicyEvaluationException
+        {
+            get { return _result.PolicyEvaluationException; }
+        }
+    }
+
+    public class WrapperForCheckinConflict : WrapperFor<CheckinConflict>, ICheckinConflict
+    {
+        private readonly CheckinConflict _conflict;
+
+        public WrapperForCheckinConflict(CheckinConflict conflict) : base(conflict)
+        {
+            _conflict = conflict;
+        }
+
+        public string ServerItem
+        {
+            get { return _conflict.ServerItem; }
+        }
+
+        public string Message
+        {
+            get { return _conflict.Message; }
+        }
+
+        public bool Resolvable
+        {
+            get { return _conflict.Resolvable; }
+        }
+    }
+
+    public class WrapperForCheckinNoteFailure : WrapperFor<CheckinNoteFailure>, ICheckinNoteFailure
+    {
+        private readonly TfsApiBridge _bridge;
+        private readonly CheckinNoteFailure _failure;
+
+        public WrapperForCheckinNoteFailure(TfsApiBridge bridge, CheckinNoteFailure failure) : base(failure)
+        {
+            _bridge = bridge;
+            _failure = failure;
+        }
+
+        public ICheckinNoteFieldDefinition Definition
+        {
+            get { return _bridge.Wrap<WrapperForCheckinNoteFieldDefinition, CheckinNoteFieldDefinition>(_failure.Definition); }
+        }
+
+        public string Message
+        {
+            get { return _failure.Message; }
+        }
+    }
+
+    public class WrapperForCheckinNoteFieldDefinition : WrapperFor<CheckinNoteFieldDefinition>, ICheckinNoteFieldDefinition
+    {
+        private readonly CheckinNoteFieldDefinition _fieldDefinition;
+
+        public WrapperForCheckinNoteFieldDefinition(CheckinNoteFieldDefinition fieldDefinition) : base(fieldDefinition)
+        {
+            _fieldDefinition = fieldDefinition;
+        }
+
+        public string ServerItem
+        {
+            get { return _fieldDefinition.ServerItem; }
+        }
+
+        public string Name
+        {
+            get { return _fieldDefinition.Name; }
+        }
+
+        public bool Required
+        {
+            get { return _fieldDefinition.Required; }
+        }
+
+        public int DisplayOrder
+        {
+            get { return _fieldDefinition.DisplayOrder; }
+        }
+    }
+
+    public class WrapperForPolicyFailure : WrapperFor<PolicyFailure>, IPolicyFailure
+    {
+        private readonly PolicyFailure _failure;
+
+        public WrapperForPolicyFailure(PolicyFailure failure) : base(failure)
+        {
+            _failure = failure;
+        }
+
+        public string Message
+        {
+            get { return _failure.Message; }
+        }
+    }
+
+    public class WrapperForWorkspace : WrapperFor<Workspace>, IWorkspace
     {
         private readonly TfsApiBridge _bridge;
         private readonly Workspace _workspace;
@@ -232,6 +362,17 @@ namespace Sep.Git.Tfs.VsCommon
         public void Shelve(IShelveset shelveset, IPendingChange [] changes, TfsShelvingOptions options)
         {
             _workspace.Shelve(_bridge.Unwrap<Shelveset>(shelveset), _bridge.Unwrap<PendingChange>(changes), _bridge.Convert<ShelvingOptions>(options));
+        }
+
+        public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IWorkItemCheckinInfo[] workItemChanges)
+        {
+            return _bridge.Wrap<WrapperForCheckinEvaluationResult, CheckinEvaluationResult>(_workspace.EvaluateCheckin(
+                _bridge.Convert<CheckinEvaluationOptions>(options),
+                _bridge.Unwrap<PendingChange>(allChanges),
+                _bridge.Unwrap<PendingChange>(changes),
+                comment,
+                _bridge.Unwrap<CheckinNote>(checkinNote),
+                _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges)));
         }
 
         public int PendAdd(string path)

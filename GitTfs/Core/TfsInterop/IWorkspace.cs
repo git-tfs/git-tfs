@@ -4,6 +4,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     {
         IPendingChange[] GetPendingChanges();
         void Shelve(IShelveset shelveset, IPendingChange [] changes, TfsShelvingOptions options);
+        ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IWorkItemCheckinInfo[] workItemChanges);
         int PendAdd(string path);
         int PendEdit(string path);
         int PendDelete(string path);

@@ -16,10 +16,12 @@ namespace Sep.Git.Tfs.Core
         private readonly IGitTfsRemote _remote;
         private readonly CheckinOptions _checkinOptions;
         private readonly ITfsHelper _tfsHelper;
+        private readonly CheckinPolicyEvaluator _policyEvaluator;
 
-        public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper)
+        public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper, CheckinPolicyEvaluator policyEvaluator)
         {
             _workspace = workspace;
+            _policyEvaluator = policyEvaluator;
             _contextVersion = contextVersion;
             _remote = remote;
             _checkinOptions = checkinOptions;
@@ -28,7 +30,7 @@ namespace Sep.Git.Tfs.Core
             _stdout = stdout;
         }
 
-        public void Shelve(string shelvesetName)
+        public void Shelve(string shelvesetName, bool evaluateCheckinPolicies)
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
@@ -41,6 +43,13 @@ namespace Sep.Git.Tfs.Core
                 var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
                 shelveset.Comment = _checkinOptions.CheckinComment;
                 shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
+                if(evaluateCheckinPolicies)
+                {
+                    foreach(var message in _policyEvaluator.EvaluateCheckin(_workspace, shelveset, pendingChanges))
+                    {
+                        _stdout.WriteLine("[Checkin Policy] " + message);
+                    }
+                }
                 _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
             }
         }

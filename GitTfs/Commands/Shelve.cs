@@ -17,6 +17,13 @@ namespace Sep.Git.Tfs.Commands
         private readonly TextWriter stdout;
         private readonly CheckinOptions checkinOptions;
 
+        [OptDef(OptValType.Flag)]
+        [ShortOptionName('p')]
+        [LongOptionName("evaluate-policies")]
+        [UseNameAsLongOption(false)]
+        [Description("Evaluate checkin policies")]
+        public bool EvaluateCheckinPolicies { get; set; }
+
         public Shelve(Globals globals, TextWriter stdout, CheckinOptions checkinOptions)
         {
             this.globals = globals;
@@ -47,7 +54,7 @@ namespace Sep.Git.Tfs.Commands
                         stdout.WriteLine("Shelveset \"" + shelvesetName + "\" already exists. Use -f to replace it.");
                         return GitTfsExitCodes.ForceRequired;
                     }
-                    changeset.Remote.Shelve(shelvesetName, refToShelve, changeset);
+                    changeset.Remote.Shelve(shelvesetName, refToShelve, changeset, EvaluateCheckinPolicies);
                     return GitTfsExitCodes.OK;
                 case 0:
                     stdout.WriteLine("No TFS parents found!");

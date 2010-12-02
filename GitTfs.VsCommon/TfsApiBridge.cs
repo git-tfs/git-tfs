@@ -14,24 +14,24 @@ namespace Sep.Git.Tfs.VsCommon
             _container = container;
         }
 
-        public TWrapper Wrap<TWrapper, TWrapped>(TWrapped wrapped)
+        public TWrapper Wrap<TWrapper, TWrapped>(TWrapped wrapped) where TWrapper : class
         {
-            return _container.With(this).With(wrapped).GetInstance<TWrapper>();
+            return wrapped == null ? null : _container.With(this).With(wrapped).GetInstance<TWrapper>();
         }
 
-        public TWrapper[] Wrap<TWrapper, TWrapped>(IEnumerable wrapped)
+        public TWrapper[] Wrap<TWrapper, TWrapped>(IEnumerable wrapped) where TWrapper : class
         {
-            return wrapped.OfType<TWrapped>().Select(x => Wrap<TWrapper, TWrapped>(x)).ToArray();
+            return wrapped == null ? null : wrapped.OfType<TWrapped>().Select(x => Wrap<TWrapper, TWrapped>(x)).ToArray();
         }
 
-        public TTfs Unwrap<TTfs>(object wrapper)
+        public TTfs Unwrap<TTfs>(object wrapper) where TTfs : class
         {
-            return ((WrapperFor<TTfs>) wrapper).Unwrap();
+            return wrapper == null ? null : ((WrapperFor<TTfs>) wrapper).Unwrap();
         }
 
-        public TTfs[] Unwrap<TTfs>(IEnumerable wrappers)
+        public TTfs[] Unwrap<TTfs>(IEnumerable wrappers) where TTfs : class
         {
-            return wrappers.Cast<object>().Select(x => Unwrap<TTfs>(x)).ToArray();
+            return wrappers == null ? null : wrappers.Cast<object>().Select(x => Unwrap<TTfs>(x)).ToArray();
         }
 
         public TEnum Convert<TEnum>(object originalEnum)

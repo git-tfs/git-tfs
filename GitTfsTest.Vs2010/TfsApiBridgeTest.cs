@@ -55,6 +55,34 @@ namespace GitTfsTest.Vs2010
             Assert.AreEqual(originalObjects[0], _mocks.ClassUnderTest.Unwrap<OriginalType>(wrappedObjects)[0], "unwrap(wrap(objects))[0]");
         }
 
+        [TestMethod]
+        public void WrapsNullAsNull()
+        {
+            OriginalType obj = null;
+            Assert.IsNull(_mocks.ClassUnderTest.Wrap<WrapperForOriginalType, OriginalType>(obj), "wrap(null)");
+        }
+
+        [TestMethod]
+        public void WrapsNullArrayAsNull()
+        {
+            OriginalType [] obj = null;
+            Assert.IsNull(_mocks.ClassUnderTest.Wrap<WrapperForOriginalType, OriginalType>(obj), "wrap(null[])");
+        }
+
+        [TestMethod]
+        public void UnwrapsNullAsNull()
+        {
+            WrapperForOriginalType obj = null;
+            Assert.IsNull(_mocks.ClassUnderTest.Unwrap<OriginalType>(obj), "unwrap(null)");
+        }
+
+        [TestMethod]
+        public void UnwrapsNullArrayAsNull()
+        {
+            WrapperForOriginalType[] obj = null;
+            Assert.IsNull(_mocks.ClassUnderTest.Unwrap<OriginalType>(obj), "unwrap(null[])");
+        }
+
         public class OriginalType
         {
             public static int counter;

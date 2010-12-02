@@ -340,10 +340,10 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset)
+        public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
         {
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => Shelve(shelvesetName, head, parentChangeset, workspace));
+                              workspace => Shelve(shelvesetName, head, parentChangeset, evaluateCheckinPolicies, workspace));
         }
 
         public bool HasShelveset(string shelvesetName)
@@ -351,13 +351,13 @@ namespace Sep.Git.Tfs.Core
             return Tfs.HasShelveset(shelvesetName);
         }
 
-        private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, ITfsWorkspace workspace)
         {
             foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))
             {
                 change.Apply(workspace);
             }
-            workspace.Shelve(shelvesetName);
+            workspace.Shelve(shelvesetName, evaluateCheckinPolicies);
         }
     }
 }

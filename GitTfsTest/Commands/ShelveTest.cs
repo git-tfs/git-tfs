@@ -114,8 +114,8 @@ namespace Sep.Git.Tfs.Test.Commands
 
             mocks.ClassUnderTest.MakeArgsAndRun("shelveset name");
 
-            remote.AssertWasCalled(x => x.Shelve(null, null, null),
-                                   y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("HEAD"), Is.Anything()));
+            remote.AssertWasCalled(x => x.Shelve(null, null, null, false),
+                                   y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("HEAD"), Is.Anything(), Is.Anything()));
         }
 
         [TestMethod]
@@ -129,8 +129,8 @@ namespace Sep.Git.Tfs.Test.Commands
 
             mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
 
-            remote.AssertWasCalled(x => x.Shelve(null, null, null),
-                                   y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("treeish"), Is.Anything()));
+            remote.AssertWasCalled(x => x.Shelve(null, null, null, false),
+                                   y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("treeish"), Is.Anything(), Is.Anything()));
         }
 
         [TestMethod]
@@ -152,7 +152,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
 
             mocks.Get<IGitTfsRemote>().AssertWasNotCalled(
-                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything));
+                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything, Arg<bool>.Is.Anything));
         }
 
         [TestMethod]
@@ -165,7 +165,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
 
             mocks.Get<IGitTfsRemote>().AssertWasCalled(
-                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything));
+                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything, Arg<bool>.Is.Anything));
         }
 
         private TfsChangesetInfo ChangesetForRemote(string remoteId)
@@ -200,8 +200,9 @@ namespace Sep.Git.Tfs.Test.Commands
             public string GetPathInGitRepo(string tfsPath){return tfsPath;}
             public void Fetch(){}
             public void QuickFetch(){}
-            public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset){}
+            public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies){}
             public bool HasShelveset(string shelvesetName) { return false; }
+            public void Checkin(string treeish, TfsChangesetInfo parentChangeset){}
         }
     }
 }
