@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -21,27 +20,26 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IItem GetItem(int itemId, int changesetNumber)
         {
-            return _bridge.Wrap(_versionControlServer.GetItem(itemId, changesetNumber));
+            return _bridge.Wrap<WrapperForItem, Item>(_versionControlServer.GetItem(itemId, changesetNumber));
         }
 
         public IItem GetItem(string itemPath, int changesetNumber)
         {
-            return _bridge.Wrap(_versionControlServer.GetItem(itemPath, new ChangesetVersionSpec(changesetNumber)));
+            return _bridge.Wrap<WrapperForItem, Item>(_versionControlServer.GetItem(itemPath, new ChangesetVersionSpec(changesetNumber)));
         }
 
         public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
         {
-            return _versionControlServer.GetItems(itemPath, new ChangesetVersionSpec(changesetNumber), _bridge.Convert(recursionType))
-                    .Items.Select(i => _bridge.Wrap(i)).ToArray();
+            var itemSet = _versionControlServer.GetItems(itemPath, new ChangesetVersionSpec(changesetNumber), _bridge.Convert<RecursionType>(recursionType));
+            return _bridge.Wrap<WrapperForItem, Item>(itemSet.Items);
         }
 
         public IEnumerable<IChangeset> QueryHistory(string path, int version, int deletionId, 
             TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, 
             bool includeChanges, bool slotMode, bool includeDownloadInfo)
         {
-            return _versionControlServer.QueryHistory(path, new ChangesetVersionSpec(version), deletionId,
-                _bridge.Convert(recursion), user, new ChangesetVersionSpec(versionFrom), new ChangesetVersionSpec(versionTo), maxCount, includeChanges, slotMode, includeDownloadInfo)
-                .Cast<Changeset>().Select(i => _bridge.Wrap(i));
+            var history = _versionControlServer.QueryHistory(path, new ChangesetVersionSpec(version), deletionId, _bridge.Convert<RecursionType>(recursion), user, new ChangesetVersionSpec(versionFrom), new ChangesetVersionSpec(versionTo), maxCount, includeChanges, slotMode, includeDownloadInfo);
+            return _bridge.Wrap<WrapperForChangeset, Changeset>(history);
         }
     }
 
@@ -58,7 +56,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IChange [] Changes
         {
-            get { return _changeset.Changes.Select(c => _bridge.Wrap(c)).ToArray(); }
+            get { return _bridge.Wrap<WrapperForChange, Change>(_changeset.Changes); }
         }
 
         public string Committer
@@ -83,7 +81,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IVersionControlServer VersionControlServer
         {
-            get { return _bridge.Wrap(_changeset.VersionControlServer); }
+            get { return _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(_changeset.VersionControlServer); }
         }
     }
 
@@ -100,12 +98,12 @@ namespace Sep.Git.Tfs.VsCommon
 
         public TfsChangeType ChangeType
         {
-            get { return _bridge.Convert(_change.ChangeType); }
+            get { return _bridge.Convert<TfsChangeType>(_change.ChangeType); }
         }
 
         public IItem Item
         {
-            get { return _bridge.Wrap(_change.Item); }
+            get { return _bridge.Wrap<WrapperForItem, Item>(_change.Item); }
         }
     }
 
@@ -122,7 +120,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IVersionControlServer VersionControlServer
         {
-            get { return _bridge.Wrap(_item.VersionControlServer); }
+            get { return _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(_item.VersionControlServer); }
         }
 
         public int ChangesetId
@@ -142,7 +140,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public TfsItemType ItemType
         {
-            get { return _bridge.Convert(_item.ItemType); }
+            get { return _bridge.Convert<TfsItemType>(_item.ItemType); }
         }
 
         public int ItemId
@@ -196,28 +194,22 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IWorkItemCheckinInfo[] WorkItemInfo
         {
-            get { return _shelveset.WorkItemInfo.Select(i => _bridge.Wrap(i)).ToArray(); }
-            set { _shelveset.WorkItemInfo = value.Select(i => _bridge.Unwrap(i)).ToArray(); }
+            get { return _bridge.Wrap<WrapperForWorkItemCheckinInfo, WorkItemCheckinInfo>(_shelveset.WorkItemInfo); }
+            set { _shelveset.WorkItemInfo = _bridge.Unwrap<WorkItemCheckinInfo>(value); }
         }
     }
 
     class WrapperForWorkItemCheckinInfo : WrapperFor<WorkItemCheckinInfo>, IWorkItemCheckinInfo
     {
-        private readonly WorkItemCheckinInfo _info;
-
-        public WrapperForWorkItemCheckinInfo(WorkItemCheckinInfo info) : base(info)
+        public WrapperForWorkItemCheckinInfo(WorkItemCheckinInfo workItemCheckinInfo) : base(workItemCheckinInfo)
         {
-            _info = info;
         }
     }
 
     class WrapperForPendingChange : WrapperFor<PendingChange>, IPendingChange
     {
-        private readonly PendingChange _pendingChange;
-
         public WrapperForPendingChange(PendingChange pendingChange) : base(pendingChange)
         {
-            _pendingChange = pendingChange;
         }
     }
 
@@ -234,12 +226,12 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IPendingChange [] GetPendingChanges()
         {
-            return _workspace.GetPendingChanges().Select(c => _bridge.Wrap(c)).ToArray();
+            return _bridge.Wrap<WrapperForPendingChange, PendingChange>(_workspace.GetPendingChanges());
         }
 
         public void Shelve(IShelveset shelveset, IPendingChange [] changes, TfsShelvingOptions options)
         {
-            _workspace.Shelve(_bridge.Unwrap(shelveset), changes.Select(c => _bridge.Unwrap(c)).ToArray(), _bridge.Convert(options));
+            _workspace.Shelve(_bridge.Unwrap<Shelveset>(shelveset), _bridge.Unwrap<PendingChange>(changes), _bridge.Convert<ShelvingOptions>(options));
         }
 
         public int PendAdd(string path)

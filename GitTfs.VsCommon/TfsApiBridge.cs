@@ -1,101 +1,42 @@
-using Microsoft.TeamFoundation.Server;
-using Microsoft.TeamFoundation.VersionControl.Client;
+using System.Collections;
+using System.Linq;
 using Sep.Git.Tfs.Core.TfsInterop;
-using ChangeType=Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
+using StructureMap;
 
 namespace Sep.Git.Tfs.VsCommon
 {
     public class TfsApiBridge
     {
-        public IChangeset Wrap(Changeset changeset)
+        private readonly IContainer _container;
+
+        public TfsApiBridge(IContainer container)
         {
-            return new WrapperForChangeset(this, changeset);
+            _container = container;
         }
 
-        public IChange Wrap(Change change)
+        public TWrapper Wrap<TWrapper, TWrapped>(TWrapped wrapped)
         {
-            return new WrapperForChange(this, change);
+            return _container.With(this).With(wrapped).GetInstance<TWrapper>();
         }
 
-        public IItem Wrap(Item item)
+        public TWrapper[] Wrap<TWrapper, TWrapped>(IEnumerable wrapped)
         {
-            // TODO: or return a NullItem?
-            return null == item ? null : new WrapperForItem(this, item);
+            return wrapped.OfType<TWrapped>().Select(x => Wrap<TWrapper, TWrapped>(x)).ToArray();
         }
 
-        public IIdentity Wrap(Identity identity)
+        public TTfs Unwrap<TTfs>(object wrapper)
         {
-            return identity == null ? (IIdentity)new NullIdentity() : new WrapperForIdentity(identity);
+            return ((WrapperFor<TTfs>) wrapper).Unwrap();
         }
 
-        public IWorkspace Wrap(Workspace workspace)
+        public TTfs[] Unwrap<TTfs>(IEnumerable wrappers)
         {
-            return new WrapperForWorkspace(this, workspace);
+            return wrappers.Cast<object>().Select(x => Unwrap<TTfs>(x)).ToArray();
         }
 
-        public Workspace Unwrap(IWorkspace workspace)
+        public TEnum Convert<TEnum>(object originalEnum)
         {
-            return WrapperFor<Workspace>.Unwrap(workspace);
-        }
-
-        public IShelveset Wrap(Shelveset shelveset)
-        {
-            return new WrapperForShelveset(this, shelveset);
-        }
-
-        public Shelveset Unwrap(IShelveset shelveset)
-        {
-            return WrapperFor<Shelveset>.Unwrap(shelveset);
-        }
-
-        public IPendingChange Wrap(PendingChange pendingChange)
-        {
-            return new WrapperForPendingChange(pendingChange);
-        }
-
-        public PendingChange Unwrap(IPendingChange pendingChange)
-        {
-            return WrapperFor<PendingChange>.Unwrap(pendingChange);
-        }
-
-        public IWorkItemCheckinInfo Wrap(WorkItemCheckinInfo workItemCheckinInfo)
-        {
-            return new WrapperForWorkItemCheckinInfo(workItemCheckinInfo);
-        }
-
-        public IVersionControlServer Wrap(VersionControlServer versionControlServer)
-        {
-            return new WrapperForVersionControlServer(this, versionControlServer);
-        }
-
-        public WorkItemCheckinInfo Unwrap(IWorkItemCheckinInfo info)
-        {
-            return WrapperFor<WorkItemCheckinInfo>.Unwrap(info);
-        }
-
-        public TfsChangeType Convert(ChangeType type)
-        {
-            return (TfsChangeType) (int) type;
-        }
-
-        public TfsItemType Convert(ItemType type)
-        {
-            return (TfsItemType) (int) type;
-        }
-
-        public WorkItemCheckinAction Convert(TfsWorkItemCheckinAction action)
-        {
-            return (WorkItemCheckinAction) (int) action;
-        }
-
-        public ShelvingOptions Convert(TfsShelvingOptions options)
-        {
-            return (ShelvingOptions) (int) options;
-        }
-
-        public RecursionType Convert(TfsRecursionType recursionType)
-        {
-            return (RecursionType) (int) recursionType;
+            return (TEnum) originalEnum;
         }
     }
 }
