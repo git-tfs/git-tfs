@@ -12,5 +12,6 @@ namespace Sep.Git.Tfs.Core
         void Edit(string path);
         void Delete(string path);
         void Rename(string pathFrom, string pathTo, string score);
+        void CheckinTool();
     }
 }

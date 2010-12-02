@@ -353,11 +353,28 @@ namespace Sep.Git.Tfs.Core
 
         private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
+            PendChangesToWorkspace(head, parentChangeset, workspace);
+            workspace.Shelve(shelvesetName);
+        }
+
+        public void CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        {
+            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
+                              workspace => CheckinTool(head, parentChangeset, workspace));
+        }
+
+        private void CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        {
+            PendChangesToWorkspace(head, parentChangeset,workspace);
+            workspace.CheckinTool();
+        }
+
+        private void PendChangesToWorkspace(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        {
             foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))
             {
                 change.Apply(workspace);
             }
-            workspace.Shelve(shelvesetName);
         }
     }
 }

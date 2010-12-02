@@ -18,5 +18,6 @@ namespace Sep.Git.Tfs.Core
         void QuickFetch();
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset);
         bool HasShelveset(string shelvesetName);
+        void CheckinTool(string head, TfsChangesetInfo parentChangeset);
     }
 }

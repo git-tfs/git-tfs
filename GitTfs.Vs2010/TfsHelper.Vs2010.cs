@@ -1,6 +1,12 @@
 using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using Microsoft.TeamFoundation.Client;
+using Microsoft.TeamFoundation.VersionControl.Client;
+using Microsoft.Win32;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Vs2010;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -32,6 +38,56 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 return server;
             }
+        }
+
+        public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges)
+        {
+            return ShowCheckinDialog(_bridge.Unwrap(workspace), pendingChanges.Select(p => _bridge.Unwrap(p)).ToArray());
+        }
+
+        private static bool ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges)
+        {
+            var result = true;
+
+            using (var parentForm = new ParentForm())
+            {
+                parentForm.Show();
+
+                dynamic dialog = new ReflectionProxy(GetCheckinDialogType(), workspace.VersionControlServer);
+
+                int dialogResult = dialog.Show(parentForm.Handle, workspace, pendingChanges);
+
+                if (dialogResult <= 0)
+                {
+                    result = false;
+                }
+
+                parentForm.Close();
+            }
+
+            return result;
+        }
+
+        private const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
+
+        private static Type GetCheckinDialogType()
+        {
+            return GetDialogAssembly().GetType(DialogAssemblyName + ".CheckinDialog");
+        }
+
+        private static Assembly GetDialogAssembly()
+        {
+            return Assembly.LoadFrom(GetDialogAssemblyPath());
+        }
+
+        private static string GetDialogAssemblyPath()
+        {
+            return Path.Combine(GetVs2010InstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
+        }
+
+        private static string GetVs2010InstallDir()
+        {
+            return Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\VisualStudio\10.0").GetValue("InstallDir").ToString();
         }
     }
 }

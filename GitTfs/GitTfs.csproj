@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sep.Git.Tfs</RootNamespace>
     <AssemblyName>git-tfs</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -31,6 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -87,7 +88,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
-    <Compile Include="Commands\Checkin.cs" />
+    <Compile Include="Commands\CheckinTool.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
     <Compile Include="Commands\Clone.cs" />
     <Compile Include="Commands\CommitOptions.cs" />
@@ -163,6 +164,7 @@
     <EmbeddedResource Include="GitVersionInfo" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Core\TfsInterop\README.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +193,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>"$(ProjectDir)..\GetCurrentVersion" "$(GitPath)" &gt; "$(ProjectDir)GitVersionInfo"</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
 </Project>

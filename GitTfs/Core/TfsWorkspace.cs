@@ -45,6 +45,23 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public void CheckinTool()
+        {
+            var pendingChanges = _workspace.GetPendingChanges();
+
+            if (pendingChanges.Any())
+            {
+                if (!_tfsHelper.ShowCheckinDialog(_workspace, pendingChanges))
+                {
+                    _stdout.WriteLine(" changes not checked in");
+                }
+            }
+            else
+            {
+                _stdout.WriteLine(" nothing to checkin");
+            }
+        }
+
         public string GetLocalPath(string path)
         {
             return Path.Combine(_localDirectory, path);
