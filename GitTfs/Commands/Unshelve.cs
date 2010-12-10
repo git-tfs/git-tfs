@@ -10,7 +10,7 @@ using StructureMap;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("unshelve")]
-    [Description("unshelve [options] (-l | shelveset-name [ref-to-shelve]")]
+    [Description("unshelve [options] (-l | shelveset-name destination-branch)")]
     [RequiresValidGitRepository]
     public class Unshelve : GitTfsCommand
     {
@@ -42,8 +42,7 @@ namespace Sep.Git.Tfs.Commands
         {
             // TODO -- let the remote be specified on the command line.
             var remote = _globals.Repository.ReadAllTfsRemotes().First();
-            remote.Tfs.Unshelve(this, args);
-            return GitTfsExitCodes.OK;
+            return remote.Tfs.Unshelve(this, remote, args);
         }
     }
 }

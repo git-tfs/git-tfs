@@ -22,7 +22,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IChangeset GetChangeset(int changesetId);
         bool MatchesUrl(string tfsUrl);
         bool HasShelveset(string shelvesetName);
-        void Unshelve(Unshelve unshelve, IList<string> args);
+        int Unshelve(Unshelve unshelve, IGitTfsRemote remote, IList<string> args);
         bool CanShowCheckinDialog { get; }
         long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
         void CleanupWorkspaces(string workingDirectory);

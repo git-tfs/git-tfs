@@ -8,5 +8,6 @@ namespace Sep.Git.Tfs
         public const int Help = 1;
         public const int InvalidArguments = 2;
         public const int ForceRequired = 3;
+        public const int InvalidPrecondition = 4;
     }
 }

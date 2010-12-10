@@ -12,6 +12,7 @@ using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
+using ChangeType = Microsoft.TeamFoundation.Server.ChangeType;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -183,20 +184,183 @@ namespace Sep.Git.Tfs.VsCommon
 
         public abstract bool CanShowCheckinDialog { get; }
 
-        public void Unshelve(Sep.Git.Tfs.Commands.Unshelve unshelve, IList<string> args)
+        [Obsolete("TODO: un-spike-ify this.")]
+        public int Unshelve(Sep.Git.Tfs.Commands.Unshelve unshelve, IGitTfsRemote remote, IList<string> args)
         {
+            var ListShelvesets = new Action<Shelveset[]>(shelvesets =>
+                                                             {
+                                                                 foreach (var shelveset in shelvesets)
+                                                                 {
+                                                                     _stdout.WriteLine("  {0,-20} {1,-20}",
+                                                                                       shelveset.OwnerName,
+                                                                                       shelveset.Name);
+                                                                 }
+                                                             });
+            var shelvesetOwner = unshelve.Owner == "all" ? null : (unshelve.Owner ?? VersionControl.AuthenticatedUser);
             if(unshelve.List)
             {
-                var user = unshelve.Owner == "all" ? null : (unshelve.Owner ?? VersionControl.AuthenticatedUser);
-                var shelvesets = VersionControl.QueryShelvesets(null, user);
-                foreach(var shelveset in shelvesets)
-                {
-                    _stdout.WriteLine("  {0,-20} {1,-20}", shelveset.OwnerName, shelveset.Name);
-                }
+                var shelvesets = VersionControl.QueryShelvesets(null, shelvesetOwner);
+                ListShelvesets(shelvesets);
             }
             else
             {
-                throw new NotImplementedException();
+                if(args.Count != 2)
+                {
+                    _stdout.WriteLine("ERROR: Two arguments are required.");
+                    return GitTfsExitCodes.InvalidArguments;
+                }
+                var shelvesetName = args[0];
+                var destinationBranch = args[1];
+
+                var shelvesets = VersionControl.QueryShelvesets(shelvesetName, shelvesetOwner);
+                if(shelvesets.Length != 1)
+                {
+                    _stdout.WriteLine("ERROR: Unable to find shelveset \"" + shelvesetName + "\" (" + shelvesets.Length + " matches).");
+                    ListShelvesets(shelvesets);
+                    return GitTfsExitCodes.InvalidArguments;
+                }
+                var shelveset = shelvesets.First();
+
+                var destinationRef = "refs/heads/" + destinationBranch;
+                if (File.Exists(Path.Combine(remote.Repository.GitDir, destinationRef)))
+                {
+                    _stdout.WriteLine("ERROR: Destination branch (" + destinationBranch + ") already exists!");
+                    return GitTfsExitCodes.ForceRequired;
+                }
+
+                // Don't need this because we're just adding a branch.
+                //var worktreeStatus = remote.Repository.Command("ls-files", "--deleted", "--modified", "--others",
+                //                                               "--exclude-standard");
+                //if(!string.IsNullOrEmpty(worktreeStatus))
+                //{
+                //    _stdout.WriteLine("ERROR: You have a dirty working tree:");
+                //    _stdout.Write(worktreeStatus);
+                //    return GitTfsExitCodes.InvalidPrecondition;
+                //}
+
+                var change = VersionControl.QueryShelvedChanges(shelveset).Single();
+                var gremote = (GitTfsRemote) remote;
+                //var tfsChangeset = new FakeTfsChangeset(change);
+                var wrapperForVersionControlServer =
+                    _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
+                var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
+                var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset)
+                                       {Summary = new TfsChangesetInfo {Remote = remote}};
+                gremote.Apply(tfsChangeset, destinationRef);
+                _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
+            }
+            return GitTfsExitCodes.OK;
+        }
+        class FakeChangeset : IChangeset
+        {
+            private readonly Shelveset _shelveset;
+            private readonly PendingSet _pendingSet;
+            private readonly IVersionControlServer _versionControlServer;
+            private readonly TfsApiBridge _bridge;
+
+            public FakeChangeset(Shelveset shelveset, PendingSet pendingSet, IVersionControlServer versionControlServer, TfsApiBridge bridge)
+            {
+                _shelveset = shelveset;
+                _versionControlServer = versionControlServer;
+                _bridge = bridge;
+                _pendingSet = pendingSet;
+            }
+
+            public IChange[] Changes
+            {
+                get { return _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge)).Cast<IChange>().ToArray(); }
+            }
+
+            public string Committer
+            {
+                get { return _pendingSet.OwnerName; }
+            }
+
+            public DateTime CreationDate
+            {
+                get { return _shelveset.CreationDate; }
+            }
+
+            public string Comment
+            {
+                get { return _shelveset.Comment; }
+            }
+
+            public int ChangesetId
+            {
+                get { return -1; }
+            }
+
+            public IVersionControlServer VersionControlServer
+            {
+                get { return _versionControlServer; }
+            }
+        }
+        class FakeChange : IChange
+        {
+            private readonly PendingChange _pendingChange;
+            private readonly TfsApiBridge _bridge;
+
+            public FakeChange(PendingChange pendingChange, TfsApiBridge bridge)
+            {
+                _pendingChange = pendingChange;
+                _bridge = bridge;
+            }
+
+            public TfsChangeType ChangeType
+            {
+                get { return _bridge.Convert<TfsChangeType>(_pendingChange.ChangeType); }
+            }
+
+            public IItem Item
+            {
+                get { return new FakeItem(_pendingChange, _bridge); }
+            }
+        }
+        class FakeItem : IItem
+        {
+            private readonly PendingChange _pendingChange;
+            private readonly TfsApiBridge _bridge;
+
+            public FakeItem(PendingChange pendingChange, TfsApiBridge bridge)
+            {
+                _pendingChange = pendingChange;
+                _bridge = bridge;
+            }
+
+            public IVersionControlServer VersionControlServer
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public int ChangesetId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public string ServerItem
+            {
+                get { return _pendingChange.ServerItem; }
+            }
+
+            public decimal DeletionId
+            {
+                get { return _pendingChange.DeletionId; }
+            }
+
+            public TfsItemType ItemType
+            {
+                get { return _bridge.Convert<TfsItemType>(_pendingChange.ItemType); }
+            }
+
+            public int ItemId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public void DownloadFile(string file)
+            {
+                _pendingChange.DownloadShelvedFile(file);
             }
         }
 
