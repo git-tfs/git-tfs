@@ -113,12 +113,14 @@ namespace Sep.Git.Tfs.Core
             return tfsPath;
         }
 
-        public void Fetch()
+        public void Fetch(Dictionary<long, string> mergeInfo)
         {
             foreach (var changeset in FetchChangesets())
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
+                if(mergeInfo.ContainsKey(changeset.Summary.ChangesetId))
+                    log.CommitParents.Add(mergeInfo[changeset.Summary.ChangesetId]);
                 UpdateRef(Commit(log), changeset.Summary.ChangesetId);
                 DoGcIfNeeded();
             }
@@ -360,19 +362,21 @@ namespace Sep.Git.Tfs.Core
             workspace.Shelve(shelvesetName, evaluateCheckinPolicies);
         }
 
-        public void Checkin(string head, TfsChangesetInfo parentChangeset)
+        public long Checkin(string head, TfsChangesetInfo parentChangeset)
         {
+            var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => Checkin(head, parentChangeset, workspace));
+                              workspace => changeset = Checkin(head, parentChangeset, workspace));
+            return changeset;
         }
 
-        private void Checkin(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        private long Checkin(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
             foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))
             {
                 change.Apply(workspace);
             }
-            workspace.Checkin();
+            return workspace.Checkin();
         }
     }
 }

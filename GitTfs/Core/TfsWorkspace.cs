@@ -54,13 +54,13 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public void Checkin()
+        public long Checkin()
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
             if (pendingChanges.Count() == 0)
             {
-                _stdout.WriteLine(" nothing to shelve");
+                throw new Exception(" nothing to shelve");
             }
             else
             {
@@ -72,18 +72,18 @@ namespace Sep.Git.Tfs.Core
                     {
                         _stdout.WriteLine("[ERROR] " + message);
                     }
-                    _stdout.WriteLine("No changes checked in.");
+                    throw new Exception("No changes checked in.");
                 }
                 else
                 {
                     var newChangeset = _workspace.Checkin(pendingChanges, _checkinOptions.CheckinComment, null, workItemInfos);
                     if(newChangeset == 0)
                     {
-                        _stdout.WriteLine("Checkin failed!");
+                        throw new Exception("Checkin failed!");
                     }
                     else
                     {
-                        _stdout.WriteLine("Checkin #" + newChangeset + " was created. Please remember to 'git tfs fetch'.");
+                        return newChangeset;
                     }
                 }
             }

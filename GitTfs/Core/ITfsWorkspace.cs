@@ -9,7 +9,7 @@ namespace Sep.Git.Tfs.Core
         /// <summary>
         /// Evaluates check-in policies and checks in all pending changes.
         /// </summary>
-        void Checkin();
+        long Checkin();
 
         string GetLocalPath(string path);
         void Add(string path);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhino.Mocks;
@@ -198,11 +199,11 @@ namespace Sep.Git.Tfs.Test.Commands
             public string RemoteRef { get; private set; }
             public bool ShouldSkip(string path){return false;}
             public string GetPathInGitRepo(string tfsPath){return tfsPath;}
-            public void Fetch(){}
+            public void Fetch(Dictionary<long, string> mergeInfo){}
             public void QuickFetch(){}
             public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies){}
             public bool HasShelveset(string shelvesetName) { return false; }
-            public void Checkin(string treeish, TfsChangesetInfo parentChangeset){}
+            public long Checkin(string treeish, TfsChangesetInfo parentChangeset) { return -1; }
         }
     }
 }

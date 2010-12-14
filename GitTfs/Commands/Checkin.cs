@@ -42,7 +42,9 @@ namespace Sep.Git.Tfs.Commands
             {
                 case 1:
                     var changeset = tfsParents.First();
-                    changeset.Remote.Checkin(refToShelve, changeset);
+                    var newChangeset = changeset.Remote.Checkin(refToShelve, changeset);
+                    _stdout.WriteLine("TFS Changeset #" + newChangeset + " was created. Marking it as a merge commit...");
+                    changeset.Remote.Fetch(new Dictionary<long, string>{{newChangeset, refToShelve}});
                     return GitTfsExitCodes.OK;
                 case 0:
                     _stdout.WriteLine("No TFS parents found!");
