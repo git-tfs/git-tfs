@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CommandLine.OptParse;
 
@@ -6,6 +7,7 @@ namespace Sep.Git.Tfs.Commands
 {
     public static class Helpers
     {
+        [Obsolete("Use MakeNestedOptionResults")]
         public static IEnumerable<IOptionResults> MakeOptionResults(this GitTfsCommand command, params object[] optionsObjects)
         {
             return
