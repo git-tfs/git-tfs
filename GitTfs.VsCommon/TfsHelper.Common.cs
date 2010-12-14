@@ -111,7 +111,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         private string GenerateWorkspaceName()
         {
-            return Guid.NewGuid().ToString();
+            return "git-tfs-" + Guid.NewGuid().ToString();
         }
 
         public bool HasShelveset(string shelvesetName)
