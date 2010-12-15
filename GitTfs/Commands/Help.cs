@@ -52,9 +52,18 @@ namespace Sep.Git.Tfs.Commands
         private int Run()
         {
             output.WriteLine("Usage: git-tfs [command] [options]");
-            foreach(var commandName in GetCommandNames().OrderBy(s => s))
+            foreach(var pair in GetCommandMap())
             {
-                output.WriteLine("    " + commandName);
+                output.Write("    " + pair.Key);
+                
+                if (pair.Value.Any())
+                {
+                    output.WriteLine(" (" + string.Join(", ", pair.Value) + ")");
+                }
+                else
+                {
+                    output.WriteLine();
+                }
             }
             output.WriteLine(" (use 'git-tfs help [command]' for more information)");
             return GitTfsExitCodes.Help;
@@ -78,12 +87,13 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.Help;
         }
 
-        private IEnumerable<string> GetCommandNames()
+        private Dictionary<string, IEnumerable<string>> GetCommandMap()
         {
             return (from instance in GetCommandInstances()
                     where instance.Name != null
-                    let aliases = commandFactory.GetAliasesForCommandName(instance.Name)
-                    select aliases.Concat(new[] {instance.Name})).SelectMany(s => s);
+                    orderby instance.Name
+                    select instance.Name)
+                .ToDictionary(s => s, s => commandFactory.GetAliasesForCommandName(s));
         }
 
         private static string GetCommandName(GitTfsCommand command)
