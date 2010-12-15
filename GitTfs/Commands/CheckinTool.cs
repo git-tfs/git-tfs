@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
-using StructureMap;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
 {
-    [Pluggable("checkintool")]
+    [PluggableWithAliases("checkintool", "ct")]
     [Description("checkintool [options] [ref-to-checkin]")]
     [RequiresValidGitRepository]
     public class CheckinTool : GitTfsCommand

@@ -8,6 +8,7 @@ using CommandLine.OptParse;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 
 namespace Sep.Git.Tfs
@@ -15,10 +16,12 @@ namespace Sep.Git.Tfs
     public class GitTfs
     {
         private ITfsHelper tfsHelper;
+        private GitTfsCommandFactory commandFactory;
 
-        public GitTfs(ITfsHelper tfsHelper)
+        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory)
         {
             this.tfsHelper = tfsHelper;
+            this.commandFactory = commandFactory;
         }
 
         public void Run(IList<string> args)
@@ -152,7 +155,7 @@ namespace Sep.Git.Tfs
         {
             for (int i = 0; i < args.Count; i++)
             {
-                var command = ObjectFactory.TryGetInstance<GitTfsCommand>(args[i]);
+                var command = commandFactory.GetCommand(args[i]);
                 if (command != null)
                 {
                     args.RemoveAt(i);

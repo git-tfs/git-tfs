@@ -138,6 +138,8 @@
     <Compile Include="Core\TfsInterop\NullIdentity.cs" />
     <Compile Include="Core\TfsInterop\IChangeset.cs" />
     <Compile Include="Core\TfsWorkspace.cs" />
+    <Compile Include="Util\GitTfsCommandFactory.cs" />
+    <Compile Include="Util\PluggableWithAliases.cs" />
     <Compile Include="Util\ConfiguresStructureMap.cs" />
     <Compile Include="Core\DelimitedReader.cs" />
     <Compile Include="Core\Ext.cs" />
@@ -168,7 +170,6 @@
     <EmbeddedResource Include="GitVersionInfo" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Core\TfsInterop\README.txt" />
   </ItemGroup>
   <ItemGroup>

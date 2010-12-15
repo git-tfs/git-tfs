@@ -5,7 +5,9 @@ using System.IO;
 using System.Linq;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Util;
 using StructureMap;
+using StructureMap.Pipeline;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -14,10 +16,12 @@ namespace Sep.Git.Tfs.Commands
     public class Help : GitTfsCommand
     {
         private readonly TextWriter output;
+        private readonly GitTfsCommandFactory commandFactory;
 
-        public Help(TextWriter output)
+        public Help(TextWriter output, GitTfsCommandFactory commandFactory)
         {
             this.output = output;
+            this.commandFactory = commandFactory;
         }
 
         public IEnumerable<IOptionResults> ExtraOptions
@@ -33,7 +37,7 @@ namespace Sep.Git.Tfs.Commands
         {
             foreach(var arg in args)
             {
-                var command = ObjectFactory.TryGetInstance<GitTfsCommand>(arg);
+                var command = commandFactory.GetCommand(arg);
                 if(command != null)
                 {
                     return Run(command);
@@ -76,31 +80,26 @@ namespace Sep.Git.Tfs.Commands
 
         private IEnumerable<string> GetCommandNames()
         {
-            foreach(var commandType in GetCommandTypes())
-            {
-                var name = GetCommandName(commandType);
-                if(name != null)
-                    yield return name;
-            }
+            return (from instance in GetCommandInstances()
+                    where instance.Name != null
+                    let aliases = commandFactory.GetAliasesForCommandName(instance.Name)
+                    select aliases.Concat(new[] {instance.Name})).SelectMany(s => s);
         }
 
-        private string GetCommandName(Type commandType)
+        private static string GetCommandName(GitTfsCommand command)
         {
-            var attribute = (PluggableAttribute) commandType.GetCustomAttributes(typeof (PluggableAttribute), false).FirstOrDefault();
-            return attribute == null ? null : attribute.ConcreteKey;
+            return (from instance in GetCommandInstances()
+                    where instance.ConcreteType == command.GetType()
+                    select instance.Name).Single();
         }
 
-        private string GetCommandName(object obj)
+        private static IEnumerable<IInstance> GetCommandInstances()
         {
-            return GetCommandName(obj.GetType());
-        }
-
-        private IEnumerable<Type> GetCommandTypes()
-        {
-            var commandType = typeof (GitTfsCommand);
-            return from t in GetType().Assembly.GetTypes()
-                   where commandType.IsAssignableFrom(t)
-                   select t;
+            return ObjectFactory.Model
+                .PluginTypes
+                .Single(p => p.PluginType == typeof (GitTfsCommand))
+                .Instances
+                .Where(i => i != null);
         }
 
         private string GetCommandUsage(GitTfsCommand command)
@@ -108,9 +107,10 @@ namespace Sep.Git.Tfs.Commands
             var descriptionAttribute =
                 command.GetType().GetCustomAttributes(typeof (DescriptionAttribute), false).FirstOrDefault() as
                 DescriptionAttribute;
+            var commandName = GetCommandName(command);
             return (descriptionAttribute != null)
                        ? descriptionAttribute.Description
-                       : GetCommandName(command) + " [options]";
+                       : commandName + " [options]";
         }
 
         public static int ShowHelp(GitTfsCommand command)
