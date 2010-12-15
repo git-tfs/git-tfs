@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Core
@@ -14,10 +15,19 @@ namespace Sep.Git.Tfs.Core
         string RemoteRef { get; }
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
-        void Fetch();
+        void Fetch(Dictionary<long, string> mergeInfo);
         void QuickFetch();
-        void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset);
+        void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies);
         bool HasShelveset(string shelvesetName);
         void CheckinTool(string head, TfsChangesetInfo parentChangeset);
+        long Checkin(string treeish, TfsChangesetInfo parentChangeset);
+    }
+
+    public static partial class Ext
+    {
+        public static void Fetch(this IGitTfsRemote remote)
+        {
+            remote.Fetch(new Dictionary<long, string>());
+        }
     }
 }

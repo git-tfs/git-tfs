@@ -1,3 +1,4 @@
+using System;
 using Microsoft.TeamFoundation.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 
@@ -10,6 +11,11 @@ namespace Sep.Git.Tfs.VsCommon
         public string TfsClientLibraryVersion
         {
             get { return typeof(TeamFoundationServer).Assembly.GetName().Version.ToString() + " (MS)"; }
+        }
+
+        public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges)
+        {
+            throw new NotImplementedException();
         }
 
         private void UpdateServer()

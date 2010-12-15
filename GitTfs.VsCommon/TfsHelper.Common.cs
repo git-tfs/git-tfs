@@ -78,7 +78,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
         {
-            return new TfsChangeset(this, _bridge.Wrap(changeset))
+            return new TfsChangeset(this, _bridge.Wrap<WrapperForChangeset, Changeset>(changeset))
             {
                 Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote }
             };
@@ -92,7 +92,7 @@ namespace Sep.Git.Tfs.VsCommon
                 var tfsWorkspace = ObjectFactory.With("localDirectory").EqualTo(localDirectory)
                     .With("remote").EqualTo(remote)
                     .With("contextVersion").EqualTo(versionToFetch)
-                    .With("workspace").EqualTo(_bridge.Wrap(workspace))
+                    .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
                     .GetInstance<TfsWorkspace>();
                 action(tfsWorkspace);
             }
@@ -111,7 +111,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         private string GenerateWorkspaceName()
         {
-            return Guid.NewGuid().ToString();
+            return "git-tfs-" + Guid.NewGuid().ToString();
         }
 
         public bool HasShelveset(string shelvesetName)
@@ -122,14 +122,13 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
-            return
-                _bridge.Wrap(new Shelveset(_bridge.Unwrap(workspace).VersionControlServer, shelvesetName,
-                                           workspace.OwnerName));
+            var shelveset = new Shelveset(_bridge.Unwrap<Workspace>(workspace).VersionControlServer, shelvesetName, workspace.OwnerName);
+            return _bridge.Wrap<WrapperForShelveset, Shelveset>(shelveset);
         }
 
         public IIdentity GetIdentity(string username)
         {
-            return _bridge.Wrap(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
+            return _bridge.Wrap<WrapperForIdentity, Identity>(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
         }
 
         public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
@@ -142,7 +141,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IChangeset GetChangeset(int changesetId)
         {
-            return _bridge.Wrap(VersionControl.GetChangeset(changesetId));
+            return _bridge.Wrap<WrapperForChangeset, Changeset>(VersionControl.GetChangeset(changesetId));
         }
 
         public bool MatchesUrl(string tfsUrl)
@@ -152,7 +151,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
         {
-            return workItems.Select(workItem => _bridge.Wrap(GetWorkItemInfo(workItem, _bridge.Convert(checkinAction))));
+            return workItems.Select(workItem => _bridge.Wrap<WrapperForWorkItemCheckinInfo, WorkItemCheckinInfo>(GetWorkItemInfo(workItem, _bridge.Convert<WorkItemCheckinAction>(checkinAction)))).Cast<IWorkItemCheckinInfo>();
         }
 
         private WorkItemCheckinInfo GetWorkItemInfo(string workItem, WorkItemCheckinAction checkinAction)

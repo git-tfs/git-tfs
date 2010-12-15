@@ -42,7 +42,8 @@ namespace Sep.Git.Tfs.VsCommon
 
         public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges)
         {
-            return ShowCheckinDialog(_bridge.Unwrap(workspace), pendingChanges.Select(p => _bridge.Unwrap(p)).ToArray());
+            return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
+                                     pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray());
         }
 
         private static bool ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges)

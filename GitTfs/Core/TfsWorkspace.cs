@@ -16,10 +16,12 @@ namespace Sep.Git.Tfs.Core
         private readonly IGitTfsRemote _remote;
         private readonly CheckinOptions _checkinOptions;
         private readonly ITfsHelper _tfsHelper;
+        private readonly CheckinPolicyEvaluator _policyEvaluator;
 
-        public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper)
+        public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper, CheckinPolicyEvaluator policyEvaluator)
         {
             _workspace = workspace;
+            _policyEvaluator = policyEvaluator;
             _contextVersion = contextVersion;
             _remote = remote;
             _checkinOptions = checkinOptions;
@@ -28,7 +30,7 @@ namespace Sep.Git.Tfs.Core
             _stdout = stdout;
         }
 
-        public void Shelve(string shelvesetName)
+        public void Shelve(string shelvesetName, bool evaluateCheckinPolicies)
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
@@ -41,6 +43,13 @@ namespace Sep.Git.Tfs.Core
                 var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
                 shelveset.Comment = _checkinOptions.CheckinComment;
                 shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
+                if(evaluateCheckinPolicies)
+                {
+                    foreach(var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, shelveset.WorkItemInfo))
+                    {
+                        _stdout.WriteLine("[Checkin Policy] " + message);
+                    }
+                }
                 _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
             }
         }
@@ -59,6 +68,41 @@ namespace Sep.Git.Tfs.Core
             else
             {
                 _stdout.WriteLine(" nothing to checkin");
+            }
+        }
+
+        public long Checkin()
+        {
+            var pendingChanges = _workspace.GetPendingChanges();
+
+            if (pendingChanges.Count() == 0)
+            {
+                throw new Exception(" nothing to shelve");
+            }
+            else
+            {
+                var workItemInfos = GetWorkItemInfos();
+                var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, _checkinOptions.CheckinComment, workItemInfos);
+                if(checkinProblems.Any())
+                {
+                    foreach (var message in checkinProblems)
+                    {
+                        _stdout.WriteLine("[ERROR] " + message);
+                    }
+                    throw new Exception("No changes checked in.");
+                }
+                else
+                {
+                    var newChangeset = _workspace.Checkin(pendingChanges, _checkinOptions.CheckinComment, null, workItemInfos);
+                    if(newChangeset == 0)
+                    {
+                        throw new Exception("Checkin failed!");
+                    }
+                    else
+                    {
+                        return newChangeset;
+                    }
+                }
             }
         }
 

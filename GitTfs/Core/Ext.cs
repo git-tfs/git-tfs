@@ -10,7 +10,7 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
-    public static class Ext
+    public static partial class Ext
     {
         public static Action<T> And<T>(this Action<T> originalAction, params Action<T> [] additionalActions)
         {

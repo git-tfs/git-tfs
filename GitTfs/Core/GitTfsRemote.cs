@@ -113,12 +113,14 @@ namespace Sep.Git.Tfs.Core
             return tfsPath;
         }
 
-        public void Fetch()
+        public void Fetch(Dictionary<long, string> mergeInfo)
         {
             foreach (var changeset in FetchChangesets())
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
+                if(mergeInfo.ContainsKey(changeset.Summary.ChangesetId))
+                    log.CommitParents.Add(mergeInfo[changeset.Summary.ChangesetId]);
                 UpdateRef(Commit(log), changeset.Summary.ChangesetId);
                 DoGcIfNeeded();
             }
@@ -340,10 +342,10 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset)
+        public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
         {
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => Shelve(shelvesetName, head, parentChangeset, workspace));
+                              workspace => Shelve(shelvesetName, head, parentChangeset, evaluateCheckinPolicies, workspace));
         }
 
         public bool HasShelveset(string shelvesetName)
@@ -351,10 +353,10 @@ namespace Sep.Git.Tfs.Core
             return Tfs.HasShelveset(shelvesetName);
         }
 
-        private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, ITfsWorkspace workspace)
         {
             PendChangesToWorkspace(head, parentChangeset, workspace);
-            workspace.Shelve(shelvesetName);
+            workspace.Shelve(shelvesetName, evaluateCheckinPolicies);
         }
 
         public void CheckinTool(string head, TfsChangesetInfo parentChangeset)
@@ -375,6 +377,23 @@ namespace Sep.Git.Tfs.Core
             {
                 change.Apply(workspace);
             }
+        }
+
+        public long Checkin(string head, TfsChangesetInfo parentChangeset)
+        {
+            var changeset = 0L;
+            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
+                              workspace => changeset = Checkin(head, parentChangeset, workspace));
+            return changeset;
+        }
+
+        private long Checkin(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        {
+            foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))
+            {
+                change.Apply(workspace);
+            }
+            return workspace.Checkin();
         }
     }
 }
