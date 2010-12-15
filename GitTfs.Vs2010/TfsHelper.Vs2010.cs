@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -40,13 +41,17 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges)
+        public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, 
+            IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
-                                     pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray());
+                                     pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray(),
+                                     checkedInfos.Select(c => _bridge.Unwrap<WorkItemCheckedInfo>(c)).ToArray(),
+                                     checkinComment);
         }
 
-        private static bool ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges)
+        private static bool ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges, 
+            WorkItemCheckedInfo[] checkedInfos, string checkinComment)
         {
             var result = true;
 
@@ -56,7 +61,8 @@ namespace Sep.Git.Tfs.VsCommon
 
                 dynamic dialog = new ReflectionProxy(GetCheckinDialogType(), workspace.VersionControlServer);
 
-                int dialogResult = dialog.Show(parentForm.Handle, workspace, pendingChanges);
+                int dialogResult = dialog.Show(parentForm.Handle, workspace, pendingChanges, pendingChanges,
+                                               checkinComment, null, null, checkedInfos);
 
                 if (dialogResult <= 0)
                 {

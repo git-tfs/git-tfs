@@ -60,7 +60,7 @@ namespace Sep.Git.Tfs.Core
 
             if (pendingChanges.Any())
             {
-                if (!_tfsHelper.ShowCheckinDialog(_workspace, pendingChanges))
+                if (!_tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), _checkinOptions.CheckinComment))
                 {
                     _stdout.WriteLine(" changes not checked in");
                 }
@@ -149,9 +149,19 @@ namespace Sep.Git.Tfs.Core
 
         private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos()
         {
-            var workItemInfos = _tfsHelper.GetWorkItemInfos(_checkinOptions.WorkItemsToAssociate, TfsWorkItemCheckinAction.Associate);
-            workItemInfos =
-                workItemInfos.Append(_tfsHelper.GetWorkItemInfos(_checkinOptions.WorkItemsToResolve, TfsWorkItemCheckinAction.Resolve));
+            return GetWorkItemInfosHelper<IWorkItemCheckinInfo>(_tfsHelper.GetWorkItemInfos);
+        }
+
+        private IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos()
+        {
+            return GetWorkItemInfosHelper<IWorkItemCheckedInfo>(_tfsHelper.GetWorkItemCheckedInfos);
+        }
+
+        private IEnumerable<T> GetWorkItemInfosHelper<T>(Func<IEnumerable<string>, TfsWorkItemCheckinAction, IEnumerable<T>> func)
+        {
+            var workItemInfos = func(_checkinOptions.WorkItemsToAssociate, TfsWorkItemCheckinAction.Associate);
+            workItemInfos = workItemInfos.Append(
+                func(_checkinOptions.WorkItemsToResolve, TfsWorkItemCheckinAction.Resolve));
             return workItemInfos;
         }
     }

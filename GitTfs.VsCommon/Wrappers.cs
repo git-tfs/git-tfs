@@ -206,6 +206,14 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
+    public class WrapperForWorkItemCheckedInfo : WrapperFor<WorkItemCheckedInfo>, IWorkItemCheckedInfo
+    {
+        public WrapperForWorkItemCheckedInfo(WorkItemCheckedInfo workItemCheckinInfo)
+            : base(workItemCheckinInfo)
+        {
+        }
+    }
+
     public class WrapperForPendingChange : WrapperFor<PendingChange>, IPendingChange
     {
         public WrapperForPendingChange(PendingChange pendingChange) : base(pendingChange)

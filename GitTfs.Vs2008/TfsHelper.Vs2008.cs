@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.TeamFoundation.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 
@@ -13,7 +14,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return typeof(TeamFoundationServer).Assembly.GetName().Version.ToString() + " (MS)"; }
         }
 
-        public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges)
+        public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             throw new NotImplementedException();
         }

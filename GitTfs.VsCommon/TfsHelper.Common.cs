@@ -151,12 +151,38 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
         {
-            return workItems.Select(workItem => _bridge.Wrap<WrapperForWorkItemCheckinInfo, WorkItemCheckinInfo>(GetWorkItemInfo(workItem, _bridge.Convert<WorkItemCheckinAction>(checkinAction)))).Cast<IWorkItemCheckinInfo>();
+            return
+                GetWorkItemInfosHelper<IWorkItemCheckinInfo, WrapperForWorkItemCheckinInfo, WorkItemCheckinInfo>(
+                    workItems, checkinAction, GetWorkItemInfo);
+        }
+
+        public IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
+        {
+            return
+                GetWorkItemInfosHelper<IWorkItemCheckedInfo, WrapperForWorkItemCheckedInfo, WorkItemCheckedInfo>(
+                    workItems, checkinAction, GetWorkItemCheckedInfo);
+        }
+
+        private IEnumerable<TInterface> GetWorkItemInfosHelper<TInterface, TWrapper, TInstance>(IEnumerable<string> workItems, 
+            TfsWorkItemCheckinAction checkinAction, Func<string, WorkItemCheckinAction, TInstance> func)
+            where TWrapper : class
+        {
+            return (from workItem in workItems
+                    select _bridge.Wrap<TWrapper, TInstance>(
+                        func(workItem, _bridge.Convert<WorkItemCheckinAction>(checkinAction))))
+                .Cast<TInterface>();
         }
 
         private WorkItemCheckinInfo GetWorkItemInfo(string workItem, WorkItemCheckinAction checkinAction)
         {
             return new WorkItemCheckinInfo(WorkItems.GetWorkItem(Convert.ToInt32(workItem)), checkinAction);
+        }
+
+        
+
+        private static WorkItemCheckedInfo GetWorkItemCheckedInfo(string workitem, WorkItemCheckinAction checkinAction)
+        {
+            return new WorkItemCheckedInfo(Convert.ToInt32(workitem), true, checkinAction);
         }
     }
 }
