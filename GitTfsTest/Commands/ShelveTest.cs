@@ -204,7 +204,7 @@ namespace Sep.Git.Tfs.Test.Commands
             public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies){}
             public bool HasShelveset(string shelvesetName) { return false; }
             public long Checkin(string treeish, TfsChangesetInfo parentChangeset) { return -1; }
-            public void CheckinTool(string head, TfsChangesetInfo parentChangeset) { }
+            public long CheckinTool(string head, TfsChangesetInfo parentChangeset) { return -1; }
         }
     }
 }
