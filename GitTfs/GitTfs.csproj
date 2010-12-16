@@ -88,6 +88,9 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="Commands\BaseCheckin.cs" />
+    <Compile Include="Commands\BaseTfsCommit.cs" />
+    <Compile Include="Commands\Checkin.cs" />
     <Compile Include="Commands\CheckinTool.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
     <Compile Include="Commands\Clone.cs" />

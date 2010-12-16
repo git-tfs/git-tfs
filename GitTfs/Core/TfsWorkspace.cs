@@ -54,20 +54,25 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public void CheckinTool()
+        public long CheckinTool()
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
             if (pendingChanges.Any())
             {
-                if (!_tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), _checkinOptions.CheckinComment))
+                var newChangeset = _tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(),
+                                                                _checkinOptions.CheckinComment);
+
+                if(newChangeset <= 0)
                 {
-                    _stdout.WriteLine(" changes not checked in");
+                    throw new Exception(" changes not checked in");
                 }
+
+                return newChangeset;
             }
             else
             {
-                _stdout.WriteLine(" nothing to checkin");
+                throw new Exception(" nothing to checkin");
             }
         }
 

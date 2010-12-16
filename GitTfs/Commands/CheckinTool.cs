@@ -11,52 +11,15 @@ namespace Sep.Git.Tfs.Commands
     [PluggableWithAliases("checkintool", "ct")]
     [Description("checkintool [options] [ref-to-checkin]")]
     [RequiresValidGitRepository]
-    public class CheckinTool : GitTfsCommand
+    public class CheckinTool : BaseCheckin
     {
-        private readonly Globals globals;
-        private readonly TextWriter stdout;
-        private readonly CheckinOptions checkinOptions;
-
         public CheckinTool(Globals globals, TextWriter stdout, CheckinOptions checkinOptions)
-        {
-            this.globals = globals;
-            this.stdout = stdout;
-            this.checkinOptions = checkinOptions;
-        }
+            : base(globals, stdout, checkinOptions)
+        {}
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        protected override long ExecuteCheckin(IGitTfsRemote remote, string treeish, TfsChangesetInfo parentChangeset)
         {
-            get { return this.MakeOptionResults(checkinOptions); }
-        }
-
-        public int Run(IList<string> args)
-        {
-            if (args.Count != 0 && args.Count != 1)
-                return Help.ShowHelpForInvalidArguments(this);
-
-            var refToShelve = args.Count > 0 ? args[0] : "HEAD";
-            var tfsParents = globals.Repository.GetParentTfsCommits(refToShelve);
-            
-            if (globals.UserSpecifiedRemoteId != null)
-                tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == globals.UserSpecifiedRemoteId);
-            
-            switch (tfsParents.Count())
-            {
-                case 1:
-                    var changeset = tfsParents.First();
-                    changeset.Remote.CheckinTool(refToShelve, changeset);
-                    return GitTfsExitCodes.OK;
-                case 0:
-                    stdout.WriteLine("No TFS parents found!");
-                    return GitTfsExitCodes.InvalidArguments;
-                default:
-                    stdout.WriteLine("More than one parent found! Use -i to choose the correct parent from: ");
-                    foreach (var parent in tfsParents)
-                    {
-                        stdout.WriteLine("  " + parent.Remote.Id);
-                    }
-                    return GitTfsExitCodes.InvalidArguments;
-            }
+            return remote.CheckinTool(treeish, parentChangeset);
         }
     }
 }
