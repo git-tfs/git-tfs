@@ -196,8 +196,8 @@ namespace Sep.Git.Tfs.Core
         {
             var log = new LogEntry();
             var identity = tfs.GetIdentity(changesetToLog.Committer);
-            log.CommitterName = log.AuthorName = identity.DisplayName ?? "Unknown TFS user";
-            log.CommitterEmail = log.AuthorEmail = identity.MailAddress ?? changesetToLog.Committer;
+            log.CommitterName = log.AuthorName = null != identity ? identity.DisplayName ?? "Unknown TFS user" : changesetToLog.Committer ?? "Unknown TFS user";
+            log.CommitterEmail = log.AuthorEmail = null != identity ? identity.MailAddress ?? changesetToLog.Committer : changesetToLog.Committer;
             log.Date = changesetToLog.CreationDate;
             log.Log = changesetToLog.Comment + Environment.NewLine;
             log.ChangesetId = changesetToLog.ChangesetId;
