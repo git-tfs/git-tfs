@@ -99,6 +99,7 @@
     <Compile Include="Core\ModeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHelpers\ExtensionMethods.cs" />
+    <Compile Include="Util\GitTfsCommandRunnerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GitTfs\GitTfs.csproj">

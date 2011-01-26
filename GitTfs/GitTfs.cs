@@ -19,13 +19,15 @@ namespace Sep.Git.Tfs
         private GitTfsCommandFactory commandFactory;
         private readonly IHelpHelper _help;
         private readonly IContainer _container;
+        private readonly GitTfsCommandRunner _runner;
 
-        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container)
+        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, GitTfsCommandRunner runner)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
             _help = help;
             _container = container;
+            _runner = runner;
         }
 
         public void Run(IList<string> args)
@@ -51,7 +53,7 @@ namespace Sep.Git.Tfs
             }
             else
             {
-                Environment.ExitCode = command.Run(unparsedArgs);
+                Environment.ExitCode = _runner.Run(command, unparsedArgs);
                 //PostFetchCheckout();
             }
         }

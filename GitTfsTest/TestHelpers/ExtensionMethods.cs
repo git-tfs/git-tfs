@@ -17,11 +17,6 @@ namespace Sep.Git.Tfs.Test.TestHelpers
             Assert.AreEqual(expected, end, "end of string");
         }
 
-        public static int MakeArgsAndRun(this GitTfsCommand command, params string [] args)
-        {
-            return command.Run(args);
-        }
-
         /// <summary>
         /// CSharpOptParse tries to wrap the help text to zero columns when
         /// it writes it during tests, which is not desired. This closure tricks

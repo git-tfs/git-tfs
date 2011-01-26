@@ -23,25 +23,6 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks = new RhinoAutoMocker<Shelve>();
             mocks.Inject<TextWriter>(new StringWriter());
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
-            mocks.MockObjectFactory();
-        }
-
-        [TestMethod]
-        public void ShouldFailForLessThanOneArguments()
-        {
-            mocks.Get<IHelpHelper>().Stub(x => x.ShowHelpForInvalidArguments(null)).IgnoreArguments().Return(
-                GitTfsExitCodes.InvalidArguments);
-            this.FixHelpFormatter(
-                () => Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.MakeArgsAndRun()));
-        }
-
-        [TestMethod]
-        public void ShouldFailForMoreThanTwoArguments()
-        {
-            mocks.Get<IHelpHelper>().Stub(x => x.ShowHelpForInvalidArguments(null)).IgnoreArguments().Return(
-                GitTfsExitCodes.InvalidArguments);
-            this.FixHelpFormatter(
-                () => Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.MakeArgsAndRun("one", "two", "three")));
         }
 
         [TestMethod]
@@ -50,7 +31,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
             mocks.Get<IGitRepository>().Stub(x => x.GetParentTfsCommits("my-head")).Return(new TfsChangesetInfo[0]);
 
-            Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.MakeArgsAndRun("don't care", "my-head"));
+            Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }
 
         [TestMethod]
@@ -61,7 +42,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetParentTfsCommits("my-head"))
                 .Return(new[] {parentChangesets, parentChangesets});
 
-            Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.MakeArgsAndRun("don't care", "my-head"));
+            Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }
 
         [TestMethod]
@@ -73,7 +54,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetParentTfsCommits("my-head"))
                 .Return(new[] { ChangesetForRemote("ok-choice"), ChangesetForRemote("good-choice") });
 
-            Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.MakeArgsAndRun("don't care", "my-head"));
+            Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }
 
         [TestMethod]
@@ -85,7 +66,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetParentTfsCommits("my-head"))
                 .Return(new[] { ChangesetForRemote("ok-choice"), ChangesetForRemote("good-choice") });
 
-            Assert.AreEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.MakeArgsAndRun("don't care", "my-head"));
+            Assert.AreEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }
 
         [TestMethod]
@@ -95,7 +76,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetParentTfsCommits(null)).IgnoreArguments()
                 .Return(new[] {new TfsChangesetInfo {Remote = mocks.Get<IGitTfsRemote>()}});
 
-            Assert.AreEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.MakeArgsAndRun("don't care"));
+            Assert.AreEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care"));
         }
 
         [TestMethod]
@@ -106,7 +87,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetParentTfsCommits("commit_to_shelve"))
                 .Return(new[] { new TfsChangesetInfo { Remote = mocks.Get<IGitTfsRemote>() } });
 
-            mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "commit_to_shelve");
+            mocks.ClassUnderTest.Run("shelveset name", "commit_to_shelve");
         }
 
         [TestMethod]
@@ -117,7 +98,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetParentTfsCommits(null)).IgnoreArguments()
                 .Return(new[] { new TfsChangesetInfo { Remote = mocks.Get<IGitTfsRemote>() } });
 
-            mocks.ClassUnderTest.MakeArgsAndRun("shelveset name");
+            mocks.ClassUnderTest.Run("shelveset name");
 
             remote.AssertWasCalled(x => x.Shelve(null, null, null, false),
                                    y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("HEAD"), Is.Anything(), Is.Anything()));
@@ -132,7 +113,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetParentTfsCommits(null)).IgnoreArguments()
                 .Return(new[] {new TfsChangesetInfo {Remote = remote}});
 
-            mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
+            mocks.ClassUnderTest.Run("shelveset name", "treeish");
 
             remote.AssertWasCalled(x => x.Shelve(null, null, null, false),
                                    y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("treeish"), Is.Anything(), Is.Anything()));
@@ -144,7 +125,7 @@ namespace Sep.Git.Tfs.Test.Commands
             WireUpMockRemote();
             CreateShelveset("shelveset name");
 
-            var exitCode = mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
+            var exitCode = mocks.ClassUnderTest.Run("shelveset name", "treeish");
             Assert.AreEqual(GitTfsExitCodes.ForceRequired, exitCode);
         }
 
@@ -154,7 +135,7 @@ namespace Sep.Git.Tfs.Test.Commands
             WireUpMockRemote();
             CreateShelveset("shelveset name");
 
-            mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
+            mocks.ClassUnderTest.Run("shelveset name", "treeish");
 
             mocks.Get<IGitTfsRemote>().AssertWasNotCalled(
                 x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything, Arg<bool>.Is.Anything));
@@ -167,7 +148,7 @@ namespace Sep.Git.Tfs.Test.Commands
             WireUpMockRemote();
             CreateShelveset("shelveset name");
 
-            mocks.ClassUnderTest.MakeArgsAndRun("shelveset name", "treeish");
+            mocks.ClassUnderTest.Run("shelveset name", "treeish");
 
             mocks.Get<IGitTfsRemote>().AssertWasCalled(
                 x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything, Arg<bool>.Is.Anything));

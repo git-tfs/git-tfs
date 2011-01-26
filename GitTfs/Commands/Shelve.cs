@@ -38,12 +38,13 @@ namespace Sep.Git.Tfs.Commands
             get { return this.MakeOptionResults(checkinOptions); }
         }
 
-        public int Run(IList<string> args)
+        public int Run(string shelvesetName)
         {
-            if (args.Count != 1 && args.Count != 2)
-                return _help.ShowHelpForInvalidArguments(this);
-            var shelvesetName = args[0];
-            var refToShelve = args.Count > 1 ? args[1] : "HEAD";
+            return Run(shelvesetName, "HEAD");
+        }
+
+        public int Run(string shelvesetName, string refToShelve)
+        {
             var tfsParents = globals.Repository.GetParentTfsCommits(refToShelve);
             if (globals.UserSpecifiedRemoteId != null)
                 tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == globals.UserSpecifiedRemoteId);
