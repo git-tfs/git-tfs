@@ -8,6 +8,7 @@ using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
 using StructureMap;
 using StructureMap.Pipeline;
+using StructureMap.Query;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -103,7 +104,7 @@ namespace Sep.Git.Tfs.Commands
                     select instance.Name).Single();
         }
 
-        private static IEnumerable<IInstance> GetCommandInstances()
+        private static IEnumerable<InstanceRef> GetCommandInstances()
         {
             return ObjectFactory.Model
                 .PluginTypes
