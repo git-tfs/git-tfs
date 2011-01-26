@@ -359,18 +359,16 @@ namespace Sep.Git.Tfs.Core
             workspace.Shelve(shelvesetName, evaluateCheckinPolicies);
         }
 
-        public long CheckinTool(string treeish, TfsChangesetInfo parentChangeset)
+        public void CheckinTool(string head, TfsChangesetInfo parentChangeset)
         {
-            var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = CheckinTool(treeish, parentChangeset, workspace));
-            return changeset;
+                              workspace => CheckinTool(head, parentChangeset, workspace));
         }
 
-        private long CheckinTool(string treeish, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        private void CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
-            PendChangesToWorkspace(treeish, parentChangeset,workspace);
-            return workspace.CheckinTool();
+            PendChangesToWorkspace(head, parentChangeset,workspace);
+            workspace.CheckinTool();
         }
 
         private void PendChangesToWorkspace(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
@@ -391,7 +389,10 @@ namespace Sep.Git.Tfs.Core
 
         private long Checkin(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
-            PendChangesToWorkspace(head, parentChangeset, workspace);
+            foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))
+            {
+                change.Apply(workspace);
+            }
             return workspace.Checkin();
         }
     }

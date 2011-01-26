@@ -41,7 +41,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, 
+        public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, 
             IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
@@ -50,10 +50,10 @@ namespace Sep.Git.Tfs.VsCommon
                                      checkinComment);
         }
 
-        private static long ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges, 
+        private static bool ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges, 
             WorkItemCheckedInfo[] checkedInfos, string checkinComment)
         {
-            long result;
+            var result = true;
 
             using (var parentForm = new ParentForm())
             {
@@ -61,8 +61,13 @@ namespace Sep.Git.Tfs.VsCommon
 
                 dynamic dialog = new ReflectionProxy(GetCheckinDialogType(), workspace.VersionControlServer);
 
-                result = dialog.Show(parentForm.Handle, workspace, pendingChanges, pendingChanges,
-                                     checkinComment, null, null, checkedInfos);
+                int dialogResult = dialog.Show(parentForm.Handle, workspace, pendingChanges, pendingChanges,
+                                               checkinComment, null, null, checkedInfos);
+
+                if (dialogResult <= 0)
+                {
+                    result = false;
+                }
 
                 parentForm.Close();
             }

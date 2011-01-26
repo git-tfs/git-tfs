@@ -18,6 +18,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IChangeset GetChangeset(int changesetId);
         bool MatchesUrl(string tfsUrl);
         bool HasShelveset(string shelvesetName);
-        long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
+        bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
     }
 }
