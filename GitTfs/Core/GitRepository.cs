@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Core
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
 
-        public GitRepository(TextWriter stdout, string gitDir, IContainer container) : base(stdout)
+        public GitRepository(TextWriter stdout, string gitDir, IContainer container) : base(stdout, container)
         {
             _container = container;
             GitDir = gitDir;

@@ -28,7 +28,7 @@ namespace Sep.Git.Tfs.Benchmarks
                                                                                 Contents = "teststring\r\nanother line\rafter just r\nafter just n"
                                                                             }
                                                                     };
-        private static readonly GitHelpers gitHelper = new GitHelpers(TextWriter.Null);
+        private static readonly GitHelpers gitHelper = new GitHelpers(TextWriter.Null, null);
 
         #region WithExecGit
 

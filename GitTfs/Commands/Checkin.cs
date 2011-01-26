@@ -16,10 +16,12 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals _globals;
         private readonly TextWriter _stdout;
         private readonly CheckinOptions _checkinOptions;
+        private readonly IHelpHelper _help;
 
-        public Checkin(Globals globals, TextWriter stdout, CheckinOptions checkinOptions)
+        public Checkin(Globals globals, TextWriter stdout, CheckinOptions checkinOptions, IHelpHelper help)
         {
             _globals = globals;
+            _help = help;
             _stdout = stdout;
             _checkinOptions = checkinOptions;
         }
@@ -33,7 +35,7 @@ namespace Sep.Git.Tfs.Commands
         public int Run(IList<string> args)
         {
             if (args.Count != 0 && args.Count != 1)
-                return Help.ShowHelpForInvalidArguments(this);
+                return _help.ShowHelpForInvalidArguments(this);
             var refToShelve = args.Count > 0 ? args[0] : "HEAD";
             var tfsParents = _globals.Repository.GetParentTfsCommits(refToShelve);
             if (_globals.UserSpecifiedRemoteId != null)

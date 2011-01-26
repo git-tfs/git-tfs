@@ -9,6 +9,7 @@ using Sep.Git.Tfs.Util;
 using StructureMap;
 using StructureMap.Pipeline;
 using StructureMap.Query;
+using IContainer = StructureMap.IContainer;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -18,11 +19,13 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly TextWriter output;
         private readonly GitTfsCommandFactory commandFactory;
+        private readonly IContainer _container;
 
-        public Help(TextWriter output, GitTfsCommandFactory commandFactory)
+        public Help(TextWriter output, GitTfsCommandFactory commandFactory, IContainer container)
         {
             this.output = output;
             this.commandFactory = commandFactory;
+            _container = container;
         }
 
         public IEnumerable<IOptionResults> ExtraOptions
@@ -80,7 +83,7 @@ namespace Sep.Git.Tfs.Commands
 
             var usage = new UsageBuilder();
             usage.BeginSection("where options are:");
-            foreach (var parseHelper in command.GetOptionParseHelpers())
+            foreach (var parseHelper in command.GetOptionParseHelpers(_container))
                 usage.AddOptions(parseHelper);
             usage.EndSection();
             output.WriteLine("Usage: git-tfs " + GetCommandUsage(command));
@@ -97,16 +100,16 @@ namespace Sep.Git.Tfs.Commands
                 .ToDictionary(s => s, s => commandFactory.GetAliasesForCommandName(s));
         }
 
-        private static string GetCommandName(GitTfsCommand command)
+        private string GetCommandName(GitTfsCommand command)
         {
             return (from instance in GetCommandInstances()
                     where instance.ConcreteType == command.GetType()
                     select instance.Name).Single();
         }
 
-        private static IEnumerable<InstanceRef> GetCommandInstances()
+        private IEnumerable<InstanceRef> GetCommandInstances()
         {
-            return ObjectFactory.Model
+            return _container.Model
                 .PluginTypes
                 .Single(p => p.PluginType == typeof (GitTfsCommand))
                 .Instances
@@ -123,13 +126,28 @@ namespace Sep.Git.Tfs.Commands
                        ? descriptionAttribute.Description
                        : commandName + " [options]";
         }
+    }
 
-        public static int ShowHelp(GitTfsCommand command)
+    public interface IHelpHelper
+    {
+        int ShowHelp(GitTfsCommand command);
+        int ShowHelpForInvalidArguments(GitTfsCommand command);
+    }
+    public class HelpHelper : IHelpHelper
+    {
+        private readonly IContainer _container;
+
+        public HelpHelper(IContainer container)
         {
-            return ObjectFactory.GetInstance<Help>().Run(command);
+            _container = container;
         }
 
-        public static int ShowHelpForInvalidArguments(GitTfsCommand command)
+        public int ShowHelp(GitTfsCommand command)
+        {
+            return _container.GetInstance<Help>().Run(command);
+        }
+
+        public int ShowHelpForInvalidArguments(GitTfsCommand command)
         {
             ShowHelp(command);
             return GitTfsExitCodes.InvalidArguments;

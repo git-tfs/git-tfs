@@ -18,8 +18,8 @@ namespace Sep.Git.Tfs
             try
             {
                 //Trace.Listeners.Add(new ConsoleTraceListener());
-                Initialize();
-                ObjectFactory.GetInstance<GitTfs>().Run(new List<string>(args));
+                var container = Initialize();
+                container.GetInstance<GitTfs>().Run(new List<string>(args));
             }
             catch (Exception e)
             {
@@ -29,12 +29,12 @@ namespace Sep.Git.Tfs
             }
         }
 
-        private static void Initialize()
+        private static IContainer Initialize()
         {
-            ObjectFactory.Initialize(Initialize);
+            return new Container(Initialize);
         }
 
-        private static void Initialize(IInitializationExpression initializer)
+        private static void Initialize(ConfigurationExpression initializer)
         {
             var tfsPlugin = TfsPlugin.Find();
             initializer.Scan(x => { Initialize(x); tfsPlugin.Initialize(x); });
@@ -45,7 +45,7 @@ namespace Sep.Git.Tfs
             tfsPlugin.Initialize(initializer);
         }
 
-        private static void AddGitChangeTypes(IInitializationExpression initializer)
+        private static void AddGitChangeTypes(ConfigurationExpression initializer)
         {
             initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Add>().WithName("A");
             initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Modify>().WithName("M");
@@ -59,7 +59,7 @@ namespace Sep.Git.Tfs
             scan.TheCallingAssembly();
         }
 
-        private static void DoCustomConfiguration(IInitializationExpression initializer)
+        private static void DoCustomConfiguration(ConfigurationExpression initializer)
         {
             foreach(var type in typeof(Program).Assembly.GetTypes())
             {

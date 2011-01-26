@@ -16,6 +16,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly TextWriter stdout;
         private readonly CheckinOptions checkinOptions;
+        private readonly IHelpHelper _help;
 
         [OptDef(OptValType.Flag)]
         [ShortOptionName('p')]
@@ -24,11 +25,12 @@ namespace Sep.Git.Tfs.Commands
         [Description("Evaluate checkin policies")]
         public bool EvaluateCheckinPolicies { get; set; }
 
-        public Shelve(Globals globals, TextWriter stdout, CheckinOptions checkinOptions)
+        public Shelve(Globals globals, TextWriter stdout, CheckinOptions checkinOptions, IHelpHelper help)
         {
             this.globals = globals;
             this.stdout = stdout;
             this.checkinOptions = checkinOptions;
+            _help = help;
         }
 
         public IEnumerable<IOptionResults> ExtraOptions
@@ -39,7 +41,7 @@ namespace Sep.Git.Tfs.Commands
         public int Run(IList<string> args)
         {
             if (args.Count != 1 && args.Count != 2)
-                return Help.ShowHelpForInvalidArguments(this);
+                return _help.ShowHelpForInvalidArguments(this);
             var shelvesetName = args[0];
             var refToShelve = args.Count > 1 ? args[1] : "HEAD";
             var tfsParents = globals.Repository.GetParentTfsCommits(refToShelve);

@@ -29,6 +29,8 @@ namespace Sep.Git.Tfs.Test.Commands
         [TestMethod]
         public void ShouldFailForLessThanOneArguments()
         {
+            mocks.Get<IHelpHelper>().Stub(x => x.ShowHelpForInvalidArguments(null)).IgnoreArguments().Return(
+                GitTfsExitCodes.InvalidArguments);
             this.FixHelpFormatter(
                 () => Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.MakeArgsAndRun()));
         }
@@ -36,6 +38,8 @@ namespace Sep.Git.Tfs.Test.Commands
         [TestMethod]
         public void ShouldFailForMoreThanTwoArguments()
         {
+            mocks.Get<IHelpHelper>().Stub(x => x.ShowHelpForInvalidArguments(null)).IgnoreArguments().Return(
+                GitTfsExitCodes.InvalidArguments);
             this.FixHelpFormatter(
                 () => Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.MakeArgsAndRun("one", "two", "three")));
         }

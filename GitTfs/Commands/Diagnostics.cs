@@ -10,10 +10,12 @@ namespace Sep.Git.Tfs.Commands
     public class Diagnostics : GitTfsCommand
     {
         private readonly TextWriter _stdout;
+        private readonly IContainer _container;
 
-        public Diagnostics(TextWriter stdout)
+        public Diagnostics(TextWriter stdout, IContainer container)
         {
             _stdout = stdout;
+            _container = container;
         }
 
         public IEnumerable<IOptionResults> ExtraOptions
@@ -23,7 +25,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(IList<string> args)
         {
-            _stdout.WriteLine(ObjectFactory.WhatDoIHave());
+            _stdout.WriteLine(_container.WhatDoIHave());
             return GitTfsExitCodes.OK;
         }
     }

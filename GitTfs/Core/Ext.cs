@@ -78,9 +78,9 @@ namespace Sep.Git.Tfs.Core
             return c == null || c.Count == 0;
         }
 
-        public static IEnumerable<IOptionResults> GetOptionParseHelpers(this GitTfsCommand command)
+        public static IEnumerable<IOptionResults> GetOptionParseHelpers(this GitTfsCommand command, IContainer container)
         {
-            yield return new PropertyFieldParserHelper(ObjectFactory.GetInstance<Globals>());
+            yield return new PropertyFieldParserHelper(container.GetInstance<Globals>());
             yield return new PropertyFieldParserHelper(command);
             if(command.ExtraOptions != null)
             {

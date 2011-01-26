@@ -20,10 +20,10 @@ namespace Sep.Git.Tfs.Util
             get { return _aliasMap ?? (_aliasMap = CreateAliasMap()); }
         }
 
-        private static Dictionary<string, string> CreateAliasMap()
+        private Dictionary<string, string> CreateAliasMap()
         {
             var aliasMap = new Dictionary<string, string>();
-            var commandPluginType = ObjectFactory.Model.PluginTypes.First(p => p.PluginType == typeof (GitTfsCommand));
+            var commandPluginType = container.Model.PluginTypes.First(p => p.PluginType == typeof (GitTfsCommand));
 
             foreach (var instance in commandPluginType.Instances)
             {

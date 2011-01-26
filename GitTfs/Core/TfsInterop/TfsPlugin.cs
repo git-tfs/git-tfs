@@ -73,7 +73,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             scan.AssemblyContainingType(GetType());
         }
 
-        public abstract void Initialize(IInitializationExpression config);
+        public abstract void Initialize(ConfigurationExpression config);
 
         public abstract bool IsViable();
     }

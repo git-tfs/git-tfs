@@ -17,11 +17,13 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly TextWriter output;
         private readonly IGitHelpers gitHelper;
+        private readonly IHelpHelper _help;
 
-        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, TextWriter output, IGitHelpers gitHelper)
+        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, TextWriter output, IGitHelpers gitHelper, IHelpHelper help)
         {
             this.remoteOptions = remoteOptions;
             this.gitHelper = gitHelper;
+            _help = help;
             this.output = output;
             this.globals = globals;
             this.initOptions = initOptions;
@@ -47,7 +49,7 @@ namespace Sep.Git.Tfs.Commands
                     GitTfsInit(args[0], args[1]);
                     return 0;
                 default:
-                    return Help.ShowHelpForInvalidArguments(this);
+                    return _help.ShowHelpForInvalidArguments(this);
             }
         }
 

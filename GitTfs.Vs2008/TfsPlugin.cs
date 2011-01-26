@@ -10,7 +10,7 @@ namespace Sep.Git.Tfs.Vs2008
             scan.AssemblyContainingType(typeof (Microsoft.TeamFoundation.Client.TeamFoundationServer));
         }
 
-        public override void Initialize(StructureMap.IInitializationExpression config)
+        public override void Initialize(StructureMap.ConfigurationExpression config)
         {
         }
 

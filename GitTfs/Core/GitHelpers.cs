@@ -9,10 +9,12 @@ namespace Sep.Git.Tfs.Core
     public class GitHelpers : IGitHelpers
     {
         private readonly TextWriter realStdout;
+        private readonly IContainer _container;
 
-        public GitHelpers(TextWriter stdout)
+        public GitHelpers(TextWriter stdout, IContainer container)
         {
             realStdout = stdout;
+            _container = container;
         }
 
         /// <summary>
@@ -252,7 +254,7 @@ namespace Sep.Git.Tfs.Core
 
         public IGitRepository MakeRepository(string dir)
         {
-            return ObjectFactory
+            return _container
                 .With("gitDir").EqualTo(dir)
                 .GetInstance<IGitRepository>();
         }

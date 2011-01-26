@@ -5,6 +5,6 @@ namespace Sep.Git.Tfs.Util
 {
     public interface ConfiguresStructureMap
     {
-        void Initialize(IInitializationExpression initializer, Type t);
+        void Initialize(ConfigurationExpression initializer, Type t);
     }
 }

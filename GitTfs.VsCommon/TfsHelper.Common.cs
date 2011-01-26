@@ -18,11 +18,13 @@ namespace Sep.Git.Tfs.VsCommon
         private readonly TextWriter _stdout;
         private string _url;
         private readonly TfsApiBridge _bridge;
+        private readonly IContainer _container;
 
-        public TfsHelper(TextWriter stdout, TfsApiBridge bridge)
+        public TfsHelper(TextWriter stdout, TfsApiBridge bridge, IContainer container)
         {
             _stdout = stdout;
             _bridge = bridge;
+            _container = container;
         }
 
         public string Url
@@ -89,7 +91,7 @@ namespace Sep.Git.Tfs.VsCommon
             var workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath);
             try
             {
-                var tfsWorkspace = ObjectFactory.With("localDirectory").EqualTo(localDirectory)
+                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
                     .With("remote").EqualTo(remote)
                     .With("contextVersion").EqualTo(versionToFetch)
                     .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
