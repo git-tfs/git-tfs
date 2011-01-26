@@ -4,22 +4,22 @@ namespace Sep.Git.Tfs.Core.Changes.Git
 {
     public class Modify : IGitChangedFile
     {
-        private readonly string _path;
-        private readonly string _newSha;
-        private readonly IGitRepository _repository;
+        public string Path { get; private set; }
+        public string NewSha { get; private set; }
+        public IGitRepository _repository { get; private set; }
 
-        public Modify(IGitRepository repository, string path, string newSha)
+        public Modify(IGitRepository repository, GitChangeInfo changeInfo)
         {
             _repository = repository;
-            _newSha = newSha;
-            _path = path;
+            NewSha = changeInfo.newSha;
+            Path = changeInfo.path;
         }
 
         public void Apply(ITfsWorkspace workspace)
         {
-            workspace.Edit(_path);
-            var workspaceFile = workspace.GetLocalPath(_path);
-            _repository.GetBlob(_newSha, workspaceFile);
+            workspace.Edit(Path);
+            var workspaceFile = workspace.GetLocalPath(Path);
+            _repository.GetBlob(NewSha, workspaceFile);
         }
     }
 }

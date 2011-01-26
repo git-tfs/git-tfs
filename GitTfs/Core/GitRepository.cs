@@ -260,17 +260,7 @@ namespace Sep.Git.Tfs.Core
 
         private IGitChangedFile BuildGitChangedFile(GitChangeInfo change)
         {
-            var builder = change.Merge(_container.With("repository").EqualTo(this));
-            IGitChangedFile changeItem;
-            try
-            {
-                changeItem = builder.GetInstance<IGitChangedFile>(change.Status);
-            }
-            catch(Exception e)
-            {
-                throw new Exception("Unable to handle change type " + change.Status + ".", e);
-            }
-            return changeItem;
+            return change.ToGitChangedFile(_container.With((IGitRepository)this));
         }
 
         public string GetChangeSummary(string from, string to)

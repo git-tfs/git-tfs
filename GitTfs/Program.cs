@@ -45,7 +45,7 @@ namespace Sep.Git.Tfs
             tfsPlugin.Initialize(initializer);
         }
 
-        private static void AddGitChangeTypes(ConfigurationExpression initializer)
+        public static void AddGitChangeTypes(ConfigurationExpression initializer)
         {
             initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Add>().WithName("A");
             initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Modify>().WithName("M");
