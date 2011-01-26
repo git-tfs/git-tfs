@@ -37,20 +37,17 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public int Run(IList<string> args)
+        public int Run(string tfsUrl, string tfsRepositoryPath)
         {
-            switch(args.Count)
-            {
-                case 3:
-                    InitSubdir(args[2]);
-                    goto case 2;
-                case 2:
-                    DoGitInitDb();
-                    GitTfsInit(args[0], args[1]);
-                    return 0;
-                default:
-                    return _help.ShowHelpForInvalidArguments(this);
-            }
+            DoGitInitDb();
+            GitTfsInit(tfsUrl, tfsRepositoryPath);
+            return 0;
+        }
+
+        public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
+        {
+            InitSubdir(gitRepositoryPath);
+            return Run(tfsUrl, tfsRepositoryPath);
         }
 
         private void InitSubdir(string repositoryPath)

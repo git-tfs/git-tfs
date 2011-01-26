@@ -28,23 +28,18 @@ namespace Sep.Git.Tfs.Commands
             get { return this.MakeNestedOptionResults(init, fetch); }
         }
 
-        public int Run(IList<string> args)
+        public int Run(string tfsUrl, string tfsRepositoryPath)
         {
-            var retVal = 0;
-            retVal = init.Run(DeriveRepositoryDirectory(args));
-            if (retVal == 0) retVal = fetch.Run(new List<string>());
-            if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadAllTfsRemotes().First().RemoteRef);
-            return retVal;
+            return Run(tfsUrl, tfsRepositoryPath, Path.GetFileName(tfsRepositoryPath));
         }
 
-        IList<string> DeriveRepositoryDirectory(IList<string> args)
+        public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
         {
-            if (args.Count == 2)
-            {
-                args = new List<string>(args);
-                args.Add(Path.GetFileName(args[1]));
-            }
-            return args;
+            var retVal = 0;
+            retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+            if (retVal == 0) retVal = fetch.Run();
+            if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadAllTfsRemotes().First().RemoteRef);
+            return retVal;
         }
     }
 }

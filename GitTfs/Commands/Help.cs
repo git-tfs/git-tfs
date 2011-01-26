@@ -47,13 +47,13 @@ namespace Sep.Git.Tfs.Commands
                     return Run(command);
                 }
             }
-            return Run();
+            return GitTfsExitCodes.InvalidArguments;
         }
 
         /// <summary>
         /// Shows help for git-tfs as a whole (i.e. a list of commands).
         /// </summary>
-        private int Run()
+        public int Run()
         {
             output.WriteLine("Usage: git-tfs [command] [options]");
             foreach(var pair in GetCommandMap())

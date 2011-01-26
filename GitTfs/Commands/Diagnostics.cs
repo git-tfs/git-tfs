@@ -23,7 +23,7 @@ namespace Sep.Git.Tfs.Commands
             get { return this.MakeOptionResults(); }
         }
 
-        public int Run(IList<string> args)
+        public int Run()
         {
             _stdout.WriteLine(_container.WhatDoIHave());
             return GitTfsExitCodes.OK;

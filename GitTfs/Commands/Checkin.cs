@@ -32,21 +32,23 @@ namespace Sep.Git.Tfs.Commands
         }
 
         // TODO: DRY up, w.r.t. with Shelve.
-        public int Run(IList<string> args)
+        public int Run()
         {
-            if (args.Count != 0 && args.Count != 1)
-                return _help.ShowHelpForInvalidArguments(this);
-            var refToShelve = args.Count > 0 ? args[0] : "HEAD";
-            var tfsParents = _globals.Repository.GetParentTfsCommits(refToShelve);
+            return Run("HEAD");
+        }
+
+        public int Run(string refToCheckin)
+        {
+            var tfsParents = _globals.Repository.GetParentTfsCommits(refToCheckin);
             if (_globals.UserSpecifiedRemoteId != null)
                 tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == _globals.UserSpecifiedRemoteId);
             switch (tfsParents.Count())
             {
                 case 1:
                     var changeset = tfsParents.First();
-                    var newChangeset = changeset.Remote.Checkin(refToShelve, changeset);
+                    var newChangeset = changeset.Remote.Checkin(refToCheckin, changeset);
                     _stdout.WriteLine("TFS Changeset #" + newChangeset + " was created. Marking it as a merge commit...");
-                    changeset.Remote.Fetch(new Dictionary<long, string>{{newChangeset, refToShelve}});
+                    changeset.Remote.Fetch(new Dictionary<long, string>{{newChangeset, refToCheckin}});
                     return GitTfsExitCodes.OK;
                 case 0:
                     _stdout.WriteLine("No TFS parents found!");

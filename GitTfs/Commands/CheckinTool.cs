@@ -31,13 +31,14 @@ namespace Sep.Git.Tfs.Commands
             get { return this.MakeOptionResults(checkinOptions); }
         }
 
-        public int Run(IList<string> args)
+        public int Run()
         {
-            if (args.Count != 0 && args.Count != 1)
-                return _help.ShowHelpForInvalidArguments(this);
+            return Run("HEAD");
+        }
 
-            var refToShelve = args.Count > 0 ? args[0] : "HEAD";
-            var tfsParents = globals.Repository.GetParentTfsCommits(refToShelve);
+        public int Run(string refToCheckin)
+        {
+            var tfsParents = globals.Repository.GetParentTfsCommits(refToCheckin);
             
             if (globals.UserSpecifiedRemoteId != null)
                 tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == globals.UserSpecifiedRemoteId);
@@ -46,7 +47,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 case 1:
                     var changeset = tfsParents.First();
-                    changeset.Remote.CheckinTool(refToShelve, changeset);
+                    changeset.Remote.CheckinTool(refToCheckin, changeset);
                     return GitTfsExitCodes.OK;
                 case 0:
                     stdout.WriteLine("No TFS parents found!");
