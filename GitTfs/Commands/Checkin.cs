@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -13,15 +14,13 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Checkin : GitTfsCommand
     {
-        private readonly Globals _globals;
         private readonly TextWriter _stdout;
         private readonly CheckinOptions _checkinOptions;
-        private readonly IHelpHelper _help;
+        private readonly TfsWriter _writer;
 
-        public Checkin(Globals globals, TextWriter stdout, CheckinOptions checkinOptions, IHelpHelper help)
+        public Checkin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
         {
-            _globals = globals;
-            _help = help;
+            _writer = writer;
             _stdout = stdout;
             _checkinOptions = checkinOptions;
         }
@@ -39,28 +38,13 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string refToCheckin)
         {
-            var tfsParents = _globals.Repository.GetParentTfsCommits(refToCheckin);
-            if (_globals.UserSpecifiedRemoteId != null)
-                tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == _globals.UserSpecifiedRemoteId);
-            switch (tfsParents.Count())
+            return _writer.Write(refToCheckin, changeset =>
             {
-                case 1:
-                    var changeset = tfsParents.First();
-                    var newChangeset = changeset.Remote.Checkin(refToCheckin, changeset);
-                    _stdout.WriteLine("TFS Changeset #" + newChangeset + " was created. Marking it as a merge commit...");
-                    changeset.Remote.Fetch(new Dictionary<long, string>{{newChangeset, refToCheckin}});
-                    return GitTfsExitCodes.OK;
-                case 0:
-                    _stdout.WriteLine("No TFS parents found!");
-                    return GitTfsExitCodes.InvalidArguments;
-                default:
-                    _stdout.WriteLine("More than one parent found! Use -i to choose the correct parent from: ");
-                    foreach (var parent in tfsParents)
-                    {
-                        _stdout.WriteLine("  " + parent.Remote.Id);
-                    }
-                    return GitTfsExitCodes.InvalidArguments;
-            }
+                var newChangeset = changeset.Remote.Checkin(refToCheckin, changeset);
+                _stdout.WriteLine("TFS Changeset #" + newChangeset + " was created. Marking it as a merge commit...");
+                changeset.Remote.Fetch(new Dictionary<long, string> { { newChangeset, refToCheckin } });
+                return GitTfsExitCodes.OK;
+            });
         }
     }
 }

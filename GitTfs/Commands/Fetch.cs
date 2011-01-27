@@ -53,7 +53,7 @@ namespace Sep.Git.Tfs.Commands
         {
             foreach(var remote in GetRemotesToFetch(args))
             {
-                Trace.WriteLine("Fetching remote " + remote.RemoteRef);
+                Trace.WriteLine("Fetching from TFS remote " + remote.Id);
                 DoFetch(remote);
             }
             return 0;

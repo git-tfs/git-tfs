@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
@@ -13,22 +12,18 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class CheckinTool : GitTfsCommand
     {
-        private readonly Globals globals;
-        private readonly TextWriter stdout;
-        private readonly CheckinOptions checkinOptions;
-        private readonly IHelpHelper _help;
+        private readonly CheckinOptions _checkinOptions;
+        private readonly TfsWriter _writer;
 
-        public CheckinTool(Globals globals, TextWriter stdout, CheckinOptions checkinOptions, IHelpHelper help)
+        public CheckinTool(CheckinOptions checkinOptions, TfsWriter writer)
         {
-            this.globals = globals;
-            this.stdout = stdout;
-            this.checkinOptions = checkinOptions;
-            _help = help;
+            _checkinOptions = checkinOptions;
+            _writer = writer;
         }
 
         public IEnumerable<IOptionResults> ExtraOptions
         {
-            get { return this.MakeOptionResults(checkinOptions); }
+            get { return this.MakeOptionResults(_checkinOptions); }
         }
 
         public int Run()
@@ -38,28 +33,11 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string refToCheckin)
         {
-            var tfsParents = globals.Repository.GetParentTfsCommits(refToCheckin);
-            
-            if (globals.UserSpecifiedRemoteId != null)
-                tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == globals.UserSpecifiedRemoteId);
-            
-            switch (tfsParents.Count())
+            return _writer.Write(refToCheckin, changeset =>
             {
-                case 1:
-                    var changeset = tfsParents.First();
-                    changeset.Remote.CheckinTool(refToCheckin, changeset);
-                    return GitTfsExitCodes.OK;
-                case 0:
-                    stdout.WriteLine("No TFS parents found!");
-                    return GitTfsExitCodes.InvalidArguments;
-                default:
-                    stdout.WriteLine("More than one parent found! Use -i to choose the correct parent from: ");
-                    foreach (var parent in tfsParents)
-                    {
-                        stdout.WriteLine("  " + parent.Remote.Id);
-                    }
-                    return GitTfsExitCodes.InvalidArguments;
-            }
+                changeset.Remote.CheckinTool(refToCheckin, changeset);
+                return GitTfsExitCodes.OK;
+            });
         }
     }
 }

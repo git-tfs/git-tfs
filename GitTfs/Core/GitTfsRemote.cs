@@ -367,7 +367,7 @@ namespace Sep.Git.Tfs.Core
 
         private void CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
-            PendChangesToWorkspace(head, parentChangeset,workspace);
+            PendChangesToWorkspace(head, parentChangeset, workspace);
             workspace.CheckinTool();
         }
 
@@ -389,10 +389,7 @@ namespace Sep.Git.Tfs.Core
 
         private long Checkin(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
-            foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))
-            {
-                change.Apply(workspace);
-            }
+            PendChangesToWorkspace(head, parentChangeset, workspace);
             return workspace.Checkin();
         }
     }

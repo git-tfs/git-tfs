@@ -73,9 +73,9 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public static bool IsEmpty(this ICollection c)
+        public static bool IsEmpty<T>(this IEnumerable<T> c)
         {
-            return c == null || c.Count == 0;
+            return c == null || !c.Any();
         }
 
         public static IEnumerable<IOptionResults> GetOptionParseHelpers(this GitTfsCommand command, IContainer container)

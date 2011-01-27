@@ -58,16 +58,18 @@ namespace Sep.Git.Tfs.Core
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
+            if (pendingChanges.IsEmpty())
+                throw new Exception("Nothing to checkin");
             if (pendingChanges.Any())
             {
                 if (!_tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), _checkinOptions.CheckinComment))
                 {
-                    _stdout.WriteLine(" changes not checked in");
+                    _stdout.WriteLine(" cancelled.");
                 }
             }
             else
             {
-                _stdout.WriteLine(" nothing to checkin");
+                throw new Exception("Nothing to checkin.");
             }
         }
 
@@ -75,33 +77,29 @@ namespace Sep.Git.Tfs.Core
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
-            if (pendingChanges.Count() == 0)
+            if(pendingChanges.IsEmpty())
+                throw new Exception("Nothing to shelve");
+
+            var workItemInfos = GetWorkItemInfos();
+            var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, _checkinOptions.CheckinComment, workItemInfos);
+            if(checkinProblems.Any())
             {
-                throw new Exception(" nothing to shelve");
+                foreach (var message in checkinProblems)
+                {
+                    _stdout.WriteLine("[ERROR] " + message);
+                }
+                throw new Exception("No changes checked in.");
             }
             else
             {
-                var workItemInfos = GetWorkItemInfos();
-                var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, _checkinOptions.CheckinComment, workItemInfos);
-                if(checkinProblems.Any())
+                var newChangeset = _workspace.Checkin(pendingChanges, _checkinOptions.CheckinComment, null, workItemInfos);
+                if(newChangeset == 0)
                 {
-                    foreach (var message in checkinProblems)
-                    {
-                        _stdout.WriteLine("[ERROR] " + message);
-                    }
-                    throw new Exception("No changes checked in.");
+                    throw new Exception("Checkin failed!");
                 }
                 else
                 {
-                    var newChangeset = _workspace.Checkin(pendingChanges, _checkinOptions.CheckinComment, null, workItemInfos);
-                    if(newChangeset == 0)
-                    {
-                        throw new Exception("Checkin failed!");
-                    }
-                    else
-                    {
-                        return newChangeset;
-                    }
+                    return newChangeset;
                 }
             }
         }

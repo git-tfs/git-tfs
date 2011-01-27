@@ -140,6 +140,7 @@
     <Compile Include="Core\TfsInterop\NullIdentity.cs" />
     <Compile Include="Core\TfsInterop\IChangeset.cs" />
     <Compile Include="Core\TfsWorkspace.cs" />
+    <Compile Include="Core\TfsWriter.cs" />
     <Compile Include="Util\GitTfsCommandFactory.cs" />
     <Compile Include="Util\GitTfsCommandRunner.cs" />
     <Compile Include="Util\PluggableWithAliases.cs" />

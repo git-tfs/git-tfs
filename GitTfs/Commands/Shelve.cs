@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -13,10 +14,9 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Shelve : GitTfsCommand
     {
-        private readonly Globals globals;
-        private readonly TextWriter stdout;
-        private readonly CheckinOptions checkinOptions;
-        private readonly IHelpHelper _help;
+        private readonly TextWriter _stdout;
+        private readonly CheckinOptions _checkinOptions;
+        private readonly TfsWriter _writer;
 
         [OptDef(OptValType.Flag)]
         [ShortOptionName('p')]
@@ -25,17 +25,16 @@ namespace Sep.Git.Tfs.Commands
         [Description("Evaluate checkin policies")]
         public bool EvaluateCheckinPolicies { get; set; }
 
-        public Shelve(Globals globals, TextWriter stdout, CheckinOptions checkinOptions, IHelpHelper help)
+        public Shelve(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
         {
-            this.globals = globals;
-            this.stdout = stdout;
-            this.checkinOptions = checkinOptions;
-            _help = help;
+            _stdout = stdout;
+            _checkinOptions = checkinOptions;
+            _writer = writer;
         }
 
         public IEnumerable<IOptionResults> ExtraOptions
         {
-            get { return this.MakeOptionResults(checkinOptions); }
+            get { return this.MakeOptionResults(_checkinOptions); }
         }
 
         public int Run(string shelvesetName)
@@ -45,31 +44,16 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string shelvesetName, string refToShelve)
         {
-            var tfsParents = globals.Repository.GetParentTfsCommits(refToShelve);
-            if (globals.UserSpecifiedRemoteId != null)
-                tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == globals.UserSpecifiedRemoteId);
-            switch (tfsParents.Count())
+            return _writer.Write(refToShelve, changeset =>
             {
-                case 1:
-                    var changeset = tfsParents.First();
-                    if (!checkinOptions.Force && changeset.Remote.HasShelveset(shelvesetName))
-                    {
-                        stdout.WriteLine("Shelveset \"" + shelvesetName + "\" already exists. Use -f to replace it.");
-                        return GitTfsExitCodes.ForceRequired;
-                    }
-                    changeset.Remote.Shelve(shelvesetName, refToShelve, changeset, EvaluateCheckinPolicies);
-                    return GitTfsExitCodes.OK;
-                case 0:
-                    stdout.WriteLine("No TFS parents found!");
-                    return GitTfsExitCodes.InvalidArguments;
-                default:
-                    stdout.WriteLine("More than one parent found! Use -i to choose the correct parent from: ");
-                    foreach (var parent in tfsParents)
-                    {
-                        stdout.WriteLine("  " + parent.Remote.Id);
-                    }
-                    return GitTfsExitCodes.InvalidArguments;
-            }
+                if (!_checkinOptions.Force && changeset.Remote.HasShelveset(shelvesetName))
+                {
+                    _stdout.WriteLine("Shelveset \"" + shelvesetName + "\" already exists. Use -f to replace it.");
+                    return GitTfsExitCodes.ForceRequired;
+                }
+                changeset.Remote.Shelve(shelvesetName, refToShelve, changeset, EvaluateCheckinPolicies);
+                return GitTfsExitCodes.OK;
+            });
         }
     }
 }
