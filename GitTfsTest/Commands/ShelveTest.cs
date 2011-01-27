@@ -156,7 +156,9 @@ namespace Sep.Git.Tfs.Test.Commands
 
         private TfsChangesetInfo ChangesetForRemote(string remoteId)
         {
-            return new TfsChangesetInfo {Remote = new DummyRemote {Id = remoteId}};
+            var mockRemote = mocks.AddAdditionalMockFor<IGitTfsRemote>();
+            mockRemote.Stub(x => x.Id).Return(remoteId);
+            return new TfsChangesetInfo() {Remote = mockRemote};
         }
 
         private void WireUpMockRemote()
@@ -170,26 +172,6 @@ namespace Sep.Git.Tfs.Test.Commands
         private void CreateShelveset(string shelvesetName)
         {
             mocks.Get<IGitTfsRemote>().Stub(x => x.HasShelveset(shelvesetName)).Return(true);
-        }
-
-        private class DummyRemote : IGitTfsRemote
-        {
-            public string Id { get; set; }
-            public string TfsRepositoryPath { get; set; }
-            public string IgnoreRegexExpression { get; set; }
-            public IGitRepository Repository { get; set; }
-            public ITfsHelper Tfs { get; set; }
-            public long MaxChangesetId { get; set; }
-            public string MaxCommitHash { get; set; }
-            public string RemoteRef { get; private set; }
-            public bool ShouldSkip(string path){return false;}
-            public string GetPathInGitRepo(string tfsPath){return tfsPath;}
-            public void Fetch(Dictionary<long, string> mergeInfo){}
-            public void QuickFetch(){}
-            public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies){}
-            public bool HasShelveset(string shelvesetName) { return false; }
-            public long Checkin(string treeish, TfsChangesetInfo parentChangeset) { return -1; }
-            public void CheckinTool(string head, TfsChangesetInfo parentChangeset) { }
         }
     }
 }
