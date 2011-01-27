@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Commands
 
         public IEnumerable<IOptionResults> ExtraOptions
         {
-            get { return this.MakeOptionResults(_checkinOptions); }
+            get { return this.MakeNestedOptionResults(_checkinOptions); }
         }
 
         public int Run(string shelvesetName)

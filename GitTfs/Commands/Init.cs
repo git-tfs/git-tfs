@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Commands
         {
             get
             {
-                return this.MakeOptionResults(initOptions, remoteOptions);
+                return this.MakeNestedOptionResults(initOptions, remoteOptions);
             }
         }
 

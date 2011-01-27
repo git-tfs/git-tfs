@@ -41,7 +41,7 @@ namespace Sep.Git.Tfs.Commands
 
         public IEnumerable<IOptionResults> ExtraOptions
         {
-            get { return this.MakeOptionResults(fcOptions, remoteOptions); }
+            get { return this.MakeNestedOptionResults(fcOptions, remoteOptions); }
         }
 
         public int Run()

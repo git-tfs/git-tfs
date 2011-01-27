@@ -7,14 +7,6 @@ namespace Sep.Git.Tfs.Commands
 {
     public static class Helpers
     {
-        [Obsolete("Use MakeNestedOptionResults")]
-        public static IEnumerable<IOptionResults> MakeOptionResults(this GitTfsCommand command, params object[] optionsObjects)
-        {
-            return
-                optionsObjects.Select(
-                    option => option is IOptionResults ? (IOptionResults)option : new PropertyFieldParserHelper(option));
-        }
-
         public static IEnumerable<IOptionResults> MakeNestedOptionResults(this GitTfsCommand command, params object[] optionsObjectsOrCommands)
         {
             foreach(var obj in optionsObjectsOrCommands)

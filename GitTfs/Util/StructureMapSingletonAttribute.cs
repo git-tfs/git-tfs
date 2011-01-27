@@ -9,7 +9,7 @@ namespace Sep.Git.Tfs.Util
     {
         public void Initialize(ConfigurationExpression initializer, Type t)
         {
-            initializer.ForRequestedType(t).CacheBy(InstanceScope.Singleton).TheDefaultIsConcreteType(t);
+            initializer.For(t).Singleton().Use(t);
         }
     }
 }

@@ -99,6 +99,10 @@ namespace GitTfsTest.Vs2010
             {
                 return obj is OriginalType && ((OriginalType) obj)._id == _id;
             }
+            public override int GetHashCode()
+            {
+                return _id;
+            }
             public override string ToString()
             {
                 return "OriginalObject:" + _id;

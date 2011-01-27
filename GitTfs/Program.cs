@@ -52,8 +52,8 @@ namespace Sep.Git.Tfs
         {
             var tfsPlugin = TfsPlugin.Find();
             initializer.Scan(x => { Initialize(x); tfsPlugin.Initialize(x); });
-            initializer.ForRequestedType<TextWriter>().TheDefault.Is.ConstructedBy(() => Console.Out);
-            initializer.InstanceOf<IGitRepository>().Is.OfConcreteType<GitRepository>();
+            initializer.For<TextWriter>().Use(() => Console.Out);
+            initializer.For<IGitRepository>().Add<GitRepository>();
             AddGitChangeTypes(initializer);
             DoCustomConfiguration(initializer);
             tfsPlugin.Initialize(initializer);
@@ -61,10 +61,10 @@ namespace Sep.Git.Tfs
 
         public static void AddGitChangeTypes(ConfigurationExpression initializer)
         {
-            initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Add>().WithName("A");
-            initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Modify>().WithName("M");
-            initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Delete>().WithName("D");
-            initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<RenameEdit>().WithName("R");
+            initializer.For<IGitChangedFile>().Use<Add>().Named("A");
+            initializer.For<IGitChangedFile>().Use<Modify>().Named("M");
+            initializer.For<IGitChangedFile>().Use<Delete>().Named("D");
+            initializer.For<IGitChangedFile>().Use<RenameEdit>().Named("R");
         }
 
         private static void Initialize(IAssemblyScanner scan)
