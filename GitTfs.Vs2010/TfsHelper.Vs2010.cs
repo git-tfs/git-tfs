@@ -41,6 +41,8 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
+        public bool CanShowCheckinDialog { get { return true; } }
+
         public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, 
             IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {

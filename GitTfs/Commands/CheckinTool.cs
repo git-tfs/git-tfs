@@ -35,7 +35,12 @@ namespace Sep.Git.Tfs.Commands
         {
             return _writer.Write(refToCheckin, changeset =>
             {
-                changeset.Remote.CheckinTool(refToCheckin, changeset);
+                if (changeset.Remote.Tfs.CanShowCheckinDialog)
+                    changeset.Remote.CheckinTool(refToCheckin, changeset);
+                else
+                    throw new Exception(
+                        "checkintool does not work with this TFS version (" + changeset.Remote.Tfs.TfsClientLibraryVersion + ").",
+                        new[] {"Try installing the VS2010 edition of Team Explorer."});
                 return GitTfsExitCodes.OK;
             });
         }

@@ -14,6 +14,8 @@ namespace Sep.Git.Tfs.VsCommon
             get { return typeof(TeamFoundationServer).Assembly.GetName().Version.ToString() + " (MS)"; }
         }
 
+        public bool CanShowCheckinDialog { get { return false; } }
+
         public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             throw new NotImplementedException();
