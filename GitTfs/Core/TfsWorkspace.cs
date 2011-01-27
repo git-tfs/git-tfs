@@ -50,17 +50,18 @@ namespace Sep.Git.Tfs.Core
             _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
         }
 
-        public void CheckinTool()
+        public long CheckinTool()
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
             if (pendingChanges.IsEmpty())
                 throw new GitTfsException("Nothing to checkin!");
 
-            if (!_tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), _checkinOptions.CheckinComment))
-            {
+            var newChangesetId = _tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(),
+                                                              _checkinOptions.CheckinComment);
+            if(newChangesetId == 0)
                 throw new GitTfsException("Checkin cancelled!");
-            }
+            return newChangesetId;
         }
 
         public long Checkin()

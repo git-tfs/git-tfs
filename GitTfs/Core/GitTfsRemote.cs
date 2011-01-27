@@ -364,16 +364,18 @@ namespace Sep.Git.Tfs.Core
             workspace.Shelve(shelvesetName, evaluateCheckinPolicies);
         }
 
-        public void CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
         {
+            var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => CheckinTool(head, parentChangeset, workspace));
+                              workspace => changeset = CheckinTool(head, parentChangeset, workspace));
+            return changeset;
         }
 
-        private void CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        private long CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
             PendChangesToWorkspace(head, parentChangeset, workspace);
-            workspace.CheckinTool();
+            return workspace.CheckinTool();
         }
 
         private void PendChangesToWorkspace(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)

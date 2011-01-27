@@ -44,8 +44,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public bool CanShowCheckinDialog { get { return true; } }
 
-        public bool ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, 
-            IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
+        public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
                                      pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray(),
@@ -53,29 +52,18 @@ namespace Sep.Git.Tfs.VsCommon
                                      checkinComment);
         }
 
-        private static bool ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges, 
+        private long ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges, 
             WorkItemCheckedInfo[] checkedInfos, string checkinComment)
         {
-            var result = true;
-
             using (var parentForm = new ParentForm())
             {
                 parentForm.Show();
 
                 var dialog = Activator.CreateInstance(GetCheckinDialogType(), new object[] {workspace.VersionControlServer});
 
-                int dialogResult = dialog.Call<int>("Show", parentForm.Handle, workspace, pendingChanges, pendingChanges,
-                                                    checkinComment, null, null, checkedInfos);
-
-                if (dialogResult <= 0)
-                {
-                    result = false;
-                }
-
-                parentForm.Close();
+                return dialog.Call<int>("Show", parentForm.Handle, workspace, pendingChanges, pendingChanges,
+                                        checkinComment, null, null, checkedInfos);
             }
-
-            return result;
         }
 
         private const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
