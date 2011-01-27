@@ -39,3 +39,6 @@ BUILDING
 msbuild (included in .NET 4) should be able to build the entire solution.
 
 You can also do `rake build:debug`.
+
+If you contribute patches, please set core.autocrlf to true.
+  git config core.autocrlf true
