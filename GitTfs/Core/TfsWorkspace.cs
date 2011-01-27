@@ -34,24 +34,20 @@ namespace Sep.Git.Tfs.Core
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
-            if (pendingChanges.Count() == 0)
+            if (pendingChanges.IsEmpty())
+                throw new GitTfsException("Nothing to shelve!");
+
+            var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
+            shelveset.Comment = _checkinOptions.CheckinComment;
+            shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
+            if(evaluateCheckinPolicies)
             {
-                _stdout.WriteLine(" nothing to shelve");
-            }
-            else
-            {
-                var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
-                shelveset.Comment = _checkinOptions.CheckinComment;
-                shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
-                if(evaluateCheckinPolicies)
+                foreach(var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, shelveset.WorkItemInfo))
                 {
-                    foreach(var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, shelveset.WorkItemInfo))
-                    {
-                        _stdout.WriteLine("[Checkin Policy] " + message);
-                    }
+                    _stdout.WriteLine("[Checkin Policy] " + message);
                 }
-                _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
             }
+            _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
         }
 
         public void CheckinTool()
@@ -59,17 +55,11 @@ namespace Sep.Git.Tfs.Core
             var pendingChanges = _workspace.GetPendingChanges();
 
             if (pendingChanges.IsEmpty())
-                throw new Exception("Nothing to checkin");
-            if (pendingChanges.Any())
+                throw new GitTfsException("Nothing to checkin!");
+
+            if (!_tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), _checkinOptions.CheckinComment))
             {
-                if (!_tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), _checkinOptions.CheckinComment))
-                {
-                    _stdout.WriteLine(" cancelled.");
-                }
-            }
-            else
-            {
-                throw new Exception("Nothing to checkin.");
+                throw new GitTfsException("Checkin cancelled!");
             }
         }
 
@@ -78,7 +68,7 @@ namespace Sep.Git.Tfs.Core
             var pendingChanges = _workspace.GetPendingChanges();
 
             if(pendingChanges.IsEmpty())
-                throw new Exception("Nothing to shelve");
+                throw new GitTfsException("Nothing to checkin!");
 
             var workItemInfos = GetWorkItemInfos();
             var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, _checkinOptions.CheckinComment, workItemInfos);
@@ -88,14 +78,14 @@ namespace Sep.Git.Tfs.Core
                 {
                     _stdout.WriteLine("[ERROR] " + message);
                 }
-                throw new Exception("No changes checked in.");
+                throw new GitTfsException("No changes checked in.");
             }
             else
             {
                 var newChangeset = _workspace.Checkin(pendingChanges, _checkinOptions.CheckinComment, null, workItemInfos);
                 if(newChangeset == 0)
                 {
-                    throw new Exception("Checkin failed!");
+                    throw new GitTfsException("Checkin failed!");
                 }
                 else
                 {

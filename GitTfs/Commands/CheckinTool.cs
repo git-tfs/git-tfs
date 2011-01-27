@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
@@ -38,7 +37,7 @@ namespace Sep.Git.Tfs.Commands
                 if (changeset.Remote.Tfs.CanShowCheckinDialog)
                     changeset.Remote.CheckinTool(refToCheckin, changeset);
                 else
-                    throw new Exception(
+                    throw new GitTfsException(
                         "checkintool does not work with this TFS version (" + changeset.Remote.Tfs.TfsClientLibraryVersion + ").",
                         new[] {"Try installing the VS2010 edition of Team Explorer."});
                 return GitTfsExitCodes.OK;

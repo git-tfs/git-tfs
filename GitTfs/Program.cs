@@ -21,6 +21,20 @@ namespace Sep.Git.Tfs
                 var container = Initialize();
                 container.GetInstance<GitTfs>().Run(new List<string>(args));
             }
+            catch(GitTfsException e)
+            {
+                Trace.WriteLine(e);
+                Console.WriteLine(e.Message);
+                if (!e.RecommendedSolutions.IsEmpty())
+                {
+                    Console.WriteLine("You may be able to resolve this problem.");
+                    foreach (var solution in e.RecommendedSolutions)
+                    {
+                        Console.WriteLine("- " + solution);
+                    }
+                }
+                Environment.ExitCode = -1;
+            }
             catch (Exception e)
             {
                 Trace.WriteLine(e);
