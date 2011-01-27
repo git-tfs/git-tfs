@@ -91,6 +91,9 @@
     <Compile Include="Commands\Checkin.cs" />
     <Compile Include="Commands\CheckinTool.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
+    <Compile Include="Commands\Cleanup.cs" />
+    <Compile Include="Commands\CleanupOptions.cs" />
+    <Compile Include="Commands\CleanupWorkspaces.cs" />
     <Compile Include="Commands\Clone.cs" />
     <Compile Include="Commands\CommitOptions.cs" />
     <Compile Include="Commands\Diagnostics.cs" />

@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Core
         bool HasShelveset(string shelvesetName);
         void CheckinTool(string head, TfsChangesetInfo parentChangeset);
         long Checkin(string treeish, TfsChangesetInfo parentChangeset);
+        void CleanupWorkspace();
     }
 
     public static partial class Ext

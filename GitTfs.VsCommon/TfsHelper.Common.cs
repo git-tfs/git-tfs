@@ -116,6 +116,30 @@ namespace Sep.Git.Tfs.VsCommon
             return "git-tfs-" + Guid.NewGuid().ToString();
         }
 
+        public void CleanupWorkspaces(string workingDirectory)
+        {
+            Trace.WriteLine("Looking for workspaces mapped to @\"" + workingDirectory +"\"...", "cleanup-workspace");
+            var workspace = VersionControl.TryGetWorkspace(workingDirectory);
+            if(workspace != null)
+            {
+                Trace.WriteLine("Found mapping in workspace \"" + workspace.DisplayName + "\".", "cleanup-workspace");
+                if (workspace.Folders.Length == 1)
+                {
+                    _stdout.WriteLine("Removing workspace \"" + workspace.DisplayName + "\".");
+                    workspace.Delete();
+                }
+                else
+                {
+                    foreach (var mapping in workspace.Folders.Where(f => Path.GetFullPath(f.LocalItem).ToLower() == Path.GetFullPath(workingDirectory).ToLower()))
+                    {
+                        _stdout.WriteLine("Removing @\"" + mapping.LocalItem + "\" from workspace \"" + workspace.DisplayName + "\".");
+                        workspace.DeleteMapping(mapping);
+                    }
+
+                }
+            }
+        }
+
         public bool HasShelveset(string shelvesetName)
         {
             var matchingShelvesets = VersionControl.QueryShelvesets(shelvesetName, VersionControl.AuthenticatedUser);

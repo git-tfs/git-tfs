@@ -38,6 +38,12 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public static T FirstOr<T>(this IEnumerable<T> e, T defaultValue)
+        {
+            foreach (var x in e) return x;
+            return defaultValue;
+        }
+
         public static void SetArguments(this ProcessStartInfo startInfo, params string [] args)
         {
             startInfo.Arguments = String.Join(" ", args.Select(arg => QuoteProcessArgument(arg)).ToArray());

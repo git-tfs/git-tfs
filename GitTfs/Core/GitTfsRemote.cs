@@ -87,6 +87,11 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public void CleanupWorkspace()
+        {
+            Tfs.CleanupWorkspaces(WorkingDirectory);
+        }
+
         public bool ShouldSkip(string path)
         {
             return IsInDotGit(path) ||
