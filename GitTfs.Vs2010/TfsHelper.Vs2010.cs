@@ -7,6 +7,7 @@ using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.Win32;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 using Sep.Git.Tfs.Vs2010;
 
 namespace Sep.Git.Tfs.VsCommon
@@ -61,10 +62,10 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 parentForm.Show();
 
-                dynamic dialog = new ReflectionProxy(GetCheckinDialogType(), workspace.VersionControlServer);
+                var dialog = Activator.CreateInstance(GetCheckinDialogType(), new object[] {workspace.VersionControlServer});
 
-                int dialogResult = dialog.Show(parentForm.Handle, workspace, pendingChanges, pendingChanges,
-                                               checkinComment, null, null, checkedInfos);
+                int dialogResult = dialog.Call<int>("Show", parentForm.Handle, workspace, pendingChanges, pendingChanges,
+                                                    checkinComment, null, null, checkedInfos);
 
                 if (dialogResult <= 0)
                 {
