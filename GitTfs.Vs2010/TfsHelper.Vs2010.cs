@@ -8,43 +8,52 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.Win32;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
-using Sep.Git.Tfs.Vs2010;
+using Sep.Git.Tfs.VsCommon;
+using StructureMap;
 
-namespace Sep.Git.Tfs.VsCommon
+namespace Sep.Git.Tfs.Vs2010
 {
-    public partial class TfsHelper : ITfsHelper
+    public class TfsHelper : TfsHelperBase
     {
-        private TfsTeamProjectCollection server;
+        private readonly TfsApiBridge _bridge;
+        private TfsTeamProjectCollection _server;
 
-        public string TfsClientLibraryVersion
+        public TfsHelper(TextWriter stdout, TfsApiBridge bridge, IContainer container) : base(stdout, bridge, container)
         {
-            get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version.ToString() + " (MS)"; }
+            _bridge = bridge;
         }
 
-        private void UpdateServer()
+        public override string TfsClientLibraryVersion
+        {
+            get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version + " (MS)"; }
+        }
+
+        protected override void UpdateServer()
         {
             if (string.IsNullOrEmpty(Url))
             {
-                server = null;
+                _server = null;
             }
             else
             {
-                server = new TfsTeamProjectCollection(new Uri(Url), new UICredentialsProvider());
-                server.EnsureAuthenticated();
+                _server = new TfsTeamProjectCollection(new Uri(Url), new UICredentialsProvider());
+                _server.EnsureAuthenticated();
             }
         }
 
-        private TfsTeamProjectCollection Server
+        protected override T GetService<T>()
         {
-            get
-            {
-                return server;
-            }
+            return (T) _server.GetService(typeof (T));
         }
 
-        public bool CanShowCheckinDialog { get { return true; } }
+        protected override string GetAuthenticatedUser()
+        {
+            return VersionControl.AuthenticatedUser;
+        }
 
-        public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
+        public override bool CanShowCheckinDialog { get { return true; } }
+
+        public override long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
                                      pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray(),

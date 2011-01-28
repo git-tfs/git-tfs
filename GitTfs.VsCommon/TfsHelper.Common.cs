@@ -13,25 +13,29 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.VsCommon
 {
-    public partial class TfsHelper : ITfsHelper
+    public abstract class TfsHelperBase : ITfsHelper
     {
         private readonly TextWriter _stdout;
         private string _url;
         private readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
 
-        public TfsHelper(TextWriter stdout, TfsApiBridge bridge, IContainer container)
+        public TfsHelperBase(TextWriter stdout, TfsApiBridge bridge, IContainer container)
         {
             _stdout = stdout;
             _bridge = bridge;
             _container = container;
         }
 
+        public abstract string TfsClientLibraryVersion { get; }
+
         public string Url
         {
             get { return _url; }
             set { _url = value; UpdateServer(); }
         }
+
+        protected abstract void UpdateServer();
 
         private string[] _legacyUrls;
         public string[] LegacyUrls
@@ -40,11 +44,13 @@ namespace Sep.Git.Tfs.VsCommon
             set { _legacyUrls = value; }
         }
 
-        private VersionControlServer VersionControl
+        protected abstract T GetService<T>();
+
+        protected VersionControlServer VersionControl
         {
             get
             {
-                var versionControlServer = (VersionControlServer)Server.GetService(typeof(VersionControlServer));
+                var versionControlServer = GetService<VersionControlServer>();
                 versionControlServer.NonFatalError += NonFatalError;
                 return versionControlServer;
             }
@@ -54,7 +60,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             get
             {
-                return (WorkItemStore) Server.GetService(typeof (WorkItemStore));
+                return GetService<WorkItemStore>();
             }
         }
 
@@ -67,7 +73,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         private IGroupSecurityService GroupSecurityService
         {
-            get { return (IGroupSecurityService) Server.GetService(typeof(IGroupSecurityService)); }
+            get { return GetService<IGroupSecurityService>(); }
         }
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
@@ -114,14 +120,16 @@ namespace Sep.Git.Tfs.VsCommon
             }
             catch (MappingConflictException e)
             {
-                throw new GitTfsException(e.Message, new string[] { "Run 'git tfs cleanup-workspace' to remove the workspace." }, e);
+                throw new GitTfsException(e.Message, new[] { "Run 'git tfs cleanup-workspace' to remove the workspace." }, e);
             }
         }
 
         private string GenerateWorkspaceName()
         {
-            return "git-tfs-" + Guid.NewGuid().ToString();
+            return "git-tfs-" + Guid.NewGuid();
         }
+
+        public abstract long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
 
         public void CleanupWorkspaces(string workingDirectory)
         {
@@ -149,9 +157,13 @@ namespace Sep.Git.Tfs.VsCommon
 
         public bool HasShelveset(string shelvesetName)
         {
-            var matchingShelvesets = VersionControl.QueryShelvesets(shelvesetName, VersionControl.AuthenticatedUser);
+            var matchingShelvesets = VersionControl.QueryShelvesets(shelvesetName, GetAuthenticatedUser());
             return matchingShelvesets != null && matchingShelvesets.Length > 0;
         }
+
+        protected abstract string GetAuthenticatedUser();
+
+        public abstract bool CanShowCheckinDialog { get; }
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
