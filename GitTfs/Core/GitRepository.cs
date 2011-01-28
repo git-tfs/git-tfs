@@ -142,6 +142,11 @@ namespace Sep.Git.Tfs.Core
             return remote;
         }
 
+        public GitCommit GetCommit(string commitish)
+        {
+            return _container.With(_repository.MapCommit(commitish)).GetInstance<GitCommit>();
+       }
+
         public IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head)
         {
             return GetParentTfsCommits(head, new List<string>());

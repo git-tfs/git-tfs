@@ -16,5 +16,6 @@ namespace Sep.Git.Tfs.Core
         IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to);
         string GetChangeSummary(string from, string to);
         void GetBlob(string sha, string outputFile);
+        GitCommit GetCommit(string commitish);
     }
 }

@@ -15,6 +15,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
         IIdentity GetIdentity(string username);
         ITfsChangeset GetLatestChangeset(GitTfsRemote remote);
+        ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote);
         IChangeset GetChangeset(int changesetId);
         bool MatchesUrl(string tfsUrl);
         bool HasShelveset(string shelvesetName);

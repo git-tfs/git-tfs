@@ -189,6 +189,11 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForChangeset, Changeset>(VersionControl.GetChangeset(changesetId));
         }
 
+        public ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote)
+        {
+            return BuildTfsChangeset(VersionControl.GetChangeset(changesetId), remote);
+        }
+
         public bool MatchesUrl(string tfsUrl)
         {
             return Url == tfsUrl || LegacyUrls.Contains(tfsUrl);

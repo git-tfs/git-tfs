@@ -22,6 +22,7 @@ namespace Sep.Git.Tfs.Core
         long CheckinTool(string head, TfsChangesetInfo parentChangeset);
         long Checkin(string treeish, TfsChangesetInfo parentChangeset);
         void CleanupWorkspace();
+        ITfsChangeset GetChangeset(long changesetId);
     }
 
     public static partial class Ext

@@ -148,6 +148,11 @@ namespace Sep.Git.Tfs.Core
             return changesets;
         }
 
+        public ITfsChangeset GetChangeset(long changesetId)
+        {
+            return Tfs.GetChangeset((int) changesetId, this);
+        }
+
         private void UpdateRef(string commitHash, long changesetId)
         {
             MaxCommitHash = commitHash;

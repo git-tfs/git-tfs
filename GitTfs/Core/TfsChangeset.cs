@@ -110,22 +110,35 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public LogEntry CopyTree(GitIndexInfo index)
+        public IEnumerable<TfsTreeEntry> GetTree()
         {
-            var maxChangesetId = 0;
-            foreach(var item in changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, changeset.ChangesetId, TfsRecursionType.Full))
+            return GetTree(false);
+        }
+
+        public IEnumerable<TfsTreeEntry> GetTree(bool includeIgnoredItems)
+        {
+            foreach (var item in changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, changeset.ChangesetId, TfsRecursionType.Full))
             {
                 if (item.ItemType == TfsItemType.File)
                 {
                     var pathInGitRepo = Summary.Remote.GetPathInGitRepo(item.ServerItem);
                     if (pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo))
                     {
-                        Add(item, pathInGitRepo, index);
-                        maxChangesetId = Math.Max(maxChangesetId, item.ChangesetId);
+                        yield return new TfsTreeEntry(pathInGitRepo, item);
                     }
                 }
             }
-            return MakeNewLogEntry(tfs.GetChangeset(maxChangesetId));
+        }
+
+        public LogEntry CopyTree(GitIndexInfo index)
+        {
+            var maxChangesetId = 0;
+            foreach (var entry in GetTree())
+            {
+                Add(entry.Item, entry.FullName, index);
+                maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
+            }
+            return MakeNewLogEntry(maxChangesetId == changeset.ChangesetId ? changeset : tfs.GetChangeset(maxChangesetId));
         }
 
         private void Add(IItem item, string pathInGitRepo, GitIndexInfo index)
