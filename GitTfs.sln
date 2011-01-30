@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2010", "GitTfs.Vs2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfsTest.Vs2010", "GitTfsTest.Vs2010\GitTfsTest.Vs2010.csproj", "{B2BF1C1C-BB58-4DEF-BFEF-DE0D2FE2E8F7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.GitExtensions.Plugin", "GitTfs.GitExtensions.Plugin\GitTfs.GitExtensions.Plugin.csproj", "{C964F29F-F5C9-4774-9977-FAA5791A7BAE}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = GitTfs1.vsmdi
@@ -55,6 +57,9 @@ Global
 		{B2BF1C1C-BB58-4DEF-BFEF-DE0D2FE2E8F7}.Debug|x86.Build.0 = Debug|x86
 		{B2BF1C1C-BB58-4DEF-BFEF-DE0D2FE2E8F7}.Release|x86.ActiveCfg = Release|x86
 		{B2BF1C1C-BB58-4DEF-BFEF-DE0D2FE2E8F7}.Release|x86.Build.0 = Release|x86
+		{C964F29F-F5C9-4774-9977-FAA5791A7BAE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C964F29F-F5C9-4774-9977-FAA5791A7BAE}.Debug|x86.Build.0 = Debug|Any CPU
+		{C964F29F-F5C9-4774-9977-FAA5791A7BAE}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
