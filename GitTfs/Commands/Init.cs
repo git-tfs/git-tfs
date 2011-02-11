@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Text.RegularExpressions;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -39,6 +40,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsUrl, string tfsRepositoryPath)
         {
+            tfsRepositoryPath.AssertValidTfsPath();
             DoGitInitDb();
             GitTfsInit(tfsUrl, tfsRepositoryPath);
             return 0;
@@ -46,6 +48,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
         {
+            tfsRepositoryPath.AssertValidTfsPath();
             InitSubdir(gitRepositoryPath);
             return Run(tfsUrl, tfsRepositoryPath);
         }
@@ -101,6 +104,26 @@ namespace Sep.Git.Tfs.Commands
         private void SetConfig(string configKey, object value)
         {
             gitHelper.CommandNoisy("config", configKey, value.ToString());
+        }
+    }
+
+    public static partial class Ext
+    {
+        static Regex ValidTfsPath = new Regex("^\\$/.+");
+        public static void AssertValidTfsPath(this string tfsPath)
+        {
+            if (!ValidTfsPath.IsMatch(tfsPath))
+                throw new GitTfsException("TFS repository can not be root and must start with \"$/\".", SuggestPaths(tfsPath));
+        }
+
+        private static IEnumerable<string> SuggestPaths(string tfsPath)
+        {
+            if (tfsPath == "$" || tfsPath == "$/")
+                yield return "Cloning an entire TFS repository is not supported. Try using a subdirectory of the root (e.g. $/MyProject).";
+            else if (tfsPath.StartsWith("$"))
+                yield return "Try using $/" + tfsPath.Substring(1);
+            else
+                yield return "Try using $/" + tfsPath;
         }
     }
 }
