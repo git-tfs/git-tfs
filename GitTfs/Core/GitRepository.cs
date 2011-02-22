@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using GitSharp.Core;
+using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 using FileMode=GitSharp.Core.FileMode;
 
@@ -56,23 +57,26 @@ namespace Sep.Git.Tfs.Core
             }
             catch(Exception e)
             {
-                throw new Exception("Unable to locate git-tfs remote with id = " + remoteId, e);
+                throw new GitTfsException("Unable to locate git-tfs remote with id = " + remoteId, e)
+                    .WithRecommendation("Try using `git tfs bootstrap` to auto-init git-tfs.");
             }
         }
 
         public IGitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath)
         {
-            try
+            var allRemotes = GetTfsRemotes();
+            var matchingRemotes =
+                allRemotes.Values.Where(
+                    remote => remote.Tfs.MatchesUrl(tfsUrl) && remote.TfsRepositoryPath == tfsRepositoryPath);
+            switch(matchingRemotes.Count())
             {
-                var allRemotes = GetTfsRemotes();
-                return
-                    allRemotes.Values.First(
-                        remote => remote.Tfs.MatchesUrl(tfsUrl) && remote.TfsRepositoryPath == tfsRepositoryPath);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Unable to locate git-tfs remote with url = " + tfsUrl + ", repo = " +
-                                    tfsRepositoryPath, e);
+                case 0:
+                    return new FakeGitTfsRemote(tfsUrl, tfsRepositoryPath);
+                case 1:
+                    return matchingRemotes.First();
+                default:
+                    Trace.WriteLine("More than one remote matched!");
+                    goto case 1;
             }
         }
 
@@ -145,7 +149,7 @@ namespace Sep.Git.Tfs.Core
         public GitCommit GetCommit(string commitish)
         {
             return _container.With(_repository.MapCommit(commitish)).GetInstance<GitCommit>();
-       }
+        }
 
         public IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head)
         {
@@ -303,6 +307,250 @@ namespace Sep.Git.Tfs.Core
             var writer = new ObjectWriter(_repository);
             var objectId = writer.WriteBlob(file.Length, file);
             return objectId.Name;
+        }
+    }
+
+    public class FakeGitTfsRemote : IGitTfsRemote
+    {
+        private readonly string _tfsUrl;
+        private readonly string _tfsRepositoryPath;
+
+        public FakeGitTfsRemote(string tfsUrl, string tfsRepositoryPath)
+        {
+            _tfsUrl = tfsUrl;
+            _tfsRepositoryPath = tfsRepositoryPath;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (FakeGitTfsRemote)) return false;
+            return Equals((FakeGitTfsRemote) obj);
+        }
+
+        private bool Equals(FakeGitTfsRemote other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(other._tfsUrl, _tfsUrl) && Equals(other._tfsRepositoryPath, _tfsRepositoryPath);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((_tfsUrl != null ? _tfsUrl.GetHashCode() : 0)*397) ^ (_tfsRepositoryPath != null ? _tfsRepositoryPath.GetHashCode() : 0);
+            }
+        }
+
+        public static bool operator ==(FakeGitTfsRemote left, FakeGitTfsRemote right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(FakeGitTfsRemote left, FakeGitTfsRemote right)
+        {
+            return !Equals(left, right);
+        }
+
+        public string Id
+        {
+            get { return "(deduced)"; }
+            set { throw new NotImplementedException(); }
+        }
+
+        public string TfsRepositoryPath
+        {
+            get { return _tfsRepositoryPath; }
+            set { throw new NotImplementedException(); }
+        }
+
+        public string IgnoreRegexExpression
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        public IGitRepository Repository
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        public ITfsHelper Tfs
+        {
+            get { return new FakeTfsHelper(this); }
+            set { throw new NotImplementedException(); }
+        }
+
+        class FakeTfsHelper : ITfsHelper
+        {
+            private readonly FakeGitTfsRemote _fakeGitTfsRemote;
+
+            public FakeTfsHelper(FakeGitTfsRemote fakeGitTfsRemote)
+            {
+                _fakeGitTfsRemote = fakeGitTfsRemote;
+            }
+
+            public string TfsClientLibraryVersion
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public string Url
+            {
+                get { return _fakeGitTfsRemote._tfsUrl; }
+                set { throw new NotImplementedException(); }
+            }
+
+            public string[] LegacyUrls
+            {
+                get { throw new NotImplementedException(); }
+                set { throw new NotImplementedException(); }
+            }
+
+            public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IIdentity GetIdentity(string username)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IChangeset GetChangeset(int changesetId)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool MatchesUrl(string tfsUrl)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool HasShelveset(string shelvesetName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanShowCheckinDialog
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void CleanupWorkspaces(string workingDirectory)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void PrepareForCheckinEvaluation()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public long MaxChangesetId
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        public string MaxCommitHash
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        public string RemoteRef
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public bool ShouldSkip(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetPathInGitRepo(string tfsPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Fetch(Dictionary<long, string> mergeInfo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void QuickFetch()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool HasShelveset(string shelvesetName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public long Checkin(string treeish, TfsChangesetInfo parentChangeset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CleanupWorkspace()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ITfsChangeset GetChangeset(long changesetId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
