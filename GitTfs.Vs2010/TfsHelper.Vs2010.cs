@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -94,7 +95,26 @@ namespace Sep.Git.Tfs.Vs2010
 
         private static string GetVs2010InstallDir()
         {
-            return Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\VisualStudio\10.0").GetValue("InstallDir").ToString();
+            return TryGetRegString(@"Software\Microsoft\VisualStudio\10.0", "InstallDir")
+                ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\10.0", "InstallDir");
+        }
+
+        private static string TryGetRegString(string path, string name)
+        {
+            try
+            {
+                Trace.WriteLine("Trying to get " + path + "|" + name);
+                var key = Registry.LocalMachine.OpenSubKey(path);
+                if(key != null)
+                {
+                    return key.GetValue(name) as string;
+                }
+            }
+            catch(Exception e)
+            {
+                Trace.WriteLine("Unable to get registry value " + path + "|" + name + ": " + e);
+            }
+            return null;
         }
     }
 }
