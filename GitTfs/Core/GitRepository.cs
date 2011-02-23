@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using GitSharp.Core;
 using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 using FileMode=GitSharp.Core.FileMode;
 
@@ -73,7 +72,7 @@ namespace Sep.Git.Tfs.Core
                         throw new GitTfsException("Unable to locate a remote for <" + tfsUrl + ">" + tfsRepositoryPath)
                             .WithRecommendation("Try using `git tfs bootstrap` to auto-init TFS remotes.")
                             .WithRecommendation("Try setting a legacy-url for an existing remote.");
-                    return new FakeGitTfsRemote(tfsUrl, tfsRepositoryPath);
+                    return new DerivedGitTfsRemote(tfsUrl, tfsRepositoryPath);
                 case 1:
                     return matchingRemotes.First();
                 default:
@@ -336,159 +335,6 @@ namespace Sep.Git.Tfs.Core
             var writer = new ObjectWriter(_repository);
             var objectId = writer.WriteBlob(file.Length, file);
             return objectId.Name;
-        }
-    }
-
-    public class FakeGitTfsRemote : IGitTfsRemote
-    {
-        private readonly string _tfsUrl;
-        private readonly string _tfsRepositoryPath;
-
-        public FakeGitTfsRemote(string tfsUrl, string tfsRepositoryPath)
-        {
-            _tfsUrl = tfsUrl;
-            _tfsRepositoryPath = tfsRepositoryPath;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (FakeGitTfsRemote)) return false;
-            return Equals((FakeGitTfsRemote) obj);
-        }
-
-        private bool Equals(FakeGitTfsRemote other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Equals(other._tfsUrl, _tfsUrl) && Equals(other._tfsRepositoryPath, _tfsRepositoryPath);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((_tfsUrl != null ? _tfsUrl.GetHashCode() : 0)*397) ^ (_tfsRepositoryPath != null ? _tfsRepositoryPath.GetHashCode() : 0);
-            }
-        }
-
-        public static bool operator ==(FakeGitTfsRemote left, FakeGitTfsRemote right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(FakeGitTfsRemote left, FakeGitTfsRemote right)
-        {
-            return !Equals(left, right);
-        }
-
-        public bool IsDerived
-        {
-            get { return true; }
-        }
-
-        public string Id
-        {
-            get { return "(deduced)"; }
-            set { throw new NotImplementedException(); }
-        }
-
-        public string TfsUrl
-        {
-            get { return _tfsUrl; }
-            set { throw new NotImplementedException(); }
-        }
-
-        public string TfsRepositoryPath
-        {
-            get { return _tfsRepositoryPath; }
-            set { throw new NotImplementedException(); }
-        }
-
-        public string IgnoreRegexExpression
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        public IGitRepository Repository
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        public ITfsHelper Tfs
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        public long MaxChangesetId
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        public string MaxCommitHash
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        public string RemoteRef
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public bool ShouldSkip(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetPathInGitRepo(string tfsPath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Fetch(Dictionary<long, string> mergeInfo)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void QuickFetch()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool HasShelveset(string shelvesetName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public long Checkin(string treeish, TfsChangesetInfo parentChangeset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CleanupWorkspace()
-        {
-            throw new NotImplementedException();
-        }
-
-        public ITfsChangeset GetChangeset(long changesetId)
-        {
-            throw new NotImplementedException();
         }
     }
 }

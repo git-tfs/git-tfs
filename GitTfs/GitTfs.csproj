@@ -116,6 +116,7 @@
     <Compile Include="Core\Changes\Git\Modify.cs" />
     <Compile Include="Core\Changes\Git\RenameEdit.cs" />
     <Compile Include="Core\CheckinPolicyEvaluator.cs" />
+    <Compile Include="Core\DerivedGitTfsRemote.cs" />
     <Compile Include="Core\GitChangeInfo.cs" />
     <Compile Include="Core\GitCommit.cs" />
     <Compile Include="Core\GitObject.cs" />
