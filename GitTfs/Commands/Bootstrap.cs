@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("bootstrap")]
     [RequiresValidGitRepository]
-    [Description("bootstrap [parent-commit [id]]")]
+    [Description("bootstrap [parent-commit]")]
     public class Bootstrap : GitTfsCommand
     {
         private readonly Globals _globals;
@@ -29,34 +30,39 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
-            if(_globals.Repository.ReadAllTfsRemotes().Any())
-            {
-                throw new GitTfsException("You already have a TFS remote.")
-                    .WithRecommendation("Try choosing a parent git-tfs commit: `git tfs bootstrap <parent-commit>`.");
-            }
-            foreach (var parent in _globals.Repository.GetParentTfsCommits("HEAD"))
+            return Run("HEAD");
+        }
+
+        private int Run(string commitish)
+        {
+            var tfsParents = _globals.Repository.GetParentTfsCommits(commitish);
+            foreach (var parent in tfsParents)
             {
                 _stdout.WriteLine("Parent found: " + parent.ChangesetId);
                 _stdout.WriteLine("   -- " + parent.Remote.Id + ", " + parent.Remote.Tfs.Url);
+                var remoteName = GetRemoteName(parent);
+                _stdout.WriteLine("   -> new remote " + remoteName);
+                _globals.Repository.CreateTfsRemote(remoteName, parent.Remote.Tfs.Url, parent.Remote.TfsRepositoryPath, null);
             }
             return GitTfsExitCodes.OK;
         }
 
-        public int Run(string commitish)
+        private string GetRemoteName(TfsChangesetInfo parent)
         {
-            return Run(commitish, "default");
+            var defaultRemoteName = "default";
+            if (IsAvailable(defaultRemoteName))
+                return defaultRemoteName;
+            var hostname = new Uri(parent.Remote.Tfs.Url).Host.Replace(".", "-");
+            var remoteName = hostname;
+            var suffix = 0;
+            while (!IsAvailable(remoteName))
+                remoteName = hostname + "-" + (suffix++);
+            return hostname;
         }
 
-        public int Run(string commitish, string tfsId)
+        private bool IsAvailable(string remoteName)
         {
-            _globals.Repository.re
-            if(_globals.Repository.ReadAllTfsRemotes().Any(remote => remote.Id == tfsId))
-            {
-                throw new GitTfsException("You already have a TFS remote with id \"" + tfsId + "\".")
-                    .WithRecommendation("Try using a different ID: `git tfs bootstrap " + commitish + " <id>`.");
-            }
-            //var commit = _globals.Repository.GetCommit()
-            return GitTfsExitCodes.OK;
+            return !_globals.Repository.HasRemote(remoteName);
         }
     }
 }

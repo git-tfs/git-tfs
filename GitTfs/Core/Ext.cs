@@ -44,6 +44,11 @@ namespace Sep.Git.Tfs.Core
             return defaultValue;
         }
 
+        public static bool Empty<T>(this IEnumerable<T> e)
+        {
+            return !e.Any();
+        }
+
         public static void SetArguments(this ProcessStartInfo startInfo, params string [] args)
         {
             startInfo.Arguments = String.Join(" ", args.Select(arg => QuoteProcessArgument(arg)).ToArray());

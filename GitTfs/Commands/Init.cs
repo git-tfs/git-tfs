@@ -85,25 +85,8 @@ namespace Sep.Git.Tfs.Commands
 
         private void GitTfsInit(string tfsUrl, string tfsRepositoryPath)
         {
-            SetConfig("core.autocrlf", "false");
-            // TODO - check that there's not already a repository configured with this ID.
-            SetTfsConfig("url", tfsUrl);
-            SetTfsConfig("repository", tfsRepositoryPath);
-            SetTfsConfig("fetch", "refs/remotes/" + globals.RemoteId + "/master");
-            if (initOptions.NoMetaData) SetTfsConfig("no-meta-data", 1);
-            if (remoteOptions.IgnoreRegex != null) SetTfsConfig("ignore-paths", remoteOptions.IgnoreRegex);
-
-            Directory.CreateDirectory(Path.Combine(globals.GitDir, "tfs"));
-        }
-
-        private void SetTfsConfig(string subkey, object value)
-        {
-            SetConfig(globals.RemoteConfigKey(subkey), value);
-        }
-
-        private void SetConfig(string configKey, object value)
-        {
-            gitHelper.CommandNoisy("config", configKey, value.ToString());
+            gitHelper.SetConfig("core.autocrlf", "false");
+            globals.Repository.CreateTfsRemote(globals.RemoteId, tfsUrl, tfsRepositoryPath, remoteOptions);
         }
     }
 

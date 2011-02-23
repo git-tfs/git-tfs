@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using GitSharp.Core;
+using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 using FileMode=GitSharp.Core.FileMode;
@@ -14,13 +15,15 @@ namespace Sep.Git.Tfs.Core
     public class GitRepository : GitHelpers, IGitRepository
     {
         private readonly IContainer _container;
+        private readonly Globals _globals;
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
 
-        public GitRepository(TextWriter stdout, string gitDir, IContainer container) : base(stdout, container)
+        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals) : base(stdout, container)
         {
             _container = container;
+            _globals = globals;
             GitDir = gitDir;
             _repository = new Repository(new DirectoryInfo(gitDir));
         }
@@ -51,15 +54,10 @@ namespace Sep.Git.Tfs.Core
 
         public IGitTfsRemote ReadTfsRemote(string remoteId)
         {
-            try
-            {
-                return GetTfsRemotes()[remoteId];
-            }
-            catch(Exception e)
-            {
-                throw new GitTfsException("Unable to locate git-tfs remote with id = " + remoteId, e)
+            if (!HasRemote(remoteId))
+                throw new GitTfsException("Unable to locate git-tfs remote with id = " + remoteId)
                     .WithRecommendation("Try using `git tfs bootstrap` to auto-init git-tfs.");
-            }
+            return GetTfsRemotes()[remoteId];
         }
 
         public IGitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath)
@@ -92,6 +90,34 @@ namespace Sep.Git.Tfs.Core
             return remotes;
         }
 
+        public bool HasRemote(string remoteId)
+        {
+            return GetTfsRemotes().ContainsKey(remoteId);
+        }
+
+        public void CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions)
+        {
+            if (HasRemote(remoteId))
+                throw new GitTfsException("A remote with id \"" + remoteId + "\" already exists.");
+
+            SetTfsConfig(remoteId, "url", tfsUrl);
+            SetTfsConfig(remoteId, "repository", tfsRepositoryPath);
+            SetTfsConfig(remoteId, "fetch", "refs/remotes/" + remoteId + "/master");
+            if (remoteOptions != null)
+            {
+                if (remoteOptions.NoMetaData) SetTfsConfig(remoteId, "no-meta-data", 1);
+                if (remoteOptions.IgnoreRegex != null) SetTfsConfig(remoteId, "ignore-paths", remoteOptions.IgnoreRegex);
+            }
+
+            Directory.CreateDirectory(Path.Combine(this.GitDir, "tfs"));
+            _cachedRemotes = null;
+        }
+
+        private void SetTfsConfig(string remoteId, string subkey, object value)
+        {
+            this.SetConfig(_globals.RemoteConfigKey(remoteId, subkey), value);
+        }
+
         private void ParseRemoteConfig(TextReader stdout, IDictionary<string, IGitTfsRemote> remotes)
         {
             string line;
@@ -111,9 +137,17 @@ namespace Sep.Git.Tfs.Core
                 var remoteId = match.Groups["id"].Value;
                 var remote = remotes.ContainsKey(remoteId)
                                  ? remotes[remoteId]
-                                 : (remotes[remoteId] = CreateRemote(remoteId));
+                                 : (remotes[remoteId] = BuildRemote(remoteId));
                 SetRemoteConfigValue(remote, key, value);
             }
+        }
+
+        private IGitTfsRemote BuildRemote(string id)
+        {
+            var remote = _container.GetInstance<IGitTfsRemote>();
+            remote.Repository = this;
+            remote.Id = id;
+            return remote;
         }
 
         private void SetRemoteConfigValue(IGitTfsRemote remote, string key, string value)
@@ -136,14 +170,6 @@ namespace Sep.Git.Tfs.Core
                     //    remote.??? = value;
                     //    break;
             }
-        }
-
-        private IGitTfsRemote CreateRemote(string id)
-        {
-            var remote = _container.GetInstance<IGitTfsRemote>();
-            remote.Repository = this;
-            remote.Id = id;
-            return remote;
         }
 
         public GitCommit GetCommit(string commitish)

@@ -23,11 +23,5 @@ namespace Sep.Git.Tfs.Commands
         [Description("The --shared option to pass to git-init.")]
         public object GitInitShared { get; set; }
 
-        [OptDef(OptValType.Flag)]
-        [LongOptionName("no-metadata")]
-        [UseNameAsLongOption(false)]
-        [Description("If specified, git-tfs will leave out the git-tfs-id: lines at the end of every commit.")]
-        public bool NoMetaData { get; set; }
-
     }
 }
