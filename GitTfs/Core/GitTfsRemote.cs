@@ -28,7 +28,19 @@ namespace Sep.Git.Tfs.Core
             Tfs = tfsHelper;
         }
 
+        public bool IsDerived
+        {
+            get { return false; }
+        }
+
         public string Id { get; set; }
+
+        public string TfsUrl
+        {
+            get { return Tfs.Url; }
+            set { Tfs.Url = value; }
+        }
+
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegexExpression { get; set; }
         public IGitRepository Repository { get; set; }
@@ -265,7 +277,7 @@ namespace Sep.Git.Tfs.Core
             Repository.CommandInputOutputPipe((procIn, procOut) =>
                                                   {
                                                       procIn.WriteLine(logEntry.Log);
-                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, Tfs.Url,
+                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl,
                                                                        TfsRepositoryPath, logEntry.ChangesetId);
                                                       procIn.Close();
                                                       commitHash = ParseCommitInfo(procOut.ReadToEnd());

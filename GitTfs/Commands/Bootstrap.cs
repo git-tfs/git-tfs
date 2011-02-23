@@ -38,26 +38,34 @@ namespace Sep.Git.Tfs.Commands
             var tfsParents = _globals.Repository.GetParentTfsCommits(commitish);
             foreach (var parent in tfsParents)
             {
-                _stdout.WriteLine("Parent found: " + parent.ChangesetId);
-                _stdout.WriteLine("   -- " + parent.Remote.Id + ", " + parent.Remote.Tfs.Url);
-                var remoteName = GetRemoteName(parent);
-                _stdout.WriteLine("   -> new remote " + remoteName);
-                _globals.Repository.CreateTfsRemote(remoteName, parent.Remote.Tfs.Url, parent.Remote.TfsRepositoryPath, null);
+                _globals.Repository.CommandNoisy("log", "-1", parent.GitCommit);
+                if (parent.Remote.IsDerived)
+                {
+                    var remoteId = GetRemoteId(parent);
+                    _globals.Repository.CreateTfsRemote(remoteId, parent.Remote.TfsUrl,
+                                                        parent.Remote.TfsRepositoryPath, null);
+                    _stdout.WriteLine("-> new remote " + remoteId);
+                }
+                else
+                {
+                    _stdout.WriteLine("-> existing remote " + parent.Remote.Id);
+                }
+                _stdout.WriteLine();
             }
             return GitTfsExitCodes.OK;
         }
 
-        private string GetRemoteName(TfsChangesetInfo parent)
+        private string GetRemoteId(TfsChangesetInfo parent)
         {
-            var defaultRemoteName = "default";
-            if (IsAvailable(defaultRemoteName))
-                return defaultRemoteName;
-            var hostname = new Uri(parent.Remote.Tfs.Url).Host.Replace(".", "-");
-            var remoteName = hostname;
+            if (IsAvailable(GitTfsConstants.DefaultRepositoryId))
+                return GitTfsConstants.DefaultRepositoryId;
+
+            var hostname = new Uri(parent.Remote.TfsUrl).Host.Replace(".", "-");
+            var remoteId = hostname;
             var suffix = 0;
-            while (!IsAvailable(remoteName))
-                remoteName = hostname + "-" + (suffix++);
-            return hostname;
+            while (!IsAvailable(remoteId))
+                remoteId = hostname + "-" + (suffix++);
+            return remoteId;
         }
 
         private bool IsAvailable(string remoteName)

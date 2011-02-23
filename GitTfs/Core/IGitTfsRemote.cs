@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sep.Git.Tfs.Core.TfsInterop;
 
@@ -5,10 +6,13 @@ namespace Sep.Git.Tfs.Core
 {
     public interface IGitTfsRemote
     {
+        bool IsDerived { get; }
         string Id { get; set; }
+        string TfsUrl { get; set; }
         string TfsRepositoryPath { get; set; }
         string IgnoreRegexExpression { get; set; }
         IGitRepository Repository { get; set; }
+        [Obsolete("Make this go away")]
         ITfsHelper Tfs { get; set; }
         long MaxChangesetId { get; set; }
         string MaxCommitHash { get; set; }

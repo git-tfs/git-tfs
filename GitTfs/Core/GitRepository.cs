@@ -155,7 +155,7 @@ namespace Sep.Git.Tfs.Core
             switch (key)
             {
                 case "url":
-                    remote.Tfs.Url = value;
+                    remote.TfsUrl = value;
                     break;
                 case "legacy-urls":
                     remote.Tfs.LegacyUrls = value.Split(',');
@@ -380,9 +380,20 @@ namespace Sep.Git.Tfs.Core
             return !Equals(left, right);
         }
 
+        public bool IsDerived
+        {
+            get { return true; }
+        }
+
         public string Id
         {
             get { return "(deduced)"; }
+            set { throw new NotImplementedException(); }
+        }
+
+        public string TfsUrl
+        {
+            get { return _tfsUrl; }
             set { throw new NotImplementedException(); }
         }
 
@@ -406,110 +417,8 @@ namespace Sep.Git.Tfs.Core
 
         public ITfsHelper Tfs
         {
-            get { return new FakeTfsHelper(this); }
+            get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
-        }
-
-        class FakeTfsHelper : ITfsHelper
-        {
-            private readonly FakeGitTfsRemote _fakeGitTfsRemote;
-
-            public FakeTfsHelper(FakeGitTfsRemote fakeGitTfsRemote)
-            {
-                _fakeGitTfsRemote = fakeGitTfsRemote;
-            }
-
-            public string TfsClientLibraryVersion
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public string Url
-            {
-                get { return _fakeGitTfsRemote._tfsUrl; }
-                set { throw new NotImplementedException(); }
-            }
-
-            public string[] LegacyUrls
-            {
-                get { throw new NotImplementedException(); }
-                set { throw new NotImplementedException(); }
-            }
-
-            public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IIdentity GetIdentity(string username)
-            {
-                throw new NotImplementedException();
-            }
-
-            public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
-            {
-                throw new NotImplementedException();
-            }
-
-            public ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IChangeset GetChangeset(int changesetId)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool MatchesUrl(string tfsUrl)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool HasShelveset(string shelvesetName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool CanShowCheckinDialog
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void CleanupWorkspaces(string workingDirectory)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void PrepareForCheckinEvaluation()
-            {
-                throw new NotImplementedException();
-            }
         }
 
         public long MaxChangesetId
