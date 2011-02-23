@@ -8,11 +8,10 @@ namespace Sep.Git.Tfs.Core
     {
         IEnumerable<IGitTfsRemote> ReadAllTfsRemotes();
         IGitTfsRemote ReadTfsRemote(string remoteId);
-        IGitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath);
         void /*or IGitTfsRemote*/ CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions);
         bool HasRemote(string remoteId);
-        IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head, ICollection<string> localCommits);
         IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head);
+        IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes);
         IDictionary<string, GitObject> GetObjects(string commit);
         string HashAndInsertObject(string filename);
         string HashAndInsertObject(Stream data);
