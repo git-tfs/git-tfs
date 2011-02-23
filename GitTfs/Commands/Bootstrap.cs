@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Commands
             return Run("HEAD");
         }
 
-        private int Run(string commitish)
+        public int Run(string commitish)
         {
             var tfsParents = _globals.Repository.GetParentTfsCommits(commitish);
             foreach (var parent in tfsParents)
