@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.Changes.Git;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -37,9 +38,20 @@ namespace Sep.Git.Tfs
             }
             catch (Exception e)
             {
-                Trace.WriteLine(e);
-                Console.WriteLine(e);
+                ReportException(e);
                 Environment.ExitCode = -1;
+            }
+        }
+
+        private static void ReportException(Exception e)
+        {
+            Trace.WriteLine(e);
+            while(e is TargetInvocationException && e.InnerException != null)
+                e = e.InnerException;
+            while (e != null)
+            {
+                Console.WriteLine(e.Message);
+                e = e.InnerException;
             }
         }
 
