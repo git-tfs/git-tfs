@@ -42,7 +42,7 @@ namespace Sep.Git.Tfs.Core
             shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
             if(evaluateCheckinPolicies)
             {
-                foreach(var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, shelveset.WorkItemInfo))
+                foreach(var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, shelveset.WorkItemInfo).Messages)
                 {
                     _stdout.WriteLine("[Checkin Policy] " + message);
                 }
@@ -73,26 +73,40 @@ namespace Sep.Git.Tfs.Core
 
             var workItemInfos = GetWorkItemInfos();
             var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, _checkinOptions.CheckinComment, workItemInfos);
-            if(checkinProblems.Any())
+            if(checkinProblems.HasErrors)
             {
-                foreach (var message in checkinProblems)
+                foreach (var message in checkinProblems.Messages)
                 {
                     _stdout.WriteLine("[ERROR] " + message);
                 }
-                throw new GitTfsException("No changes checked in.");
+                if(!_checkinOptions.Force)
+                {
+                    throw new GitTfsException("No changes checked in.");
+                }
+                if (String.IsNullOrWhiteSpace(_checkinOptions.OverrideReason))
+                {
+                    throw new GitTfsException("A reason must be supplied (-f REASON) to override the policy violations.");
+                }
+            }
+
+            var policyOverride = GetPolicyOverrides(checkinProblems.Result);
+            var newChangeset = _workspace.Checkin(pendingChanges, _checkinOptions.CheckinComment, null, workItemInfos, policyOverride);
+            if(newChangeset == 0)
+            {
+                throw new GitTfsException("Checkin failed!");
             }
             else
             {
-                var newChangeset = _workspace.Checkin(pendingChanges, _checkinOptions.CheckinComment, null, workItemInfos);
-                if(newChangeset == 0)
-                {
-                    throw new GitTfsException("Checkin failed!");
-                }
-                else
-                {
-                    return newChangeset;
-                }
+                return newChangeset;
             }
+        }
+
+        private TfsPolicyOverrideInfo GetPolicyOverrides(ICheckinEvaluationResult checkinProblems)
+        {
+            if (!_checkinOptions.Force || String.IsNullOrWhiteSpace(_checkinOptions.OverrideReason))
+                return null;
+            return new TfsPolicyOverrideInfo
+                       {Comment = _checkinOptions.OverrideReason, Failures = checkinProblems.PolicyFailures};
         }
 
         public string GetLocalPath(string path)

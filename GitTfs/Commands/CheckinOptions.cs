@@ -11,17 +11,26 @@ namespace Sep.Git.Tfs.Commands
         private List<string> _workItemsToAssociate = new List<string>();
         private List<string> _workItemsToResolve = new List<string>();
 
-        [OptDef(OptValType.ValueOpt)]
+        [OptDef(OptValType.ValueReq)]
         [ShortOptionName('m')]
         [LongOptionName("comment")]
         [UseNameAsLongOption(false)]
         [Description("A comment for the changeset.")]
         public string CheckinComment { get; set; }
 
-        [OptDef(OptValType.Flag)]
+        private string _overrideReason;
+
+        [OptDef(OptValType.ValueOpt)]
         [ShortOptionName('f')]
         [LongOptionName("force")]
         [UseNameAsLongOption(false)]
+        [Description("To force a checkin, supply the policy override reason as an argument to this flag.")]
+        public string OverrideReason
+        {
+            get { return _overrideReason; }
+            set { Force = true; _overrideReason = value; }
+        }
+
         public bool Force { get; set; }
 
         [OptDef(OptValType.MultValue, ValueType = typeof(string))]

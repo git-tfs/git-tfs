@@ -35,4 +35,10 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     {
         string Message { get; }
     }
+
+    public class TfsPolicyOverrideInfo
+    {
+        public string Comment { get; set; }
+        public IPolicyFailure[] Failures { get; set; }
+    }
 }
