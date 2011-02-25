@@ -158,9 +158,7 @@ namespace Sep.Git.Tfs.Core
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId == Tfs.GetLatestChangeset(this).Summary.ChangesetId)
                 return Enumerable.Empty<ITfsChangeset>();
-            var changesets = Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
-            changesets = changesets.OrderBy(cs => cs.Summary.ChangesetId);
-            return changesets;
+            return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
         }
 
         public ITfsChangeset GetChangeset(long changesetId)

@@ -81,7 +81,9 @@ namespace Sep.Git.Tfs.VsCommon
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                                                          null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true,
                                                          true, true);
-            return changesets.Cast<Changeset>().Select(changeset => BuildTfsChangeset(changeset, remote));
+            return changesets.Cast<Changeset>()
+                .OrderBy(changeset => changeset.ChangesetId)
+                .Select(changeset => BuildTfsChangeset(changeset, remote));
         }
 
         private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)

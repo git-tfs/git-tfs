@@ -39,7 +39,7 @@ namespace Sep.Git.Tfs.Core
             // and git doesn't really care if you add or delete empty dirs.
             if (change.Item.ItemType == TfsItemType.File)
             {
-                var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
+                var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, initialTree);
                 if (pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
                     return;
                 if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
@@ -57,9 +57,17 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        private string GetPathInGitRepo(string tfsPath, IDictionary<string, GitObject> initialTree)
+        {
+            var pathInGitRepo = Summary.Remote.GetPathInGitRepo(tfsPath);
+            if (pathInGitRepo == null)
+                return null;
+            return UpdateToMatchExtantCasing(pathInGitRepo, initialTree);
+        }
+
         private void Rename(IChange change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
         {
-            var oldPath = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
+            var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Item), initialTree);
             if (oldPath != null)
             {
                 Delete(oldPath, index, initialTree);
@@ -107,7 +115,7 @@ namespace Sep.Git.Tfs.Core
                 {
                     change.Item.DownloadFile(tempFile);
                     index.Update(GetMode(change, initialTree, pathInGitRepo),
-                                 UpdateDirectoryToMatchExtantCasing(pathInGitRepo, initialTree),
+                                 pathInGitRepo,
                                  tempFile);
                 }
             }
@@ -120,11 +128,12 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<TfsTreeEntry> GetTree(bool includeIgnoredItems)
         {
+            var treeInfo = Summary.Remote.Repository.GetObjects();
             foreach (var item in changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, changeset.ChangesetId, TfsRecursionType.Full))
             {
                 if (item.ItemType == TfsItemType.File)
                 {
-                    var pathInGitRepo = Summary.Remote.GetPathInGitRepo(item.ServerItem);
+                    var pathInGitRepo = GetPathInGitRepo(item.ServerItem, treeInfo);
                     if (pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo))
                     {
                         yield return new TfsTreeEntry(pathInGitRepo, item);
@@ -167,7 +176,9 @@ namespace Sep.Git.Tfs.Core
 
         private string GetMode(IChange change, IDictionary<string, GitObject> initialTree, string pathInGitRepo)
         {
-            if(initialTree.ContainsKey(pathInGitRepo) && !change.ChangeType.IncludesOneOf(TfsChangeType.Add))
+            if(initialTree.ContainsKey(pathInGitRepo) &&
+                !String.IsNullOrEmpty(initialTree[pathInGitRepo].Mode) &&
+                !change.ChangeType.IncludesOneOf(TfsChangeType.Add))
             {
                 return initialTree[pathInGitRepo].Mode;
             }
@@ -176,24 +187,27 @@ namespace Sep.Git.Tfs.Core
 
         private static readonly Regex pathWithDirRegex = new Regex("(?<dir>.*)/(?<file>[^/]+)");
 
-        private string UpdateDirectoryToMatchExtantCasing(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
+        private string UpdateToMatchExtantCasing(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
         {
-            string newPathTail = null;
-            string newPathHead = pathInGitRepo;
-            while(true)
+            return UpdateToMatchExtantCasing_NEW(pathInGitRepo, initialTree);
+        }
+
+        private string UpdateToMatchExtantCasing_NEW(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
+        {
+            if (initialTree.ContainsKey(pathInGitRepo))
+                return initialTree[pathInGitRepo].Path;
+
+            var fullPath = pathInGitRepo;
+            var pathWithDirMatch = pathWithDirRegex.Match(pathInGitRepo);
+            if (pathWithDirMatch.Success)
             {
-                if(initialTree.ContainsKey(newPathHead))
-                {
-                    return MaybeAppendPath(initialTree[newPathHead].Path, newPathTail);
-                }
-                var pathWithDirMatch = pathWithDirRegex.Match(newPathHead);
-                if(!pathWithDirMatch.Success)
-                {
-                    return MaybeAppendPath(newPathHead, newPathTail);
-                }
-                newPathTail = MaybeAppendPath(pathWithDirMatch.Groups["file"].Value, newPathTail);
-                newPathHead = pathWithDirMatch.Groups["dir"].Value;
+
+                var dirName = pathWithDirMatch.Groups["dir"].Value;
+                var fileName = pathWithDirMatch.Groups["file"].Value;
+                fullPath = UpdateToMatchExtantCasing_NEW(dirName, initialTree) + "/" + fileName;
             }
+            initialTree[fullPath] = new GitObject {Path = fullPath};
+            return fullPath;
         }
 
         private string MaybeAppendPath(string path, object tail)

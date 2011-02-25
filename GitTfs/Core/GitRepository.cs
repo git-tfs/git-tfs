@@ -242,13 +242,18 @@ namespace Sep.Git.Tfs.Core
 
         public IDictionary<string, GitObject> GetObjects(string commit)
         {
-            var entries = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
+            var entries = GetObjects();
             if (commit != null)
             {
                 ParseEntries(entries, Command("ls-tree", "-r", "-z", commit), commit);
                 ParseEntries(entries, Command("ls-tree", "-r", "-d", "-z", commit), commit);
             }
             return entries;
+        }
+
+        public Dictionary<string, GitObject> GetObjects()
+        {
+            return new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
         }
 
         private void ParseEntries(IDictionary<string, GitObject> entries, string treeInfo, string commit)
