@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -12,12 +13,14 @@ namespace Sep.Git.Tfs.Core
     {
         private readonly ITfsHelper tfs;
         private readonly IChangeset changeset;
+        private readonly TextWriter _stdout;
         public TfsChangesetInfo Summary { get; set; }
 
-        public TfsChangeset(ITfsHelper tfs, IChangeset changeset)
+        public TfsChangeset(ITfsHelper tfs, IChangeset changeset, TextWriter stdout)
         {
             this.tfs = tfs;
             this.changeset = changeset;
+            _stdout = stdout;
         }
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index)
@@ -132,11 +135,20 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry CopyTree(GitIndexInfo index)
         {
+            var startTime = DateTime.Now;
+            var itemsCopied = 0;
             var maxChangesetId = 0;
             foreach (var entry in GetTree())
             {
                 Add(entry.Item, entry.FullName, index);
                 maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
+
+                itemsCopied++;
+                if(DateTime.Now - startTime > TimeSpan.FromSeconds(30))
+                {
+                    _stdout.WriteLine("" + itemsCopied + " objects created...");
+                    startTime = DateTime.Now;
+                }
             }
             return MakeNewLogEntry(maxChangesetId == changeset.ChangesetId ? changeset : tfs.GetChangeset(maxChangesetId));
         }

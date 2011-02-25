@@ -86,10 +86,9 @@ namespace Sep.Git.Tfs.VsCommon
 
         private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
         {
-            return new TfsChangeset(this, _bridge.Wrap<WrapperForChangeset, Changeset>(changeset))
-            {
-                Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote }
-            };
+            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
+            tfsChangeset.Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId, Remote = remote};
+            return tfsChangeset;
         }
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
