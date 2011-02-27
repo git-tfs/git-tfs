@@ -67,18 +67,20 @@ namespace Sep.Git.Tfs
 
         public string RemoteId { get; set; }
 
-        public string RemoteConfigPrefix
+        private string GetRemoteConfigPrefix()
         {
-            get
-            {
-                if (RemoteId == null) return null;
-                return "tfs-remote." + RemoteId;
-            }
+            if (RemoteId == null) return null;
+            return GetRemoteConfigPrefix(RemoteId);
         }
 
-        public string RemoteConfigKey(string parameter)
+        private string GetRemoteConfigPrefix(string remoteId)
         {
-            return RemoteConfigPrefix + "." + parameter;
+            return "tfs-remote." + remoteId;
+        }
+
+        public string RemoteConfigKey(string remoteId, string parameter)
+        {
+            return GetRemoteConfigPrefix(remoteId) + "." + parameter;
         }
 
         public string GitDir

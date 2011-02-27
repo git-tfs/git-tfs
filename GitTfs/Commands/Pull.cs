@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Commands
         public int Run(IList<string> args)
         {
             var retVal = 0;
-            retVal = fetch.Run(new List<string>());
+            retVal = fetch.Run();
             if (retVal == 0) globals.Repository.CommandNoisy("merge", "tfs/default");
             return retVal;
         }

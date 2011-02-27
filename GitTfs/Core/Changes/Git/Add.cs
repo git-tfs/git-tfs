@@ -2,22 +2,22 @@
 {
     public class Add : IGitChangedFile
     {
-        private readonly string _path;
-        private readonly IGitRepository _repository;
-        private readonly string _newSha;
+        public string Path { get; private set; }
+        public IGitRepository Repository { get; private set; }
+        public string NewSha { get; private set; }
 
-        public Add(IGitRepository repository, string path, string newSha)
+        public Add(IGitRepository repository, GitChangeInfo changeInfo)
         {
-            _repository = repository;
-            _path = path;
-            _newSha = newSha;
+            Repository = repository;
+            Path = changeInfo.path;
+            NewSha = changeInfo.newSha;
         }
 
         public void Apply(ITfsWorkspace workspace)
         {
-            var workspaceFile = workspace.GetLocalPath(_path);
-            _repository.GetBlob(_newSha, workspaceFile);
-            workspace.Add(_path);
+            var workspaceFile = workspace.GetLocalPath(Path);
+            Repository.GetBlob(NewSha, workspaceFile);
+            workspace.Add(Path);
         }
     }
 }

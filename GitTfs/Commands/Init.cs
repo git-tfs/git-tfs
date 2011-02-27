@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Text.RegularExpressions;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -17,11 +18,13 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly TextWriter output;
         private readonly IGitHelpers gitHelper;
+        private readonly IHelpHelper _help;
 
-        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, TextWriter output, IGitHelpers gitHelper)
+        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, TextWriter output, IGitHelpers gitHelper, IHelpHelper help)
         {
             this.remoteOptions = remoteOptions;
             this.gitHelper = gitHelper;
+            _help = help;
             this.output = output;
             this.globals = globals;
             this.initOptions = initOptions;
@@ -31,24 +34,23 @@ namespace Sep.Git.Tfs.Commands
         {
             get
             {
-                return this.MakeOptionResults(initOptions, remoteOptions);
+                return this.MakeNestedOptionResults(initOptions, remoteOptions);
             }
         }
 
-        public int Run(IList<string> args)
+        public int Run(string tfsUrl, string tfsRepositoryPath)
         {
-            switch(args.Count)
-            {
-                case 3:
-                    InitSubdir(args[2]);
-                    goto case 2;
-                case 2:
-                    DoGitInitDb();
-                    GitTfsInit(args[0], args[1]);
-                    return 0;
-                default:
-                    return Help.ShowHelpForInvalidArguments(this);
-            }
+            tfsRepositoryPath.AssertValidTfsPath();
+            DoGitInitDb();
+            GitTfsInit(tfsUrl, tfsRepositoryPath);
+            return 0;
+        }
+
+        public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
+        {
+            tfsRepositoryPath.AssertValidTfsPath();
+            InitSubdir(gitRepositoryPath);
+            return Run(tfsUrl, tfsRepositoryPath);
         }
 
         private void InitSubdir(string repositoryPath)
@@ -83,25 +85,28 @@ namespace Sep.Git.Tfs.Commands
 
         private void GitTfsInit(string tfsUrl, string tfsRepositoryPath)
         {
-            SetConfig("core.autocrlf", "false");
-            // TODO - check that there's not already a repository configured with this ID.
-            SetTfsConfig("url", tfsUrl);
-            SetTfsConfig("repository", tfsRepositoryPath);
-            SetTfsConfig("fetch", "refs/remotes/" + globals.RemoteId + "/master");
-            if (initOptions.NoMetaData) SetTfsConfig("no-meta-data", 1);
-            if (remoteOptions.IgnoreRegex != null) SetTfsConfig("ignore-paths", remoteOptions.IgnoreRegex);
+            gitHelper.SetConfig("core.autocrlf", "false");
+            globals.Repository.CreateTfsRemote(globals.RemoteId, tfsUrl, tfsRepositoryPath, remoteOptions);
+        }
+    }
 
-            Directory.CreateDirectory(Path.Combine(globals.GitDir, "tfs"));
+    public static partial class Ext
+    {
+        static Regex ValidTfsPath = new Regex("^\\$/.+");
+        public static void AssertValidTfsPath(this string tfsPath)
+        {
+            if (!ValidTfsPath.IsMatch(tfsPath))
+                throw new GitTfsException("TFS repository can not be root and must start with \"$/\".", SuggestPaths(tfsPath));
         }
 
-        private void SetTfsConfig(string subkey, object value)
+        private static IEnumerable<string> SuggestPaths(string tfsPath)
         {
-            SetConfig(globals.RemoteConfigKey(subkey), value);
-        }
-
-        private void SetConfig(string configKey, object value)
-        {
-            gitHelper.CommandNoisy("config", configKey, value.ToString());
+            if (tfsPath == "$" || tfsPath == "$/")
+                yield return "Cloning an entire TFS repository is not supported. Try using a subdirectory of the root (e.g. $/MyProject).";
+            else if (tfsPath.StartsWith("$"))
+                yield return "Try using $/" + tfsPath.Substring(1);
+            else
+                yield return "Try using $/" + tfsPath;
         }
     }
 }

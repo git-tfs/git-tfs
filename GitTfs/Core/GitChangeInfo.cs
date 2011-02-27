@@ -54,15 +54,17 @@ namespace Sep.Git.Tfs.Core
         public FileMode NewMode { get { return _match.Groups["dstmode"].Value.ToFileMode(); } }
         public string Status { get { return _match.Groups["status"].Value; } }
 
-        public ExplicitArgsExpression Merge(ExplicitArgsExpression builder)
+        public string oldMode { get { return _match.Groups["srcmode"].Value; } }
+        public string newMode { get { return _match.Groups["dstmode"].Value; } }
+        public string oldSha  { get { return _match.Groups["srcsha1"].Value; } }
+        public string newSha  { get { return _match.Groups["dstsha1"].Value; } }
+        public string path    { get { return _match.Groups["srcpath"].Value; } }
+        public string pathTo  { get { return _match.Groups["dstpath"].Value; } }
+        public string score   { get { return _match.Groups["score"].Value; } }
+
+        public IGitChangedFile ToGitChangedFile(ExplicitArgsExpression builder)
         {
-            return builder
-                .With("oldMode").EqualTo(_match.Groups["srcmode"].Value)
-                .With("newMode").EqualTo(_match.Groups["dstmode"].Value)
-                .With("oldSha").EqualTo(_match.Groups["srcsha1"].Value)
-                .With("newSha").EqualTo(_match.Groups["dstsha1"].Value)
-                .With("path").EqualTo(_match.Groups["srcpath"].Value)
-                .With("pathTo").EqualTo(_match.Groups["dstpath"].Value);
+            return builder.With(this).GetInstance<IGitChangedFile>(Status);
         }
     }
 }

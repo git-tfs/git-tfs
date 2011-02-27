@@ -8,7 +8,7 @@
             scan.AssemblyContainingType(typeof (Microsoft.TeamFoundation.Client.TfsTeamProjectCollection));
         }
 
-        public override void Initialize(StructureMap.IInitializationExpression config)
+        public override void Initialize(StructureMap.ConfigurationExpression config)
         {
         }
 

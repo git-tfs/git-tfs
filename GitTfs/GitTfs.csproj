@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sep.Git.Tfs</RootNamespace>
     <AssemblyName>git-tfs</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -31,6 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -87,8 +88,14 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="Commands\Bootstrap.cs" />
     <Compile Include="Commands\Checkin.cs" />
+    <Compile Include="Commands\CheckinTool.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
+    <Compile Include="Commands\CheckinBase.cs" />
+    <Compile Include="Commands\Cleanup.cs" />
+    <Compile Include="Commands\CleanupOptions.cs" />
+    <Compile Include="Commands\CleanupWorkspaces.cs" />
     <Compile Include="Commands\Clone.cs" />
     <Compile Include="Commands\CommitOptions.cs" />
     <Compile Include="Commands\Diagnostics.cs" />
@@ -103,18 +110,28 @@
     <Compile Include="Commands\QuickFetch.cs" />
     <Compile Include="Commands\RemoteOptions.cs" />
     <Compile Include="Commands\Shelve.cs" />
+    <Compile Include="Commands\Verify.cs" />
     <Compile Include="Core\Changes\Git\Add.cs" />
     <Compile Include="Core\Changes\Git\Delete.cs" />
     <Compile Include="Core\Changes\Git\Modify.cs" />
     <Compile Include="Core\Changes\Git\RenameEdit.cs" />
+    <Compile Include="Core\CheckinPolicyEvaluator.cs" />
+    <Compile Include="Core\DerivedGitTfsRemote.cs" />
     <Compile Include="Core\GitChangeInfo.cs" />
+    <Compile Include="Core\GitCommit.cs" />
     <Compile Include="Core\GitObject.cs" />
+    <Compile Include="Core\GitTreeEntry.cs" />
     <Compile Include="Core\IGitChangedFile.cs" />
     <Compile Include="Core\IGitTfsRemote.cs" />
     <Compile Include="Core\ITfsWorkspace.cs" />
+    <Compile Include="Core\ITreeEntry.cs" />
     <Compile Include="Core\Mode.cs" />
+    <Compile Include="Core\TfsInterop\ICheckinEvaluationResult.cs" />
+    <Compile Include="Core\TfsInterop\ICheckinNote.cs" />
     <Compile Include="Core\TfsInterop\IVersionControlServer.cs" />
+    <Compile Include="Core\TfsInterop\IWorkItemCheckedInfo.cs" />
     <Compile Include="Core\TfsInterop\TfsChangeType.cs" />
+    <Compile Include="Core\TfsInterop\TfsCheckinEvaluationOptions.cs" />
     <Compile Include="Core\TfsInterop\TfsExt.cs" />
     <Compile Include="Core\TfsInterop\TfsItemType.cs" />
     <Compile Include="Core\TfsInterop\TfsPlugin.cs" />
@@ -132,7 +149,14 @@
     <Compile Include="Core\TfsInterop\IWorkspace.cs" />
     <Compile Include="Core\TfsInterop\NullIdentity.cs" />
     <Compile Include="Core\TfsInterop\IChangeset.cs" />
+    <Compile Include="Core\TfsTreeEntry.cs" />
     <Compile Include="Core\TfsWorkspace.cs" />
+    <Compile Include="Core\TfsWriter.cs" />
+    <Compile Include="Core\GitTfsException.cs" />
+    <Compile Include="Util\GitTfsCommandFactory.cs" />
+    <Compile Include="Util\GitTfsCommandRunner.cs" />
+    <Compile Include="Util\WhenDynamicDoesntWork.cs" />
+    <Compile Include="Util\PluggableWithAliases.cs" />
     <Compile Include="Util\ConfiguresStructureMap.cs" />
     <Compile Include="Core\DelimitedReader.cs" />
     <Compile Include="Core\Ext.cs" />
@@ -164,6 +188,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Core\TfsInterop\README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -2,25 +2,27 @@ namespace Sep.Git.Tfs.Core.Changes.Git
 {
     public class RenameEdit : IGitChangedFile
     {
-        private readonly string _path;
-        private readonly string _pathTo;
-        private readonly string _newSha;
-        private readonly IGitRepository _repository;
+        public string Path { get; private set; }
+        public string PathTo { get; private set; }
+        public string NewSha { get; private set; }
+        public string Score { get; private set; }
+        public IGitRepository _repository { get; private set; }
 
-        public RenameEdit(IGitRepository repository, string path, string pathTo, string newSha)
+        public RenameEdit(IGitRepository repository, GitChangeInfo changeInfo)
         {
             _repository = repository;
-            _newSha = newSha;
-            _path = path;
-            _pathTo = pathTo;
+            NewSha = changeInfo.newSha;
+            Path = changeInfo.path;
+            PathTo = changeInfo.pathTo;
+            Score = changeInfo.score;
         }
 
         public void Apply(ITfsWorkspace workspace)
         {
-            workspace.Edit(_path);
-            workspace.Rename(_path, _pathTo);
-            var workspaceFile = workspace.GetLocalPath(_pathTo);
-            _repository.GetBlob(_newSha, workspaceFile);
+            workspace.Edit(Path);
+            workspace.Rename(Path, PathTo, Score);
+            var workspaceFile = workspace.GetLocalPath(PathTo);
+            _repository.GetBlob(NewSha, workspaceFile);
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.Changes.Git;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -18,39 +19,64 @@ namespace Sep.Git.Tfs
             try
             {
                 //Trace.Listeners.Add(new ConsoleTraceListener());
-                Initialize();
-                ObjectFactory.GetInstance<GitTfs>().Run(new List<string>(args));
+                var container = Initialize();
+                container.GetInstance<GitTfs>().Run(new List<string>(args));
+            }
+            catch(GitTfsException e)
+            {
+                Trace.WriteLine(e);
+                Console.WriteLine(e.Message);
+                if (!e.RecommendedSolutions.IsEmpty())
+                {
+                    Console.WriteLine("You may be able to resolve this problem.");
+                    foreach (var solution in e.RecommendedSolutions)
+                    {
+                        Console.WriteLine("- " + solution);
+                    }
+                }
+                Environment.ExitCode = -1;
             }
             catch (Exception e)
             {
-                Trace.WriteLine(e);
-                Console.WriteLine(e);
+                ReportException(e);
                 Environment.ExitCode = -1;
             }
         }
 
-        private static void Initialize()
+        private static void ReportException(Exception e)
         {
-            ObjectFactory.Initialize(Initialize);
+            Trace.WriteLine(e);
+            while(e is TargetInvocationException && e.InnerException != null)
+                e = e.InnerException;
+            while (e != null)
+            {
+                Console.WriteLine(e.Message);
+                e = e.InnerException;
+            }
         }
 
-        private static void Initialize(IInitializationExpression initializer)
+        private static IContainer Initialize()
+        {
+            return new Container(Initialize);
+        }
+
+        private static void Initialize(ConfigurationExpression initializer)
         {
             var tfsPlugin = TfsPlugin.Find();
             initializer.Scan(x => { Initialize(x); tfsPlugin.Initialize(x); });
-            initializer.ForRequestedType<TextWriter>().TheDefault.Is.ConstructedBy(() => Console.Out);
-            initializer.InstanceOf<IGitRepository>().Is.OfConcreteType<GitRepository>();
+            initializer.For<TextWriter>().Use(() => Console.Out);
+            initializer.For<IGitRepository>().Add<GitRepository>();
             AddGitChangeTypes(initializer);
             DoCustomConfiguration(initializer);
             tfsPlugin.Initialize(initializer);
         }
 
-        private static void AddGitChangeTypes(IInitializationExpression initializer)
+        public static void AddGitChangeTypes(ConfigurationExpression initializer)
         {
-            initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Add>().WithName("A");
-            initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Modify>().WithName("M");
-            initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<Delete>().WithName("D");
-            initializer.InstanceOf<IGitChangedFile>().Is.OfConcreteType<RenameEdit>().WithName("R");
+            initializer.For<IGitChangedFile>().Use<Add>().Named("A");
+            initializer.For<IGitChangedFile>().Use<Modify>().Named("M");
+            initializer.For<IGitChangedFile>().Use<Delete>().Named("D");
+            initializer.For<IGitChangedFile>().Use<RenameEdit>().Named("R");
         }
 
         private static void Initialize(IAssemblyScanner scan)
@@ -59,7 +85,7 @@ namespace Sep.Git.Tfs
             scan.TheCallingAssembly();
         }
 
-        private static void DoCustomConfiguration(IInitializationExpression initializer)
+        private static void DoCustomConfiguration(ConfigurationExpression initializer)
         {
             foreach(var type in typeof(Program).Assembly.GetTypes())
             {

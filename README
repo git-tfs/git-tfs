@@ -1,35 +1,44 @@
 git-tfs is a two-way bridge between TFS and git, similar to git-svn.
 
-To use, you need to get the source, build it, and then fetch from TFS to
-git.
+Use it like this:
 
-git-tfs was developed using .NET 3.5 and VS 2008. It uses the TFS 2008
-client libraries. All other dependencies are stored in the repository.
-From the root directory of the repository, you should be able to run this:
-> msbuild GitTfs.sln
 
-To fetch, you can do this:
-# git init    (optional)
-# git tfs init http://tfs:8080 $/some_project
-# git tfs fetch
+git tfs clone http://tfs:8080/tfs/DefaultCollection $/some_project
+(wait for git-tfs to pull your history)
+-or-
+git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/some_project
 
-If you do "git tfs clone" instead of "git tfs init", you won't need to do
-the initial fetch.
+(cd some_project and hack away, using only git, until you need to share with TFS...)
 
-If you do "git tfs quick-clone" instead of "git tfs clone", git-tfs won't
-pull all the history from TFS. This is intended for developer private
-branches. "git tfs fetch" should still work, but you won't want to
-push/pull from other repositories that were independently cloned with
-git-tfs.
+git tfs shelve A_SHELVESET_NAME
+-or-
+git tfs checkin -m "Did stuff"
+-or-
+git tfs checkintool
 
-The shelve command replicates your changes in a shelveset in TFS. By default,
-it will shelve the current HEAD.
-# git tfs shelve SOME_SHELVESET
-# git tfs shelve SOME_SHELVESET some-treeish
 
-Help is available on the command line. Use "-h" with any command to see a
-description of the relevant options.
+`git tfs help` for more info.
 
-I've only tried it out with the TFS 2008 client libraries. I intend to
-make this work transparently with TFS 2005 or the codeplex client libs at
-some point.
+
+INSTALLING
+----------
+
+Download (https://github.com/spraints/git-tfs/downloads#uploaded_downloads)
+or build.
+
+Add the directory that contains git-tfs.exe to your path. 
+
+I've been using this with msysgit 1.7.3.1 for a while.
+
+You need .NET 4 and either the 2008 or 2010 version of Team Explorer installed.
+
+
+BUILDING
+--------
+
+msbuild (included in .NET 4) should be able to build the entire solution.
+
+You can also do `rake build:debug`.
+
+If you contribute patches, please set core.autocrlf to true.
+  git config core.autocrlf true

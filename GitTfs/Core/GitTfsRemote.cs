@@ -28,7 +28,19 @@ namespace Sep.Git.Tfs.Core
             Tfs = tfsHelper;
         }
 
+        public bool IsDerived
+        {
+            get { return false; }
+        }
+
         public string Id { get; set; }
+
+        public string TfsUrl
+        {
+            get { return Tfs.Url; }
+            set { Tfs.Url = value; }
+        }
+
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegexExpression { get; set; }
         public IGitRepository Repository { get; set; }
@@ -87,6 +99,11 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public void CleanupWorkspace()
+        {
+            Tfs.CleanupWorkspaces(WorkingDirectory);
+        }
+
         public bool ShouldSkip(string path)
         {
             return IsInDotGit(path) ||
@@ -113,12 +130,14 @@ namespace Sep.Git.Tfs.Core
             return tfsPath;
         }
 
-        public void Fetch()
+        public void Fetch(Dictionary<long, string> mergeInfo)
         {
             foreach (var changeset in FetchChangesets())
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
+                if(mergeInfo.ContainsKey(changeset.Summary.ChangesetId))
+                    log.CommitParents.Add(mergeInfo[changeset.Summary.ChangesetId]);
                 UpdateRef(Commit(log), changeset.Summary.ChangesetId);
                 DoGcIfNeeded();
             }
@@ -136,9 +155,15 @@ namespace Sep.Git.Tfs.Core
         private IEnumerable<ITfsChangeset> FetchChangesets()
         {
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
-            var changesets = Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
-            changesets = changesets.OrderBy(cs => cs.Summary.ChangesetId);
-            return changesets;
+            // TFS 2010 doesn't like when we ask for history past its last changeset.
+            if (MaxChangesetId == Tfs.GetLatestChangeset(this).Summary.ChangesetId)
+                return Enumerable.Empty<ITfsChangeset>();
+            return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
+        }
+
+        public ITfsChangeset GetChangeset(long changesetId)
+        {
+            return Tfs.GetChangeset((int) changesetId, this);
         }
 
         private void UpdateRef(string commitHash, long changesetId)
@@ -250,7 +275,7 @@ namespace Sep.Git.Tfs.Core
             Repository.CommandInputOutputPipe((procIn, procOut) =>
                                                   {
                                                       procIn.WriteLine(logEntry.Log);
-                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, Tfs.Url,
+                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl,
                                                                        TfsRepositoryPath, logEntry.ChangesetId);
                                                       procIn.Close();
                                                       commitHash = ParseCommitInfo(procOut.ReadToEnd());
@@ -340,19 +365,57 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset)
+        public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
         {
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => Shelve(shelvesetName, head, parentChangeset, workspace));
+                              workspace => Shelve(shelvesetName, head, parentChangeset, evaluateCheckinPolicies, workspace));
         }
 
-        private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        public bool HasShelveset(string shelvesetName)
+        {
+            return Tfs.HasShelveset(shelvesetName);
+        }
+
+        private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, ITfsWorkspace workspace)
+        {
+            PendChangesToWorkspace(head, parentChangeset, workspace);
+            workspace.Shelve(shelvesetName, evaluateCheckinPolicies);
+        }
+
+        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        {
+            var changeset = 0L;
+            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
+                              workspace => changeset = CheckinTool(head, parentChangeset, workspace));
+            return changeset;
+        }
+
+        private long CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        {
+            PendChangesToWorkspace(head, parentChangeset, workspace);
+            return workspace.CheckinTool();
+        }
+
+        private void PendChangesToWorkspace(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
             foreach (var change in Repository.GetChangedFiles(parentChangeset.GitCommit, head))
             {
                 change.Apply(workspace);
             }
-            workspace.Shelve(shelvesetName);
+        }
+
+        public long Checkin(string head, TfsChangesetInfo parentChangeset)
+        {
+            var changeset = 0L;
+            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
+                              workspace => changeset = Checkin(head, parentChangeset, workspace));
+            return changeset;
+        }
+
+        private long Checkin(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        {
+            PendChangesToWorkspace(head, parentChangeset, workspace);
+            return workspace.Checkin();
         }
     }
 }

@@ -8,6 +8,5 @@ namespace Sep.Git.Tfs
     public interface GitTfsCommand
     {
         IEnumerable<IOptionResults> ExtraOptions { get; }
-        int Run(IList<string> args);
     }
 }

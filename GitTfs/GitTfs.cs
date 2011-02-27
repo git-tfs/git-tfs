@@ -8,6 +8,7 @@ using CommandLine.OptParse;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 
 namespace Sep.Git.Tfs
@@ -15,10 +16,18 @@ namespace Sep.Git.Tfs
     public class GitTfs
     {
         private ITfsHelper tfsHelper;
+        private GitTfsCommandFactory commandFactory;
+        private readonly IHelpHelper _help;
+        private readonly IContainer _container;
+        private readonly GitTfsCommandRunner _runner;
 
-        public GitTfs(ITfsHelper tfsHelper)
+        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, GitTfsCommandRunner runner)
         {
             this.tfsHelper = tfsHelper;
+            this.commandFactory = commandFactory;
+            _help = help;
+            _container = container;
+            _runner = runner;
         }
 
         public void Run(IList<string> args)
@@ -32,19 +41,19 @@ namespace Sep.Git.Tfs
 
         public void Main(GitTfsCommand command, IList<string> unparsedArgs)
         {
-            var globals = ObjectFactory.GetInstance<Globals>();
+            var globals = _container.GetInstance<Globals>();
             if(globals.ShowHelp)
             {
-                Environment.ExitCode = Help.ShowHelp(command);
+                Environment.ExitCode = _help.ShowHelp(command);
             }
             else if(globals.ShowVersion)
             {
-                ObjectFactory.GetInstance<TextWriter>().WriteLine(MakeVersionString());
+                _container.GetInstance<TextWriter>().WriteLine(MakeVersionString());
                 Environment.ExitCode = GitTfsExitCodes.OK;
             }
             else
             {
-                Environment.ExitCode = command.Run(unparsedArgs);
+                Environment.ExitCode = _runner.Run(command, unparsedArgs);
                 //PostFetchCheckout();
             }
         }
@@ -55,6 +64,7 @@ namespace Sep.Git.Tfs
             versionString += " " + GetType().Assembly.GetName().Version;
             versionString += GetGitCommitForVersionString();
             versionString += " (TFS client library " + tfsHelper.TfsClientLibraryVersion + ")";
+            versionString += " (" + (Environment.Is64BitProcess ? "64-bit" : "32-bit") + ")";
             return versionString;
         }
 
@@ -93,8 +103,8 @@ namespace Sep.Git.Tfs
 
         public void InitializeGlobals()
         {
-            var git = ObjectFactory.GetInstance<IGitHelpers>();
-            var globals = ObjectFactory.GetInstance<Globals>();
+            var git = _container.GetInstance<IGitHelpers>();
+            var globals = _container.GetInstance<Globals>();
             try
             {
                 globals.StartingRepositorySubDir = git.CommandOneline("rev-parse", "--show-prefix");
@@ -116,8 +126,8 @@ namespace Sep.Git.Tfs
 
         public void AssertValidGitRepository()
         {
-            var globals = ObjectFactory.GetInstance<Globals>();
-            var git = ObjectFactory.GetInstance<IGitHelpers>();
+            var globals = _container.GetInstance<Globals>();
+            var git = _container.GetInstance<IGitHelpers>();
             if (!Directory.Exists(globals.GitDir))
             {
                 if (globals.GitDirSetByUser)
@@ -152,19 +162,19 @@ namespace Sep.Git.Tfs
         {
             for (int i = 0; i < args.Count; i++)
             {
-                var command = ObjectFactory.TryGetInstance<GitTfsCommand>(args[i]);
+                var command = commandFactory.GetCommand(args[i]);
                 if (command != null)
                 {
                     args.RemoveAt(i);
                     return command;
                 }
             }
-            return ObjectFactory.GetInstance<Help>();
+            return _container.GetInstance<Help>();
         }
 
         public IList<string> ParseOptions(GitTfsCommand command, IList<string> args)
         {
-            foreach(var parseHelper in command.GetOptionParseHelpers())
+            foreach (var parseHelper in command.GetOptionParseHelpers(_container))
             {
                 var parser = new Parser(parseHelper);
                 args = parser.Parse(args.ToArray());

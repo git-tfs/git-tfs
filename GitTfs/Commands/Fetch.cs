@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -40,13 +41,19 @@ namespace Sep.Git.Tfs.Commands
 
         public IEnumerable<IOptionResults> ExtraOptions
         {
-            get { return this.MakeOptionResults(fcOptions, remoteOptions); }
+            get { return this.MakeNestedOptionResults(fcOptions, remoteOptions); }
         }
 
-        public int Run(IList<string> args)
+        public int Run()
+        {
+            return Run(globals.RemoteId);
+        }
+
+        public int Run(params string[] args)
         {
             foreach(var remote in GetRemotesToFetch(args))
             {
+                Trace.WriteLine("Fetching from TFS remote " + remote.Id);
                 DoFetch(remote);
             }
             return 0;
@@ -65,10 +72,7 @@ namespace Sep.Git.Tfs.Commands
             else if (all)
                 remotesToFetch = globals.Repository.ReadAllTfsRemotes();
             else
-            {
-                if(args.Count == 0) args = new[] {globals.RemoteId};
                 remotesToFetch = args.Select(arg => globals.Repository.ReadTfsRemote(arg));
-            }
             return remotesToFetch;
         }
     }

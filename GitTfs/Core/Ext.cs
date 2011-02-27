@@ -10,7 +10,7 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
-    public static class Ext
+    public static partial class Ext
     {
         public static Action<T> And<T>(this Action<T> originalAction, params Action<T> [] additionalActions)
         {
@@ -36,6 +36,17 @@ namespace Sep.Git.Tfs.Core
                     yield return item;
                 }
             }
+        }
+
+        public static T FirstOr<T>(this IEnumerable<T> e, T defaultValue)
+        {
+            foreach (var x in e) return x;
+            return defaultValue;
+        }
+
+        public static bool Empty<T>(this IEnumerable<T> e)
+        {
+            return !e.Any();
         }
 
         public static void SetArguments(this ProcessStartInfo startInfo, params string [] args)
@@ -73,14 +84,14 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public static bool IsEmpty(this ICollection c)
+        public static bool IsEmpty<T>(this IEnumerable<T> c)
         {
-            return c == null || c.Count == 0;
+            return c == null || !c.Any();
         }
 
-        public static IEnumerable<IOptionResults> GetOptionParseHelpers(this GitTfsCommand command)
+        public static IEnumerable<IOptionResults> GetOptionParseHelpers(this GitTfsCommand command, IContainer container)
         {
-            yield return new PropertyFieldParserHelper(ObjectFactory.GetInstance<Globals>());
+            yield return new PropertyFieldParserHelper(container.GetInstance<Globals>());
             yield return new PropertyFieldParserHelper(command);
             if(command.ExtraOptions != null)
             {

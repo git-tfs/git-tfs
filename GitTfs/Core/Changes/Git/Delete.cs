@@ -2,16 +2,16 @@
 {
     public class Delete : IGitChangedFile
     {
-        private readonly string _path;
+        public string Path { get; private set; }
 
-        public Delete(string path)
+        public Delete(GitChangeInfo changeInfo)
         {
-            _path = path;
+            Path = changeInfo.path;
         }
 
         public void Apply(ITfsWorkspace workspace)
         {
-            workspace.Delete(_path);
+            workspace.Delete(Path);
         }
     }
 }
