@@ -20,6 +20,6 @@ namespace Sep.Git.Tfs.Core
         void GetBlob(string sha, string outputFile);
         GitCommit GetCommit(string commitish);
         Dictionary<string, GitObject> GetObjects();
-    	string GetCommitMessage(string head);
+    	string GetCommitMessage(string head, string parentCommitish);
     }
 }

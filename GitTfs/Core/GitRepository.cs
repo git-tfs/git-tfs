@@ -257,21 +257,17 @@ namespace Sep.Git.Tfs.Core
 			return new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
 		}
 
-		public string GetCommitMessage(string head)
+		public string GetCommitMessage(string head, string parentCommitish)
 		{
 			string message = string.Empty;
-			using (var logMessage = CommandOutputPipe("log", "-1"))
+			using (var logMessage = CommandOutputPipe("log", parentCommitish + ".." + head))
 			{
 				string line;
-				int lineCount = 0;
 				while (null != (line = logMessage.ReadLine()))
 				{
-					if (lineCount < 4) //ignore header lines in the git log
-					{
-						lineCount++;
+					if (!line.StartsWith("   "))
 						continue;
-					}
-					message.Append(line, "\n");
+					message += line.TrimStart() + Environment.NewLine;
 				}
 			}
 			return message;

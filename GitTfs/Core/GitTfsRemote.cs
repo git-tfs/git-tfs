@@ -393,7 +393,7 @@ namespace Sep.Git.Tfs.Core
         private long CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
             PendChangesToWorkspace(head, parentChangeset, workspace);
-        	string lastGitCommitMessage = Repository.GetCommitMessage(head);
+        	var lastGitCommitMessage = Repository.GetCommitMessage(head, parentChangeset.GitCommit);
             return workspace.CheckinTool(lastGitCommitMessage);
         }
 
