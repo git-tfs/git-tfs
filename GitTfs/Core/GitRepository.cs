@@ -256,6 +256,22 @@ namespace Sep.Git.Tfs.Core
             return new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
         }
 
+        public string GetCommitMessage(string head, string parentCommitish)
+        {
+            string message = string.Empty;
+            using (var logMessage = CommandOutputPipe("log", parentCommitish + ".." + head))
+            {
+                string line;
+                while (null != (line = logMessage.ReadLine()))
+                {
+                    if (!line.StartsWith("   "))
+                        continue;
+                    message += line.TrimStart() + Environment.NewLine;
+                }
+            }
+            return message;
+        }
+
         private void ParseEntries(IDictionary<string, GitObject> entries, string treeInfo, string commit)
         {
             foreach (var treeEntry in treeInfo.Split('\0'))
