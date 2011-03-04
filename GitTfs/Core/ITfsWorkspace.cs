@@ -1,3 +1,5 @@
+using System;
+
 namespace Sep.Git.Tfs.Core
 {
     public interface ITfsWorkspace
@@ -16,6 +18,6 @@ namespace Sep.Git.Tfs.Core
         void Edit(string path);
         void Delete(string path);
         void Rename(string pathFrom, string pathTo, string score);
-        long CheckinTool(string defaultCommitMessage = null);
+        long CheckinTool(Func<string> generateCheckinComment);
     }
 }

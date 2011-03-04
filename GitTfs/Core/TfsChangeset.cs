@@ -11,22 +11,22 @@ namespace Sep.Git.Tfs.Core
 {
     public class TfsChangeset : ITfsChangeset
     {
-        private readonly ITfsHelper tfs;
-        private readonly IChangeset changeset;
+        private readonly ITfsHelper _tfs;
+        private readonly IChangeset _changeset;
         private readonly TextWriter _stdout;
         public TfsChangesetInfo Summary { get; set; }
 
         public TfsChangeset(ITfsHelper tfs, IChangeset changeset, TextWriter stdout)
         {
-            this.tfs = tfs;
-            this.changeset = changeset;
+            _tfs = tfs;
+            _changeset = changeset;
             _stdout = stdout;
         }
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index)
         {
             var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
-            foreach (var change in Sort(changeset.Changes))
+            foreach (var change in Sort(_changeset.Changes))
             {
                 Apply(change, index, initialTree);
             }
@@ -129,7 +129,7 @@ namespace Sep.Git.Tfs.Core
         public IEnumerable<TfsTreeEntry> GetTree(bool includeIgnoredItems)
         {
             var treeInfo = Summary.Remote.Repository.GetObjects();
-            foreach (var item in changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, changeset.ChangesetId, TfsRecursionType.Full))
+            foreach (var item in _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full))
             {
                 if (item.ItemType == TfsItemType.File)
                 {
@@ -159,7 +159,7 @@ namespace Sep.Git.Tfs.Core
                     startTime = DateTime.Now;
                 }
             }
-            return MakeNewLogEntry(maxChangesetId == changeset.ChangesetId ? changeset : tfs.GetChangeset(maxChangesetId));
+            return MakeNewLogEntry(maxChangesetId == _changeset.ChangesetId ? _changeset : _tfs.GetChangeset(maxChangesetId));
         }
 
         private void Add(IItem item, string pathInGitRepo, GitIndexInfo index)
@@ -185,36 +185,24 @@ namespace Sep.Git.Tfs.Core
             return Mode.NewFile;
         }
 
-        private static readonly Regex pathWithDirRegex = new Regex("(?<dir>.*)/(?<file>[^/]+)");
+        private static readonly Regex SplitDirnameFilename = new Regex("(?<dir>.*)/(?<file>[^/]+)");
 
         private string UpdateToMatchExtantCasing(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
-        {
-            return UpdateToMatchExtantCasing_NEW(pathInGitRepo, initialTree);
-        }
-
-        private string UpdateToMatchExtantCasing_NEW(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
         {
             if (initialTree.ContainsKey(pathInGitRepo))
                 return initialTree[pathInGitRepo].Path;
 
             var fullPath = pathInGitRepo;
-            var pathWithDirMatch = pathWithDirRegex.Match(pathInGitRepo);
-            if (pathWithDirMatch.Success)
+            var splitResult = SplitDirnameFilename.Match(pathInGitRepo);
+            if (splitResult.Success)
             {
 
-                var dirName = pathWithDirMatch.Groups["dir"].Value;
-                var fileName = pathWithDirMatch.Groups["file"].Value;
-                fullPath = UpdateToMatchExtantCasing_NEW(dirName, initialTree) + "/" + fileName;
+                var dirName = splitResult.Groups["dir"].Value;
+                var fileName = splitResult.Groups["file"].Value;
+                fullPath = UpdateToMatchExtantCasing(dirName, initialTree) + "/" + fileName;
             }
             initialTree[fullPath] = new GitObject {Path = fullPath};
             return fullPath;
-        }
-
-        private string MaybeAppendPath(string path, object tail)
-        {
-            if(tail != null)
-                path = path + "/" + tail;
-            return path;
         }
 
         private void Delete(string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
@@ -228,13 +216,13 @@ namespace Sep.Git.Tfs.Core
 
         private LogEntry MakeNewLogEntry()
         {
-            return MakeNewLogEntry(changeset);
+            return MakeNewLogEntry(_changeset);
         }
 
         private LogEntry MakeNewLogEntry(IChangeset changesetToLog)
         {
             var log = new LogEntry();
-            var identity = tfs.GetIdentity(changesetToLog.Committer);
+            var identity = _tfs.GetIdentity(changesetToLog.Committer);
             log.CommitterName = log.AuthorName = null != identity ? identity.DisplayName ?? "Unknown TFS user" : changesetToLog.Committer ?? "Unknown TFS user";
             log.CommitterEmail = log.AuthorEmail = null != identity ? identity.MailAddress ?? changesetToLog.Committer : changesetToLog.Committer;
             log.Date = changesetToLog.CreationDate;
