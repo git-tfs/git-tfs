@@ -357,5 +357,12 @@ namespace Sep.Git.Tfs.Core
             var objectId = writer.WriteBlob(file.Length, file);
             return objectId.Name;
         }
+
+        public string HashAndInsertObject(Stream file, long length)
+        {
+            var writer = new ObjectWriter(_repository);
+            var objectId = writer.WriteBlob(length, file);
+            return objectId.Name;
+        }
     }
 }
