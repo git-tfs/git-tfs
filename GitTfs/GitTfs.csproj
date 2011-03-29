@@ -105,7 +105,6 @@
     <Compile Include="Commands\Helpers.cs" />
     <Compile Include="Commands\Init.cs" />
     <Compile Include="Commands\InitOptions.cs" />
-    <Compile Include="Commands\Pull.cs" />
     <Compile Include="Commands\QuickClone.cs" />
     <Compile Include="Commands\QuickFetch.cs" />
     <Compile Include="Commands\RemoteOptions.cs" />
