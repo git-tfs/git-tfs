@@ -31,7 +31,6 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
         {
-#if true
             var itemSet = _versionControlServer.GetItems(
                 new ItemSpec(itemPath, _bridge.Convert<RecursionType>(recursionType), 0),
                 new ChangesetVersionSpec(changesetNumber),
@@ -39,9 +38,6 @@ namespace Sep.Git.Tfs.VsCommon
                 ItemType.Any,
                 true
             );
-#else
-            var itemSet = _versionControlServer.GetItems(itemPath, new ChangesetVersionSpec(changesetNumber), _bridge.Convert<RecursionType>(recursionType));
-#endif
             return _bridge.Wrap<WrapperForItem, Item>(itemSet.Items);
         }
 
