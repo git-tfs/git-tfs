@@ -1,3 +1,4 @@
+using System.IO;
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public interface IItem
@@ -9,5 +10,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         TfsItemType ItemType { get; }
         int ItemId { get; }
         void DownloadFile(string file);
+        long ContentLength { get; }
+        Stream DownloadFile();
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -30,7 +31,13 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
         {
-            var itemSet = _versionControlServer.GetItems(itemPath, new ChangesetVersionSpec(changesetNumber), _bridge.Convert<RecursionType>(recursionType));
+            var itemSet = _versionControlServer.GetItems(
+                new ItemSpec(itemPath, _bridge.Convert<RecursionType>(recursionType), 0),
+                new ChangesetVersionSpec(changesetNumber),
+                DeletedState.NonDeleted,
+                ItemType.Any,
+                true
+            );
             return _bridge.Wrap<WrapperForItem, Item>(itemSet.Items);
         }
 
@@ -151,6 +158,16 @@ namespace Sep.Git.Tfs.VsCommon
         public void DownloadFile(string file)
         {
             _item.DownloadFile(file);
+        }
+
+        public long ContentLength
+        {
+            get { return _item.ContentLength; }
+        }
+
+        public Stream DownloadFile()
+        {
+            return _item.DownloadFile();
         }
     }
 
