@@ -157,11 +157,6 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _item.ItemId; }
         }
 
-        public void DownloadFile(string file)
-        {
-            _item.DownloadFile(file);
-        }
-
         public long ContentLength
         {
             get { return _item.ContentLength; }

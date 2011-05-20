@@ -19,9 +19,7 @@ namespace Sep.Git.Tfs.Core
         public string FullName { get { return _pathInGitRepo; } }
         public Stream OpenRead()
         {
-            var tempfile = new TemporaryFile();
-            _item.DownloadFile(tempfile);
-            return tempfile.ToStream();
+            return _item.DownloadFile();
         }
     }
 }
