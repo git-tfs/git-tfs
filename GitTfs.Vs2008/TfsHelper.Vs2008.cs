@@ -5,6 +5,7 @@ using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsCommon;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Vs2008
