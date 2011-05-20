@@ -51,4 +51,19 @@ namespace Sep.Git.Tfs.Vs2008
             throw new NotImplementedException();
         }
     }
+
+    public class ItemDownloadStrategy : IItemDownloadStrategy
+    {
+        private readonly TfsApiBridge _bridge;
+
+        public ItemDownloadStrategy(TfsApiBridge bridge)
+        {
+            _bridge = bridge;
+        }
+
+        public Stream DownloadFile(IItem item)
+        {
+            return _bridge.Unwrap<Item>(item).DownloadFile();
+        }
+    }
 }

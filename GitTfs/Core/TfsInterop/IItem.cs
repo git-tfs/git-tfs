@@ -13,4 +13,9 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         long ContentLength { get; }
         Stream DownloadFile();
     }
+
+    public interface IItemDownloadStrategy
+    {
+        Stream Download(IItem item);
+    }
 }

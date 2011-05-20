@@ -116,11 +116,13 @@ namespace Sep.Git.Tfs.VsCommon
 
     public class WrapperForItem : WrapperFor<Item>, IItem
     {
+        private readonly IItemDownloadStrategy _downloadStrategy;
         private readonly TfsApiBridge _bridge;
         private readonly Item _item;
 
-        public WrapperForItem(TfsApiBridge bridge, Item item) : base(item)
+        public WrapperForItem(IItemDownloadStrategy downloadStrategy, TfsApiBridge bridge, Item item) : base(item)
         {
+            _downloadStrategy = downloadStrategy;
             _bridge = bridge;
             _item = item;
         }
@@ -167,7 +169,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public Stream DownloadFile()
         {
-            return _item.DownloadFile();
+            return _downloadStrategy.DownloadFile(this);
         }
     }
 
