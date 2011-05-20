@@ -64,7 +64,9 @@ namespace Sep.Git.Tfs.Vs2008
 
         public Stream DownloadFile(IItem item)
         {
-            return _bridge.Unwrap<Item>(item).DownloadFile();
+            var tempfile = new TemporaryFile();
+            _bridge.Unwrap<Item>(item).DownloadFile(tempfile);
+            return tempfile.ToStream();
         }
     }
 }
