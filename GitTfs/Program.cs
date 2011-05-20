@@ -73,8 +73,8 @@ namespace Sep.Git.Tfs
 
         public static void AddGitChangeTypes(ConfigurationExpression initializer)
         {
-            initializer.For<IGitChangedFile>().Use<Add>().Named("A");
-            initializer.For<IGitChangedFile>().Use<Modify>().Named("M");
+            initializer.For<IGitChangedFile>().Use<Add>().Named("A").Named("C");
+            initializer.For<IGitChangedFile>().Use<Modify>().Named("M").Named("T");
             initializer.For<IGitChangedFile>().Use<Delete>().Named("D");
             initializer.For<IGitChangedFile>().Use<RenameEdit>().Named("R");
         }
