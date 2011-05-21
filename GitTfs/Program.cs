@@ -73,10 +73,15 @@ namespace Sep.Git.Tfs
 
         public static void AddGitChangeTypes(ConfigurationExpression initializer)
         {
-            initializer.For<IGitChangedFile>().Use<Add>().Named("A").Named("C");
-            initializer.For<IGitChangedFile>().Use<Modify>().Named("M").Named("T");
+            // See git-diff-tree(1).
+            initializer.For<IGitChangedFile>().Use<Add>().Named("A");
+            initializer.For<IGitChangedFile>().Use<Copy>().Named("C");
+            initializer.For<IGitChangedFile>().Use<Modify>().Named("M");
+            //initializer.For<IGitChangedFile>().Use<TypeChange>().Named("T");
             initializer.For<IGitChangedFile>().Use<Delete>().Named("D");
             initializer.For<IGitChangedFile>().Use<RenameEdit>().Named("R");
+            //initializer.For<IGitChangedFile>().Use<Unmerged>().Named("U");
+            //initializer.For<IGitChangedFile>().Use<Unknown>().Named("X");
         }
 
         private static void Initialize(IAssemblyScanner scan)

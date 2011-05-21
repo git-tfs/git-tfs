@@ -70,6 +70,20 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         [TestMethod]
+        public void GetsInstanceOfCopy()
+        {
+            var change = GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab C100\toldname\tnewname");
+            Assert.IsInstanceOfType(change, typeof(Copy));
+        }
+
+        [TestMethod]
+        public void GetsInstanceOfAddForCopyWithPath()
+        {
+            var change = (Copy)GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab C100\toldname\tnewname");
+            Assert.AreEqual("newname", change.Path);
+        }
+
+        [TestMethod]
         public void GetsInstanceOfModify()
         {
             var change = GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tblah");
