@@ -18,6 +18,7 @@ namespace Sep.Git.Tfs.Core
         string HashAndInsertObject(Stream data, long length);
         IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to);
         string GetChangeSummary(string from, string to);
+        bool WorkingCopyHasUnstagedOrUncommitedChanges { get; }
         void GetBlob(string sha, string outputFile);
         GitCommit GetCommit(string commitish);
         Dictionary<string, GitObject> GetObjects();
