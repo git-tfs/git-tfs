@@ -47,7 +47,7 @@ namespace Sep.Git.Tfs.Commands
                         .WithRecommendation("Try 'git stash' to stash your local changes and pull again.");
                 }
 
-                globals.Repository.CommandNoisy("merge", remoteRef);
+                globals.Repository.CommandNoisy("merge", remoteRef.Id);
             }
 
             return retVal;
