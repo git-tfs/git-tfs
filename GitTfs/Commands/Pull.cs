@@ -30,18 +30,26 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
-            var retVal = 0;
-            retVal = fetch.Run();
+            return Run(globals.RemoteId);
+        }
 
-            var remoteRef = globals.Repository.ReadAllTfsRemotes().First().RemoteRef;
+        public int Run(string remoteId)
+        {
+            var retVal = fetch.Run(remoteId);
 
-            if (retVal == 0 && globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
+            if (retVal == 0)
             {
-                throw new GitTfsException(String.Format("error: You have local changes; cannot pull {0}.", remoteRef))
-                    .WithRecommendation("Try 'git stash' to stash your local changes and pull again.");
+                var remoteRef = globals.Repository.ReadTfsRemote(remoteId);
+
+                if (globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
+                {
+                    throw new GitTfsException(String.Format("error: You have local changes; cannot pull {0}.", remoteRef))
+                        .WithRecommendation("Try 'git stash' to stash your local changes and pull again.");
+                }
+
+                globals.Repository.CommandNoisy("merge", remoteRef);
             }
 
-            if (retVal == 0) globals.Repository.CommandNoisy("merge", remoteRef);
             return retVal;
         }
 
