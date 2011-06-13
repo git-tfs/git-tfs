@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -39,15 +38,15 @@ namespace Sep.Git.Tfs.Commands
 
             if (retVal == 0)
             {
-                var remoteRef = globals.Repository.ReadTfsRemote(remoteId);
+                var remote = globals.Repository.ReadTfsRemote(remoteId);
 
                 if (globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
                 {
-                    throw new GitTfsException(String.Format("error: You have local changes; cannot pull {0}.", remoteRef))
+                    throw new GitTfsException(String.Format("error: You have local changes; cannot pull {0}.", remote.RemoteRef))
                         .WithRecommendation("Try 'git stash' to stash your local changes and pull again.");
                 }
 
-                globals.Repository.CommandNoisy("merge", remoteRef.Id);
+                globals.Repository.CommandNoisy("merge", remote.RemoteRef);
             }
 
             return retVal;
