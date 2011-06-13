@@ -190,7 +190,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Close(Process process)
         {
-            if (!process.WaitForExit((int)TimeSpan.FromSeconds(60).TotalMilliseconds))
+            if (!process.WaitForExit((int)TimeSpan.FromSeconds(10).TotalMilliseconds))
                 throw new GitCommandException("Command did not terminate.", process);
             if (process.ExitCode != 0)
                 throw new GitCommandException("Command exited with error code.", process);
