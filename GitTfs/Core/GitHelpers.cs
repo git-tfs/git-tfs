@@ -93,7 +93,7 @@ namespace Sep.Git.Tfs.Core
 
             protected override void Dispose(bool disposing)
             {
-                if(disposing && process != null)
+                if (disposing && process != null)
                 {
                     Close();
                 }
@@ -192,7 +192,7 @@ namespace Sep.Git.Tfs.Core
         {
             if (!process.WaitForExit((int)TimeSpan.FromSeconds(10).TotalMilliseconds))
                 throw new GitCommandException("Command did not terminate.", process);
-            if(process.ExitCode != 0)
+            if (process.ExitCode != 0)
                 throw new GitCommandException("Command exited with error code.", process);
         }
 
@@ -208,10 +208,10 @@ namespace Sep.Git.Tfs.Core
 
         private Process Start(string[] command)
         {
-            return Start(command, x => {});
+            return Start(command, x => { });
         }
 
-        protected virtual Process Start(string [] command, Action<ProcessStartInfo> initialize)
+        protected virtual Process Start(string[] command, Action<ProcessStartInfo> initialize)
         {
             var startInfo = new ProcessStartInfo();
             startInfo.FileName = "git";
@@ -229,7 +229,7 @@ namespace Sep.Git.Tfs.Core
 
         private void StdErrReceived(object sender, DataReceivedEventArgs e)
         {
-            if(e.Data != null && e.Data.Trim() != "")
+            if (e.Data != null && e.Data.Trim() != "")
             {
                 Trace.WriteLine(e.Data.TrimEnd(), "git stderr");
             }
@@ -262,7 +262,7 @@ namespace Sep.Git.Tfs.Core
         private static readonly Regex ValidCommandName = new Regex("^[a-z0-9A-Z_-]+$");
         private static void AssertValidCommand(string[] command)
         {
-            if(command.Length < 1 || !ValidCommandName.IsMatch(command[0]))
+            if (command.Length < 1 || !ValidCommandName.IsMatch(command[0]))
                 throw new Exception("bad command: " + (command.Length == 0 ? "" : command[0]));
         }
     }
