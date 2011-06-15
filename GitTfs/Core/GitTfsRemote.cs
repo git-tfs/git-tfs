@@ -146,15 +146,17 @@ namespace Sep.Git.Tfs.Core
         public void QuickFetch()
         {
             var changeset = Tfs.GetLatestChangeset(this);
-            AssertTemporaryIndexEmpty();
-            var log = CopyTree(MaxCommitHash, changeset);
-            UpdateRef(Commit(log), changeset.Summary.ChangesetId);
-            DoGcIfNeeded();
+            quickFetch(changeset);
         }
 
         public void QuickFetch(int changesetId)
         {
             var changeset = Tfs.GetChangeset(changesetId, this);
+            quickFetch(changeset);
+        }
+
+        private void quickFetch(ITfsChangeset changeset)
+        {
             AssertTemporaryIndexEmpty();
             var log = CopyTree(MaxCommitHash, changeset);
             UpdateRef(Commit(log), changeset.Summary.ChangesetId);
