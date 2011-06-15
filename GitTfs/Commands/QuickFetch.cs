@@ -1,4 +1,6 @@
 ﻿using Sep.Git.Tfs.Core;
+using System.ComponentModel;
+using CommandLine.OptParse;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -15,9 +17,21 @@ namespace Sep.Git.Tfs.Commands
         {
         }
 
+        [OptDef(OptValType.ValueOpt, ValueType=typeof(int))]
+        [LongOptionName("changeset")]
+        [ShortOptionName('c')]
+        [UseNameAsLongOption(false)]
+        [Description("Specify a changeset to clone from")]
+        public int changeSetId { get; set; }
+
         protected override void DoFetch(IGitTfsRemote remote)
         {
-            remote.QuickFetch();
+            if (changeSetId == default(int))
+                // Just grab the latest changeset:
+                remote.QuickFetch();
+            else
+                // Use a specific changeset to start from:
+                remote.QuickFetch(changeSetId);
         }
     }
 }

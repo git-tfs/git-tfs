@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Core
         string GetPathInGitRepo(string tfsPath);
         void Fetch(Dictionary<long, string> mergeInfo);
         void QuickFetch();
+        void QuickFetch(int changesetId);
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies);
         bool HasShelveset(string shelvesetName);
         long CheckinTool(string head, TfsChangesetInfo parentChangeset);
