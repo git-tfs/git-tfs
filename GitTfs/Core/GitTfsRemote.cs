@@ -152,6 +152,15 @@ namespace Sep.Git.Tfs.Core
             DoGcIfNeeded();
         }
 
+        public void QuickFetch(int changesetId)
+        {
+            var changeset = Tfs.GetChangeset(changesetId, this);
+            AssertTemporaryIndexEmpty();
+            var log = CopyTree(MaxCommitHash, changeset);
+            UpdateRef(Commit(log), changeset.Summary.ChangesetId);
+            DoGcIfNeeded();
+        }
+
         private IEnumerable<ITfsChangeset> FetchChangesets()
         {
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");

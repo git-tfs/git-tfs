@@ -1,4 +1,5 @@
 ﻿using Sep.Git.Tfs.Core;
+using CommandLine.OptParse;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -15,9 +16,18 @@ namespace Sep.Git.Tfs.Commands
         {
         }
 
+        [OptDef(OptValType.ValueOpt, ValueType=typeof(int))]
+        [LongOptionName("changeset")]
+        [ShortOptionName('c')]
+        public int changeSetId { get; set; }
+
         protected override void DoFetch(IGitTfsRemote remote)
         {
-            remote.QuickFetch();
+            // JSD: I hate this but OptParse doesn't document how to handle optional values; nullable int would be best.
+            if (changeSetId == default(int))
+                remote.QuickFetch();
+            else
+                remote.QuickFetch(changeSetId);
         }
     }
 }
