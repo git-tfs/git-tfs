@@ -9,6 +9,7 @@ namespace Sep.Git.Tfs.Core
         IEnumerable<IGitTfsRemote> ReadAllTfsRemotes();
         IGitTfsRemote ReadTfsRemote(string remoteId);
         void /*or IGitTfsRemote*/ CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions);
+        void /*or IGitTfsRemote*/ CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead);
         bool HasRemote(string remoteId);
         IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head);
         IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes);
