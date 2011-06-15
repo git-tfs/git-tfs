@@ -132,6 +132,11 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
+        public void QuickFetch(int changesetId)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
         {
             throw new NotImplementedException();
