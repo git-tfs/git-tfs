@@ -43,16 +43,16 @@ namespace Sep.Git.Tfs.Commands
 
                 var repo = parentChangeset.Remote.Repository;
                 // if committed changeset is 'ultimate parent' to the HEAD, i.e. every parent of refToCheckin is also
-                // parent of HEAD - then we could just rebase HEAD to newly created changeset safely
+                // parent of HEAD - then we could just rebase HEAD onto newly created changeset safely
                 string revList = null;
                 repo.CommandOutputPipe(output => revList = output.ReadToEnd(), "rev-list", "^HEAD", refToCheckin);
                 bool ultimateParent = revList == "";
                 if (!ultimateParent)
-                    _stdout.WriteLine("Can't rebase HEAD to changeset safely as it has parents not from the changeset");
+                    _stdout.WriteLine("Can't rebase HEAD onto changeset safely as it has parents not from the changeset:\n{0}", revList);
                 else
                 {
                     _stdout.WriteLine("Rebasing onto committed changeset...");
-                    parentChangeset.Remote.Repository.CommandNoisy("rebase", parentChangeset.Remote.MaxCommitHash);
+                    parentChangeset.Remote.Repository.CommandNoisy("rebase", "--onto", parentChangeset.Remote.MaxCommitHash, refToCheckin);
                 }
                 return GitTfsExitCodes.OK;
             }
