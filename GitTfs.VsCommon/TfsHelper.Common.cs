@@ -17,6 +17,8 @@ namespace Sep.Git.Tfs.VsCommon
     {
         private readonly TextWriter _stdout;
         private string _url;
+        private string _username;
+        private string _password;
         private readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
 
@@ -35,9 +37,23 @@ namespace Sep.Git.Tfs.VsCommon
             set { _url = value; UpdateServer(); }
         }
 
+        public string Username
+        {
+            get { return _username; }
+            set { _username = value; UpdateServer(); }
+        }
+
+        public string Password
+        {
+            get { return _password; }
+            set { _password = value; UpdateServer(); }
+        }
+
         protected abstract void UpdateServer();
 
         private string[] _legacyUrls;
+
+
         public string[] LegacyUrls
         {
             get { return _legacyUrls ?? (_legacyUrls = new string[0]); }

@@ -41,6 +41,18 @@ namespace Sep.Git.Tfs.Core
             set { Tfs.Url = value; }
         }
 
+        public string TfsUsername
+        {
+            get { return Tfs.Username; }
+            set { Tfs.Username = value; }
+        }
+
+        public string TfsPassword
+        {
+            get { return Tfs.Password; }
+            set { Tfs.Password = value; }
+        }
+
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegexExpression { get; set; }
         public IGitRepository Repository { get; set; }

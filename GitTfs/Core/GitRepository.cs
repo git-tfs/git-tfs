@@ -110,14 +110,17 @@ namespace Sep.Git.Tfs.Core
             if (HasRemote(remoteId))
                 throw new GitTfsException("A remote with id \"" + remoteId + "\" already exists.");
 
-            SetTfsConfig(remoteId, "url", tfsUrl);
-            SetTfsConfig(remoteId, "repository", tfsRepositoryPath);
-            SetTfsConfig(remoteId, "fetch", "refs/remotes/" + remoteId + "/master");
             if (remoteOptions != null)
             {
                 if (remoteOptions.NoMetaData) SetTfsConfig(remoteId, "no-meta-data", 1);
                 if (remoteOptions.IgnoreRegex != null) SetTfsConfig(remoteId, "ignore-paths", remoteOptions.IgnoreRegex);
+                if (!string.IsNullOrEmpty(remoteOptions.Username)) SetTfsConfig(remoteId, "username", remoteOptions.Username);
+                if (!string.IsNullOrEmpty(remoteOptions.Password)) SetTfsConfig(remoteId, "password", remoteOptions.Password);
             }
+
+            SetTfsConfig(remoteId, "url", tfsUrl);
+            SetTfsConfig(remoteId, "repository", tfsRepositoryPath);
+            SetTfsConfig(remoteId, "fetch", "refs/remotes/" + remoteId + "/master");
 
             Directory.CreateDirectory(Path.Combine(this.GitDir, "tfs"));
             _cachedRemotes = null;
@@ -179,6 +182,12 @@ namespace Sep.Git.Tfs.Core
                 //case "fetch":
                 //    remote.??? = value;
                 //    break;
+                case "username":
+                    remote.TfsUsername = value;
+                    break;
+                case "password":
+                    remote.TfsPassword = value;
+                    break;
             }
         }
 
