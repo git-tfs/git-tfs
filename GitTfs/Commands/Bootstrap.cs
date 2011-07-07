@@ -47,7 +47,16 @@ namespace Sep.Git.Tfs.Commands
                 }
                 else
                 {
-                    _stdout.WriteLine("-> existing remote " + parent.Remote.Id);
+                    if (parent.Remote.MaxChangesetId < parent.ChangesetId)
+                    {
+                        long oldChangeset = parent.Remote.MaxChangesetId;
+                        parent.Remote.UpdateRef(parent.GitCommit, parent.ChangesetId);
+                        _stdout.WriteLine("-> existing remote {0} (updated from changeset {1})", parent.Remote.Id, oldChangeset);
+                    }
+                    else
+                    {
+                        _stdout.WriteLine("-> existing remote {0} (up to date)", parent.Remote.Id);
+                    }
                 }
                 _stdout.WriteLine();
             }
