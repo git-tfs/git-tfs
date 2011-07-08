@@ -61,7 +61,25 @@ namespace Sep.Git.Tfs.Commands
 
         protected virtual void DoFetch(IGitTfsRemote remote)
         {
+            // It is possible that we have outdated refs/remotes/tfs/<id>.
+            // E.g. someone already fetched changesets from TFS into another git repository and we've pulled it since
+            // in that case tfs fetch will retrieve same changes again unnecessarily. To prevent it we will scan tree from HEAD and see if newer changesets from
+            // TFS exists (by checking git-tfs-id mark in commit's comments).
+            // The process is similar to bootstrapping.
+            UpdateTfsRefIfNeeded(remote);
             remote.Fetch();
+        }
+
+        private void UpdateTfsRefIfNeeded(IGitTfsRemote remote)
+        {
+            var tfsParents = globals.Repository.GetParentTfsCommits("HEAD", false);
+            foreach (var parent in tfsParents)
+            {
+                if (remote.Id == parent.Remote.Id && remote.MaxChangesetId < parent.ChangesetId)
+                {
+                    remote.UpdateRef(parent.GitCommit, parent.ChangesetId);
+                }
+            }
         }
 
         private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)
