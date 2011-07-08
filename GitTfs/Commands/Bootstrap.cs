@@ -50,7 +50,7 @@ namespace Sep.Git.Tfs.Commands
                     if (parent.Remote.MaxChangesetId < parent.ChangesetId)
                     {
                         long oldChangeset = parent.Remote.MaxChangesetId;
-                        parent.Remote.UpdateRef(parent.GitCommit, parent.ChangesetId);
+                        _globals.Repository.MoveTfsRefForwardIfNeeded(parent.Remote);
                         _stdout.WriteLine("-> existing remote {0} (updated from changeset {1})", parent.Remote.Id, oldChangeset);
                     }
                     else

@@ -99,6 +99,19 @@ namespace Sep.Git.Tfs.Core
             return GetTfsRemotes().ContainsKey(remoteId);
         }
 
+        public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
+        {
+            long currentMaxChangesetId = remote.MaxChangesetId;
+            var untrackedTfsChangesets = from cs in GetParentTfsCommitsCore("HEAD", false)
+                                         where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
+                                         orderby cs.ChangesetId
+                                         select cs;
+            foreach (var cs in untrackedTfsChangesets)
+            {
+                remote.UpdateRef(cs.GitCommit, cs.ChangesetId);
+            }
+        }
+
         public void CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead)
         {
             CreateTfsRemote(remoteId, tfsHead.Remote.TfsUrl, tfsHead.Remote.TfsRepositoryPath, null);
@@ -176,9 +189,9 @@ namespace Sep.Git.Tfs.Core
                 case "ignore-paths":
                     remote.IgnoreRegexExpression = value;
                     break;
-                //case "fetch":
-                //    remote.??? = value;
-                //    break;
+                    //case "fetch":
+                    //    remote.??? = value;
+                    //    break;
             }
         }
 
@@ -194,20 +207,26 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes)
         {
+            List<TfsChangesetInfo> tfsCommits = GetParentTfsCommitsCore(head, includeStubRemotes);
+            return from commit in tfsCommits
+                   group commit by commit.Remote
+                   into remotes
+                   select remotes.OrderBy(commit => -commit.ChangesetId).First();
+        }
+
+        private List<TfsChangesetInfo> GetParentTfsCommitsCore(string head, bool includeStubRemotes)
+        {
             var tfsCommits = new List<TfsChangesetInfo>();
             try
             {
                 CommandOutputPipe(stdout => FindTfsCommits(stdout, tfsCommits, includeStubRemotes),
-                  "log", "--no-color", "--pretty=medium", head);
+                                  "log", "--no-color", "--pretty=medium", head);
             }
             catch (GitCommandException e)
             {
                 Trace.WriteLine("An error occurred while loading head " + head + " (maybe it doesn't exist?): " + e);
             }
-            return from commit in tfsCommits
-                   group commit by commit.Remote
-                       into remotes
-                       select remotes.OrderBy(commit => -commit.ChangesetId).First();
+            return tfsCommits;
         }
 
         private void FindTfsCommits(TextReader stdout, ICollection<TfsChangesetInfo> tfsCommits, bool includeStubRemotes)
@@ -325,7 +344,7 @@ namespace Sep.Git.Tfs.Core
 
         private IGitChangedFile BuildGitChangedFile(GitChangeInfo change)
         {
-            return change.ToGitChangedFile(_container.With((IGitRepository)this));
+            return change.ToGitChangedFile(_container.With((IGitRepository) this));
         }
 
         public string GetChangeSummary(string from, string to)
@@ -355,7 +374,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Copy(TextReader stdout, string file)
         {
-            var stdoutStream = ((StreamReader)stdout).BaseStream;
+            var stdoutStream = ((StreamReader) stdout).BaseStream;
             using (var destination = File.Create(file))
             {
                 stdoutStream.CopyTo(destination);

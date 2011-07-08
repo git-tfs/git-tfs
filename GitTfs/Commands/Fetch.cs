@@ -66,20 +66,8 @@ namespace Sep.Git.Tfs.Commands
             // in that case tfs fetch will retrieve same changes again unnecessarily. To prevent it we will scan tree from HEAD and see if newer changesets from
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
-            UpdateTfsRefIfNeeded(remote);
+            globals.Repository.MoveTfsRefForwardIfNeeded(remote);
             remote.Fetch();
-        }
-
-        private void UpdateTfsRefIfNeeded(IGitTfsRemote remote)
-        {
-            var tfsParents = globals.Repository.GetParentTfsCommits("HEAD", false);
-            foreach (var parent in tfsParents)
-            {
-                if (remote.Id == parent.Remote.Id && remote.MaxChangesetId < parent.ChangesetId)
-                {
-                    remote.UpdateRef(parent.GitCommit, parent.ChangesetId);
-                }
-            }
         }
 
         private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)
