@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using CommandLine.OptParse;
@@ -37,23 +38,27 @@ namespace Sep.Git.Tfs.Commands
         {
             if (_checkinOptions.RebaseWorkflow)
             {
+                var repo = parentChangeset.Remote.Repository;
+                if (repo.WorkingCopyHasUnstagedOrUncommitedChanges)
+                {
+                    throw new GitTfsException("error: You have local changes; rebase-workflow checkin only possible with clean working directory.")
+                        .WithRecommendation("Try 'git stash' to stash your local changes and checkin again.");
+                }
+
                 var newChangesetId = DoCheckin(parentChangeset, refToCheckin);
                 _stdout.WriteLine("TFS Changeset #" + newChangesetId + " was created");
                 parentChangeset.Remote.Fetch();
 
-                var repo = parentChangeset.Remote.Repository;
                 // if committed changeset is 'ultimate parent' to the HEAD, i.e. every parent of refToCheckin is also
                 // parent of HEAD - then we could just rebase HEAD onto newly created changeset safely
                 string revList = null;
                 repo.CommandOutputPipe(output => revList = output.ReadToEnd(), "rev-list", "^HEAD", refToCheckin);
                 bool ultimateParent = revList == "";
                 if (!ultimateParent)
-                    _stdout.WriteLine("Can't rebase HEAD onto changeset safely as it has parents not from the changeset:\n{0}", revList);
-                else
-                {
-                    _stdout.WriteLine("Rebasing onto committed changeset...");
-                    parentChangeset.Remote.Repository.CommandNoisy("rebase", "--onto", parentChangeset.Remote.MaxCommitHash, refToCheckin);
-                }
+                    throw new GitTfsException("git tfs checkin -r can only TFS-checkin commits on the current branch, so that the rebase will work correctly.");
+
+                _stdout.WriteLine("Rebasing onto committed changeset...");
+                parentChangeset.Remote.Repository.CommandNoisy("rebase", "--onto", parentChangeset.Remote.MaxCommitHash, refToCheckin);
                 return GitTfsExitCodes.OK;
             }
             else
