@@ -12,8 +12,8 @@ namespace Sep.Git.Tfs.Core
         void /*or IGitTfsRemote*/ CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead);
         bool HasRemote(string remoteId);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
-        IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head);
-        IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes);
+        IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head);
+        IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head, bool includeStubRemotes);
         IDictionary<string, GitObject> GetObjects(string commit);
         string HashAndInsertObject(string filename);
         string HashAndInsertObject(Stream data);

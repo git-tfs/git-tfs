@@ -102,7 +102,7 @@ namespace Sep.Git.Tfs.Core
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets = from cs in GetParentTfsCommitsCore("HEAD", false)
+            var untrackedTfsChangesets = from cs in GetParentTfsCommits("HEAD", false)
                                          where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
                                          orderby cs.ChangesetId
                                          select cs;
@@ -132,7 +132,7 @@ namespace Sep.Git.Tfs.Core
                 if (remoteOptions.IgnoreRegex != null) SetTfsConfig(remoteId, "ignore-paths", remoteOptions.IgnoreRegex);
             }
 
-            Directory.CreateDirectory(Path.Combine(this.GitDir, "tfs"));
+            Directory.CreateDirectory(Path.Combine(GitDir, "tfs"));
             _cachedRemotes = null;
         }
 
@@ -200,21 +200,21 @@ namespace Sep.Git.Tfs.Core
             return _container.With(_repository.MapCommit(commitish)).GetInstance<GitCommit>();
         }
 
-        public IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head)
+        public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head)
         {
-            return GetParentTfsCommits(head, false);
+            return GetLastParentTfsCommits(head, false);
         }
 
-        public IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes)
+        public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head, bool includeStubRemotes)
         {
-            List<TfsChangesetInfo> tfsCommits = GetParentTfsCommitsCore(head, includeStubRemotes);
+            List<TfsChangesetInfo> tfsCommits = GetParentTfsCommits(head, includeStubRemotes);
             return from commit in tfsCommits
                    group commit by commit.Remote
                    into remotes
                    select remotes.OrderBy(commit => -commit.ChangesetId).First();
         }
 
-        private List<TfsChangesetInfo> GetParentTfsCommitsCore(string head, bool includeStubRemotes)
+        private List<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes)
         {
             var tfsCommits = new List<TfsChangesetInfo>();
             try

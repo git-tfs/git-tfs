@@ -74,7 +74,7 @@ namespace Sep.Git.Tfs.Commands
         {
             IEnumerable<IGitTfsRemote> remotesToFetch;
             if (parents)
-                remotesToFetch = globals.Repository.GetParentTfsCommits("HEAD").Select(commit => commit.Remote);
+                remotesToFetch = globals.Repository.GetLastParentTfsCommits("HEAD").Select(commit => commit.Remote);
             else if (all)
                 remotesToFetch = globals.Repository.ReadAllTfsRemotes();
             else
