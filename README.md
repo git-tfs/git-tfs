@@ -1,10 +1,10 @@
-# Introduction
+## Introduction
 
 git-tfs is a two-way bridge between TFS and git, similar to git-svn.
 
-# Usage
+## Usage
 
-## Cloning a repository
+### Cloning a repository
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/some_project
     (wait for git-tfs to pull your history)
@@ -15,9 +15,9 @@ git-tfs is a two-way bridge between TFS and git, similar to git-svn.
 
 (`cd some_project` and hack away, using only git, until you need to share with TFS...)
 
-## Pushing your changes to TFS
+### Pushing your changes to TFS
 
-### Check-in
+#### Check-in
 
     git tfs checkintool 
 
@@ -25,16 +25,16 @@ git-tfs is a two-way bridge between TFS and git, similar to git-svn.
 
     git tfs checkin -m "Did stuff"
 
-### Shelveset
+#### Shelveset
 
     git tfs shelve A_SHELVESET_NAME
 
-## Other commands
+### Other commands
 
     git tfs help
 
 
-# Installing
+## Installing
 
 [Download](https://github.com/spraints/git-tfs/downloads#uploaded_downloads) or build.
 
@@ -45,7 +45,7 @@ I've been using this with [msysgit 1.7.3.1](http://code.google.com/p/msysgit/) f
 You need .NET 4 and either the 2008 or 2010 version of Team Explorer installed.
 
 
-# Building
+## Building
 
 msbuild (included in .NET 4) should be able to build the entire solution.
 
