@@ -26,11 +26,10 @@ namespace Sep.Git.Tfs.Commands
         public bool GenerateCheckinComment { get; set; }
 
         [OptDef(OptValType.Flag)]
-        [ShortOptionName('r')]
-        [LongOptionName("rebase-workflow")]
+        [LongOptionName("no-merge")]
         [UseNameAsLongOption(false)]
         [Description("Omits setting commit being checked in as parent, thus allowing to rebase remaining onto TFS changeset without exceeding merge commits.")]
-        public bool RebaseWorkflow { get; set; }
+        public bool NoMerge { get; set; }
 
         private string _overrideReason;
 
