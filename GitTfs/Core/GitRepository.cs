@@ -102,12 +102,13 @@ namespace Sep.Git.Tfs.Core
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets = from cs in GetParentTfsCommits("HEAD", false)
+            var untrackedTfsChangesets = from cs in GetParentTfsCommits("refs/remotes/tfs/" + remote.Id + "..HEAD", false)
                                          where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
                                          orderby cs.ChangesetId
                                          select cs;
             foreach (var cs in untrackedTfsChangesets)
             {
+                // UpdateRef sets tag with TFS changeset id on each commit so we can't just update to latest
                 remote.UpdateRef(cs.GitCommit, cs.ChangesetId);
             }
         }
