@@ -109,6 +109,7 @@
     <Compile Include="Commands\Pull.cs" />
     <Compile Include="Commands\QuickClone.cs" />
     <Compile Include="Commands\QuickFetch.cs" />
+    <Compile Include="Commands\Rcheckin.cs" />
     <Compile Include="Commands\RemoteOptions.cs" />
     <Compile Include="Commands\Shelve.cs" />
     <Compile Include="Commands\Verify.cs" />
