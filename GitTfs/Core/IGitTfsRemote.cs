@@ -19,7 +19,8 @@ namespace Sep.Git.Tfs.Core
         string RemoteRef { get; }
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
-        void Fetch(Dictionary<long, string> mergeInfo);
+        void Fetch();
+        void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes);
         void QuickFetch();
         void QuickFetch(int changesetId);
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies);
@@ -29,13 +30,5 @@ namespace Sep.Git.Tfs.Core
         void CleanupWorkspace();
         ITfsChangeset GetChangeset(long changesetId);
         void UpdateRef(string commitHash, long changesetId);
-    }
-
-    public static partial class Ext
-    {
-        public static void Fetch(this IGitTfsRemote remote)
-        {
-            remote.Fetch(new Dictionary<long, string>());
-        }
     }
 }
