@@ -99,9 +99,9 @@ namespace Sep.Git.Tfs.Core
             return GetTfsRemotes().ContainsKey(remoteId);
         }
 
-        public void CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead)
+        public void CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead, RemoteOptions remoteOptions)
         {
-            CreateTfsRemote(remoteId, tfsHead.Remote.TfsUrl, tfsHead.Remote.TfsRepositoryPath, null);
+            CreateTfsRemote(remoteId, tfsHead.Remote.TfsUrl, tfsHead.Remote.TfsRepositoryPath, remoteOptions);
             ReadTfsRemote(remoteId).UpdateRef(tfsHead.GitCommit, tfsHead.ChangesetId);
         }
 
