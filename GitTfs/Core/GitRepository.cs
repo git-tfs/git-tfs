@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using GitSharp.Core;
 using Sep.Git.Tfs.Commands;
 using StructureMap;
-using FileMode=GitSharp.Core.FileMode;
+using FileMode = GitSharp.Core.FileMode;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -19,7 +19,8 @@ namespace Sep.Git.Tfs.Core
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
 
-        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals) : base(stdout, container)
+        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals)
+            : base(stdout, container)
         {
             _container = container;
             _globals = globals;
@@ -31,18 +32,18 @@ namespace Sep.Git.Tfs.Core
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
 
-        protected override Process Start(string [] command, Action<ProcessStartInfo> initialize)
+        protected override Process Start(string[] command, Action<ProcessStartInfo> initialize)
         {
             return base.Start(command, initialize.And(SetUpPaths));
         }
 
         private void SetUpPaths(ProcessStartInfo gitCommand)
         {
-            if(GitDir != null)
+            if (GitDir != null)
                 gitCommand.EnvironmentVariables["GIT_DIR"] = GitDir;
-            if(WorkingCopyPath != null)
+            if (WorkingCopyPath != null)
                 gitCommand.WorkingDirectory = WorkingCopyPath;
-            if(WorkingCopySubdir != null)
+            if (WorkingCopySubdir != null)
                 gitCommand.WorkingDirectory = Path.Combine(gitCommand.WorkingDirectory, WorkingCopySubdir);
         }
 
@@ -65,10 +66,10 @@ namespace Sep.Git.Tfs.Core
             var matchingRemotes =
                 allRemotes.Values.Where(
                     remote => remote.Tfs.MatchesUrl(tfsUrl) && remote.TfsRepositoryPath == tfsRepositoryPath);
-            switch(matchingRemotes.Count())
+            switch (matchingRemotes.Count())
             {
                 case 0:
-                    if(!includeStubRemotes)
+                    if (!includeStubRemotes)
                         throw new GitTfsException("Unable to locate a remote for <" + tfsUrl + ">" + tfsRepositoryPath)
                             .WithRecommendation("Try using `git tfs bootstrap` to auto-init TFS remotes.")
                             .WithRecommendation("Try setting a legacy-url for an existing remote.");
@@ -96,6 +97,12 @@ namespace Sep.Git.Tfs.Core
         public bool HasRemote(string remoteId)
         {
             return GetTfsRemotes().ContainsKey(remoteId);
+        }
+
+        public void CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead)
+        {
+            CreateTfsRemote(remoteId, tfsHead.Remote.TfsUrl, tfsHead.Remote.TfsRepositoryPath, null);
+            ReadTfsRemote(remoteId).UpdateRef(tfsHead.GitCommit, tfsHead.ChangesetId);
         }
 
         public void CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions)
@@ -169,9 +176,9 @@ namespace Sep.Git.Tfs.Core
                 case "ignore-paths":
                     remote.IgnoreRegexExpression = value;
                     break;
-                    //case "fetch":
-                    //    remote.??? = value;
-                    //    break;
+                //case "fetch":
+                //    remote.??? = value;
+                //    break;
             }
         }
 
@@ -199,7 +206,7 @@ namespace Sep.Git.Tfs.Core
             }
             return from commit in tfsCommits
                    group commit by commit.Remote
-                   into remotes
+                       into remotes
                        select remotes.OrderBy(commit => -commit.ChangesetId).First();
         }
 
@@ -274,13 +281,27 @@ namespace Sep.Git.Tfs.Core
 
         private void ParseEntries(IDictionary<string, GitObject> entries, string treeInfo, string commit)
         {
-            foreach (var treeEntry in treeInfo.Split('\0'))
+            int start = 0;
+            int end = 0;
+            string path = string.Empty;
+
+            while( start < treeInfo.Length && end < treeInfo.Length )
             {
-                var gitObject = MakeGitObject(commit, treeEntry);
-                if(gitObject != null)
+                end = treeInfo.IndexOf('\0',start);
+                if( -1 == end )
+                {
+                    end = treeInfo.Length;
+                }
+
+                path = treeInfo.Substring( start , end - start );
+
+                var gitObject = MakeGitObject(commit, path);
+                if (gitObject != null)
                 {
                     entries[gitObject.Path] = gitObject;
                 }
+
+                start = end + 1;
             }
         }
 
@@ -304,7 +325,7 @@ namespace Sep.Git.Tfs.Core
             using (var diffOutput = CommandOutputPipe("diff-tree", "-r", "-M", from, to))
             {
                 string line;
-                while(null != (line = diffOutput.ReadLine()))
+                while (null != (line = diffOutput.ReadLine()))
                 {
                     var change = GitChangeInfo.Parse(line);
 
@@ -329,6 +350,17 @@ namespace Sep.Git.Tfs.Core
             return summary;
         }
 
+        public bool WorkingCopyHasUnstagedOrUncommitedChanges
+        {
+            get
+            {
+                string pendingChanges = "";
+                CommandOutputPipe(stdout => pendingChanges = stdout.ReadToEnd(),
+                                  "diff-index", "--name-status", "-M", "HEAD");
+                return !string.IsNullOrEmpty(pendingChanges);
+            }
+        }
+
         public void GetBlob(string sha, string outputFile)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
@@ -337,8 +369,8 @@ namespace Sep.Git.Tfs.Core
 
         private void Copy(TextReader stdout, string file)
         {
-            var stdoutStream = ((StreamReader) stdout).BaseStream;
-            using(var destination = File.Create(file))
+            var stdoutStream = ((StreamReader)stdout).BaseStream;
+            using (var destination = File.Create(file))
             {
                 stdoutStream.CopyTo(destination);
             }
@@ -355,6 +387,13 @@ namespace Sep.Git.Tfs.Core
         {
             var writer = new ObjectWriter(_repository);
             var objectId = writer.WriteBlob(file.Length, file);
+            return objectId.Name;
+        }
+
+        public string HashAndInsertObject(Stream file, long length)
+        {
+            var writer = new ObjectWriter(_repository);
+            var objectId = writer.WriteBlob(length, file);
             return objectId.Name;
         }
     }

@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.TeamFoundation.Client;
+using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsCommon;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Vs2008
@@ -49,6 +51,23 @@ namespace Sep.Git.Tfs.Vs2008
         public override long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class ItemDownloadStrategy : IItemDownloadStrategy
+    {
+        private readonly TfsApiBridge _bridge;
+
+        public ItemDownloadStrategy(TfsApiBridge bridge)
+        {
+            _bridge = bridge;
+        }
+
+        public Stream DownloadFile(IItem item)
+        {
+            var tempfile = new TemporaryFile();
+            _bridge.Unwrap<Item>(item).DownloadFile(tempfile);
+            return tempfile.ToStream();
         }
     }
 }

@@ -111,6 +111,7 @@ def clean_working_dir?
   `git ls-files          --deleted --modified --others --exclude-standard` == ''
 end
 
+desc 'Show the current version'
 task :version do
   $stdout.puts "Current version: #{version_helper.to_s}"
 end

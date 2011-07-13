@@ -146,6 +146,17 @@ namespace Sep.Git.Tfs.Core
         public void QuickFetch()
         {
             var changeset = Tfs.GetLatestChangeset(this);
+            quickFetch(changeset);
+        }
+
+        public void QuickFetch(int changesetId)
+        {
+            var changeset = Tfs.GetChangeset(changesetId, this);
+            quickFetch(changeset);
+        }
+
+        private void quickFetch(ITfsChangeset changeset)
+        {
             AssertTemporaryIndexEmpty();
             var log = CopyTree(MaxCommitHash, changeset);
             UpdateRef(Commit(log), changeset.Summary.ChangesetId);
@@ -166,7 +177,7 @@ namespace Sep.Git.Tfs.Core
             return Tfs.GetChangeset((int) changesetId, this);
         }
 
-        private void UpdateRef(string commitHash, long changesetId)
+        public void UpdateRef(string commitHash, long changesetId)
         {
             MaxCommitHash = commitHash;
             MaxChangesetId = changesetId;
@@ -196,7 +207,15 @@ namespace Sep.Git.Tfs.Core
             if(--globals.GcCountdown < 0)
             {
                 globals.GcCountdown = globals.GcPeriod;
-                Repository.CommandNoisy("gc", "--auto");
+                try
+                {
+                    Repository.CommandNoisy("gc", "--auto");
+                }
+                catch(Exception e)
+                {
+                    Trace.WriteLine(e);
+                    stdout.WriteLine("Warning: `git gc` failed! Try running it after git-tfs is finished.");
+                }
             }
         }
 

@@ -42,8 +42,7 @@ namespace Sep.Git.Tfs.Commands
                 if (parent.Remote.IsDerived)
                 {
                     var remoteId = GetRemoteId(parent);
-                    _globals.Repository.CreateTfsRemote(remoteId, parent.Remote.TfsUrl,
-                                                        parent.Remote.TfsRepositoryPath, null);
+                    _globals.Repository.CreateTfsRemote(remoteId, parent);
                     _stdout.WriteLine("-> new remote " + remoteId);
                 }
                 else

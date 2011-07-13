@@ -116,4 +116,19 @@ namespace Sep.Git.Tfs.Vs2010
             return null;
         }
     }
+
+    public class ItemDownloadStrategy : IItemDownloadStrategy
+    {
+        private readonly TfsApiBridge _bridge;
+
+        public ItemDownloadStrategy(TfsApiBridge bridge)
+        {
+            _bridge = bridge;
+        }
+
+        public Stream DownloadFile(IItem item)
+        {
+            return _bridge.Unwrap<Item>(item).DownloadFile();
+        }
+    }
 }
