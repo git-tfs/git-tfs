@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -43,6 +44,18 @@ namespace Sep.Git.Tfs.VsCommon
         {
             get { return _legacyUrls ?? (_legacyUrls = new string[0]); }
             set { _legacyUrls = value; }
+        }
+
+        protected NetworkCredential GetCredential()
+        {
+            var idx = Username.IndexOf('\\');
+            if (idx >= 0)
+            {
+                string domain = Username.Substring(0, idx);
+                string login = Username.Substring(idx + 1);
+                return new NetworkCredential(login, Password, domain);
+            }
+            return new NetworkCredential(Username, Password);
         }
 
         protected abstract T GetService<T>();
