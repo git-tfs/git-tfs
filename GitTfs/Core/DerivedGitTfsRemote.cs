@@ -196,6 +196,11 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
+        public void EnsureTfsAuthenticated()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

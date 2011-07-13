@@ -138,6 +138,11 @@ namespace Sep.Git.Tfs.Core
             {
                 TryParseRemoteConfigLine(line, remotes);
             }
+            foreach (var gitTfsRemotePair in remotes)
+            {
+                var remote = gitTfsRemotePair.Value;
+                remote.EnsureTfsAuthenticated();
+            }
         }
 
         private void TryParseRemoteConfigLine(string line, IDictionary<string, IGitTfsRemote> remotes)

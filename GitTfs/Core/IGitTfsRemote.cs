@@ -31,6 +31,7 @@ namespace Sep.Git.Tfs.Core
         void CleanupWorkspace();
         ITfsChangeset GetChangeset(long changesetId);
         void UpdateRef(string commitHash, long changesetId);
+        void EnsureTfsAuthenticated();
     }
 
     public static partial class Ext

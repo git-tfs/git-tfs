@@ -23,7 +23,7 @@ namespace Sep.Git.Tfs.Vs2008
             get { return "" + typeof(TeamFoundationServer).Assembly.GetName().Version + " (MS)"; }
         }
 
-        protected override void UpdateServer()
+        public override void EnsureAuthenticated()
         {
             if (string.IsNullOrEmpty(Url))
             {

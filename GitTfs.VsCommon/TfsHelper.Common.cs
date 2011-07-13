@@ -16,9 +16,6 @@ namespace Sep.Git.Tfs.VsCommon
     public abstract class TfsHelperBase : ITfsHelper
     {
         private readonly TextWriter _stdout;
-        private string _url;
-        private string _username;
-        private string _password;
         private readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
 
@@ -31,25 +28,13 @@ namespace Sep.Git.Tfs.VsCommon
 
         public abstract string TfsClientLibraryVersion { get; }
 
-        public string Url
-        {
-            get { return _url; }
-            set { _url = value; UpdateServer(); }
-        }
+        public string Url { get; set; }
 
-        public string Username
-        {
-            get { return _username; }
-            set { _username = value; UpdateServer(); }
-        }
+        public string Username { get; set; }
 
-        public string Password
-        {
-            get { return _password; }
-            set { _password = value; UpdateServer(); }
-        }
+        public string Password { get; set; }
 
-        protected abstract void UpdateServer();
+        public abstract void EnsureAuthenticated();
 
         private string[] _legacyUrls;
 

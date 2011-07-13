@@ -28,6 +28,11 @@ namespace Sep.Git.Tfs.Core
             Tfs = tfsHelper;
         }
 
+        public void EnsureTfsAuthenticated()
+        {
+            Tfs.EnsureAuthenticated();
+        }
+
         public bool IsDerived
         {
             get { return false; }

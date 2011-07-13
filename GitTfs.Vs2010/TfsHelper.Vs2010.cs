@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Vs2010
             get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version + " (MS)"; }
         }
 
-        protected override void UpdateServer()
+        public override void EnsureAuthenticated()
         {
             if (string.IsNullOrEmpty(Url))
             {
