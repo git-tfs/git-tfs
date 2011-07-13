@@ -18,6 +18,7 @@ namespace Sep.Git.Tfs.Commands
         [Description("A comment for the changeset.")]
         public string CheckinComment { get; set; }
 
+		[OptDef(OptValType.Flag)]
         [LongOptionName("build-default-comment")]
         [UseNameAsLongOption(false)]
         [Description("Use the comments from the commits on the current branch to create a default checkin message (checkintool only)")]
