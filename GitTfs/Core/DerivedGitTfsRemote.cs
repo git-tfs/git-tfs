@@ -32,6 +32,30 @@ namespace Sep.Git.Tfs.Core
             set { throw new NotImplementedException(); }
         }
 
+        public string TfsUsername
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public string TfsPassword
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public string TfsRepositoryPath
         {
             get { return _tfsRepositoryPath; }
@@ -173,6 +197,11 @@ namespace Sep.Git.Tfs.Core
         }
 
         public void UpdateRef(string commitHash, long changesetId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void EnsureTfsAuthenticated()
         {
             throw new NotImplementedException();
         }

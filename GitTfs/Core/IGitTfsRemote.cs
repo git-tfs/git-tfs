@@ -11,6 +11,8 @@ namespace Sep.Git.Tfs.Core
         string TfsUrl { get; set; }
         string TfsRepositoryPath { get; set; }
         string IgnoreRegexExpression { get; set; }
+        string TfsUsername { get; set; }
+        string TfsPassword { get; set; }
         IGitRepository Repository { get; set; }
         [Obsolete("Make this go away")]
         ITfsHelper Tfs { get; set; }
@@ -30,5 +32,6 @@ namespace Sep.Git.Tfs.Core
         void CleanupWorkspace();
         ITfsChangeset GetChangeset(long changesetId);
         void UpdateRef(string commitHash, long changesetId);
+        void EnsureTfsAuthenticated();
     }
 }

@@ -28,6 +28,11 @@ namespace Sep.Git.Tfs.Core
             Tfs = tfsHelper;
         }
 
+        public void EnsureTfsAuthenticated()
+        {
+            Tfs.EnsureAuthenticated();
+        }
+
         public bool IsDerived
         {
             get { return false; }
@@ -39,6 +44,18 @@ namespace Sep.Git.Tfs.Core
         {
             get { return Tfs.Url; }
             set { Tfs.Url = value; }
+        }
+
+        public string TfsUsername
+        {
+            get { return Tfs.Username; }
+            set { Tfs.Username = value; }
+        }
+
+        public string TfsPassword
+        {
+            get { return Tfs.Password; }
+            set { Tfs.Password = value; }
         }
 
         public string TfsRepositoryPath { get; set; }

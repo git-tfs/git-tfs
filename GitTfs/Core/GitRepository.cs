@@ -99,9 +99,9 @@ namespace Sep.Git.Tfs.Core
             return GetTfsRemotes().ContainsKey(remoteId);
         }
 
-        public void CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead)
+        public void CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead, RemoteOptions remoteOptions)
         {
-            CreateTfsRemote(remoteId, tfsHead.Remote.TfsUrl, tfsHead.Remote.TfsRepositoryPath, null);
+            CreateTfsRemote(remoteId, tfsHead.Remote.TfsUrl, tfsHead.Remote.TfsRepositoryPath, remoteOptions);
             ReadTfsRemote(remoteId).UpdateRef(tfsHead.GitCommit, tfsHead.ChangesetId);
         }
 
@@ -110,14 +110,17 @@ namespace Sep.Git.Tfs.Core
             if (HasRemote(remoteId))
                 throw new GitTfsException("A remote with id \"" + remoteId + "\" already exists.");
 
-            SetTfsConfig(remoteId, "url", tfsUrl);
-            SetTfsConfig(remoteId, "repository", tfsRepositoryPath);
-            SetTfsConfig(remoteId, "fetch", "refs/remotes/" + remoteId + "/master");
             if (remoteOptions != null)
             {
                 if (remoteOptions.NoMetaData) SetTfsConfig(remoteId, "no-meta-data", 1);
                 if (remoteOptions.IgnoreRegex != null) SetTfsConfig(remoteId, "ignore-paths", remoteOptions.IgnoreRegex);
+                if (!string.IsNullOrEmpty(remoteOptions.Username)) SetTfsConfig(remoteId, "username", remoteOptions.Username);
+                if (!string.IsNullOrEmpty(remoteOptions.Password)) SetTfsConfig(remoteId, "password", remoteOptions.Password);
             }
+
+            SetTfsConfig(remoteId, "url", tfsUrl);
+            SetTfsConfig(remoteId, "repository", tfsRepositoryPath);
+            SetTfsConfig(remoteId, "fetch", "refs/remotes/" + remoteId + "/master");
 
             Directory.CreateDirectory(Path.Combine(this.GitDir, "tfs"));
             _cachedRemotes = null;
@@ -134,6 +137,11 @@ namespace Sep.Git.Tfs.Core
             while ((line = stdout.ReadLine()) != null)
             {
                 TryParseRemoteConfigLine(line, remotes);
+            }
+            foreach (var gitTfsRemotePair in remotes)
+            {
+                var remote = gitTfsRemotePair.Value;
+                remote.EnsureTfsAuthenticated();
             }
         }
 
@@ -179,6 +187,12 @@ namespace Sep.Git.Tfs.Core
                 //case "fetch":
                 //    remote.??? = value;
                 //    break;
+                case "username":
+                    remote.TfsUsername = value;
+                    break;
+                case "password":
+                    remote.TfsPassword = value;
+                    break;
             }
         }
 

@@ -7,6 +7,8 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     {
         string TfsClientLibraryVersion { get; }
         string Url { get; set; }
+        string Username { get; set; }
+        string Password { get; set; }
         string[] LegacyUrls { get; set; }
         IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
@@ -22,5 +24,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         bool CanShowCheckinDialog { get; }
         long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
         void CleanupWorkspaces(string workingDirectory);
+
+        void EnsureAuthenticated();
     }
 }

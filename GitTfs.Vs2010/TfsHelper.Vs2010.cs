@@ -14,6 +14,10 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.Vs2010
 {
+    using System.Net;
+
+    using Microsoft.TeamFoundation.Framework.Client;
+
     public class TfsHelper : TfsHelperBase
     {
         private readonly TfsApiBridge _bridge;
@@ -29,7 +33,7 @@ namespace Sep.Git.Tfs.Vs2010
             get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version + " (MS)"; }
         }
 
-        protected override void UpdateServer()
+        public override void EnsureAuthenticated()
         {
             if (string.IsNullOrEmpty(Url))
             {
@@ -37,7 +41,11 @@ namespace Sep.Git.Tfs.Vs2010
             }
             else
             {
-                _server = new TfsTeamProjectCollection(new Uri(Url), new UICredentialsProvider());
+                _server = String.IsNullOrEmpty(Username) || String.IsNullOrEmpty(Password) 
+                    ? new TfsTeamProjectCollection(new Uri(Url), new NetworkCredential(Username, Password), new UICredentialsProvider()) 
+                    : new TfsTeamProjectCollection(new Uri(Url), GetCredential());
+
+                _server.EnsureAuthenticated();
             }
         }
 
@@ -48,7 +56,7 @@ namespace Sep.Git.Tfs.Vs2010
 
         protected override string GetAuthenticatedUser()
         {
-            return VersionControl.AuthenticatedUser;
+            return VersionControl.TeamProjectCollection.AuthorizedIdentity.DisplayName;
         }
 
         public override bool CanShowCheckinDialog { get { return true; } }

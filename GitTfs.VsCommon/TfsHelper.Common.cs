@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -16,7 +17,6 @@ namespace Sep.Git.Tfs.VsCommon
     public abstract class TfsHelperBase : ITfsHelper
     {
         private readonly TextWriter _stdout;
-        private string _url;
         private readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
 
@@ -29,19 +29,33 @@ namespace Sep.Git.Tfs.VsCommon
 
         public abstract string TfsClientLibraryVersion { get; }
 
-        public string Url
-        {
-            get { return _url; }
-            set { _url = value; UpdateServer(); }
-        }
+        public string Url { get; set; }
 
-        protected abstract void UpdateServer();
+        public string Username { get; set; }
+
+        public string Password { get; set; }
+
+        public abstract void EnsureAuthenticated();
 
         private string[] _legacyUrls;
+
+
         public string[] LegacyUrls
         {
             get { return _legacyUrls ?? (_legacyUrls = new string[0]); }
             set { _legacyUrls = value; }
+        }
+
+        protected NetworkCredential GetCredential()
+        {
+            var idx = Username.IndexOf('\\');
+            if (idx >= 0)
+            {
+                string domain = Username.Substring(0, idx);
+                string login = Username.Substring(idx + 1);
+                return new NetworkCredential(login, Password, domain);
+            }
+            return new NetworkCredential(Username, Password);
         }
 
         protected abstract T GetService<T>();

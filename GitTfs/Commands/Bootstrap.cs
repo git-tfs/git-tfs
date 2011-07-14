@@ -14,18 +14,20 @@ namespace Sep.Git.Tfs.Commands
     [Description("bootstrap [parent-commit]")]
     public class Bootstrap : GitTfsCommand
     {
+        private readonly RemoteOptions _remoteOptions;
         private readonly Globals _globals;
         private readonly TextWriter _stdout;
 
-        public Bootstrap(Globals globals, TextWriter stdout)
+        public Bootstrap(RemoteOptions remoteOptions, Globals globals, TextWriter stdout)
         {
+            _remoteOptions = remoteOptions;
             _globals = globals;
             _stdout = stdout;
         }
 
         public IEnumerable<IOptionResults> ExtraOptions
         {
-            get { return this.MakeNestedOptionResults(); }
+            get { return this.MakeNestedOptionResults(_remoteOptions); }
         }
 
         public int Run()
@@ -42,7 +44,7 @@ namespace Sep.Git.Tfs.Commands
                 if (parent.Remote.IsDerived)
                 {
                     var remoteId = GetRemoteId(parent);
-                    _globals.Repository.CreateTfsRemote(remoteId, parent);
+                    _globals.Repository.CreateTfsRemote(remoteId, parent, _remoteOptions);
                     _stdout.WriteLine("-> new remote " + remoteId);
                 }
                 else
