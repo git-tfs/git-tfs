@@ -25,6 +25,12 @@ namespace Sep.Git.Tfs.Commands
                       // This can be extended to checkin when the $EDITOR is invoked.
         public bool GenerateCheckinComment { get; set; }
 
+        [OptDef(OptValType.Flag)]
+        [LongOptionName("no-merge")]
+        [UseNameAsLongOption(false)]
+        [Description("Omits setting commit being checked in as parent, thus allowing to rebase remaining onto TFS changeset without exceeding merge commits.")]
+        public bool NoMerge { get; set; }
+
         private string _overrideReason;
 
         [OptDef(OptValType.ValueOpt)]

@@ -130,14 +130,24 @@ namespace Sep.Git.Tfs.Core
             return tfsPath;
         }
 
-        public void Fetch(Dictionary<long, string> mergeInfo)
+        public void Fetch()
+        {
+            FetchWithMerge(-1);
+        }
+
+        public void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes)
         {
             foreach (var changeset in FetchChangesets())
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
-                if(mergeInfo.ContainsKey(changeset.Summary.ChangesetId))
-                    log.CommitParents.Add(mergeInfo[changeset.Summary.ChangesetId]);
+                if (changeset.Summary.ChangesetId == mergeChangesetId)
+                {
+                    foreach (var parent in parentCommitsHashes)
+                    {
+                        log.CommitParents.Add(parent);
+                    }
+                }
                 UpdateRef(Commit(log), changeset.Summary.ChangesetId);
                 DoGcIfNeeded();
             }

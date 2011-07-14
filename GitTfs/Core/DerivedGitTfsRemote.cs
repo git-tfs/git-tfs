@@ -122,7 +122,12 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public void Fetch(Dictionary<long, string> mergeInfo)
+        public void Fetch()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes)
         {
             throw new NotImplementedException();
         }

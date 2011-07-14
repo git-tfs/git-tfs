@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using CommandLine.OptParse;
@@ -30,15 +31,27 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string refToCheckin)
         {
-            return _writer.Write(refToCheckin, changeset =>
-                                                   {
-                                                       var newChangesetId = DoCheckin(changeset, refToCheckin);
-                                                       _stdout.WriteLine("TFS Changeset #" + newChangesetId + " was created. Marking it as a merge commit...");
-                                                       changeset.Remote.Fetch(new Dictionary<long, string> { { newChangesetId, refToCheckin } });
-                                                       if (refToCheckin == "HEAD")
-                                                           changeset.Remote.Repository.CommandNoisy("merge", changeset.Remote.MaxCommitHash);
-                                                       return GitTfsExitCodes.OK;
-                                                   });
+            return _writer.Write(refToCheckin, changeset => PerformCheckin(changeset, refToCheckin));
+        }
+
+        private int PerformCheckin(TfsChangesetInfo parentChangeset, string refToCheckin)
+        {
+            var newChangesetId = DoCheckin(parentChangeset, refToCheckin);
+
+            if (_checkinOptions.NoMerge)
+            {
+                _stdout.WriteLine("TFS Changeset #" + newChangesetId + " was created.");
+                parentChangeset.Remote.Fetch();
+            }
+            else
+            {
+                _stdout.WriteLine("TFS Changeset #" + newChangesetId + " was created. Marking it as a merge commit...");
+                parentChangeset.Remote.FetchWithMerge(newChangesetId, refToCheckin);
+
+                if (refToCheckin == "HEAD")
+                    parentChangeset.Remote.Repository.CommandNoisy("merge", parentChangeset.Remote.MaxCommitHash);
+            }
+            return GitTfsExitCodes.OK;
         }
 
         protected abstract long DoCheckin(TfsChangesetInfo changeset, string refToCheckin);
