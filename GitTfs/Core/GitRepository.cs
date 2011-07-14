@@ -295,13 +295,27 @@ namespace Sep.Git.Tfs.Core
 
         private void ParseEntries(IDictionary<string, GitObject> entries, string treeInfo, string commit)
         {
-            foreach (var treeEntry in treeInfo.Split('\0'))
+            int start = 0;
+            int end = 0;
+            string path = string.Empty;
+
+            while( start < treeInfo.Length && end < treeInfo.Length )
             {
-                var gitObject = MakeGitObject(commit, treeEntry);
+                end = treeInfo.IndexOf('\0',start);
+                if( -1 == end )
+                {
+                    end = treeInfo.Length;
+                }
+
+                path = treeInfo.Substring( start , end - start );
+
+                var gitObject = MakeGitObject(commit, path);
                 if (gitObject != null)
                 {
                     entries[gitObject.Path] = gitObject;
                 }
+
+                start = end + 1;
             }
         }
 
