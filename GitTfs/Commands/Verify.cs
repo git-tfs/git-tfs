@@ -37,7 +37,7 @@ namespace Sep.Git.Tfs.Commands
         {
             // Warn, based on core.autocrlf or core.safecrlf value?
             //  -- autocrlf=true or safecrlf=true: TFS may have CRLF where git has LF
-            var parents = _globals.Repository.GetParentTfsCommits(commitish);
+            var parents = _globals.Repository.GetLastParentTfsCommits(commitish);
             if(parents.IsEmpty())
                 throw new GitTfsException("No TFS parents found to compare!");
             foreach(var parent in parents)

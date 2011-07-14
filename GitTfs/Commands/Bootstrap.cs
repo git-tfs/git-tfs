@@ -37,7 +37,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string commitish)
         {
-            var tfsParents = _globals.Repository.GetParentTfsCommits(commitish, true);
+            var tfsParents = _globals.Repository.GetLastParentTfsCommits(commitish, true);
             foreach (var parent in tfsParents)
             {
                 _globals.Repository.CommandNoisy("log", "-1", parent.GitCommit);
@@ -49,7 +49,16 @@ namespace Sep.Git.Tfs.Commands
                 }
                 else
                 {
-                    _stdout.WriteLine("-> existing remote " + parent.Remote.Id);
+                    if (parent.Remote.MaxChangesetId < parent.ChangesetId)
+                    {
+                        long oldChangeset = parent.Remote.MaxChangesetId;
+                        _globals.Repository.MoveTfsRefForwardIfNeeded(parent.Remote);
+                        _stdout.WriteLine("-> existing remote {0} (updated from changeset {1})", parent.Remote.Id, oldChangeset);
+                    }
+                    else
+                    {
+                        _stdout.WriteLine("-> existing remote {0} (up to date)", parent.Remote.Id);
+                    }
                 }
                 _stdout.WriteLine();
             }

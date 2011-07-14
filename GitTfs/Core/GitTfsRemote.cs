@@ -79,7 +79,7 @@ namespace Sep.Git.Tfs.Core
         {
             if (maxChangesetId == null)
             {
-                var mostRecentUpdate = Repository.GetParentTfsCommits(RemoteRef).FirstOrDefault();
+                var mostRecentUpdate = Repository.GetLastParentTfsCommits(RemoteRef).FirstOrDefault();
                 if (mostRecentUpdate != null)
                 {
                     MaxCommitHash = mostRecentUpdate.GitCommit;
