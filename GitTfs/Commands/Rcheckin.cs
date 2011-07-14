@@ -58,14 +58,14 @@ namespace Sep.Git.Tfs.Commands
 
             // we could rcheckin only if tfsLatest changeset is a parent of HEAD
             // so that we could rebase after each single checkin without conflicts
-            if (repo.CommandOneline("rev-list", tfsLatest, "^HEAD") != "")
+            if (String.IsNullOrWhiteSpace(repo.CommandOneline("rev-list", tfsLatest, "^HEAD")))
                 throw new GitTfsException("error: latest TFS commit should be parent of commits being checked in");
 
             while (true)
             {
                 // determine first descendant of tfsLatest
                 string revList = repo.CommandOneline("rev-list", "--abbrev-commit", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + "..HEAD");
-                if (String.IsNullOrEmpty(revList))
+                if (String.IsNullOrWhiteSpace(revList))
                 {
                     _stdout.WriteLine("No more to rcheckin.");
                     return GitTfsExitCodes.OK;
