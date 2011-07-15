@@ -32,9 +32,9 @@ namespace Sep.Git.Tfs.Vs2008
             }
             else
             {
-                _server = String.IsNullOrEmpty(Username) || String.IsNullOrEmpty(Password)
-                              ? new TeamFoundationServer(Url, new NetworkCredential(Username, Password), new UICredentialsProvider())
-                              : new TeamFoundationServer(Url, GetCredential());
+                _server = HasCredentials ?
+                    new TeamFoundationServer(Url, GetCredential(), new UICredentialsProvider()) :
+                    new TeamFoundationServer(Url, new UICredentialsProvider());
 
                 _server.EnsureAuthenticated();
             }

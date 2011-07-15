@@ -41,9 +41,9 @@ namespace Sep.Git.Tfs.Vs2010
             }
             else
             {
-                _server = String.IsNullOrEmpty(Username) || String.IsNullOrEmpty(Password) 
-                    ? new TfsTeamProjectCollection(new Uri(Url), new NetworkCredential(Username, Password), new UICredentialsProvider()) 
-                    : new TfsTeamProjectCollection(new Uri(Url), GetCredential());
+                _server = HasCredentials ?
+                    new TfsTeamProjectCollection(new Uri(Url), GetCredential(), new UICredentialsProvider()) :
+                    new TfsTeamProjectCollection(new Uri(Url), new UICredentialsProvider());
 
                 _server.EnsureAuthenticated();
             }
