@@ -35,7 +35,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public string Password { get; set; }
 
-        public boolean HasCredentials { get { return !String.IsNullOrEmpty(Username); } }
+        public bool HasCredentials { get { return !String.IsNullOrEmpty(Username); } }
 
         public abstract void EnsureAuthenticated();
 
