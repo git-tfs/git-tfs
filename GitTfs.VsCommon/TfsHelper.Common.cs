@@ -137,7 +137,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
             catch (MappingConflictException e)
             {
-                throw new GitTfsException(e.Message, new[] { "Run 'git tfs cleanup-workspace' to remove the workspace." }, e);
+                throw new GitTfsException(e.Message, new[] { "Run 'git tfs cleanup-workspaces' to remove the workspace." }, e);
             }
         }
 
@@ -150,11 +150,11 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void CleanupWorkspaces(string workingDirectory)
         {
-            Trace.WriteLine("Looking for workspaces mapped to @\"" + workingDirectory +"\"...", "cleanup-workspace");
+            Trace.WriteLine("Looking for workspaces mapped to @\"" + workingDirectory +"\"...", "cleanup-workspaces");
             var workspace = VersionControl.TryGetWorkspace(workingDirectory);
             if(workspace != null)
             {
-                Trace.WriteLine("Found mapping in workspace \"" + workspace.DisplayName + "\".", "cleanup-workspace");
+                Trace.WriteLine("Found mapping in workspace \"" + workspace.DisplayName + "\".", "cleanup-workspaces");
                 if (workspace.Folders.Length == 1)
                 {
                     _stdout.WriteLine("Removing workspace \"" + workspace.DisplayName + "\".");
