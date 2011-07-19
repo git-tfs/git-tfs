@@ -223,14 +223,34 @@ namespace Sep.Git.Tfs.Core
 
         private LogEntry MakeNewLogEntry(IChangeset changesetToLog)
         {
-            var log = new LogEntry();
             var identity = _tfs.GetIdentity(changesetToLog.Committer);
-            log.CommitterName = log.AuthorName = null != identity ? identity.DisplayName ?? "Unknown TFS user" : changesetToLog.Committer ?? "Unknown TFS user";
-            log.CommitterEmail = log.AuthorEmail = null != identity ? identity.MailAddress ?? changesetToLog.Committer : changesetToLog.Committer;
-            log.Date = changesetToLog.CreationDate;
-            log.Log = changesetToLog.Comment + Environment.NewLine;
-            log.ChangesetId = changesetToLog.ChangesetId;
-            return log;
+
+            // committer's & author's name and email MUST NOT be empty as otherwise they would be picked
+            // by git from user.name and user.email config settings which is bad thing because commit could
+            // be different depending on whose machine it fetched
+            string name = "Unknown TFS user";
+            string email = "Unknown email";
+            if (identity != null)
+            {
+                if (!String.IsNullOrWhiteSpace(identity.DisplayName))
+                    name = identity.DisplayName;
+                
+                if (!String.IsNullOrWhiteSpace(identity.MailAddress))
+                    email = identity.MailAddress;
+                else if (!String.IsNullOrWhiteSpace(changesetToLog.Committer))
+                    email = changesetToLog.Committer;
+            }
+
+            return new LogEntry
+                       {
+                           Date = changesetToLog.CreationDate, 
+                           Log = changesetToLog.Comment + Environment.NewLine, 
+                           ChangesetId = changesetToLog.ChangesetId, 
+                           CommitterName = name, 
+                           AuthorName = name, 
+                           CommitterEmail = email, 
+                           AuthorEmail = email
+                       };
         }
     }
 }
