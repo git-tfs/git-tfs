@@ -52,3 +52,8 @@ msbuild (included in .NET 4) should be able to build the entire solution.
 You can also do `rake build:debug`.
 
 If you contribute patches, please set `core.autocrlf` to `true`. (`git config core.autocrlf true`)
+
+## Contributing
+
+Contributions are always welcome. For more information about contributing,
+please see [the wiki](http://github.com/spraints/git-tfs/wiki/Contributing).
