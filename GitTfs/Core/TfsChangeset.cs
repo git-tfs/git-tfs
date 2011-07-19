@@ -228,8 +228,8 @@ namespace Sep.Git.Tfs.Core
             // committer's & author's name and email MUST NOT be empty as otherwise they would be picked
             // by git from user.name and user.email config settings which is bad thing because commit could
             // be different depending on whose machine it fetched
-            string name = "Unknown TFS user";
-            string email = "Unknown email";
+            var name = "Unknown TFS user";
+            var email = "unknown@tfs.local";
             if (identity != null)
             {
                 if (!String.IsNullOrWhiteSpace(identity.DisplayName))
