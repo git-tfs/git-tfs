@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.VsCommon
     public abstract class TfsHelperBase : ITfsHelper
     {
         private readonly TextWriter _stdout;
-        private readonly TfsApiBridge _bridge;
+        protected readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
 
         public TfsHelperBase(TextWriter stdout, TfsApiBridge bridge, IContainer container)
@@ -181,6 +181,7 @@ namespace Sep.Git.Tfs.VsCommon
         protected abstract string GetAuthenticatedUser();
 
         public abstract bool CanShowCheckinDialog { get; }
+        public abstract bool CanPerformGatedCheckin { get; }
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
@@ -251,5 +252,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return new WorkItemCheckedInfo(Convert.ToInt32(workitem), true, checkinAction);
         }
+
+        public abstract int CheckIn(IWorkspace workspace, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool queueGatedCheckIn);
     }
 }

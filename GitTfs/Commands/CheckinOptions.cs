@@ -56,5 +56,11 @@ namespace Sep.Git.Tfs.Commands
         [LongOptionName("resolved-work-item")]
         [UseNameAsLongOption(false)]
         public List<string> WorkItemsToResolve { get { return _workItemsToResolve; } }
+
+        [OptDef(OptValType.Flag)]
+        [LongOptionName("queue-gated-checkin")]
+        [UseNameAsLongOption(false)]
+        [Description("To queue a gated checkin, set this option to true.")]
+        public bool QueueBuildForGatedCheckIn { get; set; }
     }
 }

@@ -5,6 +5,8 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.VsCommon
 {
+    using System.Collections.Generic;
+
     public class TfsApiBridge
     {
         private readonly IContainer _container;

@@ -22,9 +22,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         bool MatchesUrl(string tfsUrl);
         bool HasShelveset(string shelvesetName);
         bool CanShowCheckinDialog { get; }
+        bool CanPerformGatedCheckin { get; }
         long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
         void CleanupWorkspaces(string workingDirectory);
 
         void EnsureAuthenticated();
+        int CheckIn(IWorkspace workspace, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool queueGatedCheckIn);
     }
 }

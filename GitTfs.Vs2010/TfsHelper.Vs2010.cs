@@ -61,6 +61,22 @@ namespace Sep.Git.Tfs.Vs2010
 
         public override bool CanShowCheckinDialog { get { return true; } }
 
+        public override bool CanPerformGatedCheckin
+        {
+            get { return true; }
+        }
+
+        public override int CheckIn(IWorkspace workspace, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool queueGatedCheckIn)
+        {
+            var tfsWorkspace = _bridge.Unwrap<Workspace>(workspace);
+            WorkspaceCheckInParameters parms = new WorkspaceCheckInParameters(_bridge.Unwrap<PendingChange>(changes), comment);
+            parms.CheckinNotes = _bridge.Unwrap<CheckinNote>(checkinNote);
+            parms.AssociatedWorkItems = _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges);
+            parms.PolicyOverride = WrapperForWorkspace.ToTfs(policyOverrideInfo, _bridge);
+            parms.OverrideGatedCheckIn = queueGatedCheckIn;
+            return tfsWorkspace.CheckIn(parms);
+        }
+
         public override long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),

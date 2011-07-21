@@ -16,6 +16,11 @@ namespace Sep.Git.Tfs.Commands
 
         protected override long DoCheckin(TfsChangesetInfo changeset, string refToCheckin)
         {
+            if (!changeset.Remote.Tfs.CanPerformGatedCheckin && _checkinOptions.QueueBuildForGatedCheckIn)
+                throw new GitTfsException(
+                    "gated checkin does not work with this TFS version (" + changeset.Remote.Tfs.TfsClientLibraryVersion + ").",
+                    new[] { "Try installing the VS2010 edition of Team Explorer." });
+
             return changeset.Remote.Checkin(refToCheckin, changeset);
         }
     }

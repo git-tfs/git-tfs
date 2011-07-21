@@ -367,8 +367,8 @@ namespace Sep.Git.Tfs.VsCommon
 
     public class WrapperForWorkspace : WrapperFor<Workspace>, IWorkspace
     {
-        private readonly TfsApiBridge _bridge;
-        private readonly Workspace _workspace;
+        protected readonly TfsApiBridge _bridge;
+        protected readonly Workspace _workspace;
 
         public WrapperForWorkspace(TfsApiBridge bridge, Workspace workspace) : base(workspace)
         {
@@ -386,22 +386,12 @@ namespace Sep.Git.Tfs.VsCommon
             _workspace.Shelve(_bridge.Unwrap<Shelveset>(shelveset), _bridge.Unwrap<PendingChange>(changes), _bridge.Convert<ShelvingOptions>(options));
         }
 
-        public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo)
-        {
-            return _workspace.CheckIn(
-                _bridge.Unwrap<PendingChange>(changes),
-                comment,
-                _bridge.Unwrap<CheckinNote>(checkinNote),
-                _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges),
-                ToTfs(policyOverrideInfo));
-        }
-
-        private PolicyOverrideInfo ToTfs(TfsPolicyOverrideInfo policyOverrideInfo)
+        public static PolicyOverrideInfo ToTfs(TfsPolicyOverrideInfo policyOverrideInfo, TfsApiBridge tfsApiBridge)
         {
             if (policyOverrideInfo == null)
                 return null;
             return new PolicyOverrideInfo(policyOverrideInfo.Comment,
-                                          _bridge.Unwrap<PolicyFailure>(policyOverrideInfo.Failures));
+                                          tfsApiBridge.Unwrap<PolicyFailure>(policyOverrideInfo.Failures));
         }
 
         public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
