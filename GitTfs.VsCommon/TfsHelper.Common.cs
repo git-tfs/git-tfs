@@ -244,7 +244,7 @@ namespace Sep.Git.Tfs.VsCommon
                 var wrapperForVersionControlServer =
                     _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
                 var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
-                var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset)
+                var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout)
                                        {Summary = new TfsChangesetInfo {Remote = remote}};
                 gremote.Apply(tfsChangeset, destinationRef);
                 _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
@@ -300,11 +300,13 @@ namespace Sep.Git.Tfs.VsCommon
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
+            private FakeItem _fakeItem;
 
             public FakeChange(PendingChange pendingChange, TfsApiBridge bridge)
             {
                 _pendingChange = pendingChange;
                 _bridge = bridge;
+                _fakeItem = new FakeItem(_pendingChange, _bridge);
             }
 
             public TfsChangeType ChangeType
@@ -314,13 +316,14 @@ namespace Sep.Git.Tfs.VsCommon
 
             public IItem Item
             {
-                get { return new FakeItem(_pendingChange, _bridge); }
+                get { return _fakeItem; }
             }
         }
         class FakeItem : IItem
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
+            private long _contentLength;
 
             public FakeItem(PendingChange pendingChange, TfsApiBridge bridge)
             {
@@ -358,9 +361,20 @@ namespace Sep.Git.Tfs.VsCommon
                 get { throw new NotImplementedException(); }
             }
 
-            public void DownloadFile(string file)
+            public long ContentLength
             {
-                _pendingChange.DownloadShelvedFile(file);
+                get { return _contentLength; }
+            }
+
+            public Stream DownloadFile()
+            {
+                string filename = Path.GetTempFileName();
+                _pendingChange.DownloadShelvedFile(filename);
+                var buffer = File.ReadAllBytes(filename);
+                _contentLength = buffer.Length;
+                var memoryStream = new MemoryStream(buffer, false);
+                File.Delete(filename);
+                return memoryStream;
             }
         }
 
