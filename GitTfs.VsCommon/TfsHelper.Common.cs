@@ -257,6 +257,7 @@ namespace Sep.Git.Tfs.VsCommon
             private readonly PendingSet _pendingSet;
             private readonly IVersionControlServer _versionControlServer;
             private readonly TfsApiBridge _bridge;
+            private readonly IChange[] _changes;
 
             public FakeChangeset(Shelveset shelveset, PendingSet pendingSet, IVersionControlServer versionControlServer, TfsApiBridge bridge)
             {
@@ -264,11 +265,12 @@ namespace Sep.Git.Tfs.VsCommon
                 _versionControlServer = versionControlServer;
                 _bridge = bridge;
                 _pendingSet = pendingSet;
+                _changes = _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge)).Cast<IChange>().ToArray();
             }
 
             public IChange[] Changes
             {
-                get { return _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge)).Cast<IChange>().ToArray(); }
+                get { return _changes; }
             }
 
             public string Committer
