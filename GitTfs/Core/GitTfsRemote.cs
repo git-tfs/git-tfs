@@ -46,6 +46,8 @@ namespace Sep.Git.Tfs.Core
             set { Tfs.Url = value; }
         }
 
+        public bool Autotag { get; set; }
+
         public string TfsUsername
         {
             get { return Tfs.Username; }
@@ -209,7 +211,8 @@ namespace Sep.Git.Tfs.Core
             MaxCommitHash = commitHash;
             MaxChangesetId = changesetId;
             Repository.CommandNoisy("update-ref", "-m", "C" + MaxChangesetId, RemoteRef, MaxCommitHash);
-            Repository.CommandNoisy("update-ref", TagPrefix + "C" + MaxChangesetId, MaxCommitHash);
+            if (Autotag)
+                Repository.CommandNoisy("update-ref", TagPrefix + "C" + MaxChangesetId, MaxCommitHash);
             LogCurrentMapping();
         }
 

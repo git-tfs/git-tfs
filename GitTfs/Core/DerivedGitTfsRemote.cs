@@ -32,6 +32,12 @@ namespace Sep.Git.Tfs.Core
             set { throw new NotImplementedException(); }
         }
 
+        public bool Autotag
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
         public string TfsUsername
         {
             get
