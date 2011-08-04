@@ -172,6 +172,13 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public void Apply(ITfsChangeset changeset, string destinationRef)
+        {
+            var log = Apply(MaxCommitHash, changeset);
+            var commit = Commit(log);
+            Repository.CommandNoisy("update-ref", destinationRef, commit);
+        }
+
         public void QuickFetch()
         {
             var changeset = Tfs.GetLatestChangeset(this);

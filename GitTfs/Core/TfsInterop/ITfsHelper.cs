@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
@@ -21,6 +22,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IChangeset GetChangeset(int changesetId);
         bool MatchesUrl(string tfsUrl);
         bool HasShelveset(string shelvesetName);
+        int Unshelve(Unshelve unshelve, IGitTfsRemote remote, IList<string> args);
         bool CanShowCheckinDialog { get; }
         long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
         void CleanupWorkspaces(string workingDirectory);
