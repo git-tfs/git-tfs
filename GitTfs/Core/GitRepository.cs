@@ -90,7 +90,7 @@ namespace Sep.Git.Tfs.Core
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
         {
             var remotes = new Dictionary<string, IGitTfsRemote>();
-            CommandOutputPipe(stdout => ParseRemoteConfig(stdout, remotes), "config", "-l");
+            CommandOutputPipe(stdout => ParseRemoteConfig(stdout, remotes), "config", "--list");
             return remotes;
         }
 
@@ -198,14 +198,14 @@ namespace Sep.Git.Tfs.Core
                 case "ignore-paths":
                     remote.IgnoreRegexExpression = value;
                     break;
-                    //case "fetch":
-                    //    remote.??? = value;
-                    //    break;
                 case "username":
                     remote.TfsUsername = value;
                     break;
                 case "password":
                     remote.TfsPassword = value;
+                    break;
+                case "autotag":
+                    remote.Autotag = bool.Parse(value);
                     break;
             }
         }
