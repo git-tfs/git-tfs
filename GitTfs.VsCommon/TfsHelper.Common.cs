@@ -37,7 +37,10 @@ namespace Sep.Git.Tfs.VsCommon
 
         public string Password { get; set; }
 
-        public bool HasCredentials { get { return !String.IsNullOrEmpty(Username); } }
+        public bool HasCredentials
+        {
+            get { return !String.IsNullOrEmpty(Username); }
+        }
 
         public abstract void EnsureAuthenticated();
 
@@ -76,10 +79,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         private WorkItemStore WorkItems
         {
-            get
-            {
-                return GetService<WorkItemStore>();
-            }
+            get { return GetService<WorkItemStore>(); }
         }
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
@@ -97,7 +97,7 @@ namespace Sep.Git.Tfs.VsCommon
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                         null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true,
+                                                         null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
                                                          true, true);
             return changesets.Cast<Changeset>()
                 .OrderBy(changeset => changeset.ChangesetId)
@@ -139,7 +139,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
             catch (MappingConflictException e)
             {
-                throw new GitTfsException(e.Message, new[] { "Run 'git tfs cleanup-workspaces' to remove the workspace." }, e);
+                throw new GitTfsException(e.Message, new[] {"Run 'git tfs cleanup-workspaces' to remove the workspace."}, e);
             }
         }
 
@@ -152,9 +152,9 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void CleanupWorkspaces(string workingDirectory)
         {
-            Trace.WriteLine("Looking for workspaces mapped to @\"" + workingDirectory +"\"...", "cleanup-workspaces");
+            Trace.WriteLine("Looking for workspaces mapped to @\"" + workingDirectory + "\"...", "cleanup-workspaces");
             var workspace = VersionControl.TryGetWorkspace(workingDirectory);
-            if(workspace != null)
+            if (workspace != null)
             {
                 Trace.WriteLine("Found mapping in workspace \"" + workspace.DisplayName + "\".", "cleanup-workspaces");
                 if (workspace.Folders.Length == 1)
@@ -169,7 +169,6 @@ namespace Sep.Git.Tfs.VsCommon
                         _stdout.WriteLine("Removing @\"" + mapping.LocalItem + "\" from workspace \"" + workspace.DisplayName + "\".");
                         workspace.DeleteMapping(mapping);
                     }
-
                 }
             }
         }
@@ -187,24 +186,15 @@ namespace Sep.Git.Tfs.VsCommon
         [Obsolete("TODO: un-spike-ify this.")]
         public int Unshelve(Sep.Git.Tfs.Commands.Unshelve unshelve, IGitTfsRemote remote, IList<string> args)
         {
-            var ListShelvesets = new Action<Shelveset[]>(shelvesets =>
-                                                             {
-                                                                 foreach (var shelveset in shelvesets)
-                                                                 {
-                                                                     _stdout.WriteLine("  {0,-20} {1,-20}",
-                                                                                       shelveset.OwnerName,
-                                                                                       shelveset.Name);
-                                                                 }
-                                                             });
             var shelvesetOwner = unshelve.Owner == "all" ? null : (unshelve.Owner ?? VersionControl.AuthenticatedUser);
-            if(unshelve.List)
+            if (unshelve.List)
             {
                 var shelvesets = VersionControl.QueryShelvesets(null, shelvesetOwner);
                 ListShelvesets(shelvesets);
             }
             else
             {
-                if(args.Count != 2)
+                if (args.Count != 2)
                 {
                     _stdout.WriteLine("ERROR: Two arguments are required.");
                     return GitTfsExitCodes.InvalidArguments;
@@ -213,7 +203,7 @@ namespace Sep.Git.Tfs.VsCommon
                 var destinationBranch = args[1];
 
                 var shelvesets = VersionControl.QueryShelvesets(shelvesetName, shelvesetOwner);
-                if(shelvesets.Length != 1)
+                if (shelvesets.Length != 1)
                 {
                     _stdout.WriteLine("ERROR: Unable to find shelveset \"" + shelvesetName + "\" (" + shelvesets.Length + " matches).");
                     ListShelvesets(shelvesets);
@@ -228,19 +218,8 @@ namespace Sep.Git.Tfs.VsCommon
                     return GitTfsExitCodes.ForceRequired;
                 }
 
-                // Don't need this because we're just adding a branch.
-                //var worktreeStatus = remote.Repository.Command("ls-files", "--deleted", "--modified", "--others",
-                //                                               "--exclude-standard");
-                //if(!string.IsNullOrEmpty(worktreeStatus))
-                //{
-                //    _stdout.WriteLine("ERROR: You have a dirty working tree:");
-                //    _stdout.Write(worktreeStatus);
-                //    return GitTfsExitCodes.InvalidPrecondition;
-                //}
-
                 var change = VersionControl.QueryShelvedChanges(shelveset).Single();
                 var gremote = (GitTfsRemote) remote;
-                //var tfsChangeset = new FakeTfsChangeset(change);
                 var wrapperForVersionControlServer =
                     _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
                 var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
@@ -251,7 +230,18 @@ namespace Sep.Git.Tfs.VsCommon
             }
             return GitTfsExitCodes.OK;
         }
-        class FakeChangeset : IChangeset
+
+        private void ListShelvesets(IEnumerable<Shelveset> shelvesets)
+        {
+            foreach (var shelveset in shelvesets)
+            {
+                _stdout.WriteLine("  {0,-20} {1,-20}", shelveset.OwnerName, shelveset.Name);
+            }
+        }
+
+        #region Fake classes for unshelve
+
+        private class FakeChangeset : IChangeset
         {
             private readonly Shelveset _shelveset;
             private readonly PendingSet _pendingSet;
@@ -298,11 +288,12 @@ namespace Sep.Git.Tfs.VsCommon
                 get { return _versionControlServer; }
             }
         }
-        class FakeChange : IChange
+
+        private class FakeChange : IChange
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
-            private FakeItem _fakeItem;
+            private readonly FakeItem _fakeItem;
 
             public FakeChange(PendingChange pendingChange, TfsApiBridge bridge)
             {
@@ -321,7 +312,8 @@ namespace Sep.Git.Tfs.VsCommon
                 get { return _fakeItem; }
             }
         }
-        class FakeItem : IItem
+
+        private class FakeItem : IItem
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
@@ -380,6 +372,8 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
+        #endregion
+
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
             var shelveset = new Shelveset(_bridge.Unwrap<Workspace>(workspace).VersionControlServer, shelvesetName, workspace.OwnerName);
@@ -428,8 +422,11 @@ namespace Sep.Git.Tfs.VsCommon
                     workItems, checkinAction, GetWorkItemCheckedInfo);
         }
 
-        private IEnumerable<TInterface> GetWorkItemInfosHelper<TInterface, TWrapper, TInstance>(IEnumerable<string> workItems, 
-            TfsWorkItemCheckinAction checkinAction, Func<string, WorkItemCheckinAction, TInstance> func)
+        private IEnumerable<TInterface> GetWorkItemInfosHelper<TInterface, TWrapper, TInstance>(
+            IEnumerable<string> workItems,
+            TfsWorkItemCheckinAction checkinAction,
+            Func<string, WorkItemCheckinAction, TInstance> func
+            )
             where TWrapper : class
         {
             return (from workItem in workItems
@@ -442,8 +439,6 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return new WorkItemCheckinInfo(WorkItems.GetWorkItem(Convert.ToInt32(workItem)), checkinAction);
         }
-
-        
 
         private static WorkItemCheckedInfo GetWorkItemCheckedInfo(string workitem, WorkItemCheckinAction checkinAction)
         {
