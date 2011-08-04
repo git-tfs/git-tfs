@@ -8,9 +8,11 @@ using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using SEP.Extensions;
+using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
+using ChangeType = Microsoft.TeamFoundation.Server.ChangeType;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -35,7 +37,10 @@ namespace Sep.Git.Tfs.VsCommon
 
         public string Password { get; set; }
 
-        public bool HasCredentials { get { return !String.IsNullOrEmpty(Username); } }
+        public bool HasCredentials
+        {
+            get { return !String.IsNullOrEmpty(Username); }
+        }
 
         public abstract void EnsureAuthenticated();
 
@@ -74,10 +79,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         private WorkItemStore WorkItems
         {
-            get
-            {
-                return GetService<WorkItemStore>();
-            }
+            get { return GetService<WorkItemStore>(); }
         }
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
@@ -95,7 +97,7 @@ namespace Sep.Git.Tfs.VsCommon
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                         null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true,
+                                                         null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
                                                          true, true);
             return changesets.Cast<Changeset>()
                 .OrderBy(changeset => changeset.ChangesetId)
@@ -137,7 +139,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
             catch (MappingConflictException e)
             {
-                throw new GitTfsException(e.Message, new[] { "Run 'git tfs cleanup-workspaces' to remove the workspace." }, e);
+                throw new GitTfsException(e.Message, new[] {"Run 'git tfs cleanup-workspaces' to remove the workspace."}, e);
             }
         }
 
@@ -150,9 +152,9 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void CleanupWorkspaces(string workingDirectory)
         {
-            Trace.WriteLine("Looking for workspaces mapped to @\"" + workingDirectory +"\"...", "cleanup-workspaces");
+            Trace.WriteLine("Looking for workspaces mapped to @\"" + workingDirectory + "\"...", "cleanup-workspaces");
             var workspace = VersionControl.TryGetWorkspace(workingDirectory);
-            if(workspace != null)
+            if (workspace != null)
             {
                 Trace.WriteLine("Found mapping in workspace \"" + workspace.DisplayName + "\".", "cleanup-workspaces");
                 if (workspace.Folders.Length == 1)
@@ -167,7 +169,6 @@ namespace Sep.Git.Tfs.VsCommon
                         _stdout.WriteLine("Removing @\"" + mapping.LocalItem + "\" from workspace \"" + workspace.DisplayName + "\".");
                         workspace.DeleteMapping(mapping);
                     }
-
                 }
             }
         }
@@ -181,6 +182,197 @@ namespace Sep.Git.Tfs.VsCommon
         protected abstract string GetAuthenticatedUser();
 
         public abstract bool CanShowCheckinDialog { get; }
+
+        [Obsolete("TODO: un-spike-ify this.")]
+        public int Unshelve(Sep.Git.Tfs.Commands.Unshelve unshelve, IGitTfsRemote remote, IList<string> args)
+        {
+            var shelvesetOwner = unshelve.Owner == "all" ? null : (unshelve.Owner ?? VersionControl.AuthenticatedUser);
+            if (unshelve.List)
+            {
+                var shelvesets = VersionControl.QueryShelvesets(null, shelvesetOwner);
+                ListShelvesets(shelvesets);
+            }
+            else
+            {
+                if (args.Count != 2)
+                {
+                    _stdout.WriteLine("ERROR: Two arguments are required.");
+                    return GitTfsExitCodes.InvalidArguments;
+                }
+                var shelvesetName = args[0];
+                var destinationBranch = args[1];
+
+                var shelvesets = VersionControl.QueryShelvesets(shelvesetName, shelvesetOwner);
+                if (shelvesets.Length != 1)
+                {
+                    _stdout.WriteLine("ERROR: Unable to find shelveset \"" + shelvesetName + "\" (" + shelvesets.Length + " matches).");
+                    ListShelvesets(shelvesets);
+                    return GitTfsExitCodes.InvalidArguments;
+                }
+                var shelveset = shelvesets.First();
+
+                var destinationRef = "refs/heads/" + destinationBranch;
+                if (File.Exists(Path.Combine(remote.Repository.GitDir, destinationRef)))
+                {
+                    _stdout.WriteLine("ERROR: Destination branch (" + destinationBranch + ") already exists!");
+                    return GitTfsExitCodes.ForceRequired;
+                }
+
+                var change = VersionControl.QueryShelvedChanges(shelveset).Single();
+                var gremote = (GitTfsRemote) remote;
+                var wrapperForVersionControlServer =
+                    _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
+                var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
+                var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout)
+                                       {Summary = new TfsChangesetInfo {Remote = remote}};
+                gremote.Apply(tfsChangeset, destinationRef);
+                _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
+            }
+            return GitTfsExitCodes.OK;
+        }
+
+        private void ListShelvesets(IEnumerable<Shelveset> shelvesets)
+        {
+            foreach (var shelveset in shelvesets)
+            {
+                _stdout.WriteLine("  {0,-20} {1,-20}", shelveset.OwnerName, shelveset.Name);
+            }
+        }
+
+        #region Fake classes for unshelve
+
+        private class FakeChangeset : IChangeset
+        {
+            private readonly Shelveset _shelveset;
+            private readonly PendingSet _pendingSet;
+            private readonly IVersionControlServer _versionControlServer;
+            private readonly TfsApiBridge _bridge;
+            private readonly IChange[] _changes;
+
+            public FakeChangeset(Shelveset shelveset, PendingSet pendingSet, IVersionControlServer versionControlServer, TfsApiBridge bridge)
+            {
+                _shelveset = shelveset;
+                _versionControlServer = versionControlServer;
+                _bridge = bridge;
+                _pendingSet = pendingSet;
+                _changes = _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge)).Cast<IChange>().ToArray();
+            }
+
+            public IChange[] Changes
+            {
+                get { return _changes; }
+            }
+
+            public string Committer
+            {
+                get { return _pendingSet.OwnerName; }
+            }
+
+            public DateTime CreationDate
+            {
+                get { return _shelveset.CreationDate; }
+            }
+
+            public string Comment
+            {
+                get { return _shelveset.Comment; }
+            }
+
+            public int ChangesetId
+            {
+                get { return -1; }
+            }
+
+            public IVersionControlServer VersionControlServer
+            {
+                get { return _versionControlServer; }
+            }
+        }
+
+        private class FakeChange : IChange
+        {
+            private readonly PendingChange _pendingChange;
+            private readonly TfsApiBridge _bridge;
+            private readonly FakeItem _fakeItem;
+
+            public FakeChange(PendingChange pendingChange, TfsApiBridge bridge)
+            {
+                _pendingChange = pendingChange;
+                _bridge = bridge;
+                _fakeItem = new FakeItem(_pendingChange, _bridge);
+            }
+
+            public TfsChangeType ChangeType
+            {
+                get { return _bridge.Convert<TfsChangeType>(_pendingChange.ChangeType); }
+            }
+
+            public IItem Item
+            {
+                get { return _fakeItem; }
+            }
+        }
+
+        private class FakeItem : IItem
+        {
+            private readonly PendingChange _pendingChange;
+            private readonly TfsApiBridge _bridge;
+            private long _contentLength;
+
+            public FakeItem(PendingChange pendingChange, TfsApiBridge bridge)
+            {
+                _pendingChange = pendingChange;
+                _bridge = bridge;
+            }
+
+            public IVersionControlServer VersionControlServer
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public int ChangesetId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public string ServerItem
+            {
+                get { return _pendingChange.ServerItem; }
+            }
+
+            public decimal DeletionId
+            {
+                get { return _pendingChange.DeletionId; }
+            }
+
+            public TfsItemType ItemType
+            {
+                get { return _bridge.Convert<TfsItemType>(_pendingChange.ItemType); }
+            }
+
+            public int ItemId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public long ContentLength
+            {
+                get { return _contentLength; }
+            }
+
+            public Stream DownloadFile()
+            {
+                string filename = Path.GetTempFileName();
+                _pendingChange.DownloadShelvedFile(filename);
+                var buffer = File.ReadAllBytes(filename);
+                _contentLength = buffer.Length;
+                var memoryStream = new MemoryStream(buffer, false);
+                File.Delete(filename);
+                return memoryStream;
+            }
+        }
+
+        #endregion
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
@@ -230,8 +422,11 @@ namespace Sep.Git.Tfs.VsCommon
                     workItems, checkinAction, GetWorkItemCheckedInfo);
         }
 
-        private IEnumerable<TInterface> GetWorkItemInfosHelper<TInterface, TWrapper, TInstance>(IEnumerable<string> workItems, 
-            TfsWorkItemCheckinAction checkinAction, Func<string, WorkItemCheckinAction, TInstance> func)
+        private IEnumerable<TInterface> GetWorkItemInfosHelper<TInterface, TWrapper, TInstance>(
+            IEnumerable<string> workItems,
+            TfsWorkItemCheckinAction checkinAction,
+            Func<string, WorkItemCheckinAction, TInstance> func
+            )
             where TWrapper : class
         {
             return (from workItem in workItems
@@ -244,8 +439,6 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return new WorkItemCheckinInfo(WorkItems.GetWorkItem(Convert.ToInt32(workItem)), checkinAction);
         }
-
-        
 
         private static WorkItemCheckedInfo GetWorkItemCheckedInfo(string workitem, WorkItemCheckinAction checkinAction)
         {
