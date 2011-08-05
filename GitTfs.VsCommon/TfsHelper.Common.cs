@@ -367,7 +367,7 @@ namespace Sep.Git.Tfs.VsCommon
                 if(_tempFile == null)
                 {
                     _tempFile = new TemporaryFile();
-                    _pendingChange.DownloadShelvedFile(tempFile);
+                    _pendingChange.DownloadShelvedFile(_tempFile);
                 }
                 return _tempFile.ToStream();
             }
