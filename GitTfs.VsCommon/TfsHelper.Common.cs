@@ -11,6 +11,7 @@ using SEP.Extensions;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 using ChangeType = Microsoft.TeamFoundation.Server.ChangeType;
 
