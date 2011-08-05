@@ -318,6 +318,7 @@ namespace Sep.Git.Tfs.VsCommon
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
             private long _contentLength;
+            private TemporaryFile _tempFile;
 
             public FakeItem(PendingChange pendingChange, TfsApiBridge bridge)
             {
@@ -362,13 +363,12 @@ namespace Sep.Git.Tfs.VsCommon
 
             public Stream DownloadFile()
             {
-                string filename = Path.GetTempFileName();
-                _pendingChange.DownloadShelvedFile(filename);
-                var buffer = File.ReadAllBytes(filename);
-                _contentLength = buffer.Length;
-                var memoryStream = new MemoryStream(buffer, false);
-                File.Delete(filename);
-                return memoryStream;
+                if(_tempFile == null)
+                {
+                    _tempFile = new TemporaryFile();
+                    _pendingChange.DownloadShelvedFile(tempFile);
+                }
+                return _tempFile.ToStream();
             }
         }
 
