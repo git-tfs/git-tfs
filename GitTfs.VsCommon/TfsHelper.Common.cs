@@ -197,7 +197,7 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 if (args.Count != 2)
                 {
-                    _stdout.WriteLine("ERROR: Two arguments are required.");
+                    _stdout.WriteLine("ERROR: usage: unshelve (-u <shelve-owner-name> <shelve-name> <git-branch-name>|-l [-u <shelve-owner-name>]).");
                     return GitTfsExitCodes.InvalidArguments;
                 }
                 var shelvesetName = args[0];
@@ -206,7 +206,7 @@ namespace Sep.Git.Tfs.VsCommon
                 var shelvesets = VersionControl.QueryShelvesets(shelvesetName, shelvesetOwner);
                 if (shelvesets.Length != 1)
                 {
-                    _stdout.WriteLine("ERROR: Unable to find shelveset \"" + shelvesetName + "\" (" + shelvesets.Length + " matches).");
+                    _stdout.WriteLine("ERROR: Unable to find shelveset \"" + shelvesetName + "\" (" + shelvesets.Length + " matches). Maybe you've forgot to set owner name?");
                     ListShelvesets(shelvesets);
                     return GitTfsExitCodes.InvalidArguments;
                 }
