@@ -170,7 +170,14 @@ namespace Sep.Git.Tfs.Core
                 var remote = remotes.ContainsKey(remoteId)
                                  ? remotes[remoteId]
                                  : (remotes[remoteId] = BuildRemote(remoteId));
-                SetRemoteConfigValue(remote, key, value);
+                try
+                {
+                    SetRemoteConfigValue(remote, key, value);
+                }
+                catch(Exception e)
+                {
+                    throw new GitTfsException("Malformed value for " + key + ": " + value, e);
+                }
             }
         }
 
