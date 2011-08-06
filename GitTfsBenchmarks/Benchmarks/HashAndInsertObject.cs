@@ -42,13 +42,10 @@ namespace Sep.Git.Tfs.Benchmarks
         {
             // Write the data to a file and insert that, so that git will handle any
             // EOL and encoding issues.
-            using (var tempFile = new TemporaryFile())
+            using (var tempStream = TemporaryFileStream.Acquire())
             {
-                using (var tempStream = File.Create(tempFile))
-                {
-                    file.CopyTo(tempStream);
-                }
-                return HashWithGit(tempFile);
+                file.CopyTo(tempStream);
+                return HashWithGit(tempStream.Filename);
             }
         }
 

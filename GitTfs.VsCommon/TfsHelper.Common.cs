@@ -318,7 +318,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
-            private long _contentLength;
+            private long _contentLength = -1;
 
             public FakeItem(PendingChange pendingChange, TfsApiBridge bridge)
             {
@@ -358,18 +358,29 @@ namespace Sep.Git.Tfs.VsCommon
 
             public long ContentLength
             {
-                get { return _contentLength; }
+                get 
+                { 
+                    if (_contentLength < 0)
+                        throw new InvalidOperationException("You can't query ContentLength before downloading the file");
+                    // It is not great solution, but at least makes the contract explicit.
+                    // We can't actually save downloaded file in this class, because if nobody asks
+                    // for it - we won't know when it is safe to delete it and it will stay in the 
+                    // system forever, which is bad. Implementing finalizer to delete file is also bad solution:
+                    // suppose process was killed in the middle of many-megabyte operation on thousands of files
+                    // if we delete them as soon as they are not used - only current file will remain. Otherwise
+                    // all of them.
+                    // With this exception at least it would be evident asap that something went wrong, so we could fix it.
+                    return _contentLength; 
+                }
             }
 
             public Stream DownloadFile()
             {
-                string filename = Path.GetTempFileName();
-                    _pendingChange.DownloadShelvedFile(filename);
-                var buffer = File.ReadAllBytes(filename);
-                _contentLength = buffer.Length;
-                var memoryStream = new MemoryStream(buffer, false);
-                File.Delete(filename);
-                return memoryStream;
+                string temp = Path.GetTempFileName();
+                _pendingChange.DownloadShelvedFile(temp);
+                var stream = new TemporaryFileStream(temp);
+                _contentLength = stream.Length;
+                return stream;
             }
         }
 
