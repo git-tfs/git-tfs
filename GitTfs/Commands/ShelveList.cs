@@ -21,7 +21,7 @@ namespace Sep.Git.Tfs.Commands
         [ShortOptionName('s')]
         [LongOptionName("sort")]
         [UseNameAsLongOption(false)]
-        [Description("How to sort resulting shelves.")]
+        [Description("How to sort resulting shelves. Possible values are: date, owner, name, comment.")]
         public string SortBy { get; set; }
 
         [OptDef(OptValType.Flag)]
