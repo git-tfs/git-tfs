@@ -29,8 +29,9 @@ namespace Sep.Git.Tfs.Util
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            if (!disposing || _filename == null) return;
+            if (_filename == null) return;
             
+            // doing the same both on disposing and finalizing
             try
             {
                 File.Delete(_filename);
@@ -46,6 +47,7 @@ namespace Sep.Git.Tfs.Util
                 Trace.WriteLine("Unable to delete temp file - unauthorized access: " + e);
                 // ignore!
             }
+            // other exceptions indicate bugs so shouldn't be catched
         }
     }
 }
