@@ -185,58 +185,110 @@ namespace Sep.Git.Tfs.VsCommon
         public abstract bool CanShowCheckinDialog { get; }
 
         [Obsolete("TODO: un-spike-ify this.")]
-        public int Unshelve(Sep.Git.Tfs.Commands.Unshelve unshelve, IGitTfsRemote remote, IList<string> args)
+        public int Unshelve(Unshelve unshelve, IGitTfsRemote remote, IList<string> args)
         {
             var shelvesetOwner = unshelve.Owner == "all" ? null : (unshelve.Owner ?? VersionControl.AuthenticatedUser);
-            if (unshelve.List)
+            if (args.Count != 2)
             {
-                var shelvesets = VersionControl.QueryShelvesets(null, shelvesetOwner);
-                ListShelvesets(shelvesets);
+                _stdout.WriteLine("ERROR: usage: unshelve (-u <shelve-owner-name> <shelve-name> <git-branch-name>|-l [-u <shelve-owner-name>]).");
+                return GitTfsExitCodes.InvalidArguments;
             }
-            else
+            var shelvesetName = args[0];
+            var destinationBranch = args[1];
+
+            var shelvesets = VersionControl.QueryShelvesets(shelvesetName, shelvesetOwner);
+            if (shelvesets.Length != 1)
             {
-                if (args.Count != 2)
-                {
-                    _stdout.WriteLine("ERROR: usage: unshelve (-u <shelve-owner-name> <shelve-name> <git-branch-name>|-l [-u <shelve-owner-name>]).");
-                    return GitTfsExitCodes.InvalidArguments;
-                }
-                var shelvesetName = args[0];
-                var destinationBranch = args[1];
-
-                var shelvesets = VersionControl.QueryShelvesets(shelvesetName, shelvesetOwner);
-                if (shelvesets.Length != 1)
-                {
-                    _stdout.WriteLine("ERROR: Unable to find shelveset \"" + shelvesetName + "\" (" + shelvesets.Length + " matches). Maybe you've forgot to set owner name?");
-                    ListShelvesets(shelvesets);
-                    return GitTfsExitCodes.InvalidArguments;
-                }
-                var shelveset = shelvesets.First();
-
-                var destinationRef = "refs/heads/" + destinationBranch;
-                if (File.Exists(Path.Combine(remote.Repository.GitDir, destinationRef)))
-                {
-                    _stdout.WriteLine("ERROR: Destination branch (" + destinationBranch + ") already exists!");
-                    return GitTfsExitCodes.ForceRequired;
-                }
-
-                var change = VersionControl.QueryShelvedChanges(shelveset).Single();
-                var gremote = (GitTfsRemote) remote;
-                var wrapperForVersionControlServer =
-                    _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
-                var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
-                var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout)
-                                       {Summary = new TfsChangesetInfo {Remote = remote}};
-                gremote.Apply(tfsChangeset, destinationRef);
-                _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
+                _stdout.WriteLine("ERROR: Unable to find shelveset \"" + shelvesetName + "\" (" + shelvesets.Length + " matches). Maybe you've forgot to set owner name?");
+                WriteShelvesetsToStdout(shelvesets);
+                return GitTfsExitCodes.InvalidArguments;
             }
+            var shelveset = shelvesets.First();
+
+            var destinationRef = "refs/heads/" + destinationBranch;
+            if (File.Exists(Path.Combine(remote.Repository.GitDir, destinationRef)))
+            {
+                _stdout.WriteLine("ERROR: Destination branch (" + destinationBranch + ") already exists!");
+                return GitTfsExitCodes.ForceRequired;
+            }
+
+            var change = VersionControl.QueryShelvedChanges(shelveset).Single();
+            var gremote = (GitTfsRemote) remote;
+            var wrapperForVersionControlServer =
+                _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
+            var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
+            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout)
+                                   {Summary = new TfsChangesetInfo {Remote = remote}};
+            gremote.Apply(tfsChangeset, destinationRef);
+            _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
             return GitTfsExitCodes.OK;
         }
 
-        private void ListShelvesets(IEnumerable<Shelveset> shelvesets)
+        public int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote)
+        {
+            var shelvesetOwner = shelveList.Owner == "all" ? null : (shelveList.Owner ?? VersionControl.AuthenticatedUser);
+            IEnumerable<Shelveset> shelvesets;
+            try
+            {
+                shelvesets = VersionControl.QueryShelvesets(null, shelvesetOwner);
+            }
+            catch(IdentityNotFoundException e)
+            {
+                _stdout.WriteLine("User '{0}' not found", shelveList.Owner);
+                return GitTfsExitCodes.InvalidArguments;
+            }
+            if (shelvesets.Empty())
+            {
+                _stdout.WriteLine("No changesets found.");
+                return GitTfsExitCodes.OK;
+            }
+
+            string sortBy = shelveList.SortBy;
+            if (sortBy != null)
+            {
+                switch (sortBy.ToLowerInvariant())
+                {
+                    case "date":
+                        shelvesets = shelvesets.OrderBy(s => s.CreationDate);
+                        break;
+                    case "owner":
+                        shelvesets = shelvesets.OrderBy(s => s.OwnerName);
+                        break;
+                    case "name":
+                        shelvesets = shelvesets.OrderBy(s => s.Name);
+                        break;
+                    case "comment":
+                        shelvesets = shelvesets.OrderBy(s => s.Comment);
+                        break;
+                    default:
+                        _stdout.WriteLine("ERROR: sorting criteria '{0}' is invalid. Possible values are: date, owner, name, comment", sortBy);
+                        return GitTfsExitCodes.InvalidArguments;
+                }
+            }
+            if (shelveList.FullFormat)
+                WriteShelvesetsToStdoutDetailed(shelvesets);
+            else
+                WriteShelvesetsToStdout(shelvesets);
+            return GitTfsExitCodes.OK;
+        }
+
+        private void WriteShelvesetsToStdout(IEnumerable<Shelveset> shelvesets)
         {
             foreach (var shelveset in shelvesets)
             {
                 _stdout.WriteLine("  {0,-20} {1,-20}", shelveset.OwnerName, shelveset.Name);
+            }
+        }
+
+        private void WriteShelvesetsToStdoutDetailed(IEnumerable<Shelveset> shelvesets)
+        {
+            foreach (var shelveset in shelvesets)
+            {
+                _stdout.WriteLine("Name   : {0}", shelveset.Name);
+                _stdout.WriteLine("Owner  : {0}", shelveset.OwnerName);
+                _stdout.WriteLine("Date   : {0:g}", shelveset.CreationDate);
+                _stdout.WriteLine("Comment: {0}", shelveset.Comment);
+                _stdout.WriteLine();
             }
         }
 
@@ -358,8 +410,8 @@ namespace Sep.Git.Tfs.VsCommon
 
             public long ContentLength
             {
-                get 
-                { 
+                get
+                {
                     if (_contentLength < 0)
                         throw new InvalidOperationException("You can't query ContentLength before downloading the file");
                     // It is not great solution, but at least makes the contract explicit.
@@ -370,7 +422,7 @@ namespace Sep.Git.Tfs.VsCommon
                     // if we delete them as soon as they are not used - only current file will remain. Otherwise
                     // all of them.
                     // With this exception at least it would be evident asap that something went wrong, so we could fix it.
-                    return _contentLength; 
+                    return _contentLength;
                 }
             }
 

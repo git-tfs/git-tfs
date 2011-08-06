@@ -20,11 +20,6 @@ namespace Sep.Git.Tfs.Commands
         {
             _globals = globals;
         }
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('l')]
-        [UseNameAsLongOption(false)]
-        [Description("List available shelvesets")]
-        public bool List { get; set; }
 
         [OptDef(OptValType.ValueReq)]
         [ShortOptionName('u')]
