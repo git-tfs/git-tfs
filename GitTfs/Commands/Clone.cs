@@ -8,7 +8,7 @@ using StructureMap;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("clone")]
-    [Description("clone [options] tfs-url repository-path <git-repository-path>")]
+    [Description("clone [options] tfs-url-or-instance-name repository-path <git-repository-path>")]
     public class Clone : GitTfsCommand
     {
         private readonly Fetch fetch;

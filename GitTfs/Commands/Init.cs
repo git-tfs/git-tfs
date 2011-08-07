@@ -10,7 +10,7 @@ using StructureMap;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("init")]
-    [Description("init [options] tfs-url repository-path [git-repository]")]
+    [Description("init [options] tfs-url-or-instance-name repository-path [git-repository]")]
     public class Init : GitTfsCommand
     {
         private readonly InitOptions initOptions;

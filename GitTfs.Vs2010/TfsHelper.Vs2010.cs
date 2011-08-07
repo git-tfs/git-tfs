@@ -7,6 +7,7 @@ using System.Reflection;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.Win32;
+using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using Sep.Git.Tfs.VsCommon;
@@ -41,6 +42,14 @@ namespace Sep.Git.Tfs.Vs2010
             }
             else
             {
+                if (!Uri.IsWellFormedUriString(Url, UriKind.Absolute))
+                {
+                    // maybe it is not an Uri but instance name
+                    var newUrl = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\10.0\TeamFoundation\Instances\" + Url, "Uri", "") as string;
+                    if (String.IsNullOrEmpty(newUrl) || !Uri.IsWellFormedUriString(newUrl, UriKind.Absolute))
+                        throw new GitTfsException("Given tfs name is not correct URI and not found as a registered TFS instance");
+                    Url = newUrl;
+                }
                 _server = HasCredentials ?
                     new TfsTeamProjectCollection(new Uri(Url), GetCredential(), new UICredentialsProvider()) :
                     new TfsTeamProjectCollection(new Uri(Url), new UICredentialsProvider());
