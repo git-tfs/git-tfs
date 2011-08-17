@@ -73,7 +73,7 @@ namespace Sep.Git.Tfs.Vs2010
 
         protected override string GetAuthenticatedUser()
         {
-            return VersionControl.TeamProjectCollection.AuthorizedIdentity.DisplayName;
+            return VersionControl.AuthorizedUser;
         }
 
         public override bool CanShowCheckinDialog { get { return true; } }
