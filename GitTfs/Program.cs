@@ -14,7 +14,8 @@ namespace Sep.Git.Tfs
 {
     public class Program
     {
-        public static void Main(string [] args)
+        [STAThreadAttribute]
+        public static void Main(string[] args)
         {
             try
             {
