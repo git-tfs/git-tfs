@@ -34,12 +34,12 @@ namespace Sep.Git.Tfs
                         Console.WriteLine("- " + solution);
                     }
                 }
-                Environment.ExitCode = -1;
+                Environment.ExitCode = GitTfsExitCodes.ExceptionThrown;
             }
             catch (Exception e)
             {
                 ReportException(e);
-                Environment.ExitCode = -1;
+                Environment.ExitCode = GitTfsExitCodes.ExceptionThrown;
             }
         }
 
