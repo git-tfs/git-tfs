@@ -121,6 +121,7 @@ namespace Sep.Git.Tfs.VsCommon
                     .With("remote").EqualTo(remote)
                     .With("contextVersion").EqualTo(versionToFetch)
                     .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                    .With("tfsHelper").EqualTo(this)
                     .GetInstance<TfsWorkspace>();
                 action(tfsWorkspace);
             }
