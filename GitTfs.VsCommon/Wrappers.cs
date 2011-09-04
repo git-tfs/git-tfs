@@ -68,7 +68,17 @@ namespace Sep.Git.Tfs.VsCommon
 
         public string Committer
         {
-            get { return _changeset.Committer; }
+            get
+            {
+                var committer = _changeset.Committer;
+                var owner = _changeset.Owner;
+                
+                // Sometimes TFS itself commits the changeset
+                if (owner != committer)
+                    return owner;
+
+                return committer;
+            }
         }
 
         public DateTime CreationDate
