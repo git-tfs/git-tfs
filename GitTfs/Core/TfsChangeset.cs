@@ -101,7 +101,12 @@ namespace Sep.Git.Tfs.Core
                 var history = item.VersionControlServer.QueryHistory(item.ServerItem, item.ChangesetId, 0,
                                                                      TfsRecursionType.None, null, 1, previousChangeset,
                                                                      1, true, false, false);
-                var previousChange = history.First();
+                var previousChange = history.FirstOrDefault();
+                if (previousChange == null)
+                {
+                    Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
+                    return null;
+                }
                 oldItem = previousChange.Changes[0].Item;
             }
             return oldItem.ServerItem;
