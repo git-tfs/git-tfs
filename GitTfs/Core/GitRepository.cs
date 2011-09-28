@@ -255,10 +255,9 @@ namespace Sep.Git.Tfs.Core
         {
             string currentCommit = null;
             string line;
-            var commitRegex = new Regex("commit (" + GitTfsConstants.Sha1 + ")");
             while (null != (line = stdout.ReadLine()))
             {
-                var match = commitRegex.Match(line);
+                var match = GitTfsConstants.CommitRegex.Match(line);
                 if (match.Success)
                 {
                     currentCommit = match.Groups[1].Value;
