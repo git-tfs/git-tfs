@@ -191,7 +191,7 @@ namespace Sep.Git.Tfs.VsCommon
             var shelvesetOwner = unshelve.Owner == "all" ? null : (unshelve.Owner ?? VersionControl.AuthenticatedUser);
             if (args.Count != 2)
             {
-                _stdout.WriteLine("ERROR: usage: unshelve (-u <shelve-owner-name> <shelve-name> <git-branch-name>|-l [-u <shelve-owner-name>]).");
+                _stdout.WriteLine("ERROR: usage: unshelve -u <shelve-owner-name> <shelve-name> <git-branch-name>");
                 return GitTfsExitCodes.InvalidArguments;
             }
             var shelvesetName = args[0];
