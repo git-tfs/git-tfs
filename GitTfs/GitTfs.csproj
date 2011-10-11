@@ -191,6 +191,7 @@
     <EmbeddedResource Include="GitVersionInfo" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="Core\TfsInterop\README.txt" />
   </ItemGroup>
   <ItemGroup>
