@@ -309,7 +309,7 @@ namespace Sep.Git.Tfs.VsCommon
                 _versionControlServer = versionControlServer;
                 _bridge = bridge;
                 _pendingSet = pendingSet;
-                _changes = _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge)).Cast<IChange>().ToArray();
+                _changes = _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge, versionControlServer)).Cast<IChange>().ToArray();
             }
 
             public IChange[] Changes
@@ -349,11 +349,11 @@ namespace Sep.Git.Tfs.VsCommon
             private readonly TfsApiBridge _bridge;
             private readonly FakeItem _fakeItem;
 
-            public FakeChange(PendingChange pendingChange, TfsApiBridge bridge)
+            public FakeChange(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
             {
                 _pendingChange = pendingChange;
                 _bridge = bridge;
-                _fakeItem = new FakeItem(_pendingChange, _bridge);
+                _fakeItem = new FakeItem(_pendingChange, _bridge, versionControlServer);
             }
 
             public TfsChangeType ChangeType
@@ -371,22 +371,30 @@ namespace Sep.Git.Tfs.VsCommon
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
+            private readonly IVersionControlServer _versionControlServer;
             private long _contentLength = -1;
 
-            public FakeItem(PendingChange pendingChange, TfsApiBridge bridge)
+            public FakeItem(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
             {
                 _pendingChange = pendingChange;
                 _bridge = bridge;
+                _versionControlServer = versionControlServer;
             }
 
             public IVersionControlServer VersionControlServer
             {
-                get { throw new NotImplementedException(); }
+                get { return _versionControlServer; }
             }
 
             public int ChangesetId
             {
-                get { throw new NotImplementedException(); }
+                get
+                {
+                    // some operations like applying rename gets previous item state
+                    // via looking at version of item minus 1. So will try to emulate
+                    // that this shelve is real revision.
+                    return _pendingChange.Version + 1;
+                }
             }
 
             public string ServerItem
@@ -406,7 +414,7 @@ namespace Sep.Git.Tfs.VsCommon
 
             public int ItemId
             {
-                get { throw new NotImplementedException(); }
+                get { return _pendingChange.ItemId; }
             }
 
             public long ContentLength
