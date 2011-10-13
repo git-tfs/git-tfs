@@ -246,7 +246,7 @@ namespace Sep.Git.Tfs.Core
             }
             catch (GitCommandException e)
             {
-                throw new GitTfsException("An error occurred while loading head " + head + " (maybe it doesn't exist?).");
+                Trace.WriteLine("An error occurred while loading head " + head + " (maybe it doesn't exist?): " + e);
             }
             return tfsCommits;
         }
