@@ -72,7 +72,7 @@ namespace Sep.Git.Tfs.Vs2008
 
         public Stream DownloadFile(IItem item)
         {
-            return _bridge.Unwrap<Item>(item).DownloadFile();
+			return _bridge.Unwrap<Item>(item).DownloadFile();
         }
     }
 }
