@@ -462,8 +462,12 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var history = VersionControl.QueryHistory(remote.TfsRepositoryPath, VersionSpec.Latest, 0,
                                                       RecursionType.Full, null, null, VersionSpec.Latest, 1, true, false,
-                                                      false);
-            return BuildTfsChangeset(history.Cast<Changeset>().Single(), remote);
+                                                      false).Cast<Changeset>().ToList();
+
+            if (history.Empty())
+                throw new GitTfsException("error: remote TFS repository path was not found");
+
+            return BuildTfsChangeset(history.Single(), remote);
         }
 
         public IChangeset GetChangeset(int changesetId)
