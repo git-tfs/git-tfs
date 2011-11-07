@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -143,16 +142,24 @@ namespace Sep.Git.Tfs.Core
             var startTime = DateTime.Now;
             var itemsCopied = 0;
             var maxChangesetId = 0;
-            foreach (var entry in GetTree())
+            var tfsTreeEntries = GetTree().ToArray();
+            if (tfsTreeEntries.Length == 0)
             {
-                Add(entry.Item, entry.FullName, index);
-                maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
-
-                itemsCopied++;
-                if(DateTime.Now - startTime > TimeSpan.FromSeconds(30))
+                maxChangesetId = _changeset.ChangesetId;
+            }
+            else
+            {
+                foreach (var entry in tfsTreeEntries)
                 {
-                    _stdout.WriteLine("" + itemsCopied + " objects created...");
-                    startTime = DateTime.Now;
+                    Add(entry.Item, entry.FullName, index);
+                    maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
+
+                    itemsCopied++;
+                    if (DateTime.Now - startTime > TimeSpan.FromSeconds(30))
+                    {
+                        _stdout.WriteLine("{0} objects created...", itemsCopied);
+                        startTime = DateTime.Now;
+                    }
                 }
             }
             return MakeNewLogEntry(maxChangesetId == _changeset.ChangesetId ? _changeset : _tfs.GetChangeset(maxChangesetId));
