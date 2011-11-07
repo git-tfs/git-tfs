@@ -130,23 +130,12 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<TfsTreeEntry> GetTree()
         {
-            return GetTree(false);
-        }
-
-        public IEnumerable<TfsTreeEntry> GetTree(bool includeIgnoredItems)
-        {
             var treeInfo = Summary.Remote.Repository.GetObjects();
-            foreach (var item in _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full))
-            {
-                if (item.ItemType == TfsItemType.File)
-                {
-                    var pathInGitRepo = GetPathInGitRepo(item.ServerItem, treeInfo);
-                    if (pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo))
-                    {
-                        yield return new TfsTreeEntry(pathInGitRepo, item);
-                    }
-                }
-            }
+            return from item in _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full)
+                   where item.ItemType == TfsItemType.File
+                   let pathInGitRepo = GetPathInGitRepo(item.ServerItem, treeInfo)
+                   where pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo)
+                   select new TfsTreeEntry(pathInGitRepo, item);
         }
 
         public LogEntry CopyTree(GitIndexInfo index)
