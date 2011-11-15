@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
-
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("unshelve")]
@@ -35,8 +36,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(IList<string> args)
         {
-            // TODO -- let the remote be specified on the command line.
-            var remote = _globals.Repository.ReadAllTfsRemotes().First();
+            var remote = _globals.Repository.ReadTfsRemote(_globals.RemoteId);
             return remote.Tfs.Unshelve(this, remote, args);
         }
     }
