@@ -49,6 +49,8 @@ You need .NET 4 and either the 2008 or 2010 version of Team Explorer installed.
 
 msbuild (included in .NET 4) should be able to build the entire solution.
 
+Use `msbuild GitTfs.sln /p:Configuration=Vs2010_Debug` to build for the 2010 version only.
+
 You can also do `rake build:debug`.
 
 If you contribute patches, please set `core.autocrlf` to `true`. (`git config core.autocrlf true`)

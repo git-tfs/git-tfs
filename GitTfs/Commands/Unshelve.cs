@@ -10,7 +10,7 @@ using StructureMap;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("unshelve")]
-    [Description("unshelve [options] (-l | shelveset-name destination-branch)")]
+    [Description("unshelve -u <shelve-owner-name> <shelve-name> <git-branch-name>")]
     [RequiresValidGitRepository]
     public class Unshelve : GitTfsCommand
     {
@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs.Commands
         [ShortOptionName('u')]
         [LongOptionName("user")]
         [UseNameAsLongOption(false)]
-        [Description("Shelveset owner (default is the current user; 'all' means all users)")]
+        [Description("Shelveset owner ('all' means all users)")]
         public string Owner { get; set; }
 
         public IEnumerable<IOptionResults> ExtraOptions

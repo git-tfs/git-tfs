@@ -121,6 +121,7 @@ namespace Sep.Git.Tfs.VsCommon
                     .With("remote").EqualTo(remote)
                     .With("contextVersion").EqualTo(versionToFetch)
                     .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                    .With("tfsHelper").EqualTo(this)
                     .GetInstance<TfsWorkspace>();
                 action(tfsWorkspace);
             }
@@ -190,7 +191,7 @@ namespace Sep.Git.Tfs.VsCommon
             var shelvesetOwner = unshelve.Owner == "all" ? null : (unshelve.Owner ?? VersionControl.AuthenticatedUser);
             if (args.Count != 2)
             {
-                _stdout.WriteLine("ERROR: usage: unshelve (-u <shelve-owner-name> <shelve-name> <git-branch-name>|-l [-u <shelve-owner-name>]).");
+                _stdout.WriteLine("ERROR: usage: unshelve -u <shelve-owner-name> <shelve-name> <git-branch-name>");
                 return GitTfsExitCodes.InvalidArguments;
             }
             var shelvesetName = args[0];
@@ -308,7 +309,7 @@ namespace Sep.Git.Tfs.VsCommon
                 _versionControlServer = versionControlServer;
                 _bridge = bridge;
                 _pendingSet = pendingSet;
-                _changes = _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge)).Cast<IChange>().ToArray();
+                _changes = _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge, versionControlServer)).Cast<IChange>().ToArray();
             }
 
             public IChange[] Changes
@@ -348,11 +349,11 @@ namespace Sep.Git.Tfs.VsCommon
             private readonly TfsApiBridge _bridge;
             private readonly FakeItem _fakeItem;
 
-            public FakeChange(PendingChange pendingChange, TfsApiBridge bridge)
+            public FakeChange(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
             {
                 _pendingChange = pendingChange;
                 _bridge = bridge;
-                _fakeItem = new FakeItem(_pendingChange, _bridge);
+                _fakeItem = new FakeItem(_pendingChange, _bridge, versionControlServer);
             }
 
             public TfsChangeType ChangeType
@@ -370,22 +371,30 @@ namespace Sep.Git.Tfs.VsCommon
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
+            private readonly IVersionControlServer _versionControlServer;
             private long _contentLength = -1;
 
-            public FakeItem(PendingChange pendingChange, TfsApiBridge bridge)
+            public FakeItem(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
             {
                 _pendingChange = pendingChange;
                 _bridge = bridge;
+                _versionControlServer = versionControlServer;
             }
 
             public IVersionControlServer VersionControlServer
             {
-                get { throw new NotImplementedException(); }
+                get { return _versionControlServer; }
             }
 
             public int ChangesetId
             {
-                get { throw new NotImplementedException(); }
+                get
+                {
+                    // some operations like applying rename gets previous item state
+                    // via looking at version of item minus 1. So will try to emulate
+                    // that this shelve is real revision.
+                    return _pendingChange.Version + 1;
+                }
             }
 
             public string ServerItem
@@ -405,7 +414,7 @@ namespace Sep.Git.Tfs.VsCommon
 
             public int ItemId
             {
-                get { throw new NotImplementedException(); }
+                get { return _pendingChange.ItemId; }
             }
 
             public long ContentLength
@@ -453,8 +462,12 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var history = VersionControl.QueryHistory(remote.TfsRepositoryPath, VersionSpec.Latest, 0,
                                                       RecursionType.Full, null, null, VersionSpec.Latest, 1, true, false,
-                                                      false);
-            return BuildTfsChangeset(history.Cast<Changeset>().Single(), remote);
+                                                      false).Cast<Changeset>().ToList();
+
+            if (history.Empty())
+                throw new GitTfsException("error: remote TFS repository path was not found");
+
+            return BuildTfsChangeset(history.Single(), remote);
         }
 
         public IChangeset GetChangeset(int changesetId)

@@ -10,7 +10,7 @@ using StructureMap;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("shelve-list")]
-    [Description("shelve-list [options]")]
+    [Description("shelve-list -u <shelve-owner-name> [options]")]
     [RequiresValidGitRepository]
     public class ShelveList : GitTfsCommand
     {
@@ -35,7 +35,7 @@ namespace Sep.Git.Tfs.Commands
         [ShortOptionName('u')]
         [LongOptionName("user")]
         [UseNameAsLongOption(false)]
-        [Description("Shelveset owner (default is the current user; 'all' means all users)")]
+        [Description("Shelveset owner ('all' means all users)")]
         public string Owner { get; set; }
 
         public IEnumerable<IOptionResults> ExtraOptions

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using StructureMap;
+using System.Text;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -157,7 +158,7 @@ namespace Sep.Git.Tfs.Core
                               {
                                   AssertValidCommand(command);
                                   var process = Start(command, RedirectStdin);
-                                  action(process.StandardInput);
+                                  action(process.StandardInput.WithDefaultEncoding());
                                   Close(process);
                               });
         }
@@ -168,8 +169,8 @@ namespace Sep.Git.Tfs.Core
                               {
                                   AssertValidCommand(command);
                                   var process = Start(command,
-                                                      Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
-                                  interact(process.StandardInput, process.StandardOutput);
+                                                      Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));                                  
+                                  interact(process.StandardInput.WithDefaultEncoding(), process.StandardOutput);
                                   Close(process);
                               });
         }

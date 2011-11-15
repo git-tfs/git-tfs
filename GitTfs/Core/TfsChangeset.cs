@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -101,7 +100,12 @@ namespace Sep.Git.Tfs.Core
                 var history = item.VersionControlServer.QueryHistory(item.ServerItem, item.ChangesetId, 0,
                                                                      TfsRecursionType.None, null, 1, previousChangeset,
                                                                      1, true, false, false);
-                var previousChange = history.First();
+                var previousChange = history.FirstOrDefault();
+                if (previousChange == null)
+                {
+                    Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
+                    return null;
+                }
                 oldItem = previousChange.Changes[0].Item;
             }
             return oldItem.ServerItem;
@@ -125,23 +129,12 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<TfsTreeEntry> GetTree()
         {
-            return GetTree(false);
-        }
-
-        public IEnumerable<TfsTreeEntry> GetTree(bool includeIgnoredItems)
-        {
             var treeInfo = Summary.Remote.Repository.GetObjects();
-            foreach (var item in _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full))
-            {
-                if (item.ItemType == TfsItemType.File)
-                {
-                    var pathInGitRepo = GetPathInGitRepo(item.ServerItem, treeInfo);
-                    if (pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo))
-                    {
-                        yield return new TfsTreeEntry(pathInGitRepo, item);
-                    }
-                }
-            }
+            return from item in _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full)
+                   where item.ItemType == TfsItemType.File
+                   let pathInGitRepo = GetPathInGitRepo(item.ServerItem, treeInfo)
+                   where pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo)
+                   select new TfsTreeEntry(pathInGitRepo, item);
         }
 
         public LogEntry CopyTree(GitIndexInfo index)
@@ -149,16 +142,24 @@ namespace Sep.Git.Tfs.Core
             var startTime = DateTime.Now;
             var itemsCopied = 0;
             var maxChangesetId = 0;
-            foreach (var entry in GetTree())
+            var tfsTreeEntries = GetTree().ToArray();
+            if (tfsTreeEntries.Length == 0)
             {
-                Add(entry.Item, entry.FullName, index);
-                maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
-
-                itemsCopied++;
-                if(DateTime.Now - startTime > TimeSpan.FromSeconds(30))
+                maxChangesetId = _changeset.ChangesetId;
+            }
+            else
+            {
+                foreach (var entry in tfsTreeEntries)
                 {
-                    _stdout.WriteLine("" + itemsCopied + " objects created...");
-                    startTime = DateTime.Now;
+                    Add(entry.Item, entry.FullName, index);
+                    maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
+
+                    itemsCopied++;
+                    if (DateTime.Now - startTime > TimeSpan.FromSeconds(30))
+                    {
+                        _stdout.WriteLine("{0} objects created...", itemsCopied);
+                        startTime = DateTime.Now;
+                    }
                 }
             }
             return MakeNewLogEntry(maxChangesetId == _changeset.ChangesetId ? _changeset : _tfs.GetChangeset(maxChangesetId));

@@ -99,6 +99,7 @@
     <Compile Include="Core\GitChangeInfoTests.cs" />
     <Compile Include="Core\GitTfsRemoteTests.cs" />
     <Compile Include="Core\ModeTests.cs" />
+    <Compile Include="GitTfsRegexTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHelpers\ExtensionMethods.cs" />
     <Compile Include="Util\GitTfsCommandRunnerTests.cs" />
