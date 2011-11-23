@@ -49,12 +49,19 @@ namespace Sep.Git.Tfs.Commands
             }
             catch
             {
-                // if we appeared to be inside repository dir when exception was thrown - we won't be able to delete it
-                Environment.CurrentDirectory = currentDir; 
-                if (repositoryDirCreated)
-                    Directory.Delete(gitRepositoryPath, recursive: true);
-                else
-                    CleanDirectory(gitRepositoryPath);
+                try
+                {
+                    // if we appeared to be inside repository dir when exception was thrown - we won't be able to delete it
+                    Environment.CurrentDirectory = currentDir;
+                    if (repositoryDirCreated)
+                        Directory.Delete(gitRepositoryPath, recursive: true);
+                    else
+                        CleanDirectory(gitRepositoryPath);
+                }
+                catch (IOException)
+                {
+                    // swallow IOException. Smth went wrong before this and we're much more interested in that error
+                }
 
                 throw;
             }
