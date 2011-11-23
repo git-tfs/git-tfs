@@ -153,7 +153,15 @@ namespace Sep.Git.Tfs.Vs2010
 
         public Stream DownloadFile(IItem item)
         {
-            return _bridge.Unwrap<Item>(item).DownloadFile();
+            try
+            {
+                return _bridge.Unwrap<Item>(item).DownloadFile();
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(String.Format("Something went wrong downloading \"{0}\" in changeset {1}", item.ServerItem, item.ChangesetId));
+                throw;
+            }
         }
     }
 }
