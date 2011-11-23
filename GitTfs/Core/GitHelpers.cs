@@ -169,8 +169,8 @@ namespace Sep.Git.Tfs.Core
                               {
                                   AssertValidCommand(command);
                                   var process = Start(command,
-                                                      Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));                                  
-                                  interact(process.StandardInput.WithDefaultEncoding(), process.StandardOutput);
+                                                      Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
+                                  interact(new StreamWriter(process.StandardInput.BaseStream, Encoding.UTF8), new StreamReader(process.StandardOutput.BaseStream, Encoding.UTF8));
                                   Close(process);
                               });
         }
