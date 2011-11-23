@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -58,9 +60,17 @@ namespace Sep.Git.Tfs.Commands
                     else
                         CleanDirectory(gitRepositoryPath);
                 }
-                catch (IOException)
+                catch (IOException e)
                 {
                     // swallow IOException. Smth went wrong before this and we're much more interested in that error
+                    string msg = String.Format("Something went wrong, can't cleanup files because of IOException:\n{0}\n", e.IndentExceptionMessage());
+                    Trace.WriteLine(msg);
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    // swallow it also
+                    string msg = String.Format("Something went wrong, can't cleanup files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
+                    Trace.WriteLine(msg);
                 }
 
                 throw;
