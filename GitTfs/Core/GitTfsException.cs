@@ -31,5 +31,14 @@ namespace Sep.Git.Tfs.Core
         {
             return new GitTfsException(Message, RecommendedSolutions, this);
         }
+
+        public GitTfsException WithRecommendation(params string [] recommendations)
+        {
+            if (RecommendedSolutions == null)
+                RecommendedSolutions = (IEnumerable<string>) recommendations.Clone();
+            else
+                RecommendedSolutions = RecommendedSolutions.Append<string>(recommendations);
+            return this;
+        }
     }
 }

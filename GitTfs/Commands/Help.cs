@@ -46,8 +46,12 @@ namespace Sep.Git.Tfs.Commands
                 {
                     return Run(command);
                 }
+                else
+                {
+                    output.WriteLine("Invalid argument: " + arg);
+                }
             }
-            return GitTfsExitCodes.InvalidArguments;
+            return Run();
         }
 
         /// <summary>

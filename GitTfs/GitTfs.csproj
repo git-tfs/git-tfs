@@ -43,6 +43,7 @@
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -88,6 +89,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="Commands\Bootstrap.cs" />
     <Compile Include="Commands\Checkin.cs" />
     <Compile Include="Commands\CheckinTool.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
@@ -97,6 +99,7 @@
     <Compile Include="Commands\CleanupWorkspaces.cs" />
     <Compile Include="Commands\Clone.cs" />
     <Compile Include="Commands\CommitOptions.cs" />
+    <Compile Include="Commands\ShelveList.cs" />
     <Compile Include="Commands\Diagnostics.cs" />
     <Compile Include="Commands\FcOptions.cs" />
     <Compile Include="Commands\Fetch.cs" />
@@ -107,14 +110,17 @@
     <Compile Include="Commands\Pull.cs" />
     <Compile Include="Commands\QuickClone.cs" />
     <Compile Include="Commands\QuickFetch.cs" />
+    <Compile Include="Commands\Rcheckin.cs" />
     <Compile Include="Commands\RemoteOptions.cs" />
     <Compile Include="Commands\Shelve.cs" />
     <Compile Include="Commands\Verify.cs" />
+    <Compile Include="Commands\Unshelve.cs" />
     <Compile Include="Core\Changes\Git\Add.cs" />
     <Compile Include="Core\Changes\Git\Delete.cs" />
     <Compile Include="Core\Changes\Git\Modify.cs" />
     <Compile Include="Core\Changes\Git\RenameEdit.cs" />
     <Compile Include="Core\CheckinPolicyEvaluator.cs" />
+    <Compile Include="Core\DerivedGitTfsRemote.cs" />
     <Compile Include="Core\GitChangeInfo.cs" />
     <Compile Include="Core\GitCommit.cs" />
     <Compile Include="Core\GitObject.cs" />
@@ -151,6 +157,7 @@
     <Compile Include="Core\TfsWorkspace.cs" />
     <Compile Include="Core\TfsWriter.cs" />
     <Compile Include="Core\GitTfsException.cs" />
+    <Compile Include="Util\ExceptionFormattingExtensions.cs" />
     <Compile Include="Util\GitTfsCommandFactory.cs" />
     <Compile Include="Util\GitTfsCommandRunner.cs" />
     <Compile Include="Util\WhenDynamicDoesntWork.cs" />
@@ -179,12 +186,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\InspectExtensions.cs" />
     <Compile Include="Util\StructureMapSingletonAttribute.cs" />
-    <Compile Include="Util\TemporaryFile.cs" />
+    <Compile Include="Util\TemporaryFileStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="GitVersionInfo" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="Core\TfsInterop\README.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -213,7 +221,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PreBuildEvent>"$(ProjectDir)..\GetCurrentVersion" "$(GitPath)" &gt; "$(ProjectDir)GitVersionInfo"</PreBuildEvent>
   </PropertyGroup>
 </Project>

@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Microsoft.Win32;
+using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using Sep.Git.Tfs.VsCommon;
@@ -13,6 +16,10 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.Vs2010
 {
+    using System.Net;
+
+    using Microsoft.TeamFoundation.Framework.Client;
+
     public class TfsHelper : TfsHelperBase
     {
         private readonly TfsApiBridge _bridge;
@@ -28,7 +35,7 @@ namespace Sep.Git.Tfs.Vs2010
             get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version + " (MS)"; }
         }
 
-        protected override void UpdateServer()
+        public override void EnsureAuthenticated()
         {
             if (string.IsNullOrEmpty(Url))
             {
@@ -36,7 +43,25 @@ namespace Sep.Git.Tfs.Vs2010
             }
             else
             {
-                _server = new TfsTeamProjectCollection(new Uri(Url), new UICredentialsProvider());
+                Uri uri;
+                if (!Uri.IsWellFormedUriString(Url, UriKind.Absolute))
+                {
+                    // maybe it is not an Uri but instance name
+                    var servers = RegisteredTfsConnections.GetConfigurationServers();
+                    var registered = servers.FirstOrDefault(s => String.Compare(s.Name, Url, StringComparison.OrdinalIgnoreCase) == 0);
+                    if (registered == null)
+                        throw new GitTfsException("Given tfs name is not correct URI and not found as a registered TFS instance");
+                    uri = registered.Uri;
+                }
+                else
+                {
+                    uri = new Uri(Url);
+                }
+
+                _server = HasCredentials ?
+                    new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
+                    new TfsTeamProjectCollection(uri, new UICredentialsProvider());
+
                 _server.EnsureAuthenticated();
             }
         }
@@ -48,7 +73,7 @@ namespace Sep.Git.Tfs.Vs2010
 
         protected override string GetAuthenticatedUser()
         {
-            return VersionControl.AuthenticatedUser;
+            return VersionControl.AuthorizedUser;
         }
 
         public override bool CanShowCheckinDialog { get { return true; } }
@@ -94,7 +119,49 @@ namespace Sep.Git.Tfs.Vs2010
 
         private static string GetVs2010InstallDir()
         {
-            return Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\VisualStudio\10.0").GetValue("InstallDir").ToString();
+            return TryGetRegString(@"Software\Microsoft\VisualStudio\10.0", "InstallDir")
+                ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\10.0", "InstallDir");
+        }
+
+        private static string TryGetRegString(string path, string name)
+        {
+            try
+            {
+                Trace.WriteLine("Trying to get " + path + "|" + name);
+                var key = Registry.LocalMachine.OpenSubKey(path);
+                if(key != null)
+                {
+                    return key.GetValue(name) as string;
+                }
+            }
+            catch(Exception e)
+            {
+                Trace.WriteLine("Unable to get registry value " + path + "|" + name + ": " + e);
+            }
+            return null;
+        }
+    }
+
+    public class ItemDownloadStrategy : IItemDownloadStrategy
+    {
+        private readonly TfsApiBridge _bridge;
+
+        public ItemDownloadStrategy(TfsApiBridge bridge)
+        {
+            _bridge = bridge;
+        }
+
+        public Stream DownloadFile(IItem item)
+        {
+            try
+            {
+                return _bridge.Unwrap<Item>(item).DownloadFile();
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(String.Format("Something went wrong downloading \"{0}\" in changeset {1}", item.ServerItem, item.ChangesetId));
+                throw;
+            }
         }
     }
 }

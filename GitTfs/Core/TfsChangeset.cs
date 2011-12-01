@@ -1,29 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
 {
     public class TfsChangeset : ITfsChangeset
     {
-        private readonly ITfsHelper tfs;
-        private readonly IChangeset changeset;
+        private readonly ITfsHelper _tfs;
+        private readonly IChangeset _changeset;
+        private readonly TextWriter _stdout;
         public TfsChangesetInfo Summary { get; set; }
 
-        public TfsChangeset(ITfsHelper tfs, IChangeset changeset)
+        public TfsChangeset(ITfsHelper tfs, IChangeset changeset, TextWriter stdout)
         {
-            this.tfs = tfs;
-            this.changeset = changeset;
+            _tfs = tfs;
+            _changeset = changeset;
+            _stdout = stdout;
         }
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index)
         {
             var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
-            foreach (var change in Sort(changeset.Changes))
+            foreach (var change in Sort(_changeset.Changes))
             {
                 Apply(change, index, initialTree);
             }
@@ -36,7 +38,7 @@ namespace Sep.Git.Tfs.Core
             // and git doesn't really care if you add or delete empty dirs.
             if (change.Item.ItemType == TfsItemType.File)
             {
-                var pathInGitRepo = Summary.Remote.GetPathInGitRepo(change.Item.ServerItem);
+                var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, initialTree);
                 if (pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
                     return;
                 if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
@@ -54,9 +56,17 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        private string GetPathInGitRepo(string tfsPath, IDictionary<string, GitObject> initialTree)
+        {
+            var pathInGitRepo = Summary.Remote.GetPathInGitRepo(tfsPath);
+            if (pathInGitRepo == null)
+                return null;
+            return UpdateToMatchExtantCasing(pathInGitRepo, initialTree);
+        }
+
         private void Rename(IChange change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
         {
-            var oldPath = Summary.Remote.GetPathInGitRepo(GetPathBeforeRename(change.Item));
+            var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Item), initialTree);
             if (oldPath != null)
             {
                 Delete(oldPath, index, initialTree);
@@ -90,7 +100,12 @@ namespace Sep.Git.Tfs.Core
                 var history = item.VersionControlServer.QueryHistory(item.ServerItem, item.ChangesetId, 0,
                                                                      TfsRecursionType.None, null, 1, previousChangeset,
                                                                      1, true, false, false);
-                var previousChange = history.First();
+                var previousChange = history.FirstOrDefault();
+                if (previousChange == null)
+                {
+                    Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
+                    return null;
+                }
                 oldItem = previousChange.Changes[0].Item;
             }
             return oldItem.ServerItem;
@@ -100,95 +115,97 @@ namespace Sep.Git.Tfs.Core
         {
             if (change.Item.DeletionId == 0)
             {
-                using (var tempFile = new TemporaryFile())
+                using (var stream = change.Item.DownloadFile())
                 {
-                    change.Item.DownloadFile(tempFile);
-                    index.Update(GetMode(change, initialTree, pathInGitRepo),
-                                 UpdateDirectoryToMatchExtantCasing(pathInGitRepo, initialTree),
-                                 tempFile);
+                    index.Update(
+                        GetMode(change, initialTree, pathInGitRepo),
+                        pathInGitRepo,
+                        stream,
+                        change.Item.ContentLength
+                    );
                 }
             }
         }
 
         public IEnumerable<TfsTreeEntry> GetTree()
         {
-            return GetTree(false);
-        }
-
-        public IEnumerable<TfsTreeEntry> GetTree(bool includeIgnoredItems)
-        {
-            foreach (var item in changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, changeset.ChangesetId, TfsRecursionType.Full))
-            {
-                if (item.ItemType == TfsItemType.File)
-                {
-                    var pathInGitRepo = Summary.Remote.GetPathInGitRepo(item.ServerItem);
-                    if (pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo))
-                    {
-                        yield return new TfsTreeEntry(pathInGitRepo, item);
-                    }
-                }
-            }
+            var treeInfo = Summary.Remote.Repository.GetObjects();
+            return from item in _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full)
+                   where item.ItemType == TfsItemType.File
+                   let pathInGitRepo = GetPathInGitRepo(item.ServerItem, treeInfo)
+                   where pathInGitRepo != null && !Summary.Remote.ShouldSkip(pathInGitRepo)
+                   select new TfsTreeEntry(pathInGitRepo, item);
         }
 
         public LogEntry CopyTree(GitIndexInfo index)
         {
+            var startTime = DateTime.Now;
+            var itemsCopied = 0;
             var maxChangesetId = 0;
-            foreach (var entry in GetTree())
+            var tfsTreeEntries = GetTree().ToArray();
+            if (tfsTreeEntries.Length == 0)
             {
-                Add(entry.Item, entry.FullName, index);
-                maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
+                maxChangesetId = _changeset.ChangesetId;
             }
-            return MakeNewLogEntry(maxChangesetId == changeset.ChangesetId ? changeset : tfs.GetChangeset(maxChangesetId));
+            else
+            {
+                foreach (var entry in tfsTreeEntries)
+                {
+                    Add(entry.Item, entry.FullName, index);
+                    maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
+
+                    itemsCopied++;
+                    if (DateTime.Now - startTime > TimeSpan.FromSeconds(30))
+                    {
+                        _stdout.WriteLine("{0} objects created...", itemsCopied);
+                        startTime = DateTime.Now;
+                    }
+                }
+            }
+            return MakeNewLogEntry(maxChangesetId == _changeset.ChangesetId ? _changeset : _tfs.GetChangeset(maxChangesetId));
         }
 
         private void Add(IItem item, string pathInGitRepo, GitIndexInfo index)
         {
             if(item.DeletionId == 0)
             {
-                using(var tempFile = new TemporaryFile())
+                // Download the content directly into the index as a blob:
+                using (var stream = item.DownloadFile())
                 {
-                    item.DownloadFile(tempFile);
-                    index.Update(Mode.NewFile, pathInGitRepo, tempFile);
+                    index.Update(Mode.NewFile, pathInGitRepo, stream, item.ContentLength);
                 }
             }
         }
 
         private string GetMode(IChange change, IDictionary<string, GitObject> initialTree, string pathInGitRepo)
         {
-            if(initialTree.ContainsKey(pathInGitRepo) && !change.ChangeType.IncludesOneOf(TfsChangeType.Add))
+            if(initialTree.ContainsKey(pathInGitRepo) &&
+                !String.IsNullOrEmpty(initialTree[pathInGitRepo].Mode) &&
+                !change.ChangeType.IncludesOneOf(TfsChangeType.Add))
             {
                 return initialTree[pathInGitRepo].Mode;
             }
             return Mode.NewFile;
         }
 
-        private static readonly Regex pathWithDirRegex = new Regex("(?<dir>.*)/(?<file>[^/]+)");
+        private static readonly Regex SplitDirnameFilename = new Regex("(?<dir>.*)/(?<file>[^/]+)");
 
-        private string UpdateDirectoryToMatchExtantCasing(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
+        private string UpdateToMatchExtantCasing(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
         {
-            string newPathTail = null;
-            string newPathHead = pathInGitRepo;
-            while(true)
+            if (initialTree.ContainsKey(pathInGitRepo))
+                return initialTree[pathInGitRepo].Path;
+
+            var fullPath = pathInGitRepo;
+            var splitResult = SplitDirnameFilename.Match(pathInGitRepo);
+            if (splitResult.Success)
             {
-                if(initialTree.ContainsKey(newPathHead))
-                {
-                    return MaybeAppendPath(initialTree[newPathHead].Path, newPathTail);
-                }
-                var pathWithDirMatch = pathWithDirRegex.Match(newPathHead);
-                if(!pathWithDirMatch.Success)
-                {
-                    return MaybeAppendPath(newPathHead, newPathTail);
-                }
-                newPathTail = MaybeAppendPath(pathWithDirMatch.Groups["file"].Value, newPathTail);
-                newPathHead = pathWithDirMatch.Groups["dir"].Value;
-            }
-        }
 
-        private string MaybeAppendPath(string path, object tail)
-        {
-            if(tail != null)
-                path = path + "/" + tail;
-            return path;
+                var dirName = splitResult.Groups["dir"].Value;
+                var fileName = splitResult.Groups["file"].Value;
+                fullPath = UpdateToMatchExtantCasing(dirName, initialTree) + "/" + fileName;
+            }
+            initialTree[fullPath] = new GitObject {Path = fullPath};
+            return fullPath;
         }
 
         private void Delete(string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
@@ -202,19 +219,39 @@ namespace Sep.Git.Tfs.Core
 
         private LogEntry MakeNewLogEntry()
         {
-            return MakeNewLogEntry(changeset);
+            return MakeNewLogEntry(_changeset);
         }
 
         private LogEntry MakeNewLogEntry(IChangeset changesetToLog)
         {
-            var log = new LogEntry();
-            var identity = tfs.GetIdentity(changesetToLog.Committer);
-            log.CommitterName = log.AuthorName = null != identity ? identity.DisplayName ?? "Unknown TFS user" : changesetToLog.Committer ?? "Unknown TFS user";
-            log.CommitterEmail = log.AuthorEmail = null != identity ? identity.MailAddress ?? changesetToLog.Committer : changesetToLog.Committer;
-            log.Date = changesetToLog.CreationDate;
-            log.Log = changesetToLog.Comment + Environment.NewLine;
-            log.ChangesetId = changesetToLog.ChangesetId;
-            return log;
+            var identity = _tfs.GetIdentity(changesetToLog.Committer);
+
+            // committer's & author's name and email MUST NOT be empty as otherwise they would be picked
+            // by git from user.name and user.email config settings which is bad thing because commit could
+            // be different depending on whose machine it fetched
+            var name = "Unknown TFS user";
+            var email = "unknown@tfs.local";
+            if (identity != null)
+            {
+                if (!String.IsNullOrWhiteSpace(identity.DisplayName))
+                    name = identity.DisplayName;
+                
+                if (!String.IsNullOrWhiteSpace(identity.MailAddress))
+                    email = identity.MailAddress;
+                else if (!String.IsNullOrWhiteSpace(changesetToLog.Committer))
+                    email = changesetToLog.Committer;
+            }
+
+            return new LogEntry
+                       {
+                           Date = changesetToLog.CreationDate, 
+                           Log = changesetToLog.Comment + Environment.NewLine, 
+                           ChangesetId = changesetToLog.ChangesetId, 
+                           CommitterName = name, 
+                           AuthorName = name, 
+                           CommitterEmail = email, 
+                           AuthorEmail = email
+                       };
         }
     }
 }

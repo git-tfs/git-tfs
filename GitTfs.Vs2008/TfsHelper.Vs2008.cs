@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using Microsoft.TeamFoundation.Client;
+using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 using Sep.Git.Tfs.VsCommon;
 using StructureMap;
 
@@ -18,10 +21,10 @@ namespace Sep.Git.Tfs.Vs2008
 
         public override string TfsClientLibraryVersion
         {
-            get { return "" + typeof(TeamFoundationServer).Assembly.GetName().Version + " (MS)"; }
+            get { return "" + typeof (TeamFoundationServer).Assembly.GetName().Version + " (MS)"; }
         }
 
-        protected override void UpdateServer()
+        public override void EnsureAuthenticated()
         {
             if (string.IsNullOrEmpty(Url))
             {
@@ -29,7 +32,10 @@ namespace Sep.Git.Tfs.Vs2008
             }
             else
             {
-                _server = new TeamFoundationServer(Url, new UICredentialsProvider());
+                _server = HasCredentials ?
+                    new TeamFoundationServer(Url, GetCredential(), new UICredentialsProvider()) :
+                    new TeamFoundationServer(Url, new UICredentialsProvider());
+
                 _server.EnsureAuthenticated();
             }
         }
@@ -44,11 +50,31 @@ namespace Sep.Git.Tfs.Vs2008
             return VersionControl.AuthenticatedUser;
         }
 
-        public override bool CanShowCheckinDialog { get { return false; } }
+        public override bool CanShowCheckinDialog
+        {
+            get { return false; }
+        }
 
         public override long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class ItemDownloadStrategy : IItemDownloadStrategy
+    {
+        private readonly TfsApiBridge _bridge;
+
+        public ItemDownloadStrategy(TfsApiBridge bridge)
+        {
+            _bridge = bridge;
+        }
+
+        public Stream DownloadFile(IItem item)
+        {
+            string tempfile = Path.GetTempFileName();
+            _bridge.Unwrap<Item>(item).DownloadFile(tempfile);
+            return new TemporaryFileStream(tempfile);
         }
     }
 }

@@ -1,3 +1,4 @@
+
 .*.swp
 *.suo
 bin
@@ -9,3 +10,4 @@ TestResults
 GitTfs/GitVersionInfo
 pkg
 GitTfs.sln.*
+*.dotCover

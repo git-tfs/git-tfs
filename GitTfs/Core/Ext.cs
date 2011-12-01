@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using CommandLine.OptParse;
 using StructureMap;
@@ -42,6 +43,11 @@ namespace Sep.Git.Tfs.Core
         {
             foreach (var x in e) return x;
             return defaultValue;
+        }
+
+        public static bool Empty<T>(this IEnumerable<T> e)
+        {
+            return !e.Any();
         }
 
         public static void SetArguments(this ProcessStartInfo startInfo, params string [] args)
@@ -109,6 +115,15 @@ namespace Sep.Git.Tfs.Core
             var chars = new char[length];
             var charsRead = reader.Read(chars, 0, length);
             return new string(chars, 0, charsRead);
+        }
+
+        /// <summary>
+        /// Force the <paramref name="stream"/> to use current Windows ANSI code page.
+        /// For the StdIn-interactions with git it is important to use the standard ANSI codepage 
+        /// (i.e. the codepage returned by  GetACP()), and not the current terminal codepage.
+        /// </summary>
+        public static StreamWriter WithDefaultEncoding(this StreamWriter stream) {
+            return new StreamWriter(stream.BaseStream, Encoding.Default);
         }
     }
 }

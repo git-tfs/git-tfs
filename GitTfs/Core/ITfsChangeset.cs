@@ -8,6 +8,5 @@ namespace Sep.Git.Tfs.Core
         LogEntry Apply(string lastCommit, GitIndexInfo index);
         LogEntry CopyTree(GitIndexInfo index);
         IEnumerable<TfsTreeEntry> GetTree();
-        IEnumerable<TfsTreeEntry> GetTree(bool includeIgnoredItems);
     }
 }

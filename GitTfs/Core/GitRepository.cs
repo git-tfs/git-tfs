@@ -5,41 +5,45 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using GitSharp.Core;
+using Sep.Git.Tfs.Commands;
 using StructureMap;
-using FileMode=GitSharp.Core.FileMode;
+using FileMode = GitSharp.Core.FileMode;
 
 namespace Sep.Git.Tfs.Core
 {
     public class GitRepository : GitHelpers, IGitRepository
     {
         private readonly IContainer _container;
+        private readonly Globals _globals;
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
 
-        public GitRepository(TextWriter stdout, string gitDir, IContainer container) : base(stdout, container)
+        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals)
+            : base(stdout, container)
         {
             _container = container;
+            _globals = globals;
             GitDir = gitDir;
             _repository = new Repository(new DirectoryInfo(gitDir));
         }
 
-        private string GitDir { get; set; }
+        public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
 
-        protected override Process Start(string [] command, Action<ProcessStartInfo> initialize)
+        protected override Process Start(string[] command, Action<ProcessStartInfo> initialize)
         {
             return base.Start(command, initialize.And(SetUpPaths));
         }
 
         private void SetUpPaths(ProcessStartInfo gitCommand)
         {
-            if(GitDir != null)
+            if (GitDir != null)
                 gitCommand.EnvironmentVariables["GIT_DIR"] = GitDir;
-            if(WorkingCopyPath != null)
+            if (WorkingCopyPath != null)
                 gitCommand.WorkingDirectory = WorkingCopyPath;
-            if(WorkingCopySubdir != null)
+            if (WorkingCopySubdir != null)
                 gitCommand.WorkingDirectory = Path.Combine(gitCommand.WorkingDirectory, WorkingCopySubdir);
         }
 
@@ -50,29 +54,31 @@ namespace Sep.Git.Tfs.Core
 
         public IGitTfsRemote ReadTfsRemote(string remoteId)
         {
-            try
-            {
-                return GetTfsRemotes()[remoteId];
-            }
-            catch(Exception e)
-            {
-                throw new Exception("Unable to locate git-tfs remote with id = " + remoteId, e);
-            }
+            if (!HasRemote(remoteId))
+                throw new GitTfsException("Unable to locate git-tfs remote with id = " + remoteId)
+                    .WithRecommendation("Try using `git tfs bootstrap` to auto-init TFS remotes.");
+            return GetTfsRemotes()[remoteId];
         }
 
-        public IGitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath)
+        private IGitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath, bool includeStubRemotes)
         {
-            try
+            var allRemotes = GetTfsRemotes();
+            var matchingRemotes =
+                allRemotes.Values.Where(
+                    remote => remote.Tfs.MatchesUrl(tfsUrl) && remote.TfsRepositoryPath == tfsRepositoryPath);
+            switch (matchingRemotes.Count())
             {
-                var allRemotes = GetTfsRemotes();
-                return
-                    allRemotes.Values.First(
-                        remote => remote.Tfs.MatchesUrl(tfsUrl) && remote.TfsRepositoryPath == tfsRepositoryPath);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Unable to locate git-tfs remote with url = " + tfsUrl + ", repo = " +
-                                    tfsRepositoryPath, e);
+                case 0:
+                    if (!includeStubRemotes)
+                        throw new GitTfsException("Unable to locate a remote for <" + tfsUrl + ">" + tfsRepositoryPath)
+                            .WithRecommendation("Try using `git tfs bootstrap` to auto-init TFS remotes.")
+                            .WithRecommendation("Try setting a legacy-url for an existing remote.");
+                    return new DerivedGitTfsRemote(tfsUrl, tfsRepositoryPath);
+                case 1:
+                    return matchingRemotes.First();
+                default:
+                    Trace.WriteLine("More than one remote matched!");
+                    goto case 1;
             }
         }
 
@@ -84,8 +90,59 @@ namespace Sep.Git.Tfs.Core
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
         {
             var remotes = new Dictionary<string, IGitTfsRemote>();
-            CommandOutputPipe(stdout => ParseRemoteConfig(stdout, remotes), "config", "-l");
+            CommandOutputPipe(stdout => ParseRemoteConfig(stdout, remotes), "config", "--list");
             return remotes;
+        }
+
+        public bool HasRemote(string remoteId)
+        {
+            return GetTfsRemotes().ContainsKey(remoteId);
+        }
+
+        public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
+        {
+            long currentMaxChangesetId = remote.MaxChangesetId;
+            var untrackedTfsChangesets = from cs in GetParentTfsCommits("refs/remotes/tfs/" + remote.Id + "..HEAD", false)
+                                         where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
+                                         orderby cs.ChangesetId
+                                         select cs;
+            foreach (var cs in untrackedTfsChangesets)
+            {
+                // UpdateRef sets tag with TFS changeset id on each commit so we can't just update to latest
+                remote.UpdateRef(cs.GitCommit, cs.ChangesetId);
+            }
+        }
+
+        public void CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead, RemoteOptions remoteOptions)
+        {
+            CreateTfsRemote(remoteId, tfsHead.Remote.TfsUrl, tfsHead.Remote.TfsRepositoryPath, remoteOptions);
+            ReadTfsRemote(remoteId).UpdateRef(tfsHead.GitCommit, tfsHead.ChangesetId);
+        }
+
+        public void CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions)
+        {
+            if (HasRemote(remoteId))
+                throw new GitTfsException("A remote with id \"" + remoteId + "\" already exists.");
+
+            if (remoteOptions != null)
+            {
+                if (remoteOptions.NoMetaData) SetTfsConfig(remoteId, "no-meta-data", 1);
+                if (remoteOptions.IgnoreRegex != null) SetTfsConfig(remoteId, "ignore-paths", remoteOptions.IgnoreRegex);
+                if (!string.IsNullOrEmpty(remoteOptions.Username)) SetTfsConfig(remoteId, "username", remoteOptions.Username);
+                if (!string.IsNullOrEmpty(remoteOptions.Password)) SetTfsConfig(remoteId, "password", remoteOptions.Password);
+            }
+
+            SetTfsConfig(remoteId, "url", tfsUrl);
+            SetTfsConfig(remoteId, "repository", tfsRepositoryPath);
+            SetTfsConfig(remoteId, "fetch", "refs/remotes/" + remoteId + "/master");
+
+            Directory.CreateDirectory(Path.Combine(GitDir, "tfs"));
+            _cachedRemotes = null;
+        }
+
+        private void SetTfsConfig(string remoteId, string subkey, object value)
+        {
+            this.SetConfig(_globals.RemoteConfigKey(remoteId, subkey), value);
         }
 
         private void ParseRemoteConfig(TextReader stdout, IDictionary<string, IGitTfsRemote> remotes)
@@ -94,6 +151,11 @@ namespace Sep.Git.Tfs.Core
             while ((line = stdout.ReadLine()) != null)
             {
                 TryParseRemoteConfigLine(line, remotes);
+            }
+            foreach (var gitTfsRemotePair in remotes)
+            {
+                var remote = gitTfsRemotePair.Value;
+                remote.EnsureTfsAuthenticated();
             }
         }
 
@@ -107,9 +169,24 @@ namespace Sep.Git.Tfs.Core
                 var remoteId = match.Groups["id"].Value;
                 var remote = remotes.ContainsKey(remoteId)
                                  ? remotes[remoteId]
-                                 : (remotes[remoteId] = CreateRemote(remoteId));
-                SetRemoteConfigValue(remote, key, value);
+                                 : (remotes[remoteId] = BuildRemote(remoteId));
+                try
+                {
+                    SetRemoteConfigValue(remote, key, value);
+                }
+                catch(Exception e)
+                {
+                    throw new GitTfsException("Malformed value for " + key + ": " + value, e);
+                }
             }
+        }
+
+        private IGitTfsRemote BuildRemote(string id)
+        {
+            var remote = _container.GetInstance<IGitTfsRemote>();
+            remote.Repository = this;
+            remote.Id = id;
+            return remote;
         }
 
         private void SetRemoteConfigValue(IGitTfsRemote remote, string key, string value)
@@ -117,7 +194,7 @@ namespace Sep.Git.Tfs.Core
             switch (key)
             {
                 case "url":
-                    remote.Tfs.Url = value;
+                    remote.TfsUrl = value;
                     break;
                 case "legacy-urls":
                     remote.Tfs.LegacyUrls = value.Split(',');
@@ -128,63 +205,65 @@ namespace Sep.Git.Tfs.Core
                 case "ignore-paths":
                     remote.IgnoreRegexExpression = value;
                     break;
-                    //case "fetch":
-                    //    remote.??? = value;
-                    //    break;
+                case "username":
+                    remote.TfsUsername = value;
+                    break;
+                case "password":
+                    remote.TfsPassword = value;
+                    break;
+                case "autotag":
+                    remote.Autotag = bool.Parse(value);
+                    break;
             }
-        }
-
-        private IGitTfsRemote CreateRemote(string id)
-        {
-            var remote = _container.GetInstance<IGitTfsRemote>();
-            remote.Repository = this;
-            remote.Id = id;
-            return remote;
         }
 
         public GitCommit GetCommit(string commitish)
         {
             return _container.With(_repository.MapCommit(commitish)).GetInstance<GitCommit>();
-       }
-
-        public IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head)
-        {
-            return GetParentTfsCommits(head, new List<string>());
         }
 
-        public IEnumerable<TfsChangesetInfo> GetParentTfsCommits(string head, ICollection<string> localCommits)
+        public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head)
+        {
+            return GetLastParentTfsCommits(head, false);
+        }
+
+        public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head, bool includeStubRemotes)
+        {
+            List<TfsChangesetInfo> tfsCommits = GetParentTfsCommits(head, includeStubRemotes);
+            return from commit in tfsCommits
+                   group commit by commit.Remote
+                   into remotes
+                   select remotes.OrderBy(commit => -commit.ChangesetId).First();
+        }
+
+        private List<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes)
         {
             var tfsCommits = new List<TfsChangesetInfo>();
             try
             {
-                CommandOutputPipe(stdout => FindTfsCommits(stdout, tfsCommits, localCommits),
-                  "log", "--no-color", "--pretty=medium", head);
+                CommandOutputPipe(stdout => FindTfsCommits(stdout, tfsCommits, includeStubRemotes),
+                                  "log", "--no-color", "--pretty=medium", head);
             }
             catch (GitCommandException e)
             {
                 Trace.WriteLine("An error occurred while loading head " + head + " (maybe it doesn't exist?): " + e);
             }
-            return from commit in tfsCommits
-                   group commit by commit.Remote
-                   into remotes
-                       select remotes.OrderBy(commit => -commit.ChangesetId).First();
+            return tfsCommits;
         }
 
-        private void FindTfsCommits(TextReader stdout, ICollection<TfsChangesetInfo> tfsCommits, ICollection<string> localCommits)
+        private void FindTfsCommits(TextReader stdout, ICollection<TfsChangesetInfo> tfsCommits, bool includeStubRemotes)
         {
             string currentCommit = null;
             string line;
-            var commitRegex = new Regex("commit (" + GitTfsConstants.Sha1 + ")");
             while (null != (line = stdout.ReadLine()))
             {
-                var match = commitRegex.Match(line);
+                var match = GitTfsConstants.CommitRegex.Match(line);
                 if (match.Success)
                 {
-                    if (currentCommit != null) localCommits.Add(currentCommit);
                     currentCommit = match.Groups[1].Value;
                     continue;
                 }
-                var changesetInfo = TryParseChangesetInfo(line, currentCommit);
+                var changesetInfo = TryParseChangesetInfo(line, currentCommit, includeStubRemotes);
                 if (changesetInfo != null)
                 {
                     tfsCommits.Add(changesetInfo);
@@ -194,13 +273,13 @@ namespace Sep.Git.Tfs.Core
             //stdout.Close();
         }
 
-        private TfsChangesetInfo TryParseChangesetInfo(string gitTfsMetaInfo, string commit)
+        private TfsChangesetInfo TryParseChangesetInfo(string gitTfsMetaInfo, string commit, bool includeStubRemotes)
         {
             var match = GitTfsConstants.TfsCommitInfoRegex.Match(gitTfsMetaInfo);
             if (match.Success)
             {
                 var commitInfo = _container.GetInstance<TfsChangesetInfo>();
-                commitInfo.Remote = ReadTfsRemote(match.Groups["url"].Value, match.Groups["repository"].Value);
+                commitInfo.Remote = ReadTfsRemote(match.Groups["url"].Value, match.Groups["repository"].Value, includeStubRemotes);
                 commitInfo.ChangesetId = Convert.ToInt32(match.Groups["changeset"].Value);
                 commitInfo.GitCommit = commit;
                 return commitInfo;
@@ -210,7 +289,7 @@ namespace Sep.Git.Tfs.Core
 
         public IDictionary<string, GitObject> GetObjects(string commit)
         {
-            var entries = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
+            var entries = GetObjects();
             if (commit != null)
             {
                 ParseEntries(entries, Command("ls-tree", "-r", "-z", commit), commit);
@@ -219,15 +298,50 @@ namespace Sep.Git.Tfs.Core
             return entries;
         }
 
+        public Dictionary<string, GitObject> GetObjects()
+        {
+            return new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        public string GetCommitMessage(string head, string parentCommitish)
+        {
+            string message = string.Empty;
+            using (var logMessage = CommandOutputPipe("log", parentCommitish + ".." + head))
+            {
+                string line;
+                while (null != (line = logMessage.ReadLine()))
+                {
+                    if (!line.StartsWith("   "))
+                        continue;
+                    message += line.TrimStart() + Environment.NewLine;
+                }
+            }
+            return message;
+        }
+
         private void ParseEntries(IDictionary<string, GitObject> entries, string treeInfo, string commit)
         {
-            foreach (var treeEntry in treeInfo.Split('\0'))
+            int start = 0;
+            int end = 0;
+            string path = string.Empty;
+
+            while( start < treeInfo.Length && end < treeInfo.Length )
             {
-                var gitObject = MakeGitObject(commit, treeEntry);
-                if(gitObject != null)
+                end = treeInfo.IndexOf('\0',start);
+                if( -1 == end )
+                {
+                    end = treeInfo.Length;
+                }
+
+                path = treeInfo.Substring( start , end - start );
+
+                var gitObject = MakeGitObject(commit, path);
+                if (gitObject != null)
                 {
                     entries[gitObject.Path] = gitObject;
                 }
+
+                start = end + 1;
             }
         }
 
@@ -251,7 +365,7 @@ namespace Sep.Git.Tfs.Core
             using (var diffOutput = CommandOutputPipe("diff-tree", "-r", "-M", from, to))
             {
                 string line;
-                while(null != (line = diffOutput.ReadLine()))
+                while (null != (line = diffOutput.ReadLine()))
                 {
                     var change = GitChangeInfo.Parse(line);
 
@@ -265,7 +379,7 @@ namespace Sep.Git.Tfs.Core
 
         private IGitChangedFile BuildGitChangedFile(GitChangeInfo change)
         {
-            return change.ToGitChangedFile(_container.With((IGitRepository)this));
+            return change.ToGitChangedFile(_container.With((IGitRepository) this));
         }
 
         public string GetChangeSummary(string from, string to)
@@ -274,6 +388,17 @@ namespace Sep.Git.Tfs.Core
             CommandOutputPipe(stdout => summary = stdout.ReadToEnd(),
                               "diff-tree", "--shortstat", "-M", from, to);
             return summary;
+        }
+
+        public bool WorkingCopyHasUnstagedOrUncommitedChanges
+        {
+            get
+            {
+                string pendingChanges = "";
+                CommandOutputPipe(stdout => pendingChanges = stdout.ReadToEnd(),
+                                  "diff-index", "--name-status", "-M", "HEAD");
+                return !string.IsNullOrEmpty(pendingChanges);
+            }
         }
 
         public void GetBlob(string sha, string outputFile)
@@ -285,7 +410,7 @@ namespace Sep.Git.Tfs.Core
         private void Copy(TextReader stdout, string file)
         {
             var stdoutStream = ((StreamReader) stdout).BaseStream;
-            using(var destination = File.Create(file))
+            using (var destination = File.Create(file))
             {
                 stdoutStream.CopyTo(destination);
             }
@@ -302,6 +427,13 @@ namespace Sep.Git.Tfs.Core
         {
             var writer = new ObjectWriter(_repository);
             var objectId = writer.WriteBlob(file.Length, file);
+            return objectId.Name;
+        }
+
+        public string HashAndInsertObject(Stream file, long length)
+        {
+            var writer = new ObjectWriter(_repository);
+            var objectId = writer.WriteBlob(length, file);
             return objectId.Name;
         }
     }

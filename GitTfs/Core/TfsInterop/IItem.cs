@@ -1,3 +1,4 @@
+using System.IO;
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public interface IItem
@@ -8,6 +9,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         decimal DeletionId { get; }
         TfsItemType ItemType { get; }
         int ItemId { get; }
-        void DownloadFile(string file);
+        long ContentLength { get; }
+        Stream DownloadFile();
+    }
+
+    public interface IItemDownloadStrategy
+    {
+        Stream DownloadFile(IItem item);
     }
 }

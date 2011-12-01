@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
@@ -7,6 +8,8 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     {
         string TfsClientLibraryVersion { get; }
         string Url { get; set; }
+        string Username { get; set; }
+        string Password { get; set; }
         string[] LegacyUrls { get; set; }
         IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
@@ -19,8 +22,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IChangeset GetChangeset(int changesetId);
         bool MatchesUrl(string tfsUrl);
         bool HasShelveset(string shelvesetName);
+        int Unshelve(Unshelve unshelve, IGitTfsRemote remote, IList<string> args);
+        int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote);
         bool CanShowCheckinDialog { get; }
         long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
         void CleanupWorkspaces(string workingDirectory);
+
+        void EnsureAuthenticated();
     }
 }

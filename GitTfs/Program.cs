@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.Changes.Git;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -13,7 +14,8 @@ namespace Sep.Git.Tfs
 {
     public class Program
     {
-        public static void Main(string [] args)
+        [STAThreadAttribute]
+        public static void Main(string[] args)
         {
             try
             {
@@ -33,13 +35,24 @@ namespace Sep.Git.Tfs
                         Console.WriteLine("- " + solution);
                     }
                 }
-                Environment.ExitCode = -1;
+                Environment.ExitCode = GitTfsExitCodes.ExceptionThrown;
             }
             catch (Exception e)
             {
-                Trace.WriteLine(e);
-                Console.WriteLine(e);
-                Environment.ExitCode = -1;
+                ReportException(e);
+                Environment.ExitCode = GitTfsExitCodes.ExceptionThrown;
+            }
+        }
+
+        private static void ReportException(Exception e)
+        {
+            Trace.WriteLine(e);
+            while(e is TargetInvocationException && e.InnerException != null)
+                e = e.InnerException;
+            while (e != null)
+            {
+                Console.WriteLine(e.Message);
+                e = e.InnerException;
             }
         }
 
@@ -61,10 +74,15 @@ namespace Sep.Git.Tfs
 
         public static void AddGitChangeTypes(ConfigurationExpression initializer)
         {
+            // See git-diff-tree(1).
             initializer.For<IGitChangedFile>().Use<Add>().Named("A");
+            initializer.For<IGitChangedFile>().Use<Copy>().Named("C");
             initializer.For<IGitChangedFile>().Use<Modify>().Named("M");
+            //initializer.For<IGitChangedFile>().Use<TypeChange>().Named("T");
             initializer.For<IGitChangedFile>().Use<Delete>().Named("D");
             initializer.For<IGitChangedFile>().Use<RenameEdit>().Named("R");
+            //initializer.For<IGitChangedFile>().Use<Unmerged>().Named("U");
+            //initializer.For<IGitChangedFile>().Use<Unknown>().Named("X");
         }
 
         private static void Initialize(IAssemblyScanner scan)

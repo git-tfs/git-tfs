@@ -28,7 +28,38 @@ namespace Sep.Git.Tfs.Core
             Tfs = tfsHelper;
         }
 
+        public void EnsureTfsAuthenticated()
+        {
+            Tfs.EnsureAuthenticated();
+        }
+
+        public bool IsDerived
+        {
+            get { return false; }
+        }
+
         public string Id { get; set; }
+
+        public string TfsUrl
+        {
+            get { return Tfs.Url; }
+            set { Tfs.Url = value; }
+        }
+
+        public bool Autotag { get; set; }
+
+        public string TfsUsername
+        {
+            get { return Tfs.Username; }
+            set { Tfs.Username = value; }
+        }
+
+        public string TfsPassword
+        {
+            get { return Tfs.Password; }
+            set { Tfs.Password = value; }
+        }
+
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegexExpression { get; set; }
         public IGitRepository Repository { get; set; }
@@ -50,7 +81,7 @@ namespace Sep.Git.Tfs.Core
         {
             if (maxChangesetId == null)
             {
-                var mostRecentUpdate = Repository.GetParentTfsCommits(RemoteRef).FirstOrDefault();
+                var mostRecentUpdate = Repository.GetLastParentTfsCommits(RemoteRef).FirstOrDefault();
                 if (mostRecentUpdate != null)
                 {
                     MaxCommitHash = mostRecentUpdate.GitCommit;
@@ -111,6 +142,7 @@ namespace Sep.Git.Tfs.Core
 
         public string GetPathInGitRepo(string tfsPath)
         {
+            if (tfsPath == null) return null;
             if(!tfsPath.StartsWith(TfsRepositoryPath,StringComparison.InvariantCultureIgnoreCase)) return null;
             tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
             while (tfsPath.StartsWith("/"))
@@ -118,22 +150,50 @@ namespace Sep.Git.Tfs.Core
             return tfsPath;
         }
 
-        public void Fetch(Dictionary<long, string> mergeInfo)
+        public void Fetch()
+        {
+            FetchWithMerge(-1);
+        }
+
+        public void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes)
         {
             foreach (var changeset in FetchChangesets())
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
-                if(mergeInfo.ContainsKey(changeset.Summary.ChangesetId))
-                    log.CommitParents.Add(mergeInfo[changeset.Summary.ChangesetId]);
+                if (changeset.Summary.ChangesetId == mergeChangesetId)
+                {
+                    foreach (var parent in parentCommitsHashes)
+                    {
+                        log.CommitParents.Add(parent);
+                    }
+                }
                 UpdateRef(Commit(log), changeset.Summary.ChangesetId);
                 DoGcIfNeeded();
             }
         }
 
+        public void Apply(ITfsChangeset changeset, string destinationRef)
+        {
+            var log = Apply(MaxCommitHash, changeset);
+            var commit = Commit(log);
+            Repository.CommandNoisy("update-ref", destinationRef, commit);
+        }
+
         public void QuickFetch()
         {
             var changeset = Tfs.GetLatestChangeset(this);
+            quickFetch(changeset);
+        }
+
+        public void QuickFetch(int changesetId)
+        {
+            var changeset = Tfs.GetChangeset(changesetId, this);
+            quickFetch(changeset);
+        }
+
+        private void quickFetch(ITfsChangeset changeset)
+        {
             AssertTemporaryIndexEmpty();
             var log = CopyTree(MaxCommitHash, changeset);
             UpdateRef(Commit(log), changeset.Summary.ChangesetId);
@@ -143,9 +203,10 @@ namespace Sep.Git.Tfs.Core
         private IEnumerable<ITfsChangeset> FetchChangesets()
         {
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
-            var changesets = Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
-            changesets = changesets.OrderBy(cs => cs.Summary.ChangesetId);
-            return changesets;
+            // TFS 2010 doesn't like when we ask for history past its last changeset.
+            if (MaxChangesetId == Tfs.GetLatestChangeset(this).Summary.ChangesetId)
+                return Enumerable.Empty<ITfsChangeset>();
+            return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
         }
 
         public ITfsChangeset GetChangeset(long changesetId)
@@ -153,12 +214,13 @@ namespace Sep.Git.Tfs.Core
             return Tfs.GetChangeset((int) changesetId, this);
         }
 
-        private void UpdateRef(string commitHash, long changesetId)
+        public void UpdateRef(string commitHash, long changesetId)
         {
             MaxCommitHash = commitHash;
             MaxChangesetId = changesetId;
             Repository.CommandNoisy("update-ref", "-m", "C" + MaxChangesetId, RemoteRef, MaxCommitHash);
-            Repository.CommandNoisy("update-ref", TagPrefix + "C" + MaxChangesetId, MaxCommitHash);
+            if (Autotag)
+                Repository.CommandNoisy("update-ref", TagPrefix + "C" + MaxChangesetId, MaxCommitHash);
             LogCurrentMapping();
         }
 
@@ -183,7 +245,15 @@ namespace Sep.Git.Tfs.Core
             if(--globals.GcCountdown < 0)
             {
                 globals.GcCountdown = globals.GcPeriod;
-                Repository.CommandNoisy("gc", "--auto");
+                try
+                {
+                    Repository.CommandNoisy("gc", "--auto");
+                }
+                catch(Exception e)
+                {
+                    Trace.WriteLine(e);
+                    stdout.WriteLine("Warning: `git gc` failed! Try running it after git-tfs is finished.");
+                }
             }
         }
 
@@ -262,7 +332,7 @@ namespace Sep.Git.Tfs.Core
             Repository.CommandInputOutputPipe((procIn, procOut) =>
                                                   {
                                                       procIn.WriteLine(logEntry.Log);
-                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, Tfs.Url,
+                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl,
                                                                        TfsRepositoryPath, logEntry.ChangesetId);
                                                       procIn.Close();
                                                       commitHash = ParseCommitInfo(procOut.ReadToEnd());
@@ -380,7 +450,7 @@ namespace Sep.Git.Tfs.Core
         private long CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
             PendChangesToWorkspace(head, parentChangeset, workspace);
-            return workspace.CheckinTool();
+            return workspace.CheckinTool(() => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
         }
 
         private void PendChangesToWorkspace(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)

@@ -1,35 +1,61 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Core
 {
     public class CheckinPolicyEvaluator
     {
-        public IEnumerable<string> EvaluateCheckin(IWorkspace workspace, IPendingChange[] pendingChanges, string comment, IEnumerable<IWorkItemCheckinInfo> workItemInfo)
+        public CheckinPolicyEvaluationResult EvaluateCheckin(IWorkspace workspace, IPendingChange[] pendingChanges, string comment, IEnumerable<IWorkItemCheckinInfo> workItemInfo)
         {
             var result = workspace.EvaluateCheckin(TfsCheckinEvaluationOptions.All, pendingChanges,
                                                    pendingChanges, comment, null,
                                                    workItemInfo);
-            return BuildMessages(result);
+            return new CheckinPolicyEvaluationResult(result);
         }
 
-        private IEnumerable<string> BuildMessages(ICheckinEvaluationResult result)
+        public class CheckinPolicyEvaluationResult
         {
-            foreach (var x in result.Conflicts)
+            private readonly ICheckinEvaluationResult _result;
+
+            public CheckinPolicyEvaluationResult(ICheckinEvaluationResult result)
             {
-                yield return "Conflict: " + x.ServerItem + ": " + x.Message;
+                _result = result;
             }
-            foreach (var x in result.PolicyFailures)
+
+            public bool HasErrors
             {
-                yield return "Policy: " + x.Message;
+                get { return Messages.Any(); }
             }
-            foreach (var x in result.NoteFailures)
+
+            public IEnumerable<string> Messages
             {
-                yield return "Checkin Note: " + x.Definition.Name + ": " + x.Message;
+                get { return BuildMessages(); }
             }
-            if (result.PolicyEvaluationException != null)
+
+            public ICheckinEvaluationResult Result
             {
-                yield return "Exception: " + result.PolicyEvaluationException.Message;
+                get { return _result; }
+            }
+
+            private IEnumerable<string> BuildMessages()
+            {
+                foreach (var x in _result.Conflicts)
+                {
+                    yield return "Conflict: " + x.ServerItem + ": " + x.Message;
+                }
+                foreach (var x in _result.PolicyFailures)
+                {
+                    yield return "Policy: " + x.Message;
+                }
+                foreach (var x in _result.NoteFailures)
+                {
+                    yield return "Checkin Note: " + x.Definition.Name + ": " + x.Message;
+                }
+                if (_result.PolicyEvaluationException != null)
+                {
+                    yield return "Exception: " + _result.PolicyEvaluationException.Message;
+                }
             }
         }
     }

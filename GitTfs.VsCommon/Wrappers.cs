@@ -4,6 +4,7 @@ using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -30,7 +31,13 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
         {
-            var itemSet = _versionControlServer.GetItems(itemPath, new ChangesetVersionSpec(changesetNumber), _bridge.Convert<RecursionType>(recursionType));
+            var itemSet = _versionControlServer.GetItems(
+                new ItemSpec(itemPath, _bridge.Convert<RecursionType>(recursionType), 0),
+                new ChangesetVersionSpec(changesetNumber),
+                DeletedState.NonDeleted,
+                ItemType.Any,
+                true
+            );
             return _bridge.Wrap<WrapperForItem, Item>(itemSet.Items);
         }
 
@@ -61,7 +68,17 @@ namespace Sep.Git.Tfs.VsCommon
 
         public string Committer
         {
-            get { return _changeset.Committer; }
+            get
+            {
+                var committer = _changeset.Committer;
+                var owner = _changeset.Owner;
+                
+                // Sometimes TFS itself commits the changeset
+                if (owner != committer)
+                    return owner;
+
+                return committer;
+            }
         }
 
         public DateTime CreationDate
@@ -109,11 +126,13 @@ namespace Sep.Git.Tfs.VsCommon
 
     public class WrapperForItem : WrapperFor<Item>, IItem
     {
+        private readonly IItemDownloadStrategy _downloadStrategy;
         private readonly TfsApiBridge _bridge;
         private readonly Item _item;
 
-        public WrapperForItem(TfsApiBridge bridge, Item item) : base(item)
+        public WrapperForItem(IItemDownloadStrategy downloadStrategy, TfsApiBridge bridge, Item item) : base(item)
         {
+            _downloadStrategy = downloadStrategy;
             _bridge = bridge;
             _item = item;
         }
@@ -148,9 +167,14 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _item.ItemId; }
         }
 
-        public void DownloadFile(string file)
+        public long ContentLength
         {
-            _item.DownloadFile(file);
+            get { return _item.ContentLength; }
+        }
+
+        public Stream DownloadFile()
+        {
+            return _downloadStrategy.DownloadFile(this);
         }
     }
 
@@ -372,14 +396,22 @@ namespace Sep.Git.Tfs.VsCommon
             _workspace.Shelve(_bridge.Unwrap<Shelveset>(shelveset), _bridge.Unwrap<PendingChange>(changes), _bridge.Convert<ShelvingOptions>(options));
         }
 
-        public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
+        public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo)
         {
             return _workspace.CheckIn(
                 _bridge.Unwrap<PendingChange>(changes),
                 comment,
                 _bridge.Unwrap<CheckinNote>(checkinNote),
                 _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges),
-                null); // policy overrides
+                ToTfs(policyOverrideInfo));
+        }
+
+        private PolicyOverrideInfo ToTfs(TfsPolicyOverrideInfo policyOverrideInfo)
+        {
+            if (policyOverrideInfo == null)
+                return null;
+            return new PolicyOverrideInfo(policyOverrideInfo.Comment,
+                                          _bridge.Unwrap<PolicyFailure>(policyOverrideInfo.Failures));
         }
 
         public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
