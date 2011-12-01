@@ -42,9 +42,9 @@
             this.PullButton = new System.Windows.Forms.Button();
             this.PushGroupBox = new System.Windows.Forms.GroupBox();
             this.PushOptionsGroupBox = new System.Windows.Forms.GroupBox();
+            this.RCheckinRadioButton = new System.Windows.Forms.RadioButton();
             this.ShelveRadioButton = new System.Windows.Forms.RadioButton();
             this.CheckinRadioButton = new System.Windows.Forms.RadioButton();
-            this.RCheckinRadioButton = new System.Windows.Forms.RadioButton();
             this.Container.Panel1.SuspendLayout();
             this.Container.Panel2.SuspendLayout();
             this.Container.SuspendLayout();
@@ -228,6 +228,17 @@
             this.PushOptionsGroupBox.TabStop = false;
             this.PushOptionsGroupBox.Text = "Options";
             // 
+            // RCheckinRadioButton
+            // 
+            this.RCheckinRadioButton.AutoSize = true;
+            this.RCheckinRadioButton.Location = new System.Drawing.Point(7, 18);
+            this.RCheckinRadioButton.Name = "RCheckinRadioButton";
+            this.RCheckinRadioButton.Size = new System.Drawing.Size(201, 17);
+            this.RCheckinRadioButton.TabIndex = 3;
+            this.RCheckinRadioButton.TabStop = true;
+            this.RCheckinRadioButton.Text = "Recursively Checkin changes to TFS";
+            this.RCheckinRadioButton.UseVisualStyleBackColor = true;
+            // 
             // ShelveRadioButton
             // 
             this.ShelveRadioButton.AutoSize = true;
@@ -251,17 +262,6 @@
             this.CheckinRadioButton.Text = "Checkin changes to TFS";
             this.CheckinRadioButton.UseVisualStyleBackColor = true;
             this.CheckinRadioButton.CheckedChanged += new System.EventHandler(this.PushOptionCheckedChanged);
-            // 
-            // RCheckinRadioButton
-            // 
-            this.RCheckinRadioButton.AutoSize = true;
-            this.RCheckinRadioButton.Location = new System.Drawing.Point(7, 18);
-            this.RCheckinRadioButton.Name = "RCheckinRadioButton";
-            this.RCheckinRadioButton.Size = new System.Drawing.Size(202, 17);
-            this.RCheckinRadioButton.TabIndex = 3;
-            this.RCheckinRadioButton.TabStop = true;
-            this.RCheckinRadioButton.Text = "Recursively Checkin Changes to TFS";
-            this.RCheckinRadioButton.UseVisualStyleBackColor = true;
             // 
             // GitTfsDialog
             // 

@@ -121,8 +121,8 @@
   <data name="PushButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALCwAA
-        CwsBbQSEtwAAAQ1JREFUOE9j/P//PwNFAGQANkPM512fBsT/QTS6BTA9YH3YDIBpvgmUxGYIXgNgmnf/
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALCgAA
+        CwoBv0NmUwAAAQ1JREFUOE9j/P//PwNFAGQANkPM512fBsT/QTS6BTA9YH3YDIBpvgmUxGYIXgNgmnf/
         /P9//rv//0E0uiE4DYBp3vbt//8Jz///b38MoUF8ZEOwGgDTvPHj//8d9///r7uNwCA+SBxmCC4D/p/+
         BXQ20MYGoOdLryAwiA8SB8mDDMFqgNGUk/OhNvzvu/X/f/ZpBAbxYXIgdbjCgBsYXUoghROBGpIO/4Nj
         EB8kDpIHYm5CsfC/C+j8iF3f4RjEhxoAThIEDWg+++e//+aPcAzik2RA7cnv/93WvIZjEJ8kAxYC/Vxx
@@ -132,8 +132,8 @@
   <data name="PullButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALCwAA
-        CwsBbQSEtwAAAQlJREFUOE+lUz0PAUEUpL7ej1Bq/AytQkOikui0GoVEISRyJaVKFEJCJyrRKIiEjoJC
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALCgAA
+        CwoBv0NmUwAAAQlJREFUOE+lUz0PAUEUpL7ej1Bq/AytQkOikui0GoVEISRyJaVKFEJCJyrRKIiEjoJC
         cyIEibEj9nbJ+ri4ZLI7782bfbl96wfg++ujgW4Srs5sARhgy4Nkzb3OYICxCHZOCuQ0/NmgdQCKGwVy
         TwaNHZBfKZB7MqhvgexCgdyTQW0NZCYK5F8N9L9fnAOpkQK5diu28RYo6DtAWYjTQyAxuLogZ5x56owG
         ocqwxqQthMn+GdHe0QU548xT924OrGCu3aCoNAVi3T0iLee+kjPOvJgF69MguSaF8QXxngOuejGH6eMk
