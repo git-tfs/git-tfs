@@ -242,7 +242,7 @@
             // ShelveRadioButton
             // 
             this.ShelveRadioButton.AutoSize = true;
-            this.ShelveRadioButton.Location = new System.Drawing.Point(6, 64);
+            this.ShelveRadioButton.Location = new System.Drawing.Point(7, 64);
             this.ShelveRadioButton.Name = "ShelveRadioButton";
             this.ShelveRadioButton.Size = new System.Drawing.Size(137, 17);
             this.ShelveRadioButton.TabIndex = 2;
