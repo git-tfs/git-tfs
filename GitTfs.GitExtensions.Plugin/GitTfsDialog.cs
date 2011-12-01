@@ -94,6 +94,9 @@ namespace GitTfs.GitExtensions.Plugin
                 case PushSetting.Shelve:
                     ShelveRadioButton.Checked = true;
                     break;
+                case PushSetting.RCheckin:
+                    RCheckinRadioButton.Checked = true;
+                    break;
             }
 
             SetPushButtonEnabledState();
@@ -106,7 +109,7 @@ namespace GitTfs.GitExtensions.Plugin
 
         private void SetPushButtonEnabledState()
         {
-            PushButton.Enabled = CheckinRadioButton.Checked || ShelveRadioButton.Checked;
+            PushButton.Enabled = CheckinRadioButton.Checked || ShelveRadioButton.Checked || RCheckinRadioButton.Checked;
         }
 
         private void PushButtonClick(object sender, EventArgs e)
@@ -120,6 +123,11 @@ namespace GitTfs.GitExtensions.Plugin
             {
                 _settings.PushSetting = PushSetting.Shelve;
                 new ShelveDialog(_commands, _settings.ShelveSettings).ShowDialog();
+            }
+            else if (RCheckinRadioButton.Checked)
+            {
+                _settings.PushSetting = PushSetting.RCheckin;
+                _commands.StartGitTfsCommandProcessDialog("rcheckin");
             }
         }
 

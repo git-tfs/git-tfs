@@ -44,6 +44,7 @@
             this.PushOptionsGroupBox = new System.Windows.Forms.GroupBox();
             this.ShelveRadioButton = new System.Windows.Forms.RadioButton();
             this.CheckinRadioButton = new System.Windows.Forms.RadioButton();
+            this.RCheckinRadioButton = new System.Windows.Forms.RadioButton();
             this.Container.Panel1.SuspendLayout();
             this.Container.Panel2.SuspendLayout();
             this.Container.SuspendLayout();
@@ -62,7 +63,7 @@
             this.PushButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PushButton.Image = ((System.Drawing.Image)(resources.GetObject("PushButton.Image")));
             this.PushButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.PushButton.Location = new System.Drawing.Point(6, 93);
+            this.PushButton.Location = new System.Drawing.Point(6, 121);
             this.PushButton.Name = "PushButton";
             this.PushButton.Size = new System.Drawing.Size(75, 23);
             this.PushButton.TabIndex = 1;
@@ -85,7 +86,7 @@
             // Container.Panel2
             // 
             this.Container.Panel2.Controls.Add(this.PushGroupBox);
-            this.Container.Size = new System.Drawing.Size(269, 311);
+            this.Container.Size = new System.Drawing.Size(269, 346);
             this.Container.SplitterDistance = 186;
             this.Container.TabIndex = 2;
             // 
@@ -209,19 +210,20 @@
             this.PushGroupBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PushGroupBox.Location = new System.Drawing.Point(0, 0);
             this.PushGroupBox.Name = "PushGroupBox";
-            this.PushGroupBox.Size = new System.Drawing.Size(269, 121);
+            this.PushGroupBox.Size = new System.Drawing.Size(269, 156);
             this.PushGroupBox.TabIndex = 2;
             this.PushGroupBox.TabStop = false;
             this.PushGroupBox.Text = "Push";
             // 
             // PushOptionsGroupBox
             // 
+            this.PushOptionsGroupBox.Controls.Add(this.RCheckinRadioButton);
             this.PushOptionsGroupBox.Controls.Add(this.ShelveRadioButton);
             this.PushOptionsGroupBox.Controls.Add(this.CheckinRadioButton);
             this.PushOptionsGroupBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PushOptionsGroupBox.Location = new System.Drawing.Point(6, 19);
             this.PushOptionsGroupBox.Name = "PushOptionsGroupBox";
-            this.PushOptionsGroupBox.Size = new System.Drawing.Size(255, 68);
+            this.PushOptionsGroupBox.Size = new System.Drawing.Size(255, 96);
             this.PushOptionsGroupBox.TabIndex = 0;
             this.PushOptionsGroupBox.TabStop = false;
             this.PushOptionsGroupBox.Text = "Options";
@@ -229,7 +231,7 @@
             // ShelveRadioButton
             // 
             this.ShelveRadioButton.AutoSize = true;
-            this.ShelveRadioButton.Location = new System.Drawing.Point(6, 43);
+            this.ShelveRadioButton.Location = new System.Drawing.Point(6, 64);
             this.ShelveRadioButton.Name = "ShelveRadioButton";
             this.ShelveRadioButton.Size = new System.Drawing.Size(137, 17);
             this.ShelveRadioButton.TabIndex = 2;
@@ -241,7 +243,7 @@
             // CheckinRadioButton
             // 
             this.CheckinRadioButton.AutoSize = true;
-            this.CheckinRadioButton.Location = new System.Drawing.Point(7, 20);
+            this.CheckinRadioButton.Location = new System.Drawing.Point(7, 41);
             this.CheckinRadioButton.Name = "CheckinRadioButton";
             this.CheckinRadioButton.Size = new System.Drawing.Size(143, 17);
             this.CheckinRadioButton.TabIndex = 0;
@@ -250,11 +252,22 @@
             this.CheckinRadioButton.UseVisualStyleBackColor = true;
             this.CheckinRadioButton.CheckedChanged += new System.EventHandler(this.PushOptionCheckedChanged);
             // 
+            // RCheckinRadioButton
+            // 
+            this.RCheckinRadioButton.AutoSize = true;
+            this.RCheckinRadioButton.Location = new System.Drawing.Point(7, 18);
+            this.RCheckinRadioButton.Name = "RCheckinRadioButton";
+            this.RCheckinRadioButton.Size = new System.Drawing.Size(202, 17);
+            this.RCheckinRadioButton.TabIndex = 3;
+            this.RCheckinRadioButton.TabStop = true;
+            this.RCheckinRadioButton.Text = "Recursively Checkin Changes to TFS";
+            this.RCheckinRadioButton.UseVisualStyleBackColor = true;
+            // 
             // GitTfsDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(269, 311);
+            this.ClientSize = new System.Drawing.Size(269, 346);
             this.Controls.Add(this.Container);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -295,5 +308,6 @@
         private System.Windows.Forms.RadioButton RebaseRadioButton;
         private System.Windows.Forms.RadioButton PullRadioButton;
         private System.Windows.Forms.Button PullButton;
+        private System.Windows.Forms.RadioButton RCheckinRadioButton;
     }
 }
