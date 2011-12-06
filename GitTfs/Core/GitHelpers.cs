@@ -168,9 +168,9 @@ namespace Sep.Git.Tfs.Core
             Time(command, () =>
                               {
                                   AssertValidCommand(command);
-                                  var process = Start(command,
-                                                      Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
-                                  interact(new StreamWriter(process.StandardInput.BaseStream, Encoding.UTF8), new StreamReader(process.StandardOutput.BaseStream, Encoding.UTF8));
+                                  var process = Start(command, Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
+                                  var encoding = new UTF8Encoding(false);
+                                  interact(new StreamWriter(process.StandardInput.BaseStream, encoding), new StreamReader(process.StandardOutput.BaseStream, encoding));
                                   Close(process);
                               });
         }
