@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Core
@@ -188,6 +187,11 @@ namespace Sep.Git.Tfs.Core
         }
 
         public long Checkin(string treeish, TfsChangesetInfo parentChangeset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset)
         {
             throw new NotImplementedException();
         }

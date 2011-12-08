@@ -17,6 +17,11 @@ namespace Sep.Git.Tfs.Commands
         private readonly CheckinOptions _checkinOptions;
         private readonly TfsWriter _writer;
 
+        [OptDef(OptValType.Flag)]
+        [LongOptionName("quick")]
+        [Description("If specified, rcheckin would omit rebases (quicker), but can lead to problems if someone checks something in while command is running.")]
+        public bool Quick { get; set; }
+
         public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
         {
             _stdout = stdout;
@@ -61,34 +66,66 @@ namespace Sep.Git.Tfs.Commands
             if (!String.IsNullOrWhiteSpace(repo.CommandOneline("rev-list", tfsLatest, "^HEAD")))
                 throw new GitTfsException("error: latest TFS commit should be parent of commits being checked in");
 
-            while (true)
+            if (Quick)
             {
-                // determine first descendant of tfsLatest
-                string revList = repo.CommandOneline("rev-list", "--abbrev-commit", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + "..HEAD");
-                if (String.IsNullOrWhiteSpace(revList))
+                string[] revList = null;
+                repo.CommandOutputPipe(tr => revList = tr.ReadToEnd().Split('\n').Where(s => !String.IsNullOrWhiteSpace(s)).ToArray(), 
+                    "rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + "..HEAD");
+
+                string currentParent = tfsLatest;
+                foreach (string commitWithParents in revList)
                 {
-                    _stdout.WriteLine("No more to rcheckin.");
-                    return GitTfsExitCodes.OK;
+                    string[] strs = commitWithParents.Split(' ');
+                    string target = strs[0];
+                    string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != currentParent).ToArray();
+
+                    string commitMessage = repo.GetCommitMessage(target, currentParent).Trim(' ', '\r', '\n');
+                    _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
+                    _checkinOptions.CheckinComment = commitMessage;
+                    long newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset);
+                    tfsRemote.FetchWithMerge(newChangesetId, gitParents);
+                    if (tfsRemote.MaxChangesetId != newChangesetId)
+                        throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
+
+                    currentParent = target;
+                    parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote };
+                    _stdout.WriteLine("Done with {0}.", target);
                 }
 
-                string[] strs = revList.Split(' ');
-                string target = strs[0];
-                string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != tfsLatest).ToArray();
+                _stdout.WriteLine("No more to rcheckin.");
+                return GitTfsExitCodes.OK;
+            }
+            else
+            {
+                while (true)
+                {
+                    // determine first descendant of tfsLatest
+                    string revList = repo.CommandOneline("rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + "..HEAD");
+                    if (String.IsNullOrWhiteSpace(revList))
+                    {
+                        _stdout.WriteLine("No more to rcheckin.");
+                        return GitTfsExitCodes.OK;
+                    }
 
-                string commitMessage = repo.GetCommitMessage(target, tfsLatest).Trim(' ', '\r', '\n');
-                _stdout.WriteLine("Starting checkin of {0} '{1}'", target, commitMessage);
-                _checkinOptions.CheckinComment = commitMessage;
-                long newChangesetId = tfsRemote.Checkin(target, parentChangeset);
-                tfsRemote.FetchWithMerge(newChangesetId, gitParents);
-                if (tfsRemote.MaxChangesetId != newChangesetId)
-                    throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
-                
-                tfsLatest = tfsRemote.MaxCommitHash;
-                parentChangeset = new TfsChangesetInfo {ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote};
-                _stdout.WriteLine("Done with {0}, rebasing tail onto new TFS-commit...", target);
+                    string[] strs = revList.Split(' ');
+                    string target = strs[0];
+                    string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != tfsLatest).ToArray();
 
-                repo.CommandNoisy("rebase", "--preserve-merges", "--onto", tfsLatest, target);
-                _stdout.WriteLine("Rebase done successfully.");
+                    string commitMessage = repo.GetCommitMessage(target, tfsLatest).Trim(' ', '\r', '\n');
+                    _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
+                    _checkinOptions.CheckinComment = commitMessage;
+                    long newChangesetId = tfsRemote.Checkin(target, parentChangeset);
+                    tfsRemote.FetchWithMerge(newChangesetId, gitParents);
+                    if (tfsRemote.MaxChangesetId != newChangesetId)
+                        throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
+
+                    tfsLatest = tfsRemote.MaxCommitHash;
+                    parentChangeset = new TfsChangesetInfo {ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote};
+                    _stdout.WriteLine("Done with {0}, rebasing tail onto new TFS-commit...", target);
+
+                    repo.CommandNoisy("rebase", "--preserve-merges", "--onto", tfsLatest, target);
+                    _stdout.WriteLine("Rebase done successfully.");
+                }
             }
         }
     }
