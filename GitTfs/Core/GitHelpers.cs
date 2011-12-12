@@ -200,6 +200,7 @@ namespace Sep.Git.Tfs.Core
         private void RedirectStdout(ProcessStartInfo startInfo)
         {
             startInfo.RedirectStandardOutput = true;
+            startInfo.StandardOutputEncoding = Encoding.Default;
         }
 
         private void RedirectStdin(ProcessStartInfo startInfo)
