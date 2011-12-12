@@ -188,7 +188,7 @@ namespace Sep.Git.Tfs.VsCommon
         [Obsolete("TODO: un-spike-ify this.")]
         public int Unshelve(Unshelve unshelve, IGitTfsRemote remote, IList<string> args)
         {
-            var shelvesetOwner = unshelve.Owner == "all" ? null : (unshelve.Owner ?? VersionControl.AuthenticatedUser);
+            var shelvesetOwner = unshelve.Owner == "all" ? null : (unshelve.Owner ?? GetAuthenticatedUser());
             if (args.Count != 2)
             {
                 _stdout.WriteLine("ERROR: usage: unshelve -u <shelve-owner-name> <shelve-name> <git-branch-name>");
@@ -227,7 +227,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote)
         {
-            var shelvesetOwner = shelveList.Owner == "all" ? null : (shelveList.Owner ?? VersionControl.AuthenticatedUser);
+            var shelvesetOwner = shelveList.Owner == "all" ? null : (shelveList.Owner ?? GetAuthenticatedUser());
             IEnumerable<Shelveset> shelvesets;
             try
             {
