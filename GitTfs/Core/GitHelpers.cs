@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Core
         public string CommandOneline(params string[] command)
         {
             string retVal = null;
-            CommandOutputPipe(stdout => retVal = stdout.ReadLine(), command);
+            CommandOutputPipe(stdout => {retVal = stdout.ReadLine(); stdout.Close();}, command);
             return retVal;
         }
 
