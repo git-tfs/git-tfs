@@ -196,7 +196,8 @@ namespace Sep.Git.Tfs.Core
             // close stdout to indicate we're no more interested in it, thus allowing
             // child process to proceed.
             // See https://github.com/git-tfs/git-tfs/issues/121 for details.
-            process.StandardOutput.Close();
+            if (process.StartInfo.RedirectStandardOutput)
+                process.StandardOutput.Close();
 
             if (!process.WaitForExit((int)TimeSpan.FromSeconds(10).TotalMilliseconds))
                 throw new GitCommandException("Command did not terminate.", process);
