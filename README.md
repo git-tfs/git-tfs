@@ -58,4 +58,4 @@ If you contribute patches, please set `core.autocrlf` to `true`. (`git config co
 ## Contributing
 
 Contributions are always welcome. For more information about contributing,
-please see [the wiki](http://github.com/spraints/git-tfs/wiki/Contributing).
+please see [the wiki](http://github.com/git-tfs/git-tfs/wiki/Contributing).
