@@ -242,7 +242,7 @@ namespace Sep.Git.Tfs.Core
             try
             {
                 CommandOutputPipe(stdout => FindTfsCommits(stdout, tfsCommits, includeStubRemotes),
-                                  "log", "--no-color", "--pretty=medium", head);
+                                  "log", "--no-color", @"--pretty=format:'commit %H%n%b'", head );
             }
             catch (GitCommandException e)
             {
@@ -260,7 +260,7 @@ namespace Sep.Git.Tfs.Core
                 var match = GitTfsConstants.CommitRegex.Match(line);
                 if (match.Success)
                 {
-                    currentCommit = match.Groups[1].Value;
+                    currentCommit = match.Groups["commit"].Value;
                     continue;
                 }
                 var changesetInfo = TryParseChangesetInfo(line, currentCommit, includeStubRemotes);
