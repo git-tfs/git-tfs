@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using NDesk.Options;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -28,6 +29,11 @@ namespace Sep.Git.Tfs.Commands
         [UseNameAsLongOption(false)]
         [Description("Shelveset owner ('all' means all users)")]
         public string Owner { get; set; }
+
+        public OptionSet OptionSet
+        {
+            get { return new OptionSet(); }
+        }
 
         public IEnumerable<IOptionResults> ExtraOptions
         {

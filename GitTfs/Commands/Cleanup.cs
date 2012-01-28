@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NDesk.Options;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -17,6 +18,11 @@ namespace Sep.Git.Tfs.Commands
         public Cleanup(CleanupWorkspaces cleanupWorkspaces)
         {
             _cleanupWorkspaces = cleanupWorkspaces;
+        }
+
+        public OptionSet OptionSet
+        {
+            get { return new OptionSet(); }
         }
 
         public IEnumerable<IOptionResults> ExtraOptions

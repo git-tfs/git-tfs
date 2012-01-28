@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using NDesk.Options;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -23,6 +24,11 @@ namespace Sep.Git.Tfs.Commands
             _remoteOptions = remoteOptions;
             _globals = globals;
             _stdout = stdout;
+        }
+
+        public OptionSet OptionSet
+        {
+            get { return new OptionSet(); }
         }
 
         public IEnumerable<IOptionResults> ExtraOptions

@@ -174,6 +174,7 @@ namespace Sep.Git.Tfs
 
         public IList<string> ParseOptions(GitTfsCommand command, IList<string> args)
         {
+            args = command.OptionSet.Parse(args);
             foreach (var parseHelper in command.GetOptionParseHelpers(_container))
             {
                 var parser = new Parser(parseHelper);

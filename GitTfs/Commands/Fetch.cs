@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using NDesk.Options;
 using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -38,6 +39,11 @@ namespace Sep.Git.Tfs.Commands
         [OptDef(OptValType.Flag)]
         [ShortOptionName('p')]
         public bool parents { get; set; }
+
+        public OptionSet OptionSet
+        {
+            get { return new OptionSet(); }
+        }
 
         public IEnumerable<IOptionResults> ExtraOptions
         {
