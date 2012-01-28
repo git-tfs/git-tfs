@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
-using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 
@@ -31,9 +30,9 @@ namespace Sep.Git.Tfs.Commands
             get { return _remoteOptions.OptionSet; }
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
         {
-            get { return this.MakeNestedOptionResults(_remoteOptions); }
+            get { return this.MakeNestedOptionResults(); }
         }
 
         public int Run()

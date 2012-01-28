@@ -7,6 +7,7 @@ namespace Sep.Git.Tfs.Commands
 {
     public static class Helpers
     {
+        [Obsolete("... migrating to NDesk.Options ...")]
         public static IEnumerable<IOptionResults> MakeNestedOptionResults(this GitTfsCommand command, params object[] optionsObjectsOrCommands)
         {
             foreach(var obj in optionsObjectsOrCommands)
