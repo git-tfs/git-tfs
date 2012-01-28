@@ -28,7 +28,7 @@ namespace Sep.Git.Tfs.Commands
 
         public OptionSet OptionSet
         {
-            get { return new OptionSet(); }
+            get { return _remoteOptions.OptionSet; }
         }
 
         public IEnumerable<IOptionResults> ExtraOptions

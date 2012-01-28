@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using CommandLine.OptParse;
+using NDesk.Options;
 using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
@@ -9,28 +9,30 @@ namespace Sep.Git.Tfs.Commands
     [StructureMapSingleton]
     public class RemoteOptions
     {
-        [OptDef(OptValType.ValueReq)]
-        [LongOptionName("ignore-regex")]
-        [UseNameAsLongOption(false)]
-        [Description("If specified, git-tfs will not sync any paths that match this regular expression.")]
+        public OptionSet OptionSet
+        {
+            get
+            {
+                return new OptionSet
+                {
+                    { "ignore-regex=", "a regex of files to ignore",
+                        v => IgnoreRegex = v },
+                    { "no-metadata", "leave out the 'git-tfs-id:' tag in commit messages\nUse this when you're exporting from TFS and don't need to put data back into TFS.",
+                        v => NoMetaData = v != null },
+                    { "u|username=", "TFS username",
+                        v => Username = v },
+                    { "p|password=", "TFS password",
+                        v => Password = v },
+                };
+            }
+        }
+
         public string IgnoreRegex { get; set; }
 
-        [OptDef(OptValType.Flag)]
-        [LongOptionName("no-metadata")]
-        [UseNameAsLongOption(false)]
-        [Description("If specified, git-tfs will leave out the git-tfs-id: lines at the end of every commit.")]
         public bool NoMetaData { get; set; }
 
-        [OptDef(OptValType.ValueReq)]
-        [ShortOptionName('u')]
-        [UseNameAsLongOption(true)]
-        [Description("Username for TFS connection")]
         public string Username { get; set; }
 
-        [OptDef(OptValType.ValueReq)]
-        [ShortOptionName('p')]
-        [UseNameAsLongOption(true)]
-        [Description("Password for TFS connection")]
         public string Password { get; set; }
     }
 }
