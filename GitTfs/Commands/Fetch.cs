@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NDesk.Options;
-using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 
@@ -17,37 +16,39 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Fetch : GitTfsCommand
     {
-        private readonly FcOptions fcOptions;
         private readonly RemoteOptions remoteOptions;
         private readonly Globals globals;
 
-        public Fetch(Globals globals, RemoteOptions remoteOptions, FcOptions fcOptions)
+        public Fetch(Globals globals, RemoteOptions remoteOptions)
         {
-            this.fcOptions = fcOptions;
             this.remoteOptions = remoteOptions;
             this.globals = globals;
         }
 
-//        [OptDef(OptValType.ValueReq)]
-//        [ShortOptionName('r')]
-//        public int? revision { get; set; }
+//        public int? RevisionToFetch { get; set; }
 
-        [OptDef(OptValType.Flag)]
-        [LongOptionName("fetch-all")]
-        public bool all { get; set; }
-
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('p')]
-        public bool parents { get; set; }
+        bool FetchAll { get; set; }
+        bool FetchParents { get; set; }
 
         public OptionSet OptionSet
         {
-            get { return remoteOptions.OptionSet; }
+            get
+            {
+                return new OptionSet
+                {
+                    { "all|fetch-all",
+                        v => FetchAll = v != null },
+                    { "parents",
+                        v => FetchParents = v != null },
+//                    { "r|revision=",
+//                        v => RevisionToFetch = Convert.ToInt32(v) },
+                }.Merge(remoteOptions.OptionSet);
+            }
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
         {
-            get { return this.MakeNestedOptionResults(fcOptions, remoteOptions); }
+            get { return this.MakeNestedOptionResults(); }
         }
 
         public int Run()
@@ -79,9 +80,9 @@ namespace Sep.Git.Tfs.Commands
         private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)
         {
             IEnumerable<IGitTfsRemote> remotesToFetch;
-            if (parents)
+            if (FetchParents)
                 remotesToFetch = globals.Repository.GetLastParentTfsCommits("HEAD").Select(commit => commit.Remote);
-            else if (all)
+            else if (FetchAll)
                 remotesToFetch = globals.Repository.ReadAllTfsRemotes();
             else
                 remotesToFetch = args.Select(arg => globals.Repository.ReadTfsRemote(arg));

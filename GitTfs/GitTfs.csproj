@@ -105,7 +105,6 @@
     <Compile Include="Commands\CommitOptions.cs" />
     <Compile Include="Commands\ShelveList.cs" />
     <Compile Include="Commands\Diagnostics.cs" />
-    <Compile Include="Commands\FcOptions.cs" />
     <Compile Include="Commands\Fetch.cs" />
     <Compile Include="Commands\Help.cs" />
     <Compile Include="Commands\Helpers.cs" />
