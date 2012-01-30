@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
-using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 using Sep.Git.Tfs.Util;
@@ -29,12 +28,12 @@ namespace Sep.Git.Tfs.Commands
 
         public OptionSet OptionSet
         {
-            get { return new OptionSet(); }
+            get { return init.OptionSet.Merge(fetch.OptionSet); }
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
         {
-            get { return this.MakeNestedOptionResults(init, fetch); }
+            get { return this.MakeNestedOptionResults(); }
         }
 
         public int Run(string tfsUrl, string tfsRepositoryPath)
