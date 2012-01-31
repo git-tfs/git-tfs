@@ -102,7 +102,6 @@
     <Compile Include="Commands\CleanupOptions.cs" />
     <Compile Include="Commands\CleanupWorkspaces.cs" />
     <Compile Include="Commands\Clone.cs" />
-    <Compile Include="Commands\CommitOptions.cs" />
     <Compile Include="Commands\ShelveList.cs" />
     <Compile Include="Commands\Diagnostics.cs" />
     <Compile Include="Commands\Fetch.cs" />
