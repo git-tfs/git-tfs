@@ -30,7 +30,7 @@ namespace Sep.Git.Tfs.Commands
         bool FetchAll { get; set; }
         bool FetchParents { get; set; }
 
-        public OptionSet OptionSet
+        public virtual OptionSet OptionSet
         {
             get
             {
