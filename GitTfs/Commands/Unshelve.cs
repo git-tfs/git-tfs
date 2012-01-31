@@ -6,9 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NDesk.Options;
-using CommandLine.OptParse;
-using Sep.Git.Tfs.Core;
 using StructureMap;
+using Sep.Git.Tfs.Core;
+
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("unshelve")]
@@ -23,19 +23,21 @@ namespace Sep.Git.Tfs.Commands
             _globals = globals;
         }
 
-        [OptDef(OptValType.ValueReq)]
-        [ShortOptionName('u')]
-        [LongOptionName("user")]
-        [UseNameAsLongOption(false)]
-        [Description("Shelveset owner ('all' means all users)")]
-        public string Owner { get; set; }
+        private string Owner { get; set; }
 
         public OptionSet OptionSet
         {
-            get { return new OptionSet(); }
+            get
+            {
+                return new OptionSet
+                {
+                    { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to search all shelvesets.",
+                        v => Owner = v },
+                };
+            }
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        IEnumerable<CommandLine.OptParse.IOptionResults> GitTfsCommand.ExtraOptions
         {
             get { return this.MakeNestedOptionResults(); }
         }
