@@ -12,7 +12,6 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Pull : GitTfsCommand
     {
-        #region GitTfsCommand Members
         private readonly Fetch fetch;
         private readonly Globals globals;
 
@@ -49,7 +48,5 @@ namespace Sep.Git.Tfs.Commands
 
             return retVal;
         }
-
-        #endregion
     }
 }
