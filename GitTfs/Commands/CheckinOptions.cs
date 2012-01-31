@@ -21,7 +21,7 @@ namespace Sep.Git.Tfs.Commands
         [OptDef(OptValType.Flag)]
         [LongOptionName("no-build-default-comment")]
         [UseNameAsLongOption(false)]
-        [Description("Use the comments from the commits on the current branch to create a default checkin message (checkintool only)")]
+        [Description("Do not use the comments from the commits on the current branch to create a default checkin message (checkintool only)")]
                       // This can be extended to checkin when the $EDITOR is invoked.
         public bool GenerateCheckinComment { get; set; }
 
