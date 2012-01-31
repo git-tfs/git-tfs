@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
-using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 
@@ -19,12 +18,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly CheckinOptions _checkinOptions;
         private readonly TfsWriter _writer;
 
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('p')]
-        [LongOptionName("evaluate-policies")]
-        [UseNameAsLongOption(false)]
-        [Description("Evaluate checkin policies")]
-        public bool EvaluateCheckinPolicies { get; set; }
+        private bool EvaluateCheckinPolicies { get; set; }
 
         public Shelve(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
         {
@@ -35,10 +29,17 @@ namespace Sep.Git.Tfs.Commands
 
         public OptionSet OptionSet
         {
-            get { return new OptionSet(); }
+            get
+            {
+                return new OptionSet
+                {
+                    { "p|evaluate-policies", "Evaluate checkin policies (default: false)",
+                        v => EvaluateCheckinPolicies = v != null },
+                }.Merge(_checkinOptions.OptionSet);
+            }
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
         {
             get { return this.MakeNestedOptionResults(_checkinOptions); }
         }
