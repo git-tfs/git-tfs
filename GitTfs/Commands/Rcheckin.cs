@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
-using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 
@@ -18,10 +17,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly CheckinOptions _checkinOptions;
         private readonly TfsWriter _writer;
 
-        [OptDef(OptValType.Flag)]
-        [LongOptionName("quick")]
-        [Description("If specified, rcheckin would omit rebases (quicker), but can lead to problems if someone checks something in while command is running.")]
-        public bool Quick { get; set; }
+        private bool Quick { get; set; }
 
         public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
         {
@@ -32,12 +28,19 @@ namespace Sep.Git.Tfs.Commands
 
         public OptionSet OptionSet
         {
-            get { return new OptionSet(); }
+            get
+            {
+                return new OptionSet
+                {
+                    { "no-rebase|quick", "omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
+                        v => Quick = v != null },
+                }.Merge(_checkinOptions.OptionSet);
+            }
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
         {
-            get { return this.MakeNestedOptionResults(_checkinOptions); }
+            get { return this.MakeNestedOptionResults(); }
         }
 
         // uses rebase and works only with HEAD
