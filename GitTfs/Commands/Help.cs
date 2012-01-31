@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
-using CommandLine.OptParse;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
 using StructureMap;
@@ -34,7 +33,7 @@ namespace Sep.Git.Tfs.Commands
             get { return new OptionSet(); }
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
         {
             get { return null; }
         }
@@ -94,12 +93,12 @@ namespace Sep.Git.Tfs.Commands
             output.WriteLine("Usage: git-tfs " + GetCommandUsage(command));
 
             // deprecated
-            var usage = new UsageBuilder();
+            var usage = new CommandLine.OptParse.UsageBuilder();
             usage.BeginSection("where options are:");
             foreach (var parseHelper in command.GetOptionParseHelpers(_container))
                 usage.AddOptions(parseHelper);
             usage.EndSection();
-            usage.ToText(output, OptStyle.Unix, true);
+            usage.ToText(output, CommandLine.OptParse.OptStyle.Unix, true);
 
             //new
             command.OptionSet.WriteOptionDescriptions(output);
@@ -149,6 +148,7 @@ namespace Sep.Git.Tfs.Commands
         int ShowHelp(GitTfsCommand command);
         int ShowHelpForInvalidArguments(GitTfsCommand command);
     }
+
     public class HelpHelper : IHelpHelper
     {
         private readonly IContainer _container;

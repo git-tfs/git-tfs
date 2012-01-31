@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using NDesk.Options;
-using CommandLine.OptParse;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Commands
@@ -24,7 +23,7 @@ namespace Sep.Git.Tfs.Commands
             get { return new OptionSet(); }
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
         {
             get { return this.MakeNestedOptionResults(); }
         }
