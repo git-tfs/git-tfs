@@ -1,4 +1,4 @@
-﻿using CommandLine.OptParse;
+﻿using NDesk.Options;
 using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
@@ -13,11 +13,18 @@ namespace Sep.Git.Tfs.Commands
             _globals = globals;
         }
 
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('v')]
-        [LongOptionName("verbose")]
-        [UseNameAsLongOption(false)]
-        public bool IsVerbose { get; set; }
+        public OptionSet OptionSet
+        {
+            get
+            {
+                return new OptionSet
+                {
+                    { "v|verbose", v => IsVerbose = v != null },
+                };
+            }
+        }
+
+        private bool IsVerbose { get; set; }
 
         public void Init()
         {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using CommandLine.OptParse;
+using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 
@@ -17,30 +17,24 @@ namespace Sep.Git.Tfs.Commands
         private readonly TextWriter _stdout;
         private readonly Globals _globals;
 
-        [OptDef(OptValType.ValueReq)]
-        [ShortOptionName('s')]
-        [LongOptionName("sort")]
-        [UseNameAsLongOption(false)]
-        [Description("How to sort resulting shelves. Possible values are: date, owner, name, comment.")]
         public string SortBy { get; set; }
-
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('f')]
-        [LongOptionName("full")]
-        [UseNameAsLongOption(false)]
-        [Description("Use detailed format.")]
         public bool FullFormat { get; set; }
-
-        [OptDef(OptValType.ValueReq)]
-        [ShortOptionName('u')]
-        [LongOptionName("user")]
-        [UseNameAsLongOption(false)]
-        [Description("Shelveset owner ('all' means all users)")]
         public string Owner { get; set; }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public OptionSet OptionSet
         {
-            get { return this.MakeNestedOptionResults(); }
+            get
+            {
+                return new OptionSet
+                {
+                    { "s|sort=", "How to sort shelvesets\ndate, owner, name, comment",
+                        v => SortBy = v },
+                    { "f|full", "Detailed output",
+                        v => FullFormat = v != null },
+                    { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to get all shelvesets.",
+                        v => Owner = v },
+                };
+            }
         }
 
         public ShelveList(TextWriter stdout, Globals globals)

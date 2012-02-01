@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CommandLine.OptParse;
+using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
@@ -19,9 +19,9 @@ namespace Sep.Git.Tfs.Commands
             _cleanupWorkspaces = cleanupWorkspaces;
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public OptionSet OptionSet
         {
-            get { return this.MakeNestedOptionResults(_cleanupWorkspaces); }
+            get { return _cleanupWorkspaces.OptionSet; }
         }
 
 

@@ -1,0 +1,12 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${pcfiledir}/../..
+libdir=${exec_prefix}/lib
+assemblies_dir=${libdir}/ndesk-options
+Libraries=${assemblies_dir}/NDesk.Options.dll
+Sources=${assemblies_dir}/Options.cs
+ 
+Name: NDesk.Options
+Description: C# Program Option Parsing Library.
+Version: 0.2.1
+Requires: 
+Libs: -r:NDesk.Options.dll

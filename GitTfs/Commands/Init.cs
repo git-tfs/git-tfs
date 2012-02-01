@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
-using CommandLine.OptParse;
+using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 
@@ -30,12 +30,9 @@ namespace Sep.Git.Tfs.Commands
             this.initOptions = initOptions;
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public OptionSet OptionSet
         {
-            get
-            {
-                return this.MakeNestedOptionResults(initOptions, remoteOptions);
-            }
+            get { return initOptions.OptionSet.Merge(remoteOptions.OptionSet); }
         }
 
         public int Run(string tfsUrl, string tfsRepositoryPath)

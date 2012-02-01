@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CommandLine.OptParse;
+using NDesk.Options;
 using Sep.Git.Tfs.Core;
 
 namespace Sep.Git.Tfs.Commands
@@ -19,9 +19,9 @@ namespace Sep.Git.Tfs.Commands
             _writer = writer;
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public OptionSet OptionSet
         {
-            get { return this.MakeNestedOptionResults(_checkinOptions); }
+            get { return _checkinOptions.OptionSet; }
         }
 
         public int Run()
