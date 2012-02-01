@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using CommandLine.OptParse;
+using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
 
@@ -10,24 +10,27 @@ namespace Sep.Git.Tfs
     [StructureMapSingleton]
     public class Globals
     {
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('h')]
-        [ShortOptionName('H')]
-        [LongOptionName("help")]
-        [UseNameAsLongOption(false)]
-        public bool ShowHelp { get; set; }
+        public OptionSet OptionSet
+        {
+            get
+            {
+                return new OptionSet
+                {
+                    { "h|H|help",
+                        v => ShowHelp = v != null },
+                    { "V|version",
+                        v => ShowVersion = v != null },
+                    { "d|debug", "Show debug output about everything git-tfs does",
+                        v => DebugOutput = v != null },
+                    { "i|tfs-remote|remote|id=", "The remote ID of the TFS to interact with\ndefault: default",
+                        v => UserSpecifiedRemoteId = v },
+                };
+            }
+        }
 
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('V')]
-        [LongOptionName("version")]
-        [UseNameAsLongOption(false)]
+        public bool ShowHelp { get; set; }
         public bool ShowVersion { get; set; }
 
-        [OptDef(OptValType.Flag)]
-        [ShortOptionName('d')]
-        [LongOptionName("debug")]
-        [UseNameAsLongOption(false)]
-        [Description("Show lots of output.")]
         public bool DebugOutput
         {
             get { return _debugTraceListener.HasValue; }
@@ -51,13 +54,6 @@ namespace Sep.Git.Tfs
         }
         private int? _debugTraceListener;
 
-        [OptDef(OptValType.ValueReq)]
-        [ShortOptionName('i')]
-        [LongOptionName("tfs-remote")]
-        [LongOptionName("remote")]
-        [LongOptionName("id")]
-        [UseNameAsLongOption(false)]
-        [Description("An optional remote ID, useful if this repository will track multiple TFS repositories.")]
         public string UserSpecifiedRemoteId
         {
             get { return _userSpecifiedRemoteId; }

@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using CommandLine.OptParse;
+using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 using Sep.Git.Tfs.Util;
@@ -26,9 +26,9 @@ namespace Sep.Git.Tfs.Commands
             this.globals = globals;
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public OptionSet OptionSet
         {
-            get { return this.MakeNestedOptionResults(init, fetch); }
+            get { return init.OptionSet.Merge(fetch.OptionSet); }
         }
 
         public int Run(string tfsUrl, string tfsRepositoryPath)

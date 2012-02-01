@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using CommandLine.OptParse;
+using NDesk.Options;
 using StructureMap;
 
 namespace Sep.Git.Tfs
@@ -7,6 +7,6 @@ namespace Sep.Git.Tfs
     [PluginFamily]
     public interface GitTfsCommand
     {
-        IEnumerable<IOptionResults> ExtraOptions { get; }
+        OptionSet OptionSet { get; }
     }
 }
