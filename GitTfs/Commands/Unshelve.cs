@@ -23,7 +23,7 @@ namespace Sep.Git.Tfs.Commands
             _globals = globals;
         }
 
-        private string Owner { get; set; }
+        public string Owner { get; set; }
 
         public OptionSet OptionSet
         {

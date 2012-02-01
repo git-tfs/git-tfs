@@ -17,9 +17,9 @@ namespace Sep.Git.Tfs.Commands
         private readonly TextWriter _stdout;
         private readonly Globals _globals;
 
-        private string SortBy { get; set; }
-        private bool FullFormat { get; set; }
-        private string Owner { get; set; }
+        public string SortBy { get; set; }
+        public bool FullFormat { get; set; }
+        public string Owner { get; set; }
 
         public OptionSet OptionSet
         {
