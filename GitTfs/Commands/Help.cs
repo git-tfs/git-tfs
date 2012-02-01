@@ -33,11 +33,6 @@ namespace Sep.Git.Tfs.Commands
             get { return new OptionSet(); }
         }
 
-        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
-        {
-            get { return null; }
-        }
-
         /// <summary>
         /// Figures out whether it should show help for git-tfs or for
         /// a particular command, and then does that.
@@ -91,17 +86,7 @@ namespace Sep.Git.Tfs.Commands
                 return Run();
 
             output.WriteLine("Usage: git-tfs " + GetCommandUsage(command));
-
-            // deprecated
-            var usage = new CommandLine.OptParse.UsageBuilder();
-            usage.BeginSection("where options are:");
-            foreach (var parseHelper in command.GetOptionParseHelpers(_container))
-                usage.AddOptions(parseHelper);
-            usage.EndSection();
-            usage.ToText(output, CommandLine.OptParse.OptStyle.Unix, true);
-
-            //new
-            command.OptionSet.WriteOptionDescriptions(output);
+            command.GetAllOptions(_container).WriteOptionDescriptions(output);
 
             return GitTfsExitCodes.Help;
         }

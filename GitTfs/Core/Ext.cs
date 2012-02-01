@@ -6,8 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using CommandLine.OptParse;
+using NDesk.Options;
 using StructureMap;
+using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -90,17 +91,9 @@ namespace Sep.Git.Tfs.Core
             return c == null || !c.Any();
         }
 
-        public static IEnumerable<IOptionResults> GetOptionParseHelpers(this GitTfsCommand command, IContainer container)
+        public static OptionSet GetAllOptions(this GitTfsCommand command, IContainer container)
         {
-            yield return new PropertyFieldParserHelper(container.GetInstance<Globals>());
-            yield return new PropertyFieldParserHelper(command);
-            if(command.ExtraOptions != null)
-            {
-                foreach(var parseHelper in command.ExtraOptions)
-                {
-                    yield return parseHelper;
-                }
-            }
+            return container.GetInstance<Globals>().OptionSet.Merge(command.OptionSet);
         }
 
         private static readonly Regex sha1OnlyRegex = new Regex("^" + GitTfsConstants.Sha1 + "$");

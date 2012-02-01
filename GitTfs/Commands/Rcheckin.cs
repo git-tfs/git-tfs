@@ -38,11 +38,6 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
-        {
-            get { return this.MakeNestedOptionResults(); }
-        }
-
         // uses rebase and works only with HEAD
         public int Run()
         {

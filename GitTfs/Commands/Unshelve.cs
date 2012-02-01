@@ -37,11 +37,6 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        IEnumerable<CommandLine.OptParse.IOptionResults> GitTfsCommand.ExtraOptions
-        {
-            get { return this.MakeNestedOptionResults(); }
-        }
-
         public int Run(IList<string> args)
         {
             var remote = _globals.Repository.ReadTfsRemote(_globals.RemoteId);

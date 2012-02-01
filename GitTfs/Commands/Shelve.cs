@@ -39,11 +39,6 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
-        {
-            get { return this.MakeNestedOptionResults(_checkinOptions); }
-        }
-
         public int Run(string shelvesetName)
         {
             return Run(shelvesetName, "HEAD");

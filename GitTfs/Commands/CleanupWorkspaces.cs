@@ -29,11 +29,6 @@ namespace Sep.Git.Tfs.Commands
             get { return _cleanupOptions.OptionSet; }
         }
 
-        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
-        {
-            get { return this.MakeNestedOptionResults(); }
-        }
-
         public int Run()
         {
             _cleanupOptions.Init();

@@ -46,11 +46,6 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
-        {
-            get { return this.MakeNestedOptionResults(); }
-        }
-
         public int Run()
         {
             return Run(globals.RemoteId);

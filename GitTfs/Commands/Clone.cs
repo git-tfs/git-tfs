@@ -31,11 +31,6 @@ namespace Sep.Git.Tfs.Commands
             get { return init.OptionSet.Merge(fetch.OptionSet); }
         }
 
-        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
-        {
-            get { return this.MakeNestedOptionResults(); }
-        }
-
         public int Run(string tfsUrl, string tfsRepositoryPath)
         {
             return Run(tfsUrl, tfsRepositoryPath, Path.GetFileName(tfsRepositoryPath));

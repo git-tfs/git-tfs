@@ -29,29 +29,5 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
         }
-
-        [Obsolete("... migrating to NDesk.Options ...")]
-        public static IEnumerable<CommandLine.OptParse.IOptionResults> MakeNestedOptionResults(this GitTfsCommand command, params object[] optionsObjectsOrCommands)
-        {
-            foreach(var obj in optionsObjectsOrCommands)
-            {
-                if(obj is GitTfsCommand)
-                {
-                    foreach(var option in ((GitTfsCommand)obj).ExtraOptions)
-                    {
-                        yield return option;
-                    }
-                    yield return new CommandLine.OptParse.PropertyFieldParserHelper(obj);
-                }
-                else if(obj is CommandLine.OptParse.IOptionResults)
-                {
-                    yield return (CommandLine.OptParse.IOptionResults) obj;
-                }
-                else
-                {
-                    yield return new CommandLine.OptParse.PropertyFieldParserHelper(obj);
-                }
-            }
-        }
     }
 }

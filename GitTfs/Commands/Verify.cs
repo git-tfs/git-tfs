@@ -28,11 +28,6 @@ namespace Sep.Git.Tfs.Commands
             get { return new OptionSet(); }
         }
 
-        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
-        {
-            get { return this.MakeNestedOptionResults(); }
-        }
-
         public int Run()
         {
             return Run("HEAD");

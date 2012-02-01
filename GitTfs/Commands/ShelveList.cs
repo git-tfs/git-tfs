@@ -37,11 +37,6 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        IEnumerable<CommandLine.OptParse.IOptionResults> GitTfsCommand.ExtraOptions
-        {
-            get { return this.MakeNestedOptionResults(); }
-        }
-
         public ShelveList(TextWriter stdout, Globals globals)
         {
             _stdout = stdout;

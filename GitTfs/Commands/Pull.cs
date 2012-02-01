@@ -20,11 +20,6 @@ namespace Sep.Git.Tfs.Commands
             get { return fetch.OptionSet; }
         }
 
-        public IEnumerable<CommandLine.OptParse.IOptionResults> ExtraOptions
-        {
-            get { return this.MakeNestedOptionResults(fetch); }
-        }
-
         public Pull(Globals globals, Fetch fetch)
         {
             this.fetch = fetch;
