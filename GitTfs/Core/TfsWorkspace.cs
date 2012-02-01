@@ -58,7 +58,7 @@ namespace Sep.Git.Tfs.Core
                 throw new GitTfsException("Nothing to checkin!");
 
             var checkinComment = _checkinOptions.CheckinComment;
-            if (string.IsNullOrWhiteSpace(checkinComment) && !_checkinOptions.GenerateCheckinComment)
+            if (string.IsNullOrWhiteSpace(checkinComment) && !_checkinOptions.NoGenerateCheckinComment)
                 checkinComment = generateCheckinComment();
 
             var newChangesetId = _tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), checkinComment);

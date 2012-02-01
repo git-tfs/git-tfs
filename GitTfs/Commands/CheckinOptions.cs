@@ -23,7 +23,7 @@ namespace Sep.Git.Tfs.Commands
         [UseNameAsLongOption(false)]
         [Description("Do not use the comments from the commits on the current branch to create a default checkin message (checkintool only)")]
                       // This can be extended to checkin when the $EDITOR is invoked.
-        public bool GenerateCheckinComment { get; set; }
+        public bool NoGenerateCheckinComment { get; set; }
 
         [OptDef(OptValType.Flag)]
         [LongOptionName("no-merge")]
