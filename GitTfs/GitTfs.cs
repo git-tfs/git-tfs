@@ -4,12 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using CommandLine.OptParse;
+using StructureMap;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
-using StructureMap;
 
 namespace Sep.Git.Tfs
 {
@@ -20,14 +19,16 @@ namespace Sep.Git.Tfs
         private readonly IHelpHelper _help;
         private readonly IContainer _container;
         private readonly GitTfsCommandRunner _runner;
+        private readonly Globals _globals;
 
-        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, GitTfsCommandRunner runner)
+        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, GitTfsCommandRunner runner, Globals globals)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
             _help = help;
             _container = container;
             _runner = runner;
+            _globals = globals;
         }
 
         public void Run(IList<string> args)
@@ -41,12 +42,11 @@ namespace Sep.Git.Tfs
 
         public void Main(GitTfsCommand command, IList<string> unparsedArgs)
         {
-            var globals = _container.GetInstance<Globals>();
-            if(globals.ShowHelp)
+            if(_globals.ShowHelp)
             {
                 Environment.ExitCode = _help.ShowHelp(command);
             }
-            else if(globals.ShowVersion)
+            else if(_globals.ShowVersion)
             {
                 _container.GetInstance<TextWriter>().WriteLine(MakeVersionString());
                 Environment.ExitCode = GitTfsExitCodes.OK;
@@ -104,38 +104,36 @@ namespace Sep.Git.Tfs
         public void InitializeGlobals()
         {
             var git = _container.GetInstance<IGitHelpers>();
-            var globals = _container.GetInstance<Globals>();
             try
             {
-                globals.StartingRepositorySubDir = git.CommandOneline("rev-parse", "--show-prefix");
+                _globals.StartingRepositorySubDir = git.CommandOneline("rev-parse", "--show-prefix");
             }
             catch (Exception)
             {
-                globals.StartingRepositorySubDir = "";
+                _globals.StartingRepositorySubDir = "";
             }
-            if(globals.GitDir != null)
+            if(_globals.GitDir != null)
             {
-                globals.GitDirSetByUser = true;
+                _globals.GitDirSetByUser = true;
             }
             else
             {
-                globals.GitDir = ".git";
+                _globals.GitDir = ".git";
             }
-            globals.RemoteId = GitTfsConstants.DefaultRepositoryId;
+            _globals.RemoteId = GitTfsConstants.DefaultRepositoryId;
         }
 
         public void AssertValidGitRepository()
         {
-            var globals = _container.GetInstance<Globals>();
             var git = _container.GetInstance<IGitHelpers>();
-            if (!Directory.Exists(globals.GitDir))
+            if (!Directory.Exists(_globals.GitDir))
             {
-                if (globals.GitDirSetByUser)
+                if (_globals.GitDirSetByUser)
                 {
-                    throw new Exception("GIT_DIR=" + globals.GitDir + " explicitly set, but it is not a directory.");
+                    throw new Exception("GIT_DIR=" + _globals.GitDir + " explicitly set, but it is not a directory.");
                 }
-                var gitDir = globals.GitDir;
-                globals.GitDir = null;
+                var gitDir = _globals.GitDir;
+                _globals.GitDir = null;
                 string cdUp = null;
                 git.WrapGitCommandErrors("Already at toplevel, but " + gitDir + " not found.",
                                          () =>
@@ -153,9 +151,9 @@ namespace Sep.Git.Tfs
                 {
                     throw new Exception(gitDir + " still not found after going to " + cdUp);
                 }
-                globals.GitDir = gitDir;
+                _globals.GitDir = gitDir;
             }
-            globals.Repository = git.MakeRepository(globals.GitDir);
+            _globals.Repository = git.MakeRepository(_globals.GitDir);
         }
 
         public GitTfsCommand ExtractCommand(IList<string> args)
@@ -174,12 +172,7 @@ namespace Sep.Git.Tfs
 
         public IList<string> ParseOptions(GitTfsCommand command, IList<string> args)
         {
-            foreach (var parseHelper in command.GetOptionParseHelpers(_container))
-            {
-                var parser = new Parser(parseHelper);
-                args = parser.Parse(args.ToArray());
-            }
-            return args;
+            return command.GetAllOptions(_container).Parse(args);
         }
     }
 }

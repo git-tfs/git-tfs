@@ -1,6 +1,7 @@
-﻿using Sep.Git.Tfs.Core;
+﻿using System;
 using System.ComponentModel;
-using CommandLine.OptParse;
+using NDesk.Options;
+using Sep.Git.Tfs.Core;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -13,25 +14,32 @@ namespace Sep.Git.Tfs.Commands
     //  2. Load the correct set of extant casing.
     public class QuickFetch : Fetch
     {
-        public QuickFetch(Globals globals, RemoteOptions remoteOptions, FcOptions fcOptions) : base(globals, remoteOptions, fcOptions)
+        public QuickFetch(Globals globals, RemoteOptions remoteOptions) : base(globals, remoteOptions)
         {
         }
 
-        [OptDef(OptValType.ValueOpt, ValueType=typeof(int))]
-        [LongOptionName("changeset")]
-        [ShortOptionName('c')]
-        [UseNameAsLongOption(false)]
-        [Description("Specify a changeset to clone from")]
-        public int changeSetId { get; set; }
+        public override OptionSet OptionSet
+        {
+            get
+            {
+                return base.OptionSet.Merge(new OptionSet
+                {
+                    { "c|changeset=", "The changeset to clone from (must be a number)",
+                        v => InitialChangeset = Convert.ToInt32(v) },
+                });
+            }
+        }
+
+        private int? InitialChangeset { get; set; }
 
         protected override void DoFetch(IGitTfsRemote remote)
         {
-            if (changeSetId == default(int))
+            if (InitialChangeset.HasValue)
                 // Just grab the latest changeset:
                 remote.QuickFetch();
             else
                 // Use a specific changeset to start from:
-                remote.QuickFetch(changeSetId);
+                remote.QuickFetch(InitialChangeset.Value);
         }
     }
 }

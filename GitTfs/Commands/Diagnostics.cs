@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using CommandLine.OptParse;
+using NDesk.Options;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Commands
@@ -18,9 +18,9 @@ namespace Sep.Git.Tfs.Commands
             _container = container;
         }
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public OptionSet OptionSet
         {
-            get { return this.MakeNestedOptionResults(); }
+            get { return new OptionSet(); }
         }
 
         public int Run()

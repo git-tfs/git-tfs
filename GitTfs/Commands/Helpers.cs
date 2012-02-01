@@ -1,31 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CommandLine.OptParse;
+using NDesk.Options;
 
 namespace Sep.Git.Tfs.Commands
 {
     public static class Helpers
     {
-        public static IEnumerable<IOptionResults> MakeNestedOptionResults(this GitTfsCommand command, params object[] optionsObjectsOrCommands)
+        public static OptionSet Merge(this OptionSet options, params OptionSet[] others)
         {
-            foreach(var obj in optionsObjectsOrCommands)
+            var merged = new MergableOptionSet();
+            merged.Merge(options);
+            foreach(var other in others)
+                merged.Merge(other);
+            return merged;
+        }
+
+        class MergableOptionSet : OptionSet
+        {
+            public void Merge(OptionSet other)
             {
-                if(obj is GitTfsCommand)
+                foreach(var option in other)
                 {
-                    foreach(var option in ((GitTfsCommand)obj).ExtraOptions)
+                    if(!Contains(GetKeyForItem(option)))
                     {
-                        yield return option;
+                        Add(option);
                     }
-                    yield return new PropertyFieldParserHelper(obj);
-                }
-                else if(obj is IOptionResults)
-                {
-                    yield return (IOptionResults) obj;
-                }
-                else
-                {
-                    yield return new PropertyFieldParserHelper(obj);
                 }
             }
         }

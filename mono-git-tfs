@@ -1,0 +1,2 @@
+#!/bin/sh -x
+GIT_TFS_CLIENT=Fake mono ./GitTfs/bin/Debug/git-tfs.exe $*

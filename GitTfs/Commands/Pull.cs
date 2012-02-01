@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using CommandLine.OptParse;
+using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 
@@ -12,13 +12,12 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Pull : GitTfsCommand
     {
-        #region GitTfsCommand Members
         private readonly Fetch fetch;
         private readonly Globals globals;
 
-        public IEnumerable<IOptionResults> ExtraOptions
+        public OptionSet OptionSet
         {
-            get { return this.MakeNestedOptionResults(fetch); }
+            get { return fetch.OptionSet; }
         }
 
         public Pull(Globals globals, Fetch fetch)
@@ -44,7 +43,5 @@ namespace Sep.Git.Tfs.Commands
 
             return retVal;
         }
-
-        #endregion
     }
 }
