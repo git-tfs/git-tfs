@@ -16,8 +16,8 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "m|comment=", "A comment for the changeset",
                         v => CheckinComment = v },
-                    { "build-default-comment", "Concatenate commit comments for the changeset comment.",
-                        v => GenerateCheckinComment = v != null },
+                    { "no-build-default-comment", "Do not concatenate commit comments for the changeset comment.",
+                        v => NoGenerateCheckinComment = v != null },
                     { "no-merge", "Omits setting commit being checked in as parent, thus allowing to rebase remaining onto TFS changeset without exceeding merge commits.",
                         v => NoMerge = v != null },
                     { "f|force=", "The policy override reason.",
@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Commands
 
         public string CheckinComment { get; set; }
         // This can be extended to checkin when the $EDITOR is invoked.
-        public bool GenerateCheckinComment { get; set; }
+        public bool NoGenerateCheckinComment { get; set; }
         public bool NoMerge { get; set; }
         public string OverrideReason { get; set; }
         public bool Force { get; set; }
