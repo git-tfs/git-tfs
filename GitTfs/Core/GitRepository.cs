@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using GitSharp.Core;
 using Sep.Git.Tfs.Commands;
 using StructureMap;
 using FileMode = GitSharp.Core.FileMode;
+using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Core
         private readonly Globals _globals;
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
-        private Repository _repository;
+        private GitSharp.Core.Repository _repository;
 
         public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals)
             : base(stdout, container)
@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs.Core
             _container = container;
             _globals = globals;
             GitDir = gitDir;
-            _repository = new Repository(new DirectoryInfo(gitDir));
+            _repository = new GitSharp.Core.Repository(new DirectoryInfo(gitDir));
         }
 
         public string GitDir { get; set; }
@@ -305,18 +305,16 @@ namespace Sep.Git.Tfs.Core
 
         public string GetCommitMessage(string head, string parentCommitish)
         {
-            string message = string.Empty;
-            using (var logMessage = CommandOutputPipe("log", parentCommitish + ".." + head))
+            System.Text.StringBuilder message = new System.Text.StringBuilder();
+            using(LibGit2Sharp.Repository repo = new LibGit2Sharp.Repository(GitDir))
             {
-                string line;
-                while (null != (line = logMessage.ReadLine()))
+                foreach (LibGit2Sharp.Commit comm in
+                    repo.Commits.QueryBy(new LibGit2Sharp.Filter { Since = head, Until = parentCommitish }))
                 {
-                    if (!line.StartsWith("   "))
-                        continue;
-                    message += line.TrimStart() + Environment.NewLine;
+                    message.AppendLine(comm.Message);
                 }
             }
-            return message;
+            return message.ToString();
         }
 
         private void ParseEntries(IDictionary<string, GitObject> entries, string treeInfo, string commit)
@@ -403,36 +401,38 @@ namespace Sep.Git.Tfs.Core
 
         public void GetBlob(string sha, string outputFile)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
-            CommandOutputPipe(stdout => Copy(stdout, outputFile), "cat-file", "-p", sha);
+            using(LibGit2Sharp.Repository repo = new LibGit2Sharp.Repository(GitDir))
+            {
+                Blob blob;
+                if ((blob = repo.Lookup<Blob>(sha)) != null)
+                    using (Stream stream = blob.ContentStream)
+                        Copy(stream, outputFile);
+            }
         }
 
-        private void Copy(TextReader stdout, string file)
+        private void Copy(Stream gitstream, string file)
         {
-            var stdoutStream = ((StreamReader) stdout).BaseStream;
             using (var destination = File.Create(file))
-            {
-                stdoutStream.CopyTo(destination);
-            }
+                gitstream.CopyTo(destination);
         }
 
         public string HashAndInsertObject(string filename)
         {
-            var writer = new ObjectWriter(_repository);
+            var writer = new GitSharp.Core.ObjectWriter(_repository);
             var objectId = writer.WriteBlob(new FileInfo(filename));
             return objectId.Name;
         }
 
         public string HashAndInsertObject(Stream file)
         {
-            var writer = new ObjectWriter(_repository);
+            var writer = new GitSharp.Core.ObjectWriter(_repository);
             var objectId = writer.WriteBlob(file.Length, file);
             return objectId.Name;
         }
 
         public string HashAndInsertObject(Stream file, long length)
         {
-            var writer = new ObjectWriter(_repository);
+            var writer = new GitSharp.Core.ObjectWriter(_repository);
             var objectId = writer.WriteBlob(length, file);
             return objectId.Name;
         }
