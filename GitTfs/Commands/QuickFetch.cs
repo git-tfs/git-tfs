@@ -35,11 +35,9 @@ namespace Sep.Git.Tfs.Commands
         protected override void DoFetch(IGitTfsRemote remote)
         {
             if (InitialChangeset.HasValue)
-                // Just grab the latest changeset:
-                remote.QuickFetch();
-            else
-                // Use a specific changeset to start from:
                 remote.QuickFetch(InitialChangeset.Value);
+            else
+                remote.QuickFetch();
         }
     }
 }
