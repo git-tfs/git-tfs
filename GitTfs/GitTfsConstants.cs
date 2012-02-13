@@ -21,5 +21,8 @@ namespace Sep.Git.Tfs
                           "(?<repository>.+);" +
                           "C(?<changeset>\\d+)" +
                           "\\s*$");
+        // e.g. git-tfs-work-item: 24 associate
+        public static readonly Regex TfsWorkItemRegex =
+                new Regex(@"^\s*"+ GitTfsPrefix + @"-work-item:\s+(?<item_id>\d+)\s(?<action>.+)");
     }
 }
