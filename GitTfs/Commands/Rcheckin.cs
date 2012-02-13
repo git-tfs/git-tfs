@@ -6,6 +6,7 @@ using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
+using System.Text.RegularExpressions;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -48,6 +49,8 @@ namespace Sep.Git.Tfs.Commands
         {
             var tfsRemote = parentChangeset.Remote;
             var repo = tfsRemote.Repository;
+            MatchCollection workitemMatches; 
+
             if (repo.WorkingCopyHasUnstagedOrUncommitedChanges)
             {
                 throw new GitTfsException("error: You have local changes; rebase-workflow checkin only possible with clean working directory.")
@@ -84,6 +87,10 @@ namespace Sep.Git.Tfs.Commands
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != currentParent).ToArray();
 
                     string commitMessage = repo.GetCommitMessage(target, currentParent).Trim(' ', '\r', '\n');
+                    if ((workitemMatches = Sep.Git.Tfs.GitTfsConstants.TfsWorkItemRegex.Matches(commitMessage)).Count > 0)
+                    {
+                        // TODO: associate work items
+                    }
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
                     _checkinOptions.CheckinComment = commitMessage;
                     long newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset);
