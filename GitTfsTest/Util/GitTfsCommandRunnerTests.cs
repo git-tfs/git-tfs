@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using CommandLine.OptParse;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Util;
 using StructureMap.AutoMocking;
+using NDesk.Options;
 
 namespace Sep.Git.Tfs.Test.Util
 {
@@ -33,11 +33,8 @@ namespace Sep.Git.Tfs.Test.Util
                 }
             }
             internal List<Invocation> Calls = new List<Invocation>();
-            // Implement the GitTfsCommand interface
-            public IEnumerable<IOptionResults> ExtraOptions
-            {
-                get { return new IOptionResults[0]; }
-            }
+
+            public OptionSet OptionSet { get; set; }
         }
         #endregion
 
