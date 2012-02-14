@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using CommandLine.OptParse;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Test.TestHelpers;
 using StructureMap.AutoMocking;
+using NDesk.Options;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
@@ -49,13 +49,11 @@ namespace Sep.Git.Tfs.Test.Commands
 
         public class TestCommand : GitTfsCommand
         {
-            [OptDef(OptValType.Flag)]
-            [ShortOptionName('s')]
             public bool Flag { get; set; }
 
-            public static IEnumerable<IOptionResults> TestOptions = new List<IOptionResults>();
+            OptionSet TestOptions = new OptionSet();
 
-            public IEnumerable<IOptionResults> ExtraOptions
+            public OptionSet OptionSet
             {
                 get { return TestOptions; }
             }
