@@ -51,7 +51,7 @@ You need .NET 4 and either the 2008 or 2010 version of Team Explorer installed.
 
 ### Prerequisites 
 
-* [Visual Studio 2010 SDK](http://www.microsoft.com/download/en/details.aspx?id=2680)
+* [Visual Studio 2010 SDK](http://www.microsoft.com/downloads/en/details.aspx?FamilyID=21307C23-F0FF-4EF2-A0A4-DCA54DDB1E21&displaylang=en)
 * [Visual Studio 2008 SDK](http://www.microsoft.com/download/en/details.aspx?id=21827)
 * MSBuild (included in .NET 4) 
 
