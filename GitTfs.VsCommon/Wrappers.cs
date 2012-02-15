@@ -442,8 +442,16 @@ namespace Sep.Git.Tfs.VsCommon
 
         public int PendRename(string pathFrom, string pathTo)
         {
+			//looks like TFS Api cannot overwrite existing target file
+			EnsureTargetFileDoesNotExist(pathTo);
+
             return _workspace.PendRename(pathFrom, pathTo);
         }
+
+    	private void EnsureTargetFileDoesNotExist(string pathTo)
+    	{
+    		File.Delete(pathTo);
+    	}
 
         public void ForceGetFile(string path, int changeset)
         {
