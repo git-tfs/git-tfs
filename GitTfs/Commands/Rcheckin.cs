@@ -45,11 +45,32 @@ namespace Sep.Git.Tfs.Commands
             return _writer.Write("HEAD", PerformRCheckin);
         }
 
+        private void ProcessWorkItems(string commitMessage)
+        {
+            MatchCollection workitemMatches; 
+            if ((workitemMatches = Sep.Git.Tfs.GitTfsConstants.TfsWorkItemRegex.Matches(commitMessage)).Count > 0)
+            {
+                foreach (Match match in workitemMatches)
+                {
+                    switch (match.Groups["action"].Value)
+                    {
+                        case "associate":
+                            _stdout.WriteLine("Associating with work item {0}", match.Groups["item_id"]);
+                            _checkinOptions.WorkItemsToAssociate.Add(match.Groups["item_id"].Value);
+                            break;
+                        case "resolve":
+                            _stdout.WriteLine("Resolving work item {0}", match.Groups["item_id"]);
+                            _checkinOptions.WorkItemsToResolve.Add(match.Groups["item_id"].Value);
+                            break;
+                    }
+                }
+            }
+        }
+
         private int PerformRCheckin(TfsChangesetInfo parentChangeset)
         {
             var tfsRemote = parentChangeset.Remote;
             var repo = tfsRemote.Repository;
-            MatchCollection workitemMatches; 
 
             if (repo.WorkingCopyHasUnstagedOrUncommitedChanges)
             {
@@ -87,19 +108,7 @@ namespace Sep.Git.Tfs.Commands
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != currentParent).ToArray();
 
                     string commitMessage = repo.GetCommitMessage(target, currentParent).Trim(' ', '\r', '\n');
-                    if ((workitemMatches = Sep.Git.Tfs.GitTfsConstants.TfsWorkItemRegex.Matches(commitMessage)).Count > 0)
-                    {
-                        foreach(Match match in workitemMatches){
-                            switch(match.Groups["action"].Value){
-                                case "associate": 
-                                    _checkinOptions.WorkItemsToAssociate.Add(match.Groups["item_id"].Value);
-                                    break;
-                                case "resolve": 
-                                    _checkinOptions.WorkItemsToResolve.Add(match.Groups["item_id"].Value);
-                                    break;
-                            }
-                        }
-                    }
+                    ProcessWorkItems(commitMessage);
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
                     _checkinOptions.CheckinComment = commitMessage;
                     long newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset);
@@ -132,6 +141,7 @@ namespace Sep.Git.Tfs.Commands
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != tfsLatest).ToArray();
 
                     string commitMessage = repo.GetCommitMessage(target, tfsLatest).Trim(' ', '\r', '\n');
+                    ProcessWorkItems(commitMessage);
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
                     _checkinOptions.CheckinComment = commitMessage;
                     long newChangesetId = tfsRemote.Checkin(target, parentChangeset);

@@ -23,6 +23,6 @@ namespace Sep.Git.Tfs
                           "\\s*$");
         // e.g. git-tfs-work-item: 24 associate
         public static readonly Regex TfsWorkItemRegex =
-                new Regex(@"^\s*"+ GitTfsPrefix + @"-work-item:\s+(?<item_id>\d+)\s(?<action>.+)");
+                new Regex(GitTfsPrefix + @"-work-item:\s+(?<item_id>\d+)\s(?<action>.+)");
     }
 }
