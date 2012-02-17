@@ -89,7 +89,16 @@ namespace Sep.Git.Tfs.Commands
                     string commitMessage = repo.GetCommitMessage(target, currentParent).Trim(' ', '\r', '\n');
                     if ((workitemMatches = Sep.Git.Tfs.GitTfsConstants.TfsWorkItemRegex.Matches(commitMessage)).Count > 0)
                     {
-                        // TODO: associate work items
+                        foreach(Match match in workitemMatches){
+                            switch(match.Groups["action"].Value){
+                                case "associate": 
+                                    _checkinOptions.WorkItemsToAssociate.Add(match.Groups["item_id"].Value);
+                                    break;
+                                case "resolve": 
+                                    _checkinOptions.WorkItemsToResolve.Add(match.Groups["item_id"].Value);
+                                    break;
+                            }
+                        }
                     }
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
                     _checkinOptions.CheckinComment = commitMessage;
