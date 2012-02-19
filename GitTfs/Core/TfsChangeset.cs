@@ -120,8 +120,7 @@ namespace Sep.Git.Tfs.Core
                     index.Update(
                         GetMode(change, initialTree, pathInGitRepo),
                         pathInGitRepo,
-                        stream,
-                        change.Item.ContentLength
+                        stream
                     );
                 }
             }
@@ -172,7 +171,7 @@ namespace Sep.Git.Tfs.Core
                 // Download the content directly into the index as a blob:
                 using (var stream = item.DownloadFile())
                 {
-                    index.Update(Mode.NewFile, pathInGitRepo, stream, item.ContentLength);
+                    index.Update(Mode.NewFile, pathInGitRepo, stream);
                 }
             }
         }

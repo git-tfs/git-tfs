@@ -418,23 +418,8 @@ namespace Sep.Git.Tfs.Core
 
         public string HashAndInsertObject(string filename)
         {
-            var writer = new GitSharp.Core.ObjectWriter(_repository);
-            var objectId = writer.WriteBlob(new FileInfo(filename));
-            return objectId.Name;
-        }
-
-        public string HashAndInsertObject(Stream file)
-        {
-            var writer = new GitSharp.Core.ObjectWriter(_repository);
-            var objectId = writer.WriteBlob(file.Length, file);
-            return objectId.Name;
-        }
-
-        public string HashAndInsertObject(Stream file, long length)
-        {
-            var writer = new GitSharp.Core.ObjectWriter(_repository);
-            var objectId = writer.WriteBlob(length, file);
-            return objectId.Name;
+            using (Repository repo = new Repository(GitDir))
+                return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
         }
     }
 }
