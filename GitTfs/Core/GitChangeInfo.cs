@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using GitSharp.Core;
@@ -20,11 +21,14 @@ namespace Sep.Git.Tfs.Core
             " " +
             "(?<status>.)" + "(?<score>[0-9]*)" +
             "\\t" +
-            "(?<srcpath>[^\\t]+)" +
+            "(?<srcquot>\"?)(?<srcpath>[^\\t]+?)\"?" +
             "(\\t" +
-            "(?<dstpath>[^\\t]+)" +
+            "(?<dstquot>\"?)(?<dstpath>[^\\t]+?)\"?" +
             ")?" +
             "$",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private static readonly Regex unicodePattern = new Regex(@"\\[0-7]{3}",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static GitChangeInfo Parse(string diffTreeLine)
@@ -44,11 +48,28 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        private static string replaceUnicode(Match match)
+        {
+            return char.ConvertFromUtf32(Convert.ToInt32(match.Value.Substring(1), 8));
+        }
+
+        private static string getPathFromMatch(Match match, string quotName, string pathName)
+        {
+            if (String.IsNullOrEmpty(match.Groups[quotName].Value))
+                return match.Groups[pathName].Value;
+            else
+                return unicodePattern.Replace(match.Groups[pathName].Value, replaceUnicode);
+        }
+
         private readonly Match _match;
+        private readonly string _srcpath;
+        private readonly string _dstpath;
 
         private GitChangeInfo(Match match)
         {
             _match = match;
+            _srcpath = getPathFromMatch(match, "srcquot", "srcpath");
+            _dstpath = getPathFromMatch(match, "dstquot", "dstpath");
         }
 
         public FileMode NewMode { get { return _match.Groups["dstmode"].Value.ToFileMode(); } }
@@ -58,8 +79,8 @@ namespace Sep.Git.Tfs.Core
         public string newMode { get { return _match.Groups["dstmode"].Value; } }
         public string oldSha  { get { return _match.Groups["srcsha1"].Value; } }
         public string newSha  { get { return _match.Groups["dstsha1"].Value; } }
-        public string path    { get { return _match.Groups["srcpath"].Value; } }
-        public string pathTo  { get { return _match.Groups["dstpath"].Value; } }
+        public string path    { get { return _srcpath; } }
+        public string pathTo  { get { return _dstpath; } }
         public string score   { get { return _match.Groups["score"].Value; } }
 
         public IGitChangedFile ToGitChangedFile(ExplicitArgsExpression builder)
