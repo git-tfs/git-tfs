@@ -109,7 +109,7 @@ namespace Sep.Git.Tfs.Commands
                     string target = strs[0];
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != currentParent).ToArray();
 
-                    string commitMessage = ProcessWorkItems(repo.GetCommitMessage(target, currentParent).Trim(' ', '\r', '\n'));
+                    string commitMessage = ProcessWorkItems(repo.GetCommitMessage(target, currentParent)).Trim(' ', '\r', '\n');
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
                     _checkinOptions.CheckinComment = commitMessage;
                     long newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset);
@@ -143,7 +143,7 @@ namespace Sep.Git.Tfs.Commands
                     string target = strs[0];
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != tfsLatest).ToArray();
 
-                    string commitMessage = ProcessWorkItems(repo.GetCommitMessage(target, tfsLatest).Trim(' ', '\r', '\n'));
+                    string commitMessage = ProcessWorkItems(repo.GetCommitMessage(target, tfsLatest)).Trim(' ', '\r', '\n');
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
                     _checkinOptions.CheckinComment = commitMessage;
                     long newChangesetId = tfsRemote.Checkin(target, parentChangeset);
