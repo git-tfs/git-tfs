@@ -41,6 +41,38 @@ namespace Sep.Git.Tfs.Test.Core
             Assert.AreEqual("R", info.Status);
         }
 
+        [TestMethod]
+        public void GetsPath()
+        {
+            var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tFoo\tBar";
+            var info = GitChangeInfo.Parse(line);
+            Assert.AreEqual("Foo", info.path);
+        }
+
+        [TestMethod]
+        public void GetsPathTo()
+        {
+            var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tFoo\tBar";
+            var info = GitChangeInfo.Parse(line);
+            Assert.AreEqual("Bar", info.pathTo);
+        }
+
+        [TestMethod]
+        public void GetsPathWithQuotepath()
+        {
+            var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\t\"\\366\"\t\"\\337\"";
+            var info = GitChangeInfo.Parse(line);
+            Assert.AreEqual("ö", info.path);
+        }
+
+        [TestMethod]
+        public void GetsPathToWithQuotepath()
+        {
+            var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\t\"\\366\"\t\"\\337\"";
+            var info = GitChangeInfo.Parse(line);
+            Assert.AreEqual("ß", info.pathTo);
+        }
+
         private IGitChangedFile GetChangeItem(string diffTreeLine)
         {
             // This method is similar to BuildGitChangedFile in GitRepository.
