@@ -120,6 +120,8 @@ namespace Sep.Git.Tfs.Commands
                     currentParent = target;
                     parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote };
                     _stdout.WriteLine("Done with {0}.", target);
+                    _checkinOptions.WorkItemsToAssociate.Clear();
+                    _checkinOptions.WorkItemsToResolve.Clear();
                 }
 
                 _stdout.WriteLine("No more to rcheckin.");
@@ -155,6 +157,8 @@ namespace Sep.Git.Tfs.Commands
 
                     repo.CommandNoisy("rebase", "--preserve-merges", "--onto", tfsLatest, target);
                     _stdout.WriteLine("Rebase done successfully.");
+                    _checkinOptions.WorkItemsToAssociate.Clear();
+                    _checkinOptions.WorkItemsToResolve.Clear();
                 }
             }
         }
