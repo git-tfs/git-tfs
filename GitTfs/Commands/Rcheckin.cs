@@ -6,6 +6,7 @@ using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
+using System.Text.RegularExpressions;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -44,10 +45,35 @@ namespace Sep.Git.Tfs.Commands
             return _writer.Write("HEAD", PerformRCheckin);
         }
 
+        private String ProcessWorkItems(string commitMessage)
+        {
+            MatchCollection workitemMatches; 
+            if ((workitemMatches = Sep.Git.Tfs.GitTfsConstants.TfsWorkItemRegex.Matches(commitMessage)).Count > 0)
+            {
+                foreach (Match match in workitemMatches)
+                {
+                    switch (match.Groups["action"].Value)
+                    {
+                        case "associate":
+                            _stdout.WriteLine("Associating with work item {0}", match.Groups["item_id"]);
+                            _checkinOptions.WorkItemsToAssociate.Add(match.Groups["item_id"].Value);
+                            break;
+                        case "resolve":
+                            _stdout.WriteLine("Resolving work item {0}", match.Groups["item_id"]);
+                            _checkinOptions.WorkItemsToResolve.Add(match.Groups["item_id"].Value);
+                            break;
+                    }
+                }
+                return Sep.Git.Tfs.GitTfsConstants.TfsWorkItemRegex.Replace(commitMessage, "");
+            }
+            return commitMessage;
+        }
+
         private int PerformRCheckin(TfsChangesetInfo parentChangeset)
         {
             var tfsRemote = parentChangeset.Remote;
             var repo = tfsRemote.Repository;
+
             if (repo.WorkingCopyHasUnstagedOrUncommitedChanges)
             {
                 throw new GitTfsException("error: You have local changes; rebase-workflow checkin only possible with clean working directory.")
@@ -83,7 +109,7 @@ namespace Sep.Git.Tfs.Commands
                     string target = strs[0];
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != currentParent).ToArray();
 
-                    string commitMessage = repo.GetCommitMessage(target, currentParent).Trim(' ', '\r', '\n');
+                    string commitMessage = ProcessWorkItems(repo.GetCommitMessage(target, currentParent).Trim(' ', '\r', '\n'));
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
                     _checkinOptions.CheckinComment = commitMessage;
                     long newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset);
@@ -94,6 +120,8 @@ namespace Sep.Git.Tfs.Commands
                     currentParent = target;
                     parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote };
                     _stdout.WriteLine("Done with {0}.", target);
+                    _checkinOptions.WorkItemsToAssociate.Clear();
+                    _checkinOptions.WorkItemsToResolve.Clear();
                 }
 
                 _stdout.WriteLine("No more to rcheckin.");
@@ -115,7 +143,7 @@ namespace Sep.Git.Tfs.Commands
                     string target = strs[0];
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != tfsLatest).ToArray();
 
-                    string commitMessage = repo.GetCommitMessage(target, tfsLatest).Trim(' ', '\r', '\n');
+                    string commitMessage = ProcessWorkItems(repo.GetCommitMessage(target, tfsLatest).Trim(' ', '\r', '\n'));
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitMessage);
                     _checkinOptions.CheckinComment = commitMessage;
                     long newChangesetId = tfsRemote.Checkin(target, parentChangeset);
@@ -129,6 +157,8 @@ namespace Sep.Git.Tfs.Commands
 
                     repo.CommandNoisy("rebase", "--preserve-merges", "--onto", tfsLatest, target);
                     _stdout.WriteLine("Rebase done successfully.");
+                    _checkinOptions.WorkItemsToAssociate.Clear();
+                    _checkinOptions.WorkItemsToResolve.Clear();
                 }
             }
         }
