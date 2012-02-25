@@ -1,14 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Sep.Git.Tfs.VsCommon
 {
-    public class WrapperForVersionControlServer :WrapperFor<VersionControlServer>, IVersionControlServer
+    public class WrapperForVersionControlServer : WrapperFor<VersionControlServer>, IVersionControlServer
     {
         private readonly TfsApiBridge _bridge;
         private readonly VersionControlServer _versionControlServer;
@@ -37,15 +37,18 @@ namespace Sep.Git.Tfs.VsCommon
                 DeletedState.NonDeleted,
                 ItemType.Any,
                 true
-            );
+                );
             return _bridge.Wrap<WrapperForItem, Item>(itemSet.Items);
         }
 
-        public IEnumerable<IChangeset> QueryHistory(string path, int version, int deletionId, 
-            TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, 
-            bool includeChanges, bool slotMode, bool includeDownloadInfo)
+        public IEnumerable<IChangeset> QueryHistory(string path, int version, int deletionId,
+                                                    TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount,
+                                                    bool includeChanges, bool slotMode, bool includeDownloadInfo)
         {
-            var history = _versionControlServer.QueryHistory(path, new ChangesetVersionSpec(version), deletionId, _bridge.Convert<RecursionType>(recursion), user, new ChangesetVersionSpec(versionFrom), new ChangesetVersionSpec(versionTo), maxCount, includeChanges, slotMode, includeDownloadInfo);
+            var history = _versionControlServer.QueryHistory(path, new ChangesetVersionSpec(version), deletionId,
+                                                             _bridge.Convert<RecursionType>(recursion), user, new ChangesetVersionSpec(versionFrom),
+                                                             new ChangesetVersionSpec(versionTo), maxCount, includeChanges, slotMode,
+                                                             includeDownloadInfo);
             return _bridge.Wrap<WrapperForChangeset, Changeset>(history);
         }
     }
@@ -61,7 +64,7 @@ namespace Sep.Git.Tfs.VsCommon
             _changeset = changeset;
         }
 
-        public IChange [] Changes
+        public IChange[] Changes
         {
             get { return _bridge.Wrap<WrapperForChange, Change>(_changeset.Changes); }
         }
@@ -72,7 +75,7 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 var committer = _changeset.Committer;
                 var owner = _changeset.Owner;
-                
+
                 // Sometimes TFS itself commits the changeset
                 if (owner != committer)
                     return owner;
@@ -248,7 +251,8 @@ namespace Sep.Git.Tfs.VsCommon
     public class WrapperForCheckinNote : WrapperFor<CheckinNote>, ICheckinNote
     {
         public WrapperForCheckinNote(CheckinNote checkiNote) : base(checkiNote)
-        {}
+        {
+        }
     }
 
     public class WrapperForCheckinEvaluationResult : WrapperFor<CheckinEvaluationResult>, ICheckinEvaluationResult
@@ -386,17 +390,18 @@ namespace Sep.Git.Tfs.VsCommon
             _workspace = workspace;
         }
 
-        public IPendingChange [] GetPendingChanges()
+        public IPendingChange[] GetPendingChanges()
         {
             return _bridge.Wrap<WrapperForPendingChange, PendingChange>(_workspace.GetPendingChanges());
         }
 
-        public void Shelve(IShelveset shelveset, IPendingChange [] changes, TfsShelvingOptions options)
+        public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
         {
             _workspace.Shelve(_bridge.Unwrap<Shelveset>(shelveset), _bridge.Unwrap<PendingChange>(changes), _bridge.Convert<ShelvingOptions>(options));
         }
 
-        public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo)
+        public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges,
+                           TfsPolicyOverrideInfo policyOverrideInfo)
         {
             return _workspace.CheckIn(
                 _bridge.Unwrap<PendingChange>(changes),
@@ -414,7 +419,8 @@ namespace Sep.Git.Tfs.VsCommon
                                           _bridge.Unwrap<PolicyFailure>(policyOverrideInfo.Failures));
         }
 
-        public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
+        public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes,
+                                                        string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
         {
             return _bridge.Wrap<WrapperForCheckinEvaluationResult, CheckinEvaluationResult>(_workspace.EvaluateCheckin(
                 _bridge.Convert<CheckinEvaluationOptions>(options),
@@ -442,15 +448,9 @@ namespace Sep.Git.Tfs.VsCommon
 
         public int PendRename(string pathFrom, string pathTo)
         {
-            //looks like TFS Api cannot overwrite existing target file
-            EnsureTargetFileDoesNotExist(pathTo);
+            TfsApiLimitations.PendRename.EnsureTargetFileDoesNotExist(pathTo);
 
             return _workspace.PendRename(pathFrom, pathTo);
-        }
-
-        private void EnsureTargetFileDoesNotExist(string pathTo)
-        {
-            File.Delete(pathTo);
         }
 
         public void ForceGetFile(string path, int changeset)
@@ -462,6 +462,18 @@ namespace Sep.Git.Tfs.VsCommon
         public string OwnerName
         {
             get { return _workspace.OwnerName; }
+        }
+    }
+
+    internal class TfsApiLimitations
+    {
+        internal class PendRename
+        {
+            internal static void EnsureTargetFileDoesNotExist(string pathTo)
+            {
+                if (File.Exists(pathTo))
+                    File.Delete(pathTo);
+            }
         }
     }
 }
