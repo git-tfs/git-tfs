@@ -392,10 +392,15 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                string pendingChanges = "";
-                CommandOutputPipe(stdout => pendingChanges = stdout.ReadToEnd(),
-                                  "diff-index", "--name-status", "-M", "HEAD");
-                return !string.IsNullOrEmpty(pendingChanges);
+                using (LibGit2Sharp.Repository repo = new LibGit2Sharp.Repository(GitDir))
+                {
+                    return (from 
+                                entry in repo.Index.RetrieveStatus()
+                            where 
+                                 entry.State != FileStatus.Ignored &&
+                                 entry.State != FileStatus.Untracked
+                            select entry).Count() > 0;
+                }
             }
         }
 
