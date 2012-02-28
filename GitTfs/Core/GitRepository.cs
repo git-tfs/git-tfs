@@ -380,14 +380,6 @@ namespace Sep.Git.Tfs.Core
             return change.ToGitChangedFile(_container.With((IGitRepository) this));
         }
 
-        public string GetChangeSummary(string from, string to)
-        {
-            string summary = "";
-            CommandOutputPipe(stdout => summary = stdout.ReadToEnd(),
-                              "diff-tree", "--shortstat", "-M", from, to);
-            return summary;
-        }
-
         public bool WorkingCopyHasUnstagedOrUncommitedChanges
         {
             get
