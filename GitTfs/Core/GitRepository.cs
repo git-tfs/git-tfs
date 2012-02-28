@@ -404,21 +404,16 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public void GetBlob(string sha, string outputFile)
+        public void CopyBlob(string sha, string outputFile)
         {
             using(LibGit2Sharp.Repository repo = new LibGit2Sharp.Repository(GitDir))
             {
                 Blob blob;
                 if ((blob = repo.Lookup<Blob>(sha)) != null)
                     using (Stream stream = blob.ContentStream)
-                        Copy(stream, outputFile);
+                    using (var destination = File.Create(outputFile))
+                            stream.CopyTo(destination);
             }
-        }
-
-        private void Copy(Stream gitstream, string file)
-        {
-            using (var destination = File.Create(file))
-                gitstream.CopyTo(destination);
         }
 
         public string HashAndInsertObject(string filename)

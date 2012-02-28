@@ -16,7 +16,7 @@
         public void Apply(ITfsWorkspace workspace)
         {
             var workspaceFile = workspace.GetLocalPath(Path);
-            Repository.GetBlob(NewSha, workspaceFile);
+            Repository.CopyBlob(NewSha, workspaceFile);
             workspace.Add(Path);
         }
     }
