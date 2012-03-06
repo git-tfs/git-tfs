@@ -448,8 +448,11 @@ namespace Sep.Git.Tfs.VsCommon
 
         public int PendRename(string pathFrom, string pathTo)
         {
-            TfsApiLimitations.PendRename.EnsureTargetFileDoesNotExist(pathTo);
-
+            FileInfo info = new FileInfo(pathTo);
+            if (!info.Directory.Exists)
+            {
+                Directory.CreateDirectory(info.Directory.ToString());
+            }
             return _workspace.PendRename(pathFrom, pathTo);
         }
 
@@ -462,18 +465,6 @@ namespace Sep.Git.Tfs.VsCommon
         public string OwnerName
         {
             get { return _workspace.OwnerName; }
-        }
-    }
-
-    internal class TfsApiLimitations
-    {
-        internal class PendRename
-        {
-            internal static void EnsureTargetFileDoesNotExist(string pathTo)
-            {
-                if (File.Exists(pathTo))
-                    File.Delete(pathTo);
-            }
         }
     }
 }
