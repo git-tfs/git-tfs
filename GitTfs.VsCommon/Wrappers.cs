@@ -450,9 +450,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             FileInfo info = new FileInfo(pathTo);
             if (!info.Directory.Exists)
-            {
-                Directory.CreateDirectory(info.Directory.ToString());
-            }
+                info.Directory.Create();
             return _workspace.PendRename(pathFrom, pathTo);
         }
 
