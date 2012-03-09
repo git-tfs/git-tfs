@@ -449,8 +449,8 @@ namespace Sep.Git.Tfs.VsCommon
         public int PendRename(string pathFrom, string pathTo)
         {
             FileInfo info = new FileInfo(pathTo);
-            if (!info.Directory.Exists)
-                info.Directory.Create();
+            if (info.Exists)
+                info.Delete();
             return _workspace.PendRename(pathFrom, pathTo);
         }
 
