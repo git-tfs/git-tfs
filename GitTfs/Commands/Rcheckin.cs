@@ -64,7 +64,7 @@ namespace Sep.Git.Tfs.Commands
                             break;
                     }
                 }
-                return Sep.Git.Tfs.GitTfsConstants.TfsWorkItemRegex.Replace(commitMessage, "");
+                return Sep.Git.Tfs.GitTfsConstants.TfsWorkItemRegex.Replace(commitMessage, "").Trim(' ', '\r', '\n');
             }
             return commitMessage;
         }
