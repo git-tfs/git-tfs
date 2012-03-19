@@ -18,7 +18,8 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 return x.Try("GitTfs.Vs" + explicitVersion, "Sep.Git.Tfs.Vs" + explicitVersion + ".TfsPlugin") ??
                        x.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");
             }
-            return x.Try("GitTfs.Vs2010", "Sep.Git.Tfs.Vs2010.TfsPlugin") ??
+            return x.Try("GitTfs.Vs11", "Sep.Git.Tfs.Vs11.TfsPlugin") ??
+                   x.Try("GitTfs.Vs2010", "Sep.Git.Tfs.Vs2010.TfsPlugin") ??
                    x.Try("GitTfs.Vs2008", "Sep.Git.Tfs.Vs2008.TfsPlugin") ??
                    x.Fail();
         }
