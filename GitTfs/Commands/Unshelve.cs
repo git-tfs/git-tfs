@@ -12,15 +12,17 @@ using Sep.Git.Tfs.Core;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("unshelve")]
-    [Description("unshelve -u <shelve-owner-name> <shelve-name> <git-branch-name>")]
+    [Description("unshelve -u <shelve-owner-name> <shelve-name> <destination-branch>")]
     [RequiresValidGitRepository]
     public class Unshelve : GitTfsCommand
     {
         private readonly Globals _globals;
+        private readonly TextWriter _stdout;
 
-        public Unshelve(Globals globals)
+        public Unshelve(Globals globals, TextWriter stdout)
         {
             _globals = globals;
+            _stdout = stdout;
         }
 
         public string Owner { get; set; }
@@ -37,10 +39,12 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public int Run(IList<string> args)
+        public int Run(string shelvesetName, string destinationBranch)
         {
             var remote = _globals.Repository.ReadTfsRemote(_globals.RemoteId);
-            return remote.Tfs.Unshelve(this, remote, args);
+            remote.Unshelve(Owner, shelvesetName, destinationBranch);
+            _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
+            return GitTfsExitCodes.OK;
         }
     }
 }

@@ -171,6 +171,11 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
+        public void Unshelve(string a, string b, string c)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
         {
             throw new NotImplementedException();

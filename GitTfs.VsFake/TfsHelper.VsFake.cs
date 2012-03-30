@@ -70,7 +70,7 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public int Unshelve(Unshelve unshelve, IGitTfsRemote remote, IList<string> args)
+        public ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName)
         {
             throw new NotImplementedException();
         }
