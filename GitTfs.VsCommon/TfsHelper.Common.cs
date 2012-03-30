@@ -185,44 +185,24 @@ namespace Sep.Git.Tfs.VsCommon
 
         public abstract bool CanShowCheckinDialog { get; }
 
-        [Obsolete("TODO: un-spike-ify this.")]
-        public int Unshelve(Unshelve unshelve, IGitTfsRemote remote, IList<string> args)
+        public ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName)
         {
-            var shelvesetOwner = unshelve.Owner == "all" ? null : (unshelve.Owner ?? GetAuthenticatedUser());
-            if (args.Count != 2)
-            {
-                _stdout.WriteLine("ERROR: usage: unshelve -u <shelve-owner-name> <shelve-name> <git-branch-name>");
-                return GitTfsExitCodes.InvalidArguments;
-            }
-            var shelvesetName = args[0];
-            var destinationBranch = args[1];
-
+            shelvesetOwner = shelvesetOwner == "all" ? null : (shelvesetOwner ?? GetAuthenticatedUser());
             var shelvesets = VersionControl.QueryShelvesets(shelvesetName, shelvesetOwner);
             if (shelvesets.Length != 1)
             {
-                _stdout.WriteLine("ERROR: Unable to find shelveset \"" + shelvesetName + "\" (" + shelvesets.Length + " matches). Maybe you've forgot to set owner name?");
-                WriteShelvesetsToStdout(shelvesets);
-                return GitTfsExitCodes.InvalidArguments;
+                throw new GitTfsException("Unable to find " + shelvesetOwner + "'s shelveset \"" + shelvesetName + "\" (" + shelvesets.Length + " matches).")
+                    .WithRecommendation("Try providing the shelveset owner.");
             }
             var shelveset = shelvesets.First();
 
-            var destinationRef = "refs/heads/" + destinationBranch;
-            if (File.Exists(Path.Combine(remote.Repository.GitDir, destinationRef)))
-            {
-                _stdout.WriteLine("ERROR: Destination branch (" + destinationBranch + ") already exists!");
-                return GitTfsExitCodes.ForceRequired;
-            }
-
             var change = VersionControl.QueryShelvedChanges(shelveset).Single();
-            var gremote = (GitTfsRemote) remote;
             var wrapperForVersionControlServer =
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
+            // TODO - containerify this (no `new`)!
             var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
-            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout)
-                                   {Summary = new TfsChangesetInfo {Remote = remote}};
-            gremote.Apply(tfsChangeset, destinationRef);
-            _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
-            return GitTfsExitCodes.OK;
+            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout) { Summary = new TfsChangesetInfo { Remote = remote } };
+            return tfsChangeset;
         }
 
         public int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote)
