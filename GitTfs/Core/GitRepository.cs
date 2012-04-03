@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Core
         private readonly Globals _globals;
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
-        private GitSharp.Core.Repository _repository;
+        private Repository _repository;
 
         public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals)
             : base(stdout, container)
@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs.Core
             _container = container;
             _globals = globals;
             GitDir = gitDir;
-            _repository = new GitSharp.Core.Repository(new DirectoryInfo(gitDir));
+            _repository = new LibGit2Sharp.Repository(GitDir);
         }
 
         public string GitDir { get; set; }
@@ -219,7 +219,8 @@ namespace Sep.Git.Tfs.Core
 
         public GitCommit GetCommit(string commitish)
         {
-            return _container.With(_repository.MapCommit(commitish)).GetInstance<GitCommit>();
+            GitSharp.Core.Repository repo = new GitSharp.Core.Repository(new DirectoryInfo(GitDir));
+            return _container.With(repo.MapCommit(commitish)).GetInstance<GitCommit>();
         }
 
         public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head)
@@ -306,13 +307,10 @@ namespace Sep.Git.Tfs.Core
         public string GetCommitMessage(string head, string parentCommitish)
         {
             System.Text.StringBuilder message = new System.Text.StringBuilder();
-            using(LibGit2Sharp.Repository repo = new LibGit2Sharp.Repository(GitDir))
+            foreach (LibGit2Sharp.Commit comm in
+                _repository.Commits.QueryBy(new LibGit2Sharp.Filter { Since = head, Until = parentCommitish }))
             {
-                foreach (LibGit2Sharp.Commit comm in
-                    repo.Commits.QueryBy(new LibGit2Sharp.Filter { Since = head, Until = parentCommitish }))
-                {
-                    message.AppendLine(comm.Message);
-                }
+                message.AppendLine(comm.Message);
             }
             return message.ToString();
         }
@@ -384,34 +382,27 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                using (LibGit2Sharp.Repository repo = new LibGit2Sharp.Repository(GitDir))
-                {
-                    return (from 
-                                entry in repo.Index.RetrieveStatus()
-                            where 
-                                 entry.State != FileStatus.Ignored &&
-                                 entry.State != FileStatus.Untracked
-                            select entry).Count() > 0;
-                }
+                return (from 
+                            entry in _repository.Index.RetrieveStatus()
+                        where 
+                             entry.State != FileStatus.Ignored &&
+                             entry.State != FileStatus.Untracked
+                        select entry).Count() > 0;
             }
         }
 
         public void CopyBlob(string sha, string outputFile)
         {
-            using(LibGit2Sharp.Repository repo = new LibGit2Sharp.Repository(GitDir))
-            {
-                Blob blob;
-                if ((blob = repo.Lookup<Blob>(sha)) != null)
-                    using (Stream stream = blob.ContentStream)
-                    using (var destination = File.Create(outputFile))
-                            stream.CopyTo(destination);
-            }
+            Blob blob;
+            if ((blob = _repository.Lookup<Blob>(sha)) != null)
+                using (Stream stream = blob.ContentStream)
+                using (var destination = File.Create(outputFile))
+                        stream.CopyTo(destination);
         }
 
         public string HashAndInsertObject(string filename)
         {
-            using (Repository repo = new Repository(GitDir))
-                return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
+            return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
         }
     }
 }
