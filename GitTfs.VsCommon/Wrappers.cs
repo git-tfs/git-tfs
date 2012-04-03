@@ -379,7 +379,7 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
-    public class WrapperForWorkspace : WrapperFor<Workspace>, IWorkspace
+    public partial class WrapperForWorkspace : WrapperFor<Workspace>, IWorkspace
     {
         private readonly TfsApiBridge _bridge;
         private readonly Workspace _workspace;
@@ -398,17 +398,6 @@ namespace Sep.Git.Tfs.VsCommon
         public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
         {
             _workspace.Shelve(_bridge.Unwrap<Shelveset>(shelveset), _bridge.Unwrap<PendingChange>(changes), _bridge.Convert<ShelvingOptions>(options));
-        }
-
-        public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges,
-                           TfsPolicyOverrideInfo policyOverrideInfo)
-        {
-            return _workspace.CheckIn(
-                _bridge.Unwrap<PendingChange>(changes),
-                comment,
-                _bridge.Unwrap<CheckinNote>(checkinNote),
-                _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges),
-                ToTfs(policyOverrideInfo));
         }
 
         private PolicyOverrideInfo ToTfs(TfsPolicyOverrideInfo policyOverrideInfo)
