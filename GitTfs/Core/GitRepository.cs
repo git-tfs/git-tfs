@@ -28,6 +28,11 @@ namespace Sep.Git.Tfs.Core
             _repository = new LibGit2Sharp.Repository(GitDir);
         }
 
+        ~GitRepository()
+        {
+            _repository.Dispose();
+        }
+
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
