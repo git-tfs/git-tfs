@@ -398,11 +398,14 @@ namespace Sep.Git.Tfs.Core
 
         public void CopyBlob(string sha, string outputFile)
         {
-            Blob blob;
+            Blob blob; 
+            var destination = new FileInfo(outputFile);
+            if (!destination.Directory.Exists)
+                destination.Directory.Create();
             if ((blob = _repository.Lookup<Blob>(sha)) != null)
                 using (Stream stream = blob.ContentStream)
-                using (var destination = File.Create(outputFile))
-                        stream.CopyTo(destination);
+                using (var outstream = File.Create(destination.FullName))
+                        stream.CopyTo(outstream);
         }
 
         public string HashAndInsertObject(string filename)
