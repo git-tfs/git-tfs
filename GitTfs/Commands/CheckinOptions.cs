@@ -25,6 +25,8 @@ namespace Sep.Git.Tfs.Commands
                     { "w|work-item=:", "Associated work items\ne.g. -w12345 to associate with 12345\nor -w12345:resolve to resolve 12345",
                         (n, opt) => { if(n == null) throw new OptionException("Missing work item number for option -w.", "-w");
                             (opt == "resolve" ? WorkItemsToResolve : WorkItemsToAssociate).Add(n); } },
+                    { "no-gate", "Disables gated checkin.",
+                        v => { OverrideGatedCheckIn = true; } },
                 };
             }
         }
@@ -38,6 +40,7 @@ namespace Sep.Git.Tfs.Commands
         public bool NoMerge { get; set; }
         public string OverrideReason { get; set; }
         public bool Force { get; set; }
+        public bool OverrideGatedCheckIn { get; set; }
         public List<string> WorkItemsToAssociate { get { return _workItemsToAssociate; } }
         public List<string> WorkItemsToResolve { get { return _workItemsToResolve; } }
     }
