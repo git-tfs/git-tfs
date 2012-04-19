@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using Sep.Git.Tfs.Core;
 namespace Sep.Git.Tfs.VsFake
 {
     class TfsPlugin : Sep.Git.Tfs.Core.TfsInterop.TfsPlugin
@@ -15,7 +18,28 @@ namespace Sep.Git.Tfs.VsFake
 
         public override bool IsViable()
         {
-            return true; // lies...
+            return ScriptPath.AndAnd(File.Exists);
+        }
+
+        internal static string ScriptPath
+        {
+            get
+            {
+                return Environment.GetEnvironmentVariable(Script.EnvVar);
+            }
+        }
+
+        static Script _script;
+        internal static Script Script
+        {
+            get
+            {
+                if (_script == null)
+                {
+                    _script = ScriptPath.AndAnd(Script.Load);
+                }
+                return _script;
+            }
         }
     }
 }

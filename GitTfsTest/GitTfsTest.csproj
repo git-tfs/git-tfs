@@ -99,11 +99,17 @@
     <Compile Include="Core\GitTfsRemoteTests.cs" />
     <Compile Include="Core\ModeTests.cs" />
     <Compile Include="GitTfsRegexTests.cs" />
+    <Compile Include="Integration\CloneTests.cs" />
+    <Compile Include="Integration\IntegrationHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHelpers\ExtensionMethods.cs" />
     <Compile Include="Util\GitTfsCommandRunnerTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GitTfs.VsFake\GitTfs.VsFake.csproj">
+      <Project>{20c411e8-49c7-11e1-a776-3fe84824019b}</Project>
+      <Name>GitTfs.VsFake</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GitTfs\GitTfs.csproj">
       <Project>{55C169E0-93CC-488C-9885-1D4EAF4EA236}</Project>
       <Name>GitTfs</Name>
