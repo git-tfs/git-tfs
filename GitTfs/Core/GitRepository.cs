@@ -300,7 +300,7 @@ namespace Sep.Git.Tfs.Core
 
         public Dictionary<string, GitObject> GetObjects()
         {
-            return new Dictionary<string, GitObject>(StringComparer.InvariantCulture);
+            return new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
         }
 
         public string GetCommitMessage(string head, string parentCommitish)
