@@ -11,6 +11,7 @@ namespace Sep.Git.Tfs.Core
     {
         private readonly TextWriter realStdout;
         private readonly IContainer _container;
+        private const string GitDir = ".git";
 
         public GitHelpers(TextWriter stdout, IContainer container)
         {
@@ -274,6 +275,41 @@ namespace Sep.Git.Tfs.Core
         {
             if(command.Length < 1 || !ValidCommandName.IsMatch(command[0]))
                 throw new Exception("bad command: " + (command.Length == 0 ? "" : command[0]));
+        }
+
+        public static DirectoryInfo ResolveRepositoryLocation()
+        {
+            // Check if this repo is a root git repo or a submodule.
+            if(Directory.Exists(GitDir))
+            {
+                return new DirectoryInfo(GitDir);
+            }
+            else if (File.Exists(GitDir))
+            {
+                // Parse out the location of the submodule.
+                using (StreamReader StreamReader = new StreamReader(GitDir))
+                {
+                    string GitDirConfig = "gitdir:";
+                    string Line;
+                    while ((Line = StreamReader.ReadLine()) != null)
+                    {
+                        // Skip the unneeded lines.
+                        if (!Line.Trim().ToLower().StartsWith(GitDirConfig))
+                        {
+                            continue;
+                        }
+
+                        // Get out the path of the submodule via the relative path stored in the file.
+                        string SubmoduleGitDirectoryRelativePath = Line.Replace(GitDirConfig, "").Trim();
+
+                        // Return submodule repo.
+                        return new DirectoryInfo(SubmoduleGitDirectoryRelativePath);
+                    }
+                }
+            }
+
+            // Throw exception as is not a git repo.
+            throw new Exception("Git repo does not exist in " + Directory.GetCurrentDirectory());
         }
     }
 }

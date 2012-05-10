@@ -118,7 +118,7 @@ namespace Sep.Git.Tfs
             }
             else
             {
-                _globals.GitDir = ".git";
+                _globals.GitDir = GitHelpers.ResolveRepositoryLocation().FullName;
             }
             _globals.RemoteId = GitTfsConstants.DefaultRepositoryId;
         }
