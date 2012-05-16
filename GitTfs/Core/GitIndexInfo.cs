@@ -60,11 +60,12 @@ namespace Sep.Git.Tfs.Core
         public int Update(string mode, string path, Stream stream)
         {
             // Create tempfile to hold filestream, for hashing into DB
-            var tmp = Path.Combine(repository.GitDir, "tfs", "TMPFILE");
-            FileStream fstream = File.Open(tmp,FileMode.Create);
+            var tmp = Path.GetTempFileName();
+            FileStream fstream = File.Open(tmp,FileMode.Open);
             using(fstream)
                 stream.CopyTo(fstream);
-            var sha = repository.HashAndInsertObject(tmp.Substring(tmp.LastIndexOf(".git"),tmp.Length));
+            var sha = repository.HashAndInsertObject(tmp);
+            File.Delete(tmp);
             Trace.WriteLine("   U " + sha + " = " + path);
             stdin.Write(mode);
             stdin.Write(' ');
