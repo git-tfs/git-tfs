@@ -158,13 +158,13 @@ namespace Sep.Git.Tfs.VsFake
                 get { return ((IItem)this).DownloadFile().Length; }
             }
 
-            System.IO.Stream IItem.DownloadFile()
+            string IItem.DownloadFile()
             {
-                var written = new MemoryStream();
+                var written = new FileStream(Path.GetTempFileName(),FileMode.Open);
                 var writer = new StreamWriter(written);
                 writer.Write(_change.Content);
                 writer.Flush();
-                return new MemoryStream(written.ToArray());
+                return written.Name;
             }
         }
 

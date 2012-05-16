@@ -152,11 +152,13 @@ namespace Sep.Git.Tfs.Vs11
             _bridge = bridge;
         }
 
-        public Stream DownloadFile(IItem item)
+        public string DownloadFile(IItem item)
         {
             try
             {
-                return _bridge.Unwrap<Item>(item).DownloadFile();
+                var temp = Path.GetTempFileName();
+                _bridge.Unwrap<Item>(item).DownloadFile(temp);
+                return temp;
             }
             catch (Exception e)
             {

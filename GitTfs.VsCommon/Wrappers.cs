@@ -175,7 +175,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _item.ContentLength; }
         }
 
-        public Stream DownloadFile()
+        public string DownloadFile()
         {
             return _downloadStrategy.DownloadFile(this);
         }

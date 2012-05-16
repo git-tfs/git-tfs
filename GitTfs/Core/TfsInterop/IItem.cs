@@ -10,11 +10,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         TfsItemType ItemType { get; }
         int ItemId { get; }
         long ContentLength { get; }
-        Stream DownloadFile();
+        string DownloadFile();
     }
 
     public interface IItemDownloadStrategy
     {
-        Stream DownloadFile(IItem item);
+        string DownloadFile(IItem item);
     }
 }

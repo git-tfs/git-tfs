@@ -57,25 +57,6 @@ namespace Sep.Git.Tfs.Core
             return ++nr;
         }
 
-        public int Update(string mode, string path, Stream stream)
-        {
-            // Create tempfile to hold filestream, for hashing into DB
-            var tmp = Path.GetTempFileName();
-            FileStream fstream = File.Open(tmp,FileMode.Open);
-            using(fstream)
-                stream.CopyTo(fstream);
-            var sha = repository.HashAndInsertObject(tmp);
-            File.Delete(tmp);
-            Trace.WriteLine("   U " + sha + " = " + path);
-            stdin.Write(mode);
-            stdin.Write(' ');
-            stdin.Write(sha);
-            stdin.Write('\t');
-            stdin.Write(path);
-            stdin.Write('\0');
-            return ++nr;
-        }
-
         public void Dispose()
         {
             stdin.Close();

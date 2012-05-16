@@ -415,13 +415,12 @@ namespace Sep.Git.Tfs.VsCommon
                 }
             }
 
-            public Stream DownloadFile()
+            public string DownloadFile()
             {
                 string temp = Path.GetTempFileName();
                 _pendingChange.DownloadShelvedFile(temp);
-                var stream = new TemporaryFileStream(temp);
-                _contentLength = stream.Length;
-                return stream;
+                _contentLength = new FileInfo(temp).Length;
+                return temp;
             }
         }
 
