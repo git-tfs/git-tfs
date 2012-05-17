@@ -11,7 +11,7 @@ namespace Sep.Git.Tfs.Core
     {
         private readonly TextWriter realStdout;
         private readonly IContainer _container;
-        private const string GitDir = ".git";
+        public const string DEFAULT_GIT_DIR = ".git";
 
         public GitHelpers(TextWriter stdout, IContainer container)
         {
@@ -279,15 +279,11 @@ namespace Sep.Git.Tfs.Core
 
         public static DirectoryInfo ResolveRepositoryLocation()
         {
-            // Check if this repo is a root git repo or a submodule.
-            if(Directory.Exists(GitDir))
-            {
-                return new DirectoryInfo(GitDir);
-            }
-            else if (File.Exists(GitDir))
+            // special case for a submodule.
+            if (File.Exists(DEFAULT_GIT_DIR))
             {
                 // Parse out the location of the submodule.
-                using (StreamReader StreamReader = new StreamReader(GitDir))
+                using (StreamReader StreamReader = new StreamReader(DEFAULT_GIT_DIR))
                 {
                     string GitDirConfig = "gitdir:";
                     string Line;
@@ -308,8 +304,7 @@ namespace Sep.Git.Tfs.Core
                 }
             }
 
-            // Throw exception as is not a git repo.
-            throw new Exception("Git repo does not exist in " + Directory.GetCurrentDirectory());
+            return new DirectoryInfo(DEFAULT_GIT_DIR);
         }
     }
 }
