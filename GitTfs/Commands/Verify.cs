@@ -82,23 +82,18 @@ namespace Sep.Git.Tfs.Commands
                     }
                     else
                     {
-                        OnlyIn("TFS", tfsTree[file]);
+                        _stdout.WriteLine("Only in TFS: " + tfsTree[file].FullName);
                         foundDiff = true;
                     }
                 }
                 else
                 {
-                    OnlyIn("git", gitTree[file]);
+                    _stdout.WriteLine("Only in git: " + gitTree[file].FullName);
                     foundDiff = true;
                 }
             }
             if(!foundDiff)
                 _stdout.WriteLine("No differences!");
-        }
-
-        private void OnlyIn(string source, ITreeEntry treeEntry)
-        {
-            _stdout.WriteLine("Only in " + source + ": " + treeEntry.FullName);
         }
 
         private bool Compare(TfsTreeEntry tfsTreeEntry, GitTreeEntry gitTreeEntry)
