@@ -171,6 +171,7 @@
     <Compile Include="Util\ExceptionFormattingExtensions.cs" />
     <Compile Include="Util\GitTfsCommandFactory.cs" />
     <Compile Include="Util\GitTfsCommandRunner.cs" />
+    <Compile Include="Util\TemporaryFile.cs" />
     <Compile Include="Util\WhenDynamicDoesntWork.cs" />
     <Compile Include="Util\PluggableWithAliases.cs" />
     <Compile Include="Util\ConfiguresStructureMap.cs" />

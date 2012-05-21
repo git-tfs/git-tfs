@@ -70,9 +70,9 @@ namespace Sep.Git.Tfs.Vs2008
             _bridge = bridge;
         }
 
-        public string DownloadFile(IItem item)
+        public TemporaryFile DownloadFile(IItem item)
         {
-            string tempfile = Path.GetTempFileName();
+            var tempfile = new TemporaryFile();
             _bridge.Unwrap<Item>(item).DownloadFile(tempfile);
             return tempfile;
         }

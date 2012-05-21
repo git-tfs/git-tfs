@@ -415,9 +415,9 @@ namespace Sep.Git.Tfs.VsCommon
                 }
             }
 
-            public string DownloadFile()
+            public TemporaryFile DownloadFile()
             {
-                string temp = Path.GetTempFileName();
+                var temp = new TemporaryFile();
                 _pendingChange.DownloadShelvedFile(temp);
                 _contentLength = new FileInfo(temp).Length;
                 return temp;

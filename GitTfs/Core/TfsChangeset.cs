@@ -115,13 +115,14 @@ namespace Sep.Git.Tfs.Core
         {
             if (change.Item.DeletionId == 0)
             {
-                var temp = change.Item.DownloadFile();
-                index.Update(
-                    GetMode(change, initialTree, pathInGitRepo),
-                    pathInGitRepo,
-                    temp
-                );
-                File.Delete(temp);
+                using (var temp = change.Item.DownloadFile())
+                {
+                    index.Update(
+                        GetMode(change, initialTree, pathInGitRepo),
+                        pathInGitRepo,
+                        temp
+                    );
+                }
             }
         }
 
@@ -168,9 +169,10 @@ namespace Sep.Git.Tfs.Core
             if(item.DeletionId == 0)
             {
                 // Download the content directly into the index as a blob:
-                var temp = item.DownloadFile();
-                index.Update(Mode.NewFile, pathInGitRepo, temp);
-                File.Delete(temp);
+                using (var temp = item.DownloadFile())
+                {
+                    index.Update(Mode.NewFile, pathInGitRepo, temp);
+                }
             }
         }
 

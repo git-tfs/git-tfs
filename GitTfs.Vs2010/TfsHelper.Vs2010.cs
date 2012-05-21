@@ -151,17 +151,18 @@ namespace Sep.Git.Tfs.Vs2010
             _bridge = bridge;
         }
 
-        public string DownloadFile(IItem item)
+        public TemporaryFile DownloadFile(IItem item)
         {
+            var temp = new TemporaryFile();
             try
             {
-                var temp = Path.GetTempFileName();
-               _bridge.Unwrap<Item>(item).DownloadFile(temp);
+                _bridge.Unwrap<Item>(item).DownloadFile(temp);
                 return temp;
             }
             catch (Exception e)
             {
                 Trace.WriteLine(String.Format("Something went wrong downloading \"{0}\" in changeset {1}", item.ServerItem, item.ChangesetId));
+                temp.Dispose();
                 throw;
             }
         }
