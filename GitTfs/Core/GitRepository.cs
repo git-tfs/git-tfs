@@ -224,8 +224,7 @@ namespace Sep.Git.Tfs.Core
 
         public GitCommit GetCommit(string commitish)
         {
-            GitSharp.Core.Repository repo = new GitSharp.Core.Repository(new DirectoryInfo(GitDir));
-            return _container.With(repo.MapCommit(commitish)).GetInstance<GitCommit>();
+            return new GitCommit(_repository.Lookup<Commit>(commitish));
         }
 
         public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head)

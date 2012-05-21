@@ -168,7 +168,7 @@ namespace Sep.Git.Tfs.Core
         {
             if(item.DeletionId == 0)
             {
-                // Download the content directly into the index as a blob:
+                // Download the content directly into the git database as a blob:
                 using (var temp = item.DownloadFile())
                 {
                     index.Update(Mode.NewFile, pathInGitRepo, temp);

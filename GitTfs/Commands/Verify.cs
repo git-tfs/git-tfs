@@ -63,7 +63,7 @@ namespace Sep.Git.Tfs.Commands
         {
             _stdout.WriteLine("Comparing TFS changeset " + changeset.ChangesetId + " to git commit " + changeset.GitCommit);
             var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant());
-            var gitTree = changeset.Remote.Repository.GetCommit(changeset.GitCommit).GetTree().ToDictionary(entry => entry.Entry.FullName.ToLowerInvariant());
+            var gitTree = changeset.Remote.Repository.GetCommit(changeset.GitCommit).GetTree().ToDictionary(entry => entry.Entry.Path.ToLowerInvariant());
 
             var all = tfsTree.Keys.Union(gitTree.Keys);
             var inBoth = tfsTree.Keys.Intersect(gitTree.Keys);
