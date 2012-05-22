@@ -62,7 +62,7 @@ namespace Sep.Git.Tfs.Commands
         public void Verify(TfsChangesetInfo changeset)
         {
             _stdout.WriteLine("Comparing TFS changeset " + changeset.ChangesetId + " to git commit " + changeset.GitCommit);
-            var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant());
+            var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant().Replace("/",@"\"));
             var gitTree = changeset.Remote.Repository.GetCommit(changeset.GitCommit).GetTree().ToDictionary(entry => entry.Entry.Path.ToLowerInvariant());
 
             var all = tfsTree.Keys.Union(gitTree.Keys);
@@ -99,7 +99,7 @@ namespace Sep.Git.Tfs.Commands
         private bool Compare(TfsTreeEntry tfsTreeEntry, GitTreeEntry gitTreeEntry)
         {
             var different = false;
-            if (tfsTreeEntry.FullName != gitTreeEntry.FullName)
+            if (tfsTreeEntry.FullName.Replace("/",@"\") != gitTreeEntry.FullName)
             {
                 _stdout.WriteLine("Name case mismatch:");
                 _stdout.WriteLine("  TFS: " + tfsTreeEntry.FullName);
