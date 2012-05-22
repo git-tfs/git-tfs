@@ -146,7 +146,7 @@ namespace Sep.Git.Tfs.Core
             if(!tfsPath.StartsWith(TfsRepositoryPath,StringComparison.InvariantCultureIgnoreCase)) return null;
             tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
             while (tfsPath.StartsWith("/"))
-                tfsPath = tfsPath.Substring(1).Replace("/","\\");
+                tfsPath = tfsPath.Substring(1);
             return tfsPath;
         }
 
