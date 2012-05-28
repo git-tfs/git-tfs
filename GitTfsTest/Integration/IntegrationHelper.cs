@@ -142,7 +142,7 @@ namespace Sep.Git.Tfs.Test.Integration
         {
             var path = Path.Combine(Workdir, repodir);
             Assert.IsTrue(Directory.Exists(path), path + " should be a directory");
-            Assert.IsTrue(Directory.Exists(Path.Combine(path, ".git")), path + " should have a .git dir inside of it");
+            Assert.IsTrue(Directory.Exists(Path.Combine(path, GitHelpers.ResolveRepositoryLocation().FullName)), path + " should have a .git dir inside of it");
         }
 
         public void AssertRef(string repodir, string gitref, string expectedSha)
@@ -153,7 +153,7 @@ namespace Sep.Git.Tfs.Test.Integration
         private string RevParse(string repodir, string gitref)
         {
             // This really should delegate to libgit2, which isn't yet a part of GitTfs.
-            var gitpath = Path.Combine(Workdir, repodir, ".git");
+            var gitpath = Path.Combine(Workdir, repodir, GitHelpers.ResolveRepositoryLocation().FullName);
             var resolved = ReadIfPresent(Path.Combine(gitpath, gitref)) ??
                 ReadIfPresent(Path.Combine(gitpath, "refs", "heads", gitref)) ??
                 ReadIfPresent(Path.Combine(gitpath, "refs", "remotes", gitref));

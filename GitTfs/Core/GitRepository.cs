@@ -24,8 +24,11 @@ namespace Sep.Git.Tfs.Core
         {
             _container = container;
             _globals = globals;
-            GitDir = gitDir;
-            _repository = new Repository(new DirectoryInfo(gitDir));
+
+            DirectoryInfo GitDirectoryInfo = GitHelpers.ResolveRepositoryLocation();
+
+            GitDir = GitDirectoryInfo.ToString();
+            _repository = new Repository(GitDirectoryInfo);
         }
 
         public string GitDir { get; set; }

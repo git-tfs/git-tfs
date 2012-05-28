@@ -55,7 +55,7 @@ namespace Sep.Git.Tfs.Commands
             if(!Directory.Exists(repositoryPath))
                 Directory.CreateDirectory(repositoryPath);
             Environment.CurrentDirectory = repositoryPath;
-            globals.GitDir = ".git";
+            globals.GitDir = GitHelpers.ResolveRepositoryLocation().FullName;
         }
 
         private void DoGitInitDb()

@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Benchmarks
         {
             public string ObjectId { get; set; }
             public string Contents { get; set; }
-            public string ObjectPath { get { return ".git/objects/" + ObjectId.Substring(0, 2) + "/" + ObjectId.Substring(2); } }
+            public string ObjectPath { get { return GitHelpers.ResolveRepositoryLocation().FullName + "/objects/" + ObjectId.Substring(0, 2) + "/" + ObjectId.Substring(2); } }
         }
 
         private static readonly List<TestGitObject> TestObjects = new List<TestGitObject>
@@ -69,7 +69,7 @@ namespace Sep.Git.Tfs.Benchmarks
 
         private static string HashWithGitSharp(Stream file)
         {
-            var repository = new Repository(new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, ".git")));
+            var repository = new Repository(new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, GitHelpers.ResolveRepositoryLocation().FullName)));
             var writer = new ObjectWriter(repository);
             return writer.WriteBlob(file.Length, file).ToString();
         }
