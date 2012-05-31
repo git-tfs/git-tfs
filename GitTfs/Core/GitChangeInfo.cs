@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using GitSharp.Core;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Core
@@ -72,7 +71,7 @@ namespace Sep.Git.Tfs.Core
             _dstpath = getPathFromMatch(match, "dstquot", "dstpath");
         }
 
-        public FileMode NewMode { get { return _match.Groups["dstmode"].Value.ToFileMode(); } }
+        public LibGit2Sharp.Mode NewMode { get { return _match.Groups["dstmode"].Value.ToFileMode(); } }
         public string Status { get { return _match.Groups["status"].Value; } }
 
         public string oldMode { get { return _match.Groups["srcmode"].Value; } }

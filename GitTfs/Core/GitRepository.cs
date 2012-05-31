@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
 using StructureMap;
-using FileMode = GitSharp.Core.FileMode;
+using FileMode = LibGit2Sharp.Mode;
 using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Core

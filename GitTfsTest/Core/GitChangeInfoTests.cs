@@ -1,8 +1,8 @@
-﻿using GitSharp.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.Changes.Git;
 using StructureMap;
+using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Core
 {
@@ -22,7 +22,7 @@ namespace Sep.Git.Tfs.Test.Core
         {
             var line = ":000000 160000 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tblah";
             var info = GitChangeInfo.Parse(line);
-            Assert.AreEqual(FileMode.GitLink, info.NewMode);
+            Assert.AreEqual(LibGit2Sharp.Mode.GitLink, info.NewMode);
         }
 
         [TestMethod]
