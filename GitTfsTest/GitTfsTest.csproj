@@ -56,10 +56,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GitSharp.Core, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\GitSharp-0.3\GitSharp.Core.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.TeamFoundation, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.TeamFoundation.VersionControl.Client, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
@@ -113,6 +109,10 @@
     <ProjectReference Include="..\GitTfs\GitTfs.csproj">
       <Project>{55C169E0-93CC-488C-9885-1D4EAF4EA236}</Project>
       <Name>GitTfs</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\lib\libgit2sharp\LibGit2Sharp\LibGit2Sharp.csproj">
+      <Project>{EE6ED99F-CB12-4683-B055-D28FC7357A34}</Project>
+      <Name>LibGit2Sharp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
