@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using GitSharp.Core;
+using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -16,23 +16,23 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<GitTreeEntry> GetTree()
         {
-            var treesToDescend = new Queue<Tree>(new[] {_commit.TreeEntry});
+            var treesToDescend = new Queue<Tree>(new[] {_commit.Tree});
             while(treesToDescend.Any())
             {
                 var currentTree = treesToDescend.Dequeue();
-                foreach(var entry in currentTree.Members)
+                foreach(var entry in currentTree)
                 {
-                    if(entry is Tree)
+                    if(entry.Type == GitObjectType.Tree)
                     {
-                        treesToDescend.Enqueue((Tree) entry);
+                        treesToDescend.Enqueue((Tree)entry.Target);
                     }
-                    else if (entry is FileTreeEntry)
+                    else if (entry.Type == GitObjectType.Blob)
                     {
-                        yield return new GitTreeEntry((FileTreeEntry)entry);
+                        yield return new GitTreeEntry(entry);
                     }
                     else
                     {
-                        Trace.WriteLine("Not including " + entry.FullName + ": type is " + entry.GetType().Name);
+                        Trace.WriteLine("Not including " + entry.Name + ": type is " + entry.GetType().Name);
                     }
                 }
             }

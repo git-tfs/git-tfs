@@ -4,10 +4,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
-using GitSharp.Core;
 using SEP.Extensions;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
+using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Benchmarks
 {
@@ -59,19 +59,20 @@ namespace Sep.Git.Tfs.Benchmarks
 
         #endregion
 
-        #region WithGitSharp
+        #region WithLibGit2Sharp
 
         [Benchmark]
-        public static void WithGitSharp()
+        public static void WithLibGit2Sharp()
         {
-            Run("gitsharp", HashWithGitSharp);
+            Run("gitsharp", HashWithLibGit2Sharp);
         }
 
-        private static string HashWithGitSharp(Stream file)
+        private static string HashWithLibGit2Sharp(Stream file)
         {
-            var repository = new Repository(new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, ".git")));
-            var writer = new ObjectWriter(repository);
-            return writer.WriteBlob(file.Length, file).ToString();
+            var repository = new Repository(Environment.CurrentDirectory);
+            var temp = new FileStream(Path.GetTempFileName(),FileMode.Open);
+            file.CopyTo(temp);
+            return repository.ObjectDatabase.CreateBlob(temp.Name).Sha.ToString();
         }
 
         #endregion

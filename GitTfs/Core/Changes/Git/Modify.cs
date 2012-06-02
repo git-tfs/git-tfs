@@ -19,7 +19,7 @@ namespace Sep.Git.Tfs.Core.Changes.Git
         {
             workspace.Edit(Path);
             var workspaceFile = workspace.GetLocalPath(Path);
-            _repository.GetBlob(NewSha, workspaceFile);
+            _repository.CopyBlob(NewSha, workspaceFile);
         }
     }
 }

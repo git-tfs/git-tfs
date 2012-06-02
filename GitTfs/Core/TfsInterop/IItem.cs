@@ -1,4 +1,6 @@
 using System.IO;
+using Sep.Git.Tfs.Util;
+
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public interface IItem
@@ -10,11 +12,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         TfsItemType ItemType { get; }
         int ItemId { get; }
         long ContentLength { get; }
-        Stream DownloadFile();
+        TemporaryFile DownloadFile();
     }
 
     public interface IItemDownloadStrategy
     {
-        Stream DownloadFile(IItem item);
+        TemporaryFile DownloadFile(IItem item);
     }
 }
