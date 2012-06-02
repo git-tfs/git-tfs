@@ -18,6 +18,12 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         [TestMethod]
+        public void ShouldFormatDirectoryFileMode()
+        {
+            Assert.AreEqual("040000", LibGit2Sharp.Mode.Directory.ToModeString());
+        }
+
+        [TestMethod]
         public void ShouldDetectGitLink()
         {
             Assert.AreEqual(LibGit2Sharp.Mode.GitLink, "160000".ToFileMode());

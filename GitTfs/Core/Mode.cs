@@ -15,26 +15,17 @@ namespace Sep.Git.Tfs.Core
 
         public static LibGit2Sharp.Mode ToFileMode(this string mode)
         {
-            switch (mode)
-            {
-                case "100644": return LibGit2Sharp.Mode.NonExecutableFile;
-                case "040000": return LibGit2Sharp.Mode.Directory;
-                case "160000": return LibGit2Sharp.Mode.GitLink;
-                case "120000": return LibGit2Sharp.Mode.SymbolicLink;
-                default: throw new ArgumentException();
-            }
+            return (LibGit2Sharp.Mode)Convert.ToInt32(mode, 8);
         }
 
         public static string ToModeString(this LibGit2Sharp.Mode mode)
         {
-            switch (mode)
+            var modeString = Convert.ToString((int)mode, 8);
+            while (modeString.Length < 6)
             {
-                case LibGit2Sharp.Mode.NonExecutableFile: return "100644"; 
-                case LibGit2Sharp.Mode.Directory: return "040000";
-                case LibGit2Sharp.Mode.GitLink: return "160000"; 
-                case LibGit2Sharp.Mode.SymbolicLink: return "120000";
-                default: throw new ArgumentException();
+                modeString = "0" + modeString;
             }
+            return modeString;
         }
     }
 }
