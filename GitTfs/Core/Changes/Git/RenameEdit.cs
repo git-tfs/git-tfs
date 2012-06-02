@@ -22,7 +22,7 @@ namespace Sep.Git.Tfs.Core.Changes.Git
             workspace.Edit(Path);
             workspace.Rename(Path, PathTo, Score);
             var workspaceFile = workspace.GetLocalPath(PathTo);
-            _repository.GetBlob(NewSha, workspaceFile);
+            _repository.CopyBlob(NewSha, workspaceFile);
         }
     }
 }

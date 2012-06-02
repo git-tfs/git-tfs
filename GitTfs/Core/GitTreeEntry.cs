@@ -1,13 +1,14 @@
-﻿using System.IO;
-using GitSharp.Core;
+﻿using System;
+using System.IO;
+using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Core
 {
     public class GitTreeEntry : ITreeEntry
     {
-        private readonly FileTreeEntry _entry;
+        private readonly TreeEntry _entry;
 
-        public GitTreeEntry(FileTreeEntry entry)
+        public GitTreeEntry(TreeEntry entry)
         {
             _entry = entry;
         }
@@ -16,12 +17,17 @@ namespace Sep.Git.Tfs.Core
 
         public string FullName
         {
-            get { return _entry.FullName; }
+            get { return _entry.Path; }
         }
 
         public Stream OpenRead()
         {
-            return new MemoryStream(_entry.OpenReader().CachedBytes);
+            if (_entry.Type == GitObjectType.Blob)
+            {
+                return ((Blob)_entry.Target).ContentStream;
+            }
+            else
+                throw new InvalidOperationException("Invalid object type");
         }
     }
 }

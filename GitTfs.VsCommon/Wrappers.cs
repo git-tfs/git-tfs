@@ -5,6 +5,7 @@ using System.IO;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -175,7 +176,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _item.ContentLength; }
         }
 
-        public Stream DownloadFile()
+        public TemporaryFile DownloadFile()
         {
             return _downloadStrategy.DownloadFile(this);
         }

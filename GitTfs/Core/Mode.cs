@@ -1,5 +1,5 @@
 ﻿using System;
-using GitSharp.Core;
+using LibGit2Sharp.Core;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -11,17 +11,17 @@ namespace Sep.Git.Tfs.Core
         /// <summary>
         /// The default mode for new files. (S_IFREG | S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
         /// </summary>
-        public static readonly string NewFile = FileMode.RegularFile.ToModeString();// "100644";
+        public static readonly string NewFile = LibGit2Sharp.Mode.NonExecutableFile.ToModeString();
 
-        public static FileMode ToFileMode(this string mode)
+        public static LibGit2Sharp.Mode ToFileMode(this string mode)
         {
-            return FileMode.FromBits(Convert.ToInt32(mode, 8));
+            return (LibGit2Sharp.Mode)Convert.ToInt32(mode, 8);
         }
 
-        public static string ToModeString(this FileMode mode)
+        public static string ToModeString(this LibGit2Sharp.Mode mode)
         {
-            var modeString = Convert.ToString(mode.Bits, 8);
-            while(modeString.Length < 6)
+            var modeString = Convert.ToString((int)mode, 8);
+            while (modeString.Length < 6)
             {
                 modeString = "0" + modeString;
             }

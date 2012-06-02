@@ -62,8 +62,8 @@ namespace Sep.Git.Tfs.Commands
         public void Verify(TfsChangesetInfo changeset)
         {
             _stdout.WriteLine("Comparing TFS changeset " + changeset.ChangesetId + " to git commit " + changeset.GitCommit);
-            var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant());
-            var gitTree = changeset.Remote.Repository.GetCommit(changeset.GitCommit).GetTree().ToDictionary(entry => entry.Entry.FullName.ToLowerInvariant());
+            var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant().Replace("/",@"\"));
+            var gitTree = changeset.Remote.Repository.GetCommit(changeset.GitCommit).GetTree().ToDictionary(entry => entry.Entry.Path.ToLowerInvariant());
 
             var all = tfsTree.Keys.Union(gitTree.Keys);
             var inBoth = tfsTree.Keys.Intersect(gitTree.Keys);
@@ -82,13 +82,13 @@ namespace Sep.Git.Tfs.Commands
                     }
                     else
                     {
-                        OnlyIn("TFS", tfsTree[file]);
+                        _stdout.WriteLine("Only in TFS: " + tfsTree[file].FullName);
                         foundDiff = true;
                     }
                 }
                 else
                 {
-                    OnlyIn("git", gitTree[file]);
+                    _stdout.WriteLine("Only in git: " + gitTree[file].FullName);
                     foundDiff = true;
                 }
             }
@@ -96,15 +96,10 @@ namespace Sep.Git.Tfs.Commands
                 _stdout.WriteLine("No differences!");
         }
 
-        private void OnlyIn(string source, ITreeEntry treeEntry)
-        {
-            _stdout.WriteLine("Only in " + source + ": " + treeEntry.FullName);
-        }
-
         private bool Compare(TfsTreeEntry tfsTreeEntry, GitTreeEntry gitTreeEntry)
         {
             var different = false;
-            if (tfsTreeEntry.FullName != gitTreeEntry.FullName)
+            if (tfsTreeEntry.FullName.Replace("/",@"\") != gitTreeEntry.FullName)
             {
                 _stdout.WriteLine("Name case mismatch:");
                 _stdout.WriteLine("  TFS: " + tfsTreeEntry.FullName);

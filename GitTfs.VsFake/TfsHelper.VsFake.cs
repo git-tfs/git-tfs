@@ -5,6 +5,7 @@ using System.Linq;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 
 namespace Sep.Git.Tfs.VsFake
@@ -155,16 +156,19 @@ namespace Sep.Git.Tfs.VsFake
 
             long IItem.ContentLength
             {
-                get { return ((IItem)this).DownloadFile().Length; }
+                get
+                {
+                    using (var temp = ((IItem)this).DownloadFile())
+                        return new FileInfo(temp).Length;
+                }
             }
 
-            System.IO.Stream IItem.DownloadFile()
+            TemporaryFile IItem.DownloadFile()
             {
-                var written = new MemoryStream();
-                var writer = new StreamWriter(written);
-                writer.Write(_change.Content);
-                writer.Flush();
-                return new MemoryStream(written.ToArray());
+                var temp = new TemporaryFile();
+                using(var writer = new StreamWriter(temp))
+                    writer.Write(_change.Content);
+                return temp;
             }
         }
 

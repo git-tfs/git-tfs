@@ -57,19 +57,6 @@ namespace Sep.Git.Tfs.Core
             return ++nr;
         }
 
-        public int Update(string mode, string path, Stream stream, long length)
-        {
-            var sha = repository.HashAndInsertObject(stream, length);
-            Trace.WriteLine("   U " + sha + " = " + path);
-            stdin.Write(mode);
-            stdin.Write(' ');
-            stdin.Write(sha);
-            stdin.Write('\t');
-            stdin.Write(path);
-            stdin.Write('\0');
-            return ++nr;
-        }
-
         public void Dispose()
         {
             stdin.Close();
