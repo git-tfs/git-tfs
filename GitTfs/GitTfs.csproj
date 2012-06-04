@@ -69,6 +69,9 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="NDesk.Options, Version=0.2.1.0, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
@@ -236,5 +239,8 @@
   -->
   <PropertyGroup>
     <PreBuildEvent>"$(ProjectDir)..\GetCurrentVersion" "$(GitPath)" &gt; "$(ProjectDir)GitVersionInfo"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /Y $(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries\$(PlatformName)\*.* $(TargetDir)</PostBuildEvent>
   </PropertyGroup>
 </Project>
