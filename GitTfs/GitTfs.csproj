@@ -241,6 +241,6 @@
     <PreBuildEvent>"$(ProjectDir)..\GetCurrentVersion" "$(GitPath)" &gt; "$(ProjectDir)GitVersionInfo"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Y $(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries\$(PlatformName)\*.* $(TargetDir)</PostBuildEvent>
+    <PostBuildEvent>xcopy /Y "$(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries\$(PlatformName)\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
