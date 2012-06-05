@@ -63,3 +63,9 @@ If you contribute patches, please set `core.autocrlf` to `true`. (`git config co
 
 Contributions are always welcome. For more information about contributing,
 please see [the wiki](http://github.com/git-tfs/git-tfs/wiki/Contributing).
+
+### Community
+
+`#git-tfs` on FreeNode, and the [mailing list](https://groups.google.com/group/git-tfs-dev)
+
+
