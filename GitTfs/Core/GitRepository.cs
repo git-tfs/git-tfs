@@ -297,8 +297,7 @@ namespace Sep.Git.Tfs.Core
             var entries = GetObjects();
             if (commit != null)
             {
-                ParseEntries(entries, Command("ls-tree", "-r", "-z", commit), commit);
-                ParseEntries(entries, Command("ls-tree", "-r", "-d", "-z", commit), commit);
+                ParseEntries(entries, _repository.Lookup<Commit>(commit).Tree, commit);
             }
             return entries;
         }
@@ -319,45 +318,28 @@ namespace Sep.Git.Tfs.Core
             return message.ToString();
         }
 
-        private void ParseEntries(IDictionary<string, GitObject> entries, string treeInfo, string commit)
+        private void ParseEntries(IDictionary<string, GitObject> entries, Tree treeInfo, string commit)
         {
-            int start = 0;
-            int end = 0;
-            string path = string.Empty;
-
-            while( start < treeInfo.Length && end < treeInfo.Length )
+            var treesToDescend = new Queue<Tree>(new[] {treeInfo});
+            while (treesToDescend.Any())
             {
-                end = treeInfo.IndexOf('\0',start);
-                if( -1 == end )
+                var currentTree = treesToDescend.Dequeue();
+                foreach (var item in currentTree)
                 {
-                    end = treeInfo.Length;
+                    if (item.Type == GitObjectType.Tree)
+                    {
+                        treesToDescend.Enqueue((Tree)item.Target);
+                    }
+                    entries[item.Path] = new GitObject
+                    {
+                        Mode = item.Mode.ToModeString(),
+                        Sha = item.Target.Sha,
+                        ObjectType = item.Type.ToString().ToLower(),
+                        Path = item.Path,
+                        Commit = commit
+                    };
                 }
-
-                path = treeInfo.Substring( start , end - start );
-
-                var gitObject = MakeGitObject(commit, path);
-                if (gitObject != null)
-                {
-                    entries[gitObject.Path] = gitObject;
-                }
-
-                start = end + 1;
             }
-        }
-
-        private GitObject MakeGitObject(string commit, string treeInfo)
-        {
-            var treeRegex =
-                new Regex(@"\A(?<mode>\d{6}) (?<type>blob|tree) (?<sha>" + GitTfsConstants.Sha1 + @")\t(?<path>.*)");
-            var match = treeRegex.Match(treeInfo);
-            return !match.Success ? null : new GitObject
-                                               {
-                                                   Mode = match.Groups["mode"].Value,
-                                                   Sha = match.Groups["sha"].Value,
-                                                   ObjectType = match.Groups["type"].Value,
-                                                   Path = match.Groups["path"].Value,
-                                                   Commit = commit
-                                               };
         }
 
         public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
