@@ -74,6 +74,7 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 var versionControlServer = GetService<VersionControlServer>();
                 versionControlServer.NonFatalError += NonFatalError;
+                versionControlServer.Getting += Getting;
                 return versionControlServer;
             }
         }
@@ -88,6 +89,11 @@ namespace Sep.Git.Tfs.VsCommon
             _stdout.WriteLine(e.Failure.Message);
             Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
             Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+        }
+
+        private void Getting(object sender, GettingEventArgs e)
+        {
+            Trace.WriteLine("get [C" + e.Version + "]" + e.ServerItem);
         }
 
         private IGroupSecurityService GroupSecurityService
