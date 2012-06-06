@@ -139,7 +139,7 @@ namespace Sep.Git.Tfs.VsFake
                 get { return _change.RepositoryPath; }
             }
 
-            decimal IItem.DeletionId
+            int IItem.DeletionId
             {
                 get { return 0; }
             }

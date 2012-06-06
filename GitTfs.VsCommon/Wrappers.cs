@@ -156,7 +156,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _item.ServerItem; }
         }
 
-        public decimal DeletionId
+        public int DeletionId
         {
             get { return _item.DeletionId; }
         }

@@ -388,7 +388,7 @@ namespace Sep.Git.Tfs.VsCommon
                 get { return _pendingChange.ServerItem; }
             }
 
-            public decimal DeletionId
+            public int DeletionId
             {
                 get { return _pendingChange.DeletionId; }
             }
