@@ -158,6 +158,11 @@ namespace Sep.Git.Tfs.Core
             _workspace.GetSpecificVersion(changesetId);
         }
 
+        public void Get(IChangeset changeset)
+        {
+            _workspace.GetSpecificVersion(changeset);
+        }
+
         private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos()
         {
             return GetWorkItemInfosHelper<IWorkItemCheckinInfo>(_tfsHelper.GetWorkItemInfos);
