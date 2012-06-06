@@ -136,7 +136,7 @@ namespace Sep.Git.Tfs.Core
                    select new TfsTreeEntry(pathInGitRepo, item);
         }
 
-        public LogEntry CopyTree(GitIndexInfo index)
+        public LogEntry CopyTree(GitIndexInfo index, ITfsWorkspace workspace)
         {
             var startTime = DateTime.Now;
             var itemsCopied = 0;
@@ -148,9 +148,10 @@ namespace Sep.Git.Tfs.Core
             }
             else
             {
+                workspace.Get(_changeset.ChangesetId);
                 foreach (var entry in tfsTreeEntries)
                 {
-                    Add(entry.Item, entry.FullName, index);
+                    Add(entry.Item, entry.FullName, index, workspace);
                     maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
 
                     itemsCopied++;
@@ -173,6 +174,14 @@ namespace Sep.Git.Tfs.Core
                 {
                     index.Update(Mode.NewFile, pathInGitRepo, temp);
                 }
+            }
+        }
+
+        private void Add(IItem item, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace)
+        {
+            if (item.DeletionId == 0)
+            {
+                index.Update(Mode.NewFile, pathInGitRepo, workspace.GetLocalPath(pathInGitRepo));
             }
         }
 

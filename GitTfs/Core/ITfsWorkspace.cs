@@ -13,6 +13,7 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         long Checkin();
 
+        void Get(int changesetId);
         string GetLocalPath(string path);
         void Add(string path);
         void Edit(string path);

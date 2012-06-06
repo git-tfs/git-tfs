@@ -450,6 +450,11 @@ namespace Sep.Git.Tfs.VsCommon
             _workspace.Get(new GetRequest(item, changeset), GetOptions.Overwrite | GetOptions.GetAll);
         }
 
+        public void GetSpecificVersion(int changeset)
+        {
+            _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll);
+        }
+
         public string OwnerName
         {
             get { return _workspace.OwnerName; }
