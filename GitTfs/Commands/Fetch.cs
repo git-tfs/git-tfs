@@ -29,6 +29,7 @@ namespace Sep.Git.Tfs.Commands
 
         bool FetchAll { get; set; }
         bool FetchParents { get; set; }
+		  internal int? StartWithChangesetId { get; set; }
 
         public virtual OptionSet OptionSet
         {
@@ -69,6 +70,10 @@ namespace Sep.Git.Tfs.Commands
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
             globals.Repository.MoveTfsRefForwardIfNeeded(remote);
+				if (StartWithChangesetId.HasValue)
+				{
+					remote.MaxChangesetId = StartWithChangesetId.Value;
+				}
             remote.Fetch();
         }
 
