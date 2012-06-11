@@ -19,6 +19,8 @@ namespace Sep.Git.Tfs.Commands
         private readonly Init init;
         private readonly Globals globals;
 
+        string InitialChangesetNumber { get; set; }
+
         public Clone(Globals globals, Fetch fetch, Init init)
         {
             this.fetch = fetch;
@@ -28,7 +30,15 @@ namespace Sep.Git.Tfs.Commands
 
         public OptionSet OptionSet
         {
-            get { return init.OptionSet.Merge(fetch.OptionSet); }
+            get
+            {
+                return
+                new OptionSet()
+                {
+                    { "initchangeset=", "the initial changeset number to start with when pulling down a clone for the first time",
+                        v => InitialChangesetNumber = v}, 
+                }.Merge(init.OptionSet, fetch.OptionSet);
+            }
         }
 
         public int Run(string tfsUrl, string tfsRepositoryPath)
@@ -38,6 +48,19 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
         {
+            int startingChangesetNumber; 
+            if (!String.IsNullOrWhiteSpace(InitialChangesetNumber))
+            {
+                if (!int.TryParse(this.InitialChangesetNumber, out startingChangesetNumber))
+                {
+                    throw new GitTfsException("The initial changeset number was not a valid number!.  Please enter a valid number for the initial changeset value.");
+                }
+                else if (startingChangesetNumber > 0)
+                {
+                    fetch.StartWithChangesetId = startingChangesetNumber;
+                }
+            }
+
             var currentDir = Environment.CurrentDirectory;
             var repositoryDirCreated = InitGitDir(gitRepositoryPath);
 
