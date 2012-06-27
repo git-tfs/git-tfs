@@ -445,7 +445,7 @@ namespace Sep.Git.Tfs.Core
         private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, ITfsWorkspace workspace)
         {
             PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace);
-            workspace.Shelve(shelvesetName, evaluateCheckinPolicies);
+            workspace.Shelve(shelvesetName, evaluateCheckinPolicies, () => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
         }
 
         public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
