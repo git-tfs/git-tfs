@@ -38,10 +38,7 @@ namespace Sep.Git.Tfs.Core
                 throw new GitTfsException("Nothing to shelve!");
 
             var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
-            var checkinComment = _checkinOptions.CheckinComment;
-            if (string.IsNullOrWhiteSpace(checkinComment) && !_checkinOptions.NoGenerateCheckinComment)
-                checkinComment = generateCheckinComment();
-            shelveset.Comment = checkinComment;
+            shelveset.Comment = string.IsNullOrWhiteSpace(_checkinOptions.CheckinComment) && !_checkinOptions.NoGenerateCheckinComment ? generateCheckinComment() : _checkinOptions.CheckinComment;
             shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
             if(evaluateCheckinPolicies)
             {
