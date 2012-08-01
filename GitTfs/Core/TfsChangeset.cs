@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -13,13 +14,15 @@ namespace Sep.Git.Tfs.Core
         private readonly ITfsHelper _tfs;
         private readonly IChangeset _changeset;
         private readonly TextWriter _stdout;
+        private readonly AuthorsFile _authors;
         public TfsChangesetInfo Summary { get; set; }
 
-        public TfsChangeset(ITfsHelper tfs, IChangeset changeset, TextWriter stdout)
+        public TfsChangeset(ITfsHelper tfs, IChangeset changeset, TextWriter stdout, AuthorsFile authors)
         {
             _tfs = tfs;
             _changeset = changeset;
             _stdout = stdout;
+            _authors = authors;
         }
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index)
@@ -166,7 +169,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Add(IItem item, string pathInGitRepo, GitIndexInfo index)
         {
-            if(item.DeletionId == 0)
+            if (item.DeletionId == 0)
             {
                 // Download the content directly into the git database as a blob:
                 using (var temp = item.DownloadFile())
@@ -178,7 +181,7 @@ namespace Sep.Git.Tfs.Core
 
         private string GetMode(IChange change, IDictionary<string, GitObject> initialTree, string pathInGitRepo)
         {
-            if(initialTree.ContainsKey(pathInGitRepo) &&
+            if (initialTree.ContainsKey(pathInGitRepo) &&
                 !String.IsNullOrEmpty(initialTree[pathInGitRepo].Mode) &&
                 !change.ChangeType.IncludesOneOf(TfsChangeType.Add))
             {
@@ -203,13 +206,13 @@ namespace Sep.Git.Tfs.Core
                 var fileName = splitResult.Groups["file"].Value;
                 fullPath = UpdateToMatchExtantCasing(dirName, initialTree) + "/" + fileName;
             }
-            initialTree[fullPath] = new GitObject {Path = fullPath};
+            initialTree[fullPath] = new GitObject { Path = fullPath };
             return fullPath;
         }
 
         private void Delete(string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
         {
-            if(initialTree.ContainsKey(pathInGitRepo))
+            if (initialTree.ContainsKey(pathInGitRepo))
             {
                 index.Remove(initialTree[pathInGitRepo].Path);
                 Trace.WriteLine("\tD\t" + pathInGitRepo);
@@ -224,31 +227,53 @@ namespace Sep.Git.Tfs.Core
         private LogEntry MakeNewLogEntry(IChangeset changesetToLog)
         {
             var identity = _tfs.GetIdentity(changesetToLog.Committer);
+            var name = changesetToLog.Committer;
+            var email = changesetToLog.Committer;
+            if (_authors != null && _authors.Authors.ContainsKey(changesetToLog.Committer))
+            {
+                name = _authors.Authors[changesetToLog.Committer].Name;
+                email = _authors.Authors[changesetToLog.Committer].Email;
+            }
+            else if (identity != null)
+            {
+                //This can be null if the user was deleted from AD.
+                //We want to keep their original history around with as little 
+                //hassle to the end user as possible
+                if (!String.IsNullOrWhiteSpace(identity.DisplayName))
+                    name = identity.DisplayName;
+
+                if (!String.IsNullOrWhiteSpace(identity.MailAddress))
+                    email = identity.MailAddress;
+            }
+            else if (!String.IsNullOrWhiteSpace(changesetToLog.Committer))
+            {
+                string[] split = changesetToLog.Committer.Split('\\');
+                if (split.Length == 2)
+                {
+                    name = split[1].ToLower();
+                    email = string.Format("{0}@{1}.tfs.local", name, split[0].ToLower());
+                }
+            }
 
             // committer's & author's name and email MUST NOT be empty as otherwise they would be picked
             // by git from user.name and user.email config settings which is bad thing because commit could
             // be different depending on whose machine it fetched
-            var name = "Unknown TFS user";
-            var email = "unknown@tfs.local";
-            if (identity != null)
+            if (String.IsNullOrWhiteSpace(name))
             {
-                if (!String.IsNullOrWhiteSpace(identity.DisplayName))
-                    name = identity.DisplayName;
-                
-                if (!String.IsNullOrWhiteSpace(identity.MailAddress))
-                    email = identity.MailAddress;
-                else if (!String.IsNullOrWhiteSpace(changesetToLog.Committer))
-                    email = changesetToLog.Committer;
+                name = "Unknown TFS user";
             }
-
+            if (String.IsNullOrWhiteSpace(email))
+            {
+                email = "unknown@tfs.local";
+            }
             return new LogEntry
                        {
-                           Date = changesetToLog.CreationDate, 
-                           Log = changesetToLog.Comment + Environment.NewLine, 
-                           ChangesetId = changesetToLog.ChangesetId, 
-                           CommitterName = name, 
-                           AuthorName = name, 
-                           CommitterEmail = email, 
+                           Date = changesetToLog.CreationDate,
+                           Log = changesetToLog.Comment + Environment.NewLine,
+                           ChangesetId = changesetToLog.ChangesetId,
+                           CommitterName = name,
+                           AuthorName = name,
+                           CommitterEmail = email,
                            AuthorEmail = email
                        };
         }
