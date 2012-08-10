@@ -123,12 +123,12 @@ namespace Sep.Git.Tfs.Core
         }
 
         /// <summary>
-        /// Force the <paramref name="stream"/> to use current Windows ANSI code page.
-        /// For the StdIn-interactions with git it is important to use the standard ANSI codepage 
-        /// (i.e. the codepage returned by  GetACP()), and not the current terminal codepage.
+        /// The encoding used by a stream is a read-only property. Use this method to
+        /// create a new stream based on <paramref name="stream"/> that uses
+        /// the given <paramref name="encoding"/> instead.
         /// </summary>
-        public static StreamWriter WithDefaultEncoding(this StreamWriter stream) {
-            return new StreamWriter(stream.BaseStream, Encoding.Default);
+        public static StreamWriter WithEncoding(this StreamWriter stream, Encoding encoding) {
+            return new StreamWriter(stream.BaseStream, encoding);
         }
     }
 }
