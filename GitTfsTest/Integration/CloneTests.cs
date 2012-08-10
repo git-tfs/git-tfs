@@ -67,5 +67,63 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
         }
+
+        [TestMethod]
+        public void CloneProjectWithInternationalCharactersInFileNamesAndFolderNames()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/ÆØÅ")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/ÆØÅ/äöü.txt", "File contents");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject");
+            h.AssertGitRepo("MyProject");
+            AssertRefs("2697fc1748a13832ef25804ef2d3be65a7cd3129");
+            h.AssertFileInWorkspace("MyProject", "ÆØÅ/äöü.txt", "File contents");
+        }
+
+        [TestMethod]
+        public void CloneProjectWithInternationalCharactersInFileContents()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Folder")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "Blåbærsyltetøy er godt!"); // "Blueberry jam is tasty!"
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject");
+            h.AssertGitRepo("MyProject");
+            AssertRefs("4307a071b67c51bf141b34e931faa8fe166924b1");
+            h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "Blåbærsyltetøy er godt!");
+        }
+
+        [TestMethod]
+        public void CloneProjectWithInternationalCharactersInCommitMessages()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Blåbærsyltetøy", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Folder")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "File contents");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject");
+            h.AssertGitRepo("MyProject");
+            AssertRefs("fd91b4eacedb8ae519c7046f6bb60b0ce9894cb2");
+            h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
+        }
+
+        private void AssertRefs(string expectedSha)
+        {
+            h.AssertRef("MyProject", "HEAD", expectedSha);
+            h.AssertRef("MyProject", "master", expectedSha);
+            h.AssertRef("MyProject", "tfs/default", expectedSha);
+        }
     }
 }

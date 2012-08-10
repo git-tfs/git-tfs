@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -179,7 +180,7 @@ namespace Sep.Git.Tfs.Test.Integration
         public void AssertFileInWorkspace(string repodir, string file, string contents)
         {
             var path = Path.Combine(Workdir, repodir, file);
-            Assert.AreEqual(contents, File.ReadAllText(path), "Contents of " + path);
+            Assert.AreEqual(contents, File.ReadAllText(path, Encoding.UTF8), "Contents of " + path); // UTF-8 is the default, but let's be explicit about it
         }
 
         #endregion
