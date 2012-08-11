@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
 using StructureMap;
-using FileMode = LibGit2Sharp.Mode;
 using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Core
@@ -344,16 +343,11 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
         {
-            using (var diffOutput = CommandOutputPipe("diff-tree", "-r", "-M", from, to))
+            using (var diffOutput = CommandOutputPipe("diff-tree", "-r", "-M", "-z", from, to))
             {
-                string line;
-                while (null != (line = diffOutput.ReadLine()))
+                var changes = GitChangeInfo.GetChangedFiles(diffOutput);
+                foreach (var change in changes)
                 {
-                    var change = GitChangeInfo.Parse(line);
-
-                    if (FileMode.GitLink == change.NewMode)
-                        continue;
-
                     yield return BuildGitChangedFile(change);
                 }
             }
