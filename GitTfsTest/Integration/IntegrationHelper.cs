@@ -192,6 +192,13 @@ namespace Sep.Git.Tfs.Test.Integration
             Assert.AreEqual(contents, File.ReadAllText(path, Encoding.UTF8), "Contents of " + path); // UTF-8 is the default, but let's be explicit about it
         }
 
+        public void AssertCommitMessage(string repodir, string commitish, string message)
+        {
+            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
+            var commit = LibGit2Sharp.RepositoryExtensions.Lookup<LibGit2Sharp.Commit>(repo, commitish);
+            Assert.AreEqual(message, commit.Message);
+        }
+
         #endregion
     }
 }

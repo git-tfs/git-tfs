@@ -117,6 +117,13 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertGitRepo("MyProject");
             AssertRefs("9a73fe007130ca91517283aafe1d442f406df973");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
+
+            var expectedCommitMessage = new System.Text.StringBuilder();
+            expectedCommitMessage.AppendLine("Blåbærsyltetøy");
+            expectedCommitMessage.AppendLine("");
+            expectedCommitMessage.AppendLine("git-tfs-id: [http://does/not/matter]$/MyProject;C2");
+
+            h.AssertCommitMessage("MyProject", "HEAD", expectedCommitMessage.ToString());
         }
 
         private void AssertRefs(string expectedSha)
