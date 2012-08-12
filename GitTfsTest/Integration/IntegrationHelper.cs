@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -175,6 +176,14 @@ namespace Sep.Git.Tfs.Test.Integration
             entries.Remove("..");
             entries.Remove(".git");
             Assert.AreEqual("", String.Join(", ", entries.ToArray()), "other entries in " + repodir);
+        }
+
+        public void AssertCleanWorkspace(string repodir)
+        {
+            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
+            var status = repo.Index.RetrieveStatus();
+            var statusString = String.Join("\n", status.Select(statusEntry => "" + statusEntry.State + ": " + statusEntry.FilePath).ToArray());
+            Assert.AreEqual("", statusString, "repo status");
         }
 
         public void AssertFileInWorkspace(string repodir, string file, string contents)
