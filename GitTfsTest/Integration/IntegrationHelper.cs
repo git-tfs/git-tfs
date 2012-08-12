@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -115,7 +116,7 @@ namespace Sep.Git.Tfs.Test.Integration
             startInfo.EnvironmentVariables["GIT_TFS_CLIENT"] = "Fake";
             startInfo.EnvironmentVariables[Script.EnvVar] = FakeScript;
             startInfo.EnvironmentVariables["Path"] = CurrentBuildPath + ";" + Environment.GetEnvironmentVariable("Path");
-            startInfo.FileName = @"C:\Program Files\git\cmd\git.cmd";
+            startInfo.FileName = "git.cmd";
             startInfo.Arguments = "tfs --debug " + String.Join(" ", args);
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
@@ -188,7 +189,7 @@ namespace Sep.Git.Tfs.Test.Integration
         public void AssertFileInWorkspace(string repodir, string file, string contents)
         {
             var path = Path.Combine(Workdir, repodir, file);
-            Assert.AreEqual(contents, File.ReadAllText(path), "Contents of " + path);
+            Assert.AreEqual(contents, File.ReadAllText(path, Encoding.UTF8), "Contents of " + path); // UTF-8 is the default, but let's be explicit about it
         }
 
         #endregion

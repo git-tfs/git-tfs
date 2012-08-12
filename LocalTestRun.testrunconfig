@@ -1,5 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<TestRunConfiguration name="Local Test Run" id="5655a60c-4b6a-4d38-b593-3d93e2d5c1a2" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TestSettings name="Local Test Run" id="5655a60c-4b6a-4d38-b593-3d93e2d5c1a2" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <Description>This is a default test run configuration for a local test run.</Description>
-  <TestTypeSpecific />
-</TestRunConfiguration>
+  <Deployment>
+    <DeploymentItem filename="GitTfs\git2.dll" />
+  </Deployment>
+  <Execution>
+    <TestTypeSpecific>
+      <UnitTestRunConfig testTypeId="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b">
+        <AssemblyResolution>
+          <TestDirectory useLoadContext="true" />
+        </AssemblyResolution>
+      </UnitTestRunConfig>
+    </TestTypeSpecific>
+    <AgentRule name="Execution Agents">
+    </AgentRule>
+  </Execution>
+</TestSettings>
