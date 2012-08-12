@@ -116,7 +116,7 @@ namespace Sep.Git.Tfs.Test.Integration
             startInfo.EnvironmentVariables["GIT_TFS_CLIENT"] = "Fake";
             startInfo.EnvironmentVariables[Script.EnvVar] = FakeScript;
             startInfo.EnvironmentVariables["Path"] = CurrentBuildPath + ";" + Environment.GetEnvironmentVariable("Path");
-            startInfo.FileName = "git.cmd";
+            startInfo.FileName = "git";
             startInfo.Arguments = "tfs --debug " + String.Join(" ", args);
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
