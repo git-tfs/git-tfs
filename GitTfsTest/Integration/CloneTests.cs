@@ -60,7 +60,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
-            const string expectedSha = "dd806911118e6fa16d028b322ad91360d56ea47b";
+            const string expectedSha = "72a03802ac5f864a40a9bee13608f85e0e2ad05b";
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
             h.AssertRef("MyProject", "tfs/default", expectedSha);
@@ -81,7 +81,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
-            AssertRefs("2697fc1748a13832ef25804ef2d3be65a7cd3129");
+            AssertRefs("ea7ed178fb4cce7f46d2c84b907a88fa9d194014");
             h.AssertFileInWorkspace("MyProject", "ÆØÅ/äöü.txt", "File contents");
         }
 
@@ -98,7 +98,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
-            AssertRefs("4307a071b67c51bf141b34e931faa8fe166924b1");
+            AssertRefs("78f0490e22ae245a63238744de2d96f0675880a0");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "Blåbærsyltetøy er godt!");
         }
 
@@ -115,7 +115,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
-            AssertRefs("fd91b4eacedb8ae519c7046f6bb60b0ce9894cb2");
+            AssertRefs("9a73fe007130ca91517283aafe1d442f406df973");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
         }
 
