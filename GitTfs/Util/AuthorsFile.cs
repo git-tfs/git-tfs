@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core;
 
@@ -17,7 +15,7 @@ namespace Sep.Git.Tfs.Util
     [StructureMapSingleton]
     public class AuthorsFile
     {
-        private Dictionary<string, Author> authors = new Dictionary<string, Author>();
+        private readonly Dictionary<string, Author> authors = new Dictionary<string, Author>(StringComparer.OrdinalIgnoreCase);
 
         public AuthorsFile()
         { }
