@@ -67,6 +67,20 @@ namespace Sep.Git.Tfs.Test.Util
         }
 
         [TestMethod]
+        public void TestCaseInsensitiveRecord()
+        {
+            string author = @"DOMAIN\Test.User = Test User <TestUser@example.com>";
+            AuthorsFile authFile = new AuthorsFile();
+            authFile.Parse(new StreamReader(new MemoryStream(Encoding.ASCII.GetBytes(author))));
+            Assert.IsNotNull(authFile.Authors);
+            Assert.AreEqual<int>(1, authFile.Authors.Count);
+            Assert.IsTrue(authFile.Authors.ContainsKey(@"domain\Test.User"));
+            Author auth = authFile.Authors[@"domain\Test.User"];
+            Assert.AreEqual<string>("Test User", auth.Name);
+            Assert.AreEqual<string>("TestUser@example.com", auth.Email);
+        }
+
+        [TestMethod]
         public void TestMultiLineRecord()
         {
             string author = 
