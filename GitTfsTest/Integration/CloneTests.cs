@@ -131,18 +131,20 @@ namespace Sep.Git.Tfs.Test.Integration
         {
             h.SetupFake(r =>
             {
-                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12"))
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
                     .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
-                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12"))
-                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Folder")
-                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "File contents")
-                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr");
-                r.Changeset(2, "Second commit", DateTime.Parse("2012-01-02 12:12:12"))
-                    .Change(TfsChangeType.Add, TfsItemType.File, "$/myproject/folder/file2.txt", "File contents in lowercase path");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Foo")
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Foo/Bar")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Foo/Bar/File.txt", "File contents");
+                r.Changeset(3, "Second commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Edit, TfsItemType.File, "$/myproject/foo/BAR/file.txt", "Updated file contents in path with different casing")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/myproject/FOO/bar/file2.txt", "Another file in the same folder, but with different casing");
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
             h.AssertCleanWorkspace("MyProject");
+            AssertRefs("70cdbdca83c3808e60bc1f8cde7e155055447df7");
         }
     }
 }

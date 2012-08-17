@@ -330,12 +330,13 @@ namespace Sep.Git.Tfs.Core
                     {
                         treesToDescend.Enqueue((Tree)item.Target);
                     }
-                    entries[item.Path] = new GitObject
+                    var path = item.Path.Replace('\\', '/');
+                    entries[path] = new GitObject
                     {
                         Mode = item.Mode.ToModeString(),
                         Sha = item.Target.Sha,
                         ObjectType = item.Type.ToString().ToLower(),
-                        Path = item.Path,
+                        Path = path,
                         Commit = commit
                     };
                 }
