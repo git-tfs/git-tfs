@@ -171,6 +171,7 @@
     <Compile Include="Core\TfsWriter.cs" />
     <Compile Include="Core\GitTfsException.cs" />
     <Compile Include="Util\AuthorsFile.cs" />
+    <Compile Include="Util\CheckinOptionsHelper.cs" />
     <Compile Include="Util\ExceptionFormattingExtensions.cs" />
     <Compile Include="Util\GitTfsCommandFactory.cs" />
     <Compile Include="Util\GitTfsCommandRunner.cs" />
