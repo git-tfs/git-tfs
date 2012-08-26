@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System;
 
 namespace Sep.Git.Tfs
 {
@@ -15,7 +16,7 @@ namespace Sep.Git.Tfs
         public const string TfsCommitInfoFormat = "git-tfs-id: [{0}]{1};C{2}";
         public static readonly Regex TfsCommitInfoRegex =
                 new Regex("^\\s*" +
-                          GitTfsPrefix + 
+                          GitTfsPrefix +
                           "-id:\\s+" +
                           "\\[(?<url>.+)\\]" +
                           "(?<repository>.+);" +
@@ -24,5 +25,9 @@ namespace Sep.Git.Tfs
         // e.g. git-tfs-work-item: 24 associate
         public static readonly Regex TfsWorkItemRegex =
                 new Regex(GitTfsPrefix + @"-work-item:\s+(?<item_id>\d+)\s(?<action>.+)");
+
+        // e.g. git-tfs-force: override reason
+        public static readonly Regex TfsForceRegex =
+                new Regex(GitTfsPrefix + @"-force:\s+(?<reason>.+)\s*$");
     }
 }
