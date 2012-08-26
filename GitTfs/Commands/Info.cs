@@ -16,6 +16,7 @@ namespace Sep.Git.Tfs.Commands
         TextWriter stdout;
         IGitHelpers githelpers;
         IHelpHelper help;
+        IGitTfsVersionProvider versionProvider;
 
         /// <summary>
         /// Initializes a new instance of the Info class.
@@ -24,22 +25,26 @@ namespace Sep.Git.Tfs.Commands
         /// <param name="stdout"></param>
         /// <param name="githelpers"></param>
         /// <param name="help"></param>
-        public Info(Globals globals, TextWriter stdout, IGitHelpers githelpers, IHelpHelper help)
+        public Info(Globals globals, TextWriter stdout, IGitHelpers githelpers, IHelpHelper help, IGitTfsVersionProvider versionProvider)
         {
             this.globals = globals;
             this.stdout = stdout;
             this.githelpers = githelpers;
             this.help = help;
+            this.versionProvider = versionProvider;
         }
 
         public OptionSet OptionSet { get { return globals.OptionSet; } }
 
         public int Run()
         {
-            stdout.WriteLine("remote tfs id: {0}", globals.RemoteId);
-            foreach (var changeset in globals.Repository.GetLastParentTfsCommits("HEAD"))
+            stdout.WriteLine(versionProvider.GetVersionString());
+
+            var changeset = globals.Repository.GetLastParentTfsCommits("HEAD").FirstOr(null);
+
+            if (changeset != null)
             {
-                stdout.WriteLine("- {0} {1}", changeset.Remote.TfsUrl, changeset.Remote.TfsRepositoryPath);
+                stdout.WriteLine("remote tfs id '{0}' maps to {1} {2}", globals.RemoteId, changeset.Remote.TfsUrl, changeset.Remote.TfsRepositoryPath);
             }
 
             return GitTfsExitCodes.OK;
