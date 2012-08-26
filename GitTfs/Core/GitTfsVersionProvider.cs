@@ -23,6 +23,7 @@ namespace Sep.Git.Tfs.Core
             versionString += GetGitCommitForVersionString();
             versionString += " (TFS client library " + tfsHelper.TfsClientLibraryVersion + ")";
             versionString += " (" + (Environment.Is64BitProcess ? "64-bit" : "32-bit") + ")";
+            versionString += Environment.NewLine + " " + Assembly.GetExecutingAssembly().Location;
             return versionString;
         }
 
