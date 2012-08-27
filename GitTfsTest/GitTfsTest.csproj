@@ -93,6 +93,8 @@
     <Compile Include="Core\GitChangeInfoTests.cs" />
     <Compile Include="Core\ModeTests.cs" />
     <Compile Include="Core\TfsApiBridgeTest.cs" />
+    <Compile Include="Core\StubbedCheckinEvaluationResult.cs" />
+    <Compile Include="Core\TfsWorkspaceTests.cs" />
     <Compile Include="GitTfsRegexTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
     <Compile Include="Integration\IntegrationHelper.cs" />
