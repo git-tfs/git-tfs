@@ -80,7 +80,14 @@ namespace Sep.Git.Tfs.Core
             {
                 foreach (var message in checkinProblems.Messages)
                 {
-                    _stdout.WriteLine("[ERROR] " + message);
+                    if (_checkinOptions.Force && string.IsNullOrWhiteSpace(_checkinOptions.OverrideReason) == false)
+                    {
+                        _stdout.WriteLine("[OVERRIDDEN] " + message);
+                    }
+                    else
+                    {
+                        _stdout.WriteLine("[ERROR] " + message);
+                    }
                 }
                 if(!_checkinOptions.Force)
                 {
