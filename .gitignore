@@ -11,3 +11,4 @@ GitTfs/GitVersionInfo
 pkg
 GitTfs.sln.*
 *.dotCover
+packages/
