@@ -95,7 +95,6 @@
     <Compile Include="GitTfsRegexTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
     <Compile Include="Integration\IntegrationHelper.cs" />
-    <Compile Include="ObsoletingMstest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHelpers\ExtensionMethods.cs" />
     <Compile Include="Util\AuthorsFileUnitTest.cs" />
