@@ -1,76 +1,75 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sep.Git.Tfs.Core;
+﻿using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.Changes.Git;
 using StructureMap;
 using LibGit2Sharp;
+using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    [TestClass]
     public class GitChangeInfoTests
     {
-        [TestMethod]
+        [Fact]
         public void GetsMode()
         {
             var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tblah";
             var info = GitChangeInfo.Parse(line);
-            Assert.AreEqual("100644", info.NewMode.ToModeString());
+            Assert.Equal("100644", info.NewMode.ToModeString());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsLinkMode()
         {
             var line = ":000000 160000 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tblah";
             var info = GitChangeInfo.Parse(line);
-            Assert.AreEqual(LibGit2Sharp.Mode.GitLink, info.NewMode);
+            Assert.Equal(LibGit2Sharp.Mode.GitLink, info.NewMode);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsChangeType()
         {
             var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tblah";
             var info = GitChangeInfo.Parse(line);
-            Assert.AreEqual("M", info.Status);
+            Assert.Equal("M", info.Status);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsChangeTypeWhenScoreIsPresent()
         {
             var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab R001\tblah\tnewblah";
             var info = GitChangeInfo.Parse(line);
-            Assert.AreEqual("R", info.Status);
+            Assert.Equal("R", info.Status);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsPath()
         {
             var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tFoo\tBar";
             var info = GitChangeInfo.Parse(line);
-            Assert.AreEqual("Foo", info.path);
+            Assert.Equal("Foo", info.path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsPathTo()
         {
             var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tFoo\tBar";
             var info = GitChangeInfo.Parse(line);
-            Assert.AreEqual("Bar", info.pathTo);
+            Assert.Equal("Bar", info.pathTo);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsPathWithQuotepath()
         {
             var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\t\"\\366\"\t\"\\337\"";
             var info = GitChangeInfo.Parse(line);
-            Assert.AreEqual("ö", info.path);
+            Assert.Equal("ö", info.path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsPathToWithQuotepath()
         {
             var line = ":000000 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\t\"\\366\"\t\"\\337\"";
             var info = GitChangeInfo.Parse(line);
-            Assert.AreEqual("ß", info.pathTo);
+            Assert.Equal("ß", info.pathTo);
         }
 
         private IGitChangedFile GetChangeItem(string diffTreeLine)
@@ -80,109 +79,109 @@ namespace Sep.Git.Tfs.Test.Core
             return GitChangeInfo.Parse(diffTreeLine).ToGitChangedFile(container.With((IGitRepository)null));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfAdd()
         {
             var change = GetChangeItem(":000000 100644 0000000000000000000000000000000000000000 01234567ab01234567ab01234567ab01234567ab A\tblah");
-            Assert.IsInstanceOfType(change, typeof(Add));
+            Assert.IsType<Add>(change);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfAddWithNewMode()
         {
             var change = (Add)GetChangeItem(":000000 100644 0000000000000000000000000000000000000000 01234567ab01234567ab01234567ab01234567ab A\tblah");
-            Assert.AreEqual("01234567ab01234567ab01234567ab01234567ab", change.NewSha);
+            Assert.Equal("01234567ab01234567ab01234567ab01234567ab", change.NewSha);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfAddWithNewPath()
         {
             var change = (Add)GetChangeItem(":000000 100644 0000000000000000000000000000000000000000 01234567ab01234567ab01234567ab01234567ab A\tblah");
-            Assert.AreEqual("blah", change.Path);
+            Assert.Equal("blah", change.Path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfCopy()
         {
             var change = GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab C100\toldname\tnewname");
-            Assert.IsInstanceOfType(change, typeof(Copy));
+            Assert.IsType<Copy>(change);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfAddForCopyWithPath()
         {
             var change = (Copy)GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab C100\toldname\tnewname");
-            Assert.AreEqual("newname", change.Path);
+            Assert.Equal("newname", change.Path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfModify()
         {
             var change = GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tblah");
-            Assert.IsInstanceOfType(change, typeof(Modify));
+            Assert.IsType<Modify>(change);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfModifyWithPath()
         {
             var change = (Modify)GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tblah");
-            Assert.AreEqual("blah", change.Path);
+            Assert.Equal("blah", change.Path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfModifyWithNewSha()
         {
             var change = (Modify)GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab M\tblah");
-            Assert.AreEqual("01234567ab01234567ab01234567ab01234567ab", change.NewSha);
+            Assert.Equal("01234567ab01234567ab01234567ab01234567ab", change.NewSha);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfDelete()
         {
             var change = GetChangeItem(":100644 000000 abcdef0123abcdef0123abcdef0123abcdef0123 0000000000000000000000000000000000000000 D\tblah");
-            Assert.IsInstanceOfType(change, typeof(Delete));
+            Assert.IsType<Delete>(change);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfDeleteWithPath()
         {
             var change = (Delete)GetChangeItem(":100644 000000 abcdef0123abcdef0123abcdef0123abcdef0123 0000000000000000000000000000000000000000 D\tblah");
-            Assert.AreEqual("blah", change.Path);
+            Assert.Equal("blah", change.Path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfRenameEdit()
         {
             var change = GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab R001\tblah\tnewblah");
-            Assert.IsInstanceOfType(change, typeof(RenameEdit));
+            Assert.IsType<RenameEdit>(change);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfRenameEditWithPath()
         {
             var change = (RenameEdit)GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab R001\tblah\tnewblah");
-            Assert.AreEqual("blah", change.Path);
+            Assert.Equal("blah", change.Path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfRenameEditWithPathTo()
         {
             var change = (RenameEdit)GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab R001\tblah\tnewblah");
-            Assert.AreEqual("newblah", change.PathTo);
+            Assert.Equal("newblah", change.PathTo);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfRenameEditWithNewSha()
         {
             var change = (RenameEdit)GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab R001\tblah\tnewblah");
-            Assert.AreEqual("01234567ab01234567ab01234567ab01234567ab", change.NewSha);
+            Assert.Equal("01234567ab01234567ab01234567ab01234567ab", change.NewSha);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetsInstanceOfRenameEditWithScore()
         {
             var change = (RenameEdit)GetChangeItem(":100644 100644 abcdef0123abcdef0123abcdef0123abcdef0123 01234567ab01234567ab01234567ab01234567ab R001\tblah\tnewblah");
-            Assert.AreEqual("001", change.Score);
+            Assert.Equal("001", change.Score);
         }
     }
 }

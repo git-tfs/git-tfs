@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhino.Mocks;
 using Rhino.Mocks.Constraints;
 using Sep.Git.Tfs.Commands;
@@ -9,32 +8,31 @@ using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Test.TestHelpers;
 using StructureMap.AutoMocking;
+using Xunit;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
-    [TestClass]
     public class ShelveTest
     {
         private RhinoAutoMocker<Shelve> mocks;
 
-        [TestInitialize]
-        public void Setup()
+        public ShelveTest()
         {
             mocks = new RhinoAutoMocker<Shelve>();
             mocks.Inject<TextWriter>(new StringWriter());
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldFailWithLessThanOneParents()
         {
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("my-head")).Return(new TfsChangesetInfo[0]);
 
-            Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
+            Assert.NotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldFailWithMoreThanOneParents()
         {
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
@@ -42,10 +40,10 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("my-head"))
                 .Return(new[] {parentChangesets, parentChangesets});
 
-            Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
+            Assert.NotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldFailWithMoreThanOneParentsWhenSpecifiedParentIsNotAParent()
         {
             var globals = mocks.Get<Globals>();
@@ -54,10 +52,10 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("my-head"))
                 .Return(new[] { ChangesetForRemote("ok-choice"), ChangesetForRemote("good-choice") });
 
-            Assert.AreNotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
+            Assert.NotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldSucceedWithMoreThanOneParentsWhenCorrectParentSpecified()
         {
             var globals = mocks.Get<Globals>();
@@ -66,20 +64,20 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("my-head"))
                 .Return(new[] { ChangesetForRemote("ok-choice"), ChangesetForRemote("good-choice") });
 
-            Assert.AreEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
+            Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldSucceedForOneArgument()
         {
             mocks.Get<IGitRepository>().Stub(x => x.ReadTfsRemote(null)).IgnoreArguments().Return(mocks.Get<IGitTfsRemote>());
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits(null)).IgnoreArguments()
                 .Return(new[] {new TfsChangesetInfo {Remote = mocks.Get<IGitTfsRemote>()}});
 
-            Assert.AreEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care"));
+            Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldAskForCorrectParent()
         {
             var remote = mocks.Get<IGitTfsRemote>();
@@ -90,7 +88,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.ClassUnderTest.Run("shelveset name", "commit_to_shelve");
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldTellRemoteToShelve()
         {
             var remote = mocks.Get<IGitTfsRemote>();
@@ -104,7 +102,7 @@ namespace Sep.Git.Tfs.Test.Commands
                                    y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("HEAD"), Is.Anything(), Is.Anything()));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldTellRemoteToShelveTreeish()
         {
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
@@ -119,17 +117,17 @@ namespace Sep.Git.Tfs.Test.Commands
                                    y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("treeish"), Is.Anything(), Is.Anything()));
         }
 
-        [TestMethod]
+        [Fact]
         public void FailureCodeWhenShelvesetExists()
         {
             WireUpMockRemote();
             CreateShelveset("shelveset name");
 
             var exitCode = mocks.ClassUnderTest.Run("shelveset name", "treeish");
-            Assert.AreEqual(GitTfsExitCodes.ForceRequired, exitCode);
+            Assert.Equal(GitTfsExitCodes.ForceRequired, exitCode);
         }
 
-        [TestMethod]
+        [Fact]
         public void DoesNotTryToShelveIfShelvesetExists()
         {
             WireUpMockRemote();
@@ -141,7 +139,7 @@ namespace Sep.Git.Tfs.Test.Commands
                 x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything, Arg<bool>.Is.Anything));
         }
 
-        [TestMethod]
+        [Fact]
         public void DoesNotStopIfForceIsSpecified()
         {
             mocks.Get<CheckinOptions>().Force = true;

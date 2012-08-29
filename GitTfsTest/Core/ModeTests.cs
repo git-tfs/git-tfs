@@ -2,37 +2,36 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sep.Git.Tfs.Core;
 using LibGit2Sharp;
+using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    [TestClass]
     public class ModeTests
     {
-        [TestMethod]
+        [Fact]
         public void ShouldGetNewFileMode()
         {
-            Assert.AreEqual("100644", Sep.Git.Tfs.Core.Mode.NewFile);
+            Assert.Equal("100644", Sep.Git.Tfs.Core.Mode.NewFile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldFormatDirectoryFileMode()
         {
-            Assert.AreEqual("040000", LibGit2Sharp.Mode.Directory.ToModeString());
+            Assert.Equal("040000", LibGit2Sharp.Mode.Directory.ToModeString());
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldDetectGitLink()
         {
-            Assert.AreEqual(LibGit2Sharp.Mode.GitLink, "160000".ToFileMode());
+            Assert.Equal(LibGit2Sharp.Mode.GitLink, "160000".ToFileMode());
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldDetectGitLinkWithEqualityBackwards()
         {
-            Assert.AreEqual("160000".ToFileMode(), LibGit2Sharp.Mode.GitLink);
+            Assert.Equal("160000".ToFileMode(), LibGit2Sharp.Mode.GitLink);
         }
     }
 }

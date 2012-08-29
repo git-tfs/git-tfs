@@ -1,35 +1,32 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Xunit;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
     //NOTE: All timestamps in these tests must specify a time zone. If they don't, the local time zone will be used in the DateTime,
     //      but the commit timestamp will use the ToUniversalTime() version of the DateTime.
     //      This will cause the hashes to differ on computers in different time zones.
-    [TestClass]
-    public class CloneTests
+    public class CloneTests : IDisposable
     {
         IntegrationHelper h;
 
-        [TestInitialize]
-        public void Setup()
+        public CloneTests()
         {
             h = new IntegrationHelper();
         }
 
-        [TestCleanup]
-        public void Teardown()
+        public void Dispose()
         {
             h.Dispose();
         }
 
-        [TestMethod, Ignore]
+        [Fact(Skip="eventually")]
         public void FailOnNoProject()
         {
         }
 
-        [TestMethod, Ignore]
+        [Fact(Skip="eventually")]
         public void ClonesEmptyProject()
         {
             h.SetupFake(r =>
@@ -46,7 +43,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertEmptyWorkspace("MyProject");
         }
 
-        [TestMethod]
+        [Fact]
         public void CloneProjectWithChangesets()
         {
             h.SetupFake(r =>
@@ -68,7 +65,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
         }
 
-        [TestMethod]
+        [Fact]
         public void CloneProjectWithInternationalCharactersInFileNamesAndFolderNames()
         {
             h.SetupFake(r =>
@@ -85,7 +82,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "ÆØÅ/äöü.txt", "File contents");
         }
 
-        [TestMethod]
+        [Fact]
         public void CloneProjectWithInternationalCharactersInFileContents()
         {
             h.SetupFake(r =>
@@ -102,7 +99,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "Blåbærsyltetøy er godt!");
         }
 
-        [TestMethod]
+        [Fact]
         public void CloneProjectWithInternationalCharactersInCommitMessages()
         {
             h.SetupFake(r =>
@@ -126,8 +123,8 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertRef("MyProject", "tfs/default", expectedSha);
         }
 
-        [TestMethod]
-        public void CloneWithtMixedUpCase()
+        [Fact]
+        public void CloneWithMixedUpCase()
         {
             h.SetupFake(r =>
             {

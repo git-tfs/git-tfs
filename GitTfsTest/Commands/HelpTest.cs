@@ -1,30 +1,28 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Test.TestHelpers;
 using StructureMap.AutoMocking;
 using NDesk.Options;
+using Xunit;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
-    [TestClass]
     public class HelpTest
     {
         private StringWriter outputWriter;
         private RhinoAutoMocker<Help> mocks;
 
-        [TestInitialize]
-        public void Setup()
+        public HelpTest()
         {
             outputWriter = new StringWriter();
             mocks = new RhinoAutoMocker<Help>(MockMode.AAA);
             mocks.Inject<TextWriter>(outputWriter);
         }
 
-        [TestMethod, Ignore /* doesn't pass on build server because rhino mocks can't be loaded. test run config problem? */]
+        [Fact(Skip="Not sure why this doesn't work.")]
         public void ShouldWriteGeneralHelp()
         {
             mocks.ClassUnderTest.Run(new string[0]);
@@ -34,7 +32,7 @@ namespace Sep.Git.Tfs.Test.Commands
             output.TrimEnd().AssertEndsWith(" (use 'git-tfs help [command]' for more information)");
         }
 
-        [TestMethod, Ignore /* mock registration doesn't work right */]
+        [Fact(Skip = "Not sure why this doesn't work.")]
         public void ShouldWriteCommandHelp()
         {
             mocks.Container.PluginGraph.CreateFamily(typeof (GitTfsCommand));
@@ -44,7 +42,7 @@ namespace Sep.Git.Tfs.Test.Commands
 
             var output = outputWriter.GetStringBuilder().ToString();
             output = Regex.Replace(output, "\r\n?|\n", "~");
-            Assert.AreEqual("abc", output);
+            Assert.Equal("abc", output);
         }
 
         public class TestCommand : GitTfsCommand
