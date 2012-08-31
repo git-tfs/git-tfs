@@ -146,6 +146,7 @@
     <Compile Include="Core\TfsInterop\ICheckinNote.cs" />
     <Compile Include="Core\TfsInterop\IVersionControlServer.cs" />
     <Compile Include="Core\TfsInterop\IWorkItemCheckedInfo.cs" />
+    <Compile Include="Core\TfsInterop\TfsApiBridge.cs" />
     <Compile Include="Core\TfsInterop\TfsChangeType.cs" />
     <Compile Include="Core\TfsInterop\TfsCheckinEvaluationOptions.cs" />
     <Compile Include="Core\TfsInterop\TfsExt.cs" />

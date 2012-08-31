@@ -62,9 +62,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\GitTfs.VsCommon\TfsApiBridge.cs">
-      <Link>TfsApiBridge.cs</Link>
-    </Compile>
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Common.cs">
       <Link>TfsHelper.Common.cs</Link>
     </Compile>
