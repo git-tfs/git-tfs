@@ -204,9 +204,6 @@
     <Compile Include="Util\TemporaryFileStream.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="GitVersionInfo" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="App.config" />
     <None Include="Core\TfsInterop\README.txt" />
   </ItemGroup>
@@ -247,8 +244,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>xcopy /Y "$(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries\$(PlatformName)\*.*" "$(ProjectDir)"
-"$(ProjectDir)..\GetCurrentVersion" "$(GitPath)" &gt; "$(ProjectDir)GitVersionInfo"</PreBuildEvent>
+    <PreBuildEvent>xcopy /Y "$(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries\$(PlatformName)\*.*" "$(ProjectDir)"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>
