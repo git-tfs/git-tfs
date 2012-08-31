@@ -12,7 +12,7 @@ namespace Sep.Git.Tfs.Test.Util
     public class AuthorsFileUnitTest
     {
         [Fact]
-        public void TestEmptyFile()
+        public void AuthorsFileEmptyFile()
         {
             MemoryStream ms = new MemoryStream();
             StreamReader sr = new StreamReader(ms);
@@ -23,7 +23,7 @@ namespace Sep.Git.Tfs.Test.Util
         }
 
         [Fact]
-        public void TestSimpleRecord()
+        public void AuthorsFileSimpleRecord()
         {
             string author = @"Domain\Test.User = Test User <TestUser@example.com>";
             AuthorsFile authFile = new AuthorsFile();
@@ -37,7 +37,7 @@ namespace Sep.Git.Tfs.Test.Util
         }
 
         [Fact]
-        public void TestCaseInsensitiveRecord()
+        public void AuthorsFileCaseInsensitiveRecord()
         {
             string author = @"DOMAIN\Test.User = Test User <TestUser@example.com>";
             AuthorsFile authFile = new AuthorsFile();
@@ -51,7 +51,7 @@ namespace Sep.Git.Tfs.Test.Util
         }
 
         [Fact]
-        public void TestMultiLineRecord()
+        public void AuthorsFileMultiLineRecord()
         {
             string author = 
 @"Domain\Test.User = Test User <TestUser@example.com>
@@ -73,7 +73,7 @@ Domain\Different.User = Three Name User < TestUser@example.com >";
         }
 
         [Fact]
-        public void TestMultiLineRecordWithBlankLine()
+        public void AuthorsFileMultiLineRecordWithBlankLine()
         {
             string author =
 @"Domain\Test.User = Test User <TestUser@example.com>
@@ -84,12 +84,88 @@ Domain\Different.User = Three Name User < TestUser@example.com >";
         }
 
         [Fact]
-        public void TestBadRecord()
+        public void AuthorsFileTestBadRecord()
         {
             string author =
 @"Domain\Test.User = Test User";
             AuthorsFile authFile = new AuthorsFile();
             Assert.Throws<GitTfsException>(() => authFile.Parse(new StreamReader(new MemoryStream(Encoding.ASCII.GetBytes(author)))));
+        }
+
+        [Fact]
+        public void AuthorsFileCommentCharacterStartOfLine()
+        {
+            string author =
+@"Domain\Test.User = Test User <TestUser@example.com>
+#Domain\Different.User = Three Name User < TestUser@example.com >";
+            AuthorsFile authFile = new AuthorsFile();
+            authFile.Parse(new StreamReader(new MemoryStream(Encoding.ASCII.GetBytes(author))));
+            Assert.NotNull(authFile.Authors);
+            Assert.Equal<int>(1, authFile.Authors.Count);
+
+            Assert.True(authFile.Authors.ContainsKey(@"Domain\Test.User"));
+            Assert.False(authFile.Authors.ContainsKey(@"Domain\Different.User"));
+        }
+
+        [Fact]
+        public void AuthorsFileCommentCharacterMiddleOfLine()
+        {
+            string author =
+@"Domain\Test.User = Test User <TestUser@example.com>
+D#omain\Different.User = Three Name User < TestUser@example.com >";
+            AuthorsFile authFile = new AuthorsFile();
+            authFile.Parse(new StreamReader(new MemoryStream(Encoding.ASCII.GetBytes(author))));
+            Assert.NotNull(authFile.Authors);
+            Assert.Equal<int>(2, authFile.Authors.Count);
+
+            Assert.True(authFile.Authors.ContainsKey(@"Domain\Test.User"));
+            Assert.True(authFile.Authors.ContainsKey(@"D#omain\Different.User"));
+        }
+
+        [Fact]
+        public void AuthorsFileInternationalCharacters()
+        {
+            string author = @"DOMAIN\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
+            AuthorsFile authFile = new AuthorsFile();
+            authFile.Parse(new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(author))));
+            Assert.NotNull(authFile.Authors);
+            Assert.Equal<int>(1, authFile.Authors.Count);
+            Assert.True(authFile.Authors.ContainsKey(@"domain\Blåbærsyltetøy"));
+            Author auth = authFile.Authors[@"domain\Blåbærsyltetøy"];
+            Assert.Equal<string>("ÆØÅ User", auth.Name);
+            Assert.Equal<string>("ÆØÅ@example.com", auth.Email);
+        }
+
+        [Fact]
+        public void AuthorsFileInternationalCharactersMultiLine()
+        {
+            string author = @"DOMAIN\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>
+differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
+            AuthorsFile authFile = new AuthorsFile();
+            authFile.Parse(new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(author))));
+            Assert.NotNull(authFile.Authors);
+            Assert.Equal<int>(2, authFile.Authors.Count);
+            Assert.True(authFile.Authors.ContainsKey(@"domain\Blåbærsyltetøy"));
+            Author auth = authFile.Authors[@"domain\Blåbærsyltetøy"];
+            Assert.Equal<string>("ÆØÅ User", auth.Name);
+            Assert.Equal<string>("ÆØÅ@example.com", auth.Email);
+
+            Assert.True(authFile.Authors.ContainsKey(@"differentDomain\Blåbærsyltetøy"));
+            auth = authFile.Authors[@"differentDomain\Blåbærsyltetøy"];
+            Assert.Equal<string>("ÆØÅ User", auth.Name);
+            Assert.Equal<string>("ÆØÅ@example.com", auth.Email);
+        }
+
+        [Fact]
+        public void AuthorsFileInternationalCharactersCommented()
+        {
+            string author = @"DOMAIN\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>
+#DifferentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
+            AuthorsFile authFile = new AuthorsFile();
+            authFile.Parse(new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(author))));
+            Assert.NotNull(authFile.Authors);
+            Assert.Equal<int>(1, authFile.Authors.Count);
+            Assert.True(authFile.Authors.ContainsKey(@"domain\Blåbærsyltetøy"));
         }
     }
 }
