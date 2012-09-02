@@ -244,7 +244,8 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>xcopy /Y "$(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries\$(PlatformName)\*.*" "$(ProjectDir)"</PreBuildEvent>
+    <PreBuildEvent Condition="'$(OS)' == 'Windows_NT'">xcopy /Y "$(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries\$(PlatformName)\*.*" "$(ProjectDir)"</PreBuildEvent>
+    <PreBuildEvent Condition="'$(OS)' != 'Windows_NT'">cp "$(SolutionDir)/lib/libgit2sharp/Lib/NativeBinaries/$(PlatformName)/"* "$(ProjectDir)"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>
