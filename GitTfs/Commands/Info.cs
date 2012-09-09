@@ -14,23 +14,12 @@ namespace Sep.Git.Tfs.Commands
     {
         Globals globals;
         TextWriter stdout;
-        IGitHelpers githelpers;
-        IHelpHelper help;
         IGitTfsVersionProvider versionProvider;
 
-        /// <summary>
-        /// Initializes a new instance of the Info class.
-        /// </summary>
-        /// <param name="globals"></param>
-        /// <param name="stdout"></param>
-        /// <param name="githelpers"></param>
-        /// <param name="help"></param>
-        public Info(Globals globals, TextWriter stdout, IGitHelpers githelpers, IHelpHelper help, IGitTfsVersionProvider versionProvider)
+        public Info(Globals globals, TextWriter stdout, IGitTfsVersionProvider versionProvider)
         {
             this.globals = globals;
             this.stdout = stdout;
-            this.githelpers = githelpers;
-            this.help = help;
             this.versionProvider = versionProvider;
         }
 
