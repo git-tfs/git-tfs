@@ -1,13 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
-using StructureMap;
-using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Util;
+using StructureMap;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -17,7 +14,7 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly TextWriter _stdout;
         private readonly CheckinOptions _checkinOptions;
-        private readonly CheckinOptionsHelper _checkinOptionsHelper;
+        private readonly CommitSpecificCheckinOptionsFactory _checkinOptionsFactory;
         private readonly TfsWriter _writer;
 
         private bool Quick { get; set; }
@@ -26,7 +23,7 @@ namespace Sep.Git.Tfs.Commands
         {
             _stdout = stdout;
             _checkinOptions = checkinOptions;
-            _checkinOptionsHelper = new CheckinOptionsHelper(_stdout);
+            _checkinOptionsFactory = new CommitSpecificCheckinOptionsFactory(_stdout);
             _writer = writer;
         }
 
@@ -78,7 +75,7 @@ namespace Sep.Git.Tfs.Commands
             if (Quick)
             {
                 string[] revList = null;
-                repo.CommandOutputPipe(tr => revList = tr.ReadToEnd().Split('\n').Where(s => !String.IsNullOrWhiteSpace(s)).ToArray(), 
+                repo.CommandOutputPipe(tr => revList = tr.ReadToEnd().Split('\n').Where(s => !String.IsNullOrWhiteSpace(s)).ToArray(),
                     "rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + "..HEAD");
 
                 string currentParent = tfsLatest;
@@ -89,18 +86,17 @@ namespace Sep.Git.Tfs.Commands
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != currentParent).ToArray();
 
                     string commitMessage = repo.GetCommitMessage(target, currentParent).Trim(' ', '\r', '\n');
-                    using (var caretaker = _checkinOptionsHelper.UpdateCheckinOptionsForThisCommit(_checkinOptions, commitMessage))
-                    {
-                        _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), _checkinOptions.CheckinComment);
-                        long newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset);
-                        tfsRemote.FetchWithMerge(newChangesetId, gitParents);
-                        if (tfsRemote.MaxChangesetId != newChangesetId)
-                            throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
+                    var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, commitMessage);
 
-                        currentParent = target;
-                        parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote };
-                        _stdout.WriteLine("Done with {0}.", target);
-                    }
+                    _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
+                    long newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions);
+                    tfsRemote.FetchWithMerge(newChangesetId, gitParents);
+                    if (tfsRemote.MaxChangesetId != newChangesetId)
+                        throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
+
+                    currentParent = target;
+                    parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote };
+                    _stdout.WriteLine("Done with {0}.", target);
                 }
 
                 _stdout.WriteLine("No more to rcheckin.");
@@ -123,27 +119,19 @@ namespace Sep.Git.Tfs.Commands
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != tfsLatest).ToArray();
 
                     string commitMessage = repo.GetCommitMessage(target, tfsLatest).Trim(' ', '\r', '\n');
-                    using (var caretaker = _checkinOptionsHelper.UpdateCheckinOptionsForThisCommit(_checkinOptions, commitMessage))
-                    {
-                        _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), _checkinOptions.CheckinComment);
-                        long newChangesetId = tfsRemote.Checkin(target, parentChangeset);
-                        tfsRemote.FetchWithMerge(newChangesetId, gitParents);
-                        if (tfsRemote.MaxChangesetId != newChangesetId)
-                            throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
+                    var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, commitMessage);
+                    _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
+                    long newChangesetId = tfsRemote.Checkin(target, parentChangeset, commitSpecificCheckinOptions);
+                    tfsRemote.FetchWithMerge(newChangesetId, gitParents);
+                    if (tfsRemote.MaxChangesetId != newChangesetId)
+                        throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
 
                     tfsLatest = tfsRemote.MaxCommitHash;
                     parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote };
                     _stdout.WriteLine("Done with {0}, rebasing tail onto new TFS-commit...", target);
-                    tfsLatest = tfsRemote.MaxCommitHash;
-                    parentChangeset = new TfsChangesetInfo {ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote};
-                    _stdout.WriteLine("Done with {0}, rebasing tail onto new TFS-commit...", target);
-                        tfsLatest = tfsRemote.MaxCommitHash;
-                        parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote };
-                        _stdout.WriteLine("Done with {0}, rebasing tail onto new TFS-commit...", target);
 
-                        repo.CommandNoisy("rebase", "--preserve-merges", "--onto", tfsLatest, target);
-                        _stdout.WriteLine("Rebase done successfully.");
-                    }
+                    repo.CommandNoisy("rebase", "--preserve-merges", "--onto", tfsLatest, target);
+                    _stdout.WriteLine("Rebase done successfully.");
                 }
             }
         }

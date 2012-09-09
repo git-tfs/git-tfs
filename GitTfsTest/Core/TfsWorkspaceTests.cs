@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             var ex = Assert.Throws<GitTfsException>(() =>
             {
-                var result = tfsWorkspace.Checkin();
+                var result = tfsWorkspace.Checkin(checkinOptions);
             });
 
             Assert.Equal("Nothing to checkin!", ex.Message);
@@ -76,7 +76,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             var ex = Assert.Throws<GitTfsException>(() =>
             {
-                var result = tfsWorkspace.Checkin();
+                var result = tfsWorkspace.Checkin(checkinOptions);
             });
 
             Assert.Equal("Checkin failed!", ex.Message);
@@ -124,7 +124,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             var ex = Assert.Throws<GitTfsException>(() =>
             {
-                var result = tfsWorkspace.Checkin();
+                var result = tfsWorkspace.Checkin(checkinOptions);
             });
 
             Assert.Equal("No changes checked in.", ex.Message);
@@ -175,7 +175,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             var ex = Assert.Throws<GitTfsException>(() =>
             {
-                var result = tfsWorkspace.Checkin();
+                var result = tfsWorkspace.Checkin(checkinOptions);
             });
 
             Assert.Equal("A reason must be supplied (-f REASON) to override the policy violations.", ex.Message);
@@ -225,7 +225,7 @@ namespace Sep.Git.Tfs.Test.Core
                                     Arg<bool>.Is.Anything))
                       .Return(1);
 
-            var result = tfsWorkspace.Checkin();
+            var result = tfsWorkspace.Checkin(checkinOptions);
 
             Assert.Contains("[OVERRIDDEN] Policy: No work items associated.", writer.ToString());
         }
