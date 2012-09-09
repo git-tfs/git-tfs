@@ -27,16 +27,42 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
-            stdout.WriteLine(versionProvider.GetVersionString());
+            DescribeGit();
 
-            var changeset = globals.Repository.GetLastParentTfsCommits("HEAD").FirstOr(null);
+            DescribeGitTfs();
 
-            if (changeset != null)
+            var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
+            foreach (var remote in tfsRemotes)
             {
-                stdout.WriteLine("remote tfs id '{0}' maps to {1} {2}", globals.RemoteId, changeset.Remote.TfsUrl, changeset.Remote.TfsRepositoryPath);
+                DescribeTfsRemotes(remote);
             }
 
             return GitTfsExitCodes.OK;
+        }
+
+        private void DescribeGit()
+        {
+            // add a line of whitespace to improve readability
+            stdout.WriteLine();
+
+            // show git version
+            globals.Repository.CommandOutputPipe(reader => stdout.Write(reader.ReadToEnd()), "--version");
+        }
+
+        private void DescribeGitTfs()
+        {
+            // add a line of whitespace to improve readability
+            stdout.WriteLine();
+            stdout.WriteLine(versionProvider.GetVersionString());
+            stdout.WriteLine(" " + versionProvider.GetPathToGitTfsExecutable());
+        }
+
+        private void DescribeTfsRemotes(IGitTfsRemote remote)
+        {
+            // add a line of whitespace to improve readability
+            stdout.WriteLine();
+            stdout.WriteLine("remote tfs id: '{0}' {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
+            stdout.WriteLine("               {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
         }
     }
 }

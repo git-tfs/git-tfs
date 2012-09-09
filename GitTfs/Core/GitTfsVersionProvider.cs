@@ -18,41 +18,15 @@ namespace Sep.Git.Tfs.Core
 
         public string GetVersionString()
         {
-            var versionString = "git-tfs version";
-            versionString += " " + GetType().Assembly.GetName().Version;
-            versionString += GetGitCommitForVersionString();
-            versionString += " (TFS client library " + tfsHelper.TfsClientLibraryVersion + ")";
-            versionString += " (" + (Environment.Is64BitProcess ? "64-bit" : "32-bit") + ")";
-            versionString += Environment.NewLine + " " + Assembly.GetExecutingAssembly().Location;
-            return versionString;
+            return string.Format("git-tfs version {0} (TFS client library {1}) ({2}-bit)", 
+                       GetType().Assembly.GetName().Version, 
+                       tfsHelper.TfsClientLibraryVersion, 
+                       (Environment.Is64BitProcess ? "64" : "32"));
         }
 
-        private string GetGitCommitForVersionString()
+        public string GetPathToGitTfsExecutable()
         {
-            try
-            {
-                return " (" + GetGitCommit().Substring(0, 8) + ")";
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine("Unable to get git version: " + e);
-                return "";
-            }
-        }
-
-        private string GetGitCommit()
-        {
-            var gitTfsAssembly = GetType().Assembly;
-            using (var head = gitTfsAssembly.GetManifestResourceStream("Sep.Git.Tfs.GitVersionInfo"))
-            {
-                var commitRegex = new Regex(@"commit (?<sha>[a-f0-9]{8})", RegexOptions.IgnoreCase);
-                return commitRegex.Match(ReadAllText(head)).Groups["sha"].Value;
-            }
-        }
-
-        private string ReadAllText(Stream stream)
-        {
-            return new StreamReader(stream).ReadToEnd().Trim();
+            return Assembly.GetExecutingAssembly().Location;
         }
     }
 }
