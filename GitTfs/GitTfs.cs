@@ -94,12 +94,12 @@ namespace Sep.Git.Tfs
             {
                 if (_globals.GitDirSetByUser)
                 {
-                    throw new Exception("GIT_DIR=" + _globals.GitDir + " explicitly set, but it is not a directory.");
+                    throw new Exception("This command must be run inside a git repository!\nGIT_DIR=" + _globals.GitDir + " explicitly set, but it is not a directory.");
                 }
                 var gitDir = _globals.GitDir;
                 _globals.GitDir = null;
                 string cdUp = null;
-                git.WrapGitCommandErrors("Already at toplevel, but " + gitDir + " not found.",
+                git.WrapGitCommandErrors("This command must be run inside a git repository!\nAlready at top level, but " + gitDir + " not found.",
                                          () =>
                                              {
                                                  cdUp = git.CommandOneline("rev-parse", "--show-cdup");
@@ -113,7 +113,7 @@ namespace Sep.Git.Tfs
                 Environment.CurrentDirectory = cdUp;
                 if (!Directory.Exists(gitDir))
                 {
-                    throw new Exception(gitDir + " still not found after going to " + cdUp);
+                    throw new Exception("This command must be run inside a git repository!\n" + gitDir + " still not found after going to " + cdUp);
                 }
                 _globals.GitDir = gitDir;
             }
