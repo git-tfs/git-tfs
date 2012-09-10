@@ -14,6 +14,7 @@ namespace Sep.Git.Tfs
 {
     public class GitTfs
     {
+        private IGitTfsVersionProvider _gitTfsVersionProvider;
         private ITfsHelper tfsHelper;
         private GitTfsCommandFactory commandFactory;
         private readonly IHelpHelper _help;
@@ -21,12 +22,13 @@ namespace Sep.Git.Tfs
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
 
-        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, GitTfsCommandRunner runner, Globals globals)
+        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
             _help = help;
             _container = container;
+            _gitTfsVersionProvider = gitTfsVersionProvider;
             _runner = runner;
             _globals = globals;
         }
@@ -48,7 +50,7 @@ namespace Sep.Git.Tfs
             }
             else if(_globals.ShowVersion)
             {
-                _container.GetInstance<TextWriter>().WriteLine(MakeVersionString());
+                _container.GetInstance<TextWriter>().WriteLine(_gitTfsVersionProvider.GetVersionString());
                 Environment.ExitCode = GitTfsExitCodes.OK;
             }
             else
@@ -56,15 +58,6 @@ namespace Sep.Git.Tfs
                 Environment.ExitCode = _runner.Run(command, unparsedArgs);
                 //PostFetchCheckout();
             }
-        }
-
-        private string MakeVersionString()
-        {
-            var versionString = "git-tfs version";
-            versionString += " " + GetType().Assembly.GetName().Version;
-            versionString += " (TFS client library " + tfsHelper.TfsClientLibraryVersion + ")";
-            versionString += " (" + (Environment.Is64BitProcess ? "64-bit" : "32-bit") + ")";
-            return versionString;
         }
 
         public bool RequiresValidGitRepository(GitTfsCommand command)

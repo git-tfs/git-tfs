@@ -1,4 +1,5 @@
 using System;
+using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -11,7 +12,7 @@ namespace Sep.Git.Tfs.Core
         /// <summary>
         /// Evaluates check-in policies and checks in all pending changes.
         /// </summary>
-        long Checkin();
+        long Checkin(CheckinOptions checkinOptions);
 
         string GetLocalPath(string path);
         void Add(string path);

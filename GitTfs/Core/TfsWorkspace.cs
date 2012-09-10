@@ -40,9 +40,9 @@ namespace Sep.Git.Tfs.Core
             var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
             shelveset.Comment = string.IsNullOrWhiteSpace(_checkinOptions.CheckinComment) && !_checkinOptions.NoGenerateCheckinComment ? generateCheckinComment() : _checkinOptions.CheckinComment;
             shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
-            if(evaluateCheckinPolicies)
+            if (evaluateCheckinPolicies)
             {
-                foreach(var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, shelveset.WorkItemInfo).Messages)
+                foreach (var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, shelveset.WorkItemInfo).Messages)
                 {
                     _stdout.WriteLine("[Checkin Policy] " + message);
                 }
@@ -62,39 +62,48 @@ namespace Sep.Git.Tfs.Core
                 checkinComment = generateCheckinComment();
 
             var newChangesetId = _tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), checkinComment);
-            if(newChangesetId <= 0)
+            if (newChangesetId <= 0)
                 throw new GitTfsException("Checkin cancelled!");
             return newChangesetId;
         }
 
-        public long Checkin()
+        public long Checkin(CheckinOptions options)
         {
+            if (options == null) options = _checkinOptions;
+
             var pendingChanges = _workspace.GetPendingChanges();
 
-            if(pendingChanges.IsEmpty())
+            if (pendingChanges.IsEmpty())
                 throw new GitTfsException("Nothing to checkin!");
 
             var workItemInfos = GetWorkItemInfos();
-            var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, _checkinOptions.CheckinComment, workItemInfos);
-            if(checkinProblems.HasErrors)
+            var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, options.CheckinComment, workItemInfos);
+            if (checkinProblems.HasErrors)
             {
                 foreach (var message in checkinProblems.Messages)
                 {
-                    _stdout.WriteLine("[ERROR] " + message);
+                    if (options.Force && string.IsNullOrWhiteSpace(options.OverrideReason) == false)
+                    {
+                        _stdout.WriteLine("[OVERRIDDEN] " + message);
+                    }
+                    else
+                    {
+                        _stdout.WriteLine("[ERROR] " + message);
+                    }
                 }
-                if(!_checkinOptions.Force)
+                if (!options.Force)
                 {
                     throw new GitTfsException("No changes checked in.");
                 }
-                if (String.IsNullOrWhiteSpace(_checkinOptions.OverrideReason))
+                if (String.IsNullOrWhiteSpace(options.OverrideReason))
                 {
                     throw new GitTfsException("A reason must be supplied (-f REASON) to override the policy violations.");
                 }
             }
 
-            var policyOverride = GetPolicyOverrides(checkinProblems.Result);
-            var newChangeset = _workspace.Checkin(pendingChanges, _checkinOptions.CheckinComment, null, workItemInfos, policyOverride, _checkinOptions.OverrideGatedCheckIn);
-            if(newChangeset == 0)
+            var policyOverride = GetPolicyOverrides(options, checkinProblems.Result);
+            var newChangeset = _workspace.Checkin(pendingChanges, options.CheckinComment, null, workItemInfos, policyOverride, options.OverrideGatedCheckIn);
+            if (newChangeset == 0)
             {
                 throw new GitTfsException("Checkin failed!");
             }
@@ -104,12 +113,11 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private TfsPolicyOverrideInfo GetPolicyOverrides(ICheckinEvaluationResult checkinProblems)
+        private TfsPolicyOverrideInfo GetPolicyOverrides(CheckinOptions options, ICheckinEvaluationResult checkinProblems)
         {
-            if (!_checkinOptions.Force || String.IsNullOrWhiteSpace(_checkinOptions.OverrideReason))
+            if (!options.Force || String.IsNullOrWhiteSpace(options.OverrideReason))
                 return null;
-            return new TfsPolicyOverrideInfo
-                       {Comment = _checkinOptions.OverrideReason, Failures = checkinProblems.PolicyFailures};
+            return new TfsPolicyOverrideInfo { Comment = options.OverrideReason, Failures = checkinProblems.PolicyFailures };
         }
 
         public string GetLocalPath(string path)
@@ -129,7 +137,7 @@ namespace Sep.Git.Tfs.Core
             _stdout.WriteLine(" edit " + path);
             GetFromTfs(path);
             var edited = _workspace.PendEdit(GetLocalPath(path));
-            if(edited != 1) throw new Exception("One item should have been edited, but actually edited " + edited + " items.");
+            if (edited != 1) throw new Exception("One item should have been edited, but actually edited " + edited + " items.");
         }
 
         public void Delete(string path)
@@ -150,7 +158,7 @@ namespace Sep.Git.Tfs.Core
 
         private void GetFromTfs(string path)
         {
-            _workspace.ForceGetFile(_remote.TfsRepositoryPath + "/" + path, (int) _contextVersion.ChangesetId);
+            _workspace.ForceGetFile(_remote.TfsRepositoryPath + "/" + path, (int)_contextVersion.ChangesetId);
         }
 
         private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos()
