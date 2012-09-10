@@ -108,6 +108,7 @@
     <Compile Include="Commands\CheckinTool.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
     <Compile Include="Commands\CheckinBase.cs" />
+    <Compile Include="Commands\Info.cs" />
     <Compile Include="Commands\Cleanup.cs" />
     <Compile Include="Commands\CleanupOptions.cs" />
     <Compile Include="Commands\CleanupWorkspaces.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Commands\Shelve.cs" />
     <Compile Include="Commands\Verify.cs" />
     <Compile Include="Commands\Unshelve.cs" />
+    <Compile Include="Commands\Version.cs" />
     <Compile Include="Core\Changes\Git\Add.cs" />
     <Compile Include="Core\Changes\Git\Delete.cs" />
     <Compile Include="Core\Changes\Git\Modify.cs" />
@@ -171,9 +173,12 @@
     <Compile Include="Core\TfsWriter.cs" />
     <Compile Include="Core\GitTfsException.cs" />
     <Compile Include="Util\AuthorsFile.cs" />
+    <Compile Include="Util\CommitSpecificCheckinOptionsFactory.cs" />
+    <Compile Include="Core\GitTfsVersionProvider.cs" />
     <Compile Include="Util\ExceptionFormattingExtensions.cs" />
     <Compile Include="Util\GitTfsCommandFactory.cs" />
     <Compile Include="Util\GitTfsCommandRunner.cs" />
+    <Compile Include="Core\IGitTfsVersionProvider.cs" />
     <Compile Include="Util\TemporaryFile.cs" />
     <Compile Include="Util\WhenDynamicDoesntWork.cs" />
     <Compile Include="Util\PluggableWithAliases.cs" />

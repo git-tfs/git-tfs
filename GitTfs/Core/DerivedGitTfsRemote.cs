@@ -1,5 +1,6 @@
 ﻿using System;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -191,12 +192,12 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public long Checkin(string treeish, TfsChangesetInfo parentChangeset)
+        public long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset)
+        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             throw new NotImplementedException();
         }

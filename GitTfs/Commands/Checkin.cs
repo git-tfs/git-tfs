@@ -10,13 +10,14 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Checkin : CheckinBase
     {
-        public Checkin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer) : base (stdout, checkinOptions, writer)
+        public Checkin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
+            : base(stdout, checkinOptions, writer)
         {
         }
 
         protected override long DoCheckin(TfsChangesetInfo changeset, string refToCheckin)
         {
-            return changeset.Remote.Checkin(refToCheckin, changeset);
+            return changeset.Remote.Checkin(refToCheckin, changeset, _checkinOptions);
         }
     }
 }
