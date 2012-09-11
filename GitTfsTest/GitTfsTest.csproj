@@ -91,6 +91,7 @@
     <Compile Include="Core\DelimitedReaderTests.cs" />
     <Compile Include="Core\ExtTests.cs" />
     <Compile Include="Core\GitChangeInfoTests.cs" />
+    <Compile Include="Core\RemoteConfigReaderTests.cs" />
     <Compile Include="Core\ModeTests.cs" />
     <Compile Include="Core\TfsApiBridgeTest.cs" />
     <Compile Include="GitTfsRegexTests.cs" />

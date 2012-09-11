@@ -18,14 +18,16 @@ namespace Sep.Git.Tfs.Core
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
+        private RemoteConfigReader _remoteConfigReader;
 
-        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals)
+        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals, RemoteConfigReader remoteConfigReader)
             : base(stdout, container)
         {
             _container = container;
             _globals = globals;
             GitDir = gitDir;
             _repository = new LibGit2Sharp.Repository(GitDir);
+            _remoteConfigReader = remoteConfigReader;
         }
 
         ~GitRepository()
@@ -94,9 +96,8 @@ namespace Sep.Git.Tfs.Core
 
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
         {
-            var remotes = new Dictionary<string, IGitTfsRemote>();
-            CommandOutputPipe(stdout => ParseRemoteConfig(stdout, remotes), "config", "--list");
-            return remotes;
+            _repository.Config.Set("tfs.touch", "1"); // reload configuration, because `git tfs init` and `git tfs clone` use Process.Start to update the config, so _repository's copy is out of date.
+            return _remoteConfigReader.Load(_repository.Config).Select(x => _container.With(x).With<IGitRepository>(this).GetInstance<IGitTfsRemote>()).ToDictionary(x => x.Id);
         }
 
         public bool HasRemote(string remoteId)
@@ -148,78 +149,6 @@ namespace Sep.Git.Tfs.Core
         private void SetTfsConfig(string remoteId, string subkey, object value)
         {
             this.SetConfig(_globals.RemoteConfigKey(remoteId, subkey), value);
-        }
-
-        private void ParseRemoteConfig(TextReader stdout, IDictionary<string, IGitTfsRemote> remotes)
-        {
-            string line;
-            while ((line = stdout.ReadLine()) != null)
-            {
-                TryParseRemoteConfigLine(line, remotes);
-            }
-            foreach (var gitTfsRemotePair in remotes)
-            {
-                var remote = gitTfsRemotePair.Value;
-                remote.EnsureTfsAuthenticated();
-            }
-        }
-
-        private void TryParseRemoteConfigLine(string line, IDictionary<string, IGitTfsRemote> remotes)
-        {
-            var match = configLineRegex.Match(line);
-            if (match.Success)
-            {
-                var key = match.Groups["key"].Value;
-                var value = match.Groups["value"].Value;
-                var remoteId = match.Groups["id"].Value;
-                var remote = remotes.ContainsKey(remoteId)
-                                 ? remotes[remoteId]
-                                 : (remotes[remoteId] = BuildRemote(remoteId));
-                try
-                {
-                    SetRemoteConfigValue(remote, key, value);
-                }
-                catch(Exception e)
-                {
-                    throw new GitTfsException("Malformed value for " + key + ": " + value, e);
-                }
-            }
-        }
-
-        private IGitTfsRemote BuildRemote(string id)
-        {
-            var remote = _container.GetInstance<IGitTfsRemote>();
-            remote.Repository = this;
-            remote.Id = id;
-            return remote;
-        }
-
-        private void SetRemoteConfigValue(IGitTfsRemote remote, string key, string value)
-        {
-            switch (key)
-            {
-                case "url":
-                    remote.TfsUrl = value;
-                    break;
-                case "legacy-urls":
-                    remote.Tfs.LegacyUrls = value.Split(',');
-                    break;
-                case "repository":
-                    remote.TfsRepositoryPath = value;
-                    break;
-                case "ignore-paths":
-                    remote.IgnoreRegexExpression = value;
-                    break;
-                case "username":
-                    remote.TfsUsername = value;
-                    break;
-                case "password":
-                    remote.TfsPassword = value;
-                    break;
-                case "autotag":
-                    remote.Autotag = bool.Parse(value);
-                    break;
-            }
         }
 
         public GitCommit GetCommit(string commitish)

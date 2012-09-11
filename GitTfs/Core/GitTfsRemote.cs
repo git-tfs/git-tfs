@@ -20,12 +20,21 @@ namespace Sep.Git.Tfs.Core
         private long? maxChangesetId;
         private string maxCommitHash;
 
-        public GitTfsRemote(RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
+        public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
             this.stdout = stdout;
             Tfs = tfsHelper;
+            Repository = repository;
+
+            Id = info.Id;
+            TfsUrl = info.Url;
+            TfsRepositoryPath = info.Repository;
+            TfsUsername = info.Username;
+            TfsPassword = info.Password;
+            IgnoreRegexExpression = info.IgnoreRegex;
+            Autotag = info.Autotag;
         }
 
         public void EnsureTfsAuthenticated()
