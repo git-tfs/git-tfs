@@ -21,12 +21,12 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Dispose();
         }
 
-        [Fact(Skip="eventually")]
+        [FactExceptOnUnix(Skip="eventually")]
         public void FailOnNoProject()
         {
         }
 
-        [Fact(Skip="eventually")]
+        [FactExceptOnUnix(Skip="eventually")]
         public void ClonesEmptyProject()
         {
             h.SetupFake(r =>
@@ -43,7 +43,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertEmptyWorkspace("MyProject");
         }
 
-        [Fact]
+        [FactExceptOnUnix]
         public void CloneProjectWithChangesets()
         {
             h.SetupFake(r =>
@@ -65,7 +65,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
         }
 
-        [Fact]
+        [FactExceptOnUnix]
         public void CloneProjectWithInternationalCharactersInFileNamesAndFolderNames()
         {
             h.SetupFake(r =>
@@ -82,7 +82,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "ÆØÅ/äöü.txt", "File contents");
         }
 
-        [Fact]
+        [FactExceptOnUnix]
         public void CloneProjectWithInternationalCharactersInFileContents()
         {
             h.SetupFake(r =>
@@ -99,7 +99,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "Blåbærsyltetøy er godt!");
         }
 
-        [Fact]
+        [FactExceptOnUnix]
         public void CloneProjectWithInternationalCharactersInCommitMessages()
         {
             h.SetupFake(r =>
@@ -123,7 +123,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertRef("MyProject", "tfs/default", expectedSha);
         }
 
-        [Fact]
+        [FactExceptOnUnix]
         public void CloneWithMixedUpCase()
         {
             h.SetupFake(r =>
