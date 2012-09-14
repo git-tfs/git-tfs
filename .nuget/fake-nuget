@@ -2,7 +2,7 @@
 
 command=$1
 manifest=$2
-dest=$7
+dest=$6
 
 ERR_COMMAND=1
 ERR_DOWNLOAD=2

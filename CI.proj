@@ -4,13 +4,14 @@
   <PropertyGroup>
     <SolutionDir>./</SolutionDir>
     <PackagesConfig>.nuget/packages.config</PackagesConfig>
+    <RequireRestoreConsent>false</RequireRestoreConsent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 
   <Target Name="CI" DependsOnTargets="Build; RunTests" />
 
   <Target Name="Build">
-    <MSBuild Projects="GitTfs.sln" Properties="Configuration=Debug" Targets="GitTfsTest" />
+    <MSBuild Projects="GitTfs.sln" Properties="Configuration=Debug;RequireRestoreConsent=false" Targets="GitTfsTest" />
   </Target>
 
   <UsingTask AssemblyFile="packages/xunit.runner.1.9.1/tools/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
