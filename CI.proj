@@ -14,14 +14,20 @@
     <MSBuild Projects="GitTfs.sln" Properties="Configuration=Debug;RequireRestoreConsent=false" Targets="GitTfsTest" />
   </Target>
 
-  <UsingTask AssemblyFile="packages/xunit.runner.1.9.1/tools/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
-
   <PropertyGroup>
-    <DotNetShell Condition=" '$(OS)' != 'Windows_NT' ">mono</DotNetShell>
+    <RealRunTests Condition=" '$(OS)' != 'Windows_NT' ">RunTestsWithMonoRunner</RealRunTests>
+    <RealRunTests Condition=" '$(RealRunTests)' == '' ">RunTestsWithTask</RealRunTests>
   </PropertyGroup>
-  <Target Name="RunTests" DependsOnTargets="RestorePackages">
-    <!-- <xunit Assembly="GitTfsTest/bin/Debug/GitTfsTest.dll" /> -->
-    <Exec Command="$(DotNetShell) packages/xunit.runners.1.9.1/tools/xunit.console.clr4.exe GitTfsTest/bin/Debug/GitTfsTest.dll" />
+
+  <Target Name="RunTests" DependsOnTargets="RestorePackages;$(RealRunTests)" />
+
+  <UsingTask AssemblyFile="packages/xunit.runner.1.9.1/tools/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
+  <Target Name="RunTestsWithTask">
+    <xunit Assembly="GitTfsTest/bin/Debug/GitTfsTest.dll" />
+  </Target>
+
+  <Target Name="RunTestsWithMonoRunner">
+    <Exec Command="mono packages/xunit.runners.1.9.1/tools/xunit.console.clr4.exe GitTfsTest/bin/Debug/GitTfsTest.dll" />
   </Target>
 
 </Project>
