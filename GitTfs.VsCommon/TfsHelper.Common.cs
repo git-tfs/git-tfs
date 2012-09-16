@@ -85,9 +85,16 @@ namespace Sep.Git.Tfs.VsCommon
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
-            _stdout.WriteLine(e.Failure.Message);
-            Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
-            Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+           if (e.Failure != null)
+           {
+              _stdout.WriteLine(e.Failure.Message);
+              Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
+           }
+           if (e.Exception != null)
+           {
+              _stdout.WriteLine(e.Exception.Message);
+              Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+           }
         }
 
         private IGroupSecurityService GroupSecurityService
