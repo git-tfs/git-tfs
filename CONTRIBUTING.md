@@ -12,5 +12,3 @@
 
 * In general, pull requests with unit tests get merged quicker than those without.
 
-## Donations
-Or, if you want to go above and beyond, it'd be awesome if you chipped in towards a Windows PC, so I can improve upon [this process](http://www.websequencediagrams.com/?lz=TWF0dCBvbiBhIG1hYy0-Z2l0LXRmcyBvbiBnaXRodWI6IFB1c2gKAAcRLT5KZW5raW4AJgVXaW5kb3dzOiBOZXcgY29tbWl0IQoADhIAHhZCdWlsZAAZFQCBDw06IEZBSUwhCg&s=napkin).
