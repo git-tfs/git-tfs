@@ -392,7 +392,11 @@ namespace Sep.Git.Tfs.Core
 
         public string HashAndInsertObject(string filename)
         {
-            return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
+            String sha;
+            Blob result = _repository.ObjectDatabase.CreateBlob(filename)
+            using(result)
+                sha = result.Id.Sha;
+            return sha;
         }
     }
 }
