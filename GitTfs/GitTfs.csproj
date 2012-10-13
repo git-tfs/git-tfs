@@ -108,6 +108,7 @@
     <Compile Include="Commands\CheckinTool.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
     <Compile Include="Commands\CheckinBase.cs" />
+    <Compile Include="Commands\InitBranch.cs" />
     <Compile Include="Commands\Info.cs" />
     <Compile Include="Commands\Cleanup.cs" />
     <Compile Include="Commands\CleanupOptions.cs" />

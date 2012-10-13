@@ -404,5 +404,39 @@ namespace Sep.Git.Tfs.Core
         {
             return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
         }
+
+        public string AssertValidBranchName(string gitBranchName)
+        {
+            var newGitBranchName = CommandOneline("check-ref-format", "--branch", gitBranchName);
+            if (string.IsNullOrWhiteSpace(newGitBranchName) || newGitBranchName.IndexOf("fatal:") == 0)
+                throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
+            return newGitBranchName.Trim();
+        }
+
+        public bool CreateBranch(string gitBranchName, string target)
+        {
+            Reference reference;
+            try
+            {
+                reference = _repository.Refs.Create(gitBranchName, target);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return reference != null;
+        }
+
+        public string FindCommitHashByCommitMessage(string patternToFind)
+        {
+            var regex = new Regex(patternToFind);
+            foreach (var branch in _repository.Branches.Where(p => p.IsRemote).ToList())
+            {
+                var commit = branch.Commits.SingleOrDefault(c => regex.IsMatch(c.Message));
+                if (commit != null)
+                    return commit.Sha;
+            }
+            return null;
+        }
     }
 }
