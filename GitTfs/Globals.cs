@@ -24,16 +24,12 @@ namespace Sep.Git.Tfs
                         v => DebugOutput = v != null },
                     { "i|tfs-remote|remote|id=", "The remote ID of the TFS to interact with\ndefault: default",
                         v => UserSpecifiedRemoteId = v },
-                    { "experimental", "Turn on experimental features",
-                        v => Experimental = true },
                 };
             }
         }
 
         public bool ShowHelp { get; set; }
         public bool ShowVersion { get; set; }
-
-        public bool Experimental { get; set; }
 
         public bool DebugOutput
         {
