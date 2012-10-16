@@ -296,21 +296,22 @@ namespace Sep.Git.Tfs.Core
         private LogEntry Apply(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(
-                () => GitIndexInfo.Do(Repository, index => result = changeset.Apply(lastCommit, index)));
-            WithTemporaryIndex(
-                () => result.Tree = Repository.CommandOneline("write-tree"));
-            if (!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
+            WithTemporaryIndex(() => Tfs.WithWorkspace(WorkingDirectory, this, changeset.Summary, workspace =>
+            {
+                GitIndexInfo.Do(Repository, index => result = changeset.Apply(lastCommit, index, workspace));
+                result.Tree = Repository.CommandOneline("write-tree");
+            }));
+            if(!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
             return result;
         }
 
         private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(
-                () => GitIndexInfo.Do(Repository, index => result = changeset.CopyTree(index)));
-            WithTemporaryIndex(
-                () => result.Tree = Repository.CommandOneline("write-tree"));
+            WithTemporaryIndex(() => Tfs.WithWorkspace(WorkingDirectory, this, changeset.Summary, workspace => {
+                GitIndexInfo.Do(Repository, index => result = changeset.CopyTree(index, workspace));
+                result.Tree = Repository.CommandOneline("write-tree");
+            }));
             if (!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
             return result;
         }

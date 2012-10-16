@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -156,7 +157,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _item.ServerItem; }
         }
 
-        public decimal DeletionId
+        public int DeletionId
         {
             get { return _item.DeletionId; }
         }
@@ -448,6 +449,18 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var item = new ItemSpec(path, RecursionType.None);
             _workspace.Get(new GetRequest(item, changeset), GetOptions.Overwrite | GetOptions.GetAll);
+        }
+
+        public void GetSpecificVersion(int changeset)
+        {
+            _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll);
+        }
+
+        public void GetSpecificVersion(IChangeset changeset)
+        {
+            var requests = from change in changeset.Changes
+                           select new GetRequest(new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId), changeset.ChangesetId);
+            _workspace.Get(requests.ToArray(), GetOptions.Overwrite);
         }
 
         public string OwnerName
