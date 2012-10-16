@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -16,5 +17,11 @@ namespace Sep.Git.Tfs.Core
         public bool NoMetaData { get; set; }
         public IEnumerable<string> Aliases { get; set; }
         public bool Autotag { get; set; }
+
+        public RemoteOptions RemoteOptions
+        {
+            get { return new RemoteOptions { IgnoreRegex = IgnoreRegex, NoMetaData = NoMetaData, Username = Username, Password = Password }; }
+            set { IgnoreRegex = value.IgnoreRegex; NoMetaData = value.NoMetaData; Username = value.Username; Password = value.Password; }
+        }
     }
 }

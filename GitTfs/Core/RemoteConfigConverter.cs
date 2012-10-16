@@ -4,7 +4,7 @@ using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Core
 {
-    public class RemoteConfigReader
+    public class RemoteConfigConverter
     {
         public IEnumerable<RemoteInfo> Load(IEnumerable<ConfigurationEntry> config)
         {
@@ -37,6 +37,22 @@ namespace Sep.Git.Tfs.Core
                 }
             }
             return remotes.Values;
+        }
+
+        public IEnumerable<ConfigurationEntry> Dump(RemoteInfo remote)
+        {
+            if (!string.IsNullOrWhiteSpace(remote.Id))
+            {
+                var prefix = "tfs-remote." + remote.Id + ".";
+                yield return new ConfigurationEntry(prefix + "url", remote.Url);
+                yield return new ConfigurationEntry(prefix + "repository", remote.Repository);
+                yield return new ConfigurationEntry(prefix + "username", remote.Username);
+                yield return new ConfigurationEntry(prefix + "password", remote.Password);
+                yield return new ConfigurationEntry(prefix + "ignore-paths", remote.IgnoreRegex);
+                yield return new ConfigurationEntry(prefix + "no-meta-data", remote.NoMetaData ? "true" : null);
+                yield return new ConfigurationEntry(prefix + "legacy-urls", remote.Aliases == null ? null : string.Join(",", remote.Aliases));
+                yield return new ConfigurationEntry(prefix + "autotag", remote.Autotag ? "true" : null);
+            }
         }
     }
 }

@@ -121,11 +121,16 @@ namespace Sep.Git.Tfs.Test.Integration
             startInfo.Arguments = "/c git tfs --debug " + String.Join(" ", args);
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
             Console.WriteLine("PATH: " + startInfo.EnvironmentVariables["Path"]);
             Console.WriteLine(">> " + startInfo.FileName + " " + startInfo.Arguments);
             var process = Process.Start(startInfo);
+            var stderr = "";
+            process.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => stderr += e.Data);
+            process.BeginErrorReadLine();
             Console.Out.Write(process.StandardOutput.ReadToEnd());
             process.WaitForExit();
+            if (!string.IsNullOrWhiteSpace(stderr)) Console.Out.WriteLine("stderr:\n" + stderr);
         }
 
         private string CurrentBuildPath

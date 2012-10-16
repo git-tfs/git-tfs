@@ -18,9 +18,9 @@ namespace Sep.Git.Tfs.Core
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
-        private RemoteConfigReader _remoteConfigReader;
+        private RemoteConfigConverter _remoteConfigReader;
 
-        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals, RemoteConfigReader remoteConfigReader)
+        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals, RemoteConfigConverter remoteConfigReader)
             : base(stdout, container)
         {
             _container = container;
@@ -94,10 +94,40 @@ namespace Sep.Git.Tfs.Core
             return _cachedRemotes ?? (_cachedRemotes = ReadTfsRemotes());
         }
 
+        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote)
+        {
+            if (HasRemote(remote.Id))
+                throw new GitTfsException("A remote with id \"" + remote.Id + "\" already exists.");
+
+            // These help the new (if it's new) git repository to behave more sanely.
+            _repository.Config.Set("core.autocrlf", "false");
+            _repository.Config.Set("core.ignorecase", "false");
+
+            foreach (var entry in _remoteConfigReader.Dump(remote))
+            {
+                if (entry.Value != null)
+                {
+                    _repository.Config.Set(entry.Key, entry.Value);
+                }
+                else
+                {
+                    _repository.Config.Unset(entry.Key);
+                }
+            }
+
+            return _cachedRemotes[remote.Id] = BuildRemote(remote);
+        }
+
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
         {
+            // does this need to ensuretfsauthenticated?
             _repository.Config.Set("tfs.touch", "1"); // reload configuration, because `git tfs init` and `git tfs clone` use Process.Start to update the config, so _repository's copy is out of date.
-            return _remoteConfigReader.Load(_repository.Config).Select(x => _container.With(x).With<IGitRepository>(this).GetInstance<IGitTfsRemote>()).ToDictionary(x => x.Id);
+            return _remoteConfigReader.Load(_repository.Config).Select(x => BuildRemote(x)).ToDictionary(x => x.Id);
+        }
+
+        private IGitTfsRemote BuildRemote(RemoteInfo remoteInfo)
+        {
+            return _container.With(remoteInfo).With<IGitRepository>(this).GetInstance<IGitTfsRemote>();
         }
 
         public bool HasRemote(string remoteId)
@@ -117,33 +147,6 @@ namespace Sep.Git.Tfs.Core
                 // UpdateRef sets tag with TFS changeset id on each commit so we can't just update to latest
                 remote.UpdateRef(cs.GitCommit, cs.ChangesetId);
             }
-        }
-
-        public void CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead, RemoteOptions remoteOptions)
-        {
-            CreateTfsRemote(remoteId, tfsHead.Remote.TfsUrl, tfsHead.Remote.TfsRepositoryPath, remoteOptions);
-            ReadTfsRemote(remoteId).UpdateRef(tfsHead.GitCommit, tfsHead.ChangesetId);
-        }
-
-        public void CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions)
-        {
-            if (HasRemote(remoteId))
-                throw new GitTfsException("A remote with id \"" + remoteId + "\" already exists.");
-
-            if (remoteOptions != null)
-            {
-                if (remoteOptions.NoMetaData) SetTfsConfig(remoteId, "no-meta-data", 1);
-                if (remoteOptions.IgnoreRegex != null) SetTfsConfig(remoteId, "ignore-paths", remoteOptions.IgnoreRegex);
-                if (!string.IsNullOrEmpty(remoteOptions.Username)) SetTfsConfig(remoteId, "username", remoteOptions.Username);
-                if (!string.IsNullOrEmpty(remoteOptions.Password)) SetTfsConfig(remoteId, "password", remoteOptions.Password);
-            }
-
-            SetTfsConfig(remoteId, "url", tfsUrl);
-            SetTfsConfig(remoteId, "repository", tfsRepositoryPath);
-            SetTfsConfig(remoteId, "fetch", "refs/remotes/" + remoteId + "/master");
-
-            Directory.CreateDirectory(Path.Combine(GitDir, "tfs"));
-            _cachedRemotes = null;
         }
 
         private void SetTfsConfig(string remoteId, string subkey, object value)

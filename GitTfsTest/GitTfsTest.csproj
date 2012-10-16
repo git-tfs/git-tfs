@@ -12,7 +12,6 @@
     <AssemblyName>GitTfsTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -91,7 +90,8 @@
     <Compile Include="Core\DelimitedReaderTests.cs" />
     <Compile Include="Core\ExtTests.cs" />
     <Compile Include="Core\GitChangeInfoTests.cs" />
-    <Compile Include="Core\RemoteConfigReaderTests.cs" />
+    <Compile Include="Core\RemoteConfigConverterDumpTests.cs" />
+    <Compile Include="Core\RemoteConfigConverterLoadTests.cs" />
     <Compile Include="Core\ModeTests.cs" />
     <Compile Include="Core\TfsApiBridgeTest.cs" />
     <Compile Include="GitTfsRegexTests.cs" />

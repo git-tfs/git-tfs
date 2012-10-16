@@ -7,16 +7,16 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class RemoteConfigReaderTests
+    public class RemoteConfigConverterLoadTests
     {
-        RemoteConfigReader _reader = new RemoteConfigReader();
+        RemoteConfigConverter _reader = new RemoteConfigConverter();
         Dictionary<string, string> _config = new Dictionary<string, string>();
 
         IEnumerable<ConfigurationEntry> _gitConfig { get { return _config.Select(x => new ConfigurationEntry(x.Key, x.Value)); } }
         IEnumerable<RemoteInfo> _remotes { get { return _reader.Load(_gitConfig); } }
         RemoteInfo _firstRemote { get { return _remotes.FirstOrDefault(); } }
 
-        public RemoteConfigReaderTests()
+        public RemoteConfigConverterLoadTests()
         {
             // Set some normal-ish config params. This makes sure that there is no barfing on extra config entries.
             _config["core.autocrlf"] = "true";
@@ -91,7 +91,4 @@ namespace Sep.Git.Tfs.Test.Core
             Assert.False(_firstRemote.NoMetaData);
         }
     }
-
-    // also a GitTfsHistoryLoaderTest
-    // also a GitTfsConfig
 }
