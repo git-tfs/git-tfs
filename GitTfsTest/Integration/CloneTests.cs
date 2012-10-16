@@ -9,12 +9,7 @@ namespace Sep.Git.Tfs.Test.Integration
     //      This will cause the hashes to differ on computers in different time zones.
     public class CloneTests : IDisposable
     {
-        IntegrationHelper h;
-
-        public CloneTests()
-        {
-            h = new IntegrationHelper();
-        }
+        IntegrationHelper h = new IntegrationHelper();
 
         public void Dispose()
         {

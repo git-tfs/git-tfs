@@ -95,6 +95,7 @@
     <Compile Include="Core\ModeTests.cs" />
     <Compile Include="Core\TfsApiBridgeTest.cs" />
     <Compile Include="GitTfsRegexTests.cs" />
+    <Compile Include="Integration\BootstrapTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
     <Compile Include="Integration\IntegrationHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

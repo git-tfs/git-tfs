@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using LibGit2Sharp;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsFake;
@@ -49,6 +50,33 @@ namespace Sep.Git.Tfs.Test.Integration
 
         #endregion
 
+        #region set up a git repository
+
+        public void SetupGitRepo(string path, Action<RepoBuilder> buildIt)
+        {
+            using (var repo = Repository.Init(Path.Combine(Workdir, path)))
+                buildIt(new RepoBuilder(repo));
+        }
+
+        public class RepoBuilder
+        {
+            private Repository _repo;
+
+            public RepoBuilder(Repository repo)
+            {
+                _repo = repo;
+            }
+
+            public string Commit(string message)
+            {
+                File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
+                _repo.Index.Stage("README.txt");
+                return _repo.Commit(message).Id.Sha;
+            }
+        }
+
+        #endregion
+
         #region set up vsfake script
 
         public string FakeScript
@@ -71,7 +99,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             public FakeChangesetBuilder Changeset(int changesetId, string message, DateTime checkinDate)
             {
-                var changeset =new ScriptedChangeset
+                var changeset = new ScriptedChangeset
                 {
                     Id = changesetId,
                     Comment = message,
@@ -110,11 +138,12 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public string TfsUrl { get { return "http://does/not/matter"; } }
 
-        public void Run(params string[] args)
+        public void RunIn(string pathInWorkdir, params string[] args)
         {
             var startInfo = new ProcessStartInfo();
-            startInfo.WorkingDirectory = Workdir;
+            startInfo.WorkingDirectory = Path.Combine(Workdir, pathInWorkdir);
             startInfo.EnvironmentVariables["GIT_TFS_CLIENT"] = "Fake";
+            if (!File.Exists(FakeScript)) File.WriteAllText(FakeScript, "");
             startInfo.EnvironmentVariables[Script.EnvVar] = FakeScript;
             startInfo.EnvironmentVariables["Path"] = CurrentBuildPath + ";" + Environment.GetEnvironmentVariable("Path");
             startInfo.FileName = "cmd";
@@ -131,6 +160,11 @@ namespace Sep.Git.Tfs.Test.Integration
             Console.Out.Write(process.StandardOutput.ReadToEnd());
             process.WaitForExit();
             if (!string.IsNullOrWhiteSpace(stderr)) Console.Out.WriteLine("stderr:\n" + stderr);
+        }
+
+        public void Run(params string[] args)
+        {
+            RunIn(".", args);
         }
 
         private string CurrentBuildPath
@@ -153,8 +187,14 @@ namespace Sep.Git.Tfs.Test.Integration
             Assert.True(Directory.Exists(Path.Combine(path, ".git")), path + " should have a .git dir inside of it");
         }
 
+        public void AssertNoRef(string repodir, string gitref)
+        {
+            AssertEqual(null, RevParse(repodir, gitref), "Expected no ref " + gitref);
+        }
+
         public void AssertRef(string repodir, string gitref, string expectedSha)
         {
+            Assert.NotNull(expectedSha);
             AssertEqual(expectedSha, RevParse(repodir, gitref), "Expected " + gitref + " to be " + expectedSha);
         }
 
