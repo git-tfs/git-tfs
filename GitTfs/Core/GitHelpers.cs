@@ -157,7 +157,7 @@ namespace Sep.Git.Tfs.Core
                               {
                                   AssertValidCommand(command);
                                   var process = Start(command, RedirectStdin);
-                                  action(process.StandardInput.WithDefaultEncoding());
+                                  action(process.StandardInput.WithUTF8EncodingWithoutBOM());
                                   Close(process);
                               });
         }

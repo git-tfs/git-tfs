@@ -1,4 +1,5 @@
 using System;
+using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Core
@@ -8,11 +9,11 @@ namespace Sep.Git.Tfs.Core
         /// <summary>
         /// Shelves all pending changes, with the given shelveset name.
         /// </summary>
-        void Shelve(string shelvesetName, bool evaluateCheckinPolicies);
+        void Shelve(string shelvesetName, bool evaluateCheckinPolicies, Func<string> generateCheckinComment);
         /// <summary>
         /// Evaluates check-in policies and checks in all pending changes.
         /// </summary>
-        long Checkin();
+        long Checkin(CheckinOptions checkinOptions);
         /// <summary>
         /// Populates the workspace with a snapshot, as of the given changeset.
         /// </summary>

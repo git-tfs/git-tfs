@@ -2,18 +2,17 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    [TestClass]
     public class ExtTests
     {
         #region Action.And()
 
-        [TestMethod]
+        [Fact]
         public void ShouldCombineActionsInOne_And_Call()
         {
             var action1 = new Action<IDictionary>(d => d["action1"] = true);
@@ -22,12 +21,12 @@ namespace Sep.Git.Tfs.Test.Core
             var combinedAction = action1.And(action2, action3);
             var record = new Hashtable();
             combinedAction(record);
-            Assert.AreEqual(true, record["action1"], "action1 should have been executed.");
-            Assert.AreEqual(true, record["action2"], "action2 should have been executed.");
-            Assert.AreEqual(true, record["action3"], "action3 should have been executed.");
+            Assert.True((bool)record["action1"], "action1 should have been executed.");
+            Assert.True((bool)record["action2"], "action2 should have been executed.");
+            Assert.True((bool)record["action3"], "action3 should have been executed.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldCombineActionsInAChainOfAndCalls()
         {
             var action1 = new Action<IDictionary>(d => d["action1"] = true);
@@ -36,123 +35,123 @@ namespace Sep.Git.Tfs.Test.Core
             var combinedAction = action1.And(action2).And(action3);
             var record = new Hashtable();
             combinedAction(record);
-            Assert.AreEqual(true, record["action1"], "action1 should have been executed.");
-            Assert.AreEqual(true, record["action2"], "action2 should have been executed.");
-            Assert.AreEqual(true, record["action3"], "action3 should have been executed.");
+            Assert.True((bool)record["action1"], "action1 should have been executed.");
+            Assert.True((bool)record["action2"], "action2 should have been executed.");
+            Assert.True((bool)record["action3"], "action3 should have been executed.");
         }
 
         #endregion
 
         #region ProcessStartInfo.SetArguments()
 
-        [TestMethod]
+        [Fact]
         public void ShouldSetProcessStartInfoArguments()
         {
             var info = new ProcessStartInfo();
             info.SetArguments("a", "b", "c");
-            Assert.AreEqual("a b c", info.Arguments);
+            Assert.Equal("a b c", info.Arguments);
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldQuoteSpacesInProcessStartInfoArguments()
         {
             var info = new ProcessStartInfo();
             info.SetArguments("a", "b c");
-            Assert.AreEqual("a \"b c\"", info.Arguments);
+            Assert.Equal("a \"b c\"", info.Arguments);
         }
 
         #endregion
 
         #region CombinePaths()
 
-        [TestMethod]
+        [Fact]
         public void ShouldReturnSingleArgumentWhenProvided()
         {
-            Assert.AreEqual("a", Ext.CombinePaths("a"));
+            Assert.Equal("a", Ext.CombinePaths("a"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldCombineSeveralPaths()
         {
-            Assert.AreEqual("a\\b\\c", Ext.CombinePaths("a", "b", "c"));
+            Assert.Equal(Path.Combine(Path.Combine("a", "b"), "c"), Ext.CombinePaths("a", "b", "c"));
         }
 
-        [TestMethod]
+        [FactExceptOnUnix]
         public void ShouldIgnorePathPartsBeforeAbsolute()
         {
-            Assert.AreEqual("c:\\x\\y", Ext.CombinePaths("a", "b", "c:\\x", "y"));
+            Assert.Equal("c:\\x\\y", Ext.CombinePaths("a", "b", "c:\\x", "y"));
         }
 
         #endregion
 
         #region FormatForGit()
 
-        [TestMethod]
+        [Fact]
         public void ShouldFormatDateForGit()
         {
             var date = new DateTime(2000, 1, 2, 12, 34, 56);
-            Assert.AreEqual("2000-01-02T12:34:56Z", date.ToLocalTime().FormatForGit());
+            Assert.Equal("2000-01-02T12:34:56Z", date.ToLocalTime().FormatForGit());
         }
 
         #endregion
 
         #region Stream.CopyTo()
 
-        [TestMethod]
+        [Fact]
         public void ShouldCopyOneStreamToAnother()
         {
             var input = new MemoryStream(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0xfe, 0xff });
             var output = new MemoryStream();
             input.CopyTo(output);
-            CollectionAssert.AreEqual(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0xfe, 0xff }, output.ToArray());
+            Assert.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0xfe, 0xff }, output.ToArray());
         }
         #endregion
 
         #region ChangeType.IncludesOneOf()
 
-        [TestMethod]
+        [Fact]
         public void ShouldNotDetectUnincludedChangeTypes()
         {
-            Assert.IsFalse(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Branch, TfsChangeType.Delete, TfsChangeType.Edit, TfsChangeType.Encoding, TfsChangeType.Lock, TfsChangeType.Merge, TfsChangeType.None, TfsChangeType.Rename, TfsChangeType.Undelete));
+            Assert.False(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Branch, TfsChangeType.Delete, TfsChangeType.Edit, TfsChangeType.Encoding, TfsChangeType.Lock, TfsChangeType.Merge, TfsChangeType.None, TfsChangeType.Rename, TfsChangeType.Undelete));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldNotDetectUnincludedChangeType()
         {
             var everythingExceptAdd = TfsChangeType.Branch | TfsChangeType.Delete | TfsChangeType.Edit |
                                       TfsChangeType.Encoding | TfsChangeType.Lock | TfsChangeType.Merge |
                                       TfsChangeType.None | TfsChangeType.Rename | TfsChangeType.Undelete;
-            Assert.IsFalse(everythingExceptAdd.IncludesOneOf(TfsChangeType.Add));
+            Assert.False(everythingExceptAdd.IncludesOneOf(TfsChangeType.Add));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldDetectIncludedChangeTypeForExactMatch()
         {
-            Assert.IsTrue(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Add));
+            Assert.True(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Add));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldDetectIncludedChangeTypeForOneOfSeveral()
         {
-            Assert.IsTrue(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Branch, TfsChangeType.Add));
+            Assert.True(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Branch, TfsChangeType.Add));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldDetectIncludedChangeTypeForMultivalue()
         {
-            Assert.IsTrue((TfsChangeType.Add | TfsChangeType.Branch).IncludesOneOf(TfsChangeType.Branch));
+            Assert.True((TfsChangeType.Add | TfsChangeType.Branch).IncludesOneOf(TfsChangeType.Branch));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldNotDetectMultivaluesThatIntersectWithoutBeingSubset()
         {
-            Assert.IsFalse((TfsChangeType.Add | TfsChangeType.Branch).IncludesOneOf(TfsChangeType.Branch | TfsChangeType.Edit));
+            Assert.False((TfsChangeType.Add | TfsChangeType.Branch).IncludesOneOf(TfsChangeType.Branch | TfsChangeType.Edit));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldDetectMultivaluesThatIntersectAndAreASubset()
         {
-            Assert.IsTrue((TfsChangeType.Add | TfsChangeType.Branch | TfsChangeType.Edit).IncludesOneOf(TfsChangeType.Branch | TfsChangeType.Edit));
+            Assert.True((TfsChangeType.Add | TfsChangeType.Branch | TfsChangeType.Edit).IncludesOneOf(TfsChangeType.Branch | TfsChangeType.Edit));
         }
 
         #endregion

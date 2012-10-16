@@ -1,0 +1,52 @@
+#!/bin/bash
+
+command=$1
+manifest=$2
+dest=$6
+
+ERR_COMMAND=1
+ERR_DOWNLOAD=2
+ERR_EXTRACT=3
+
+if [ "$command" != "install" ]
+then
+  echo "Only install is supported. (command was $command)"
+  exit $ERR_COMMAND
+fi
+
+# http://stackoverflow.com/questions/893585/how-to-parse-xml-in-bash
+read_dom() {
+  local IFS=\>
+  read -d \< ENTITY CONTENT
+}
+
+parse_dom() {
+  echo $ENTITY
+  TAG_NAME=${ENTITY%% *}
+  ATTRIBUTES=${ENTITY#* }
+  if [ "$TAG_NAME" == "package" ]
+  then
+    eval local $ATTRIBUTES
+    pkgdest="$dest/$id.$version"
+    pkg="$id.$version.nupkg"
+    downloaded="$pkgdest/$pkg"
+    if [ ! -d "$pkgdest" ]
+    then
+      mkdir -p "$pkgdest"
+    fi
+    if [ ! -f "$downloaded" ]
+    then
+      curl -L -o "$downloaded" "https://nuget.org/api/v2/package/$id/$version" || exit $ERR_DOWNLOAD
+    fi
+    unzip -o -d $pkgdest $downloaded || exit $ERR_EXTRACT
+  fi
+}
+
+install_packages() {
+  while read_dom
+  do
+    parse_dom
+  done
+}
+
+cat $manifest | install_packages

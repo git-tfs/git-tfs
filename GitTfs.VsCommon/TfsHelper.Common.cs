@@ -86,9 +86,16 @@ namespace Sep.Git.Tfs.VsCommon
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
-            _stdout.WriteLine(e.Failure.Message);
-            Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
-            Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+           if (e.Failure != null)
+           {
+              _stdout.WriteLine(e.Failure.Message);
+              Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
+           }
+           if (e.Exception != null)
+           {
+              _stdout.WriteLine(e.Exception.Message);
+              Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+           }
         }
 
         private void Getting(object sender, GettingEventArgs e)
@@ -207,7 +214,7 @@ namespace Sep.Git.Tfs.VsCommon
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
             // TODO - containerify this (no `new`)!
             var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
-            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout) { Summary = new TfsChangesetInfo { Remote = remote } };
+            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout, null) { Summary = new TfsChangesetInfo { Remote = remote } };
             return tfsChangeset;
         }
 

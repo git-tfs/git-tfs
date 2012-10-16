@@ -1,15 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sep.Git.Tfs.Core;
+using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    [TestClass]
     public class DelimitedReaderTests
     {
-        [TestMethod]
+        [Fact]
         public void ShouldParseTwoNullTerminatedStrings()
         {
             var bytes = new List<byte>();
@@ -18,12 +17,12 @@ namespace Sep.Git.Tfs.Test.Core
             bytes.AddRange(Encoding.ASCII.GetBytes("def"));
             bytes.Add(0);
             var reader = new DelimitedReader(new StreamReader(new MemoryStream(bytes.ToArray())));
-            Assert.AreEqual("abc", reader.Read());
-            Assert.AreEqual("def", reader.Read());
-            Assert.AreEqual(null, reader.Read());
+            Assert.Equal("abc", reader.Read());
+            Assert.Equal("def", reader.Read());
+            Assert.Equal(null, reader.Read());
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldParseWhenLastStringHasNoTerminator()
         {
             var bytes = new List<byte>();
@@ -31,9 +30,9 @@ namespace Sep.Git.Tfs.Test.Core
             bytes.Add(0);
             bytes.AddRange(Encoding.ASCII.GetBytes("def"));
             var reader = new DelimitedReader(new StreamReader(new MemoryStream(bytes.ToArray())));
-            Assert.AreEqual("abc", reader.Read());
-            Assert.AreEqual("def", reader.Read());
-            Assert.AreEqual(null, reader.Read());
+            Assert.Equal("abc", reader.Read());
+            Assert.Equal("def", reader.Read());
+            Assert.Equal(null, reader.Read());
         }
     }
 }

@@ -1,13 +1,17 @@
-
-.*.swp
+# Local-only VS/Re#/etc files
 *.suo
-bin
-_ReSharper.*
-obj
-*.gpState
 *.user
-TestResults
-GitTfs/GitVersionInfo
+*.gpState
+_ReSharper.*
+.*.swp
+
+#
+
+# Build outputs
+bin
+obj
 pkg
-GitTfs.sln.*
-*.dotCover
+
+# 3rd-party stuff copied during build
+packages/
+GitTfs/git2.*
