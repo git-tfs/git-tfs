@@ -161,6 +161,16 @@ namespace Sep.Git.Tfs.Core
             _workspace.ForceGetFile(_remote.TfsRepositoryPath + "/" + path, (int)_contextVersion.ChangesetId);
         }
 
+        public void Get(int changesetId)
+        {
+            _workspace.GetSpecificVersion(changesetId);
+        }
+
+        public void Get(IChangeset changeset)
+        {
+            _workspace.GetSpecificVersion(changeset);
+        }
+
         private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos()
         {
             return GetWorkItemInfosHelper<IWorkItemCheckinInfo>(_tfsHelper.GetWorkItemInfos);

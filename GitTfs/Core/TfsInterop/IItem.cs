@@ -8,7 +8,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IVersionControlServer VersionControlServer { get; }
         int ChangesetId { get; }
         string ServerItem { get; }
-        decimal DeletionId { get; }
+        int DeletionId { get; }
         TfsItemType ItemType { get; }
         int ItemId { get; }
         long ContentLength { get; }

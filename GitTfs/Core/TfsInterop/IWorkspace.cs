@@ -13,6 +13,8 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         int PendDelete(string path);
         int PendRename(string pathFrom, string pathTo);
         void ForceGetFile(string path, int changeset);
+        void GetSpecificVersion(int changeset);
+        void GetSpecificVersion(IChangeset changeset);
         string OwnerName { get; }
     }
 }
