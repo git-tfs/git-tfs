@@ -315,7 +315,6 @@ namespace Sep.Git.Tfs.Core
             {
                 message.AppendLine(comm.Message);
             }
-
             return GitTfsConstants.TfsCommitInfoRegex.Replace(message.ToString(), "").Trim(' ', '\r', '\n');
         }
 
