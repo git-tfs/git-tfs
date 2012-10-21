@@ -309,13 +309,13 @@ namespace Sep.Git.Tfs.Core
 
         public string GetCommitMessage(string head, string parentCommitish)
         {
-            System.Text.StringBuilder message = new System.Text.StringBuilder();
+            var message = new System.Text.StringBuilder();
             foreach (LibGit2Sharp.Commit comm in
                 _repository.Commits.QueryBy(new LibGit2Sharp.Filter { Since = head, Until = parentCommitish }))
             {
                 message.AppendLine(comm.Message);
             }
-            return message.ToString();
+            return GitTfsConstants.TfsCommitInfoRegex.Replace(message.ToString(), "").Trim(' ', '\r', '\n');
         }
 
         private void ParseEntries(IDictionary<string, GitObject> entries, Tree treeInfo, string commit)
