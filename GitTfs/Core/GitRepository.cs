@@ -313,9 +313,19 @@ namespace Sep.Git.Tfs.Core
             foreach (LibGit2Sharp.Commit comm in
                 _repository.Commits.QueryBy(new LibGit2Sharp.Filter { Since = head, Until = parentCommitish }))
             {
-                message.AppendLine(comm.Message);
+                // Normalize commit message line endings to CR+LF style, so that message
+                // would be correctly shown in TFS commit dialog.
+                message.AppendLine(NormalizeLineEndings(comm.Message));
             }
+
             return GitTfsConstants.TfsCommitInfoRegex.Replace(message.ToString(), "").Trim(' ', '\r', '\n');
+        }
+
+        private static string NormalizeLineEndings(string input)
+        {
+            return string.IsNullOrEmpty(input)
+                ? input
+                : input.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "\r\n");
         }
 
         private void ParseEntries(IDictionary<string, GitObject> entries, Tree treeInfo, string commit)
