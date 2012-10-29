@@ -76,7 +76,7 @@ namespace Sep.Git.Tfs.Core
             if (pendingChanges.IsEmpty())
                 throw new GitTfsException("Nothing to checkin!");
 
-            var workItemInfos = GetWorkItemInfos();
+            var workItemInfos = GetWorkItemInfos(options);
             var checkinNote = _tfsHelper.CreateCheckinNote(options.CheckinNotes);
 
             var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, options.CheckinComment, checkinNote, workItemInfos);
@@ -173,9 +173,9 @@ namespace Sep.Git.Tfs.Core
             _workspace.GetSpecificVersion(changeset);
         }
 
-        private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos()
+        private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(CheckinOptions options = null)
         {
-            return GetWorkItemInfosHelper<IWorkItemCheckinInfo>(_tfsHelper.GetWorkItemInfos);
+            return GetWorkItemInfosHelper<IWorkItemCheckinInfo>(_tfsHelper.GetWorkItemInfos, options);
         }
 
         private IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos()
@@ -183,11 +183,13 @@ namespace Sep.Git.Tfs.Core
             return GetWorkItemInfosHelper<IWorkItemCheckedInfo>(_tfsHelper.GetWorkItemCheckedInfos);
         }
 
-        private IEnumerable<T> GetWorkItemInfosHelper<T>(Func<IEnumerable<string>, TfsWorkItemCheckinAction, IEnumerable<T>> func)
+        private IEnumerable<T> GetWorkItemInfosHelper<T>(Func<IEnumerable<string>, TfsWorkItemCheckinAction, IEnumerable<T>> func, CheckinOptions options = null)
         {
-            var workItemInfos = func(_checkinOptions.WorkItemsToAssociate, TfsWorkItemCheckinAction.Associate);
+            var checkinOptions = options ?? _checkinOptions;
+
+            var workItemInfos = func(checkinOptions.WorkItemsToAssociate, TfsWorkItemCheckinAction.Associate);
             workItemInfos = workItemInfos.Append(
-                func(_checkinOptions.WorkItemsToResolve, TfsWorkItemCheckinAction.Resolve));
+                func(checkinOptions.WorkItemsToResolve, TfsWorkItemCheckinAction.Resolve));
             return workItemInfos;
         }
     }
