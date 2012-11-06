@@ -15,10 +15,12 @@ namespace Sep.Git.Tfs.VsFake
         #region misc/null
 
         IContainer _container;
+        private TextWriter _stdout;
 
-        public TfsHelper(IContainer container)
+        public TfsHelper(IContainer container, TextWriter stdout)
         {
             _container = container;
+            _stdout = stdout;
         }
 
         public string TfsClientLibraryVersion { get { return "(FAKE)"; } }
@@ -174,12 +176,106 @@ namespace Sep.Git.Tfs.VsFake
 
         #endregion
 
-        #region unimplemented
+        #region workspaces
 
         public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            throw new NotImplementedException();
+            var fakeWorkspace = new FakeWorkspace(directory, remote.TfsRepositoryPath);
+            var workspace = new TfsWorkspace(fakeWorkspace, directory, _stdout, versionToFetch, remote, null, this, null);
+            action(workspace);
         }
+
+        class FakeWorkspace : IWorkspace
+        {
+            string _directory;
+            string _repositoryRoot;
+
+            public FakeWorkspace(string directory, string repositoryRoot)
+            {
+                _directory = directory;
+                _repositoryRoot = repositoryRoot;
+            }
+
+            public void GetSpecificVersion(IChangeset changeset)
+            {
+                var repositoryRoot = _repositoryRoot.ToLower();
+                if(!repositoryRoot.EndsWith("/")) repositoryRoot += "/";
+                foreach (var change in changeset.Changes)
+                {
+                    if (change.Item.ItemType == TfsItemType.File)
+                    {
+                        var outPath = Path.Combine(_directory, change.Item.ServerItem.ToLower().Replace(repositoryRoot, ""));
+                        var outDir = Path.GetDirectoryName(outPath);
+                        if (!Directory.Exists(outDir)) Directory.CreateDirectory(outDir);
+                        using (var download = change.Item.DownloadFile())
+                            File.WriteAllText(outPath, File.ReadAllText(download.Path));
+                    }
+                }
+            }
+
+            #region unimplemented
+
+            public IPendingChange[] GetPendingChanges()
+            {
+                throw new NotImplementedException();
+            }
+
+            public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int PendAdd(string path)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int PendEdit(string path)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int PendDelete(string path)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int PendRename(string pathFrom, string pathTo)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void ForceGetFile(string path, int changeset)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void GetSpecificVersion(int changeset)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string OwnerName
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region unimplemented
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
