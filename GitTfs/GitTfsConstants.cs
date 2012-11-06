@@ -26,6 +26,10 @@ namespace Sep.Git.Tfs
         public static readonly Regex TfsWorkItemRegex =
                 new Regex(GitTfsPrefix + @"-work-item:\s+(?<item_id>\d+)\s+(?<action>.+)");
 
+        // e.g. git-tfs-code-reviewer: John Smith
+        public static readonly Regex TfsCodeReviewerRegex =
+                new Regex(GitTfsPrefix + @"-code-reviewer:\s+(?<reviewer>.+)");
+
         // e.g. git-tfs-force: override reason
         public static readonly Regex TfsForceRegex =
                 new Regex(GitTfsPrefix + @"-force:\s+(?<reason>.+)\s*$");

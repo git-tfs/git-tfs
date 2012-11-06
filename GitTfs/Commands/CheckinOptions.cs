@@ -34,6 +34,7 @@ namespace Sep.Git.Tfs.Commands
 
         private List<string> _workItemsToAssociate = new List<string>();
         private List<string> _workItemsToResolve = new List<string>();
+        private Dictionary<string, string> _checkinNotes = new Dictionary<string,string>();
 
         public string CheckinComment { get; set; }
         // This can be extended to checkin when the $EDITOR is invoked.
@@ -44,5 +45,6 @@ namespace Sep.Git.Tfs.Commands
         public bool OverrideGatedCheckIn { get; set; }
         public List<string> WorkItemsToAssociate { get { return _workItemsToAssociate; } }
         public List<string> WorkItemsToResolve { get { return _workItemsToResolve; } }
+        public Dictionary<string, string> CheckinNotes { get { return _checkinNotes; } }
     }
 }

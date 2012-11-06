@@ -31,6 +31,8 @@ namespace Sep.Git.Tfs.Util
 
             ProcessWorkItemCommands(customCheckinOptions, writer);
 
+            ProcessCheckinNoteCommands(customCheckinOptions, writer);
+
             ProcessForceCommand(customCheckinOptions, writer);
 
             return customCheckinOptions;
@@ -72,6 +74,22 @@ namespace Sep.Git.Tfs.Util
                     }
                 }
                 checkinOptions.CheckinComment = GitTfsConstants.TfsWorkItemRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
+            }
+        }
+
+        private void ProcessCheckinNoteCommands(CheckinOptions checkinOptions, TextWriter writer)
+        {
+            MatchCollection matches;
+            if ((matches = GitTfsConstants.TfsCodeReviewerRegex.Matches(checkinOptions.CheckinComment)).Count == 1)
+            {
+                string reviewer = matches[0].Groups["reviewer"].Value;
+
+                if (!string.IsNullOrWhiteSpace(reviewer))
+                {
+                    writer.WriteLine("Code reviewer: {0}", reviewer);
+                    checkinOptions.CheckinNotes.Add("Code Reviewer", reviewer);
+                }
+                checkinOptions.CheckinComment = GitTfsConstants.TfsCodeReviewerRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
             }
         }
 
