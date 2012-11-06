@@ -86,5 +86,33 @@ namespace Sep.Git.Tfs.Test.Util
             Assert.Contains("1234", specificCheckinOptions.WorkItemsToResolve);
             Assert.Equal(expectedCheckinComment.Replace(Environment.NewLine, "NEWLINE"), specificCheckinOptions.CheckinComment.Replace(Environment.NewLine, "NEWLINE"));
         }
+
+        [Fact]
+        public void Adds_code_reviewer_and_removes_checkin_command_comment()
+        {
+            StringWriter textWriter = new StringWriter();
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter);
+
+            CheckinOptions checkinOptions = new CheckinOptions();
+
+            string commitMessage =
+                "Test message\n" +
+                "\n" +
+                "Some more information,\n" +
+                "in a paragraph.\n" +
+                "\n" +
+                "git-tfs-code-reviewer: John Smith";
+
+            string expectedCheckinComment =
+                "Test message\n" +
+                "\n" +
+                "Some more information,\n" +
+                "in a paragraph.";
+
+            var specificCheckinOptions = factory.BuildCommitSpecificCheckinOptions(checkinOptions, commitMessage);
+            Assert.Equal(1, specificCheckinOptions.CheckinNotes.Count);
+            Assert.Equal("John Smith", specificCheckinOptions.CheckinNotes["Code Reviewer"]);
+            Assert.Equal(expectedCheckinComment, specificCheckinOptions.CheckinComment);
+        }
     }
 }
