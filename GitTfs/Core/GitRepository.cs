@@ -15,7 +15,7 @@ namespace Sep.Git.Tfs.Core
     {
         private readonly IContainer _container;
         private readonly Globals _globals;
-        private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
+        private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>.+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
 
