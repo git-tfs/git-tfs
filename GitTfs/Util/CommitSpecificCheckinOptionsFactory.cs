@@ -50,6 +50,10 @@ namespace Sep.Git.Tfs.Util
             clone.OverrideGatedCheckIn = source.OverrideGatedCheckIn;
             clone.WorkItemsToAssociate.AddRange(source.WorkItemsToAssociate);
             clone.WorkItemsToResolve.AddRange(source.WorkItemsToResolve);
+            foreach (var note in source.CheckinNotes)
+            {
+                clone.CheckinNotes[note.Key] = note.Value;
+            }
 
             return clone;
         }
