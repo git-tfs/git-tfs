@@ -88,7 +88,7 @@ namespace Sep.Git.Tfs.Test.Util
         }
 
         [Fact]
-        public void Adds_code_reviewer_and_removes_checkin_command_comment()
+        public void Adds_reviewers_and_removes_checkin_command_comment()
         {
             StringWriter textWriter = new StringWriter();
             CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter);
@@ -101,7 +101,9 @@ namespace Sep.Git.Tfs.Test.Util
                 "Some more information,\n" +
                 "in a paragraph.\n" +
                 "\n" +
-                "git-tfs-code-reviewer: John Smith";
+                "git-tfs-code-reviewer: John Smith\n" +
+                "git-tfs-security-reviewer: Teddy Knox\n" +
+                "git-tfs-performance-reviewer: Liam Fasterson";
 
             string expectedCheckinComment =
                 "Test message\n" +
@@ -110,8 +112,10 @@ namespace Sep.Git.Tfs.Test.Util
                 "in a paragraph.";
 
             var specificCheckinOptions = factory.BuildCommitSpecificCheckinOptions(checkinOptions, commitMessage);
-            Assert.Equal(1, specificCheckinOptions.CheckinNotes.Count);
+            Assert.Equal(3, specificCheckinOptions.CheckinNotes.Count);
             Assert.Equal("John Smith", specificCheckinOptions.CheckinNotes["Code Reviewer"]);
+            Assert.Equal("Teddy Knox", specificCheckinOptions.CheckinNotes["Security Reviewer"]);
+            Assert.Equal("Liam Fasterson", specificCheckinOptions.CheckinNotes["Performance Reviewer"]);
             Assert.Equal(expectedCheckinComment, specificCheckinOptions.CheckinComment);
         }
     }
