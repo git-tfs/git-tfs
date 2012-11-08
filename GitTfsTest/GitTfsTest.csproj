@@ -85,6 +85,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\InitOptionsTest.cs" />
     <Compile Include="FactExceptOnUnix.cs" />
     <Compile Include="Commands\HelpTest.cs" />
     <Compile Include="Commands\ShelveTest.cs" />
