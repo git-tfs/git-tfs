@@ -83,18 +83,29 @@ namespace Sep.Git.Tfs.Util
 
         private void ProcessCheckinNoteCommands(CheckinOptions checkinOptions, TextWriter writer)
         {
-            MatchCollection matches;
-            if ((matches = GitTfsConstants.TfsCodeReviewerRegex.Matches(checkinOptions.CheckinComment)).Count == 1)
+            foreach (Match match in GitTfsConstants.TfsReviewerRegex.Matches(checkinOptions.CheckinComment))
             {
-                string reviewer = matches[0].Groups["reviewer"].Value;
-
+                string reviewer = match.Groups["reviewer"].Value;
                 if (!string.IsNullOrWhiteSpace(reviewer))
                 {
-                    writer.WriteLine("Code reviewer: {0}", reviewer);
-                    checkinOptions.CheckinNotes.Add("Code Reviewer", reviewer);
+                    switch (match.Groups["type"].Value)
+                    {
+                        case "code":
+                            writer.WriteLine("Code reviewer: {0}", reviewer);
+                            checkinOptions.CheckinNotes.Add("Code Reviewer", reviewer);
+                            break;
+                        case "security":
+                            writer.WriteLine("Security reviewer: {0}", reviewer);
+                            checkinOptions.CheckinNotes.Add("Security Reviewer", reviewer);
+                            break;
+                        case "performance":
+                            writer.WriteLine("Performance reviewer: {0}", reviewer);
+                            checkinOptions.CheckinNotes.Add("Performance Reviewer", reviewer);
+                            break;
+                    }
                 }
-                checkinOptions.CheckinComment = GitTfsConstants.TfsCodeReviewerRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
             }
+            checkinOptions.CheckinComment = GitTfsConstants.TfsReviewerRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
         }
 
         private void ProcessForceCommand(CheckinOptions checkinOptions, TextWriter writer)
