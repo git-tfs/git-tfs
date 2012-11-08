@@ -31,6 +31,8 @@ namespace Sep.Git.Tfs.Util
 
             ProcessWorkItemCommands(customCheckinOptions, writer);
 
+            ProcessCheckinNoteCommands(customCheckinOptions, writer);
+
             ProcessForceCommand(customCheckinOptions, writer);
 
             return customCheckinOptions;
@@ -48,6 +50,10 @@ namespace Sep.Git.Tfs.Util
             clone.OverrideGatedCheckIn = source.OverrideGatedCheckIn;
             clone.WorkItemsToAssociate.AddRange(source.WorkItemsToAssociate);
             clone.WorkItemsToResolve.AddRange(source.WorkItemsToResolve);
+            foreach (var note in source.CheckinNotes)
+            {
+                clone.CheckinNotes[note.Key] = note.Value;
+            }
 
             return clone;
         }
@@ -73,6 +79,33 @@ namespace Sep.Git.Tfs.Util
                 }
                 checkinOptions.CheckinComment = GitTfsConstants.TfsWorkItemRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
             }
+        }
+
+        private void ProcessCheckinNoteCommands(CheckinOptions checkinOptions, TextWriter writer)
+        {
+            foreach (Match match in GitTfsConstants.TfsReviewerRegex.Matches(checkinOptions.CheckinComment))
+            {
+                string reviewer = match.Groups["reviewer"].Value;
+                if (!string.IsNullOrWhiteSpace(reviewer))
+                {
+                    switch (match.Groups["type"].Value)
+                    {
+                        case "code":
+                            writer.WriteLine("Code reviewer: {0}", reviewer);
+                            checkinOptions.CheckinNotes.Add("Code Reviewer", reviewer);
+                            break;
+                        case "security":
+                            writer.WriteLine("Security reviewer: {0}", reviewer);
+                            checkinOptions.CheckinNotes.Add("Security Reviewer", reviewer);
+                            break;
+                        case "performance":
+                            writer.WriteLine("Performance reviewer: {0}", reviewer);
+                            checkinOptions.CheckinNotes.Add("Performance Reviewer", reviewer);
+                            break;
+                    }
+                }
+            }
+            checkinOptions.CheckinComment = GitTfsConstants.TfsReviewerRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
         }
 
         private void ProcessForceCommand(CheckinOptions checkinOptions, TextWriter writer)

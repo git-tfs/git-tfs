@@ -42,7 +42,7 @@ namespace Sep.Git.Tfs.Core
             shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
             if (evaluateCheckinPolicies)
             {
-                foreach (var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, shelveset.WorkItemInfo).Messages)
+                foreach (var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, null, shelveset.WorkItemInfo).Messages)
                 {
                     _stdout.WriteLine("[Checkin Policy] " + message);
                 }
@@ -77,7 +77,9 @@ namespace Sep.Git.Tfs.Core
                 throw new GitTfsException("Nothing to checkin!");
 
             var workItemInfos = GetWorkItemInfos();
-            var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, options.CheckinComment, workItemInfos);
+            var checkinNote = _tfsHelper.CreateCheckinNote(options.CheckinNotes);
+
+            var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, options.CheckinComment, checkinNote, workItemInfos);
             if (checkinProblems.HasErrors)
             {
                 foreach (var message in checkinProblems.Messages)
@@ -102,7 +104,7 @@ namespace Sep.Git.Tfs.Core
             }
 
             var policyOverride = GetPolicyOverrides(options, checkinProblems.Result);
-            var newChangeset = _workspace.Checkin(pendingChanges, options.CheckinComment, null, workItemInfos, policyOverride, options.OverrideGatedCheckIn);
+            var newChangeset = _workspace.Checkin(pendingChanges, options.CheckinComment, checkinNote, workItemInfos, policyOverride, options.OverrideGatedCheckIn);
             if (newChangeset == 0)
             {
                 throw new GitTfsException("Checkin failed!");
