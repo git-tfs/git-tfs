@@ -491,6 +491,23 @@ namespace Sep.Git.Tfs.VsCommon
                     workItems, checkinAction, GetWorkItemCheckedInfo);
         }
 
+        public ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes)
+        {
+            if (checkinNotes.IsEmpty())
+            {
+                return null;
+            }
+
+            var index = 0;
+            var values = new CheckinNoteFieldValue[checkinNotes.Count];
+            foreach (var pair in checkinNotes)
+            {
+                values[index++] = new CheckinNoteFieldValue(pair.Key, pair.Value);
+            }
+
+            return _bridge.Wrap<WrapperForCheckinNote, CheckinNote>(new CheckinNote(values));
+        }
+
         private IEnumerable<TInterface> GetWorkItemInfosHelper<TInterface, TWrapper, TInstance>(
             IEnumerable<string> workItems,
             TfsWorkItemCheckinAction checkinAction,

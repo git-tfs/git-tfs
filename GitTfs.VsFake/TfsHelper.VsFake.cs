@@ -292,6 +292,11 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
+        public ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes)
+        {
+            throw new NotImplementedException();
+        }
+
         public ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote)
         {
             throw new NotImplementedException();
