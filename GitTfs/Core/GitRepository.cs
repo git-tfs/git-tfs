@@ -408,10 +408,9 @@ namespace Sep.Git.Tfs.Core
 
         public string AssertValidBranchName(string gitBranchName)
         {
-            var newGitBranchName = CommandOneline("check-ref-format", "--branch", gitBranchName);
-            if (string.IsNullOrWhiteSpace(newGitBranchName) || newGitBranchName.IndexOf("fatal:") == 0)
+            if (!_repository.Refs.IsValidName("refs/heads/" + gitBranchName))
                 throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
-            return newGitBranchName.Trim();
+            return gitBranchName;
         }
 
         public bool CreateBranch(string gitBranchName, string target)
