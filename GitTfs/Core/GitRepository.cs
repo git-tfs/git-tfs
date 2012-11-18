@@ -30,7 +30,8 @@ namespace Sep.Git.Tfs.Core
 
         ~GitRepository()
         {
-            _repository.Dispose();
+            if (_repository != null)
+                _repository.Dispose();
         }
 
         public string GitDir { get; set; }
