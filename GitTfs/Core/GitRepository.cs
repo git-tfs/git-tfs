@@ -15,7 +15,7 @@ namespace Sep.Git.Tfs.Core
     {
         private readonly IContainer _container;
         private readonly Globals _globals;
-        private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
+        private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>.+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
 
@@ -30,7 +30,8 @@ namespace Sep.Git.Tfs.Core
 
         ~GitRepository()
         {
-            _repository.Dispose();
+            if (_repository != null)
+                _repository.Dispose();
         }
 
         public string GitDir { get; set; }
@@ -403,6 +404,39 @@ namespace Sep.Git.Tfs.Core
         public string HashAndInsertObject(string filename)
         {
             return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
+        }
+
+        public string AssertValidBranchName(string gitBranchName)
+        {
+            if (!_repository.Refs.IsValidName("refs/heads/" + gitBranchName))
+                throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
+            return gitBranchName;
+        }
+
+        public bool CreateBranch(string gitBranchName, string target)
+        {
+            Reference reference;
+            try
+            {
+                reference = _repository.Refs.Create(gitBranchName, target);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return reference != null;
+        }
+
+        public string FindCommitHashByCommitMessage(string patternToFind)
+        {
+            var regex = new Regex(patternToFind);
+            foreach (var branch in _repository.Branches.Where(p => p.IsRemote).ToList())
+            {
+                var commit = branch.Commits.SingleOrDefault(c => regex.IsMatch(c.Message));
+                if (commit != null)
+                    return commit.Sha;
+            }
+            return null;
         }
     }
 }
