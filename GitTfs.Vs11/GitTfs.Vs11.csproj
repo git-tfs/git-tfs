@@ -48,6 +48,7 @@
     <Reference Include="Microsoft.TeamFoundation.Common, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.TeamFoundation.Common.Library, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.TeamFoundation.VersionControl.Client, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.TeamFoundation.VersionControl.Common, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.Client, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="StructureMap">
       <HintPath>..\lib\StructureMap\StructureMap.dll</HintPath>
@@ -64,6 +65,9 @@
   <ItemGroup>
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Common.cs">
       <Link>TfsHelper.Common.cs</Link>
+    </Compile>
+    <Compile Include="..\GitTfs.VsCommon\TfsHelper.PostVs2010.Common.cs">
+      <Link>TfsHelper.PostVs2010.Common.cs</Link>
     </Compile>
     <Compile Include="..\GitTfs.VsCommon\Wrappers.cs">
       <Link>Wrappers.cs</Link>
