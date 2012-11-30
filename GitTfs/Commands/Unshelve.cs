@@ -12,7 +12,7 @@ using Sep.Git.Tfs.Core;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("unshelve")]
-    [Description("unshelve -u <shelve-owner-name> <shelve-name> <destination-branch>")]
+    [Description("unshelve [options] shelve-name destination-branch")]
     [RequiresValidGitRepository]
     public class Unshelve : GitTfsCommand
     {
