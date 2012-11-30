@@ -58,20 +58,8 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(params string[] args)
         {
-            if (!String.IsNullOrWhiteSpace(AuthorsFilePath))
-            {
-                if (!File.Exists(AuthorsFilePath))
-                {
-                    throw new GitTfsException("Authors file cannot be found: '" + AuthorsFilePath + "'");
-                }
-                else
-                {
-                    using (StreamReader sr = new StreamReader(AuthorsFilePath))
-                    {
-                        authors.Parse(sr);
-                    }
-                }
-            }
+            authors.Parse(AuthorsFilePath);
+
             foreach (var remote in GetRemotesToFetch(args))
             {
                 Trace.WriteLine("Fetching from TFS remote " + remote.Id);

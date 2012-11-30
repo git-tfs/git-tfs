@@ -61,6 +61,22 @@ namespace Sep.Git.Tfs.Util
             }
         }
 
-
+        public void Parse(string authorsFilePath)
+        {
+            if (!String.IsNullOrWhiteSpace(authorsFilePath))
+            {
+                if (!File.Exists(authorsFilePath))
+                {
+                    throw new GitTfsException("Authors file cannot be found: '" + authorsFilePath + "'");
+                }
+                else
+                {
+                    using (StreamReader sr = new StreamReader(authorsFilePath))
+                    {
+                        Parse(sr);
+                    }
+                }
+            }
+        }
     }
 }
