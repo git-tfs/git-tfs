@@ -58,7 +58,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(params string[] args)
         {
-            authors.Parse(AuthorsFilePath);
+            authors.Parse(AuthorsFilePath, globals.GitDir);
 
             foreach (var remote in GetRemotesToFetch(args))
             {

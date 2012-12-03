@@ -27,6 +27,7 @@ namespace Sep.Git.Tfs.Test.Commands
         {
             gitRepository = mocks.Get<IGitRepository>();
             mocks.Get<Globals>().Repository = gitRepository;
+            mocks.Get<Globals>().GitDir = ".git";
             remote = MockRepository.GenerateStub<IGitTfsRemote>();
             remote.TfsUsername = "user";
             remote.TfsPassword = "pwd";

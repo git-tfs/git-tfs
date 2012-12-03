@@ -122,7 +122,7 @@ namespace Sep.Git.Tfs.Commands
                 _remoteOptions.Password = defaultRemote.TfsPassword;
             }
 
-            _authors.Parse(AuthorsFilePath);
+            _authors.Parse(AuthorsFilePath, _globals.GitDir);
 
             return defaultRemote;
         }
