@@ -6,6 +6,7 @@ using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -17,18 +18,21 @@ namespace Sep.Git.Tfs.Commands
         private readonly TextWriter _stdout;
         private readonly Globals _globals;
         private readonly Help _helper;
+        private readonly AuthorsFile _authors;
 
         private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
         public string ParentBranch { get; set; }
         public bool CloneAllBranches { get; set; }
+        string AuthorsFilePath { get; set; }
 
-        public InitBranch(TextWriter stdout, Globals globals, Help helper)
+        public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
         {
             this._stdout = stdout;
             this._globals = globals;
             this._helper = helper;
+            this._authors = authors;
         }
 
         public OptionSet OptionSet
@@ -41,6 +45,7 @@ namespace Sep.Git.Tfs.Commands
                     { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
+                    { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
                 };
             }
         }
@@ -116,6 +121,9 @@ namespace Sep.Git.Tfs.Commands
                 _remoteOptions.Username = defaultRemote.TfsUsername;
                 _remoteOptions.Password = defaultRemote.TfsPassword;
             }
+
+            _authors.Parse(AuthorsFilePath, _globals.GitDir);
+
             return defaultRemote;
         }
 
