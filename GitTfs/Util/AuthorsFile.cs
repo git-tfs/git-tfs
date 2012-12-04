@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Util
 {
@@ -61,6 +62,40 @@ namespace Sep.Git.Tfs.Util
             }
         }
 
-
+        public void Parse(string authorsFilePath, string gitDir)
+        {
+            var savedAuthorFile = Path.Combine(gitDir, "git-tfs_authors");
+            if (!String.IsNullOrWhiteSpace(authorsFilePath))
+            {
+                if (!File.Exists(authorsFilePath))
+                {
+                    throw new GitTfsException("Authors file cannot be found: '" + authorsFilePath + "'");
+                }
+                else
+                {
+                    Trace.WriteLine("Reading authors file : " + authorsFilePath);
+                    using (StreamReader sr = new StreamReader(authorsFilePath))
+                    {
+                        Parse(sr);
+                    }
+                    try
+                    {
+                        File.Copy(authorsFilePath, savedAuthorFile, true);
+                    }
+                    catch (Exception) { }
+                }
+            }
+            else
+            {
+                Trace.WriteLine("Reading cached authors file (" + savedAuthorFile+ ")...");
+                if (File.Exists(savedAuthorFile))
+                {
+                    using (StreamReader sr = new StreamReader(savedAuthorFile))
+                    {
+                        Parse(sr);
+                    }
+                }
+            }
+        }
     }
 }
