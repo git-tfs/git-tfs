@@ -170,7 +170,7 @@ namespace Sep.Git.Tfs.Core
 
         public void Get(IChangeset changeset)
         {
-            _workspace.GetSpecificVersion(changeset);
+            changeset.Get(_workspace);
         }
 
         private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(CheckinOptions options = null)
