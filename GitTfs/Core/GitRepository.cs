@@ -105,6 +105,11 @@ namespace Sep.Git.Tfs.Core
             return GetTfsRemotes().ContainsKey(remoteId);
         }
 
+        public bool HasRef(string gitRef)
+        {
+            return _repository.Refs[gitRef] != null;
+        }
+
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
             long currentMaxChangesetId = remote.MaxChangesetId;
