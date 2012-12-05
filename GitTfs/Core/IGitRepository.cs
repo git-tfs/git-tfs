@@ -12,6 +12,7 @@ namespace Sep.Git.Tfs.Core
         void /*or IGitTfsRemote*/ CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions);
         void /*or IGitTfsRemote*/ CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead, RemoteOptions remoteOptions);
         bool HasRemote(string remoteId);
+        bool HasRef(string gitRef);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head, bool includeStubRemotes);
