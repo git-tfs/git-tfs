@@ -223,7 +223,7 @@ namespace Sep.Git.Tfs.VsCommon
             var wrapperForVersionControlServer =
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
             // TODO - containerify this (no `new`)!
-            var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
+            var fakeChangeset = new Unshelveable(shelveset, change, wrapperForVersionControlServer, _bridge);
             var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout, null) { Summary = new TfsChangesetInfo { Remote = remote } };
             return tfsChangeset;
         }
@@ -298,7 +298,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         #region Fake classes for unshelve
 
-        private class FakeChangeset : IChangeset
+        private class Unshelveable : IChangeset
         {
             private readonly Shelveset _shelveset;
             private readonly PendingSet _pendingSet;
@@ -306,13 +306,13 @@ namespace Sep.Git.Tfs.VsCommon
             private readonly TfsApiBridge _bridge;
             private readonly IChange[] _changes;
 
-            public FakeChangeset(Shelveset shelveset, PendingSet pendingSet, IVersionControlServer versionControlServer, TfsApiBridge bridge)
+            public Unshelveable(Shelveset shelveset, PendingSet pendingSet, IVersionControlServer versionControlServer, TfsApiBridge bridge)
             {
                 _shelveset = shelveset;
                 _versionControlServer = versionControlServer;
                 _bridge = bridge;
                 _pendingSet = pendingSet;
-                _changes = _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge, versionControlServer)).Cast<IChange>().ToArray();
+                _changes = _pendingSet.PendingChanges.Select(x => new UnshelveChange(x, _bridge, versionControlServer)).Cast<IChange>().ToArray();
             }
 
             public IChange[] Changes
@@ -344,19 +344,28 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 get { return _versionControlServer; }
             }
+
+            public void Get(IWorkspace workspace)
+            {
+                foreach (var change in _changes)
+                {
+                    var item = (UnshelveItem)change.Item;
+                    item.Get(workspace);
+                }
+            }
         }
 
-        private class FakeChange : IChange
+        private class UnshelveChange : IChange
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
-            private readonly FakeItem _fakeItem;
+            private readonly UnshelveItem _fakeItem;
 
-            public FakeChange(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
+            public UnshelveChange(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
             {
                 _pendingChange = pendingChange;
                 _bridge = bridge;
-                _fakeItem = new FakeItem(_pendingChange, _bridge, versionControlServer);
+                _fakeItem = new UnshelveItem(_pendingChange, _bridge, versionControlServer);
             }
 
             public TfsChangeType ChangeType
@@ -370,14 +379,14 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        private class FakeItem : IItem
+        private class UnshelveItem : IItem
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
             private readonly IVersionControlServer _versionControlServer;
             private long _contentLength = -1;
 
-            public FakeItem(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
+            public UnshelveItem(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
             {
                 _pendingChange = pendingChange;
                 _bridge = bridge;
@@ -445,6 +454,12 @@ namespace Sep.Git.Tfs.VsCommon
                 _contentLength = new FileInfo(temp).Length;
                 return temp;
             }
+
+            public void Get(IWorkspace workspace)
+            {
+                _pendingChange.DownloadShelvedFile(workspace.GetLocalItemForServerItem(_pendingChange.ServerItem));
+            }
+
         }
 
         #endregion

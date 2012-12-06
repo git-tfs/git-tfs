@@ -10,5 +10,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         string Comment { get; }
         int ChangesetId { get; }
         IVersionControlServer VersionControlServer { get; }
+        void Get(IWorkspace workspace);
     }
 }

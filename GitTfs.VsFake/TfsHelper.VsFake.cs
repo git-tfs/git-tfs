@@ -103,6 +103,11 @@ namespace Sep.Git.Tfs.VsFake
             {
                 get { throw new NotImplementedException(); }
             }
+
+            public void Get(IWorkspace workspace)
+            {
+                workspace.GetSpecificVersion(this);
+            }
         }
 
         class Change : IChange, IItem
@@ -261,6 +266,11 @@ namespace Sep.Git.Tfs.VsFake
             }
 
             public void GetSpecificVersion(int changeset)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetLocalItemForServerItem(string serverItem)
             {
                 throw new NotImplementedException();
             }
