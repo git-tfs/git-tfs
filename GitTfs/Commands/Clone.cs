@@ -18,17 +18,24 @@ namespace Sep.Git.Tfs.Commands
         private readonly Fetch fetch;
         private readonly Init init;
         private readonly Globals globals;
+        private readonly InitBranch initBranch;
+        private bool withBranches;
 
-        public Clone(Globals globals, Fetch fetch, Init init)
+        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch)
         {
             this.fetch = fetch;
             this.init = init;
             this.globals = globals;
+            this.initBranch = initBranch;
         }
 
         public OptionSet OptionSet
         {
-            get { return init.OptionSet.Merge(fetch.OptionSet); }
+            get
+            {
+                return init.OptionSet.Merge(fetch.OptionSet)
+                           .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null);
+            }
         }
 
         public int Run(string tfsUrl, string tfsRepositoryPath)
@@ -47,6 +54,11 @@ namespace Sep.Git.Tfs.Commands
                 retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
                 if (retVal == 0) retVal = fetch.Run();
                 if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadAllTfsRemotes().First().RemoteRef);
+                if (retVal == 0 && withBranches && initBranch != null)
+                {
+                    initBranch.CloneAllBranches = true;
+                    retVal = initBranch.Run();
+                }
                 return retVal;
             }
             catch
