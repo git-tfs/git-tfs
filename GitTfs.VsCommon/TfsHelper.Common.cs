@@ -344,6 +344,15 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 get { return _versionControlServer; }
             }
+
+            public void Get(IWorkspace workspace)
+            {
+                foreach (var change in _changes)
+                {
+                    var item = (FakeItem)change.Item;
+                    item.Get(workspace);
+                }
+            }
         }
 
         private class FakeChange : IChange
@@ -445,6 +454,12 @@ namespace Sep.Git.Tfs.VsCommon
                 _contentLength = new FileInfo(temp).Length;
                 return temp;
             }
+
+            public void Get(IWorkspace workspace)
+            {
+                _pendingChange.DownloadShelvedFile(workspace.GetLocalItemForServerItem(_pendingChange.ServerItem));
+            }
+
         }
 
         #endregion
