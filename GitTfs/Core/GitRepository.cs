@@ -437,5 +437,11 @@ namespace Sep.Git.Tfs.Core
             }
             return null;
         }
+
+        public void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate)
+        {
+            if (_repository.Tags[name] == null)
+                _repository.ApplyTag(name, sha, new Signature(Owner, emailOwner, new DateTimeOffset(creationDate)), comment);
+        }
     }
 }

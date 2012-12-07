@@ -351,6 +351,11 @@ namespace Sep.Git.Tfs.VsFake
         {
             throw new NotImplementedException();
         }
+
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }
