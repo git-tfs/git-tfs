@@ -193,6 +193,13 @@ namespace Sep.Git.Tfs.Test.Integration
             AssertEqual(contents, actual, "Contents of " + path);
         }
 
+        public void AssertCommitMessage(string repodir, string commitish, string message)
+        {
+            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
+            var commit = LibGit2Sharp.RepositoryExtensions.Lookup<LibGit2Sharp.Commit>(repo, commitish);
+            AssertEqual(message, commit.Message, "Commit message of " + commitish);
+        }
+		
         private void AssertEqual<T>(T expected, T actual, string message)
         {
             try
