@@ -16,6 +16,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);
         IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
         IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
+        ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes);
         IIdentity GetIdentity(string username);
         ITfsChangeset GetLatestChangeset(GitTfsRemote remote);
         ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote);
@@ -27,7 +28,8 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         bool CanShowCheckinDialog { get; }
         long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
         void CleanupWorkspaces(string workingDirectory);
-
+        int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null);
+        IEnumerable<string> GetAllTfsBranchesOrderedByCreation();
         void EnsureAuthenticated();
     }
 }

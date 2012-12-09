@@ -1,5 +1,6 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
+using Xunit.Sdk;
 
 namespace Sep.Git.Tfs.Test.TestHelpers
 {
@@ -7,14 +8,14 @@ namespace Sep.Git.Tfs.Test.TestHelpers
     {
         public static void AssertStartsWith(this string s, string expected)
         {
-            var start = s.Substring(0, expected.Length);
-            Assert.AreEqual(expected, start, "beginning of string");
+            if (!s.StartsWith(expected))
+                throw new AssertActualExpectedException(expected, s, "Expected start of string");
         }
 
         public static void AssertEndsWith(this string s, string expected)
         {
-            var end = s.Substring(s.Length - expected.Length);
-            Assert.AreEqual(expected, end, "end of string");
+            if(!s.EndsWith(expected))
+                throw new AssertActualExpectedException(expected, s, "Expected end of string");
         }
 
         /// <summary>

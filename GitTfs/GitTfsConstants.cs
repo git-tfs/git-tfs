@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System;
 
 namespace Sep.Git.Tfs
 {
@@ -15,14 +16,22 @@ namespace Sep.Git.Tfs
         public const string TfsCommitInfoFormat = "git-tfs-id: [{0}]{1};C{2}";
         public static readonly Regex TfsCommitInfoRegex =
                 new Regex("^\\s*" +
-                          GitTfsPrefix + 
+                          GitTfsPrefix +
                           "-id:\\s+" +
                           "\\[(?<url>.+)\\]" +
                           "(?<repository>.+);" +
                           "C(?<changeset>\\d+)" +
-                          "\\s*$");
+                          "\\s*$", RegexOptions.Multiline);
         // e.g. git-tfs-work-item: 24 associate
         public static readonly Regex TfsWorkItemRegex =
-                new Regex(GitTfsPrefix + @"-work-item:\s+(?<item_id>\d+)\s(?<action>.+)");
+                new Regex(GitTfsPrefix + @"-work-item:\s*(?<item_id>\d+)\s*(?<action>associate|resolve)");
+
+        // e.g. git-tfs-code-reviewer: John Smith
+        public static readonly Regex TfsReviewerRegex =
+                new Regex(GitTfsPrefix + @"-(?<type>code|security|performance)-reviewer:\s*(?<reviewer>.+)");
+
+        // e.g. git-tfs-force: override reason
+        public static readonly Regex TfsForceRegex =
+                new Regex(GitTfsPrefix + @"-force:\s*(?<reason>.+)\s*$");
     }
 }

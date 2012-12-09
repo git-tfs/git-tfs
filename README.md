@@ -69,3 +69,8 @@ please see [the wiki](http://github.com/git-tfs/git-tfs/wiki/Contributing).
 `#git-tfs` on FreeNode, and the [mailing list](https://groups.google.com/group/git-tfs-dev)
 
 
+[![Build Status](https://secure.travis-ci.org/git-tfs/git-tfs.png)](http://travis-ci.org/git-tfs/git-tfs)
+
+Thanks to [travis-ci](http://travis-ci.org/) and [jetbrains](http://www.jetbrains.com/teamcity)
+([teamcity](http://teamcity.codebetter.org/))
+for providing CI!

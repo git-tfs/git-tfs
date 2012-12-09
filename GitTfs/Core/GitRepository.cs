@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Core
     {
         private readonly IContainer _container;
         private readonly Globals _globals;
-        private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>[^.]+)\\.(?<key>[^.=]+)=(?<value>.*)$");
+        private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>.+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
 
@@ -29,7 +29,8 @@ namespace Sep.Git.Tfs.Core
 
         ~GitRepository()
         {
-            _repository.Dispose();
+            if (_repository != null)
+                _repository.Dispose();
         }
 
         public string GitDir { get; set; }
@@ -101,6 +102,11 @@ namespace Sep.Git.Tfs.Core
         public bool HasRemote(string remoteId)
         {
             return GetTfsRemotes().ContainsKey(remoteId);
+        }
+
+        public bool HasRef(string gitRef)
+        {
+            return _repository.Refs[gitRef] != null;
         }
 
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
@@ -308,13 +314,23 @@ namespace Sep.Git.Tfs.Core
 
         public string GetCommitMessage(string head, string parentCommitish)
         {
-            System.Text.StringBuilder message = new System.Text.StringBuilder();
+            var message = new System.Text.StringBuilder();
             foreach (LibGit2Sharp.Commit comm in
                 _repository.Commits.QueryBy(new LibGit2Sharp.Filter { Since = head, Until = parentCommitish }))
             {
-                message.AppendLine(comm.Message);
+                // Normalize commit message line endings to CR+LF style, so that message
+                // would be correctly shown in TFS commit dialog.
+                message.AppendLine(NormalizeLineEndings(comm.Message));
             }
-            return message.ToString();
+
+            return GitTfsConstants.TfsCommitInfoRegex.Replace(message.ToString(), "").Trim(' ', '\r', '\n');
+        }
+
+        private static string NormalizeLineEndings(string input)
+        {
+            return string.IsNullOrEmpty(input)
+                ? input
+                : input.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "\r\n");
         }
 
         private void ParseEntries(IDictionary<string, GitObject> entries, Tree treeInfo, string commit)
@@ -329,12 +345,13 @@ namespace Sep.Git.Tfs.Core
                     {
                         treesToDescend.Enqueue((Tree)item.Target);
                     }
-                    entries[item.Path] = new GitObject
+                    var path = item.Path.Replace('\\', '/');
+                    entries[path] = new GitObject
                     {
                         Mode = item.Mode.ToModeString(),
                         Sha = item.Target.Sha,
                         ObjectType = item.Type.ToString().ToLower(),
-                        Path = item.Path,
+                        Path = path,
                         Commit = commit
                     };
                 }
@@ -386,6 +403,39 @@ namespace Sep.Git.Tfs.Core
         public string HashAndInsertObject(string filename)
         {
             return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
+        }
+
+        public string AssertValidBranchName(string gitBranchName)
+        {
+            if (!_repository.Refs.IsValidName("refs/heads/" + gitBranchName))
+                throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
+            return gitBranchName;
+        }
+
+        public bool CreateBranch(string gitBranchName, string target)
+        {
+            Reference reference;
+            try
+            {
+                reference = _repository.Refs.Create(gitBranchName, target);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return reference != null;
+        }
+
+        public string FindCommitHashByCommitMessage(string patternToFind)
+        {
+            var regex = new Regex(patternToFind);
+            foreach (var branch in _repository.Branches.Where(p => p.IsRemote).ToList())
+            {
+                var commit = branch.Commits.SingleOrDefault(c => regex.IsMatch(c.Message));
+                if (commit != null)
+                    return commit.Sha;
+            }
+            return null;
         }
     }
 }

@@ -5,10 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsFake;
+using Xunit;
+using Xunit.Sdk;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
@@ -116,8 +117,8 @@ namespace Sep.Git.Tfs.Test.Integration
             startInfo.EnvironmentVariables["GIT_TFS_CLIENT"] = "Fake";
             startInfo.EnvironmentVariables[Script.EnvVar] = FakeScript;
             startInfo.EnvironmentVariables["Path"] = CurrentBuildPath + ";" + Environment.GetEnvironmentVariable("Path");
-            startInfo.FileName = "git";
-            startInfo.Arguments = "tfs --debug " + String.Join(" ", args);
+            startInfo.FileName = "cmd";
+            startInfo.Arguments = "/c git tfs --debug " + String.Join(" ", args);
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
             Console.WriteLine("PATH: " + startInfo.EnvironmentVariables["Path"]);
@@ -143,13 +144,13 @@ namespace Sep.Git.Tfs.Test.Integration
         public void AssertGitRepo(string repodir)
         {
             var path = Path.Combine(Workdir, repodir);
-            Assert.IsTrue(Directory.Exists(path), path + " should be a directory");
-            Assert.IsTrue(Directory.Exists(Path.Combine(path, ".git")), path + " should have a .git dir inside of it");
+            Assert.True(Directory.Exists(path), path + " should be a directory");
+            Assert.True(Directory.Exists(Path.Combine(path, ".git")), path + " should have a .git dir inside of it");
         }
 
         public void AssertRef(string repodir, string gitref, string expectedSha)
         {
-            Assert.AreEqual(expectedSha, RevParse(repodir, gitref), "Expected " + gitref + " to be " + expectedSha);
+            AssertEqual(expectedSha, RevParse(repodir, gitref), "Expected " + gitref + " to be " + expectedSha);
         }
 
         private string RevParse(string repodir, string gitref)
@@ -175,28 +176,40 @@ namespace Sep.Git.Tfs.Test.Integration
             entries.Remove(".");
             entries.Remove("..");
             entries.Remove(".git");
-            Assert.AreEqual("", String.Join(", ", entries.ToArray()), "other entries in " + repodir);
+            AssertEqual(new List<string>(), entries, "entries in " + repodir);
         }
 
         public void AssertCleanWorkspace(string repodir)
         {
             var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
             var status = repo.Index.RetrieveStatus();
-            var statusString = String.Join("\n", status.Select(statusEntry => "" + statusEntry.State + ": " + statusEntry.FilePath).ToArray());
-            Assert.AreEqual("", statusString, "repo status");
+            AssertEqual(new List<string>(), status.Select(statusEntry => "" + statusEntry.State + ": " + statusEntry.FilePath).ToList(), "repo status");
         }
 
         public void AssertFileInWorkspace(string repodir, string file, string contents)
         {
             var path = Path.Combine(Workdir, repodir, file);
-            Assert.AreEqual(contents, File.ReadAllText(path, Encoding.UTF8), "Contents of " + path); // UTF-8 is the default, but let's be explicit about it
+            var actual = File.ReadAllText(path, Encoding.UTF8);
+            AssertEqual(contents, actual, "Contents of " + path);
         }
 
         public void AssertCommitMessage(string repodir, string commitish, string message)
         {
             var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
             var commit = LibGit2Sharp.RepositoryExtensions.Lookup<LibGit2Sharp.Commit>(repo, commitish);
-            Assert.AreEqual(message, commit.Message);
+            AssertEqual(message, commit.Message, "Commit message of " + commitish);
+        }
+		
+        private void AssertEqual<T>(T expected, T actual, string message)
+        {
+            try
+            {
+                Assert.Equal(expected, actual);
+            }
+            catch (AssertActualExpectedException)
+            {
+                throw new AssertActualExpectedException(expected, actual, message);
+            }
         }
 
         #endregion

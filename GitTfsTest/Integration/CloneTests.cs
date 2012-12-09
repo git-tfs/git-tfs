@@ -1,35 +1,32 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Xunit;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
     //NOTE: All timestamps in these tests must specify a time zone. If they don't, the local time zone will be used in the DateTime,
     //      but the commit timestamp will use the ToUniversalTime() version of the DateTime.
     //      This will cause the hashes to differ on computers in different time zones.
-    [TestClass]
-    public class CloneTests
+    public class CloneTests : IDisposable
     {
         IntegrationHelper h;
 
-        [TestInitialize]
-        public void Setup()
+        public CloneTests()
         {
             h = new IntegrationHelper();
         }
 
-        [TestCleanup]
-        public void Teardown()
+        public void Dispose()
         {
             h.Dispose();
         }
 
-        [TestMethod, Ignore]
+        [FactExceptOnUnix(Skip="eventually")]
         public void FailOnNoProject()
         {
         }
 
-        [TestMethod, Ignore]
+        [FactExceptOnUnix(Skip="eventually")]
         public void ClonesEmptyProject()
         {
             h.SetupFake(r =>
@@ -46,7 +43,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertEmptyWorkspace("MyProject");
         }
 
-        [TestMethod]
+        [FactExceptOnUnix]
         public void CloneProjectWithChangesets()
         {
             h.SetupFake(r =>
@@ -68,7 +65,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
         }
 
-        [TestMethod]
+        [FactExceptOnUnix]
         public void CloneProjectWithInternationalCharactersInFileNamesAndFolderNames()
         {
             h.SetupFake(r =>
@@ -85,7 +82,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "ÆØÅ/äöü.txt", "File contents");
         }
 
-        [TestMethod]
+        [FactExceptOnUnix]
         public void CloneProjectWithInternationalCharactersInFileContents()
         {
             h.SetupFake(r =>
@@ -102,7 +99,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "Blåbærsyltetøy er godt!");
         }
 
-        [TestMethod]
+        [FactExceptOnUnix]
         public void CloneProjectWithInternationalCharactersInCommitMessages()
         {
             h.SetupFake(r =>
@@ -133,23 +130,25 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertRef("MyProject", "tfs/default", expectedSha);
         }
 
-        [TestMethod]
-        public void CloneWithtMixedUpCase()
+        [FactExceptOnUnix]
+        public void CloneWithMixedUpCase()
         {
             h.SetupFake(r =>
             {
-                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12"))
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
                     .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
-                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12"))
-                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Folder")
-                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "File contents")
-                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr");
-                r.Changeset(2, "Second commit", DateTime.Parse("2012-01-02 12:12:12"))
-                    .Change(TfsChangeType.Add, TfsItemType.File, "$/myproject/folder/file2.txt", "File contents in lowercase path");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Foo")
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Foo/Bar")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Foo/Bar/File.txt", "File contents");
+                r.Changeset(3, "Second commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Edit, TfsItemType.File, "$/myproject/foo/BAR/file.txt", "Updated file contents in path with different casing")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/myproject/FOO/bar/file2.txt", "Another file in the same folder, but with different casing");
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
             h.AssertCleanWorkspace("MyProject");
+            AssertRefs("70cdbdca83c3808e60bc1f8cde7e155055447df7");
         }
     }
 }

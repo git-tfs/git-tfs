@@ -32,6 +32,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -108,9 +110,6 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\GitTfs.VsCommon\TfsApiBridge.cs">
-      <Link>TfsApiBridge.cs</Link>
-    </Compile>
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Common.cs">
       <Link>TfsHelper.Common.cs</Link>
     </Compile>
@@ -159,4 +158,5 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy /y "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

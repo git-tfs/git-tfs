@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using NDesk.Options;
 using Sep.Git.Tfs.Util;
+using System;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -25,6 +26,12 @@ namespace Sep.Git.Tfs.Commands
                     { "w|work-item=:", "Associated work items\ne.g. -w12345 to associate with 12345\nor -w12345:resolve to resolve 12345",
                         (n, opt) => { if(n == null) throw new OptionException("Missing work item number for option -w.", "-w");
                             (opt == "resolve" ? WorkItemsToResolve : WorkItemsToAssociate).Add(n); } },
+                    { "c|code-reviewer=", "Set code reviewer\ne.g. -c \"John Smith\"",
+                        (reviewer) => { CheckinNotes["Code Reviewer"] = reviewer; } },
+                    { "s|security-reviewer=", "Set security reviewer\ne.g. -s \"John Smith\"",
+                        (reviewer) => { CheckinNotes["Security Reviewer"] = reviewer; } },
+                    { "p|performance-reviewer=", "Set performance reviewer\ne.g. -p \"John Smith\"",
+                        (reviewer) => { CheckinNotes["Performance Reviewer"] = reviewer; } },
                     { "no-gate", "Disables gated checkin.",
                         v => { OverrideGatedCheckIn = true; } },
                 };
@@ -33,6 +40,7 @@ namespace Sep.Git.Tfs.Commands
 
         private List<string> _workItemsToAssociate = new List<string>();
         private List<string> _workItemsToResolve = new List<string>();
+        private Dictionary<string, string> _checkinNotes = new Dictionary<string,string>();
 
         public string CheckinComment { get; set; }
         // This can be extended to checkin when the $EDITOR is invoked.
@@ -43,5 +51,6 @@ namespace Sep.Git.Tfs.Commands
         public bool OverrideGatedCheckIn { get; set; }
         public List<string> WorkItemsToAssociate { get { return _workItemsToAssociate; } }
         public List<string> WorkItemsToResolve { get { return _workItemsToResolve; } }
+        public Dictionary<string, string> CheckinNotes { get { return _checkinNotes; } }
     }
 }
