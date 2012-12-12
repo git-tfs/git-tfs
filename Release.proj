@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Project ToolsVersion="4.0" DefaultTargets="Help" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Target Name="Help">
+    <ReadLinesFromFile File="Releasing.md">
+      <Output TaskParameter="Lines" ItemName="DeployInstructions"/>
+    </ReadLinesFromFile>
+    <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />    
+  </Target>
+
+</Project>
