@@ -8,4 +8,8 @@
     <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />    
   </Target>
 
+  <Target Name="Build">
+    <MSBuild Projects="GitTfs.sln" Targets="Rebuild" Properties="Configuration=Release" />
+  </Target>
+
 </Project>
