@@ -360,15 +360,27 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
         {
+            var filesInCommit = GetCommit(to).GetTree().Select(entry => entry.Entry.Path.ToLowerInvariant());
+
             using (var diffOutput = CommandOutputPipe("diff-tree", "-r", "-M", "-z", from, to))
             {
                 var changes = GitChangeInfo.GetChangedFiles(diffOutput);
+                var changedFiles = new List<IGitChangedFile>();
                 foreach (var change in changes)
                 {
-                    yield return BuildGitChangedFile(change);
+                    changedFiles.Add(BuildGitChangedFile(change));
+                    if (change.Status == "D" && !IsDirectoryContainingFiles(filesInCommit, Path.GetDirectoryName(change.path).ToLowerInvariant()))
+                        changedFiles.Add(new Sep.Git.Tfs.Core.Changes.Git.Delete(Path.GetDirectoryName(change.path)));
                 }
+                return changedFiles;
             }
         }
+
+        public bool IsDirectoryContainingFiles(IEnumerable<string> filesInCommit, string directoryPath)
+        {
+            return filesInCommit.FirstOrDefault(f => f.IndexOf(directoryPath) == 0) != null;
+        }
+
 
         private IGitChangedFile BuildGitChangedFile(GitChangeInfo change)
         {
