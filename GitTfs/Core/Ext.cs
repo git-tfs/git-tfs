@@ -123,13 +123,12 @@ namespace Sep.Git.Tfs.Core
         }
 
         /// <summary>
-        /// Force the <paramref name="stream"/> to use UTF-8 without byte order mark.
-        /// For the StdIn-interactions with git it is important to use this encoding, 
-        /// and not the current terminal codepage. The reason for using UTF-8 instead 
-        /// of ANSI is that this allows for file names with international characters.
+        /// The encoding used by a stream is a read-only property. Use this method to
+        /// create a new stream based on <paramref name="stream"/> that uses
+        /// the given <paramref name="encoding"/> instead.
         /// </summary>
-        public static StreamWriter WithUTF8EncodingWithoutBOM(this StreamWriter stream) {
-            return new StreamWriter(stream.BaseStream, new UTF8Encoding(false));
+        public static StreamWriter WithEncoding(this StreamWriter stream, Encoding encoding) {
+            return new StreamWriter(stream.BaseStream, encoding);
         }
     }
 }

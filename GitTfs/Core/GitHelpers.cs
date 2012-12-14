@@ -12,6 +12,12 @@ namespace Sep.Git.Tfs.Core
         private readonly TextWriter realStdout;
         private readonly IContainer _container;
 
+        /// <summary>
+        /// Starting with version 1.7.10, Git uses UTF-8.
+        /// Use this encoding for Git input and output.
+        /// </summary>
+        private static Encoding _encoding = new UTF8Encoding(false, true);
+
         public GitHelpers(TextWriter stdout, IContainer container)
         {
             realStdout = stdout;
@@ -157,7 +163,7 @@ namespace Sep.Git.Tfs.Core
                               {
                                   AssertValidCommand(command);
                                   var process = Start(command, RedirectStdin);
-                                  action(process.StandardInput.WithUTF8EncodingWithoutBOM());
+                                  action(process.StandardInput.WithEncoding(_encoding));
                                   Close(process);
                               });
         }
@@ -168,8 +174,7 @@ namespace Sep.Git.Tfs.Core
                               {
                                   AssertValidCommand(command);
                                   var process = Start(command, Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
-                                  var encoding = new UTF8Encoding(false);
-                                  interact(new StreamWriter(process.StandardInput.BaseStream, encoding), new StreamReader(process.StandardOutput.BaseStream, encoding));
+                                  interact(process.StandardInput.WithEncoding(_encoding), process.StandardOutput);
                                   Close(process);
                               });
         }
@@ -208,12 +213,19 @@ namespace Sep.Git.Tfs.Core
         private void RedirectStdout(ProcessStartInfo startInfo)
         {
             startInfo.RedirectStandardOutput = true;
-            startInfo.StandardOutputEncoding = Encoding.Default;
+            startInfo.StandardOutputEncoding = _encoding;
+        }
+
+        private void RedirectStderr(ProcessStartInfo startInfo)
+        {
+           startInfo.RedirectStandardError= true;
+           startInfo.StandardErrorEncoding = _encoding;
         }
 
         private void RedirectStdin(ProcessStartInfo startInfo)
         {
             startInfo.RedirectStandardInput = true;
+            // there is no StandardInputEncoding property, use extension method StreamWriter.WithEncoding instead
         }
 
         private Process Start(string[] command)
@@ -228,7 +240,7 @@ namespace Sep.Git.Tfs.Core
             startInfo.SetArguments(command);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardError = true;
+            RedirectStderr(startInfo);
             initialize(startInfo);
             Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments, "git command");
             var process = Process.Start(startInfo);
