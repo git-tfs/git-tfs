@@ -85,17 +85,16 @@ namespace Sep.Git.Tfs.Util
                     catch (Exception) { }
                 }
             }
-            else
+            else if (File.Exists(savedAuthorFile))
             {
-                Trace.WriteLine("Reading cached authors file (" + savedAuthorFile+ ")...");
-                if (File.Exists(savedAuthorFile))
+                Trace.WriteLine("Reading cached authors file (" + savedAuthorFile + ")...");
+                using (StreamReader sr = new StreamReader(savedAuthorFile))
                 {
-                    using (StreamReader sr = new StreamReader(savedAuthorFile))
-                    {
-                        Parse(sr);
-                    }
+                    Parse(sr);
                 }
             }
+            else
+                Trace.WriteLine("No authors file used.");
         }
     }
 }
