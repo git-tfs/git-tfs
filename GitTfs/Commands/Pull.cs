@@ -44,7 +44,14 @@ namespace Sep.Git.Tfs.Commands
             {
                 var remote = globals.Repository.ReadTfsRemote(remoteId);
                 if (_shouldRebase)
+                {
+                    if (globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
+                    {
+                        throw new GitTfsException("error: You have local changes; rebase-workflow only possible with clean working directory.")
+                            .WithRecommendation("Try 'git stash' to stash your local changes and pull again.");
+                    }
                     globals.Repository.CommandNoisy("rebase", remote.RemoteRef);
+                }
                 else
                     globals.Repository.CommandNoisy("merge", remote.RemoteRef);
             }
