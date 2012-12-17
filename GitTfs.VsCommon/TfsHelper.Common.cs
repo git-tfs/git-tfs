@@ -555,5 +555,20 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return new WorkItemCheckedInfo(Convert.ToInt32(workitem), true, checkinAction);
         }
+
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch)
+        {
+            var labels = VersionControl.QueryLabels(null, tfsPathBranch, null, true, tfsPathBranch, VersionSpec.Latest);
+            return labels.Select(e => new TfsLabel {
+                Id = e.LabelId,
+                Name = e.Name,
+                Comment = e.Comment,
+                ChangesetId = e.Items.Where(i=>i.ServerItem.IndexOf(tfsPathBranch) == 0).OrderByDescending(i=>i.ChangesetId).First().ChangesetId,
+                Owner = e.OwnerName,
+                Date = e.LastModifiedDate,
+                IsTransBranch = (e.Items.FirstOrDefault(i => i.ServerItem.IndexOf(tfsPathBranch) != 0) != null)
+            });
+        }
+
     }
 }
