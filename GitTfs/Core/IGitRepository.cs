@@ -27,5 +27,6 @@ namespace Sep.Git.Tfs.Core
         string AssertValidBranchName(string gitBranchName);
         bool CreateBranch(string gitBranchName, string target);
         string FindCommitHashByCommitMessage(string patternToFind);
+        void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate);
     }
 }
