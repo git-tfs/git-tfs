@@ -1,4 +1,5 @@
-﻿namespace Sep.Git.Tfs.Core.Changes.Git
+﻿using System.IO;
+namespace Sep.Git.Tfs.Core.Changes.Git
 {
     public class Delete : IGitChangedFile
     {
@@ -12,6 +13,10 @@
         public void Apply(ITfsWorkspace workspace)
         {
             workspace.Delete(Path);
+            var directoryPath = System.IO.Path.GetDirectoryName(Path);
+            var files = Directory.GetFiles(directoryPath);
+            if (files.Length == 0)
+                workspace.Delete(directoryPath);
         }
     }
 }
