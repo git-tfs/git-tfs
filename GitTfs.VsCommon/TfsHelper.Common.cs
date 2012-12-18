@@ -118,9 +118,11 @@ namespace Sep.Git.Tfs.VsCommon
                 .Select(changeset => BuildTfsChangeset(changeset, remote));
         }
 
+        public virtual bool CanGetBranchInformation { get { return false; } }
+
         public virtual IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
         {
-            throw new GitTfsException("This version of TFS Server doesn't permit to use this command :(");
+            throw new NotImplementedException();
         }
 
         public virtual int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)

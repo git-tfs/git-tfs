@@ -16,6 +16,8 @@ namespace Sep.Git.Tfs.VsCommon
         {
         }
 
+        public override bool CanGetBranchInformation { get { return true; } }
+
         public override IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
         {
             return VersionControl.QueryRootBranchObjects(RecursionType.Full).Select(b => b.Properties.RootItem.Item);

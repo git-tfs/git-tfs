@@ -99,14 +99,9 @@ namespace Sep.Git.Tfs.Commands
             if (initBranch != null)
             {
                 var remote = globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
-                List<string> tfsBranchesPath;
-                try
-                {
-                    tfsBranchesPath = remote.Tfs.GetAllTfsBranchesOrderedByCreation().ToList();
-                }
-                //Catch GitTfsException for TFS2008 where GetAllTfsBranchesOrderedByCreation() is not supported/implemented
-                //=>No control could be done!
-                catch (GitTfsException) { return; }
+                if (!remote.Tfs.CanGetBranchInformation)
+                    return;
+                var tfsBranchesPath = remote.Tfs.GetAllTfsBranchesOrderedByCreation().ToList();
                 var tfsPathToClone = tfsRepositoryPath.TrimEnd('/').ToLower();
                 var tfsTrunkRepositoryPath = tfsBranchesPath.First();
                 if (tfsPathToClone != tfsTrunkRepositoryPath.ToLower())
