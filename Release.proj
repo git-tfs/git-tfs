@@ -2,26 +2,29 @@
 <Project ToolsVersion="4.0" DefaultTargets="Help" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <SolutionDir>./</SolutionDir>
-    <BuildDir>$(SolutionDir)\GitTfs\bin\Release</BuildDir>
-    <PackagedDir>$(SolutionDir)\Releases</PackagedDir>
+    <SolutionDir>.</SolutionDir>
+    <BuildDir>$(SolutionDir)/GitTfs/bin/Release</BuildDir>
+    <PackagedDir>$(SolutionDir)/Releases</PackagedDir>
     <TargetPlatform>AnyCPU</TargetPlatform>
-    <TargetPlatform Condition="Exists('$(SolutionDir)\GitTfs.Vs2008\GitTfs.Vs2008.csproj')">x86</TargetPlatform>
+    <TargetPlatform Condition="Exists('$(SolutionDir)/GitTfs.Vs2008/GitTfs.Vs2008.csproj')">x86</TargetPlatform>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackagesConfig>$(SolutionDir)/.nuget/packages.config</PackagesConfig>
     <RequireRestoreConsent>false</RequireRestoreConsent>
-    <MSBuildCommunityTasksPath>$(SolutionDir)\packages\MSBuildTasks.1.4.0.45\tools</MSBuildCommunityTasksPath>
-    <MSBuildCommunityTasksLib>$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.dll</MSBuildCommunityTasksLib>
+    <MSBuildCommunityTasksPath>$(SolutionDir)/packages/MSBuildTasks.1.4.0.45/tools</MSBuildCommunityTasksPath>
+    <MSBuildCommunityTasksLib>$(MSBuildCommunityTasksPath)/MSBuild.Community.Tasks.dll</MSBuildCommunityTasksLib>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <Import Project="$(SolutionDir)/.nuget/nuget.targets" />
 
   <Target Name="Help">
     <ReadLinesFromFile File="Releasing.md">
       <Output TaskParameter="Lines" ItemName="DeployInstructions"/>
     </ReadLinesFromFile>
-    <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />    
+    <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />
+  </Target>
+
+  <Target Name="Release" DependsOnTargets="Build; Package">
   </Target>
 
   <Target Name="Build">
@@ -30,21 +33,25 @@
 
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Zip" />
   <ItemGroup>
-    <ReleaseFiles Include="$(SolutionDir)\README.md" />
-    <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
-    <ReleaseFiles Include="$(SolutionDir)\NOTICE" />
-    <ReleaseFiles Include="$(BuildDir)\git-tfs.exe" />
-    <ReleaseFiles Include="$(BuildDir)\*.config" />
-    <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
+    <ReleaseFiles Include="$(SolutionDir)/README.md" />
+    <ReleaseFiles Include="$(SolutionDir)/LICENSE" />
+    <ReleaseFiles Include="$(SolutionDir)/NOTICE" />
+    <ReleaseFiles Include="$(BuildDir)/git-tfs.exe" />
+    <ReleaseFiles Include="$(BuildDir)/*.config" />
+    <ReleaseFiles Include="$(BuildDir)/*.dll" Exclude="$(BuildDir)/Microsoft.*.dll" />
+    <ReleaseFiles Include="$(BuildDir)/NativeBinaries/**/*.*" />
   </ItemGroup>
   <Target Name="Package" DependsOnTargets="RestorePackages; Version">
-    <Zip Files="@(ReleaseFiles)" ZipFileName="$(PackagedDir)\GitTfs-$(Version).zip" WorkingDirectory="$(BuildDir)" />
+    <Zip Files="@(ReleaseFiles)" ZipFileName="$(Archive)" WorkingDirectory="$(BuildDir)" />
   </Target>
 
   <Target Name="Version">
     <ReadLinesFromFile File="$(SolutionDir)\VERSION">
       <Output TaskParameter="Lines" PropertyName="Version" />
     </ReadLinesFromFile>
+    <PropertyGroup>
+      <Archive>$(PackagedDir)/GitTfs-$(Version).zip</Archive>
+    </PropertyGroup>
   </Target>
 
 </Project>
