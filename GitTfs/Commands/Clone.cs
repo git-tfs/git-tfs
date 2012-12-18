@@ -20,13 +20,15 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly InitBranch initBranch;
         private bool withBranches;
+        private TextWriter stdout;
 
-        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch)
+        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout)
         {
             this.fetch = fetch;
             this.init = init;
             this.globals = globals;
             this.initBranch = initBranch;
+            this.stdout = stdout;
         }
 
         public OptionSet OptionSet
@@ -52,6 +54,9 @@ namespace Sep.Git.Tfs.Commands
             {
                 var retVal = 0;
                 retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+
+                VerifyTfsPathToClone(tfsRepositoryPath);
+
                 if (retVal == 0) retVal = fetch.Run();
                 if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadAllTfsRemotes().First().RemoteRef);
                 if (retVal == 0 && withBranches && initBranch != null)
@@ -86,6 +91,46 @@ namespace Sep.Git.Tfs.Commands
                 }
 
                 throw;
+            }
+        }
+
+        private void VerifyTfsPathToClone(string tfsRepositoryPath)
+        {
+            if (initBranch != null)
+            {
+                var remote = globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
+                List<string> tfsBranchesPath;
+                try
+                {
+                    tfsBranchesPath = remote.Tfs.GetAllTfsBranchesOrderedByCreation().ToList();
+                }
+                //Catch GitTfsException for TFS2008 where GetAllTfsBranchesOrderedByCreation() is not supported/implemented
+                //=>No control could be done!
+                catch (GitTfsException) { return; }
+                var tfsPathToClone = tfsRepositoryPath.TrimEnd('/').ToLower();
+                var tfsTrunkRepositoryPath = tfsBranchesPath.First();
+                if (tfsPathToClone != tfsTrunkRepositoryPath.ToLower())
+                {
+                    if (tfsBranchesPath.Select(e=>e.ToLower()).Contains(tfsPathToClone))
+                        stdout.WriteLine("info: you are going to clone a branch instead of the trunk ( {0} )\n"
+                            + "   => If you want to manage branches with git-tfs, clone {0} with '--with-branches' option instead...)", tfsTrunkRepositoryPath);
+                    else
+                    {
+                        if (tfsTrunkRepositoryPath.ToLower().IndexOf(tfsPathToClone) == 0)
+                        {
+                            if (withBranches)
+                                throw new GitTfsException("error: cloning the whole repository doesn't permit to manage branches!\n"
+                                    + "   =>If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " instead...");
+                            stdout.WriteLine("warning: you are going to clone the whole repository!\n"
+                                + "   =>If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " instead...");
+                        }
+                        else
+                        {
+                            stdout.WriteLine("warning: you are going to clone a subdirectory of a branch and won't be able to manage branches :(\n"
+                                + "   => If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " with '--with-branches' option instead...)");
+                        }
+                    }
+                }
             }
         }
 
