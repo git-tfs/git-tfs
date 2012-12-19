@@ -188,17 +188,6 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.OK;
         }
 
-        private string RemoveNotAllowedChars(string expectedBranchName)
-        {
-            expectedBranchName = expectedBranchName.Replace("@{", string.Empty);
-            expectedBranchName = expectedBranchName.Replace("..", string.Empty);
-            expectedBranchName = expectedBranchName.Replace("//", string.Empty);
-            expectedBranchName = expectedBranchName.Replace("/.", "/");
-            expectedBranchName = expectedBranchName.TrimEnd('.');
-            expectedBranchName = expectedBranchName.Trim('/');
-            return System.Text.RegularExpressions.Regex.Replace(expectedBranchName, @"[!~$?[*^: \\]", string.Empty);
-        }
-
         protected string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
         {
             string gitBranchNameExpected;
@@ -210,8 +199,8 @@ namespace Sep.Git.Tfs.Commands
             {
                 gitBranchNameExpected = tfsRepositoryPath;
             }
-            gitBranchNameExpected = gitBranchNameExpected.TrimEnd('/', '.');
-            var gitBranchName = _globals.Repository.AssertValidBranchName(RemoveNotAllowedChars(gitBranchNameExpected.Trim()));
+            gitBranchNameExpected = gitBranchNameExpected.ToGitRefName();
+            var gitBranchName = _globals.Repository.AssertValidBranchName(gitBranchNameExpected);
             _stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
             return gitBranchName;
         }
