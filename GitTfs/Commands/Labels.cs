@@ -84,8 +84,9 @@ namespace Sep.Git.Tfs.Commands
         private int CreateLabelsForTfsBranch(IGitTfsRemote tfsRemote)
         {
             UpdateRemote(tfsRemote);
-            Trace.WriteLine("Looking for label on " + tfsRemote.TfsRepositoryPath);
+            _stdout.WriteLine("Looking for label on " + tfsRemote.TfsRepositoryPath + "...");
             var labels = tfsRemote.Tfs.GetLabels(tfsRemote.TfsRepositoryPath);
+            _stdout.WriteLine(labels.Count() +" labels found!");
             foreach (var label in labels)
             {
                 Trace.WriteLine("LabelId:" + label.Id + "/ChangesetId:" + label.ChangesetId + "/LabelName:" + label.Name + "/Owner:" + label.Owner);
@@ -111,7 +112,7 @@ namespace Sep.Git.Tfs.Commands
                     ownerName = label.Owner;
                     ownerEmail = label.Owner;
                 }
-                var labelName = label.IsTransBranch ? label.Name + "(" + tfsRemote.Id + ")" : label.Name;
+                var labelName = (label.IsTransBranch ? label.Name + "(" + tfsRemote.Id + ")" : label.Name).ToGitRefName();
                 _stdout.WriteLine("Writing label '" + labelName + "'...");
                 _globals.Repository.CreateTag(labelName, sha1TagCommit, label.Comment, ownerName, ownerEmail ,label.Date);
             }

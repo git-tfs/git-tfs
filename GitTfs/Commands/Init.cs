@@ -105,5 +105,17 @@ namespace Sep.Git.Tfs.Commands
             else
                 yield return "Try using $/" + tfsPath;
         }
+
+        public static string ToGitRefName(this string expectedRefName)
+        {
+            expectedRefName = System.Text.RegularExpressions.Regex.Replace(expectedRefName, @"[!~$?[*^: \\]", string.Empty);
+            expectedRefName = expectedRefName.Replace("@{", string.Empty);
+            expectedRefName = expectedRefName.Replace("..", string.Empty);
+            expectedRefName = expectedRefName.Replace("//", string.Empty);
+            expectedRefName = expectedRefName.Replace("/.", "/");
+            expectedRefName = expectedRefName.TrimEnd('.', '/');
+            return expectedRefName.Trim('/');
+        }
+
     }
 }

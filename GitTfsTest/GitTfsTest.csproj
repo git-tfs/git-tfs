@@ -107,6 +107,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ExtTest.cs" />
     <Compile Include="Commands\InitOptionsTest.cs" />
     <Compile Include="Commands\InitBranchTest.cs" />
     <Compile Include="FactExceptOnUnix.cs" />
