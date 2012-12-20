@@ -52,6 +52,11 @@ namespace Sep.Git.Tfs.Core
                 gitCommand.WorkingDirectory = Path.Combine(gitCommand.WorkingDirectory, WorkingCopySubdir);
         }
 
+        public string GetConfig(string key)
+        {
+            return _repository.Config.Get<string>(key, null);
+        }
+
         public IEnumerable<IGitTfsRemote> ReadAllTfsRemotes()
         {
             return GetTfsRemotes().Values;
