@@ -33,13 +33,13 @@
 
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Zip" />
   <ItemGroup>
-    <ReleaseFiles Include="$(SolutionDir)/README.md" />
-    <ReleaseFiles Include="$(SolutionDir)/LICENSE" />
-    <ReleaseFiles Include="$(SolutionDir)/NOTICE" />
-    <ReleaseFiles Include="$(BuildDir)/git-tfs.exe" />
-    <ReleaseFiles Include="$(BuildDir)/*.config" />
-    <ReleaseFiles Include="$(BuildDir)/*.dll" Exclude="$(BuildDir)/Microsoft.*.dll" />
-    <ReleaseFiles Include="$(BuildDir)/NativeBinaries/**/*.*" />
+    <ReleaseFiles Include="$(SolutionDir)\README.md" />
+    <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
+    <ReleaseFiles Include="$(SolutionDir)\NOTICE" />
+    <ReleaseFiles Include="$(BuildDir)\git-tfs.exe" />
+    <ReleaseFiles Include="$(BuildDir)\*.config" />
+    <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
+    <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.*" />
   </ItemGroup>
   <Target Name="Package" DependsOnTargets="RestorePackages; Version">
     <Zip Files="@(ReleaseFiles)" ZipFileName="$(Archive)" WorkingDirectory="$(BuildDir)" />
