@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Sep.Git.Tfs.Commands;
@@ -185,6 +186,7 @@ namespace Sep.Git.Tfs.VsFake
 
         public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
+            Trace.WriteLine("Setting up a TFS workspace at " + directory);
             var fakeWorkspace = new FakeWorkspace(directory, remote.TfsRepositoryPath);
             var workspace = new TfsWorkspace(fakeWorkspace, directory, _stdout, versionToFetch, remote, null, this, null);
             action(workspace);

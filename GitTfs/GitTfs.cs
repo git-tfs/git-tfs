@@ -44,6 +44,7 @@ namespace Sep.Git.Tfs
 
         public void Main(GitTfsCommand command, IList<string> unparsedArgs)
         {
+            Trace.WriteLine(_gitTfsVersionProvider.GetVersionString());
             if(_globals.ShowHelp)
             {
                 Environment.ExitCode = _help.ShowHelp(command);

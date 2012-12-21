@@ -114,7 +114,7 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                return Path.Combine(Dir, "workspace");
+                return Repository.GetConfig("git-tfs.workspace-dir") ?? Path.Combine(Dir, "workspace");
             }
         }
 
