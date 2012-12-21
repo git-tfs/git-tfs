@@ -135,6 +135,7 @@
     <Compile Include="Commands\CheckinTool.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
     <Compile Include="Commands\CheckinBase.cs" />
+    <Compile Include="Commands\CleanupWorkspaceLocal.cs" />
     <Compile Include="Commands\Labels.cs" />
     <Compile Include="Commands\InitBranch.cs" />
     <Compile Include="Commands\Info.cs" />
