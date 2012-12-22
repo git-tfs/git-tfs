@@ -19,6 +19,7 @@ namespace Sep.Git.Tfs.Core
         private readonly RemoteOptions remoteOptions;
         private long? maxChangesetId;
         private string maxCommitHash;
+        private bool IsTfsAuthenticated { get; set; }
 
         public GitTfsRemote(RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
         {
@@ -26,11 +27,15 @@ namespace Sep.Git.Tfs.Core
             this.globals = globals;
             this.stdout = stdout;
             Tfs = tfsHelper;
+            IsTfsAuthenticated = false;
         }
 
         public void EnsureTfsAuthenticated()
         {
+            if (IsTfsAuthenticated)
+                return;
             Tfs.EnsureAuthenticated();
+            IsTfsAuthenticated = true;
         }
 
         public bool IsDerived
