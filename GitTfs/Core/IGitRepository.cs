@@ -18,7 +18,7 @@ namespace Sep.Git.Tfs.Core
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head, bool includeStubRemotes);
         IDictionary<string, GitObject> GetObjects(string commit);
         string HashAndInsertObject(string filename);
-        IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to);
+        IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to, IEnumerable<string> tfsTree);
         bool WorkingCopyHasUnstagedOrUncommitedChanges { get; }
         void CopyBlob(string sha, string outputFile);
         GitCommit GetCommit(string commitish);

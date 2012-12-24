@@ -358,7 +358,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
+        public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to, IEnumerable<string> tfsTree)
         {
             var filesInCommit = GetCommit(to).GetTree().Select(entry => entry.Entry.Path.ToLowerInvariant());
 
@@ -369,8 +369,19 @@ namespace Sep.Git.Tfs.Core
                 foreach (var change in changes)
                 {
                     changedFiles.Add(BuildGitChangedFile(change));
-                    if (change.Status == "D" && !IsDirectoryContainingFiles(filesInCommit, Path.GetDirectoryName(change.path).ToLowerInvariant()))
-                        changedFiles.Add(new Sep.Git.Tfs.Core.Changes.Git.Delete(Path.GetDirectoryName(change.path)));
+                    if (change.Status == GitChangeInfo.ChangeType.DELETE || change.Status == GitChangeInfo.ChangeType.RENAMEEDIT)
+                    {
+                        var pathToDelete = Path.GetDirectoryName(change.path);
+                        var pathToDeleteLower = pathToDelete.ToLowerInvariant();
+                        if (!IsDirectoryContainingFiles(filesInCommit, pathToDeleteLower))
+                        {
+                            //Verify if ALL the files of the tfs directory are also managed by git (deleted or renamed)
+                            //if that's the case we could delete the directory
+                            var filesInTfs = tfsTree.Where(file => file.IndexOf(pathToDeleteLower) == 0);
+                            if (filesInTfs.Where(file => !changes.Where(c => c.Status == GitChangeInfo.ChangeType.DELETE || c.Status == GitChangeInfo.ChangeType.RENAMEEDIT).Select(c => c.path).Contains(file)).Count() == 0)
+                                changedFiles.Add(new Sep.Git.Tfs.Core.Changes.Git.Delete(pathToDelete));
+                        }
+                    }
                 }
                 return changedFiles;
             }

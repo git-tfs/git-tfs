@@ -75,14 +75,14 @@ namespace Sep.Git.Tfs
         public static void AddGitChangeTypes(ConfigurationExpression initializer)
         {
             // See git-diff-tree(1).
-            initializer.For<IGitChangedFile>().Use<Add>().Named("A");
-            initializer.For<IGitChangedFile>().Use<Copy>().Named("C");
-            initializer.For<IGitChangedFile>().Use<Modify>().Named("M");
-            //initializer.For<IGitChangedFile>().Use<TypeChange>().Named("T");
-            initializer.For<IGitChangedFile>().Use<Delete>().Named("D");
-            initializer.For<IGitChangedFile>().Use<RenameEdit>().Named("R");
-            //initializer.For<IGitChangedFile>().Use<Unmerged>().Named("U");
-            //initializer.For<IGitChangedFile>().Use<Unknown>().Named("X");
+            initializer.For<IGitChangedFile>().Use<Add>().Named(GitChangeInfo.ChangeType.ADD);
+            initializer.For<IGitChangedFile>().Use<Copy>().Named(GitChangeInfo.ChangeType.COPY);
+            initializer.For<IGitChangedFile>().Use<Modify>().Named(GitChangeInfo.ChangeType.MODIFY);
+            //initializer.For<IGitChangedFile>().Use<TypeChange>().Named(GitChangeInfo.GitChange.TYPECHANGE);
+            initializer.For<IGitChangedFile>().Use<Delete>().Named(GitChangeInfo.ChangeType.DELETE);
+            initializer.For<IGitChangedFile>().Use<RenameEdit>().Named(GitChangeInfo.ChangeType.RENAMEEDIT);
+            //initializer.For<IGitChangedFile>().Use<Unmerged>().Named(GitChangeInfo.GitChange.UNMERGED);
+            //initializer.For<IGitChangedFile>().Use<Unknown>().Named(GitChangeInfo.GitChange.UNKNOWN);
         }
 
         private static void Initialize(IAssemblyScanner scan)
