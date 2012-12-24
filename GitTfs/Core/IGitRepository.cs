@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Sep.Git.Tfs.Commands;
 
@@ -29,5 +30,6 @@ namespace Sep.Git.Tfs.Core
         bool CreateBranch(string gitBranchName, string target);
         string FindCommitHashByCommitMessage(string patternToFind);
         void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate);
+        void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate);
     }
 }

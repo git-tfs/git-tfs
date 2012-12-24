@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -108,11 +109,18 @@ namespace Sep.Git.Tfs.VsCommon
             get { return GetService<IGroupSecurityService>(); }
         }
 
+        private ILinking _linking;
+        private ILinking Linking
+        {
+            get { return _linking ?? (_linking = GetService<ILinking>()); }
+        }
+
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                                                          null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
                                                          true, true);
+
             return changesets.Cast<Changeset>()
                 .OrderBy(changeset => changeset.ChangesetId)
                 .Select(changeset => BuildTfsChangeset(changeset, remote));
@@ -133,7 +141,19 @@ namespace Sep.Git.Tfs.VsCommon
         private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
         {
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
-            tfsChangeset.Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId, Remote = remote};
+            tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };
+
+            if (changeset.WorkItems != null)
+            {
+                tfsChangeset.Summary.Workitems = changeset.WorkItems.Select(wi => new TfsWorkitem
+                    {
+                        Id = wi.Id,
+                        Title = wi.Title,
+                        Description = wi.Description,
+                        Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
+                    });
+            }
+
             return tfsChangeset;
         }
 

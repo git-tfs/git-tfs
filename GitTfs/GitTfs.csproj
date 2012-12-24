@@ -130,6 +130,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="Core\ITfsWorkitem.cs" />
     <Compile Include="Commands\Bootstrap.cs" />
     <Compile Include="Commands\Checkin.cs" />
     <Compile Include="Commands\CheckinTool.cs" />
@@ -200,6 +201,7 @@
     <Compile Include="Core\TfsInterop\NullIdentity.cs" />
     <Compile Include="Core\TfsInterop\IChangeset.cs" />
     <Compile Include="Core\TfsTreeEntry.cs" />
+    <Compile Include="Core\TfsWorkitem.cs" />
     <Compile Include="Core\TfsWorkspace.cs" />
     <Compile Include="Core\TfsWriter.cs" />
     <Compile Include="Core\GitTfsException.cs" />

@@ -448,5 +448,11 @@ namespace Sep.Git.Tfs.Core
             if (_repository.Tags[name] == null)
                 _repository.ApplyTag(name, sha, new Signature(Owner, emailOwner, new DateTimeOffset(creationDate)), comment);
         }
+
+        public void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate)
+        {
+            Signature author = new Signature(owner, emailOwner, creationDate);
+            _repository.Notes.Add(new ObjectId(sha), content, author, author, "commits");
+        }
     }
 }
