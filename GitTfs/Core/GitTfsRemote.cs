@@ -508,5 +508,15 @@ namespace Sep.Git.Tfs.Core
             PendChangesToWorkspace(head, parent, workspace);
             return workspace.Checkin(options);
         }
+
+        public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
+        {
+            return MatchesTfsUrl(tfsUrl) && TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool MatchesTfsUrl(string tfsUrl)
+        {
+            return TfsUrl.Equals(tfsUrl, StringComparison.OrdinalIgnoreCase) || Tfs.LegacyUrls.Contains(tfsUrl, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

@@ -227,6 +227,11 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
+        public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

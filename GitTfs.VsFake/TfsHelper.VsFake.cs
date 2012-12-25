@@ -319,11 +319,6 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public bool MatchesUrl(string tfsUrl)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool HasShelveset(string shelvesetName)
         {
             throw new NotImplementedException();
