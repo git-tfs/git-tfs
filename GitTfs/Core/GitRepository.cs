@@ -100,7 +100,7 @@ namespace Sep.Git.Tfs.Core
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
         {
             var remotes = new Dictionary<string, IGitTfsRemote>();
-            CommandOutputPipe(stdout => ParseRemoteConfig(stdout, remotes), "config", "--list");
+            CommandOutputPipe(stdout => ParseRemoteConfig(stdout, remotes), "config", "--list", "--local");
             return remotes;
         }
 
