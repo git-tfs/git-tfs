@@ -26,18 +26,21 @@ namespace Sep.Git.Tfs.Commands
             get { return _cleanupWorkspaces.OptionSet; }
         }
 
-
         public int Run()
         {
-            var result = Choose(_cleanupWorkspaces.Run());
-            if (result != GitTfsExitCodes.OK)
-                return result;
-            return Choose(_cleanupWorkspaceLocal.Run());
+            return RunAll(_cleanupWorkspaces.Run, _cleanupWorkspaceLocal.Run);
         }
 
-        private int Choose(params int[] results)
+        private int RunAll(params Func<int>[] cleaners)
         {
-            return results.Where(x => x != GitTfsExitCodes.OK).FirstOr(GitTfsExitCodes.OK);
+            var result = GitTfsExitCodes.OK;
+            foreach (var cleaner in cleaners)
+            {
+                result = cleaner();
+                if (result != GitTfsExitCodes.OK)
+                    return result;
+            }
+            return GitTfsExitCodes.OK;
         }
     }
 }
