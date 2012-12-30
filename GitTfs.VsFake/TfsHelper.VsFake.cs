@@ -56,7 +56,7 @@ namespace Sep.Git.Tfs.VsFake
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
-            return TfsPlugin.Script.Changesets.Where(x => x.Id > startVersion).Select(x => BuildTfsChangeset(x, remote));
+            return TfsPlugin.Script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
         }
 
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)

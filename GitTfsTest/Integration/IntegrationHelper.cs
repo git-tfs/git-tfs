@@ -173,9 +173,7 @@ namespace Sep.Git.Tfs.Test.Integration
         public void AssertEmptyWorkspace(string repodir)
         {
             var entries = new List<string>(Directory.GetFileSystemEntries(Path.Combine(Workdir, repodir)));
-            entries.Remove(".");
-            entries.Remove("..");
-            entries.Remove(".git");
+            entries = entries.Where(f => Path.GetFileName(f) != ".git").ToList();
             AssertEqual(new List<string>(), entries, "entries in " + repodir);
         }
 
