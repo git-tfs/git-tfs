@@ -7,6 +7,7 @@ using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 using Sep.Git.Tfs.Util;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -79,7 +80,7 @@ namespace Sep.Git.Tfs.Commands
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
             bool first = true;
-            var allTfsBranches = defaultRemote.Tfs.GetAllTfsBranchesOrderedByCreation();
+            var allTfsBranches = defaultRemote.Tfs.GetRootTfsBranchForRemotePath(defaultRemote.TfsRepositoryPath).GetAllChildren().Select(b=>b.Path);
 
             _stdout.WriteLine("Tfs branches found:");
             foreach (var tfsBranch in allTfsBranches)

@@ -245,6 +245,15 @@ namespace Sep.Git.Tfs.Test.Commands
         #endregion
 
         #region Init All branches
+        public class MockBranch : IBranch
+        {
+            public IEnumerable<IBranch> ChildBranches { get; set; }
+
+            public DateTime DateCreated { get; set; }
+
+            public string Path { get; set; }
+        }
+
         [Fact]
         public void ShouldInitAllBranches()
         {
@@ -259,7 +268,15 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs = mocks.Get<ITfsHelper>();
             var tfsPathBranch1 = "$/MyProject/MyBranch1";
             var tfsPathBranch2 = "$/MyProject/MyBranch2";
-            remote.Tfs.Stub(t => t.GetAllTfsBranchesOrderedByCreation()).Return(new List<string> { remote.TfsRepositoryPath, tfsPathBranch1, tfsPathBranch2 });
+            remote.Tfs.Stub(t => t.GetRootTfsBranchForRemotePath("")).IgnoreArguments().Return(new MockBranch()
+            {
+                ChildBranches = new List<MockBranch>{
+                    new MockBranch(){ Path = remote.TfsRepositoryPath, ChildBranches = new List<MockBranch>()},
+                    new MockBranch(){ Path = tfsPathBranch1, ChildBranches = new List<MockBranch>()},
+                    new MockBranch(){ Path = tfsPathBranch2, ChildBranches = new List<MockBranch>() }
+                }
+            });
+            remote.Tfs.Stub(t => t.GetAllTfsRootBranchesOrderedByCreation()).Return(new List<string> { remote.TfsRepositoryPath });
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
@@ -306,8 +323,8 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.VerifyAllExpectations();
             newBranch1Remote.VerifyAllExpectations();
             newBranch2Remote.VerifyAllExpectations();
-
         }
+
         [Fact]
         public void ShouldFailInitAllBranchesBecauseNeedCloneWasMadeFromTrunk()
         {
@@ -322,7 +339,15 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs = mocks.Get<ITfsHelper>();
             var tfsPathBranch1 = "$/MyProject/MyBranch1";
             var tfsPathBranch2 = "$/MyProject/MyBranch2";
-            remote.Tfs.Stub(t => t.GetAllTfsBranchesOrderedByCreation()).Return(new List<string> { "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", tfsPathBranch1, tfsPathBranch2 });
+            remote.Tfs.Stub(t => t.GetRootTfsBranchForRemotePath("")).IgnoreArguments().Return(new MockBranch()
+            {
+                ChildBranches = new List<MockBranch>{
+                    new MockBranch(){ Path = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", ChildBranches = new List<MockBranch>()},
+                    new MockBranch(){ Path = tfsPathBranch1, ChildBranches = new List<MockBranch>()},
+                    new MockBranch(){ Path = tfsPathBranch2, ChildBranches = new List<MockBranch>() }
+                }
+            });
+            remote.Tfs.Stub(t => t.GetAllTfsRootBranchesOrderedByCreation()).Return(new List<string> { "$/MyProject/TheCloneWasNotMadeFromTheTrunk!" });
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();

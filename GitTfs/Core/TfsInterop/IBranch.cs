@@ -21,5 +21,15 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 childBranch.AcceptVisitor(visitor, level + 1);
             }
         }
+
+        public static IEnumerable<IBranch> GetAllChildren(this IBranch branch)
+        {
+            var childrenBranches = new List<IBranch>(branch.ChildBranches);
+            foreach (var childBranch in branch.ChildBranches)
+            {
+                childrenBranches.AddRange(childBranch.GetAllChildren());
+            }
+            return childrenBranches;
+        }
     }
 }

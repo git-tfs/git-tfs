@@ -120,12 +120,12 @@ namespace Sep.Git.Tfs.VsCommon
 
         public virtual bool CanGetBranchInformation { get { return false; } }
 
-        public virtual IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public virtual IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
             throw new NotImplementedException();
         }
 
-        public virtual IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath)
+        public virtual IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath, bool searchExactPath = true)
         {
             throw new NotImplementedException();
         }

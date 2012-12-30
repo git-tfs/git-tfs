@@ -12,17 +12,21 @@ namespace Sep.Git.Tfs.VsCommon
     public class BranchContainsPathVisitor : IBranchVisitor
     {
         private string searchPath;
+        private bool searchExactPath;
 
-        public BranchContainsPathVisitor(string searchPath)
+        public BranchContainsPathVisitor(string searchPath, bool searchExactPath)
         {
             this.searchPath = searchPath;
+            this.searchExactPath = searchExactPath;
         }
 
         public bool Found { get; private set; }
 
         public void Visit(IBranch childBranch, int level)
         {
-            if (Found == false && childBranch.Path == searchPath)
+            if (Found == false
+                && ((searchExactPath && searchPath.ToLower() == childBranch.Path.ToLower())
+                || (!searchExactPath && searchPath.ToLower().IndexOf(childBranch.Path.ToLower()) == 0)))
             {
                 Found = true;
             }
@@ -38,12 +42,14 @@ namespace Sep.Git.Tfs.VsCommon
 
         public override bool CanGetBranchInformation { get { return true; } }
 
-        public override IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public override IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
-            return VersionControl.QueryRootBranchObjects(RecursionType.Full).Select(b => b.Properties.RootItem.Item);
+            return VersionControl.QueryRootBranchObjects(RecursionType.Full)
+                .Where(b => b.Properties.ParentBranch == null)
+                .Select(b => b.Properties.RootItem.Item);
         }
 
-        public override IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath)
+        public override IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath, bool searchExactPath = true)
         {
             var recursionType = RecursionType.Full;
             var branches = VersionControl.QueryRootBranchObjects(recursionType)
@@ -57,7 +63,7 @@ namespace Sep.Git.Tfs.VsCommon
 
             return wrapped.FirstOrDefault(b =>
                 {
-                    var visitor = new BranchContainsPathVisitor(remoteTfsPath);
+                    var visitor = new BranchContainsPathVisitor(remoteTfsPath, searchExactPath);
                     b.AcceptVisitor(visitor);
                     return visitor.Found;
                 });

@@ -351,12 +351,12 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
             throw new NotImplementedException();
         }
 
-        public IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath)
+        public IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath, bool searchExactPath = true)
         {
             throw new NotImplementedException();
         }
