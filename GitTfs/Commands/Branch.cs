@@ -16,15 +16,29 @@ namespace Sep.Git.Tfs.Commands
     {
         private Globals globals;
         private TextWriter stdout;
+        public string TfsUsername { get; set; }
+        public string TfsPassword { get; set; }
+        public bool DisplayRemotes { get; set; }
 
-        public OptionSet OptionSet { get; private set; }
+        public OptionSet OptionSet
+        {
+            get
+            {
+                return new OptionSet
+                {
+                    { "r|remotes", "Display all the TFS branch of the current TFS server", v => DisplayRemotes = (v != null) },
+                    //{ "u|username=", "TFS username", v => TfsUsername = v },
+                    //{ "p|password=", "TFS password", v => TfsPassword = v },
+                };
+            }
+        }
 
         public Branch(Globals globals, TextWriter stdout)
         {
             this.globals = globals;
             this.stdout = stdout;
 
-            this.OptionSet = globals.OptionSet;
+            //this.OptionSet = globals.OptionSet;
         }
 
         private class Visitor : IBranchVisitor
@@ -57,20 +71,33 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
-            stdout.WriteLine("TFS branches:");
-            stdout.WriteLine("");
+            if (DisplayRemotes)
+            {
+                stdout.WriteLine("TFS branches:");
+                stdout.WriteLine("");
 
-            var repo = globals.Repository;
-            var remote = repo.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
+                var repo = globals.Repository;
+                var remote = repo.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
 
-            var root = remote.Tfs.GetRootTfsBranchForRemotePath(remote.TfsRepositoryPath);
+                var root = remote.Tfs.GetRootTfsBranchForRemotePath(remote.TfsRepositoryPath);
 
-            var visitor = new Visitor(remote.TfsRepositoryPath, stdout);
+                var visitor = new Visitor(remote.TfsRepositoryPath, stdout);
 
-            root.AcceptVisitor(visitor);
+                root.AcceptVisitor(visitor);
 
-            stdout.WriteLine("");
+                stdout.WriteLine("");
 
+                return GitTfsExitCodes.OK;
+            }
+
+            var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
+            stdout.WriteLine("Git-tfs remotes:");
+            foreach (var remote in tfsRemotes)
+            {
+                stdout.WriteLine();
+                stdout.WriteLine(" {0} -> {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
+                stdout.WriteLine("        {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
+            }
             return GitTfsExitCodes.OK;
         }
     }
