@@ -123,6 +123,22 @@ namespace Sep.Git.Tfs.Core
             Tfs.CleanupWorkspaces(WorkingDirectory);
         }
 
+        public void CleanupWorkspaceDirectory()
+        {
+            try
+            {
+                var allFiles = Directory.EnumerateFiles(WorkingDirectory, "*", SearchOption.AllDirectories);
+                foreach (var file in allFiles)
+                    File.SetAttributes(file, File.GetAttributes(file) & ~FileAttributes.ReadOnly);
+
+                Directory.Delete(WorkingDirectory, true);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
+        }
+
         public bool ShouldSkip(string path)
         {
             return IsInDotGit(path) ||
