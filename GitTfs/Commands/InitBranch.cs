@@ -81,26 +81,21 @@ namespace Sep.Git.Tfs.Commands
 
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
-            bool first = true;
-            var allTfsBranches = defaultRemote.Tfs.GetRootTfsBranchForRemotePath(defaultRemote.TfsRepositoryPath).GetAllChildren().Select(b=>b.Path);
+            var rootBranch = defaultRemote.Tfs.GetRootTfsBranchForRemotePath(defaultRemote.TfsRepositoryPath);
+            if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
+               throw new GitTfsException("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from the trunk...");
+
+            var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path);
 
             _stdout.WriteLine("Tfs branches found:");
-            foreach (var tfsBranch in allTfsBranches)
+            foreach (var tfsBranchPath in childBranchPaths)
             {
-                _stdout.WriteLine("- " + tfsBranch);
+                _stdout.WriteLine("- " + tfsBranchPath);
             }
 
-            foreach (var tfsBranch in allTfsBranches)
+            foreach (var tfsBranchPath in childBranchPaths)
             {
-                if (first)
-                {
-                    if (defaultRemote.TfsRepositoryPath.ToLower() != tfsBranch.ToLower())
-                        throw new GitTfsException("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from the trunk...");
-
-                    first = false;
-                    continue;
-                }
-                var result = CreateBranch(defaultRemote, tfsBranch, allRemotes);
+                var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
                 if (result < 0)
                     return result;
             }
