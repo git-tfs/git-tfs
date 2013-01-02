@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -25,6 +26,7 @@ namespace Sep.Git.Tfs.Commands
         public string ParentBranch { get; set; }
         public bool LabelAllBranches { get; set; }
         public string NameFilter { get; set; }
+        public string ExcludeNameFilter { get; set; }
         string AuthorsFilePath { get; set; }
 
         public Labels(TextWriter stdout, Globals globals, AuthorsFile authors)
@@ -42,6 +44,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "all|fetch-all", "Fetch all the labels on all the TFS remotes (For TFS 2010 and later)", v => LabelAllBranches = v != null },
                     { "n|label-name=", "Fetch all the labels respecting this name filter", v => NameFilter = v },
+                    { "e|exclude-label-name=", "Exclude all the labels respecting this regex name filter", v => ExcludeNameFilter = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
@@ -94,8 +97,16 @@ namespace Sep.Git.Tfs.Commands
             _stdout.WriteLine("Looking for label on " + tfsRemote.TfsRepositoryPath + "...");
             var labels = tfsRemote.Tfs.GetLabels(tfsRemote.TfsRepositoryPath, NameFilter);
             _stdout.WriteLine(labels.Count() +" labels found!");
+
+            Regex exludeRegex = null;
+            if (ExcludeNameFilter != null)
+                exludeRegex = new Regex(ExcludeNameFilter);
+
             foreach (var label in labels)
             {
+                if (ExcludeNameFilter != null && exludeRegex.IsMatch(label.Name))
+                    continue;
+
                 Trace.WriteLine("LabelId:" + label.Id + "/ChangesetId:" + label.ChangesetId + "/LabelName:" + label.Name + "/Owner:" + label.Owner);
                 Trace.WriteLine("Try to find changeset in git repository...");
                 string sha1TagCommit = _globals.Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + label.ChangesetId + "[^0-9]");
