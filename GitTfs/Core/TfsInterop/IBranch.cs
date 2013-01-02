@@ -24,6 +24,8 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
         public static IEnumerable<IBranch> GetAllChildren(this IBranch branch)
         {
+            if (branch == null) return Enumerable.Empty<IBranch>();
+
             var childrenBranches = new List<IBranch>(branch.ChildBranches);
             foreach (var childBranch in branch.ChildBranches)
             {
