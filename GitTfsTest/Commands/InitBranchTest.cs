@@ -328,7 +328,6 @@ namespace Sep.Git.Tfs.Test.Commands
         [Fact]
         public void ShouldFailInitAllBranchesBecauseNeedCloneWasMadeFromTrunk()
         {
-
             const string GIT_BRANCH_TO_INIT1 = "MyBranch1";
             const string GIT_BRANCH_TO_INIT2 = "MyBranch2";
 
@@ -347,7 +346,6 @@ namespace Sep.Git.Tfs.Test.Commands
                     new MockBranch(){ Path = tfsPathBranch2, ChildBranches = new List<MockBranch>() }
                 }
             });
-            remote.Tfs.Stub(t => t.GetAllTfsRootBranchesOrderedByCreation()).Return(new List<string> { "$/MyProject/TheCloneWasNotMadeFromTheTrunk!" });
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
@@ -377,7 +375,7 @@ namespace Sep.Git.Tfs.Test.Commands
 
             var ex = Assert.Throws(typeof(GitTfsException), ()=>mocks.ClassUnderTest.Run());
 
-            Assert.Equal("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from the trunk...", ex.Message);
+            Assert.Equal("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '$/MyProject/TheCloneWasNotMadeFromTheTrunk!'...", ex.Message);
 
             gitRepository.VerifyAllExpectations();
 

@@ -83,7 +83,7 @@ namespace Sep.Git.Tfs.Commands
 
             var rootBranch = defaultRemote.Tfs.GetRootTfsBranchForRemotePath(defaultRemote.TfsRepositoryPath);
             if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
-               throw new GitTfsException("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from the trunk...");
+               throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
 
             var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path);
 
