@@ -270,8 +270,8 @@ namespace Sep.Git.Tfs.Test.Commands
             var tfsPathBranch2 = "$/MyProject/MyBranch2";
             remote.Tfs.Stub(t => t.GetRootTfsBranchForRemotePath("")).IgnoreArguments().Return(new MockBranch()
             {
+                Path = remote.TfsRepositoryPath, 
                 ChildBranches = new List<MockBranch>{
-                    new MockBranch(){ Path = remote.TfsRepositoryPath, ChildBranches = new List<MockBranch>()},
                     new MockBranch(){ Path = tfsPathBranch1, ChildBranches = new List<MockBranch>()},
                     new MockBranch(){ Path = tfsPathBranch2, ChildBranches = new List<MockBranch>() }
                 }
@@ -341,8 +341,8 @@ namespace Sep.Git.Tfs.Test.Commands
             var tfsPathBranch2 = "$/MyProject/MyBranch2";
             remote.Tfs.Stub(t => t.GetRootTfsBranchForRemotePath("")).IgnoreArguments().Return(new MockBranch()
             {
+                Path = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", 
                 ChildBranches = new List<MockBranch>{
-                    new MockBranch(){ Path = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", ChildBranches = new List<MockBranch>()},
                     new MockBranch(){ Path = tfsPathBranch1, ChildBranches = new List<MockBranch>()},
                     new MockBranch(){ Path = tfsPathBranch2, ChildBranches = new List<MockBranch>() }
                 }
