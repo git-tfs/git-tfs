@@ -375,7 +375,9 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.ReadTfsRemote(GIT_BRANCH_TO_INIT2)).Return(newBranch2Remote).Repeat.Never();
             #endregion
 
-            Assert.Throws(typeof(GitTfsException), ()=>mocks.ClassUnderTest.Run());
+            var ex = Assert.Throws(typeof(GitTfsException), ()=>mocks.ClassUnderTest.Run());
+
+            Assert.Equal("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from the trunk...", ex.Message);
 
             gitRepository.VerifyAllExpectations();
 
