@@ -51,6 +51,9 @@ namespace Sep.Git.Tfs.Commands
             var currentDir = Environment.CurrentDirectory;
             var repositoryDirCreated = InitGitDir(gitRepositoryPath);
 
+            // TFS string representations of repository paths do not end in trailing slashes
+            tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
+
             try
             {
                 var retVal = 0;

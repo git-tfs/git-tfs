@@ -4,35 +4,12 @@ using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Core.BranchVisitors;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 
 namespace Sep.Git.Tfs.VsCommon
 {
-    public class BranchContainsPathVisitor : IBranchVisitor
-    {
-        private string searchPath;
-        private bool searchExactPath;
-
-        public BranchContainsPathVisitor(string searchPath, bool searchExactPath)
-        {
-            this.searchPath = searchPath;
-            this.searchExactPath = searchExactPath;
-        }
-
-        public bool Found { get; private set; }
-
-        public void Visit(IBranch childBranch, int level)
-        {
-            if (Found == false
-                && ((searchExactPath && searchPath.ToLower() == childBranch.Path.ToLower())
-                || (!searchExactPath && searchPath.ToLower().IndexOf(childBranch.Path.ToLower()) == 0)))
-            {
-                Found = true;
-            }
-        }
-    }
-
     public abstract class TfsHelperVs2010Base : TfsHelperBase
     {
         public TfsHelperVs2010Base(TextWriter stdout, TfsApiBridge bridge, IContainer container)

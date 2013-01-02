@@ -58,8 +58,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsBranchPath, string gitBranchNameExpected)
         {
-
             var defaultRemote = InitFromDefaultRemote();
+
+            // TFS representations of repository paths do not have trailing slashes
+            tfsBranchPath = (tfsBranchPath ?? string.Empty).TrimEnd('/');
 
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
@@ -131,6 +133,9 @@ namespace Sep.Git.Tfs.Commands
         public int CreateBranch(IGitTfsRemote defaultRemote, string tfsRepositoryPath, IEnumerable<IGitTfsRemote> allRemotes, string gitBranchNameExpected = null, string tfsRepositoryPathParentBranch = null)
         {
             Trace.WriteLine("=> Working on TFS branch : " + tfsRepositoryPath);
+
+            // TFS string representations of repository paths do not end in trailing slashes
+            tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
             if (allRemotes.Count(r => r.TfsRepositoryPath.ToLower() == tfsRepositoryPath.ToLower()) != 0)
             {
