@@ -24,6 +24,7 @@ namespace Sep.Git.Tfs.Commands
         public string TfsPassword { get; set; }
         public string ParentBranch { get; set; }
         public bool LabelAllBranches { get; set; }
+        public string NameFilter { get; set; }
         string AuthorsFilePath { get; set; }
 
         public Labels(TextWriter stdout, Globals globals, AuthorsFile authors)
@@ -40,6 +41,7 @@ namespace Sep.Git.Tfs.Commands
                 return new OptionSet
                 {
                     { "all|fetch-all", "Fetch all the labels on all the TFS remotes (For TFS 2010 and later)", v => LabelAllBranches = v != null },
+                    { "n|label-name=", "Fetch all the labels respecting this name filter", v => NameFilter = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
@@ -83,9 +85,14 @@ namespace Sep.Git.Tfs.Commands
 
         private int CreateLabelsForTfsBranch(IGitTfsRemote tfsRemote)
         {
+            if (string.IsNullOrWhiteSpace(NameFilter))
+                NameFilter = null;
+            else
+                NameFilter = NameFilter.Trim();
+
             UpdateRemote(tfsRemote);
             _stdout.WriteLine("Looking for label on " + tfsRemote.TfsRepositoryPath + "...");
-            var labels = tfsRemote.Tfs.GetLabels(tfsRemote.TfsRepositoryPath);
+            var labels = tfsRemote.Tfs.GetLabels(tfsRemote.TfsRepositoryPath, NameFilter);
             _stdout.WriteLine(labels.Count() +" labels found!");
             foreach (var label in labels)
             {

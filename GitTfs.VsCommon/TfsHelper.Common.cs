@@ -559,9 +559,10 @@ namespace Sep.Git.Tfs.VsCommon
             return new WorkItemCheckedInfo(Convert.ToInt32(workitem), true, checkinAction);
         }
 
-        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch)
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
         {
-            var labels = VersionControl.QueryLabels(null, tfsPathBranch, null, true, tfsPathBranch, VersionSpec.Latest);
+            var labels = VersionControl.QueryLabels(nameFilter, tfsPathBranch, null, true, tfsPathBranch, VersionSpec.Latest);
+
             return labels.Select(e => new TfsLabel {
                 Id = e.LabelId,
                 Name = e.Name,

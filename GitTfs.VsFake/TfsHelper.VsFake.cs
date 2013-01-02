@@ -356,7 +356,7 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch)
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
         {
             throw new NotImplementedException();
         }
