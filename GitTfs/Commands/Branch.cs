@@ -45,11 +45,13 @@ namespace Sep.Git.Tfs.Commands
         {
             private readonly TextWriter _stdout;
             private readonly string _targetPath;
+            private readonly IEnumerable<IGitTfsRemote> _tfsRemotes;
 
-            public Visitor(string targetPath, TextWriter writer)
+            public Visitor(string targetPath, TextWriter writer, IEnumerable<IGitTfsRemote> tfsRemotes = null)
             {
                 _targetPath = targetPath;
                 _stdout = writer;
+                _tfsRemotes = tfsRemotes;
             }
 
             public void Visit(IBranch branch, int level)
@@ -65,12 +67,20 @@ namespace Sep.Git.Tfs.Commands
                 if (branch.Path.Equals(_targetPath))
                     _stdout.Write(" * ");
 
+                if (_tfsRemotes != null)
+                {
+                    var remote = _tfsRemotes.FirstOrDefault(r => r.TfsRepositoryPath == branch.Path);
+                    if (remote != null)
+                        _stdout.Write("  -> " + remote.Id);
+                }
+
                 _stdout.WriteLine();
             }
         }
 
         public int Run()
         {
+            var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
             if (DisplayRemotes)
             {
                 stdout.WriteLine("TFS branches:");
@@ -81,7 +91,7 @@ namespace Sep.Git.Tfs.Commands
 
                 var root = remote.Tfs.GetRootTfsBranchForRemotePath(remote.TfsRepositoryPath);
 
-                var visitor = new Visitor(remote.TfsRepositoryPath, stdout);
+                var visitor = new Visitor(remote.TfsRepositoryPath, stdout, tfsRemotes);
 
                 root.AcceptVisitor(visitor);
 
@@ -90,7 +100,6 @@ namespace Sep.Git.Tfs.Commands
                 return GitTfsExitCodes.OK;
             }
 
-            var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
             stdout.WriteLine("Git-tfs remotes:");
             foreach (var remote in tfsRemotes)
             {
