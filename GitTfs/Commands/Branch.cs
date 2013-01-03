@@ -16,20 +16,16 @@ namespace Sep.Git.Tfs.Commands
     {
         private Globals globals;
         private TextWriter stdout;
-        public string TfsUsername { get; set; }
-        public string TfsPassword { get; set; }
         public bool DisplayRemotes { get; set; }
 
         public OptionSet OptionSet
         {
-            get
-            {
+            get { 
                 return new OptionSet
                 {
-                    { "r|remotes", "Display all the TFS branch of the current TFS server", v => DisplayRemotes = (v != null) },
-                    //{ "u|username=", "TFS username", v => TfsUsername = v },
-                    //{ "p|password=", "TFS password", v => TfsPassword = v },
-                };
+                    { "r|remotes", "Display all the TFS branch of the current TFS server", v => DisplayRemotes = (v != null) }
+                }
+                .Merge(globals.OptionSet); 
             }
         }
 
@@ -37,8 +33,6 @@ namespace Sep.Git.Tfs.Commands
         {
             this.globals = globals;
             this.stdout = stdout;
-
-            //this.OptionSet = globals.OptionSet;
         }
 
         private class Visitor : IBranchVisitor
@@ -103,8 +97,7 @@ namespace Sep.Git.Tfs.Commands
             stdout.WriteLine("Git-tfs remotes:");
             foreach (var remote in tfsRemotes)
             {
-                stdout.WriteLine();
-                stdout.WriteLine(" {0} -> {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
+                stdout.WriteLine("\n {0} -> {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
                 stdout.WriteLine("        {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
             }
             return GitTfsExitCodes.OK;
