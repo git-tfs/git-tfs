@@ -35,13 +35,51 @@ namespace Sep.Git.Tfs.Commands
             this.stdout = stdout;
         }
 
-        private class Visitor : IBranchVisitor
+        public int Run()
+        {
+            // should probably pull this from options so that it is settable from the command-line
+            const string remoteId = GitTfsConstants.DefaultRepositoryId;
+
+            var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
+            if (DisplayRemotes)
+            {
+                WriteRemoteTfsBranchStructure(stdout, remoteId, tfsRemotes);
+                return GitTfsExitCodes.OK;
+            }
+
+            WriteTfsRemoteDetails(stdout, tfsRemotes);
+            return GitTfsExitCodes.OK;
+        }
+
+        private void WriteRemoteTfsBranchStructure(TextWriter writer, string remoteId, IEnumerable<IGitTfsRemote> tfsRemotes)
+        {
+            writer.WriteLine("TFS branch structure:");
+
+            var repo = globals.Repository;
+            var remote = repo.ReadTfsRemote(remoteId);
+            var root = remote.Tfs.GetRootTfsBranchForRemotePath(remote.TfsRepositoryPath);
+
+            var visitor = new WriteBranchStructureTreeVisitor(remote.TfsRepositoryPath, writer, tfsRemotes);
+            root.AcceptVisitor(visitor);
+        }
+
+        private void WriteTfsRemoteDetails(TextWriter writer, IEnumerable<IGitTfsRemote> tfsRemotes)
+        {
+            writer.WriteLine("Git-tfs remote details:");
+            foreach (var remote in tfsRemotes)
+            {
+                writer.WriteLine("\n {0} -> {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
+                writer.WriteLine("        {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
+            }
+        }
+
+        private class WriteBranchStructureTreeVisitor : IBranchTreeVisitor
         {
             private readonly TextWriter _stdout;
             private readonly string _targetPath;
             private readonly IEnumerable<IGitTfsRemote> _tfsRemotes;
 
-            public Visitor(string targetPath, TextWriter writer, IEnumerable<IGitTfsRemote> tfsRemotes = null)
+            public WriteBranchStructureTreeVisitor(string targetPath, TextWriter writer, IEnumerable<IGitTfsRemote> tfsRemotes = null)
             {
                 _targetPath = targetPath;
                 _stdout = writer;
@@ -51,10 +89,10 @@ namespace Sep.Git.Tfs.Commands
             public void Visit(IBranch branch, int level)
             {
                 for (var i = 0; i < level-1; i++ )
-                    _stdout.Write(" | ");
+                    _stdout.Write("| ");
 
                 if (level > 0)
-                    _stdout.Write(" +- ");
+                    _stdout.Write("+- ");
 
                 _stdout.Write(branch.Path);
 
@@ -65,42 +103,11 @@ namespace Sep.Git.Tfs.Commands
                 {
                     var remote = _tfsRemotes.FirstOrDefault(r => r.TfsRepositoryPath == branch.Path);
                     if (remote != null)
-                        _stdout.Write("  -> " + remote.Id);
+                        _stdout.Write("-> " + remote.Id);
                 }
 
                 _stdout.WriteLine();
             }
-        }
-
-        public int Run()
-        {
-            var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
-            if (DisplayRemotes)
-            {
-                stdout.WriteLine("TFS branches:");
-                stdout.WriteLine("");
-
-                var repo = globals.Repository;
-                var remote = repo.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
-
-                var root = remote.Tfs.GetRootTfsBranchForRemotePath(remote.TfsRepositoryPath);
-
-                var visitor = new Visitor(remote.TfsRepositoryPath, stdout, tfsRemotes);
-
-                root.AcceptVisitor(visitor);
-
-                stdout.WriteLine("");
-
-                return GitTfsExitCodes.OK;
-            }
-
-            stdout.WriteLine("Git-tfs remotes:");
-            foreach (var remote in tfsRemotes)
-            {
-                stdout.WriteLine("\n {0} -> {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
-                stdout.WriteLine("        {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
-            }
-            return GitTfsExitCodes.OK;
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.VsCommon
 
             return wrapped.FirstOrDefault(b =>
                 {
-                    var visitor = new BranchContainsPathVisitor(remoteTfsPath, searchExactPath);
+                    var visitor = new BranchTreeContainsPathVisitor(remoteTfsPath, searchExactPath);
                     b.AcceptVisitor(visitor);
                     return visitor.Found;
                 });

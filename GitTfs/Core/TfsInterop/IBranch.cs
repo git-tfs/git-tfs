@@ -13,12 +13,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
     public static class BranchExtensions
     {
-        public static void AcceptVisitor(this IBranch branch, IBranchVisitor visitor, int level = 0)
+        public static void AcceptVisitor(this IBranch branch, IBranchTreeVisitor treeVisitor, int level = 0)
         {
-            visitor.Visit(branch, level);
+            treeVisitor.Visit(branch, level);
             foreach (var childBranch in branch.ChildBranches)
             {
-                childBranch.AcceptVisitor(visitor, level + 1);
+                childBranch.AcceptVisitor(treeVisitor, level + 1);
             }
         }
 

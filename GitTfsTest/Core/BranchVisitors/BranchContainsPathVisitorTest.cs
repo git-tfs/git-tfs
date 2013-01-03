@@ -24,7 +24,7 @@ namespace Sep.Git.Tfs.Test.Core.BranchVisitors
         [Fact]
         public void InexactMatch_WithoutTrailingSlash_IsFound()
         {
-            var visitor = new BranchContainsPathVisitor(@"$/Scratch/Source/Main", false);
+            var visitor = new BranchTreeContainsPathVisitor(@"$/Scratch/Source/Main", false);
 
             branch.AcceptVisitor(visitor);
 
@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Test.Core.BranchVisitors
         [Fact]
         public void InexactMatch_WithTrailingSlash_IsFound()
         {
-            var visitor = new BranchContainsPathVisitor(@"$/Scratch/Source/Main/", false);
+            var visitor = new BranchTreeContainsPathVisitor(@"$/Scratch/Source/Main/", false);
 
             branch.AcceptVisitor(visitor);
 
@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Test.Core.BranchVisitors
         [Fact]
         public void ExactMatch_WithoutTrailingSlash_IsFound()
         {
-            var visitor = new BranchContainsPathVisitor(@"$/Scratch/Source/Main", true);
+            var visitor = new BranchTreeContainsPathVisitor(@"$/Scratch/Source/Main", true);
 
             branch.AcceptVisitor(visitor);
 
@@ -54,7 +54,7 @@ namespace Sep.Git.Tfs.Test.Core.BranchVisitors
         [Fact]
         public void ExactMatch_WithTrailingSlash_IsNotFound()
         {
-            var visitor = new BranchContainsPathVisitor(@"$/Scratch/Source/Main/", true);
+            var visitor = new BranchTreeContainsPathVisitor(@"$/Scratch/Source/Main/", true);
 
             branch.AcceptVisitor(visitor);
 

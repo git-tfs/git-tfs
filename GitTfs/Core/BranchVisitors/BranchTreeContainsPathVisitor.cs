@@ -4,12 +4,12 @@ using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Core.BranchVisitors
 {
-    public class BranchContainsPathVisitor : IBranchVisitor
+    public class BranchTreeContainsPathVisitor : IBranchTreeVisitor
     {
         private string searchPath;
         private bool searchExactPath;
 
-        public BranchContainsPathVisitor(string searchPath, bool searchExactPath)
+        public BranchTreeContainsPathVisitor(string searchPath, bool searchExactPath)
         {
             this.searchPath = searchPath;
             this.searchExactPath = searchExactPath;

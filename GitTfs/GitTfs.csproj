@@ -131,8 +131,8 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Commands\Branch.cs" />
-    <Compile Include="Core\BranchVisitors\BranchContainsPathVisitor.cs" />
-    <Compile Include="Core\IBranchVisitor.cs" />
+    <Compile Include="Core\BranchVisitors\BranchTreeContainsPathVisitor.cs" />
+    <Compile Include="Core\IBranchTreeVisitor.cs" />
     <Compile Include="Core\TfsInterop\IBranch.cs" />
     <Compile Include="Commands\Bootstrap.cs" />
     <Compile Include="Commands\Checkin.cs" />
