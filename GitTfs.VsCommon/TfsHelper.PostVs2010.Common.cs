@@ -4,11 +4,12 @@ using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Core.BranchVisitors;
+using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 
 namespace Sep.Git.Tfs.VsCommon
 {
-
     public abstract class TfsHelperVs2010Base : TfsHelperBase
     {
         public TfsHelperVs2010Base(TextWriter stdout, TfsApiBridge bridge, IContainer container)
@@ -18,9 +19,31 @@ namespace Sep.Git.Tfs.VsCommon
 
         public override bool CanGetBranchInformation { get { return true; } }
 
-        public override IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public override IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
-            return VersionControl.QueryRootBranchObjects(RecursionType.Full).Select(b => b.Properties.RootItem.Item);
+            return VersionControl.QueryRootBranchObjects(RecursionType.Full)
+                .Where(b => b.Properties.ParentBranch == null)
+                .Select(b => b.Properties.RootItem.Item);
+        }
+
+        public override IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath, bool searchExactPath = true)
+        {
+            var recursionType = RecursionType.Full;
+            var branches = VersionControl.QueryRootBranchObjects(recursionType)
+                .Where(b => b.Properties.RootItem.IsDeleted == false)
+                .ToList();
+
+            var roots = branches.Where(b => b.Properties.ParentBranch == null).ToList();
+            var children = branches.Except(roots).ToList();
+
+            var wrapped = roots.Select(b => WrapperForBranchFactory.Wrap(b, children)).ToList();
+
+            return wrapped.FirstOrDefault(b =>
+                {
+                    var visitor = new BranchTreeContainsPathVisitor(remoteTfsPath, searchExactPath);
+                    b.AcceptVisitor(visitor);
+                    return visitor.Found;
+                });
         }
 
         public override int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)

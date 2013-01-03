@@ -7,6 +7,7 @@ using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 using Sep.Git.Tfs.Util;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -57,8 +58,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsBranchPath, string gitBranchNameExpected)
         {
-
             var defaultRemote = InitFromDefaultRemote();
+
+            // TFS representations of repository paths do not have trailing slashes
+            tfsBranchPath = (tfsBranchPath ?? string.Empty).TrimEnd('/');
 
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
@@ -78,26 +81,21 @@ namespace Sep.Git.Tfs.Commands
 
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
-            bool first = true;
-            var allTfsBranches = defaultRemote.Tfs.GetAllTfsBranchesOrderedByCreation();
+            var rootBranch = defaultRemote.Tfs.GetRootTfsBranchForRemotePath(defaultRemote.TfsRepositoryPath);
+            if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
+               throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
+
+            var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path);
 
             _stdout.WriteLine("Tfs branches found:");
-            foreach (var tfsBranch in allTfsBranches)
+            foreach (var tfsBranchPath in childBranchPaths)
             {
-                _stdout.WriteLine("- " + tfsBranch);
+                _stdout.WriteLine("- " + tfsBranchPath);
             }
 
-            foreach (var tfsBranch in allTfsBranches)
+            foreach (var tfsBranchPath in childBranchPaths)
             {
-                if (first)
-                {
-                    if (defaultRemote.TfsRepositoryPath.ToLower() != tfsBranch.ToLower())
-                        throw new GitTfsException("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from the trunk...");
-
-                    first = false;
-                    continue;
-                }
-                var result = CreateBranch(defaultRemote, tfsBranch, allRemotes);
+                var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
                 if (result < 0)
                     return result;
             }
@@ -130,6 +128,9 @@ namespace Sep.Git.Tfs.Commands
         public int CreateBranch(IGitTfsRemote defaultRemote, string tfsRepositoryPath, IEnumerable<IGitTfsRemote> allRemotes, string gitBranchNameExpected = null, string tfsRepositoryPathParentBranch = null)
         {
             Trace.WriteLine("=> Working on TFS branch : " + tfsRepositoryPath);
+
+            // TFS string representations of repository paths do not end in trailing slashes
+            tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
             if (allRemotes.Count(r => r.TfsRepositoryPath.ToLower() == tfsRepositoryPath.ToLower()) != 0)
             {

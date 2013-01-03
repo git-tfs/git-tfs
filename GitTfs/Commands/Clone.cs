@@ -8,6 +8,7 @@ using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 using Sep.Git.Tfs.Util;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -49,6 +50,9 @@ namespace Sep.Git.Tfs.Commands
         {
             var currentDir = Environment.CurrentDirectory;
             var repositoryDirCreated = InitGitDir(gitRepositoryPath);
+
+            // TFS string representations of repository paths do not end in trailing slashes
+            tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
             try
             {
@@ -101,30 +105,29 @@ namespace Sep.Git.Tfs.Commands
                 var remote = globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
                 if (!remote.Tfs.CanGetBranchInformation)
                     return;
-                var tfsBranchesPath = remote.Tfs.GetAllTfsBranchesOrderedByCreation().ToList();
+                var tfsTrunkRepository = remote.Tfs.GetRootTfsBranchForRemotePath(tfsRepositoryPath, false);
+                if (tfsTrunkRepository == null)
+                {
+                    var tfsRootBranches = remote.Tfs.GetAllTfsRootBranchesOrderedByCreation();
+                    var cloneMsg = "   => If you want to manage branches with git-tfs, clone one of this branch instead :\n"
+                                    + " - " + tfsRootBranches.Aggregate((s1, s2) => s1 + @"\n - " + s2);
+                    
+                    if (withBranches)
+                        throw new GitTfsException("error: cloning the whole repository or too high in the repository path doesn't permit to manage branches!\n" + cloneMsg);
+                    stdout.WriteLine("warning: you are going to clone the whole repository or too high in the repository path !\n" + cloneMsg);
+                }
+
+                var tfsBranchesPath = tfsTrunkRepository.GetAllChildren();
                 var tfsPathToClone = tfsRepositoryPath.TrimEnd('/').ToLower();
-                var tfsTrunkRepositoryPath = tfsBranchesPath.First();
+                var tfsTrunkRepositoryPath = tfsTrunkRepository.Path;
                 if (tfsPathToClone != tfsTrunkRepositoryPath.ToLower())
                 {
-                    if (tfsBranchesPath.Select(e=>e.ToLower()).Contains(tfsPathToClone))
+                    if (tfsBranchesPath.Select(e=>e.Path.ToLower()).Contains(tfsPathToClone))
                         stdout.WriteLine("info: you are going to clone a branch instead of the trunk ( {0} )\n"
                             + "   => If you want to manage branches with git-tfs, clone {0} with '--with-branches' option instead...)", tfsTrunkRepositoryPath);
                     else
-                    {
-                        if (tfsTrunkRepositoryPath.ToLower().IndexOf(tfsPathToClone) == 0)
-                        {
-                            if (withBranches)
-                                throw new GitTfsException("error: cloning the whole repository doesn't permit to manage branches!\n"
-                                    + "   =>If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " instead...");
-                            stdout.WriteLine("warning: you are going to clone the whole repository!\n"
-                                + "   =>If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " instead...");
-                        }
-                        else
-                        {
-                            stdout.WriteLine("warning: you are going to clone a subdirectory of a branch and won't be able to manage branches :(\n"
-                                + "   => If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " with '--with-branches' option instead...)");
-                        }
-                    }
+                        stdout.WriteLine("warning: you are going to clone a subdirectory of a branch and won't be able to manage branches :(\n"
+                            + "   => If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " with '--with-branches' option instead...)");
                 }
             }
         }

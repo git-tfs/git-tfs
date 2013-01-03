@@ -215,7 +215,7 @@ namespace Sep.Git.Tfs.Core
                     remote.Tfs.LegacyUrls = value.Split(',');
                     break;
                 case "repository":
-                    remote.TfsRepositoryPath = value;
+                    remote.TfsRepositoryPath = (value ?? string.Empty).TrimEnd('/'); /* tfs paths don't have trailing slashes */
                     break;
                 case "ignore-paths":
                     remote.IgnoreRegexExpression = value;

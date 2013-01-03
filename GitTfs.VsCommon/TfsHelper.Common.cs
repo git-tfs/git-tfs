@@ -20,7 +20,7 @@ namespace Sep.Git.Tfs.VsCommon
     public abstract class TfsHelperBase : ITfsHelper
     {
         private readonly TextWriter _stdout;
-        private readonly TfsApiBridge _bridge;
+        protected readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
 
         public TfsHelperBase(TextWriter stdout, TfsApiBridge bridge, IContainer container)
@@ -120,7 +120,12 @@ namespace Sep.Git.Tfs.VsCommon
 
         public virtual bool CanGetBranchInformation { get { return false; } }
 
-        public virtual IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public virtual IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath, bool searchExactPath = true)
         {
             throw new NotImplementedException();
         }
