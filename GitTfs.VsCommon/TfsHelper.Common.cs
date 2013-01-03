@@ -500,11 +500,6 @@ namespace Sep.Git.Tfs.VsCommon
             return BuildTfsChangeset(VersionControl.GetChangeset(changesetId), remote);
         }
 
-        public bool MatchesUrl(string tfsUrl)
-        {
-            return Url == tfsUrl || LegacyUrls.Contains(tfsUrl);
-        }
-
         public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
         {
             return
