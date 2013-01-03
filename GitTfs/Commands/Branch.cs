@@ -53,7 +53,7 @@ namespace Sep.Git.Tfs.Commands
 
         private void WriteRemoteTfsBranchStructure(TextWriter writer, string remoteId, IEnumerable<IGitTfsRemote> tfsRemotes)
         {
-            writer.WriteLine("TFS branch structure:");
+            writer.WriteLine("\nTFS branch structure:");
 
             var repo = globals.Repository;
             var remote = repo.ReadTfsRemote(remoteId);
@@ -65,7 +65,7 @@ namespace Sep.Git.Tfs.Commands
 
         private void WriteTfsRemoteDetails(TextWriter writer, IEnumerable<IGitTfsRemote> tfsRemotes)
         {
-            writer.WriteLine("Git-tfs remote details:");
+            writer.WriteLine("\nGit-tfs remote details:");
             foreach (var remote in tfsRemotes)
             {
                 writer.WriteLine("\n {0} -> {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
@@ -88,23 +88,28 @@ namespace Sep.Git.Tfs.Commands
 
             public void Visit(IBranch branch, int level)
             {
-                for (var i = 0; i < level-1; i++ )
-                    _stdout.Write("| ");
+                for (var i = 0; i < level; i++ )
+                    _stdout.Write(" | ");
+                
+                _stdout.WriteLine();
+
+                for (var i = 0; i < level - 1; i++)
+                    _stdout.Write(" | ");
 
                 if (level > 0)
-                    _stdout.Write("+- ");
+                    _stdout.Write(" +-");
 
-                _stdout.Write(branch.Path);
-
-                if (branch.Path.Equals(_targetPath))
-                    _stdout.Write(" * ");
+                _stdout.Write(" {0}", branch.Path);
 
                 if (_tfsRemotes != null)
                 {
                     var remote = _tfsRemotes.FirstOrDefault(r => r.TfsRepositoryPath == branch.Path);
                     if (remote != null)
-                        _stdout.Write("-> " + remote.Id);
+                        _stdout.Write(" -> " + remote.Id);
                 }
+
+                if (branch.Path.Equals(_targetPath))
+                    _stdout.Write(" [*]");
 
                 _stdout.WriteLine();
             }
