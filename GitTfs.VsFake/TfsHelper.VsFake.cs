@@ -188,7 +188,12 @@ namespace Sep.Git.Tfs.VsFake
         {
             Trace.WriteLine("Setting up a TFS workspace at " + directory);
             var fakeWorkspace = new FakeWorkspace(directory, remote.TfsRepositoryPath);
-            var workspace = new TfsWorkspace(fakeWorkspace, directory, _stdout, versionToFetch, remote, null, this, null);
+            var workspace = _container.With("localDirectory").EqualTo(directory)
+                .With("remote").EqualTo(remote)
+                .With("contextVersion").EqualTo(versionToFetch)
+                .With("workspace").EqualTo(fakeWorkspace)
+                .With("tfsHelper").EqualTo(this)
+                .GetInstance<TfsWorkspace>();
             action(workspace);
         }
 
