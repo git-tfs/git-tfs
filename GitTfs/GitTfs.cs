@@ -33,31 +33,30 @@ namespace Sep.Git.Tfs
             _globals = globals;
         }
 
-        public void Run(IList<string> args)
+        public int Run(IList<string> args)
         {
             InitializeGlobals();
             var command = ExtractCommand(args);
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
-            Main(command, unparsedArgs);
+            return Main(command, unparsedArgs);
         }
 
-        public void Main(GitTfsCommand command, IList<string> unparsedArgs)
+        public int Main(GitTfsCommand command, IList<string> unparsedArgs)
         {
             Trace.WriteLine(_gitTfsVersionProvider.GetVersionString());
             if(_globals.ShowHelp)
             {
-                Environment.ExitCode = _help.ShowHelp(command);
+                return _help.ShowHelp(command);
             }
             else if(_globals.ShowVersion)
             {
                 _container.GetInstance<TextWriter>().WriteLine(_gitTfsVersionProvider.GetVersionString());
-                Environment.ExitCode = GitTfsExitCodes.OK;
+                return GitTfsExitCodes.OK;
             }
             else
             {
-                Environment.ExitCode = _runner.Run(command, unparsedArgs);
-                //PostFetchCheckout();
+                return _runner.Run(command, unparsedArgs);
             }
         }
 

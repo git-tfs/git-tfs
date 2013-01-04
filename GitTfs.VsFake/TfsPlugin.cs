@@ -10,11 +10,12 @@ namespace Sep.Git.Tfs.VsFake
         {
             base.Initialize(scan);
         }
+        */
 
         public override void Initialize(StructureMap.ConfigurationExpression config)
         {
+            config.For<Script>().Use(() => Script.Load(ScriptPath));
         }
-        */
 
         public override bool IsViable()
         {
@@ -26,19 +27,6 @@ namespace Sep.Git.Tfs.VsFake
             get
             {
                 return Environment.GetEnvironmentVariable(Script.EnvVar);
-            }
-        }
-
-        static Script _script;
-        internal static Script Script
-        {
-            get
-            {
-                if (_script == null)
-                {
-                    _script = ScriptPath.AndAnd(Script.Load);
-                }
-                return _script;
             }
         }
     }

@@ -126,22 +126,46 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public string TfsUrl { get { return "http://does/not/matter"; } }
 
-        public void Run(params string[] args)
+        public int Run(params string[] args)
         {
-            var startInfo = new ProcessStartInfo();
-            startInfo.WorkingDirectory = Workdir;
-            startInfo.EnvironmentVariables["GIT_TFS_CLIENT"] = "Fake";
-            startInfo.EnvironmentVariables[Script.EnvVar] = FakeScript;
-            startInfo.EnvironmentVariables["Path"] = CurrentBuildPath + ";" + Environment.GetEnvironmentVariable("Path");
-            startInfo.FileName = "cmd";
-            startInfo.Arguments = "/c git tfs --debug " + String.Join(" ", args);
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardOutput = true;
-            Console.WriteLine("PATH: " + startInfo.EnvironmentVariables["Path"]);
-            Console.WriteLine(">> " + startInfo.FileName + " " + startInfo.Arguments);
-            var process = Process.Start(startInfo);
-            Console.Out.Write(process.StandardOutput.ReadToEnd());
-            process.WaitForExit();
+            return RunIn(".", args);
+        }
+
+        public int RunIn(string workPath, params string[] args)
+        {
+            var origPwd = Environment.CurrentDirectory;
+            var origClient = Environment.GetEnvironmentVariable("GIT_TFS_CLIENT");
+            var origScript = Environment.GetEnvironmentVariable(Script.EnvVar);
+            try
+            {
+                Environment.CurrentDirectory = Path.Combine(Workdir, workPath);
+                Environment.SetEnvironmentVariable("GIT_TFS_CLIENT", "Fake");
+                Environment.SetEnvironmentVariable(Script.EnvVar, FakeScript);
+                Console.WriteLine(">> git tfs " + QuoteArgs(args));
+                var argsWithDebug = new List<string>();
+                argsWithDebug.Add("--debug");
+                argsWithDebug.AddRange(args);
+                return Program.MainCore(argsWithDebug.ToArray());
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("GIT_TFS_CLIENT", origClient);
+                Environment.SetEnvironmentVariable(Script.EnvVar, origScript);
+                Environment.CurrentDirectory = origPwd;
+            }
+        }
+
+        private string QuoteArgs(string[] args)
+        {
+            return string.Join(" ", args.Select(arg => QuoteArg(arg)).ToArray());
+        }
+
+        private string QuoteArg(string arg)
+        {
+            // This is not complete, but it is adequate for these tests.
+            if (arg.Contains(' '))
+                return '"' + arg + '"';
+            return arg;
         }
 
         private string CurrentBuildPath

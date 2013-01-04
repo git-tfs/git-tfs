@@ -16,12 +16,14 @@ namespace Sep.Git.Tfs.VsFake
         #region misc/null
 
         IContainer _container;
-        private TextWriter _stdout;
+        TextWriter _stdout;
+        Script _script;
 
-        public TfsHelper(IContainer container, TextWriter stdout)
+        public TfsHelper(IContainer container, TextWriter stdout, Script script)
         {
             _container = container;
             _stdout = stdout;
+            _script = script;
         }
 
         public string TfsClientLibraryVersion { get { return "(FAKE)"; } }
@@ -51,12 +53,12 @@ namespace Sep.Git.Tfs.VsFake
 
         public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
         {
-            return TfsPlugin.Script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
+            return _script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
         }
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
-            return TfsPlugin.Script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
+            return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
         }
 
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)
