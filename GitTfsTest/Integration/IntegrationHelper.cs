@@ -10,6 +10,7 @@ using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsFake;
 using Xunit;
 using Xunit.Sdk;
+using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
@@ -34,6 +35,12 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public void Dispose()
         {
+            while (!_repositories.Empty())
+            {
+                var repo = _repositories.First();
+                repo.Value.Dispose();
+                _repositories.Remove(repo.Key);
+            }
             if (_workdir != null)
             {
                 try
@@ -45,6 +52,15 @@ namespace Sep.Git.Tfs.Test.Integration
                 {
                 }
             }
+        }
+
+        private Dictionary<string, Repository> _repositories = new Dictionary<string,Repository>();
+        public Repository Repository(string path)
+        {
+            path = Path.Combine(Workdir, path);
+            if (!_repositories.ContainsKey(path))
+                _repositories.Add(path, new Repository(path));
+            return _repositories[path];
         }
 
         #endregion
@@ -155,14 +171,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         private string RevParse(string repodir, string gitref)
         {
-            // This really should delegate to libgit2, which isn't yet a part of GitTfs.
-            var gitpath = Path.Combine(Workdir, repodir, ".git");
-            var resolved = ReadIfPresent(Path.Combine(gitpath, gitref)) ??
-                ReadIfPresent(Path.Combine(gitpath, "refs", "heads", gitref)) ??
-                ReadIfPresent(Path.Combine(gitpath, "refs", "remotes", gitref));
-            if (resolved != null && resolved.StartsWith("ref:"))
-                return RevParse(repodir, resolved.Replace("ref:", "").Trim());
-            return resolved;
+            return Repository(repodir).Lookup<Commit>(gitref).Sha;
         }
 
         private string ReadIfPresent(string path)
@@ -179,8 +188,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public void AssertCleanWorkspace(string repodir)
         {
-            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
-            var status = repo.Index.RetrieveStatus();
+            var status = Repository(repodir).Index.RetrieveStatus();
             AssertEqual(new List<string>(), status.Select(statusEntry => "" + statusEntry.State + ": " + statusEntry.FilePath).ToList(), "repo status");
         }
 
@@ -193,8 +201,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public void AssertCommitMessage(string repodir, string commitish, string message)
         {
-            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
-            var commit = LibGit2Sharp.RepositoryExtensions.Lookup<LibGit2Sharp.Commit>(repo, commitish);
+            var commit = Repository(repodir).Lookup<Commit>(commitish);
             AssertEqual(message, commit.Message, "Commit message of " + commitish);
         }
 		
