@@ -21,7 +21,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         ITfsChangeset GetLatestChangeset(GitTfsRemote remote);
         ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote);
         IChangeset GetChangeset(int changesetId);
-        bool MatchesUrl(string tfsUrl);
         bool HasShelveset(string shelvesetName);
         ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName);
         int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote);

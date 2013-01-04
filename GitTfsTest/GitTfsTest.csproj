@@ -110,6 +110,7 @@
     <Compile Include="Commands\ExtTest.cs" />
     <Compile Include="Commands\InitOptionsTest.cs" />
     <Compile Include="Commands\InitBranchTest.cs" />
+    <Compile Include="Core\GitTfsRemoteTests.cs" />
     <Compile Include="FactExceptOnUnix.cs" />
     <Compile Include="Commands\HelpTest.cs" />
     <Compile Include="Commands\ShelveTest.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="Core\TfsWorkspaceTests.cs" />
     <Compile Include="GitTfsRegexTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
+    <Compile Include="Integration\FetchTests.cs" />
     <Compile Include="Integration\IntegrationHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHelpers\ExtensionMethods.cs" />

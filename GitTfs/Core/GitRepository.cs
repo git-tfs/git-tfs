@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
+using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 using LibGit2Sharp;
 
@@ -75,7 +76,7 @@ namespace Sep.Git.Tfs.Core
             var allRemotes = GetTfsRemotes();
             var matchingRemotes =
                 allRemotes.Values.Where(
-                    remote => remote.Tfs.MatchesUrl(tfsUrl) && remote.TfsRepositoryPath == tfsRepositoryPath);
+                    remote => remote.MatchesUrlAndRepositoryPath(tfsUrl, tfsRepositoryPath));
             switch (matchingRemotes.Count())
             {
                 case 0:
@@ -85,6 +86,7 @@ namespace Sep.Git.Tfs.Core
                             .WithRecommendation("Try setting a legacy-url for an existing remote.");
                     return new DerivedGitTfsRemote(tfsUrl, tfsRepositoryPath);
                 case 1:
+                    Trace.WriteLine("One remote matched");
                     return matchingRemotes.First();
                 default:
                     Trace.WriteLine("More than one remote matched!");
