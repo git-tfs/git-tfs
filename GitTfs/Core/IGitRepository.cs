@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Sep.Git.Tfs.Commands;
+using Branch = LibGit2Sharp.Branch;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -12,6 +13,7 @@ namespace Sep.Git.Tfs.Core
         IEnumerable<IGitTfsRemote> ReadAllTfsRemotes();
         IGitTfsRemote ReadTfsRemote(string remoteId);
         IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo);
+        void DeleteTfsRemote(IGitTfsRemote remoteId);
         bool HasRemote(string remoteId);
         bool HasRef(string gitRef);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
@@ -27,8 +29,10 @@ namespace Sep.Git.Tfs.Core
         string GetCommitMessage(string head, string parentCommitish);
         string AssertValidBranchName(string gitBranchName);
         bool CreateBranch(string gitBranchName, string target);
+        Branch RenameBranch(string oldName, string newName);
         string FindCommitHashByCommitMessage(string patternToFind);
         void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate);
         void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate);
+        void MoveRemote(string oldRemoteName, string newRemoteName);
     }
 }

@@ -20,6 +20,7 @@ namespace Sep.Git.Tfs.Core
         private long? maxChangesetId;
         private string maxCommitHash;
         private bool isTfsAuthenticated;
+        public RemoteInfo RemoteInfo { get; private set; }
 
         public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
         {
@@ -29,6 +30,7 @@ namespace Sep.Git.Tfs.Core
             Tfs = tfsHelper;
             Repository = repository;
 
+            RemoteInfo = info;
             Id = info.Id;
             TfsUrl = info.Url;
             TfsRepositoryPath = info.Repository;
