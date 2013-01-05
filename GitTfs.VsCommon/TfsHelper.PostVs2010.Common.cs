@@ -30,13 +30,12 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var recursionType = RecursionType.Full;
             var branches = VersionControl.QueryRootBranchObjects(recursionType)
-                .Where(b => b.Properties.RootItem.IsDeleted == false)
-                .ToList();
+                .Where(b => b.Properties.RootItem.IsDeleted == false).ToList();
 
-            var roots = branches.Where(b => b.Properties.ParentBranch == null).ToList();
+            var roots = branches.Where(b => b.Properties.ParentBranch == null);
             var children = branches.Except(roots).ToList();
 
-            var wrapped = roots.Select(b => WrapperForBranchFactory.Wrap(b, children)).ToList();
+            var wrapped = roots.Select(b => WrapperForBranchFactory.Wrap(b, children));
 
             return wrapped.FirstOrDefault(b =>
                 {
