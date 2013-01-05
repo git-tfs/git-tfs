@@ -157,9 +157,14 @@ namespace Sep.Git.Tfs.Core
             _cachedRemotes = null;
         }
 
+        public void SetConfig(string key, object value)
+        {
+            _repository.Config.Set(key, value.ToString());
+        }
+
         private void SetTfsConfig(string remoteId, string subkey, object value)
         {
-            this.SetConfig(_globals.RemoteConfigKey(remoteId, subkey), value);
+            SetConfig(_globals.RemoteConfigKey(remoteId, subkey), value);
         }
 
         private void ParseRemoteConfig(TextReader stdout, IDictionary<string, IGitTfsRemote> remotes)
