@@ -19,34 +19,40 @@ namespace Sep.Git.Tfs.Commands
         private TextWriter stdout;
         private readonly Help helper;
         private readonly Cleanup cleanup;
+        private readonly InitBranch initBranch;
         public bool DisplayRemotes { get; set; }
-        public bool RenameRemote { get; set; }
-        public bool DeleteRemote { get; set; }
+        public bool ShouldRenameRemote { get; set; }
+        public bool ShouldDeleteRemote { get; set; }
+        public bool ShouldCreateRemote { get; set; }
+        public string Comment { get; set; }
 
         public OptionSet OptionSet
         {
             get { 
                 return new OptionSet
                 {
-                    { "r|remotes", "Display all the TFS branch of the current TFS server", v => DisplayRemotes = (v != null) },
-                    { "m|move", "Rename a TFS branch", v => RenameRemote = (v != null) },
-                    { "delete", "Delete a TFS branch", v => DeleteRemote = (v != null) },
+                    { "r|remotes", "Display the TFS branches of the current TFS root branch existing on the TFS server", v => DisplayRemotes = (v != null) },
+                    { "c|create", "Create a TFS branch", v => ShouldCreateRemote = (v != null) },
+                    { "comment=", "Comment used for the creation of the TFS branch ", v => Comment = v },
+                    { "m|move", "Rename a TFS remote", v => ShouldRenameRemote = (v != null) },
+                    { "delete", "Delete a TFS remote", v => ShouldDeleteRemote = (v != null) },
                 }
                 .Merge(globals.OptionSet); 
             }
         }
 
-        public Branch(Globals globals, TextWriter stdout, Help helper, Cleanup cleanup)
+        public Branch(Globals globals, TextWriter stdout, Help helper, Cleanup cleanup, InitBranch initBranch)
         {
             this.globals = globals;
             this.stdout = stdout;
             this.helper = helper;
             this.cleanup = cleanup;
+            this.initBranch = initBranch;
         }
 
         public int Run(string oldRemoteName, string newRemoteName)
         {
-            if (!RenameRemote)
+            if (!ShouldRenameRemote)
             {
                 helper.Run(this);
                 return GitTfsExitCodes.Help;
@@ -72,14 +78,38 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.OK;
         }
 
-        public int Run(string remoteName)
+        public int Run(string param)
         {
-            if (!DeleteRemote)
-            {
+            if (!(ShouldDeleteRemote ^ ShouldCreateRemote))
+        {
                 helper.Run(this);
                 return GitTfsExitCodes.Help;
             }
+            if (ShouldDeleteRemote)
+                return DeleteRemote(param);
 
+            if (ShouldCreateRemote)
+                return CreateRemote(param, "test creation branch");
+
+            return GitTfsExitCodes.OK;
+        }
+
+        private int CreateRemote(string tfsPath, string gitBranchNameExpected = null)
+        {
+            tfsPath.AssertValidTfsPath();
+            Trace.WriteLine("Getting commit informations...");
+            var commit = globals.Repository.GetCurrentTfsCommit();
+            if(commit == null)
+                throw new GitTfsException("error : the current commit is not checked in TFS!");
+            var remote = commit.Remote;
+            Trace.WriteLine("Creating branch in TFS...");
+            remote.Tfs.CreateBranch(remote.TfsRepositoryPath, tfsPath, (int)commit.ChangesetId, Comment ?? "Creation branch " + tfsPath);
+            Trace.WriteLine("Init branch in local repository...");
+            return initBranch.Run(tfsPath, gitBranchNameExpected);
+        }
+
+        private int DeleteRemote(string remoteName)
+        {
             var remote = globals.Repository.ReadTfsRemote(remoteName);
             if (remote == null)
             {

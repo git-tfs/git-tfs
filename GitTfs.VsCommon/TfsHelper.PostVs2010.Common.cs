@@ -118,6 +118,19 @@ namespace Sep.Git.Tfs.VsCommon
                             });
             }
         }
+
+        public override void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)
+        {
+            var changesetToBranch = new ChangesetVersionSpec(changesetId);
+            int branchChangesetId = VersionControl.CreateBranch(sourcePath, targetPath, changesetToBranch);
+
+            if (comment != null)
+            {
+                Changeset changeset = VersionControl.GetChangeset(branchChangesetId);
+                changeset.Comment = comment;
+                changeset.Update();
+            }
+        }
     }
 
 }

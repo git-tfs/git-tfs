@@ -260,6 +260,12 @@ namespace Sep.Git.Tfs.Core
             return tfsCommits;
         }
 
+        public TfsChangesetInfo GetCurrentTfsCommit()
+        {
+            var currentCommit = _repository.Head.Commits.First();
+            return TryParseChangesetInfo(currentCommit.Message, currentCommit.Sha, false);
+        }
+
         private void FindTfsCommits(TextReader stdout, ICollection<TfsChangesetInfo> tfsCommits, bool includeStubRemotes)
         {
             string currentCommit = null;
