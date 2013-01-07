@@ -184,7 +184,17 @@ namespace Sep.Git.Tfs.Core
                         log.CommitParents.Add(parent);
                     }
                 }
-                UpdateRef(Commit(log), changeset.Summary.ChangesetId);
+                var commitSha = Commit(log);
+                UpdateRef(commitSha, changeset.Summary.ChangesetId);
+                if(changeset.Summary.Workitems.Count() != 0)
+                {
+                    string workitemNote = "Workitems:\n";
+                    foreach(var workitem in changeset.Summary.Workitems)
+                    {
+                        workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitem.Id, workitem.Title, workitem.Url);
+                    }
+                    Repository.CreateNote(commitSha, workitemNote, log.AuthorName, log.AuthorEmail, log.Date);
+                }
                 DoGcIfNeeded();
             }
         }
