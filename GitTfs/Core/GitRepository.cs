@@ -60,7 +60,11 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<IGitTfsRemote> ReadAllTfsRemotes()
         {
-            return GetTfsRemotes().Values;
+            var remotes = GetTfsRemotes().Values;
+            foreach (var remote in remotes)
+                remote.EnsureTfsAuthenticated();
+
+            return remotes;
         }
 
         public IGitTfsRemote ReadTfsRemote(string remoteId)
@@ -68,7 +72,9 @@ namespace Sep.Git.Tfs.Core
             if (!HasRemote(remoteId))
                 throw new GitTfsException("Unable to locate git-tfs remote with id = " + remoteId)
                     .WithRecommendation("Try using `git tfs bootstrap` to auto-init TFS remotes.");
-            return GetTfsRemotes()[remoteId];
+            var remote = GetTfsRemotes()[remoteId];
+            remote.EnsureTfsAuthenticated();
+            return remote;
         }
 
         private IGitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath, bool includeStubRemotes)
@@ -87,7 +93,9 @@ namespace Sep.Git.Tfs.Core
                     return new DerivedGitTfsRemote(tfsUrl, tfsRepositoryPath);
                 case 1:
                     Trace.WriteLine("One remote matched");
-                    return matchingRemotes.First();
+                    var remote = matchingRemotes.First();
+                    remote.EnsureTfsAuthenticated();
+                    return remote;
                 default:
                     Trace.WriteLine("More than one remote matched!");
                     goto case 1;
@@ -177,7 +185,6 @@ namespace Sep.Git.Tfs.Core
             foreach (var gitTfsRemotePair in remotes)
             {
                 var remote = gitTfsRemotePair.Value;
-                remote.EnsureTfsAuthenticated();
             }
         }
 
