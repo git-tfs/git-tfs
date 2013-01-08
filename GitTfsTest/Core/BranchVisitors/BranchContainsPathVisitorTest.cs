@@ -9,15 +9,11 @@ namespace Sep.Git.Tfs.Test.Core.BranchVisitors
 {
     public class BranchContainsPathVisitorTest
     {
-        private IBranch branch;
+        private BranchTree branch;
 
         public BranchContainsPathVisitorTest()
         {
-            branch = new InitBranchTest.MockBranch
-                {
-                    ChildBranches = Enumerable.Empty<InitBranchTest.MockBranch>(),
-                    Path = @"$/Scratch/Source/Main"
-                };
+            branch = new BranchTree(new InitBranchTest.MockBranchObject { Path = @"$/Scratch/Source/Main" });
         }
 
         [Fact]

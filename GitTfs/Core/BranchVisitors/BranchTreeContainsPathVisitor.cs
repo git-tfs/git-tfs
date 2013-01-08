@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Core.BranchVisitors
 
         public bool Found { get; private set; }
 
-        public void Visit(IBranch childBranch, int level)
+        public void Visit(BranchTree childBranch, int level)
         {
             if (Found == false
                 && ((searchExactPath && searchPath.ToLower() == childBranch.Path.ToLower())

@@ -8,9 +8,9 @@ namespace Sep.Git.Tfs.Test.Core.TfsInterop
     public class BranchExtensionsTest
     {
         [Fact]
-        public void FactMethodName()
+        public void AllChildrenAlwaysReturnsAnEnumerable()
         {
-            IEnumerable<IBranch> result = ((IBranch) null).GetAllChildren();
+            IEnumerable<BranchTree> result = ((BranchTree) null).GetAllChildren();
 
             Assert.NotNull(result);
             Assert.Empty(result);

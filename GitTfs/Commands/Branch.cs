@@ -86,7 +86,7 @@ namespace Sep.Git.Tfs.Commands
                 _tfsRemotes = tfsRemotes;
             }
 
-            public void Visit(IBranch branch, int level)
+            public void Visit(BranchTree branch, int level)
             {
                 for (var i = 0; i < level; i++ )
                     _stdout.Write(" | ");

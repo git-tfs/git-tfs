@@ -246,13 +246,6 @@ namespace Sep.Git.Tfs.Test.Commands
 
         #region Init All branches
 
-        public class MockBranch : IBranch
-        {
-            public IEnumerable<IBranch> ChildBranches { get; set; }
-
-            public string Path { get; set; }
-        }
-
         public class MockBranchObject : IBranchObject
         {
             public string Path { get; set; }

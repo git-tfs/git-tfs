@@ -12,15 +12,41 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         bool IsRoot { get; }
     }
 
-    public interface IBranch
+    public class BranchTree
     {
-        string Path { get; }
-        IEnumerable<IBranch> ChildBranches { get; }
+        public BranchTree(IBranchObject branch)
+            : this(branch, new List<BranchTree>())
+        {
+        }
+
+        public BranchTree(IBranchObject branch, IEnumerable<BranchTree> childBranches)
+            : this(branch, childBranches.ToList())
+        {
+        }
+
+        public BranchTree(IBranchObject branch, List<BranchTree> childBranches)
+        {
+            if (childBranches == null)
+                throw new ArgumentNullException("childBranches");
+            Branch = branch;
+            ChildBranches = childBranches;
+        }
+
+        public IBranchObject Branch { get; private set; }
+
+        public List<BranchTree> ChildBranches { get; private set; }
+
+        public string Path { get { return Branch.Path; } }
+
+        public override string ToString()
+        {
+            return string.Format("{0} [{1} children]", this.Path, this.ChildBranches.Count);
+        }
     }
 
     public static class BranchExtensions
     {
-        public static IBranch GetRootTfsBranchForRemotePath(this ITfsHelper tfs, string remoteTfsPath, bool searchExactPath = true)
+        public static BranchTree GetRootTfsBranchForRemotePath(this ITfsHelper tfs, string remoteTfsPath, bool searchExactPath = true)
         {
             var branches = tfs.GetBranches();
             var roots = branches.Where(b => b.IsRoot);
@@ -36,39 +62,17 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
         class WrapperForBranchFactory
         {
-            public static IBranch Wrap(IBranchObject branch, IEnumerable<IBranchObject> related)
+            public static BranchTree Wrap(IBranchObject branch, IEnumerable<IBranchObject> related)
             {
                 var children =
                     related.Where(c => c.ParentPath == branch.Path)
                            .Select(c => WrapperForBranchFactory.Wrap(c, related));
 
-                var wrapper = new WrapperForBranch(branch, children);
-
-                return wrapper;
+                return new BranchTree(branch, children);
             }
         }
 
-        class WrapperForBranch : IBranch
-        {
-            IBranchObject _branch;
-            IEnumerable<IBranch> _children;
-
-            public WrapperForBranch(IBranchObject branch, IEnumerable<IBranch> children)
-            {
-                _branch = branch;
-                _children = children;
-            }
-
-            public string Path { get { return _branch.Path; } }
-            public IEnumerable<IBranch> ChildBranches { get { return _children; } }
-
-            public override string ToString()
-            {
-                return string.Format("{0} [{1} children]", this.Path, this.ChildBranches.Count());
-            }
-        }
-
-        public static void AcceptVisitor(this IBranch branch, IBranchTreeVisitor treeVisitor, int level = 0)
+        public static void AcceptVisitor(this BranchTree branch, IBranchTreeVisitor treeVisitor, int level = 0)
         {
             treeVisitor.Visit(branch, level);
             foreach (var childBranch in branch.ChildBranches)
@@ -77,11 +81,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             }
         }
 
-        public static IEnumerable<IBranch> GetAllChildren(this IBranch branch)
+        public static IEnumerable<BranchTree> GetAllChildren(this BranchTree branch)
         {
-            if (branch == null) return Enumerable.Empty<IBranch>();
+            if (branch == null) return Enumerable.Empty<BranchTree>();
 
-            var childrenBranches = new List<IBranch>(branch.ChildBranches);
+            var childrenBranches = new List<BranchTree>(branch.ChildBranches);
             foreach (var childBranch in branch.ChildBranches)
             {
                 childrenBranches.AddRange(childBranch.GetAllChildren());

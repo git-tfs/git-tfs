@@ -6,6 +6,6 @@ namespace Sep.Git.Tfs.Core
 {
     public interface IBranchTreeVisitor
     {
-        void Visit(IBranch childBranch, int level);
+        void Visit(BranchTree childBranch, int level);
     }
 }
