@@ -125,7 +125,7 @@ namespace Sep.Git.Tfs.VsCommon
             throw new NotImplementedException();
         }
 
-        public virtual IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath, bool searchExactPath = true)
+        public virtual IEnumerable<IBranchObject> GetBranches()
         {
             throw new NotImplementedException();
         }

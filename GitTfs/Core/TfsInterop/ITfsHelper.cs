@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IEnumerable<TfsLabel> GetLabels(string tfsPathBranch);
         bool CanGetBranchInformation { get; }
         IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation();
-        IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath, bool searchExactPath = true);
+        IEnumerable<IBranchObject> GetBranches();
         void EnsureAuthenticated();
     }
 }

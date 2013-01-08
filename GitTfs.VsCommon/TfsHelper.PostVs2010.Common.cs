@@ -12,9 +12,12 @@ namespace Sep.Git.Tfs.VsCommon
 {
     public abstract class TfsHelperVs2010Base : TfsHelperBase
     {
+        TfsApiBridge _bridge;
+
         public TfsHelperVs2010Base(TextWriter stdout, TfsApiBridge bridge, IContainer container)
             : base(stdout, bridge, container)
         {
+            _bridge = bridge;
         }
 
         public override bool CanGetBranchInformation { get { return true; } }
@@ -26,23 +29,11 @@ namespace Sep.Git.Tfs.VsCommon
                 .Select(b => b.Properties.RootItem.Item);
         }
 
-        public override IBranch GetRootTfsBranchForRemotePath(string remoteTfsPath, bool searchExactPath = true)
+        public override IEnumerable<IBranchObject> GetBranches()
         {
-            var recursionType = RecursionType.Full;
-            var branches = VersionControl.QueryRootBranchObjects(recursionType)
-                .Where(b => b.Properties.RootItem.IsDeleted == false).ToList();
-
-            var roots = branches.Where(b => b.Properties.ParentBranch == null);
-            var children = branches.Except(roots).ToList();
-
-            var wrapped = roots.Select(b => WrapperForBranchFactory.Wrap(b, children));
-
-            return wrapped.FirstOrDefault(b =>
-                {
-                    var visitor = new BranchTreeContainsPathVisitor(remoteTfsPath, searchExactPath);
-                    b.AcceptVisitor(visitor);
-                    return visitor.Found;
-                });
+            var branches = VersionControl.QueryRootBranchObjects(RecursionType.Full)
+                .Where(b => b.Properties.RootItem.IsDeleted == false);
+            return _bridge.Wrap<WrapperForBranchObject, IBranchObject>(branches);
         }
 
         public override int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)

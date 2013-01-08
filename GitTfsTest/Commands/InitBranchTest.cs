@@ -245,6 +245,7 @@ namespace Sep.Git.Tfs.Test.Commands
         #endregion
 
         #region Init All branches
+
         public class MockBranch : IBranch
         {
             public IEnumerable<IBranch> ChildBranches { get; set; }
@@ -252,6 +253,17 @@ namespace Sep.Git.Tfs.Test.Commands
             public DateTime DateCreated { get; set; }
 
             public string Path { get; set; }
+        }
+
+        public class MockBranchObject : IBranchObject
+        {
+            public DateTime DateCreated { get; set; }
+
+            public string Path { get; set; }
+
+            public string ParentPath { get; set; }
+
+            public bool IsRoot { get; set; }
         }
 
         [Fact]
@@ -268,13 +280,10 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs = mocks.Get<ITfsHelper>();
             var tfsPathBranch1 = "$/MyProject/MyBranch1";
             var tfsPathBranch2 = "$/MyProject/MyBranch2";
-            remote.Tfs.Stub(t => t.GetRootTfsBranchForRemotePath("")).IgnoreArguments().Return(new MockBranch()
-            {
-                Path = remote.TfsRepositoryPath, 
-                ChildBranches = new List<MockBranch>{
-                    new MockBranch(){ Path = tfsPathBranch1, ChildBranches = new List<MockBranch>()},
-                    new MockBranch(){ Path = tfsPathBranch2, ChildBranches = new List<MockBranch>() }
-                }
+            remote.Tfs.Stub(t => t.GetBranches()).Return(new IBranchObject[] {
+                new MockBranchObject() { IsRoot = true, Path = remote.TfsRepositoryPath },
+                new MockBranchObject() { ParentPath = remote.TfsRepositoryPath, Path = tfsPathBranch1 },
+                new MockBranchObject() { ParentPath = remote.TfsRepositoryPath, Path = tfsPathBranch2 },
             });
             remote.Tfs.Stub(t => t.GetAllTfsRootBranchesOrderedByCreation()).Return(new List<string> { remote.TfsRepositoryPath });
 
@@ -338,13 +347,11 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs = mocks.Get<ITfsHelper>();
             var tfsPathBranch1 = "$/MyProject/MyBranch1";
             var tfsPathBranch2 = "$/MyProject/MyBranch2";
-            remote.Tfs.Stub(t => t.GetRootTfsBranchForRemotePath("")).IgnoreArguments().Return(new MockBranch()
-            {
-                Path = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", 
-                ChildBranches = new List<MockBranch>{
-                    new MockBranch(){ Path = tfsPathBranch1, ChildBranches = new List<MockBranch>()},
-                    new MockBranch(){ Path = tfsPathBranch2, ChildBranches = new List<MockBranch>() }
-                }
+            remote.Tfs.Stub(t => t.GetBranches()).Return(new IBranchObject[] {
+                new MockBranchObject() { IsRoot = true, Path = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!" },
+                new MockBranchObject() { ParentPath = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", Path = tfsPathBranch1 },
+                new MockBranchObject() { ParentPath = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", Path = tfsPathBranch2 },
+                new MockBranchObject() { ParentPath = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", Path = remote.TfsRepositoryPath },
             });
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();

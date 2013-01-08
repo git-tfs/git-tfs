@@ -6,41 +6,33 @@ using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.VsCommon
 {
-    public class WrapperForBranch : IBranch
+    public class WrapperForBranchObject : WrapperFor<BranchObject>, IBranchObject
     {
-        private readonly BranchObject branch;
+        BranchObject _branch;
 
-        public WrapperForBranch(BranchObject branch, IEnumerable<IBranch> children)
+        public WrapperForBranchObject(BranchObject branch) : base(branch)
         {
-            this.branch = branch;
-            this.ChildBranches = children;
+            _branch = branch;
         }
 
-        public BranchObject WrappedBranch { get { return this.branch; } }
-
-        public IEnumerable<IBranch> ChildBranches { get; private set; }
-
-        public DateTime DateCreated { get { return branch.DateCreated; } }
-
-        public string Path { get { return branch.Properties.RootItem.Item; } }
-
-        public override string ToString()
+        public DateTime DateCreated
         {
-            return string.Format("{0} [{1} children]", this.Path, this.ChildBranches.Count());
+            get { return _branch.DateCreated; }
         }
-    }
 
-    public class WrapperForBranchFactory
-    {
-        public static WrapperForBranch Wrap(BranchObject branch, IList<BranchObject> related)
+        public string Path
         {
-            var children =
-                related.Where(c => c.Properties.ParentBranch.Item == branch.Properties.RootItem.Item)
-                       .Select(c => WrapperForBranchFactory.Wrap(c, related));
+            get { return _branch.Properties.RootItem.Item; }
+        }
 
-            var wrapper = new WrapperForBranch(branch, children);
+        public bool IsRoot
+        {
+            get { return _branch.Properties.ParentBranch == null; }
+        }
 
-            return wrapper;
+        public string ParentPath
+        {
+            get { return _branch.Properties.ParentBranch.Item; }
         }
     }
 }
