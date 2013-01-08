@@ -159,7 +159,12 @@ namespace Sep.Git.Tfs.VsFake
 
             int IItem.ItemId
             {
-                get { throw new NotImplementedException(); }
+                get
+                {
+                    if (_change.ItemId.HasValue)
+                        return _change.ItemId.Value;
+                    throw new NotImplementedException();
+                }
             }
 
             long IItem.ContentLength

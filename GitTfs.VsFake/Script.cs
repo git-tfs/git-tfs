@@ -54,5 +54,6 @@ namespace Sep.Git.Tfs.VsFake
         public TfsItemType ItemType { get; set; }
         public string RepositoryPath { get; set; }
         public string Content { get; set; }
+        public int? ItemId { get; set; }
     }
 }

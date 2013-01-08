@@ -150,5 +150,25 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertCleanWorkspace("MyProject");
             AssertRefs("175420603e41cd0175e3c25581754726bd21cb96");
         }
+
+        [FactExceptOnUnix]
+        public void CloneWithTrickyRenameAndDelete()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/File1.txt", "File1")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/File2.txt", "File2", itemId: 1000);
+                r.Changeset(3, "Second commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Delete, TfsItemType.File, "$/MyProject/File1.txt")
+                    .Change(TfsChangeType.Rename, TfsItemType.File, "$/MyProject/File1.txt", "File2", itemId: 1000);
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject");
+            h.AssertGitRepo("MyProject");
+            h.AssertFileInWorkspace("MyProject", "File1.txt", "File2");
+            h.AssertNoFileInWorkspace("MyProject", "File2.txt");
+        }
     }
 }

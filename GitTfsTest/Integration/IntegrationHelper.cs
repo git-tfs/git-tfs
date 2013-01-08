@@ -91,13 +91,14 @@ namespace Sep.Git.Tfs.Test.Integration
                 _changeset = changeset;
             }
 
-            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents = null)
+            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents = null, int? itemId = null)
             {
                 _changeset.Changes.Add(new ScriptedChange
                 {
                     ChangeType = changeType,
                     ItemType = itemType,
                     RepositoryPath = tfsPath,
+                    ItemId = itemId,
                     Content = contents
                 });
                 return this;
@@ -206,6 +207,12 @@ namespace Sep.Git.Tfs.Test.Integration
             var path = Path.Combine(Workdir, repodir, file);
             var actual = File.ReadAllText(path, Encoding.UTF8);
             AssertEqual(contents, actual, "Contents of " + path);
+        }
+
+        public void AssertNoFileInWorkspace(string repodir, string file)
+        {
+            var path = Path.Combine(Workdir, repodir, file);
+            Assert.False(File.Exists(path), "File.Exists? " + path);
         }
 
         public void AssertCommitMessage(string repodir, string commitish, string message)
