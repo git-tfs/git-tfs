@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var branches = VersionControl.QueryRootBranchObjects(RecursionType.Full)
                 .Where(b => b.Properties.RootItem.IsDeleted == false);
-            return _bridge.Wrap<WrapperForBranchObject, IBranchObject>(branches);
+            return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches);
         }
 
         public override int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
