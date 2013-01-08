@@ -15,11 +15,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         TemporaryFile DownloadFile();
     }
 
-    public interface IItemIdentifier
-    {
-        
-    }
-
     public interface IItemDownloadStrategy
     {
         TemporaryFile DownloadFile(IItem item);
