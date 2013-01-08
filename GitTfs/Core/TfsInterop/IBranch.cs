@@ -7,7 +7,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public interface IBranchObject
     {
-        DateTime DateCreated { get; }
         string Path { get; }
         string ParentPath { get; }
         bool IsRoot { get; }
@@ -15,7 +14,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
     public interface IBranch
     {
-        DateTime DateCreated { get; }
         string Path { get; }
         IEnumerable<IBranch> ChildBranches { get; }
     }
@@ -61,7 +59,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 _children = children;
             }
 
-            public DateTime DateCreated { get { return _branch.DateCreated; } }
             public string Path { get { return _branch.Path; } }
             public IEnumerable<IBranch> ChildBranches { get { return _children; } }
 

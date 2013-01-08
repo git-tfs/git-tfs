@@ -250,15 +250,11 @@ namespace Sep.Git.Tfs.Test.Commands
         {
             public IEnumerable<IBranch> ChildBranches { get; set; }
 
-            public DateTime DateCreated { get; set; }
-
             public string Path { get; set; }
         }
 
         public class MockBranchObject : IBranchObject
         {
-            public DateTime DateCreated { get; set; }
-
             public string Path { get; set; }
 
             public string ParentPath { get; set; }

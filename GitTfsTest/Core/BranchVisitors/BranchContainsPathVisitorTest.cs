@@ -16,7 +16,6 @@ namespace Sep.Git.Tfs.Test.Core.BranchVisitors
             branch = new InitBranchTest.MockBranch
                 {
                     ChildBranches = Enumerable.Empty<InitBranchTest.MockBranch>(),
-                    DateCreated = DateTime.Now,
                     Path = @"$/Scratch/Source/Main"
                 };
         }

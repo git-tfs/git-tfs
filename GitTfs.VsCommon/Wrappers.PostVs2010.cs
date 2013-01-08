@@ -15,11 +15,6 @@ namespace Sep.Git.Tfs.VsCommon
             _branch = branch;
         }
 
-        public DateTime DateCreated
-        {
-            get { return _branch.DateCreated; }
-        }
-
         public string Path
         {
             get { return _branch.Properties.RootItem.Item; }
