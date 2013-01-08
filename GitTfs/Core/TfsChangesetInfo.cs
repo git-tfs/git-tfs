@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+
 namespace Sep.Git.Tfs.Core
 {
     public class TfsChangesetInfo
@@ -7,5 +9,10 @@ namespace Sep.Git.Tfs.Core
         public long ChangesetId { get; set; }
         public string GitCommit { get; set; }
         public IEnumerable<ITfsWorkitem> Workitems { get; set; }
+
+        public TfsChangesetInfo()
+        {
+            Workitems = Enumerable.Empty<ITfsWorkitem>();
+        }
     }
 }
