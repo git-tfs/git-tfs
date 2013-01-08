@@ -346,7 +346,12 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<IBranchObject> GetBranches()
         {
             throw new NotImplementedException();
         }

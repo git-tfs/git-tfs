@@ -111,6 +111,8 @@
     <Compile Include="Commands\InitOptionsTest.cs" />
     <Compile Include="Commands\InitBranchTest.cs" />
     <Compile Include="Core\GitTfsRemoteTests.cs" />
+    <Compile Include="Core\BranchVisitors\BranchContainsPathVisitorTest.cs" />
+    <Compile Include="Core\TfsInterop\BranchExtensionsTest.cs" />
     <Compile Include="FactExceptOnUnix.cs" />
     <Compile Include="Commands\HelpTest.cs" />
     <Compile Include="Commands\ShelveTest.cs" />

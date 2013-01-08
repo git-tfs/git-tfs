@@ -4,23 +4,36 @@ using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Core.BranchVisitors;
+using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 
 namespace Sep.Git.Tfs.VsCommon
 {
-
     public abstract class TfsHelperVs2010Base : TfsHelperBase
     {
+        TfsApiBridge _bridge;
+
         public TfsHelperVs2010Base(TextWriter stdout, TfsApiBridge bridge, IContainer container)
             : base(stdout, bridge, container)
         {
+            _bridge = bridge;
         }
 
         public override bool CanGetBranchInformation { get { return true; } }
 
-        public override IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public override IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
-            return VersionControl.QueryRootBranchObjects(RecursionType.Full).Select(b => b.Properties.RootItem.Item);
+            return VersionControl.QueryRootBranchObjects(RecursionType.Full)
+                .Where(b => b.Properties.ParentBranch == null)
+                .Select(b => b.Properties.RootItem.Item);
+        }
+
+        public override IEnumerable<IBranchObject> GetBranches()
+        {
+            var branches = VersionControl.QueryRootBranchObjects(RecursionType.Full)
+                .Where(b => b.Properties.RootItem.IsDeleted == false);
+            return _bridge.Wrap<WrapperForBranchObject, IBranchObject>(branches);
         }
 
         public override int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)

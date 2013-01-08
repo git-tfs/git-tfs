@@ -30,7 +30,8 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null);
         IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null);
         bool CanGetBranchInformation { get; }
-        IEnumerable<string> GetAllTfsBranchesOrderedByCreation();
+        IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation();
+        IEnumerable<IBranchObject> GetBranches();
         void EnsureAuthenticated();
     }
 }
