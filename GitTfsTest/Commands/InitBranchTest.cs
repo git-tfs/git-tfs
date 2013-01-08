@@ -388,8 +388,64 @@ namespace Sep.Git.Tfs.Test.Commands
 
             newBranch1Remote.VerifyAllExpectations();
             newBranch2Remote.VerifyAllExpectations();
-
         }
+
+        [Fact]
+        public void ShouldFailInitAllBranchesBecauseCloneWasNotMadeFromABranch()
+        {
+            const string GIT_BRANCH_TO_INIT1 = "MyBranch1";
+            const string GIT_BRANCH_TO_INIT2 = "MyBranch2";
+
+            IGitRepository gitRepository; IGitTfsRemote remote; IGitTfsRemote newBranch1Remote;
+            InitMocks4Tests(GIT_BRANCH_TO_INIT1, out gitRepository, out remote, out newBranch1Remote);
+
+            mocks.ClassUnderTest.CloneAllBranches = true;
+            remote.Tfs = mocks.Get<ITfsHelper>();
+            var tfsPathBranch1 = "$/MyProject/MyBranch1";
+            var tfsPathBranch2 = "$/MyProject/MyBranch2";
+            remote.Tfs.Stub(t => t.GetBranches()).Return(new IBranchObject[] {
+                new MockBranchObject() { IsRoot = true, Path = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!" },
+                new MockBranchObject() { ParentPath = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", Path = tfsPathBranch1 },
+                new MockBranchObject() { ParentPath = "$/MyProject/TheCloneWasNotMadeFromTheTrunk!", Path = tfsPathBranch2 },
+                // Note the remote TfsRepositoryPath is NOT included!
+            });
+
+            gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
+            gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
+
+            #region Branch1
+            var rootChangeSetB1 = 1000;
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch1)).Return(rootChangeSetB1);
+
+            gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT1)).Return(GIT_BRANCH_TO_INIT1).Repeat.Never();
+            gitRepository.Expect(x => x.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + rootChangeSetB1 + "[^0-9]")).Return("Sha_Branch1").Repeat.Never();
+            gitRepository.Expect(x => x.CreateTfsRemote(Arg<string>.Is.Same(GIT_BRANCH_TO_INIT1), Arg<string>.Is.Same("http://myTfsServer:8080/tfs"), Arg<string>.Is.Same(tfsPathBranch1), Arg<RemoteOptions>.Is.Anything)).Repeat.Never();
+            gitRepository.Expect(x => x.ReadTfsRemote(GIT_BRANCH_TO_INIT1)).Return(newBranch1Remote).Repeat.Never();
+            #endregion
+
+            #region Branch2
+            var newBranch2Remote = MockRepository.GenerateStub<IGitTfsRemote>();
+            newBranch2Remote.Id = GIT_BRANCH_TO_INIT2;
+
+            var rootChangeSetB2 = 2000;
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch2)).Return(rootChangeSetB2);
+
+            gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT2)).Return(GIT_BRANCH_TO_INIT2).Repeat.Never();
+            gitRepository.Expect(x => x.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + rootChangeSetB2 + "[^0-9]")).Return("Sha_Branch2").Repeat.Never();
+            gitRepository.Expect(x => x.CreateTfsRemote(Arg<string>.Is.Same(GIT_BRANCH_TO_INIT2), Arg<string>.Is.Same("http://myTfsServer:8080/tfs"), Arg<string>.Is.Same(tfsPathBranch2), Arg<RemoteOptions>.Is.Anything)).Repeat.Never();
+            gitRepository.Expect(x => x.ReadTfsRemote(GIT_BRANCH_TO_INIT2)).Return(newBranch2Remote).Repeat.Never();
+            #endregion
+
+            var ex = Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run());
+
+            Assert.Equal("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '$/MyProject/Trunk' is not a TFS branch!", ex.Message);
+
+            gitRepository.VerifyAllExpectations();
+
+            newBranch1Remote.VerifyAllExpectations();
+            newBranch2Remote.VerifyAllExpectations();
+        }
+
         #endregion
 
         #region Help Command
