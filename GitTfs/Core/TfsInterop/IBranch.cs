@@ -37,6 +37,8 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         public List<BranchTree> ChildBranches { get; private set; }
 
         public string Path { get { return Branch.Path; } }
+        public string ParentPath { get { return Branch.ParentPath; } }
+        public bool IsRoot { get { return Branch.IsRoot; } }
 
         public override string ToString()
         {
@@ -49,27 +51,21 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         public static BranchTree GetRootTfsBranchForRemotePath(this ITfsHelper tfs, string remoteTfsPath, bool searchExactPath = true)
         {
             var branches = tfs.GetBranches();
-            var roots = branches.Where(b => b.IsRoot);
-            var children = branches.Except(roots);
-            var wrapped = roots.Select(b => WrapperForBranchFactory.Wrap(b, children));
-            return wrapped.FirstOrDefault(b =>
+            var branchTrees = branches.Aggregate(new Dictionary<string, BranchTree>(StringComparer.OrdinalIgnoreCase), (dict, branch) => dict.Tap(d => d.Add(branch.Path, new BranchTree(branch))));
+            foreach(var branch in branchTrees.Values)
+            {
+                if(!branch.IsRoot)
+                {
+                    branchTrees[branch.ParentPath].ChildBranches.Add(branch);
+                }
+            }
+            var roots = branchTrees.Values.Where(b => b.IsRoot);
+            return roots.FirstOrDefault(b =>
             {
                 var visitor = new BranchTreeContainsPathVisitor(remoteTfsPath, searchExactPath);
                 b.AcceptVisitor(visitor);
                 return visitor.Found;
             });
-        }
-
-        class WrapperForBranchFactory
-        {
-            public static BranchTree Wrap(IBranchObject branch, IEnumerable<IBranchObject> related)
-            {
-                var children =
-                    related.Where(c => c.ParentPath == branch.Path)
-                           .Select(c => WrapperForBranchFactory.Wrap(c, related));
-
-                return new BranchTree(branch, children);
-            }
         }
 
         public static void AcceptVisitor(this BranchTree branch, IBranchTreeVisitor treeVisitor, int level = 0)
