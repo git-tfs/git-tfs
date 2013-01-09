@@ -39,7 +39,7 @@ namespace Sep.Git.Tfs.Test.Integration
             const string expectedSha = "4053764b2868a2be71ae7f5f113ad84dff8a052a";
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "tfs/default", expectedSha);
+            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
             h.AssertEmptyWorkspace("MyProject");
         }
 
@@ -60,7 +60,7 @@ namespace Sep.Git.Tfs.Test.Integration
             const string expectedSha = "d64d883266eca65bede947c79529318718a0d8eb";
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "tfs/default", expectedSha);
+            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
         }
@@ -127,7 +127,7 @@ namespace Sep.Git.Tfs.Test.Integration
         {
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "tfs/default", expectedSha);
+            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
         }
 
         [FactExceptOnUnix]
