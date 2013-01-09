@@ -25,17 +25,18 @@ namespace Sep.Git.Tfs.Core
             _authors = authors;
         }
 
-        public LogEntry Apply(string lastCommit, GitIndexInfo index)
+        public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)
         {
             var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
+            workspace.Get(_changeset);
             foreach (var change in Sort(_changeset.Changes))
             {
-                Apply(change, index, initialTree);
+                Apply(change, index, workspace, initialTree);
             }
             return MakeNewLogEntry();
         }
 
-        private void Apply(IChange change, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
+        private void Apply(IChange change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             // If you make updates to a dir in TF, the changeset includes changes for all the children also,
             // and git doesn't really care if you add or delete empty dirs.
@@ -46,7 +47,7 @@ namespace Sep.Git.Tfs.Core
                     return;
                 if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
                 {
-                    Rename(change, pathInGitRepo, index, initialTree);
+                    Rename(change, pathInGitRepo, index, workspace, initialTree);
                 }
                 else if (change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
                 {
@@ -54,7 +55,7 @@ namespace Sep.Git.Tfs.Core
                 }
                 else
                 {
-                    Update(change, pathInGitRepo, index, initialTree);
+                    Update(change, pathInGitRepo, index, workspace, initialTree);
                 }
             }
         }
@@ -67,7 +68,7 @@ namespace Sep.Git.Tfs.Core
             return UpdateToMatchExtantCasing(pathInGitRepo, initialTree);
         }
 
-        private void Rename(IChange change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
+        private void Rename(IChange change, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Item), initialTree);
             if (oldPath != null)
@@ -76,7 +77,7 @@ namespace Sep.Git.Tfs.Core
             }
             if (!change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
             {
-                Update(change, pathInGitRepo, index, initialTree);
+                Update(change, pathInGitRepo, index, workspace, initialTree);
             }
         }
 
@@ -114,18 +115,15 @@ namespace Sep.Git.Tfs.Core
             return oldItem.ServerItem;
         }
 
-        private void Update(IChange change, string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
+        private void Update(IChange change, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             if (change.Item.DeletionId == 0)
             {
-                using (var temp = change.Item.DownloadFile())
-                {
-                    index.Update(
-                        GetMode(change, initialTree, pathInGitRepo),
-                        pathInGitRepo,
-                        temp
-                    );
-                }
+                index.Update(
+                    GetMode(change, initialTree, pathInGitRepo),
+                    pathInGitRepo,
+                    workspace.GetLocalPath(pathInGitRepo)
+                );
             }
         }
 
@@ -139,7 +137,7 @@ namespace Sep.Git.Tfs.Core
                    select new TfsTreeEntry(pathInGitRepo, item);
         }
 
-        public LogEntry CopyTree(GitIndexInfo index)
+        public LogEntry CopyTree(GitIndexInfo index, ITfsWorkspace workspace)
         {
             var startTime = DateTime.Now;
             var itemsCopied = 0;
@@ -151,9 +149,10 @@ namespace Sep.Git.Tfs.Core
             }
             else
             {
+                workspace.Get(_changeset.ChangesetId);
                 foreach (var entry in tfsTreeEntries)
                 {
-                    Add(entry.Item, entry.FullName, index);
+                    Add(entry.Item, entry.FullName, index, workspace);
                     maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
 
                     itemsCopied++;
@@ -176,6 +175,14 @@ namespace Sep.Git.Tfs.Core
                 {
                     index.Update(Mode.NewFile, pathInGitRepo, temp);
                 }
+            }
+        }
+
+        private void Add(IItem item, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace)
+        {
+            if (item.DeletionId == 0)
+            {
+                index.Update(Mode.NewFile, pathInGitRepo, workspace.GetLocalPath(pathInGitRepo));
             }
         }
 

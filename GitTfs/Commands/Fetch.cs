@@ -20,17 +20,20 @@ namespace Sep.Git.Tfs.Commands
         private readonly RemoteOptions remoteOptions;
         private readonly Globals globals;
         private readonly AuthorsFile authors;
+        private readonly Labels labels;
 
-        public Fetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors)
+        public Fetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
             this.authors = authors;
+            this.labels = labels;
         }
 
 //        public int? RevisionToFetch { get; set; }
 
         bool FetchAll { get; set; }
+        bool FetchLabels { get; set; }
         bool FetchParents { get; set; }
         string AuthorsFilePath { get; set; }
         public virtual OptionSet OptionSet
@@ -45,6 +48,8 @@ namespace Sep.Git.Tfs.Commands
                         v => FetchParents = v != null },
                     { "authors=", "Path to an Authors file to map TFS users to Git users",
                         v => AuthorsFilePath = v },
+                    { "l|with-labels|fetch-labels", "Fetch the labels also when fetching TFS changesets",
+                        v => FetchLabels = v != null },
 //                    { "r|revision=",
 //                        v => RevisionToFetch = Convert.ToInt32(v) },
                 }.Merge(remoteOptions.OptionSet);
@@ -58,24 +63,17 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(params string[] args)
         {
-            if (!String.IsNullOrWhiteSpace(AuthorsFilePath))
-            {
-                if (!File.Exists(AuthorsFilePath))
-                {
-                    throw new GitTfsException("Authors file cannot be found: '" + AuthorsFilePath + "'");
-                }
-                else
-                {
-                    using (StreamReader sr = new StreamReader(AuthorsFilePath))
-                    {
-                        authors.Parse(sr);
-                    }
-                }
-            }
+            authors.Parse(AuthorsFilePath, globals.GitDir);
+
             foreach (var remote in GetRemotesToFetch(args))
             {
                 Trace.WriteLine("Fetching from TFS remote " + remote.Id);
                 DoFetch(remote);
+                if (labels != null && FetchLabels)
+                {
+                    Trace.WriteLine("Fetching labels from TFS remote " + remote.Id);
+                    labels.Run(remote);
+                }
             }
             return 0;
         }

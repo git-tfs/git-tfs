@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Sep.Git.Tfs.Commands;
@@ -15,10 +16,14 @@ namespace Sep.Git.Tfs.VsFake
         #region misc/null
 
         IContainer _container;
+        TextWriter _stdout;
+        Script _script;
 
-        public TfsHelper(IContainer container)
+        public TfsHelper(IContainer container, TextWriter stdout, Script script)
         {
             _container = container;
+            _stdout = stdout;
+            _script = script;
         }
 
         public string TfsClientLibraryVersion { get { return "(FAKE)"; } }
@@ -48,12 +53,12 @@ namespace Sep.Git.Tfs.VsFake
 
         public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
         {
-            return TfsPlugin.Script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
+            return _script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
         }
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
-            return TfsPlugin.Script.Changesets.Where(x => x.Id > startVersion).Select(x => BuildTfsChangeset(x, remote));
+            return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
         }
 
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)
@@ -101,6 +106,11 @@ namespace Sep.Git.Tfs.VsFake
             {
                 get { throw new NotImplementedException(); }
             }
+
+            public void Get(IWorkspace workspace)
+            {
+                workspace.GetSpecificVersion(this);
+            }
         }
 
         class Change : IChange, IItem
@@ -139,7 +149,7 @@ namespace Sep.Git.Tfs.VsFake
                 get { return _change.RepositoryPath; }
             }
 
-            decimal IItem.DeletionId
+            int IItem.DeletionId
             {
                 get { return 0; }
             }
@@ -174,12 +184,117 @@ namespace Sep.Git.Tfs.VsFake
 
         #endregion
 
-        #region unimplemented
+        #region workspaces
 
         public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            throw new NotImplementedException();
+            Trace.WriteLine("Setting up a TFS workspace at " + directory);
+            var fakeWorkspace = new FakeWorkspace(directory, remote.TfsRepositoryPath);
+            var workspace = _container.With("localDirectory").EqualTo(directory)
+                .With("remote").EqualTo(remote)
+                .With("contextVersion").EqualTo(versionToFetch)
+                .With("workspace").EqualTo(fakeWorkspace)
+                .With("tfsHelper").EqualTo(this)
+                .GetInstance<TfsWorkspace>();
+            action(workspace);
         }
+
+        class FakeWorkspace : IWorkspace
+        {
+            string _directory;
+            string _repositoryRoot;
+
+            public FakeWorkspace(string directory, string repositoryRoot)
+            {
+                _directory = directory;
+                _repositoryRoot = repositoryRoot;
+            }
+
+            public void GetSpecificVersion(IChangeset changeset)
+            {
+                var repositoryRoot = _repositoryRoot.ToLower();
+                if(!repositoryRoot.EndsWith("/")) repositoryRoot += "/";
+                foreach (var change in changeset.Changes)
+                {
+                    if (change.Item.ItemType == TfsItemType.File)
+                    {
+                        var outPath = Path.Combine(_directory, change.Item.ServerItem.ToLower().Replace(repositoryRoot, ""));
+                        var outDir = Path.GetDirectoryName(outPath);
+                        if (!Directory.Exists(outDir)) Directory.CreateDirectory(outDir);
+                        using (var download = change.Item.DownloadFile())
+                            File.WriteAllText(outPath, File.ReadAllText(download.Path));
+                    }
+                }
+            }
+
+            #region unimplemented
+
+            public IPendingChange[] GetPendingChanges()
+            {
+                throw new NotImplementedException();
+            }
+
+            public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int PendAdd(string path)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int PendEdit(string path)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int PendDelete(string path)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int PendRename(string pathFrom, string pathTo)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void ForceGetFile(string path, int changeset)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void GetSpecificVersion(int changeset)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetLocalItemForServerItem(string serverItem)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string OwnerName
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region unimplemented
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
@@ -196,17 +311,17 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
+        public ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes)
+        {
+            throw new NotImplementedException();
+        }
+
         public ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote)
         {
             throw new NotImplementedException();
         }
 
         public IChangeset GetChangeset(int changesetId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool MatchesUrl(string tfsUrl)
         {
             throw new NotImplementedException();
         }
@@ -231,7 +346,27 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        #endregion
+        public bool CanGetBranchInformation { get { return false; } }
 
+        public int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<IBranchObject> GetBranches()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }

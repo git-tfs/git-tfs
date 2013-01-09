@@ -14,6 +14,7 @@ namespace Sep.Git.Tfs
 {
     public class GitTfs
     {
+        private IGitTfsVersionProvider _gitTfsVersionProvider;
         private ITfsHelper tfsHelper;
         private GitTfsCommandFactory commandFactory;
         private readonly IHelpHelper _help;
@@ -21,50 +22,42 @@ namespace Sep.Git.Tfs
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
 
-        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, GitTfsCommandRunner runner, Globals globals)
+        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
             _help = help;
             _container = container;
+            _gitTfsVersionProvider = gitTfsVersionProvider;
             _runner = runner;
             _globals = globals;
         }
 
-        public void Run(IList<string> args)
+        public int Run(IList<string> args)
         {
             InitializeGlobals();
             var command = ExtractCommand(args);
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
-            Main(command, unparsedArgs);
+            return Main(command, unparsedArgs);
         }
 
-        public void Main(GitTfsCommand command, IList<string> unparsedArgs)
+        public int Main(GitTfsCommand command, IList<string> unparsedArgs)
         {
+            Trace.WriteLine(_gitTfsVersionProvider.GetVersionString());
             if(_globals.ShowHelp)
             {
-                Environment.ExitCode = _help.ShowHelp(command);
+                return _help.ShowHelp(command);
             }
             else if(_globals.ShowVersion)
             {
-                _container.GetInstance<TextWriter>().WriteLine(MakeVersionString());
-                Environment.ExitCode = GitTfsExitCodes.OK;
+                _container.GetInstance<TextWriter>().WriteLine(_gitTfsVersionProvider.GetVersionString());
+                return GitTfsExitCodes.OK;
             }
             else
             {
-                Environment.ExitCode = _runner.Run(command, unparsedArgs);
-                //PostFetchCheckout();
+                return _runner.Run(command, unparsedArgs);
             }
-        }
-
-        private string MakeVersionString()
-        {
-            var versionString = "git-tfs version";
-            versionString += " " + GetType().Assembly.GetName().Version;
-            versionString += " (TFS client library " + tfsHelper.TfsClientLibraryVersion + ")";
-            versionString += " (" + (Environment.Is64BitProcess ? "64-bit" : "32-bit") + ")";
-            return versionString;
         }
 
         public bool RequiresValidGitRepository(GitTfsCommand command)
@@ -101,12 +94,12 @@ namespace Sep.Git.Tfs
             {
                 if (_globals.GitDirSetByUser)
                 {
-                    throw new Exception("GIT_DIR=" + _globals.GitDir + " explicitly set, but it is not a directory.");
+                    throw new Exception("This command must be run inside a git repository!\nGIT_DIR=" + _globals.GitDir + " explicitly set, but it is not a directory.");
                 }
                 var gitDir = _globals.GitDir;
                 _globals.GitDir = null;
                 string cdUp = null;
-                git.WrapGitCommandErrors("Already at toplevel, but " + gitDir + " not found.",
+                git.WrapGitCommandErrors("This command must be run inside a git repository!\nAlready at top level, but " + gitDir + " not found.",
                                          () =>
                                              {
                                                  cdUp = git.CommandOneline("rev-parse", "--show-cdup");
@@ -120,7 +113,7 @@ namespace Sep.Git.Tfs
                 Environment.CurrentDirectory = cdUp;
                 if (!Directory.Exists(gitDir))
                 {
-                    throw new Exception(gitDir + " still not found after going to " + cdUp);
+                    throw new Exception("This command must be run inside a git repository!\n" + gitDir + " still not found after going to " + cdUp);
                 }
                 _globals.GitDir = gitDir;
             }

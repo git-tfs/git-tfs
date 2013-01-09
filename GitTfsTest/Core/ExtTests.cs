@@ -73,10 +73,10 @@ namespace Sep.Git.Tfs.Test.Core
         [Fact]
         public void ShouldCombineSeveralPaths()
         {
-            Assert.Equal("a\\b\\c", Ext.CombinePaths("a", "b", "c"));
+            Assert.Equal(Path.Combine(Path.Combine("a", "b"), "c"), Ext.CombinePaths("a", "b", "c"));
         }
 
-        [Fact]
+        [FactExceptOnUnix]
         public void ShouldIgnorePathPartsBeforeAbsolute()
         {
             Assert.Equal("c:\\x\\y", Ext.CombinePaths("a", "b", "c:\\x", "y"));

@@ -14,10 +14,15 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly Fetch fetch;
         private readonly Globals globals;
+        private bool _shouldRebase;
 
         public OptionSet OptionSet
         {
-            get { return fetch.OptionSet; }
+            get
+            {
+                return fetch.OptionSet
+                            .Add("r|rebase", "rebase your modifications on tfs changes", v => _shouldRebase = v != null);
+            }
         }
 
         public Pull(Globals globals, Fetch fetch)
@@ -38,7 +43,17 @@ namespace Sep.Git.Tfs.Commands
             if (retVal == 0)
             {
                 var remote = globals.Repository.ReadTfsRemote(remoteId);
-                globals.Repository.CommandNoisy("merge", remote.RemoteRef);
+                if (_shouldRebase)
+                {
+                    if (globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
+                    {
+                        throw new GitTfsException("error: You have local changes; rebase-workflow only possible with clean working directory.")
+                            .WithRecommendation("Try 'git stash' to stash your local changes and pull again.");
+                    }
+                    globals.Repository.CommandNoisy("rebase", remote.RemoteRef);
+                }
+                else
+                    globals.Repository.CommandNoisy("merge", remote.RemoteRef);
             }
 
             return retVal;

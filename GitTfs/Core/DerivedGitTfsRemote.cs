@@ -1,5 +1,6 @@
 ﻿using System;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -191,17 +192,22 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public long Checkin(string treeish, TfsChangesetInfo parentChangeset)
+        public long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset)
+        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             throw new NotImplementedException();
         }
 
         public void CleanupWorkspace()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CleanupWorkspaceDirectory()
         {
             throw new NotImplementedException();
         }
@@ -217,6 +223,11 @@ namespace Sep.Git.Tfs.Core
         }
 
         public void EnsureTfsAuthenticated()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
         {
             throw new NotImplementedException();
         }

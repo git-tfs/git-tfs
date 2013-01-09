@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -74,6 +75,7 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 var versionControlServer = GetService<VersionControlServer>();
                 versionControlServer.NonFatalError += NonFatalError;
+                versionControlServer.Getting += Getting;
                 return versionControlServer;
             }
         }
@@ -85,9 +87,21 @@ namespace Sep.Git.Tfs.VsCommon
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
-            _stdout.WriteLine(e.Failure.Message);
-            Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
-            Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+           if (e.Failure != null)
+           {
+              _stdout.WriteLine(e.Failure.Message);
+              Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
+           }
+           if (e.Exception != null)
+           {
+              _stdout.WriteLine(e.Exception.Message);
+              Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+           }
+        }
+
+        private void Getting(object sender, GettingEventArgs e)
+        {
+            Trace.WriteLine("get [C" + e.Version + "]" + e.ServerItem);
         }
 
         private IGroupSecurityService GroupSecurityService
@@ -95,25 +109,62 @@ namespace Sep.Git.Tfs.VsCommon
             get { return GetService<IGroupSecurityService>(); }
         }
 
+        private ILinking _linking;
+        private ILinking Linking
+        {
+            get { return _linking ?? (_linking = GetService<ILinking>()); }
+        }
+
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                                                          null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
                                                          true, true);
+
             return changesets.Cast<Changeset>()
                 .OrderBy(changeset => changeset.ChangesetId)
                 .Select(changeset => BuildTfsChangeset(changeset, remote));
         }
 
+        public virtual bool CanGetBranchInformation { get { return false; } }
+
+        public virtual IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual IEnumerable<IBranchObject> GetBranches()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
+        {
+            throw new NotImplementedException();
+        }
+
         private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
         {
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
-            tfsChangeset.Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId, Remote = remote};
+            tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };
+
+            if (changeset.WorkItems != null)
+            {
+                tfsChangeset.Summary.Workitems = changeset.WorkItems.Select(wi => new TfsWorkitem
+                    {
+                        Id = wi.Id,
+                        Title = wi.Title,
+                        Description = wi.Description,
+                        Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
+                    });
+            }
+
             return tfsChangeset;
         }
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
+            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
             var workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath);
             try
             {
@@ -200,7 +251,7 @@ namespace Sep.Git.Tfs.VsCommon
             var wrapperForVersionControlServer =
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
             // TODO - containerify this (no `new`)!
-            var fakeChangeset = new FakeChangeset(shelveset, change, wrapperForVersionControlServer, _bridge);
+            var fakeChangeset = new Unshelveable(shelveset, change, wrapperForVersionControlServer, _bridge);
             var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout, null) { Summary = new TfsChangesetInfo { Remote = remote } };
             return tfsChangeset;
         }
@@ -275,7 +326,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         #region Fake classes for unshelve
 
-        private class FakeChangeset : IChangeset
+        private class Unshelveable : IChangeset
         {
             private readonly Shelveset _shelveset;
             private readonly PendingSet _pendingSet;
@@ -283,13 +334,13 @@ namespace Sep.Git.Tfs.VsCommon
             private readonly TfsApiBridge _bridge;
             private readonly IChange[] _changes;
 
-            public FakeChangeset(Shelveset shelveset, PendingSet pendingSet, IVersionControlServer versionControlServer, TfsApiBridge bridge)
+            public Unshelveable(Shelveset shelveset, PendingSet pendingSet, IVersionControlServer versionControlServer, TfsApiBridge bridge)
             {
                 _shelveset = shelveset;
                 _versionControlServer = versionControlServer;
                 _bridge = bridge;
                 _pendingSet = pendingSet;
-                _changes = _pendingSet.PendingChanges.Select(x => new FakeChange(x, _bridge, versionControlServer)).Cast<IChange>().ToArray();
+                _changes = _pendingSet.PendingChanges.Select(x => new UnshelveChange(x, _bridge, versionControlServer)).Cast<IChange>().ToArray();
             }
 
             public IChange[] Changes
@@ -321,19 +372,28 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 get { return _versionControlServer; }
             }
+
+            public void Get(IWorkspace workspace)
+            {
+                foreach (var change in _changes)
+                {
+                    var item = (UnshelveItem)change.Item;
+                    item.Get(workspace);
+                }
+            }
         }
 
-        private class FakeChange : IChange
+        private class UnshelveChange : IChange
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
-            private readonly FakeItem _fakeItem;
+            private readonly UnshelveItem _fakeItem;
 
-            public FakeChange(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
+            public UnshelveChange(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
             {
                 _pendingChange = pendingChange;
                 _bridge = bridge;
-                _fakeItem = new FakeItem(_pendingChange, _bridge, versionControlServer);
+                _fakeItem = new UnshelveItem(_pendingChange, _bridge, versionControlServer);
             }
 
             public TfsChangeType ChangeType
@@ -347,14 +407,14 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        private class FakeItem : IItem
+        private class UnshelveItem : IItem
         {
             private readonly PendingChange _pendingChange;
             private readonly TfsApiBridge _bridge;
             private readonly IVersionControlServer _versionControlServer;
             private long _contentLength = -1;
 
-            public FakeItem(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
+            public UnshelveItem(PendingChange pendingChange, TfsApiBridge bridge, IVersionControlServer versionControlServer)
             {
                 _pendingChange = pendingChange;
                 _bridge = bridge;
@@ -382,7 +442,7 @@ namespace Sep.Git.Tfs.VsCommon
                 get { return _pendingChange.ServerItem; }
             }
 
-            public decimal DeletionId
+            public int DeletionId
             {
                 get { return _pendingChange.DeletionId; }
             }
@@ -422,6 +482,12 @@ namespace Sep.Git.Tfs.VsCommon
                 _contentLength = new FileInfo(temp).Length;
                 return temp;
             }
+
+            public void Get(IWorkspace workspace)
+            {
+                _pendingChange.DownloadShelvedFile(workspace.GetLocalItemForServerItem(_pendingChange.ServerItem));
+            }
+
         }
 
         #endregion
@@ -459,11 +525,6 @@ namespace Sep.Git.Tfs.VsCommon
             return BuildTfsChangeset(VersionControl.GetChangeset(changesetId), remote);
         }
 
-        public bool MatchesUrl(string tfsUrl)
-        {
-            return Url == tfsUrl || LegacyUrls.Contains(tfsUrl);
-        }
-
         public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
         {
             return
@@ -476,6 +537,23 @@ namespace Sep.Git.Tfs.VsCommon
             return
                 GetWorkItemInfosHelper<IWorkItemCheckedInfo, WrapperForWorkItemCheckedInfo, WorkItemCheckedInfo>(
                     workItems, checkinAction, GetWorkItemCheckedInfo);
+        }
+
+        public ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes)
+        {
+            if (checkinNotes.IsEmpty())
+            {
+                return null;
+            }
+
+            var index = 0;
+            var values = new CheckinNoteFieldValue[checkinNotes.Count];
+            foreach (var pair in checkinNotes)
+            {
+                values[index++] = new CheckinNoteFieldValue(pair.Key, pair.Value);
+            }
+
+            return _bridge.Wrap<WrapperForCheckinNote, CheckinNote>(new CheckinNote(values));
         }
 
         private IEnumerable<TInterface> GetWorkItemInfosHelper<TInterface, TWrapper, TInstance>(
@@ -500,5 +578,21 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return new WorkItemCheckedInfo(Convert.ToInt32(workitem), true, checkinAction);
         }
+
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
+        {
+            var labels = VersionControl.QueryLabels(nameFilter, tfsPathBranch, null, true, tfsPathBranch, VersionSpec.Latest);
+
+            return labels.Select(e => new TfsLabel {
+                Id = e.LabelId,
+                Name = e.Name,
+                Comment = e.Comment,
+                ChangesetId = e.Items.Where(i=>i.ServerItem.IndexOf(tfsPathBranch) == 0).OrderByDescending(i=>i.ChangesetId).First().ChangesetId,
+                Owner = e.OwnerName,
+                Date = e.LastModifiedDate,
+                IsTransBranch = (e.Items.FirstOrDefault(i => i.ServerItem.IndexOf(tfsPathBranch) != 0) != null)
+            });
+        }
+
     }
 }

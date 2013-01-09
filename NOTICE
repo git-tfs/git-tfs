@@ -1,5 +1,5 @@
 Copyright 2009-2011 Software Engineering Professionals, Inc.
-Copyright 2011 Matt Burke
+Copyright 2011-2012 Matt Burke
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@ limitations under the License.
 
 This software distribution contains the following libraries:
 
-CSharpOptParse
-http://csharpoptparse.sourceforge.net/
+NDesk.Options, Copyright (C) 2008 Novell (http://www.novell.com)
+http://www.ndesk.org/Options
 
-GitSharp, copyright 2007-2009, The Git Development Community and the GitSharp Team
-http://www.eqqon.com/index.php/GitSharp
+LibGit2Sharp, Copyright (c) 2011-2012 LibGit2Sharp contributors
+https://github.com/libgit2/libgit2sharp/
+
+libgit2, Copyright (C) 2009-2012 the libgit2 contributors
+http://libgit2.github.com/
 
 StructureMap, copyright 2004-2009 Jeremy D. Miller
 http://structuremap.sourceforge.net/

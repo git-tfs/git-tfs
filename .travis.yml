@@ -5,8 +5,4 @@ install:
 
 script:
   - git submodule update --init
-  - xbuild GitTfs.sln /p:Configuration=Debug /t:GitTfsTest
-
-after_script:
-  - ./.nuget/fake-nuget install .nuget/packages.config -source ""  -RequireConsent -o ./packages
-  - mono packages/xunit.runners.1.9.1/tools/xunit.console.clr4.exe GitTfsTest/bin/Debug/GitTfsTest.dll
+  - xbuild CI.proj

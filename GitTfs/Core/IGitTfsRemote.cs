@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -30,15 +31,17 @@ namespace Sep.Git.Tfs.Core
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies);
         bool HasShelveset(string shelvesetName);
         long CheckinTool(string head, TfsChangesetInfo parentChangeset);
-        long Checkin(string treeish, TfsChangesetInfo parentChangeset);
-        
+        long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options);
+
         /// <summary>
         /// Checks in to TFS set of changes from git repository between given commits (parent..head) onto given TFS changeset. Returns ID of the new changeset.
         /// </summary>
-        long Checkin(string head, string parent, TfsChangesetInfo parentChangeset);
+        long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options);
         void CleanupWorkspace();
+        void CleanupWorkspaceDirectory();
         ITfsChangeset GetChangeset(long changesetId);
         void UpdateRef(string commitHash, long changesetId);
         void EnsureTfsAuthenticated();
+        bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath);
     }
 }

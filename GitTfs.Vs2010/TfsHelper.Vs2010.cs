@@ -20,7 +20,7 @@ namespace Sep.Git.Tfs.Vs2010
 
     using Microsoft.TeamFoundation.Framework.Client;
 
-    public class TfsHelper : TfsHelperBase
+    public class TfsHelper : TfsHelperVs2010Base
     {
         private readonly TfsApiBridge _bridge;
         private TfsTeamProjectCollection _server;

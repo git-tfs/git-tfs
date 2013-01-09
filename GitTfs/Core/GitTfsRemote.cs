@@ -19,6 +19,7 @@ namespace Sep.Git.Tfs.Core
         private readonly RemoteOptions remoteOptions;
         private long? maxChangesetId;
         private string maxCommitHash;
+        private bool isTfsAuthenticated;
 
         public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
         {
@@ -39,7 +40,10 @@ namespace Sep.Git.Tfs.Core
 
         public void EnsureTfsAuthenticated()
         {
+            if (isTfsAuthenticated)
+                return;
             Tfs.EnsureAuthenticated();
+            isTfsAuthenticated = true;
         }
 
         public bool IsDerived
@@ -123,13 +127,29 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                return Path.Combine(Dir, "workspace");
+                return Repository.GetConfig("git-tfs.workspace-dir") ?? Path.Combine(Dir, "workspace");
             }
         }
 
         public void CleanupWorkspace()
         {
             Tfs.CleanupWorkspaces(WorkingDirectory);
+        }
+
+        public void CleanupWorkspaceDirectory()
+        {
+            try
+            {
+                var allFiles = Directory.EnumerateFiles(WorkingDirectory, "*", SearchOption.AllDirectories);
+                foreach (var file in allFiles)
+                    File.SetAttributes(file, File.GetAttributes(file) & ~FileAttributes.ReadOnly);
+
+                Directory.Delete(WorkingDirectory, true);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
         }
 
         public bool ShouldSkip(string path)
@@ -152,7 +172,7 @@ namespace Sep.Git.Tfs.Core
         public string GetPathInGitRepo(string tfsPath)
         {
             if (tfsPath == null) return null;
-            if(!tfsPath.StartsWith(TfsRepositoryPath,StringComparison.InvariantCultureIgnoreCase)) return null;
+            if (!tfsPath.StartsWith(TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)) return null;
             tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
             while (tfsPath.StartsWith("/"))
                 tfsPath = tfsPath.Substring(1);
@@ -177,7 +197,17 @@ namespace Sep.Git.Tfs.Core
                         log.CommitParents.Add(parent);
                     }
                 }
-                UpdateRef(Commit(log), changeset.Summary.ChangesetId);
+                var commitSha = Commit(log);
+                UpdateRef(commitSha, changeset.Summary.ChangesetId);
+                if(changeset.Summary.Workitems.Count() != 0)
+                {
+                    string workitemNote = "Workitems:\n";
+                    foreach(var workitem in changeset.Summary.Workitems)
+                    {
+                        workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitem.Id, workitem.Title, workitem.Url);
+                    }
+                    Repository.CreateNote(commitSha, workitemNote, log.AuthorName, log.AuthorEmail, log.Date);
+                }
                 DoGcIfNeeded();
             }
         }
@@ -220,7 +250,7 @@ namespace Sep.Git.Tfs.Core
 
         public ITfsChangeset GetChangeset(long changesetId)
         {
-            return Tfs.GetChangeset((int) changesetId, this);
+            return Tfs.GetChangeset((int)changesetId, this);
         }
 
         public void UpdateRef(string commitHash, long changesetId)
@@ -251,14 +281,14 @@ namespace Sep.Git.Tfs.Core
         private void DoGcIfNeeded()
         {
             Trace.WriteLine("GC Countdown: " + globals.GcCountdown);
-            if(--globals.GcCountdown < 0)
+            if (--globals.GcCountdown < 0)
             {
                 globals.GcCountdown = globals.GcPeriod;
                 try
                 {
                     Repository.CommandNoisy("gc", "--auto");
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Trace.WriteLine(e);
                     stdout.WriteLine("Warning: `git gc` failed! Try running it after git-tfs is finished.");
@@ -268,7 +298,7 @@ namespace Sep.Git.Tfs.Core
 
         private void AssertTemporaryIndexClean(string treeish)
         {
-            if(string.IsNullOrEmpty(treeish))
+            if (string.IsNullOrEmpty(treeish))
             {
                 AssertTemporaryIndexEmpty();
                 return;
@@ -305,10 +335,11 @@ namespace Sep.Git.Tfs.Core
         private LogEntry Apply(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(
-                () => GitIndexInfo.Do(Repository, index => result = changeset.Apply(lastCommit, index)));
-            WithTemporaryIndex(
-                () => result.Tree = Repository.CommandOneline("write-tree"));
+            WithTemporaryIndex(() => Tfs.WithWorkspace(WorkingDirectory, this, changeset.Summary, workspace =>
+            {
+                GitIndexInfo.Do(Repository, index => result = changeset.Apply(lastCommit, index, workspace));
+                result.Tree = Repository.CommandOneline("write-tree");
+            }));
             if(!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
             return result;
         }
@@ -316,10 +347,10 @@ namespace Sep.Git.Tfs.Core
         private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(
-                () => GitIndexInfo.Do(Repository, index => result = changeset.CopyTree(index)));
-            WithTemporaryIndex(
-                () => result.Tree = Repository.CommandOneline("write-tree"));
+            WithTemporaryIndex(() => Tfs.WithWorkspace(WorkingDirectory, this, changeset.Summary, workspace => {
+                GitIndexInfo.Do(Repository, index => result = changeset.CopyTree(index, workspace));
+                result.Tree = Repository.CommandOneline("write-tree");
+            }));
             if (!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
             return result;
         }
@@ -400,7 +431,7 @@ namespace Sep.Git.Tfs.Core
                                          {
                                              Directory.CreateDirectory(Path.GetDirectoryName(IndexFile));
                                              action();
-                                         }, new Dictionary<string, string> {{"GIT_INDEX_FILE", IndexFile}});
+                                         }, new Dictionary<string, string> { { "GIT_INDEX_FILE", IndexFile } });
         }
 
         private void WithTemporaryEnvironment(Action action, IDictionary<string, string> newEnvironment)
@@ -424,7 +455,7 @@ namespace Sep.Git.Tfs.Core
 
         private void PushEnvironment(IDictionary<string, string> desiredEnvironment, IDictionary<string, string> oldEnvironment)
         {
-            foreach(var key in desiredEnvironment.Keys)
+            foreach (var key in desiredEnvironment.Keys)
             {
                 oldEnvironment[key] = Environment.GetEnvironmentVariable(key);
                 Environment.SetEnvironmentVariable(key, desiredEnvironment[key]);
@@ -434,7 +465,7 @@ namespace Sep.Git.Tfs.Core
         public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch)
         {
             var destinationRef = "refs/heads/" + destinationBranch;
-            if (File.Exists(Path.Combine(Repository.GitDir, destinationRef)))
+            if(Repository.HasRef(destinationRef))
                 throw new GitTfsException("ERROR: Destination branch (" + destinationBranch + ") already exists!");
             var shelvesetChangeset = Tfs.GetShelvesetData(this, shelvesetOwner, shelvesetName);
             Apply(shelvesetChangeset, destinationRef);
@@ -479,26 +510,36 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public long Checkin(string head, TfsChangesetInfo parentChangeset)
+        public long Checkin(string head, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace));
+                              workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options));
             return changeset;
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset)
+        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = Checkin(head, parent, workspace));
+                              workspace => changeset = Checkin(head, parent, workspace, options));
             return changeset;
         }
 
-        private long Checkin(string head, string parent, ITfsWorkspace workspace)
+        private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options)
         {
             PendChangesToWorkspace(head, parent, workspace);
-            return workspace.Checkin();
+            return workspace.Checkin(options);
+        }
+
+        public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
+        {
+            return MatchesTfsUrl(tfsUrl) && TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool MatchesTfsUrl(string tfsUrl)
+        {
+            return TfsUrl.Equals(tfsUrl, StringComparison.OrdinalIgnoreCase) || Tfs.LegacyUrls.Contains(tfsUrl, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
