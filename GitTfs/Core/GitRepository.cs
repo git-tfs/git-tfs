@@ -168,10 +168,6 @@ namespace Sep.Git.Tfs.Core
                 remote.UpdateRef(cs.GitCommit, cs.ChangesetId);
             }
         }
-        private void SetTfsConfig(string remoteId, string subkey, object value)
-        {
-            SetConfig(_globals.RemoteConfigKey(remoteId, subkey), value);
-        }
 
         public GitCommit GetCommit(string commitish)
         {

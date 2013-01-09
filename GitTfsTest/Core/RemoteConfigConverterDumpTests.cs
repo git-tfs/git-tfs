@@ -66,10 +66,10 @@ namespace Sep.Git.Tfs.Test.Core
 
         private void AssertContainsConfig(string key, string value, IEnumerable<ConfigurationEntry> configs)
         {
-            Assert.Contains(new ConfigurationEntry(key, value), configs, comparer);
+            Assert.Contains(new ConfigurationEntry(key, value, ConfigurationLevel.Local), configs, configComparer);
         }
 
-        static IEqualityComparer<ConfigurationEntry> comparer = new ConfigurationEntryComparer();
+        static IEqualityComparer<ConfigurationEntry> configComparer = new ConfigurationEntryComparer();
 
         class ConfigurationEntryComparer : IEqualityComparer<ConfigurationEntry>
         {

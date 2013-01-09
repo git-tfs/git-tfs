@@ -12,7 +12,7 @@ namespace Sep.Git.Tfs.Test.Core
         RemoteConfigConverter _reader = new RemoteConfigConverter();
         Dictionary<string, string> _config = new Dictionary<string, string>();
 
-        IEnumerable<ConfigurationEntry> _gitConfig { get { return _config.Select(x => new ConfigurationEntry(x.Key, x.Value)); } }
+        IEnumerable<ConfigurationEntry> _gitConfig { get { return _config.Select(x => new ConfigurationEntry(x.Key, x.Value, ConfigurationLevel.Local)); } }
         IEnumerable<RemoteInfo> _remotes { get { return _reader.Load(_gitConfig); } }
         RemoteInfo _firstRemote { get { return _remotes.FirstOrDefault(); } }
 

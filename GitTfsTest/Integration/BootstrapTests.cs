@@ -7,6 +7,11 @@ namespace Sep.Git.Tfs.Test.Integration
     {
         IntegrationHelper h = new IntegrationHelper();
 
+        public BootstrapTests()
+        {
+            h.SetupFake(_ => { });
+        }
+
         public void Dispose()
         {
             h.Dispose();

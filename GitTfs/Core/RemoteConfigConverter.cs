@@ -44,15 +44,20 @@ namespace Sep.Git.Tfs.Core
             if (!string.IsNullOrWhiteSpace(remote.Id))
             {
                 var prefix = "tfs-remote." + remote.Id + ".";
-                yield return new ConfigurationEntry(prefix + "url", remote.Url);
-                yield return new ConfigurationEntry(prefix + "repository", remote.Repository);
-                yield return new ConfigurationEntry(prefix + "username", remote.Username);
-                yield return new ConfigurationEntry(prefix + "password", remote.Password);
-                yield return new ConfigurationEntry(prefix + "ignore-paths", remote.IgnoreRegex);
-                yield return new ConfigurationEntry(prefix + "no-meta-data", remote.NoMetaData ? "true" : null);
-                yield return new ConfigurationEntry(prefix + "legacy-urls", remote.Aliases == null ? null : string.Join(",", remote.Aliases));
-                yield return new ConfigurationEntry(prefix + "autotag", remote.Autotag ? "true" : null);
+                yield return c(prefix + "url", remote.Url);
+                yield return c(prefix + "repository", remote.Repository);
+                yield return c(prefix + "username", remote.Username);
+                yield return c(prefix + "password", remote.Password);
+                yield return c(prefix + "ignore-paths", remote.IgnoreRegex);
+                yield return c(prefix + "no-meta-data", remote.NoMetaData ? "true" : null);
+                yield return c(prefix + "legacy-urls", remote.Aliases == null ? null : string.Join(",", remote.Aliases));
+                yield return c(prefix + "autotag", remote.Autotag ? "true" : null);
             }
+        }
+
+        private ConfigurationEntry c(string key, string value)
+        {
+            return new ConfigurationEntry(key, value, ConfigurationLevel.Local);
         }
     }
 }

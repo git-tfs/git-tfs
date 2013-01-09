@@ -70,7 +70,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public void SetupGitRepo(string path, Action<RepoBuilder> buildIt)
         {
-            using (var repo = Repository.Init(Path.Combine(Workdir, path)))
+            using (var repo = LibGit2Sharp.Repository.Init(Path.Combine(Workdir, path)))
                 buildIt(new RepoBuilder(repo));
         }
 
@@ -241,7 +241,8 @@ namespace Sep.Git.Tfs.Test.Integration
 
         private string RevParse(string repodir, string gitref)
         {
-            return Repository(repodir).Lookup<Commit>(gitref).Sha;
+            var parsed = Repository(repodir).Lookup<Commit>(gitref);
+            return parsed == null ? null : parsed.Sha;
         }
 
         private string ReadIfPresent(string path)
