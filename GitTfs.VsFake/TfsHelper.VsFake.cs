@@ -326,11 +326,6 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public bool MatchesUrl(string tfsUrl)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool HasShelveset(string shelvesetName)
         {
             throw new NotImplementedException();
@@ -358,12 +353,17 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch)
+        public IEnumerable<IBranchObject> GetBranches()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
         {
             throw new NotImplementedException();
         }

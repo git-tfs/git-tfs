@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
+using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 using LibGit2Sharp;
 
@@ -59,7 +60,11 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<IGitTfsRemote> ReadAllTfsRemotes()
         {
-            return GetTfsRemotes().Values;
+            var remotes = GetTfsRemotes().Values;
+            foreach (var remote in remotes)
+                remote.EnsureTfsAuthenticated();
+
+            return remotes;
         }
 
         public IGitTfsRemote ReadTfsRemote(string remoteId)
@@ -67,7 +72,9 @@ namespace Sep.Git.Tfs.Core
             if (!HasRemote(remoteId))
                 throw new GitTfsException("Unable to locate git-tfs remote with id = " + remoteId)
                     .WithRecommendation("Try using `git tfs bootstrap` to auto-init TFS remotes.");
-            return GetTfsRemotes()[remoteId];
+            var remote = GetTfsRemotes()[remoteId];
+            remote.EnsureTfsAuthenticated();
+            return remote;
         }
 
         private IGitTfsRemote ReadTfsRemote(string tfsUrl, string tfsRepositoryPath, bool includeStubRemotes)
@@ -75,7 +82,7 @@ namespace Sep.Git.Tfs.Core
             var allRemotes = GetTfsRemotes();
             var matchingRemotes =
                 allRemotes.Values.Where(
-                    remote => remote.Tfs.MatchesUrl(tfsUrl) && remote.TfsRepositoryPath == tfsRepositoryPath);
+                    remote => remote.MatchesUrlAndRepositoryPath(tfsUrl, tfsRepositoryPath));
             switch (matchingRemotes.Count())
             {
                 case 0:
@@ -85,7 +92,10 @@ namespace Sep.Git.Tfs.Core
                             .WithRecommendation("Try setting a legacy-url for an existing remote.");
                     return new DerivedGitTfsRemote(tfsUrl, tfsRepositoryPath);
                 case 1:
-                    return matchingRemotes.First();
+                    Trace.WriteLine("One remote matched");
+                    var remote = matchingRemotes.First();
+                    remote.EnsureTfsAuthenticated();
+                    return remote;
                 default:
                     Trace.WriteLine("More than one remote matched!");
                     goto case 1;
@@ -155,9 +165,14 @@ namespace Sep.Git.Tfs.Core
             _cachedRemotes = null;
         }
 
+        public void SetConfig(string key, object value)
+        {
+            _repository.Config.Set(key, value.ToString());
+        }
+
         private void SetTfsConfig(string remoteId, string subkey, object value)
         {
-            this.SetConfig(_globals.RemoteConfigKey(remoteId, subkey), value);
+            SetConfig(_globals.RemoteConfigKey(remoteId, subkey), value);
         }
 
         private void ParseRemoteConfig(TextReader stdout, IDictionary<string, IGitTfsRemote> remotes)
@@ -170,7 +185,6 @@ namespace Sep.Git.Tfs.Core
             foreach (var gitTfsRemotePair in remotes)
             {
                 var remote = gitTfsRemotePair.Value;
-                remote.EnsureTfsAuthenticated();
             }
         }
 
@@ -215,7 +229,7 @@ namespace Sep.Git.Tfs.Core
                     remote.Tfs.LegacyUrls = value.Split(',');
                     break;
                 case "repository":
-                    remote.TfsRepositoryPath = value;
+                    remote.TfsRepositoryPath = (value ?? string.Empty).TrimEnd('/'); /* tfs paths don't have trailing slashes */
                     break;
                 case "ignore-paths":
                     remote.IgnoreRegexExpression = value;
@@ -447,6 +461,12 @@ namespace Sep.Git.Tfs.Core
         {
             if (_repository.Tags[name] == null)
                 _repository.ApplyTag(name, sha, new Signature(Owner, emailOwner, new DateTimeOffset(creationDate)), comment);
+        }
+
+        public void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate)
+        {
+            Signature author = new Signature(owner, emailOwner, creationDate);
+            _repository.Notes.Add(new ObjectId(sha), content, author, author, "commits");
         }
     }
 }

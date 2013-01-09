@@ -177,9 +177,21 @@ namespace Sep.Git.Tfs.Test.Integration
             }
         }
 
+        public void ChangeConfigSetting(string repodir, string key, string value)
+        {
+            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
+            repo.Config.Set(key, value);
+        }
+
         #endregion
 
         #region assertions
+
+        public int GetCommitCount(string repodir)
+        {
+            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
+            return repo.Commits.Count();
+        }
 
         public void AssertGitRepo(string repodir)
         {
@@ -228,7 +240,7 @@ namespace Sep.Git.Tfs.Test.Integration
             var commit = Repository(repodir).Lookup<Commit>(commitish);
             AssertEqual(message, commit.Message, "Commit message of " + commitish);
         }
-		
+
         private void AssertEqual<T>(T expected, T actual, string message)
         {
             try

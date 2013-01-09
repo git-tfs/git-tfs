@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Sep.Git.Tfs.Commands;
 
@@ -8,6 +9,7 @@ namespace Sep.Git.Tfs.Core
     {
         string GitDir { get; set; }
         string GetConfig(string key);
+        void SetConfig(string key, object value);
         IEnumerable<IGitTfsRemote> ReadAllTfsRemotes();
         IGitTfsRemote ReadTfsRemote(string remoteId);
         void /*or IGitTfsRemote*/ CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions);
@@ -29,5 +31,6 @@ namespace Sep.Git.Tfs.Core
         bool CreateBranch(string gitBranchName, string target);
         string FindCommitHashByCommitMessage(string patternToFind);
         void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate);
+        void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate);
     }
 }

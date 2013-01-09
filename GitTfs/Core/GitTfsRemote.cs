@@ -19,6 +19,7 @@ namespace Sep.Git.Tfs.Core
         private readonly RemoteOptions remoteOptions;
         private long? maxChangesetId;
         private string maxCommitHash;
+        private bool IsTfsAuthenticated { get; set; }
 
         public GitTfsRemote(RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
         {
@@ -26,11 +27,15 @@ namespace Sep.Git.Tfs.Core
             this.globals = globals;
             this.stdout = stdout;
             Tfs = tfsHelper;
+            IsTfsAuthenticated = false;
         }
 
         public void EnsureTfsAuthenticated()
         {
+            if (IsTfsAuthenticated)
+                return;
             Tfs.EnsureAuthenticated();
+            IsTfsAuthenticated = true;
         }
 
         public bool IsDerived
@@ -184,7 +189,17 @@ namespace Sep.Git.Tfs.Core
                         log.CommitParents.Add(parent);
                     }
                 }
-                UpdateRef(Commit(log), changeset.Summary.ChangesetId);
+                var commitSha = Commit(log);
+                UpdateRef(commitSha, changeset.Summary.ChangesetId);
+                if(changeset.Summary.Workitems.Count() != 0)
+                {
+                    string workitemNote = "Workitems:\n";
+                    foreach(var workitem in changeset.Summary.Workitems)
+                    {
+                        workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitem.Id, workitem.Title, workitem.Url);
+                    }
+                    Repository.CreateNote(commitSha, workitemNote, log.AuthorName, log.AuthorEmail, log.Date);
+                }
                 DoGcIfNeeded();
             }
         }
@@ -507,6 +522,16 @@ namespace Sep.Git.Tfs.Core
         {
             PendChangesToWorkspace(head, parent, workspace);
             return workspace.Checkin(options);
+        }
+
+        public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
+        {
+            return MatchesTfsUrl(tfsUrl) && TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool MatchesTfsUrl(string tfsUrl)
+        {
+            return TfsUrl.Equals(tfsUrl, StringComparison.OrdinalIgnoreCase) || Tfs.LegacyUrls.Contains(tfsUrl, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

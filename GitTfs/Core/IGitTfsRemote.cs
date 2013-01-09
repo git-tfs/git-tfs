@@ -42,5 +42,6 @@ namespace Sep.Git.Tfs.Core
         ITfsChangeset GetChangeset(long changesetId);
         void UpdateRef(string commitHash, long changesetId);
         void EnsureTfsAuthenticated();
+        bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath);
     }
 }
