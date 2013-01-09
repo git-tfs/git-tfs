@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.TfsPassword = "pwd";
             remote.TfsRepositoryPath = "$/MyProject/Trunk";
             remote.TfsUrl = "http://myTfsServer:8080/tfs";
-            remote.Tfs = new VsFake.TfsHelper(mocks.Container, null);
+            remote.Tfs = new VsFake.TfsHelper(mocks.Container, null, null);
             gitRepository.Stub(r => r.GitDir).Return(".");
 
             newBranchRemote = MockRepository.GenerateStub<IGitTfsRemote>();
@@ -122,7 +122,7 @@ namespace Sep.Git.Tfs.Test.Commands
             existingBranchRemote.TfsPassword = "pwd";
             existingBranchRemote.TfsRepositoryPath = "$/MyProject/MyBranch";
             existingBranchRemote.TfsUrl = "http://myTfsServer:8080/tfs";
-            existingBranchRemote.Tfs = new VsFake.TfsHelper(mocks.Container, null);
+            existingBranchRemote.Tfs = new VsFake.TfsHelper(mocks.Container, null, null);
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote, existingBranchRemote }).Repeat.Once();
@@ -448,7 +448,7 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.TfsPassword = "pwd";
             remote.TfsRepositoryPath = "$/MyProject/Trunk";
             remote.TfsUrl = "http://myTfsServer:8080/tfs";
-            remote.Tfs = new VsFake.TfsHelper(mocks.Container, null);
+            remote.Tfs = new VsFake.TfsHelper(mocks.Container, null, null);
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Never();
 
             //Not Very Clean!!! Don't know how to test that :(

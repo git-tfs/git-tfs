@@ -26,7 +26,7 @@ namespace Sep.Git.Tfs.Test.Integration
             string tfsUrlInUpperCase = integrationHelper.TfsUrl.ToUpper();
             integrationHelper.ChangeConfigSetting("MyProject", "tfs-remote.default.url", tfsUrlInUpperCase);
 
-            integrationHelper.RunInProjectDirectory("MyProject", "pull");
+            integrationHelper.RunIn("MyProject", "pull");
 
             Assert.Equal(3, integrationHelper.GetCommitCount("MyProject"));
         }
@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.Test.Integration
             integrationHelper.ChangeConfigSetting("MyProject", "tfs-remote.default.url", "nomatch");
             integrationHelper.ChangeConfigSetting("MyProject", "tfs-remote.default.legacy-urls", tfsUrlInUpperCase + ",aDifferentUrl");
 
-            integrationHelper.RunInProjectDirectory("MyProject", "pull");
+            integrationHelper.RunIn("MyProject", "pull");
 
             Assert.Equal(3, integrationHelper.GetCommitCount("MyProject"));
         }
@@ -53,7 +53,7 @@ namespace Sep.Git.Tfs.Test.Integration
             const string repoUrlInUpperCase = "$/MYPROJECT";
             integrationHelper.ChangeConfigSetting("MyProject", "tfs-remote.default.repository", repoUrlInUpperCase);
 
-            integrationHelper.RunInProjectDirectory("MyProject", "pull");
+            integrationHelper.RunIn("MyProject", "pull");
 
             Assert.Equal(3, integrationHelper.GetCommitCount("MyProject"));
         }

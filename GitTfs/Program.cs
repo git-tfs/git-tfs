@@ -19,9 +19,7 @@ namespace Sep.Git.Tfs
         {
             try
             {
-                //Trace.Listeners.Add(new ConsoleTraceListener());
-                var container = Initialize();
-                container.GetInstance<GitTfs>().Run(new List<string>(args));
+                Environment.ExitCode = MainCore(args);
             }
             catch(GitTfsException e)
             {
@@ -42,6 +40,12 @@ namespace Sep.Git.Tfs
                 ReportException(e);
                 Environment.ExitCode = GitTfsExitCodes.ExceptionThrown;
             }
+        }
+
+        public static int MainCore(string[] args)
+        {
+            var container = Initialize();
+            return container.GetInstance<GitTfs>().Run(new List<string>(args));
         }
 
         private static void ReportException(Exception e)
