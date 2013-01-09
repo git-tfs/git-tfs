@@ -36,6 +36,7 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches);
         }
 
+        // TODO: pass back richer information so that the calling client (who likely has access to stdout) can surface details about the branch origin to the console.
         public override int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
         {
             if (!string.IsNullOrWhiteSpace(tfsPathParentBranch))
@@ -64,7 +65,8 @@ namespace Sep.Git.Tfs.VsCommon
                                            new ItemIdentifier(tfsPathBranchToCreate),
                                            new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch),}, null);
 
-            var lastChangesetsMergeFromParentBranch = mergedItemsToFirstChangesetInBranchToCreate.LastOrDefault();
+            var lastChangesetsMergeFromParentBranch = mergedItemsToFirstChangesetInBranchToCreate
+                .LastOrDefault(m => m.SourceItem.Item.ServerItem.ToLower() == tfsPathParentBranch.ToLower());
 
             if (lastChangesetsMergeFromParentBranch == null)
             {
