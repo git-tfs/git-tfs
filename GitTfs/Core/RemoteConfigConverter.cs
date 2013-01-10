@@ -28,8 +28,6 @@ namespace Sep.Git.Tfs.Core
                         remote.Password = entry.Value;
                     else if (key == "ignore-paths")
                         remote.IgnoreRegex = entry.Value;
-                    else if (key == "no-meta-data")
-                        remote.NoMetaData = entry.Value.ToLower() != "false";
                     else if (key == "legacy-urls")
                         remote.Aliases = entry.Value.Split(',');
                     else if (key == "autotag")
@@ -49,7 +47,6 @@ namespace Sep.Git.Tfs.Core
                 yield return c(prefix + "username", remote.Username);
                 yield return c(prefix + "password", remote.Password);
                 yield return c(prefix + "ignore-paths", remote.IgnoreRegex);
-                yield return c(prefix + "no-meta-data", remote.NoMetaData ? "true" : null);
                 yield return c(prefix + "legacy-urls", remote.Aliases == null ? null : string.Join(",", remote.Aliases));
                 yield return c(prefix + "autotag", remote.Autotag ? "true" : null);
             }

@@ -51,7 +51,3 @@ key for the remote `default` is `tfs-remote.default.url`.
   can be set to `true` to make git-tfs create a tag for each
   TFS commit. This is disabled by default, because creating
   a lot of tags will slow down your git operations.
-* `no-meta-data`
-  does nothing. It formerly controlled whether TFS meta-data
-  (the `git-tfs-id` field) was added to commit messages during
-  fetch.

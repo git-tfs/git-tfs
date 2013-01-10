@@ -14,14 +14,13 @@ namespace Sep.Git.Tfs.Core
         public string Username { get; set; }
         public string Password { get; set; }
         public string IgnoreRegex { get; set; }
-        public bool NoMetaData { get; set; }
         public IEnumerable<string> Aliases { get; set; }
         public bool Autotag { get; set; }
 
         public RemoteOptions RemoteOptions
         {
-            get { return new RemoteOptions { IgnoreRegex = IgnoreRegex, NoMetaData = NoMetaData, Username = Username, Password = Password }; }
-            set { IgnoreRegex = value.IgnoreRegex; NoMetaData = value.NoMetaData; Username = value.Username; Password = value.Password; }
+            get { return new RemoteOptions { IgnoreRegex = IgnoreRegex, Username = Username, Password = Password }; }
+            set { IgnoreRegex = value.IgnoreRegex; Username = value.Username; Password = value.Password; }
         }
     }
 }

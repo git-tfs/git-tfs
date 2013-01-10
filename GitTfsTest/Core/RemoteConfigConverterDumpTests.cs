@@ -33,7 +33,6 @@ namespace Sep.Git.Tfs.Test.Core
             AssertContainsConfig("tfs-remote.default.repository", "$/Project", config);
             AssertContainsConfig("tfs-remote.default.username", null, config);
             AssertContainsConfig("tfs-remote.default.password", null, config);
-            AssertContainsConfig("tfs-remote.default.no-meta-data", null, config);
             AssertContainsConfig("tfs-remote.default.ignore-paths", null, config);
             AssertContainsConfig("tfs-remote.default.legacy-urls", null, config);
             AssertContainsConfig("tfs-remote.default.autotag", null, config);
@@ -49,7 +48,6 @@ namespace Sep.Git.Tfs.Test.Core
                 Username = "user",
                 Password = "pass",
                 IgnoreRegex = "abc",
-                NoMetaData = true,
                 Autotag = true,
                 Aliases = new string[] { "http://abc", "http://def" },
             };
@@ -58,7 +56,6 @@ namespace Sep.Git.Tfs.Test.Core
             AssertContainsConfig("tfs-remote.default.repository", "$/Project", config);
             AssertContainsConfig("tfs-remote.default.username", "user", config);
             AssertContainsConfig("tfs-remote.default.password", "pass", config);
-            AssertContainsConfig("tfs-remote.default.no-meta-data", "true", config);
             AssertContainsConfig("tfs-remote.default.ignore-paths", "abc", config);
             AssertContainsConfig("tfs-remote.default.legacy-urls", "http://abc,http://def", config);
             AssertContainsConfig("tfs-remote.default.autotag", "true", config);
