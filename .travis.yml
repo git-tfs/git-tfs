@@ -2,7 +2,10 @@ language: c
 
 notifications:
   irc:
-    - irc.freenode.org#git-tfs
+    channels:
+      - "irc.freenode.org#git-tfs"
+    on_success: change
+    on_failure: always
 
 install:
   - sudo apt-get install cmake mono-devel mono-gmcs
