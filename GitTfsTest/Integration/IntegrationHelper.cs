@@ -87,7 +87,8 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
                 _repo.Index.Stage("README.txt");
-                return _repo.Commit(message, new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now))).Id.Sha;
+                var committer = new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
+                return _repo.Commit(message, committer, committer).Id.Sha;
             }
         }
 
