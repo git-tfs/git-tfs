@@ -21,6 +21,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F52EAF
 		.nuget\nuget.targets = .nuget\nuget.targets
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{4A46FEEE-B8A2-4445-B9D1-8160520C7301}"
+	ProjectSection(SolutionItems) = preProject
+		docs\config.md = docs\config.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = GitTfs1.vsmdi
