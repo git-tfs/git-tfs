@@ -172,8 +172,7 @@ namespace Sep.Git.Tfs.Commands
             Trace.WriteLine("Commit found! sha1 : " + sha1RootCommit);
 
             Trace.WriteLine("Try creating remote...");
-            _globals.Repository.CreateTfsRemote(gitBranchName, defaultRemote.TfsUrl, tfsRepositoryPath, _remoteOptions);
-            var tfsRemote = _globals.Repository.ReadTfsRemote(gitBranchName);
+            var tfsRemote = _globals.Repository.CreateTfsRemote(new RemoteInfo { Id = gitBranchName, Url = defaultRemote.TfsUrl, Repository = tfsRepositoryPath, RemoteOptions = _remoteOptions });
             if (!_globals.Repository.CreateBranch(tfsRemote.RemoteRef, sha1RootCommit))
                 throw new GitTfsException("error: Fail to create remote branch ref file!");
             Trace.WriteLine("Remote created!");

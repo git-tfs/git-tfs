@@ -52,6 +52,13 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public static T GetOrAdd<K, T>(this Dictionary<K, T> dictionary, K key) where T : new()
+        {
+            if (!dictionary.ContainsKey(key))
+                dictionary.Add(key, new T());
+            return dictionary[key];
+        }
+
         public static T FirstOr<T>(this IEnumerable<T> e, T defaultValue)
         {
             foreach (var x in e) return x;

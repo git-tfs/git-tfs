@@ -48,13 +48,6 @@ namespace Sep.Git.Tfs.VsCommon
 
         private string[] _legacyUrls;
 
-
-        public string[] LegacyUrls
-        {
-            get { return _legacyUrls ?? (_legacyUrls = new string[0]); }
-            set { _legacyUrls = value; }
-        }
-
         protected NetworkCredential GetCredential()
         {
             var idx = Username.IndexOf('\\');
