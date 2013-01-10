@@ -13,81 +13,53 @@ namespace Sep.Git.Tfs.Test.Core
         [Fact]
         public void MatchesUrlAndRepositoryPath_should_be_case_insensitive_for_tfs_url()
         {
-            var mocker = new RhinoAutoMocker<GitTfsRemote>();
-            mocker.Inject<TextWriter>(new StringWriter());
-            var helper = MockRepository.GenerateStub<ITfsHelper>();
-            helper.Url = "http://testvcs:8080/tfs/test";
-            helper.LegacyUrls = new string[0];
-            mocker.Inject(helper);
-            mocker.ClassUnderTest.TfsRepositoryPath = "test";
-
-            bool matches = mocker.ClassUnderTest.MatchesUrlAndRepositoryPath("http://testvcs:8080/tfs/Test", "test");
-
-            Assert.Equal(true, matches);
+            var remote = BuildRemote(url: "http://testvcs:8080/tfs/test", repository: "test");
+            Assert.True(remote.MatchesUrlAndRepositoryPath("http://testvcs:8080/tfs/Test", "test"));
         }
 
         [Fact]
         public void MatchesUrlAndRepositoryPath_should_be_false_if_no_match_for_tfs_url()
         {
-            var mocker = new RhinoAutoMocker<GitTfsRemote>();
-            mocker.Inject<TextWriter>(new StringWriter());
-            var helper = MockRepository.GenerateStub<ITfsHelper>();
-            helper.Url = "http://testvcs:8080/tfs/test";
-            helper.LegacyUrls = new string[0];
-            mocker.Inject(helper);
-            mocker.ClassUnderTest.TfsRepositoryPath = "test";
-
-            bool matches = mocker.ClassUnderTest.MatchesUrlAndRepositoryPath("http://adifferenturl:8080/tfs/Test", "test");
-
-            Assert.Equal(false, matches);
+            var remote = BuildRemote(url: "http://testvcs:8080/tfs/test", repository: "test");
+            Assert.False(remote.MatchesUrlAndRepositoryPath("http://adifferenturl:8080/tfs/Test", "test"));
         }
 
         [Fact]
         public void MatchesUrlAndRepositoryPath_should_be_case_insensitive_for_legacy_urls()
         {
-            var mocker = new RhinoAutoMocker<GitTfsRemote>();
-            mocker.Inject<TextWriter>(new StringWriter());
-            var helper = MockRepository.GenerateStub<ITfsHelper>();
-            helper.Url = "";
-            helper.LegacyUrls = new[] { "http://testvcs:8080/tfs/test", "AnotherUrlThatDoesntMatch" };
-            mocker.Inject(helper);
-            mocker.ClassUnderTest.TfsRepositoryPath = "test";
-
-            bool matches = mocker.ClassUnderTest.MatchesUrlAndRepositoryPath("http://testvcs:8080/tfs/Test", "test");
-
-            Assert.Equal(true, matches);
+            var remote = BuildRemote(legacyUrls: new[] { "http://testvcs:8080/tfs/test", "AnotherUrlThatDoesntMatch" }, repository: "test");
+            Assert.True(remote.MatchesUrlAndRepositoryPath("http://testvcs:8080/tfs/Test", "test"));
         }
 
         [Fact]
         public void MatchesUrlAndRepositoryPath_should_be_case_insensitive_for_tfs_repository_path()
         {
-            var mocker = new RhinoAutoMocker<GitTfsRemote>();
-            mocker.Inject<TextWriter>(new StringWriter());
-            var helper = MockRepository.GenerateStub<ITfsHelper>();
-            helper.Url = "test";
-            helper.LegacyUrls = new string[0];
-            mocker.Inject(helper);
-            mocker.ClassUnderTest.TfsRepositoryPath = "$/Test";
-
-            bool matches = mocker.ClassUnderTest.MatchesUrlAndRepositoryPath("test", "$/test");
-
-            Assert.Equal(true, matches);
+            var remote = BuildRemote(url: "test", repository: "$/Test");
+            Assert.True(remote.MatchesUrlAndRepositoryPath("test", "$/test"));
         }
 
         [Fact]
         public void MatchesUrlAndRepositoryPath_should_be_false_if_no_match_for_tfs_repository_path()
         {
-            var mocker = new RhinoAutoMocker<GitTfsRemote>();
-            mocker.Inject<TextWriter>(new StringWriter());
-            var helper = MockRepository.GenerateStub<ITfsHelper>();
-            helper.Url = "test";
-            helper.LegacyUrls = new string[0];
-            mocker.Inject(helper);
-            mocker.ClassUnderTest.TfsRepositoryPath = "$/Test";
+            var remote = BuildRemote(url: "test", repository: "$/Test");
+            Assert.False(remote.MatchesUrlAndRepositoryPath("test", "$/shouldnotmatch"));
+        }
 
-            bool matches = mocker.ClassUnderTest.MatchesUrlAndRepositoryPath("test", "$/shouldnotmatch");
-
-            Assert.Equal(false, matches);
+        private GitTfsRemote BuildRemote(string repository, string url = "", string[] legacyUrls = null)
+        {
+            if (legacyUrls == null)
+                legacyUrls = new string[0];
+            var info = new RemoteInfo
+            {
+                Url = url,
+                Repository = repository,
+                Aliases = legacyUrls,
+            };
+            var mocks = new RhinoAutoMocker<GitTfsRemote>();
+            mocks.Inject<TextWriter>(new StringWriter());
+            mocks.Inject<RemoteInfo>(info);
+            mocks.Inject<ITfsHelper>(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
+            return mocks.ClassUnderTest;
         }
     }
 }

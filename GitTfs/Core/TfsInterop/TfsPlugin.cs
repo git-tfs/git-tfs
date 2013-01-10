@@ -59,7 +59,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             {
                 public IEnumerable<Exception> InnerExceptions { get; private set; }
 
-                public PluginLoaderException(string message, IEnumerable<Exception> failures) : base(message, failures.Last())
+                public PluginLoaderException(string message, IEnumerable<Exception> failures) : base(message, failures.LastOrDefault())
                 {
                     InnerExceptions = failures;
                 }

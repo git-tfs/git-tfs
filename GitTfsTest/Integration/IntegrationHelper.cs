@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using LibGit2Sharp;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsFake;
@@ -65,6 +66,34 @@ namespace Sep.Git.Tfs.Test.Integration
 
         #endregion
 
+        #region set up a git repository
+
+        public void SetupGitRepo(string path, Action<RepoBuilder> buildIt)
+        {
+            using (var repo = LibGit2Sharp.Repository.Init(Path.Combine(Workdir, path)))
+                buildIt(new RepoBuilder(repo));
+        }
+
+        public class RepoBuilder
+        {
+            private Repository _repo;
+
+            public RepoBuilder(Repository repo)
+            {
+                _repo = repo;
+            }
+
+            public string Commit(string message)
+            {
+                File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
+                _repo.Index.Stage("README.txt");
+                var committer = new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
+                return _repo.Commit(message, committer, committer).Id.Sha;
+            }
+        }
+
+        #endregion
+
         #region set up vsfake script
 
         public string FakeScript
@@ -87,7 +116,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             public FakeChangesetBuilder Changeset(int changesetId, string message, DateTime checkinDate)
             {
-                var changeset =new ScriptedChangeset
+                var changeset = new ScriptedChangeset
                 {
                     Id = changesetId,
                     Comment = message,
@@ -200,14 +229,21 @@ namespace Sep.Git.Tfs.Test.Integration
             Assert.True(Directory.Exists(Path.Combine(path, ".git")), path + " should have a .git dir inside of it");
         }
 
+        public void AssertNoRef(string repodir, string gitref)
+        {
+            AssertEqual(null, RevParse(repodir, gitref), "Expected no ref " + gitref);
+        }
+
         public void AssertRef(string repodir, string gitref, string expectedSha)
         {
+            Assert.NotNull(expectedSha);
             AssertEqual(expectedSha, RevParse(repodir, gitref), "Expected " + gitref + " to be " + expectedSha);
         }
 
         private string RevParse(string repodir, string gitref)
         {
-            return Repository(repodir).Lookup<Commit>(gitref).Sha;
+            var parsed = Repository(repodir).Lookup<Commit>(gitref);
+            return parsed == null ? null : parsed.Sha;
         }
 
         private string ReadIfPresent(string path)

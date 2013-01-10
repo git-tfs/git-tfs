@@ -19,23 +19,32 @@ namespace Sep.Git.Tfs.Core
         private readonly RemoteOptions remoteOptions;
         private long? maxChangesetId;
         private string maxCommitHash;
-        private bool IsTfsAuthenticated { get; set; }
+        private bool isTfsAuthenticated;
 
-        public GitTfsRemote(RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
+        public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
             this.stdout = stdout;
             Tfs = tfsHelper;
-            IsTfsAuthenticated = false;
+            Repository = repository;
+
+            Id = info.Id;
+            TfsUrl = info.Url;
+            TfsRepositoryPath = info.Repository;
+            TfsUsername = info.Username;
+            TfsPassword = info.Password;
+            Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
+            IgnoreRegexExpression = info.IgnoreRegex;
+            Autotag = info.Autotag;
         }
 
         public void EnsureTfsAuthenticated()
         {
-            if (IsTfsAuthenticated)
+            if (isTfsAuthenticated)
                 return;
             Tfs.EnsureAuthenticated();
-            IsTfsAuthenticated = true;
+            isTfsAuthenticated = true;
         }
 
         public bool IsDerived
@@ -50,6 +59,8 @@ namespace Sep.Git.Tfs.Core
             get { return Tfs.Url; }
             set { Tfs.Url = value; }
         }
+
+        private string[] Aliases { get; set; }
 
         public bool Autotag { get; set; }
 
@@ -531,7 +542,7 @@ namespace Sep.Git.Tfs.Core
 
         private bool MatchesTfsUrl(string tfsUrl)
         {
-            return TfsUrl.Equals(tfsUrl, StringComparison.OrdinalIgnoreCase) || Tfs.LegacyUrls.Contains(tfsUrl, StringComparison.OrdinalIgnoreCase);
+            return TfsUrl.Equals(tfsUrl, StringComparison.OrdinalIgnoreCase) || Aliases.Contains(tfsUrl, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

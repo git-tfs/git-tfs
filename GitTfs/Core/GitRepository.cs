@@ -18,14 +18,16 @@ namespace Sep.Git.Tfs.Core
         private static readonly Regex configLineRegex = new Regex("^tfs-remote\\.(?<id>.+)\\.(?<key>[^.=]+)=(?<value>.*)$");
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private Repository _repository;
+        private RemoteConfigConverter _remoteConfigReader;
 
-        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals)
+        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals, RemoteConfigConverter remoteConfigReader)
             : base(stdout, container)
         {
             _container = container;
             _globals = globals;
             GitDir = gitDir;
             _repository = new LibGit2Sharp.Repository(GitDir);
+            _remoteConfigReader = remoteConfigReader;
         }
 
         ~GitRepository()
@@ -107,11 +109,40 @@ namespace Sep.Git.Tfs.Core
             return _cachedRemotes ?? (_cachedRemotes = ReadTfsRemotes());
         }
 
+        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote)
+        {
+            if (HasRemote(remote.Id))
+                throw new GitTfsException("A remote with id \"" + remote.Id + "\" already exists.");
+
+            // These help the new (if it's new) git repository to behave more sanely.
+            _repository.Config.Set("core.autocrlf", "false");
+            _repository.Config.Set("core.ignorecase", "false");
+
+            foreach (var entry in _remoteConfigReader.Dump(remote))
+            {
+                if (entry.Value != null)
+                {
+                    _repository.Config.Set(entry.Key, entry.Value);
+                }
+                else
+                {
+                    _repository.Config.Unset(entry.Key);
+                }
+            }
+
+            return _cachedRemotes[remote.Id] = BuildRemote(remote);
+        }
+
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
         {
-            var remotes = new Dictionary<string, IGitTfsRemote>();
-            CommandOutputPipe(stdout => ParseRemoteConfig(stdout, remotes), "config", "--list", "--local");
-            return remotes;
+            // does this need to ensuretfsauthenticated?
+            _repository.Config.Set("tfs.touch", "1"); // reload configuration, because `git tfs init` and `git tfs clone` use Process.Start to update the config, so _repository's copy is out of date.
+            return _remoteConfigReader.Load(_repository.Config).Select(x => BuildRemote(x)).ToDictionary(x => x.Id);
+        }
+
+        private IGitTfsRemote BuildRemote(RemoteInfo remoteInfo)
+        {
+            return _container.With(remoteInfo).With<IGitRepository>(this).GetInstance<IGitTfsRemote>();
         }
 
         public bool HasRemote(string remoteId)
@@ -135,114 +166,6 @@ namespace Sep.Git.Tfs.Core
             {
                 // UpdateRef sets tag with TFS changeset id on each commit so we can't just update to latest
                 remote.UpdateRef(cs.GitCommit, cs.ChangesetId);
-            }
-        }
-
-        public void CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead, RemoteOptions remoteOptions)
-        {
-            CreateTfsRemote(remoteId, tfsHead.Remote.TfsUrl, tfsHead.Remote.TfsRepositoryPath, remoteOptions);
-            ReadTfsRemote(remoteId).UpdateRef(tfsHead.GitCommit, tfsHead.ChangesetId);
-        }
-
-        public void CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions)
-        {
-            if (HasRemote(remoteId))
-                throw new GitTfsException("A remote with id \"" + remoteId + "\" already exists.");
-
-            if (remoteOptions != null)
-            {
-                if (remoteOptions.NoMetaData) SetTfsConfig(remoteId, "no-meta-data", 1);
-                if (remoteOptions.IgnoreRegex != null) SetTfsConfig(remoteId, "ignore-paths", remoteOptions.IgnoreRegex);
-                if (!string.IsNullOrEmpty(remoteOptions.Username)) SetTfsConfig(remoteId, "username", remoteOptions.Username);
-                if (!string.IsNullOrEmpty(remoteOptions.Password)) SetTfsConfig(remoteId, "password", remoteOptions.Password);
-            }
-
-            SetTfsConfig(remoteId, "url", tfsUrl);
-            SetTfsConfig(remoteId, "repository", tfsRepositoryPath);
-            SetTfsConfig(remoteId, "fetch", "refs/remotes/" + remoteId + "/master");
-
-            Directory.CreateDirectory(Path.Combine(GitDir, "tfs"));
-            _cachedRemotes = null;
-        }
-
-        public void SetConfig(string key, object value)
-        {
-            _repository.Config.Set(key, value.ToString());
-        }
-
-        private void SetTfsConfig(string remoteId, string subkey, object value)
-        {
-            SetConfig(_globals.RemoteConfigKey(remoteId, subkey), value);
-        }
-
-        private void ParseRemoteConfig(TextReader stdout, IDictionary<string, IGitTfsRemote> remotes)
-        {
-            string line;
-            while ((line = stdout.ReadLine()) != null)
-            {
-                TryParseRemoteConfigLine(line, remotes);
-            }
-            foreach (var gitTfsRemotePair in remotes)
-            {
-                var remote = gitTfsRemotePair.Value;
-            }
-        }
-
-        private void TryParseRemoteConfigLine(string line, IDictionary<string, IGitTfsRemote> remotes)
-        {
-            var match = configLineRegex.Match(line);
-            if (match.Success)
-            {
-                var key = match.Groups["key"].Value;
-                var value = match.Groups["value"].Value;
-                var remoteId = match.Groups["id"].Value;
-                var remote = remotes.ContainsKey(remoteId)
-                                 ? remotes[remoteId]
-                                 : (remotes[remoteId] = BuildRemote(remoteId));
-                try
-                {
-                    SetRemoteConfigValue(remote, key, value);
-                }
-                catch(Exception e)
-                {
-                    throw new GitTfsException("Malformed value for " + key + ": " + value, e);
-                }
-            }
-        }
-
-        private IGitTfsRemote BuildRemote(string id)
-        {
-            var remote = _container.GetInstance<IGitTfsRemote>();
-            remote.Repository = this;
-            remote.Id = id;
-            return remote;
-        }
-
-        private void SetRemoteConfigValue(IGitTfsRemote remote, string key, string value)
-        {
-            switch (key)
-            {
-                case "url":
-                    remote.TfsUrl = value;
-                    break;
-                case "legacy-urls":
-                    remote.Tfs.LegacyUrls = value.Split(',');
-                    break;
-                case "repository":
-                    remote.TfsRepositoryPath = (value ?? string.Empty).TrimEnd('/'); /* tfs paths don't have trailing slashes */
-                    break;
-                case "ignore-paths":
-                    remote.IgnoreRegexExpression = value;
-                    break;
-                case "username":
-                    remote.TfsUsername = value;
-                    break;
-                case "password":
-                    remote.TfsPassword = value;
-                    break;
-                case "autotag":
-                    remote.Autotag = bool.Parse(value);
-                    break;
             }
         }
 

@@ -9,11 +9,9 @@ namespace Sep.Git.Tfs.Core
     {
         string GitDir { get; set; }
         string GetConfig(string key);
-        void SetConfig(string key, object value);
         IEnumerable<IGitTfsRemote> ReadAllTfsRemotes();
         IGitTfsRemote ReadTfsRemote(string remoteId);
-        void /*or IGitTfsRemote*/ CreateTfsRemote(string remoteId, string tfsUrl, string tfsRepositoryPath, RemoteOptions remoteOptions);
-        void /*or IGitTfsRemote*/ CreateTfsRemote(string remoteId, TfsChangesetInfo tfsHead, RemoteOptions remoteOptions);
+        IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo);
         bool HasRemote(string remoteId);
         bool HasRef(string gitRef);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
