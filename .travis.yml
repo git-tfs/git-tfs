@@ -1,5 +1,9 @@
 language: c
 
+notifications:
+  irc:
+    - irc.freenode.org#git-tfs
+
 install:
   - sudo apt-get install cmake mono-devel mono-gmcs
 
