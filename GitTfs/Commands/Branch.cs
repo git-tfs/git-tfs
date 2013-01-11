@@ -58,6 +58,10 @@ namespace Sep.Git.Tfs.Commands
         {
             var root = tfsHelper.GetRootTfsBranchForRemotePath(tfsRepositoryPath);
 
+            if (!tfsHelper.CanGetBranchInformation)
+            {
+                throw new GitTfsException("error: this version of TFS doesn't support this functionality");
+            }
             var visitor = new WriteBranchStructureTreeVisitor(tfsRepositoryPath, writer, tfsRemotes);
             root.AcceptVisitor(visitor);
         }
