@@ -130,7 +130,10 @@ namespace Sep.Git.Tfs.Core
                 }
             }
 
-            return _cachedRemotes[remote.Id] = BuildRemote(remote);
+            var gitTfsRemote = BuildRemote(remote);
+            gitTfsRemote.EnsureTfsAuthenticated();
+
+            return _cachedRemotes[remote.Id] = gitTfsRemote;
         }
 
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
