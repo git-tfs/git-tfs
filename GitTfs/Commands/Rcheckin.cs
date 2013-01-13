@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using LibGit2Sharp;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
@@ -99,6 +100,7 @@ namespace Sep.Git.Tfs.Commands
                     _stdout.WriteLine("Done with {0}.", target);
                 }
 
+                repo.Reset(tfsRemote.MaxCommitHash, ResetOptions.Hard);
                 _stdout.WriteLine("No more to rcheckin.");
                 return GitTfsExitCodes.OK;
             }
