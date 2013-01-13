@@ -39,5 +39,6 @@ namespace Sep.Git.Tfs.Core
         void Get(IChangeset changeset);
 
         long CheckinTool(Func<string> generateCheckinComment);
+        void Merge(string sourceTfsPath, string tfsRepositoryPath);
     }
 }

@@ -533,17 +533,17 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public long Checkin(string head, TfsChangesetInfo parentChangeset, CheckinOptions options)
+        public long Checkin(string head, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             var changeset = 0L;
-            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options));
+            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options, sourceTfsPath));
             return changeset;
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options)
+        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             var changeset = 0L;
-            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parent, workspace, options));
+            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parent, workspace, options, sourceTfsPath));
             return changeset;
         }
 
@@ -558,9 +558,11 @@ namespace Sep.Git.Tfs.Core
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
         }
 
-        private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options)
+        private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options, string sourceTfsPath)
         {
             PendChangesToWorkspace(head, parent, workspace);
+            if (!string.IsNullOrWhiteSpace(sourceTfsPath))
+                workspace.Merge(sourceTfsPath, TfsRepositoryPath);
             return workspace.Checkin(options);
         }
 

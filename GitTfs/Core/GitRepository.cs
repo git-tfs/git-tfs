@@ -270,6 +270,11 @@ namespace Sep.Git.Tfs.Core
             return TryParseChangesetInfo(currentCommit.Message, currentCommit.Sha, false);
         }
 
+        public TfsChangesetInfo GetTfsCommit(string sha)
+        {
+            return TryParseChangesetInfo(GetCommitMessage(sha), sha, false);
+        }
+
         private void FindTfsCommits(TextReader stdout, ICollection<TfsChangesetInfo> tfsCommits, bool includeStubRemotes)
         {
             string currentCommit = null;

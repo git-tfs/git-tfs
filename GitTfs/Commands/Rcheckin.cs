@@ -106,13 +106,14 @@ namespace Sep.Git.Tfs.Commands
                 rc.ExtractCommit(commitWithParents, currentParent);
                 rc.BuildCommitMessage(!_checkinOptions.NoGenerateCheckinComment, currentParent);
                 string target = rc.Sha;
+                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(repo, rc.Parents);
 
                 var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, rc.Message, rc.Commit);
 
                 _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
                 try
                 {
-                    newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions);
+                    newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
                     tfsRemote.FetchWithMerge(newChangesetId, rc.Parents);
                     if (tfsRemote.MaxChangesetId != newChangesetId)
                     {
@@ -177,11 +178,12 @@ namespace Sep.Git.Tfs.Commands
                 rc.ExtractCommit(revList, tfsLatest);
                 rc.BuildCommitMessage(!_checkinOptions.NoGenerateCheckinComment, tfsLatest);
                 string target = rc.Sha;
+                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(repo, rc.Parents);
 
                 var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, rc.Message, rc.Commit);
 
                 _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
-                long newChangesetId = tfsRemote.Checkin(rc.Sha, parentChangeset, commitSpecificCheckinOptions);
+                long newChangesetId = tfsRemote.Checkin(rc.Sha, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
                 tfsRemote.FetchWithMerge(newChangesetId, rc.Parents);
                 if (tfsRemote.MaxChangesetId != newChangesetId)
                     throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
@@ -228,6 +230,26 @@ namespace Sep.Git.Tfs.Commands
                           repo.GetCommitMessage(this.Sha, latest)
                           : repo.GetCommitMessage(this.Sha);
             }
+        }
+
+        private string FindTfsRepositoryPathOfMergedBranch(IGitRepository repo, string[] gitParents)
+        {
+            if (gitParents.Length != 0)
+            {
+                if (gitParents.Length > 1)
+                    _stdout.WriteLine("warning: only 1 parent is supported by TFS for a merge changeset. The other parents won't be materialized on the TFS merge!");
+                foreach (var gitParent in gitParents)
+                {
+                    var tfsCommit = repo.GetTfsCommit(gitParent);
+                    if (tfsCommit != null)
+                        return tfsCommit.Remote.TfsRepositoryPath;
+                    _stdout.WriteLine("warning: the parent " + gitParent + " of the merge commit was not checked in TFS and will be ignored!");
+                }
+                //Local merge where didn't found a checked in commit (strange!)
+                //TODO (IMO) Find if that's TFS branches that are not completely checked in
+                //If that's the case, we should fail and ask for rcheckin the merged branch before
+            }
+            return null;
         }
 
         public void RebaseOnto(IGitRepository repository, string tfsLatest, string target)

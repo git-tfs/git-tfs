@@ -233,6 +233,11 @@ namespace Sep.Git.Tfs.VsFake
 
             #region unimplemented
 
+            public void Merge(string sourceTfsPath, string tfsRepositoryPath)
+            {
+                throw new NotImplementedException();
+            }
+
             public IPendingChange[] GetPendingChanges()
             {
                 throw new NotImplementedException();

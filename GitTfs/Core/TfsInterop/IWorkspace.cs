@@ -17,5 +17,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         void GetSpecificVersion(IChangeset changeset);
         string GetLocalItemForServerItem(string serverItem);
         string OwnerName { get; }
+        void Merge(string sourceTfsPath, string tfsRepositoryPath);
     }
 }

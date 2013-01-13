@@ -67,6 +67,11 @@ namespace Sep.Git.Tfs.Core
             return newChangesetId;
         }
 
+        public void Merge(string sourceTfsPath, string tfsRepositoryPath)
+        {
+            _workspace.Merge(sourceTfsPath, tfsRepositoryPath);
+        }
+
         public long Checkin(CheckinOptions options)
         {
             if (options == null) options = _checkinOptions;

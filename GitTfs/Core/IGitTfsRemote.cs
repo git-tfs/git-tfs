@@ -32,12 +32,12 @@ namespace Sep.Git.Tfs.Core
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies);
         bool HasShelveset(string shelvesetName);
         long CheckinTool(string head, TfsChangesetInfo parentChangeset);
-        long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options);
+        long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null);
 
         /// <summary>
         /// Checks in to TFS set of changes from git repository between given commits (parent..head) onto given TFS changeset. Returns ID of the new changeset.
         /// </summary>
-        long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options);
+        long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null);
         void CleanupWorkspace();
         void CleanupWorkspaceDirectory();
         ITfsChangeset GetChangeset(long changesetId);
