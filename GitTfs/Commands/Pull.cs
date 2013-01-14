@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using NDesk.Options;
@@ -50,7 +50,7 @@ namespace Sep.Git.Tfs.Commands
                         throw new GitTfsException("error: You have local changes; rebase-workflow only possible with clean working directory.")
                             .WithRecommendation("Try 'git stash' to stash your local changes and pull again.");
                     }
-                    globals.Repository.CommandNoisy("rebase", remote.RemoteRef);
+                    globals.Repository.CommandNoisy("rebase", "--preserve-merges", remote.RemoteRef);
                 }
                 else
                     globals.Repository.CommandNoisy("merge", remote.RemoteRef);
