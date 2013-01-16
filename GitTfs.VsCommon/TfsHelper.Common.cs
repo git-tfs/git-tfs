@@ -304,7 +304,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             foreach (var shelveset in shelvesets)
             {
-                _stdout.WriteLine("  {0,-20} {1,-20}", shelveset.OwnerName, shelveset.Name);
+                _stdout.WriteLine("{0,-22} {1,-20}", shelveset.OwnerName, shelveset.Name);
             }
         }
 
