@@ -43,7 +43,10 @@ namespace Sep.Git.Tfs.Commands
             var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
             if (DisplayRemotes)
             {
-                WriteRemoteTfsBranchStructure(stdout, remoteId, tfsRemotes);
+                var remote = globals.Repository.ReadTfsRemote(remoteId);
+
+                stdout.WriteLine("\nTFS branch structure:");
+                WriteRemoteTfsBranchStructure(remote.Tfs, stdout, remote.TfsRepositoryPath, tfsRemotes);
                 return GitTfsExitCodes.OK;
             }
 
@@ -51,15 +54,11 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.OK;
         }
 
-        private void WriteRemoteTfsBranchStructure(TextWriter writer, string remoteId, IEnumerable<IGitTfsRemote> tfsRemotes)
+        public static void WriteRemoteTfsBranchStructure(ITfsHelper tfsHelper, TextWriter writer, string tfsRepositoryPath, IEnumerable<IGitTfsRemote> tfsRemotes = null)
         {
-            writer.WriteLine("\nTFS branch structure:");
+            var root = tfsHelper.GetRootTfsBranchForRemotePath(tfsRepositoryPath);
 
-            var repo = globals.Repository;
-            var remote = repo.ReadTfsRemote(remoteId);
-            var root = remote.Tfs.GetRootTfsBranchForRemotePath(remote.TfsRepositoryPath);
-
-            var visitor = new WriteBranchStructureTreeVisitor(remote.TfsRepositoryPath, writer, tfsRemotes);
+            var visitor = new WriteBranchStructureTreeVisitor(tfsRepositoryPath, writer, tfsRemotes);
             root.AcceptVisitor(visitor);
         }
 

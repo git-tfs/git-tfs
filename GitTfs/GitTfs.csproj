@@ -130,6 +130,7 @@
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="Commands\ListRemoteBranches.cs" />
     <Compile Include="Core\ITfsWorkitem.cs" />
     <Compile Include="Commands\Branch.cs" />
     <Compile Include="Core\BranchVisitors\BranchTreeContainsPathVisitor.cs" />
