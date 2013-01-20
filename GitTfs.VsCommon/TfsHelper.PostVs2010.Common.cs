@@ -64,7 +64,9 @@ namespace Sep.Git.Tfs.VsCommon
                                            new ItemIdentifier(tfsPathBranchToCreate),
                                            new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch),}, null);
 
-            var lastChangesetsMergeFromParentBranch = mergedItemsToFirstChangesetInBranchToCreate.LastOrDefault();
+            // Find the last changeset that was created before the first one in the new branch to be created.
+            var lastChangesetsMergeFromParentBranch = mergedItemsToFirstChangesetInBranchToCreate.LastOrDefault(
+                    e => e.SourceChangeset.ChangesetId < firstChangesetInBranchToCreate.ChangesetId);
 
             if (lastChangesetsMergeFromParentBranch == null)
             {
