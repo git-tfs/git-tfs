@@ -277,7 +277,7 @@ namespace Sep.Git.Tfs.VsCommon
                         shelvesets = shelvesets.OrderBy(s => s.CreationDate);
                         break;
                     case "owner":
-                        shelvesets = shelvesets.OrderBy(s => s.OwnerName);
+                        shelvesets = shelvesets.OrderBy(s => s.OwnerName).ThenBy(s => s.CreationDate);
                         break;
                     case "name":
                         shelvesets = shelvesets.OrderBy(s => s.Name);
@@ -290,6 +290,9 @@ namespace Sep.Git.Tfs.VsCommon
                         return GitTfsExitCodes.InvalidArguments;
                 }
             }
+            else
+                shelvesets = shelvesets.OrderBy(s => s.CreationDate);
+
             if (shelveList.FullFormat)
                 WriteShelvesetsToStdoutDetailed(shelvesets);
             else
@@ -301,7 +304,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             foreach (var shelveset in shelvesets)
             {
-                _stdout.WriteLine("  {0,-20} {1,-20}", shelveset.OwnerName, shelveset.Name);
+                _stdout.WriteLine("{0,-22} {1,-20}", shelveset.OwnerName, shelveset.Name);
             }
         }
 
