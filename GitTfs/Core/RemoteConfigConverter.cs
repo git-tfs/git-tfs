@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Core
@@ -14,8 +15,9 @@ namespace Sep.Git.Tfs.Core
                 var keyParts = entry.Key.Split('.');
                 if (keyParts.Length == 3 && keyParts[0] == "tfs-remote")
                 {
-                    var id = keyParts[1];
-                    var key = keyParts[2];
+                    // The branch name may contain dots ("maint-1.0.0") which must be considered since split on "."
+                    var id = string.Join(".", keyParts, 1, keyParts.Length - 2);
+                    var key = keyParts.Last();
                     var remote = remotes.GetOrAdd(id);
                     remote.Id = id;
                     if (key == "url")
