@@ -45,7 +45,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
-            var remote = _globals.Repository.ReadAllTfsRemotes().First();
+            var remote = _globals.Repository.ReadTfsRemote(_globals.RemoteId);
             return remote.Tfs.ListShelvesets(this, remote);
         }
     }
