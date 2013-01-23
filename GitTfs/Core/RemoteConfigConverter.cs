@@ -13,7 +13,7 @@ namespace Sep.Git.Tfs.Core
             foreach (var entry in config)
             {
                 var keyParts = entry.Key.Split('.');
-                if (keyParts.Length == 3 && keyParts[0] == "tfs-remote")
+                if (keyParts.Length >= 3 && keyParts[0] == "tfs-remote")
                 {
                     // The branch name may contain dots ("maint-1.0.0") which must be considered since split on "."
                     var id = string.Join(".", keyParts, 1, keyParts.Length - 2);
