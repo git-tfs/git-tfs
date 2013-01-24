@@ -303,17 +303,40 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
+        public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to, IEnumerable<string> tfsTree)
         {
+            var filesInCommit = GetCommit(to).GetTree().Select(entry => entry.Entry.Path.ToLowerInvariant());
+
             using (var diffOutput = CommandOutputPipe("diff-tree", "-r", "-M", "-z", from, to))
             {
                 var changes = GitChangeInfo.GetChangedFiles(diffOutput);
+                var changedFiles = new List<IGitChangedFile>();
                 foreach (var change in changes)
                 {
-                    yield return BuildGitChangedFile(change);
+                    changedFiles.Add(BuildGitChangedFile(change));
+                    if (change.Status == GitChangeInfo.ChangeType.DELETE || change.Status == GitChangeInfo.ChangeType.RENAMEEDIT)
+                    {
+                        var pathToDelete = Path.GetDirectoryName(change.path);
+                        var pathToDeleteLower = pathToDelete.ToLowerInvariant();
+                        if (!IsDirectoryContainingFiles(filesInCommit, pathToDeleteLower))
+                        {
+                            //Verify if ALL the files of the tfs directory are also managed by git (deleted or renamed)
+                            //if that's the case we could delete the directory
+                            var filesInTfs = tfsTree.Where(file => file.IndexOf(pathToDeleteLower) == 0);
+                            if (filesInTfs.Where(file => !changes.Where(c => c.Status == GitChangeInfo.ChangeType.DELETE || c.Status == GitChangeInfo.ChangeType.RENAMEEDIT).Select(c => c.path).Contains(file)).Count() == 0)
+                                changedFiles.Add(new Sep.Git.Tfs.Core.Changes.Git.Delete(pathToDelete));
+                        }
+                    }
                 }
+                return changedFiles;
             }
         }
+
+        public bool IsDirectoryContainingFiles(IEnumerable<string> filesInCommit, string directoryPath)
+        {
+            return filesInCommit.FirstOrDefault(f => f.IndexOf(directoryPath) == 0) != null;
+        }
+
 
         private IGitChangedFile BuildGitChangedFile(GitChangeInfo change)
         {
