@@ -463,13 +463,14 @@ namespace Sep.Git.Tfs.Core
             return workspace.CheckinTool(() => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
         }
 
-        private void PendChangesToWorkspace(string head, string parent, ITfsWorkspace workspace, long parentChangesetId)
+        private void PendChangesToWorkspace(string head, string parent, ITfsWorkspaceModifier workspace, long parentChangesetId)
         {
-            var tfsTree = GetChangeset(parentChangesetId).GetTree().Select(entry => entry.FullName.ToLowerInvariant().Replace("/", @"\"));
-
-            foreach (var change in Repository.GetChangedFiles(parent, head, tfsTree))
+            using (var tidyWorkspace = new DirectoryTidier(workspace, Tfs.GetLatestChangeset(this).GetFullTree()))
             {
-                change.Apply(workspace);
+                foreach (var change in Repository.GetChangedFiles(parent, head))
+                {
+                    change.Apply(tidyWorkspace);
+                }
             }
         }
 
