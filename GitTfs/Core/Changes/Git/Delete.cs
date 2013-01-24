@@ -15,7 +15,7 @@ namespace Sep.Git.Tfs.Core.Changes.Git
             Path = path;
         }
 
-        public void Apply(ITfsWorkspace workspace)
+        public void Apply(ITfsWorkspaceModifier workspace)
         {
             workspace.Delete(Path);
         }
