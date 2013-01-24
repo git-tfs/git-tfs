@@ -1,5 +1,4 @@
-﻿using System.IO;
-namespace Sep.Git.Tfs.Core.Changes.Git
+﻿namespace Sep.Git.Tfs.Core.Changes.Git
 {
     public class Delete : IGitChangedFile
     {
@@ -8,11 +7,6 @@ namespace Sep.Git.Tfs.Core.Changes.Git
         public Delete(GitChangeInfo changeInfo)
         {
             Path = changeInfo.path;
-        }
-
-        public Delete(string path)
-        {
-            Path = path;
         }
 
         public void Apply(ITfsWorkspaceModifier workspace)

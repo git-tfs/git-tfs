@@ -445,7 +445,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, ITfsWorkspace workspace)
         {
-            PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace, parentChangeset.ChangesetId);
+            PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace);
             workspace.Shelve(shelvesetName, evaluateCheckinPolicies, () => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
         }
 
@@ -459,11 +459,11 @@ namespace Sep.Git.Tfs.Core
 
         private long CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
-            PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace, parentChangeset.ChangesetId);
+            PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace);
             return workspace.CheckinTool(() => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
         }
 
-        private void PendChangesToWorkspace(string head, string parent, ITfsWorkspaceModifier workspace, long parentChangesetId)
+        private void PendChangesToWorkspace(string head, string parent, ITfsWorkspaceModifier workspace)
         {
             using (var tidyWorkspace = new DirectoryTidier(workspace, Tfs.GetLatestChangeset(this).GetFullTree()))
             {
@@ -478,7 +478,7 @@ namespace Sep.Git.Tfs.Core
         {
             var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = Checkin(head, parentChangeset.GitCommit, parentChangeset, workspace, options));
+                              workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options));
             return changeset;
         }
 
@@ -486,13 +486,13 @@ namespace Sep.Git.Tfs.Core
         {
             var changeset = 0L;
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = Checkin(head, parent, parentChangeset, workspace, options));
+                              workspace => changeset = Checkin(head, parent, workspace, options));
             return changeset;
         }
 
-        private long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace, CheckinOptions options)
+        private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options)
         {
-            PendChangesToWorkspace(head, parent, workspace, parentChangeset.ChangesetId);
+            PendChangesToWorkspace(head, parent, workspace);
             return workspace.Checkin(options);
         }
     }

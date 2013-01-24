@@ -370,7 +370,6 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-
         private IGitChangedFile BuildGitChangedFile(GitChangeInfo change)
         {
             return change.ToGitChangedFile(_container.With((IGitRepository) this));
