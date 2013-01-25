@@ -131,11 +131,17 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Core\DirectoryTidier.cs" />
+    <Compile Include="Core\ITfsWorkitem.cs" />
+    <Compile Include="Commands\Branch.cs" />
+    <Compile Include="Core\BranchVisitors\BranchTreeContainsPathVisitor.cs" />
+    <Compile Include="Core\IBranchTreeVisitor.cs" />
+    <Compile Include="Core\TfsInterop\IBranch.cs" />
     <Compile Include="Commands\Bootstrap.cs" />
     <Compile Include="Commands\Checkin.cs" />
     <Compile Include="Commands\CheckinTool.cs" />
     <Compile Include="Commands\CheckinOptions.cs" />
     <Compile Include="Commands\CheckinBase.cs" />
+    <Compile Include="Commands\CleanupWorkspaceLocal.cs" />
     <Compile Include="Commands\Labels.cs" />
     <Compile Include="Commands\InitBranch.cs" />
     <Compile Include="Commands\Info.cs" />
@@ -169,6 +175,8 @@
     <Compile Include="Core\GitChangeInfo.cs" />
     <Compile Include="Core\GitCommit.cs" />
     <Compile Include="Core\GitObject.cs" />
+    <Compile Include="Core\RemoteConfigConverter.cs" />
+    <Compile Include="Core\RemoteInfo.cs" />
     <Compile Include="Core\GitTreeEntry.cs" />
     <Compile Include="Core\IGitChangedFile.cs" />
     <Compile Include="Core\IGitTfsRemote.cs" />
@@ -200,6 +208,7 @@
     <Compile Include="Core\TfsInterop\NullIdentity.cs" />
     <Compile Include="Core\TfsInterop\IChangeset.cs" />
     <Compile Include="Core\TfsTreeEntry.cs" />
+    <Compile Include="Core\TfsWorkitem.cs" />
     <Compile Include="Core\TfsWorkspace.cs" />
     <Compile Include="Core\TfsWriter.cs" />
     <Compile Include="Core\GitTfsException.cs" />

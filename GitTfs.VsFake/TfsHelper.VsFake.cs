@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Sep.Git.Tfs.Commands;
@@ -15,12 +16,14 @@ namespace Sep.Git.Tfs.VsFake
         #region misc/null
 
         IContainer _container;
-        private TextWriter _stdout;
+        TextWriter _stdout;
+        Script _script;
 
-        public TfsHelper(IContainer container, TextWriter stdout)
+        public TfsHelper(IContainer container, TextWriter stdout, Script script)
         {
             _container = container;
             _stdout = stdout;
+            _script = script;
         }
 
         public string TfsClientLibraryVersion { get { return "(FAKE)"; } }
@@ -28,7 +31,6 @@ namespace Sep.Git.Tfs.VsFake
         public string Url { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public string[] LegacyUrls { get; set; }
 
         public void EnsureAuthenticated() {}
 
@@ -50,12 +52,12 @@ namespace Sep.Git.Tfs.VsFake
 
         public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
         {
-            return TfsPlugin.Script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
+            return _script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
         }
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
-            return TfsPlugin.Script.Changesets.Where(x => x.Id > startVersion).Select(x => BuildTfsChangeset(x, remote));
+            return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
         }
 
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)
@@ -185,8 +187,14 @@ namespace Sep.Git.Tfs.VsFake
 
         public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
+            Trace.WriteLine("Setting up a TFS workspace at " + directory);
             var fakeWorkspace = new FakeWorkspace(directory, remote.TfsRepositoryPath);
-            var workspace = new TfsWorkspace(fakeWorkspace, directory, _stdout, versionToFetch, remote, null, this, null);
+            var workspace = _container.With("localDirectory").EqualTo(directory)
+                .With("remote").EqualTo(remote)
+                .With("contextVersion").EqualTo(versionToFetch)
+                .With("workspace").EqualTo(fakeWorkspace)
+                .With("tfsHelper").EqualTo(this)
+                .GetInstance<TfsWorkspace>();
             action(workspace);
         }
 
@@ -317,11 +325,6 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public bool MatchesUrl(string tfsUrl)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool HasShelveset(string shelvesetName)
         {
             throw new NotImplementedException();
@@ -349,12 +352,17 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch)
+        public IEnumerable<IBranchObject> GetBranches()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
         {
             throw new NotImplementedException();
         }

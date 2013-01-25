@@ -19,18 +19,32 @@ namespace Sep.Git.Tfs.Core
         private readonly RemoteOptions remoteOptions;
         private long? maxChangesetId;
         private string maxCommitHash;
+        private bool isTfsAuthenticated;
 
-        public GitTfsRemote(RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
+        public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
             this.stdout = stdout;
             Tfs = tfsHelper;
+            Repository = repository;
+
+            Id = info.Id;
+            TfsUrl = info.Url;
+            TfsRepositoryPath = info.Repository;
+            TfsUsername = info.Username;
+            TfsPassword = info.Password;
+            Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
+            IgnoreRegexExpression = info.IgnoreRegex;
+            Autotag = info.Autotag;
         }
 
         public void EnsureTfsAuthenticated()
         {
+            if (isTfsAuthenticated)
+                return;
             Tfs.EnsureAuthenticated();
+            isTfsAuthenticated = true;
         }
 
         public bool IsDerived
@@ -45,6 +59,8 @@ namespace Sep.Git.Tfs.Core
             get { return Tfs.Url; }
             set { Tfs.Url = value; }
         }
+
+        private string[] Aliases { get; set; }
 
         public bool Autotag { get; set; }
 
@@ -114,13 +130,29 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                return Path.Combine(Dir, "workspace");
+                return Repository.GetConfig("git-tfs.workspace-dir") ?? Path.Combine(Dir, "workspace");
             }
         }
 
         public void CleanupWorkspace()
         {
             Tfs.CleanupWorkspaces(WorkingDirectory);
+        }
+
+        public void CleanupWorkspaceDirectory()
+        {
+            try
+            {
+                var allFiles = Directory.EnumerateFiles(WorkingDirectory, "*", SearchOption.AllDirectories);
+                foreach (var file in allFiles)
+                    File.SetAttributes(file, File.GetAttributes(file) & ~FileAttributes.ReadOnly);
+
+                Directory.Delete(WorkingDirectory, true);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
         }
 
         public bool ShouldSkip(string path)
@@ -168,7 +200,17 @@ namespace Sep.Git.Tfs.Core
                         log.CommitParents.Add(parent);
                     }
                 }
-                UpdateRef(Commit(log), changeset.Summary.ChangesetId);
+                var commitSha = Commit(log);
+                UpdateRef(commitSha, changeset.Summary.ChangesetId);
+                if(changeset.Summary.Workitems.Count() != 0)
+                {
+                    string workitemNote = "Workitems:\n";
+                    foreach(var workitem in changeset.Summary.Workitems)
+                    {
+                        workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitem.Id, workitem.Title, workitem.Url);
+                    }
+                    Repository.CreateNote(commitSha, workitemNote, log.AuthorName, log.AuthorEmail, log.Date);
+                }
                 DoGcIfNeeded();
             }
         }
@@ -494,6 +536,16 @@ namespace Sep.Git.Tfs.Core
         {
             PendChangesToWorkspace(head, parent, workspace);
             return workspace.Checkin(options);
+        }
+
+        public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
+        {
+            return MatchesTfsUrl(tfsUrl) && TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool MatchesTfsUrl(string tfsUrl)
+        {
+            return TfsUrl.Equals(tfsUrl, StringComparison.OrdinalIgnoreCase) || Aliases.Contains(tfsUrl, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

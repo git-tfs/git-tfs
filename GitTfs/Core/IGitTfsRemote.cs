@@ -38,8 +38,10 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options);
         void CleanupWorkspace();
+        void CleanupWorkspaceDirectory();
         ITfsChangeset GetChangeset(long changesetId);
         void UpdateRef(string commitHash, long changesetId);
         void EnsureTfsAuthenticated();
+        bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath);
     }
 }

@@ -81,9 +81,13 @@ namespace Sep.Git.Tfs.Commands
 
         private void GitTfsInit(string tfsUrl, string tfsRepositoryPath)
         {
-            gitHelper.SetConfig("core.autocrlf", initOptions.GitInitAutoCrlf);
-            gitHelper.SetConfig("core.ignorecase", "false");
-            globals.Repository.CreateTfsRemote(globals.RemoteId, tfsUrl, tfsRepositoryPath, remoteOptions);
+            globals.Repository.CreateTfsRemote(new RemoteInfo
+            {
+                Id = globals.RemoteId,
+                Url = tfsUrl,
+                Repository = tfsRepositoryPath,
+                RemoteOptions = remoteOptions,
+            });
         }
     }
 

@@ -1,22 +1,22 @@
 ﻿namespace Sep.Git.Tfs.Core.TfsInterop
 {
-    public class WrapperFor<T>
+    public class WrapperFor<TFS_TYPE>
     {
-        private readonly T _wrapped;
+        private readonly TFS_TYPE _wrapped;
 
-        public WrapperFor(T wrapped)
+        public WrapperFor(TFS_TYPE wrapped)
         {
             _wrapped = wrapped;
         }
 
-        public T Unwrap()
+        public TFS_TYPE Unwrap()
         {
             return _wrapped;
         }
 
-        public static T Unwrap(object wrapper)
+        public static TFS_TYPE Unwrap(object wrapper)
         {
-            return ((WrapperFor<T>)wrapper).Unwrap();
+            return ((WrapperFor<TFS_TYPE>)wrapper).Unwrap();
         }
     }
 }
