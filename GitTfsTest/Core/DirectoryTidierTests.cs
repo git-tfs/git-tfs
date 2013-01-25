@@ -7,7 +7,6 @@ using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    [Trait("focus", "true")]
     public class DirectoryTidierTests : IDisposable
     {
         MockRepository mocks;
