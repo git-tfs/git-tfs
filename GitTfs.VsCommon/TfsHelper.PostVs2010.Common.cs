@@ -73,10 +73,12 @@ namespace Sep.Git.Tfs.VsCommon
                     tfsPathBranchToCreate);
             }
 
-            var mergedItemsToFirstChangesetInBranchToCreate =
-                VersionControl.TrackMerges(new int[] {firstChangesetInBranchToCreate.ChangesetId},
-                                           new ItemIdentifier(tfsPathBranchToCreate),
-                                           new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch),}, null);
+            var mergedItemsToFirstChangesetInBranchToCreate = VersionControl
+                .TrackMerges(new int[] {firstChangesetInBranchToCreate.ChangesetId},
+                             new ItemIdentifier(tfsPathBranchToCreate),
+                             new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch),},
+                             null)
+                .OrderBy(x => x.SourceChangeset.ChangesetId);
 
             var rootChangesetInParentBranch =
                 GetRelevantChangesetBasedOnChangeType(mergedItemsToFirstChangesetInBranchToCreate, tfsPathParentBranch);
