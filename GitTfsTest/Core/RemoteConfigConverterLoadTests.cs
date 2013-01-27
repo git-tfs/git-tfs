@@ -29,40 +29,57 @@ namespace Sep.Git.Tfs.Test.Core
             Assert.Empty(_remotes);
         }
 
-        void SetUpMinimalRemote()
+        private void SetUpMinimalRemote(string remoteId)
         {
-            _config["tfs-remote.default.url"] = "http://server/path";
-            _config["tfs-remote.default.repository"] = "$/project";
+            _config["tfs-remote." + remoteId + ".url"] = "http://server/path";
+            _config["tfs-remote." + remoteId + ".repository"] = "$/project";
         }
 
         [Fact]
         public void MinimalRemote()
         {
-            SetUpMinimalRemote();
-            Assert.Equal(1, _remotes.Count());
-            Assert.Equal("default", _firstRemote.Id);
-            Assert.Equal("http://server/path", _firstRemote.Url);
-            Assert.Equal("$/project", _firstRemote.Repository);
-            Assert.Null(_firstRemote.Username);
-            Assert.Null(_firstRemote.Password);
-            Assert.Null(_firstRemote.IgnoreRegex);
+            var remoteId = "default";
+            SetUpMinimalRemote(remoteId);
+            VerifyMinimalRemote(remoteId);
         }
 
-        void SetUpCompleteRemote()
+        private void SetUpCompleteRemote(string remoteId)
         {
-            SetUpMinimalRemote();
-            _config["tfs-remote.default.username"] = "theuser";
-            _config["tfs-remote.default.password"] = "thepassword";
-            _config["tfs-remote.default.ignore-paths"] = "ignorethis.zip";
-            _config["tfs-remote.default.legacy-urls"] = "http://old:8080/,http://other/";
-            _config["tfs-remote.default.autotag"] = "true";
+            SetUpMinimalRemote(remoteId);
+            _config["tfs-remote." + remoteId + ".username"] = "theuser";
+            _config["tfs-remote." + remoteId + ".password"] = "thepassword";
+            _config["tfs-remote." + remoteId + ".ignore-paths"] = "ignorethis.zip";
+            _config["tfs-remote." + remoteId + ".legacy-urls"] = "http://old:8080/,http://other/";
+            _config["tfs-remote." + remoteId + ".autotag"] = "true";
         }
 
         [Fact]
-        public void RemoteWithEverything()
+        public void CompleteRemote()
         {
-            SetUpCompleteRemote();
-            Assert.Equal("default", _firstRemote.Id);
+            var remoteId = "default";
+            SetUpCompleteRemote(remoteId);
+            VerifyCompleteRemote(remoteId);
+        }
+
+        [Fact]
+        public void MinimalRemoteWithDotInName()
+        {
+            var remoteId = "maint-1.0.0.0";
+            SetUpCompleteRemote(remoteId);
+            VerifyCompleteRemote(remoteId);
+        }
+
+        [Fact]
+        public void CompleteRemoteWithDotInName()
+        {
+            var remoteId = "maint-1.0.0.0";
+            SetUpCompleteRemote(remoteId);
+            VerifyCompleteRemote(remoteId);
+        }
+
+        private void VerifyCompleteRemote(string remoteId)
+        {
+            Assert.Equal(remoteId, _firstRemote.Id);
             Assert.Equal("http://server/path", _firstRemote.Url);
             Assert.Equal("$/project", _firstRemote.Repository);
             Assert.Equal("theuser", _firstRemote.Username);
@@ -70,6 +87,17 @@ namespace Sep.Git.Tfs.Test.Core
             Assert.Equal("ignorethis.zip", _firstRemote.IgnoreRegex);
             Assert.Equal(new string[] { "http://old:8080/", "http://other/" }, _firstRemote.Aliases);
             Assert.True(_firstRemote.Autotag);
+        }
+
+        private void VerifyMinimalRemote(string remoteId)
+        {
+            Assert.Equal(1, _remotes.Count());
+            Assert.Equal(remoteId, _firstRemote.Id);
+            Assert.Equal("http://server/path", _firstRemote.Url);
+            Assert.Equal("$/project", _firstRemote.Repository);
+            Assert.Null(_firstRemote.Username);
+            Assert.Null(_firstRemote.Password);
+            Assert.Null(_firstRemote.IgnoreRegex);
         }
     }
 }

@@ -27,22 +27,18 @@ namespace Sep.Git.Tfs.Test.Core
         [Fact]
         public void DumpsMinimalRemote()
         {
-            var remote = new RemoteInfo { Id = "default", Url = "http://server/path", Repository = "$/Project" };
+            var remoteId = "default";
+            var remote = new RemoteInfo { Id = remoteId, Url = "http://server/path", Repository = "$/Project" };
             var config = _dumper.Dump(remote);
-            AssertContainsConfig("tfs-remote.default.url", "http://server/path", config);
-            AssertContainsConfig("tfs-remote.default.repository", "$/Project", config);
-            AssertContainsConfig("tfs-remote.default.username", null, config);
-            AssertContainsConfig("tfs-remote.default.password", null, config);
-            AssertContainsConfig("tfs-remote.default.ignore-paths", null, config);
-            AssertContainsConfig("tfs-remote.default.legacy-urls", null, config);
-            AssertContainsConfig("tfs-remote.default.autotag", null, config);
+            VerifyMinimalRemote(remoteId, config);
         }
 
         [Fact]
         public void DumpsCompleteRemote()
         {
+            var remoteId = "default";
             var remote = new RemoteInfo {
-                Id = "default",
+                Id = remoteId,
                 Url = "http://server/path",
                 Repository = "$/Project",
                 Username = "user",
@@ -52,13 +48,57 @@ namespace Sep.Git.Tfs.Test.Core
                 Aliases = new string[] { "http://abc", "http://def" },
             };
             var config = _dumper.Dump(remote);
-            AssertContainsConfig("tfs-remote.default.url", "http://server/path", config);
-            AssertContainsConfig("tfs-remote.default.repository", "$/Project", config);
-            AssertContainsConfig("tfs-remote.default.username", "user", config);
-            AssertContainsConfig("tfs-remote.default.password", "pass", config);
-            AssertContainsConfig("tfs-remote.default.ignore-paths", "abc", config);
-            AssertContainsConfig("tfs-remote.default.legacy-urls", "http://abc,http://def", config);
-            AssertContainsConfig("tfs-remote.default.autotag", "true", config);
+            VerifyCompleteRemote(remoteId, config);
+        }
+
+        [Fact]
+        public void DumpsMinimalRemoteWithDotInName()
+        {
+            var remoteId = "maint-1.0.0.0";
+            var remote = new RemoteInfo { Id = remoteId, Url = "http://server/path", Repository = "$/Project" };
+            var config = _dumper.Dump(remote);
+            VerifyMinimalRemote(remoteId, config);
+        }
+
+        [Fact]
+        public void DumpsCompleteRemoteWithDotInName()
+        {
+            var remoteId = "maint-1.0.0.0";
+            var remote = new RemoteInfo
+            {
+                Id = remoteId,
+                Url = "http://server/path",
+                Repository = "$/Project",
+                Username = "user",
+                Password = "pass",
+                IgnoreRegex = "abc",
+                Autotag = true,
+                Aliases = new string[] { "http://abc", "http://def" },
+            };
+            var config = _dumper.Dump(remote);
+            VerifyCompleteRemote(remoteId, config);
+        }
+
+        private void VerifyMinimalRemote(string remoteId, IEnumerable<ConfigurationEntry> config)
+        {
+            AssertContainsConfig("tfs-remote." + remoteId  + ".url", "http://server/path", config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".repository", "$/Project", config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".username", null, config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".password", null, config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".ignore-paths", null, config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".legacy-urls", null, config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".autotag", null, config);
+        }
+
+        private void VerifyCompleteRemote(string remoteId, IEnumerable<ConfigurationEntry> config)
+        {
+            AssertContainsConfig("tfs-remote." + remoteId + ".url", "http://server/path", config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".repository", "$/Project", config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".username", "user", config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".password", "pass", config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".ignore-paths", "abc", config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".legacy-urls", "http://abc,http://def", config);
+            AssertContainsConfig("tfs-remote." + remoteId + ".autotag", "true", config);
         }
 
         private void AssertContainsConfig(string key, string value, IEnumerable<ConfigurationEntry> configs)
