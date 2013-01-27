@@ -91,6 +91,19 @@ namespace Sep.Git.Tfs.VsCommon
             return rootChangesetInParentBranch.ChangesetId;
         }
 
+        /// <summary>
+        /// Get's the relevant TFS <see cref="ChangesetSummary"/> for the root changeset given a set 
+        /// of <see cref="ExtendedMerge"/> objects and a given <paramref name="tfsPathParentBranch"/>.
+        /// </summary>
+        /// <param name="merges">An array of <see cref="ExtendedMerge"/> objects describing the a set of merges.</param>
+        /// <param name="targetBranch">The TFS repository path to the child branch that we are trying to attach.</param>
+        /// <param name="parentBranch">The TFS repository path to the parent branch where we expect to find the root ChangesetId.</param>
+        /// <remarks>
+        /// Each <see cref="ChangeType"/> uses the SourceChangeset, SourceItem, TargetChangeset, and TargetItem 
+        /// properties with different semantics, depending on what it needs to describe, so the strategy to determine
+        /// whether we are interested in a given ExtendedMerge summary depends on the SourceItem's <see cref="ChangeType"/>.
+        /// </remarks>
+        /// <returns><value>True</value> if the given <paramref name="merge"/> is relevant; <value>False</value> otherwise.</returns>
         private static ChangesetSummary GetRelevantChangesetBasedOnChangeType(ExtendedMerge[] merges, string tfsPathParentBranch)
         {
             if (merges == null) return null;
@@ -104,43 +117,21 @@ namespace Sep.Git.Tfs.VsCommon
             switch (merge.SourceItem.ChangeType)
             {
                 case ChangeType.Branch:
-                    Trace.WriteLine("Found C"+merge.SourceChangeset.ChangesetId+" on branch "+merge.SourceItem.Item.ServerItem);
+                    Trace.WriteLine("Found C" + merge.SourceChangeset.ChangesetId + " on branch " + merge.SourceItem.Item.ServerItem);
                     return merge.SourceChangeset;
                 case ChangeType.Rename:
-                    Trace.WriteLine("Found C"+merge.TargetChangeset.ChangesetId+" on branch "+merge.TargetItem.Item);
+                    Trace.WriteLine("Found C" + merge.TargetChangeset.ChangesetId + " on branch " + merge.TargetItem.Item);
                     return merge.TargetChangeset;
                 default:
-                    throw new GitTfsException("Don't know (yet) how to find the root changeset for an ExtendedMerge of type " + merge.SourceItem.ChangeType,
-                        new string[] { "Open an Issue on Github to notify the community that you need support for '"+merge.SourceItem.ChangeType+"': https://github.com/git-tfs/git-tfs/issues" });
-            }
-        }
-
-        /// <summary>
-        /// Predicate that determines if a given TFS <see cref="ExtendedMerge"/> object is relevant when searching for 
-        /// the TFS ChangesetId that roots the <paramref name="targetBranch"/> to the <paramref name="parentBranch"/>.
-        /// </summary>
-        /// <param name="merge">An <see cref="ExtendedMerge"/> object describing the details of the merge.</param>
-        /// <param name="targetBranch">The TFS repository path to the child branch that we are trying to attach.</param>
-        /// <param name="parentBranch">The TFS repository path to the parent branch where we expect to find the root ChangesetId.</param>
-        /// <remarks>
-        /// Each <see cref="ChangeType"/> uses the SourceChangeset, SourceItem, TargetChangeset, and TargetItem 
-        /// properties with different semantics, depending on what it needs to describe, so the strategy to determine
-        /// whether we are interested in a given ExtendedMerge summary depends on the SourceItem's <see cref="ChangeType"/>.
-        /// </remarks>
-        /// <returns><value>True</value> if the given <paramref name="merge"/> is relevant; <value>False</value> otherwise.</returns>
-        [Obsolete("not needed; please remove", false)]
-        private static bool IsRelevantMergeSummary(ExtendedMerge merge, string targetBranch, string parentBranch)
-        {
-            switch (merge.SourceItem.ChangeType)
-            {
-                case ChangeType.Branch:
-                    return merge.SourceItem.Item.ServerItem.Equals(parentBranch, StringComparison.InvariantCultureIgnoreCase);
-                case ChangeType.Rename:
-                    return merge.TargetItem.Item.Equals(targetBranch, StringComparison.InvariantCultureIgnoreCase);
-                default:
-                    return false;
+                    throw new GitTfsException(
+                        "Don't know (yet) how to find the root changeset for an ExtendedMerge of type " +
+                        merge.SourceItem.ChangeType,
+                        new string[]
+                            {
+                                "Open an Issue on Github to notify the community that you need support for '" +
+                                merge.SourceItem.ChangeType + "': https://github.com/git-tfs/git-tfs/issues"
+                            });
             }
         }
     }
-
 }
