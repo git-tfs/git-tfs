@@ -88,80 +88,99 @@ namespace Sep.Git.Tfs.Test.Core
 
         public class LoadTests
         {
-            RemoteConfigConverter _reader = new RemoteConfigConverter();
-            Dictionary<string, string> _config = new Dictionary<string, string>();
+            RemoteConfigConverter _loader = new RemoteConfigConverter();
 
-            IEnumerable<ConfigurationEntry> _gitConfig { get { return _config.Select(x => new ConfigurationEntry(x.Key, x.Value, ConfigurationLevel.Local)); } }
-            IEnumerable<RemoteInfo> _remotes { get { return _reader.Load(_gitConfig); } }
-            RemoteInfo _firstRemote { get { return _remotes.FirstOrDefault(); } }
-
-            public LoadTests()
+            private IEnumerable<RemoteInfo> Load(params ConfigurationEntry[] configs)
             {
-                // Set some normal-ish config params. This makes sure that there is no barfing on extra config entries.
-                _config["core.autocrlf"] = "true";
-                _config["ui.color"] = "auto";
+                return _loader.Load(configs);
+            }
+
+            private ConfigurationEntry c(string key, string value)
+            {
+                return new ConfigurationEntry(key, value, ConfigurationLevel.Local);
             }
 
             [Fact]
             public void NoConfig()
             {
-                Assert.Empty(_remotes);
+                var remotes = _loader.Load(Enumerable.Empty<ConfigurationEntry>());
+                Assert.Empty(remotes);
             }
 
-            void SetUpMinimalRemote()
+            [Fact]
+            public void OnlyGitConfig()
             {
-                _config["tfs-remote.default.url"] = "http://server/path";
-                _config["tfs-remote.default.repository"] = "$/project";
+                var remotes = Load(
+                    c("core.autocrlf", "true"),
+                    c("ui.color", "true"));
+                Assert.Empty(remotes);
             }
 
             [Fact]
             public void MinimalRemote()
             {
-                SetUpMinimalRemote();
-                Assert.Equal(1, _remotes.Count());
-                Assert.Equal("default", _firstRemote.Id);
-                Assert.Equal("http://server/path", _firstRemote.Url);
-                Assert.Equal("$/project", _firstRemote.Repository);
-                Assert.Null(_firstRemote.Username);
-                Assert.Null(_firstRemote.Password);
-                Assert.Null(_firstRemote.IgnoreRegex);
-            }
-
-            void SetUpCompleteRemote()
-            {
-                SetUpMinimalRemote();
-                _config["tfs-remote.default.username"] = "theuser";
-                _config["tfs-remote.default.password"] = "thepassword";
-                _config["tfs-remote.default.ignore-paths"] = "ignorethis.zip";
-                _config["tfs-remote.default.legacy-urls"] = "http://old:8080/,http://other/";
-                _config["tfs-remote.default.autotag"] = "true";
+                var remotes = Load(
+                    c("tfs-remote.default.url", "http://server/path"),
+                    c("tfs-remote.default.repository", "$/project"));
+                Assert.Equal(1, remotes.Count());
+                var remote = remotes.First();
+                Assert.Equal("default", remote.Id);
+                Assert.Equal("http://server/path", remote.Url);
+                Assert.Equal("$/project", remote.Repository);
+                Assert.Null(remote.Username);
+                Assert.Null(remote.Password);
+                Assert.Null(remote.IgnoreRegex);
             }
 
             [Fact]
             public void RemoteWithEverything()
             {
-                SetUpCompleteRemote();
-                Assert.Equal("default", _firstRemote.Id);
-                Assert.Equal("http://server/path", _firstRemote.Url);
-                Assert.Equal("$/project", _firstRemote.Repository);
-                Assert.Equal("theuser", _firstRemote.Username);
-                Assert.Equal("thepassword", _firstRemote.Password);
-                Assert.Equal("ignorethis.zip", _firstRemote.IgnoreRegex);
-                Assert.Equal(new string[] { "http://old:8080/", "http://other/" }, _firstRemote.Aliases);
-                Assert.True(_firstRemote.Autotag);
+                var remotes = Load(
+                    c("tfs-remote.default.url", "http://server/path"),
+                    c("tfs-remote.default.repository", "$/project"),
+                    c("tfs-remote.default.username", "theuser"),
+                    c("tfs-remote.default.password", "thepassword"),
+                    c("tfs-remote.default.ignore-paths", "ignorethis.zip"),
+                    c("tfs-remote.default.legacy-urls", "http://old:8080/,http://other/"),
+                    c("tfs-remote.default.autotag", "true"));
+                Assert.Equal(1, remotes.Count());
+                var remote = remotes.First();
+                Assert.Equal("default", remote.Id);
+                Assert.Equal("http://server/path", remote.Url);
+                Assert.Equal("$/project", remote.Repository);
+                Assert.Equal("theuser", remote.Username);
+                Assert.Equal("thepassword", remote.Password);
+                Assert.Equal("ignorethis.zip", remote.IgnoreRegex);
+                Assert.Equal(new string[] { "http://old:8080/", "http://other/" }, remote.Aliases);
+                Assert.True(remote.Autotag);
             }
         }
 
-        
+        RemoteConfigConverter _converter = new RemoteConfigConverter();
+
+        [Fact]
+        public void MultipleRemotes()
+        {
+            var remote1 = new RemoteInfo { Id = "a", Url = "http://a", Repository = "$/a" };
+            var remote2 = new RemoteInfo { Id = "b", Url = "http://b", Repository = "$/b" };
+            var config = new List<ConfigurationEntry>();
+            config.AddRange(_converter.Dump(remote1));
+            config.AddRange(_converter.Dump(remote2));
+            var remotes = _converter.Load(config.Where(e => e.Value != null));
+            Assert.Equal(2, remotes.Count());
+            Assert.Equal(new string[] { "a", "b" }, remotes.Select(r => r.Id).OrderBy(s => s));
+        }
+
         [Fact]
         public void HandlesDotsInName()
         {
             var originalRemote = new RemoteInfo { Id = "has.dots.in.it", Url = "http://do/not/care", Repository = "$/do/not/care" };
-            var converter = new RemoteConfigConverter();
-            var config = converter.Dump(originalRemote);
+
+            var config = _converter.Dump(originalRemote);
             foreach (var entry in config)
                 Assert.True(entry.Key.StartsWith("tfs-remote.has.dots.in.it."), entry.Key + " should start with tfs-remote.has.dots.in.it");
-            var remotes = converter.Load(config.Where(e => e.Value != null));
+
+            var remotes = _converter.Load(config.Where(e => e.Value != null));
             Assert.Equal(1, remotes.Count());
             Assert.Equal("has.dots.in.it", remotes.First().Id);
         }
