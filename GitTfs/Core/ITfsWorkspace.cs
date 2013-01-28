@@ -4,7 +4,22 @@ using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Core
 {
-    public interface ITfsWorkspace
+    /// <summary>
+    /// Things needed by code that pends changes to a workspace.
+    /// </summary>
+    public interface ITfsWorkspaceModifier
+    {
+        string GetLocalPath(string path);
+        void Add(string path);
+        void Edit(string path);
+        void Delete(string path);
+        void Rename(string pathFrom, string pathTo, string score);
+    }
+
+    /// <summary>
+    /// All the other tricks workspaces know.
+    /// </summary>
+    public interface ITfsWorkspace : ITfsWorkspaceModifier
     {
         /// <summary>
         /// Shelves all pending changes, with the given shelveset name.
@@ -23,11 +38,6 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         void Get(IChangeset changeset);
 
-        string GetLocalPath(string path);
-        void Add(string path);
-        void Edit(string path);
-        void Delete(string path);
-        void Rename(string pathFrom, string pathTo, string score);
         long CheckinTool(Func<string> generateCheckinComment);
     }
 }
