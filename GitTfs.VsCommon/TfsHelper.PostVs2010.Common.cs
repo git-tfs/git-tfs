@@ -123,6 +123,7 @@ namespace Sep.Git.Tfs.VsCommon
             switch (merge.SourceItem.ChangeType)
             {
                 case ChangeType.Branch:
+                case ChangeType.Merge:
                     Trace.WriteLine("Found C" + merge.SourceChangeset.ChangesetId + " on branch " + merge.SourceItem.Item.ServerItem);
                     return merge.SourceChangeset;
                 case ChangeType.Rename:
