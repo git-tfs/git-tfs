@@ -9,7 +9,7 @@
             Path = changeInfo.path;
         }
 
-        public void Apply(ITfsWorkspace workspace)
+        public void Apply(ITfsWorkspaceModifier workspace)
         {
             workspace.Delete(Path);
         }

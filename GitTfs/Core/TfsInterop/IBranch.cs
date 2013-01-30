@@ -56,7 +56,10 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             {
                 if(!branch.IsRoot)
                 {
-                    branchTrees[branch.ParentPath].ChildBranches.Add(branch);
+                    //in some strange cases there might be a branch which is not marked as IsRoot
+                    //but the parent for this branch is missing.
+                    if (branchTrees.ContainsKey(branch.ParentPath))
+                        branchTrees[branch.ParentPath].ChildBranches.Add(branch);
                 }
             }
             var roots = branchTrees.Values.Where(b => b.IsRoot);

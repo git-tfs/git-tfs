@@ -13,7 +13,7 @@
             NewSha = changeInfo.newSha;
         }
 
-        public void Apply(ITfsWorkspace workspace)
+        public void Apply(ITfsWorkspaceModifier workspace)
         {
             var workspaceFile = workspace.GetLocalPath(Path);
             Repository.CopyBlob(NewSha, workspaceFile);

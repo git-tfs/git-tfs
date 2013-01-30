@@ -505,11 +505,14 @@ namespace Sep.Git.Tfs.Core
             return workspace.CheckinTool(() => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
         }
 
-        private void PendChangesToWorkspace(string head, string parent, ITfsWorkspace workspace)
+        private void PendChangesToWorkspace(string head, string parent, ITfsWorkspaceModifier workspace)
         {
-            foreach (var change in Repository.GetChangedFiles(parent, head))
+            using (var tidyWorkspace = new DirectoryTidier(workspace, Tfs.GetLatestChangeset(this).GetFullTree()))
             {
-                change.Apply(workspace);
+                foreach (var change in Repository.GetChangedFiles(parent, head))
+                {
+                    change.Apply(tidyWorkspace);
+                }
             }
         }
 

@@ -56,13 +56,12 @@ namespace Sep.Git.Tfs.Commands
 
             try
             {
-                var retVal = 0;
-                retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+                var retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
 
                 if (retVal == 0) retVal = fetch.Run();
-                if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadAllTfsRemotes().First().RemoteRef);
+                if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
                 if (retVal == 0 && withBranches && initBranch != null)
                 {
                     initBranch.CloneAllBranches = true;
