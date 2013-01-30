@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.VersionControl.Client;
@@ -44,14 +45,11 @@ namespace Sep.Git.Tfs.VsCommon
         public override int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
         {
             if (!string.IsNullOrWhiteSpace(tfsPathParentBranch))
-                Trace.WriteLine(
-                    "Parameter about parent branch will be ignored because this version of TFS is able to find the parent!");
+                Trace.WriteLine("Parameter about parent branch will be ignored because this version of TFS is able to find the parent!");
 
             Trace.WriteLine("Looking for all branches...");
             var allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full);
-            var tfsBranchToCreate =
-                allTfsBranches.FirstOrDefault(
-                    b => b.Properties.RootItem.Item.ToLower() == tfsPathBranchToCreate.ToLower());
+            var tfsBranchToCreate = allTfsBranches.FirstOrDefault(b => b.Properties.RootItem.Item.ToLower() == tfsPathBranchToCreate.ToLower());
             if (tfsBranchToCreate == null)
                 return -1;
             tfsPathParentBranch = tfsBranchToCreate.Properties.ParentBranch.Item;
@@ -60,9 +58,18 @@ namespace Sep.Git.Tfs.VsCommon
             int firstChangesetIdOfParentBranch =
                 ((ChangesetVersionSpec) tfsBranchToCreate.Properties.ParentBranch.Version).ChangesetId;
 
-            var firstChangesetInBranchToCreate =
-                VersionControl.QueryHistory(tfsPathBranchToCreate, VersionSpec.Latest, 0, RecursionType.Full,
-                                            null, null, null, int.MaxValue, true, false, false)
+            var firstChangesetInBranchToCreate = VersionControl.QueryHistory(
+                                            tfsPathBranchToCreate, 
+                                            VersionSpec.Latest, 
+                                            0, 
+                                            RecursionType.Full,
+                                            null, 
+                                            null, 
+                                            null, 
+                                            int.MaxValue, 
+                                            true, 
+                                            false, 
+                                            false)
                               .Cast<Changeset>()
                               .LastOrDefault();
 
@@ -73,22 +80,15 @@ namespace Sep.Git.Tfs.VsCommon
                     tfsPathBranchToCreate);
             }
 
-            var mergedItemsToFirstChangesetInBranchToCreate = VersionControl
-                .TrackMerges(new int[] {firstChangesetInBranchToCreate.ChangesetId},
+            var mergedItemsToFirstChangesetInBranchToCreate = VersionControl.TrackMerges(
+                             new int[] {firstChangesetInBranchToCreate.ChangesetId},
                              new ItemIdentifier(tfsPathBranchToCreate),
-                             new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch),},
+                             new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch)},
                              null)
                 .OrderBy(x => x.SourceChangeset.ChangesetId);
 
             var rootChangesetInParentBranch =
-                GetRelevantChangesetBasedOnChangeType(mergedItemsToFirstChangesetInBranchToCreate, tfsPathParentBranch);
-
-            if (rootChangesetInParentBranch == null)
-            {
-                throw new GitTfsException(
-                    "An unexpected error occured when trying to find the root changeset.\nFailed to find root changeset for " +
-                    tfsPathBranchToCreate + " branch in " + tfsPathParentBranch + " branch");
-            }
+                GetRelevantChangesetBasedOnChangeType(mergedItemsToFirstChangesetInBranchToCreate, tfsPathParentBranch, tfsPathBranchToCreate);
 
             return rootChangesetInParentBranch.ChangesetId;
         }
@@ -98,23 +98,27 @@ namespace Sep.Git.Tfs.VsCommon
         /// of <see cref="ExtendedMerge"/> objects and a given <paramref name="tfsPathParentBranch"/>.
         /// </summary>
         /// <param name="merges">An array of <see cref="ExtendedMerge"/> objects describing the a set of merges.</param>
-        /// <param name="targetBranch">The TFS repository path to the child branch that we are trying to attach.</param>
-        /// <param name="parentBranch">The TFS repository path to the parent branch where we expect to find the root ChangesetId.</param>
+        /// <param name="tfsPathParentBranch">The tfs Path Parent Branch.</param>
+        /// <param name="tfsPathBranchToCreate">The tfs Path Branch To Create.</param>
         /// <remarks>
         /// Each <see cref="ChangeType"/> uses the SourceChangeset, SourceItem, TargetChangeset, and TargetItem 
         /// properties with different semantics, depending on what it needs to describe, so the strategy to determine
         /// whether we are interested in a given ExtendedMerge summary depends on the SourceItem's <see cref="ChangeType"/>.
         /// </remarks>
-        /// <returns><value>True</value> if the given <paramref name="merge"/> is relevant; <value>False</value> otherwise.</returns>
-        private static ChangesetSummary GetRelevantChangesetBasedOnChangeType(ExtendedMerge[] merges, string tfsPathParentBranch)
+        /// <returns><value>True</value> if the given <paramref name="merge"/> is relevant; <value>False</value> otherwise.
+        /// </returns>
+        private static ChangesetSummary GetRelevantChangesetBasedOnChangeType(IEnumerable<ExtendedMerge> merges, string tfsPathParentBranch, string tfsPathBranchToCreate)
         {
-            if (merges == null) return null;
+            merges = (merges ?? new ExtendedMerge[] {}).ToArray();
+            var merge = merges.LastOrDefault(m => m.SourceItem.Item.ServerItem.Equals(tfsPathParentBranch, StringComparison.InvariantCultureIgnoreCase))
+                     ?? merges.LastOrDefault();
 
-            var merge = merges
-                .LastOrDefault(m => m.SourceItem.Item.ServerItem.Equals(tfsPathParentBranch, StringComparison.InvariantCultureIgnoreCase))
-                ?? merges.LastOrDefault();
-
-            if (merge == null) return null;
+            if (merge == null)
+            {
+                throw new GitTfsException(
+                    "An unexpected error occured when trying to find the root changeset.\nFailed to find root changeset for " +
+                    tfsPathBranchToCreate + " branch in " + tfsPathParentBranch + " branch");
+            }
 
             switch (merge.SourceItem.ChangeType)
             {
