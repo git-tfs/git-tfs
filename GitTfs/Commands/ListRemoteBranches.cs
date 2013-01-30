@@ -5,10 +5,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
 using StructureMap;
-using Sep.Git.Tfs.Util;
+using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -48,15 +48,20 @@ namespace Sep.Git.Tfs.Commands
             tfsHelper.Username = remoteOptions.Username;
             tfsHelper.Password = remoteOptions.Password;
             tfsHelper.EnsureAuthenticated();
-            var branches = tfsHelper.GetBranches().ToList();
-            stdout.WriteLine("TFS branche(s) that could be cloned:\n");
-            foreach (var branchObject in branches.Where(b => b.IsRoot))
+            var branches = tfsHelper.GetBranches().Where(b => b.IsRoot).ToList();
+            if (branches.IsEmpty())
             {
-                Branch.WriteRemoteTfsBranchStructure(tfsHelper, stdout, branchObject.Path);
-                stdout.WriteLine(string.Empty);
+                stdout.WriteLine("No TFS branches were found!");
             }
-
-            stdout.WriteLine("\nCloning root branches (marked by [*]) are recommended!");
+            else
+            {
+                stdout.WriteLine("TFS branches that could be cloned:");
+                foreach (var branchObject in branches.Where(b => b.IsRoot))
+                {
+                    Branch.WriteRemoteTfsBranchStructure(tfsHelper, stdout, branchObject.Path);
+                }
+                stdout.WriteLine("\nCloning root branches (marked by [*]) is recommended!");
+            }
             return GitTfsExitCodes.OK;
         }
     }
