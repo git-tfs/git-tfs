@@ -52,8 +52,11 @@ You need .NET 4 and either the 2008 or 2010 version of Team Explorer installed.
 
 ### Building
 
-Use `msbuild GitTfs.sln /p:Configuration=Vs2010_Debug` to build for the 2010 version only.
+#### Building With MSBuild
+1. Update submodules. `git submodule update`  to get the libgit2sharp dependencies.
+2. Build with `msbuild GitTfs.sln /p:Configuration=debug` for the default debug build.
 
+####Building With Rake
 You can also do `rake build:debug`.
 
 ## Contributing
