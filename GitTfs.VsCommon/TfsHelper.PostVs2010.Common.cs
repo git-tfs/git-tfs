@@ -66,7 +66,9 @@ namespace Sep.Git.Tfs.VsCommon
                              null)
                 .OrderBy(x => x.SourceChangeset.ChangesetId);
 
-            var lastChangesetsMergeFromParentBranch = mergedItemsToFirstChangesetInBranchToCreate.LastOrDefault();
+            // Find the last changeset that was created before the first one in the new branch to be created.
+            var lastChangesetsMergeFromParentBranch = mergedItemsToFirstChangesetInBranchToCreate.LastOrDefault(
+                    e => e.SourceChangeset.ChangesetId < firstChangesetInBranchToCreate.ChangesetId);
 
             if (lastChangesetsMergeFromParentBranch == null)
             {

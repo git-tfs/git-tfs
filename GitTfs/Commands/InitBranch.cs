@@ -168,7 +168,7 @@ namespace Sep.Git.Tfs.Commands
             string sha1RootCommit = _globals.Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + rootChangeSetId + "[^0-9]");
             //sha1RootCommit = _globals.Repository.FindCommitByCommitMessage("git-tfs-id: .*\\$\\/" + tfsProject + "\\/.*;C" + rootChangeSetId + "[^0-9]");
             if (string.IsNullOrWhiteSpace(sha1RootCommit))
-                throw new GitTfsException("error: The root changeset " + rootChangeSetId + " have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n");
+                throw new GitTfsException("error: The root changeset " + rootChangeSetId + " was not found in the Git repository. The branch containing the changeset has not been created. Please create it before retrying!\n");
             Trace.WriteLine("Commit found! sha1 : " + sha1RootCommit);
 
             Trace.WriteLine("Try creating remote...");
