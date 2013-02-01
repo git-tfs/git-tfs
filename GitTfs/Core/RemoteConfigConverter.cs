@@ -7,7 +7,7 @@ namespace Sep.Git.Tfs.Core
 {
     public class RemoteConfigConverter
     {
-        public IEnumerable<RemoteInfo> Load(IEnumerable<ConfigurationEntry> config)
+        public IEnumerable<RemoteInfo> Load(IEnumerable<ConfigurationEntry<string>> config)
         {
             var remotes = new Dictionary<string, RemoteInfo>();
             foreach (var entry in config)
@@ -39,7 +39,7 @@ namespace Sep.Git.Tfs.Core
             return remotes.Values;
         }
 
-        public IEnumerable<ConfigurationEntry> Dump(RemoteInfo remote)
+        public IEnumerable<KeyValuePair<string, string>> Dump(RemoteInfo remote)
         {
             if (!string.IsNullOrWhiteSpace(remote.Id))
             {
@@ -54,9 +54,9 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private ConfigurationEntry c(string key, string value)
+        private KeyValuePair<string, string> c(string key, string value)
         {
-            return new ConfigurationEntry(key, value, ConfigurationLevel.Local);
+            return new KeyValuePair<string, string>(key, value);
         }
     }
 }

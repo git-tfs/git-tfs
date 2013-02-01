@@ -129,6 +129,7 @@
     <Compile Include="Integration\BootstrapTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
     <Compile Include="Integration\FetchTests.cs" />
+    <Compile Include="Integration\InitTests.cs" />
     <Compile Include="Integration\IntegrationHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHelpers\ExtensionMethods.cs" />

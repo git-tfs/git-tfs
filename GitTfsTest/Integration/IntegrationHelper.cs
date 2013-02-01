@@ -68,6 +68,11 @@ namespace Sep.Git.Tfs.Test.Integration
 
         #region set up a git repository
 
+        public void SetConfig<T>(string repodir, string key, T value)
+        {
+            Repository(repodir).Config.Set(key, value);
+        }
+
         public void SetupGitRepo(string path, Action<RepoBuilder> buildIt)
         {
             using (var repo = LibGit2Sharp.Repository.Init(Path.Combine(Workdir, path)))
@@ -275,6 +280,13 @@ namespace Sep.Git.Tfs.Test.Integration
         {
             var commit = Repository(repodir).Lookup<Commit>(commitish);
             AssertEqual(message, commit.Message, "Commit message of " + commitish);
+        }
+
+        public void AssertConfig<T>(string repodir, string key, T expectedValue)
+        {
+            var config = Repository(repodir).Config.Get<T>(key);
+            Assert.NotNull(config);
+            Assert.Equal(expectedValue, config.Value);
         }
 
         private void AssertEqual<T>(T expected, T actual, string message)

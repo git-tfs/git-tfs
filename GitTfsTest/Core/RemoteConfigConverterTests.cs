@@ -65,24 +65,9 @@ namespace Sep.Git.Tfs.Test.Core
                 AssertContainsConfig("tfs-remote.default.autotag", "true", config);
             }
 
-            private void AssertContainsConfig(string key, string value, IEnumerable<ConfigurationEntry> configs)
+            private void AssertContainsConfig(string key, string value, IEnumerable<KeyValuePair<string, string>> configs)
             {
-                Assert.Contains(new ConfigurationEntry(key, value, ConfigurationLevel.Local), configs, configComparer);
-            }
-
-            static IEqualityComparer<ConfigurationEntry> configComparer = new ConfigurationEntryComparer();
-
-            class ConfigurationEntryComparer : IEqualityComparer<ConfigurationEntry>
-            {
-                bool IEqualityComparer<ConfigurationEntry>.Equals(ConfigurationEntry x, ConfigurationEntry y)
-                {
-                    return x.Key == y.Key && x.Value == y.Value;
-                }
-
-                int IEqualityComparer<ConfigurationEntry>.GetHashCode(ConfigurationEntry obj)
-                {
-                    return obj.Key.GetHashCode();
-                }
+                Assert.Contains(new KeyValuePair<string, string>(key, value), configs);
             }
         }
 
@@ -90,14 +75,9 @@ namespace Sep.Git.Tfs.Test.Core
         {
             RemoteConfigConverter _loader = new RemoteConfigConverter();
 
-            private IEnumerable<RemoteInfo> Load(params ConfigurationEntry[] configs)
+            private IEnumerable<RemoteInfo> Load(params ConfigurationEntry<string>[] configs)
             {
                 return _loader.Load(configs);
-            }
-
-            private ConfigurationEntry c(string key, string value)
-            {
-                return new ConfigurationEntry(key, value, ConfigurationLevel.Local);
             }
 
             [Fact]
@@ -163,10 +143,10 @@ namespace Sep.Git.Tfs.Test.Core
         {
             var remote1 = new RemoteInfo { Id = "a", Url = "http://a", Repository = "$/a" };
             var remote2 = new RemoteInfo { Id = "b", Url = "http://b", Repository = "$/b" };
-            var config = new List<ConfigurationEntry>();
+            var config = new List<KeyValuePair<string, string>>();
             config.AddRange(_converter.Dump(remote1));
             config.AddRange(_converter.Dump(remote2));
-            var remotes = _converter.Load(config.Where(e => e.Value != null));
+            var remotes = _converter.Load(magic(config));
             Assert.Equal(2, remotes.Count());
             Assert.Equal(new string[] { "a", "b" }, remotes.Select(r => r.Id).OrderBy(s => s));
         }
@@ -180,9 +160,34 @@ namespace Sep.Git.Tfs.Test.Core
             foreach (var entry in config)
                 Assert.True(entry.Key.StartsWith("tfs-remote.has.dots.in.it."), entry.Key + " should start with tfs-remote.has.dots.in.it");
 
-            var remotes = _converter.Load(config.Where(e => e.Value != null));
+            var remotes = _converter.Load(magic(config));
             Assert.Equal(1, remotes.Count());
             Assert.Equal("has.dots.in.it", remotes.First().Id);
+        }
+
+        private static IEnumerable<ConfigurationEntry<string>> magic(IEnumerable<KeyValuePair<string, string>> dumped)
+        {
+            return dumped.Where(e => e.Value != null).Select(e => c(e.Key, e.Value));
+        }
+
+        private static ConfigurationEntry<string> c(string key, string value)
+        {
+            return new TestConfigurationEntry(key, value);
+        }
+
+        class TestConfigurationEntry : ConfigurationEntry<string>
+        {
+            string _key;
+            string _value;
+
+            public override string Key { get { return _key; } }
+            public override string Value { get { return _value; } }
+
+            public TestConfigurationEntry(string key, string value)
+            {
+                _key = key;
+                _value = value;
+            }
         }
     }
 }
