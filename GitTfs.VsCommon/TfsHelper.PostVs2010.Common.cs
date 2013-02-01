@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.VersionControl.Client;
@@ -38,7 +37,6 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches);
         }
 
-        // TODO: pass back richer information so that the calling client (who likely has access to stdout) can surface details about the branch origin to the console.
         public override int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
         {
             if (!string.IsNullOrWhiteSpace(tfsPathParentBranch))
@@ -76,7 +74,7 @@ namespace Sep.Git.Tfs.VsCommon
         }
 
         /// <summary>
-        /// Get's the relevant TFS <see cref="ChangesetSummary"/> for the root changeset given a set 
+        /// Gets the relevant TFS <see cref="ChangesetSummary"/> for the root changeset given a set 
         /// of <see cref="ExtendedMerge"/> objects and a given <paramref name="tfsPathParentBranch"/>.
         /// </summary>
         /// <param name="merges">An array of <see cref="ExtendedMerge"/> objects describing the a set of merges.</param>
