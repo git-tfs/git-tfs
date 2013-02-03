@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -21,10 +22,15 @@ namespace Sep.Git.Tfs.Commands
         private readonly Cleanup cleanup;
         private readonly InitBranch initBranch;
         public bool DisplayRemotes { get; set; }
-        public bool DisplayAllRootRemotes { get; set; }
+        public bool ManageAll { get; set; }
         public bool ShouldRenameRemote { get; set; }
         public bool ShouldDeleteRemote { get; set; }
+        public bool ShouldInitBranch { get; set; }
         public string Comment { get; set; }
+        public string TfsUsername { get; set; }
+        public string TfsPassword { get; set; }
+        public string AuthorsFilePath { get; set; }
+        public string ParentBranch { get; set; }
 
         public OptionSet OptionSet
         {
@@ -32,10 +38,15 @@ namespace Sep.Git.Tfs.Commands
                 return new OptionSet
                 {
                     { "r|remotes", "Display the TFS branches of the current TFS root branch existing on the TFS server", v => DisplayRemotes = (v != null) },
-                    { "a|all", "Display the TFS branches of all the root branches existing on the TFS server", v => DisplayAllRootRemotes = (v != null) },
+                    { "all", "Display (used with option --remotes) the TFS branches of all the root branches existing on the TFS server\n or Initialize (used with option --init) all existing TFS branches (For TFS 2010 and later)", v => ManageAll = (v != null) },
                     { "comment=", "Comment used for the creation of the TFS branch ", v => Comment = v },
                     { "m|move", "Rename a TFS remote", v => ShouldRenameRemote = (v != null) },
                     { "delete", "Delete a TFS remote", v => ShouldDeleteRemote = (v != null) },
+                    { "init", "Initialize an existing TFS branch", v => ShouldInitBranch = (v != null) },
+                    { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
+                    { "u|username=", "TFS username", v => TfsUsername = v },
+                    { "p|password=", "TFS password", v => TfsPassword = v },
+                    { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
                 }
                 .Merge(globals.OptionSet); 
             }
@@ -50,11 +61,25 @@ namespace Sep.Git.Tfs.Commands
             this.initBranch = initBranch;
         }
 
+        public void SetInitBranchParameters()
         {
+            initBranch.TfsUsername = TfsUsername;
+            initBranch.TfsPassword = TfsPassword;
+            initBranch.AuthorsFilePath = AuthorsFilePath;
+            initBranch.CloneAllBranches = ManageAll;
+            initBranch.ParentBranch = ParentBranch;
+        }
+
         public int Run()
         {
             if (ShouldRenameRemote || ShouldDeleteRemote)
                 return helper.Run(this);
+
+            if (ShouldInitBranch)
+            {
+                SetInitBranchParameters();
+                return initBranch.Run();
+            }
 
             return DisplayBranchData();
         }
@@ -64,7 +89,10 @@ namespace Sep.Git.Tfs.Commands
             if (ShouldRenameRemote)
                 return helper.Run(this);
 
+            if (ShouldInitBranch)
             {
+                SetInitBranchParameters();
+                return initBranch.Run(param);
             }
 
             if (ShouldDeleteRemote)
@@ -78,6 +106,12 @@ namespace Sep.Git.Tfs.Commands
 
             if (ShouldDeleteRemote)
                 return helper.Run(this);
+
+            if (ShouldInitBranch)
+            {
+                SetInitBranchParameters();
+                return initBranch.Run(param1, param2);
+            }
 
             if (ShouldRenameRemote)
                 return RenameRemote(param1, param2);
@@ -144,7 +178,7 @@ namespace Sep.Git.Tfs.Commands
             var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
             if (DisplayRemotes)
             {
-                if (!DisplayAllRootRemotes)
+                if (!ManageAll)
                 {
                     var remote = globals.Repository.ReadTfsRemote(remoteId);
 
