@@ -70,8 +70,17 @@ namespace Sep.Git.Tfs.Commands
             initBranch.ParentBranch = ParentBranch;
         }
 
+        public bool IsCommandWellUsed()
+        {
+            //Verify that some mutual exclusive options are not used together
+            return new[] {ShouldDeleteRemote, ShouldInitBranch, ShouldRenameRemote}.Count(b => b) <= 1;
+        }
+
         public int Run()
         {
+            if (!IsCommandWellUsed())
+                return helper.Run(this);
+
             if (ShouldRenameRemote || ShouldDeleteRemote)
                 return helper.Run(this);
 
@@ -86,6 +95,9 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string param)
         {
+            if (!IsCommandWellUsed())
+                return helper.Run(this);
+
             if (ShouldRenameRemote)
                 return helper.Run(this);
 
@@ -103,6 +115,8 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string param1, string param2)
         {
+            if (!IsCommandWellUsed())
+                return helper.Run(this);
 
             if (ShouldDeleteRemote)
                 return helper.Run(this);
