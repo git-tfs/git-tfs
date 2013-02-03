@@ -98,26 +98,26 @@ namespace Sep.Git.Tfs.VsCommon
                 throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find root changeset for " + tfsPathBranchToCreate + " branch in " + tfsPathParentBranch + " branch");
             }
 
-            switch (merge.SourceItem.ChangeType)
+            if (merge.SourceItem.ChangeType.HasFlag(ChangeType.Branch)
+                || merge.SourceItem.ChangeType.HasFlag(ChangeType.Merge)
+                || merge.SourceItem.ChangeType.HasFlag(ChangeType.Add))
             {
-                case ChangeType.Branch:
-                case ChangeType.Merge:
-                case ChangeType.Add | ChangeType.Encoding:
-                    Trace.WriteLine("Found C" + merge.SourceChangeset.ChangesetId + " on branch " + merge.SourceItem.Item.ServerItem);
-                    return merge.SourceChangeset;
-                case ChangeType.Rename:
-                    Trace.WriteLine("Found C" + merge.TargetChangeset.ChangesetId + " on branch " + merge.TargetItem.Item);
-                    return merge.TargetChangeset;
-                default:
-                    throw new GitTfsException(
-                        "Don't know (yet) how to find the root changeset for an ExtendedMerge of type " +
-                        merge.SourceItem.ChangeType,
-                        new string[]
+                Trace.WriteLine("Found C" + merge.SourceChangeset.ChangesetId + " on branch " + merge.SourceItem.Item.ServerItem);
+                return merge.SourceChangeset;
+            }
+            if(merge.SourceItem.ChangeType.HasFlag(ChangeType.Rename))
+            {
+                Trace.WriteLine("Found C" + merge.TargetChangeset.ChangesetId + " on branch " + merge.TargetItem.Item);
+                return merge.TargetChangeset;
+            }
+            throw new GitTfsException(
+                "Don't know (yet) how to find the root changeset for an ExtendedMerge of type " +
+                merge.SourceItem.ChangeType,
+                new string[]
                             {
                                 "Open an Issue on Github to notify the community that you need support for '" +
                                 merge.SourceItem.ChangeType + "': https://github.com/git-tfs/git-tfs/issues"
                             });
-            }
         }
     }
 
