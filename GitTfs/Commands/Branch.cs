@@ -24,7 +24,6 @@ namespace Sep.Git.Tfs.Commands
         public bool DisplayAllRootRemotes { get; set; }
         public bool ShouldRenameRemote { get; set; }
         public bool ShouldDeleteRemote { get; set; }
-        public bool ShouldCreateRemote { get; set; }
         public string Comment { get; set; }
 
         public OptionSet OptionSet
@@ -34,7 +33,6 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "r|remotes", "Display the TFS branches of the current TFS root branch existing on the TFS server", v => DisplayRemotes = (v != null) },
                     { "a|all", "Display the TFS branches of all the root branches existing on the TFS server", v => DisplayAllRootRemotes = (v != null) },
-                    { "c|create", "Create a TFS branch", v => ShouldCreateRemote = (v != null) },
                     { "comment=", "Comment used for the creation of the TFS branch ", v => Comment = v },
                     { "m|move", "Rename a TFS remote", v => ShouldRenameRemote = (v != null) },
                     { "delete", "Delete a TFS remote", v => ShouldDeleteRemote = (v != null) },
@@ -52,14 +50,43 @@ namespace Sep.Git.Tfs.Commands
             this.initBranch = initBranch;
         }
 
-        public int Run(string oldRemoteName, string newRemoteName)
         {
-            if (!ShouldRenameRemote)
+        public int Run()
+        {
+            if (ShouldRenameRemote || ShouldDeleteRemote)
+                return helper.Run(this);
+
+            return DisplayBranchData();
+        }
+
+        public int Run(string param)
+        {
+            if (ShouldRenameRemote)
+                return helper.Run(this);
+
             {
-                helper.Run(this);
-                return GitTfsExitCodes.Help;
             }
 
+            if (ShouldDeleteRemote)
+                return DeleteRemote(param);
+
+            return CreateRemote(param);
+        }
+
+        public int Run(string param1, string param2)
+        {
+
+            if (ShouldDeleteRemote)
+                return helper.Run(this);
+
+            if (ShouldRenameRemote)
+                return RenameRemote(param1, param2);
+
+            return CreateRemote(param1, param2);
+        }
+
+        private int RenameRemote(string oldRemoteName, string newRemoteName)
+        {
             var newRemoteNameExpected = globals.Repository.AssertValidBranchName(newRemoteName.ToGitRefName());
             if (newRemoteNameExpected != newRemoteName)
                 stdout.WriteLine("The name of the branch after renaming will be : " + newRemoteNameExpected);
@@ -76,22 +103,6 @@ namespace Sep.Git.Tfs.Commands
 
             if(globals.Repository.RenameBranch(oldRemoteName, newRemoteName) == null)
                 stdout.WriteLine("warning: no local branch found to rename");
-
-            return GitTfsExitCodes.OK;
-        }
-
-        public int Run(string param)
-        {
-            if (!(ShouldDeleteRemote ^ ShouldCreateRemote))
-        {
-                helper.Run(this);
-                return GitTfsExitCodes.Help;
-            }
-            if (ShouldDeleteRemote)
-                return DeleteRemote(param);
-
-            if (ShouldCreateRemote)
-                return CreateRemote(param, "test creation branch");
 
             return GitTfsExitCodes.OK;
         }
@@ -125,8 +136,7 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.OK;
         }
 
-
-        public int Run()
+        public int DisplayBranchData()
         {
             // should probably pull this from options so that it is settable from the command-line
             const string remoteId = GitTfsConstants.DefaultRepositoryId;
