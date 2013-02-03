@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly Cleanup cleanup;
         private readonly InitBranch initBranch;
         public bool DisplayRemotes { get; set; }
+        public bool DisplayAllRootRemotes { get; set; }
         public bool ShouldRenameRemote { get; set; }
         public bool ShouldDeleteRemote { get; set; }
         public bool ShouldCreateRemote { get; set; }
@@ -32,6 +33,7 @@ namespace Sep.Git.Tfs.Commands
                 return new OptionSet
                 {
                     { "r|remotes", "Display the TFS branches of the current TFS root branch existing on the TFS server", v => DisplayRemotes = (v != null) },
+                    { "a|all", "Display the TFS branches of all the root branches existing on the TFS server", v => DisplayAllRootRemotes = (v != null) },
                     { "c|create", "Create a TFS branch", v => ShouldCreateRemote = (v != null) },
                     { "comment=", "Comment used for the creation of the TFS branch ", v => Comment = v },
                     { "m|move", "Rename a TFS remote", v => ShouldRenameRemote = (v != null) },
@@ -132,11 +134,29 @@ namespace Sep.Git.Tfs.Commands
             var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
             if (DisplayRemotes)
             {
-                var remote = globals.Repository.ReadTfsRemote(remoteId);
+                if (!DisplayAllRootRemotes)
+                {
+                    var remote = globals.Repository.ReadTfsRemote(remoteId);
 
-                stdout.WriteLine("\nTFS branch structure:");
-                WriteRemoteTfsBranchStructure(remote.Tfs, stdout, remote.TfsRepositoryPath, tfsRemotes);
-                return GitTfsExitCodes.OK;
+                    stdout.WriteLine("\nTFS branch structure:");
+                    WriteRemoteTfsBranchStructure(remote.Tfs, stdout, remote.TfsRepositoryPath, tfsRemotes);
+                    return GitTfsExitCodes.OK;
+                }
+                else
+                {
+                    var remote = tfsRemotes.First(r => r.Id == remoteId);
+                    if (!remote.Tfs.CanGetBranchInformation)
+                    {
+                        throw new GitTfsException("error: this version of TFS doesn't support this functionality");
+                    }
+                    foreach (var branch in remote.Tfs.GetBranches().Where(b=>b.IsRoot))
+                    {
+                        var root = remote.Tfs.GetRootTfsBranchForRemotePath(branch.Path);
+                        var visitor = new WriteBranchStructureTreeVisitor(remote.TfsRepositoryPath, stdout, tfsRemotes);
+                        root.AcceptVisitor(visitor);
+                    }
+                    return GitTfsExitCodes.OK;
+                }
             }
 
             WriteTfsRemoteDetails(stdout, tfsRemotes);
