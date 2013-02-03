@@ -11,7 +11,7 @@ using StructureMap;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("branch")]
-    [Description("branch")]
+    [Description("branch\n       git tfs branch -r\n       git tfs branch -r -all\n       git tfs branch $/Repository/ProjectBranchToCreate <myWishedRemoteName>\n       git tfs branch --move oldTfsRemoteName newTfsRemoteName\n       git tfs branch --delete tfsRemoteName\n")]
     [RequiresValidGitRepository]
     public class Branch : GitTfsCommand
     {
