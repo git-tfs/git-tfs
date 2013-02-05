@@ -590,5 +590,11 @@ namespace Sep.Git.Tfs.VsCommon
             });
         }
 
+        public virtual void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)
+        {
+            throw new NotImplementedException();
+            
+        }
+
     }
 }

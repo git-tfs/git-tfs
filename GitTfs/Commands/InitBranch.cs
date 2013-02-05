@@ -26,14 +26,14 @@ namespace Sep.Git.Tfs.Commands
         public string TfsPassword { get; set; }
         public string ParentBranch { get; set; }
         public bool CloneAllBranches { get; set; }
-        string AuthorsFilePath { get; set; }
+        public string AuthorsFilePath { get; set; }
 
         public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
         {
-            this._stdout = stdout;
-            this._globals = globals;
-            this._helper = helper;
-            this._authors = authors;
+            _stdout = stdout;
+            _globals = globals;
+            _helper = helper;
+            _authors = authors;
         }
 
         public OptionSet OptionSet
@@ -87,7 +87,7 @@ namespace Sep.Git.Tfs.Commands
             if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
                throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
 
-            var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path);
+            var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path).ToList();
 
             _stdout.WriteLine("Tfs branches found:");
             foreach (var tfsBranchPath in childBranchPaths)

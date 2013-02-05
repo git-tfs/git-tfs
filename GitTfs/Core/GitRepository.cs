@@ -8,6 +8,7 @@ using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 using LibGit2Sharp;
+using Branch = LibGit2Sharp.Branch;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -136,6 +137,59 @@ namespace Sep.Git.Tfs.Core
             return _cachedRemotes[remote.Id] = gitTfsRemote;
         }
 
+        public void DeleteTfsRemote(IGitTfsRemote remote)
+        {
+            if (remote == null)
+                throw new GitTfsException("error: the name of the remote to delete is invalid!");
+
+            UnsetTfsRemoteConfig(remote.Id);
+            _repository.Refs.Remove(remote.RemoteRef);
+        }
+
+        private void UnsetTfsRemoteConfig(string remoteId)
+        {
+            foreach (var entry in _remoteConfigReader.Delete(remoteId))
+            {
+                _repository.Config.Unset(entry.Key);
+            }
+            _cachedRemotes = null;
+        }
+
+        public void MoveRemote(string oldRemoteName, string newRemoteName)
+        {
+            if (!_repository.Refs.IsValidName("refs/heads/" + oldRemoteName))
+                throw new GitTfsException("error: the name of the remote to move is invalid!");
+
+            if (!_repository.Refs.IsValidName("refs/heads/" + newRemoteName))
+                throw new GitTfsException("error: the new name of the remote is invalid!");
+
+            if (HasRemote(newRemoteName))
+                throw new GitTfsException(string.Format("error: this remote name \"{0}\" is already used!", newRemoteName));
+
+            var oldRemote = ReadTfsRemote(oldRemoteName);
+            if(oldRemote == null)
+                throw new GitTfsException(string.Format("error: the remote \"{0}\" doesn't exist!", oldRemoteName));
+
+            var remoteInfo = oldRemote.RemoteInfo;
+            remoteInfo.Id = newRemoteName;
+
+            CreateTfsRemote(remoteInfo);
+            var newRemote = ReadTfsRemote(newRemoteName);
+
+            _repository.Refs.Move(oldRemote.RemoteRef, newRemote.RemoteRef);
+            UnsetTfsRemoteConfig(oldRemoteName);
+        }
+
+        public Branch RenameBranch(string oldName, string newName)
+        {
+            var branch = _repository.Branches[oldName];
+
+            if (branch == null)
+                return null;
+
+            return _repository.Branches.Move(branch, newName);
+        }
+
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
         {
             // does this need to ensuretfsauthenticated?
@@ -204,6 +258,12 @@ namespace Sep.Git.Tfs.Core
                 Trace.WriteLine("An error occurred while loading head " + head + " (maybe it doesn't exist?): " + e);
             }
             return tfsCommits;
+        }
+
+        public TfsChangesetInfo GetCurrentTfsCommit()
+        {
+            var currentCommit = _repository.Head.Commits.First();
+            return TryParseChangesetInfo(currentCommit.Message, currentCommit.Sha, false);
         }
 
         private void FindTfsCommits(TextReader stdout, ICollection<TfsChangesetInfo> tfsCommits, bool includeStubRemotes)

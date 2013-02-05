@@ -36,7 +36,7 @@ namespace Sep.Git.Tfs.Core
                         remote.Autotag = bool.Parse(entry.Value);
                 }
             }
-            return remotes.Values;
+            return remotes.Values.Where(r => !string.IsNullOrWhiteSpace(r.Url) && !string.IsNullOrWhiteSpace(r.Repository));
         }
 
         public IEnumerable<KeyValuePair<string, string>> Dump(RemoteInfo remote)
@@ -57,6 +57,14 @@ namespace Sep.Git.Tfs.Core
         private KeyValuePair<string, string> c(string key, string value)
         {
             return new KeyValuePair<string, string>(key, value);
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> Delete(string remoteId)
+        {
+            if (string.IsNullOrWhiteSpace(remoteId))
+                return new List<KeyValuePair<string, string>>();
+
+            return Dump(new RemoteInfo {Id = remoteId});
         }
     }
 }

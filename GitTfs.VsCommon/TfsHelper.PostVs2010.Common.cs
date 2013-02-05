@@ -119,6 +119,19 @@ namespace Sep.Git.Tfs.VsCommon
                                 merge.SourceItem.ChangeType + "': https://github.com/git-tfs/git-tfs/issues"
                             });
         }
+
+        public override void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)
+        {
+            var changesetToBranch = new ChangesetVersionSpec(changesetId);
+            int branchChangesetId = VersionControl.CreateBranch(sourcePath, targetPath, changesetToBranch);
+
+            if (comment != null)
+            {
+                Changeset changeset = VersionControl.GetChangeset(branchChangesetId);
+                changeset.Comment = comment;
+                changeset.Update();
+            }
+        }
     }
 
 }
