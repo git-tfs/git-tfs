@@ -8,6 +8,7 @@ namespace Sep.Git.Tfs.Core
     public interface IGitTfsRemote
     {
         bool IsDerived { get; }
+        RemoteInfo RemoteInfo { get; }
         string Id { get; set; }
         string TfsUrl { get; set; }
         string TfsRepositoryPath { get; set; }

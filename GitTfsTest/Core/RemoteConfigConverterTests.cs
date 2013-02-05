@@ -134,6 +134,24 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal(new string[] { "http://old:8080/", "http://other/" }, remote.Aliases);
                 Assert.True(remote.Autotag);
             }
+
+
+            [Fact]
+            public void ShouldNotReturnLackingTfsUrlRemote()
+            {
+                var remotes = Load(
+                    c("tfs-remote.default.repository", "$/project"));
+                Assert.Equal(0, remotes.Count());
+            }
+
+            [Fact]
+            public void ShouldNotReturnLackingTfsRepositoryRemote()
+            {
+                var remotes = Load(
+                    c("tfs-remote.default.url", "http://server/path"));
+                Assert.Equal(0, remotes.Count());
+            }
+
         }
 
         RemoteConfigConverter _converter = new RemoteConfigConverter();

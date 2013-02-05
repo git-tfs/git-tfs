@@ -233,5 +233,11 @@ namespace Sep.Git.Tfs.Core
         }
 
         #endregion
+
+
+        public RemoteInfo RemoteInfo
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

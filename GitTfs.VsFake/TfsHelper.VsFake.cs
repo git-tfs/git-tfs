@@ -366,6 +366,11 @@ namespace Sep.Git.Tfs.VsFake
         {
             throw new NotImplementedException();
         }
+
+        public void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }

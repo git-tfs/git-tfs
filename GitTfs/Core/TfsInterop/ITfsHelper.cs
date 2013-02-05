@@ -32,5 +32,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation();
         IEnumerable<IBranchObject> GetBranches();
         void EnsureAuthenticated();
+        void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
     }
 }
