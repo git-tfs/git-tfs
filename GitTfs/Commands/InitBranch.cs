@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -27,6 +28,7 @@ namespace Sep.Git.Tfs.Commands
         public string ParentBranch { get; set; }
         public bool CloneAllBranches { get; set; }
         public string AuthorsFilePath { get; set; }
+        public bool ShouldBeInteractive { get; set; }
 
         public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
         {
@@ -44,6 +46,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "all", "Clone all the TFS branches (For TFS 2010 and later)", v => CloneAllBranches = (v.ToLower() == "all") },
                     { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
+                    { "interactive", "Run command in interactive mode", v => ShouldBeInteractive = (v != null) },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
@@ -51,8 +54,45 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
+        private string GetBranchNames(string tfsRepositoryPath)
+        {
+            var expectedBranchName = ExtractGitBranchNameFromTfsRepositoryPath(tfsRepositoryPath);
+            string expectedName;
+            bool firstTime = true;
+            do
+            {
+                if (!firstTime)
+                    Console.WriteLine("Wrong branch name! Choose another one...");
+                else
+                    firstTime = false;
+                Console.Write("Git remote name for tfs path " + tfsRepositoryPath + "(" + expectedBranchName + ")?");
+                expectedName = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(expectedName))
+                {
+                    return expectedBranchName;
+                }
+                expectedName = expectedName.Trim();
+            } while (!_globals.Repository.IsValidBranchName(expectedName));
+
+            return expectedName;
+        }
+
+        private Dictionary<string, string> GetBranchNames(IEnumerable<string> tfsRepositoryPathes)
+        {
+            var tmp = new Dictionary<string, string>(tfsRepositoryPathes.Count());
+            foreach (var tfsRepositoryPath in tfsRepositoryPathes)
+            {
+                tmp.Add(tfsRepositoryPath, GetBranchNames(tfsRepositoryPath));
+            }
+            return tmp;
+        }
+
         public int Run(string tfsBranchPath)
         {
+            if (ShouldBeInteractive)
+            {
+                return Run(tfsBranchPath, GetBranchNames(tfsBranchPath));
+            }
             return Run(tfsBranchPath, null);
         }
 
