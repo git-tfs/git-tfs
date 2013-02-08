@@ -117,6 +117,8 @@ namespace Sep.Git.Tfs.Commands
                 return GitTfsExitCodes.Help;
             }
 
+            Console.WriteLine("Loading datas...");
+
             var defaultRemote = InitFromDefaultRemote();
 
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
@@ -130,14 +132,38 @@ namespace Sep.Git.Tfs.Commands
             var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path).ToList();
 
             _stdout.WriteLine("Tfs branches found:");
+            //TODO : filter branches of already fetched ones!
             foreach (var tfsBranchPath in childBranchPaths)
             {
                 _stdout.WriteLine("- " + tfsBranchPath);
             }
 
+            Dictionary<string, string> branchesWithExpectedNames = null;
+            if (ShouldBeInteractive)
+            {
+                while (true)
+                {
+                    branchesWithExpectedNames = GetBranchNames(childBranchPaths);
+                    //TODO : control branch name integrity!!! and already 
+                    Console.WriteLine("Names that will be used for the tfs branches :");
+                    foreach (var tfsBranchPath in branchesWithExpectedNames.Keys)
+                    {
+                        _stdout.WriteLine("- " + tfsBranchPath + " => " + branchesWithExpectedNames[tfsBranchPath]);
+                    }
+                    Console.Write("Are name ok?(Yes/No/Quit)");
+                    var answer = (string.Empty + Console.ReadLine()).ToLower();
+                    if (answer == "q") return GitTfsExitCodes.OK;
+                    if (answer == "y") break;
+                }
+            }
+
             foreach (var tfsBranchPath in childBranchPaths)
             {
-                var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
+                int result;
+                if (ShouldBeInteractive)
+                    result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes, branchesWithExpectedNames[tfsBranchPath]);
+                else
+                    result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
                 if (result < 0)
                     return result;
             }
@@ -185,7 +211,8 @@ namespace Sep.Git.Tfs.Commands
                 gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(gitBranchNameExpected);
             else
                 gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(tfsRepositoryPath);
-            if(string.IsNullOrWhiteSpace(gitBranchName))
+            _stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
+            if (string.IsNullOrWhiteSpace(gitBranchName))
                 throw new GitTfsException("error: The Git branch name '" + gitBranchName + "' is not valid...\n");
             Trace.WriteLine("Git local branch will be :" + gitBranchName);
 
@@ -243,7 +270,6 @@ namespace Sep.Git.Tfs.Commands
             }
             gitBranchNameExpected = gitBranchNameExpected.ToGitRefName();
             var gitBranchName = _globals.Repository.AssertValidBranchName(gitBranchNameExpected);
-            _stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
             return gitBranchName;
         }
     }
