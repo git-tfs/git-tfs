@@ -18,6 +18,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly TfsWriter _writer;
 
         private bool Quick { get; set; }
+        private bool AutoRebase { get; set; }
 
         public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
         {
@@ -35,6 +36,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "no-rebase|quick", "omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
                         v => Quick = v != null },
+                    { "a|autorebase", "continue and rebase if new TFS changesets found", v => AutoRebase = v!=null},
                 }.Merge(_checkinOptions.OptionSet);
             }
         }
@@ -61,8 +63,15 @@ namespace Sep.Git.Tfs.Commands
             parentChangeset.Remote.Fetch();
             if (parentChangeset.ChangesetId != parentChangeset.Remote.MaxChangesetId)
             {
-                throw new GitTfsException("error: New TFS changesets were found.")
-                    .WithRecommendation("Try to rebase HEAD onto latest TFS checkin and repeat rcheckin or alternatively checkin s");
+                if (AutoRebase)
+                {
+                    tfsRemote.Repository.CommandNoisy("rebase", "--preserve-merges", tfsRemote.RemoteRef);
+                }
+                else
+                {
+                    throw new GitTfsException("error: New TFS changesets were found.")
+                        .WithRecommendation("Try to rebase HEAD onto latest TFS checkin and repeat rcheckin or alternatively checkin s");
+                }
             }
 
             string tfsLatest = parentChangeset.Remote.MaxCommitHash;
@@ -92,7 +101,16 @@ namespace Sep.Git.Tfs.Commands
                     long newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions);
                     tfsRemote.FetchWithMerge(newChangesetId, gitParents);
                     if (tfsRemote.MaxChangesetId != newChangesetId)
-                        throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
+                    {
+                        if (AutoRebase)
+                        {
+                            tfsRemote.Repository.CommandNoisy("rebase", "--preserve-merges", tfsRemote.RemoteRef);
+                        }
+                        else
+                        {
+                            throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
+                        }
+                    }
 
                     currentParent = target;
                     parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote };
@@ -124,7 +142,16 @@ namespace Sep.Git.Tfs.Commands
                     long newChangesetId = tfsRemote.Checkin(target, parentChangeset, commitSpecificCheckinOptions);
                     tfsRemote.FetchWithMerge(newChangesetId, gitParents);
                     if (tfsRemote.MaxChangesetId != newChangesetId)
-                        throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
+                    {
+                        if (AutoRebase)
+                        {
+                            tfsRemote.Repository.CommandNoisy("rebase", "--preserve-merges", tfsRemote.RemoteRef);
+                        }
+                        else
+                        {
+                            throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
+                        }
+                    }
 
                     tfsLatest = tfsRemote.MaxCommitHash;
                     parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote };
