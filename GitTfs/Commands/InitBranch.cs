@@ -129,11 +129,14 @@ namespace Sep.Git.Tfs.Commands
             if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
                throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
 
-            var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path).ToList();
+            var childBranchPaths = rootBranch.GetAllChildren().Select(b => b.Path);
+            var childBranchPathsNotAlreadyFetched = childBranchPaths.Where(p => !allRemotes.Select(r => r.TfsRepositoryPath.ToLower()).Contains(p.ToLower())).ToList();
 
-            _stdout.WriteLine("Tfs branches found:");
-            //TODO : filter branches of already fetched ones!
-            foreach (var tfsBranchPath in childBranchPaths)
+            if (!childBranchPathsNotAlreadyFetched.Any())
+                throw new GitTfsException("error: no new tfs branches to init!");
+
+            _stdout.WriteLine("New Tfs branches found:");
+            foreach (var tfsBranchPath in childBranchPathsNotAlreadyFetched)
             {
                 _stdout.WriteLine("- " + tfsBranchPath);
             }
@@ -143,8 +146,8 @@ namespace Sep.Git.Tfs.Commands
             {
                 while (true)
                 {
-                    branchesWithExpectedNames = GetBranchNames(childBranchPaths);
-                    //TODO : control branch name integrity!!! and already 
+                    branchesWithExpectedNames = GetBranchNames(childBranchPathsNotAlreadyFetched);
+                    //TODO : control branch name integrity!!! and already used
                     Console.WriteLine("Names that will be used for the tfs branches :");
                     foreach (var tfsBranchPath in branchesWithExpectedNames.Keys)
                     {
@@ -157,7 +160,7 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
 
-            foreach (var tfsBranchPath in childBranchPaths)
+            foreach (var tfsBranchPath in childBranchPathsNotAlreadyFetched)
             {
                 int result;
                 if (ShouldBeInteractive)
