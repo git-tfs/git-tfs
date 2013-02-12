@@ -65,7 +65,7 @@ namespace Sep.Git.Tfs.Commands
                     Console.WriteLine("Wrong branch name! Choose another one...");
                 else
                     firstTime = false;
-                Console.Write("Git remote name for tfs path " + tfsRepositoryPath + "(" + expectedBranchName + ")?");
+                Console.Write("Git remote name for tfs path " + tfsRepositoryPath + " (" + expectedBranchName + ")?");
                 expectedName = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(expectedName))
                 {
@@ -147,7 +147,8 @@ namespace Sep.Git.Tfs.Commands
                 while (true)
                 {
                     branchesWithExpectedNames = GetBranchNames(childBranchPathsNotAlreadyFetched);
-                    //TODO : control branch name integrity!!! and already used
+                    if (!ControlBranchNaming(branchesWithExpectedNames, allRemotes))
+                        continue;
                     Console.WriteLine("Names that will be used for the tfs branches :");
                     foreach (var tfsBranchPath in branchesWithExpectedNames.Keys)
                     {
@@ -171,6 +172,26 @@ namespace Sep.Git.Tfs.Commands
                     return result;
             }
             return GitTfsExitCodes.OK;
+        }
+
+        private bool ControlBranchNaming(Dictionary<string, string> branchesWithExpectedNames, IEnumerable<IGitTfsRemote> allRemotes)
+        {
+            var branchesNames = branchesWithExpectedNames.Values.Select(b => b.ToLower());
+            var duplicates = branchesNames.GroupBy(b => b).Where(g => g.Count() > 1).Select(g => g.Key);
+            if (duplicates.Any())
+            {
+                Console.WriteLine("Some name(s) you choose are duplicates: " + duplicates.Aggregate((d1, d2) => d1 + ", " + d2));
+                return false;
+            }
+            var remotes = allRemotes.Select(r => r.Id.ToLower());
+            var conflicts = branchesNames.Where(b => remotes.Contains(b));
+            if (conflicts.Any())
+            {
+                Console.WriteLine("Some name(s) you choose are already used in existing remotes: " + conflicts.Aggregate((c1, c2) => c1 + ", " + c2));
+                return false;
+            }
+
+            return true;
         }
 
         private IGitTfsRemote InitFromDefaultRemote()
