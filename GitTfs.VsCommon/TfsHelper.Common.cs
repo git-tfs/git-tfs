@@ -125,7 +125,47 @@ namespace Sep.Git.Tfs.VsCommon
 
         public virtual int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
         {
-            throw new NotImplementedException();
+            Trace.WriteLine("TFS 2008 Compatible mode!");
+            int firstChangesetIdOfParentBranch = 1;
+
+            if (string.IsNullOrWhiteSpace(tfsPathParentBranch))
+                throw new GitTfsException("This version of TFS Server doesn't permit to use this command :(\nTry using option '--parent-branch'...");
+
+            var changesetIdsFirstChangesetInMainBranch = VersionControl.GetMergeCandidates(tfsPathParentBranch, tfsPathBranchToCreate, RecursionType.Full).Select(c => c.Changeset.ChangesetId).FirstOrDefault();
+
+            if (changesetIdsFirstChangesetInMainBranch == 0)
+            {
+                Trace.WriteLine("No changeset in main branch since branch done... (need only to find the last changeset in the main branch)");
+                return VersionControl.QueryHistory(tfsPathParentBranch, VersionSpec.Latest, 0,
+                        RecursionType.Full, null, new ChangesetVersionSpec(firstChangesetIdOfParentBranch), VersionSpec.Latest,
+                        1, false, false).Cast<Changeset>().First().ChangesetId;
+            }
+
+            Trace.WriteLine("First changeset in the main branch after branching : " + changesetIdsFirstChangesetInMainBranch);
+
+            Trace.WriteLine("Try to find the previous changeset...");
+            int step = 100;
+            int upperBound = changesetIdsFirstChangesetInMainBranch - 1;
+            int lowerBound = Math.Max(upperBound - step, 1);
+            //for optimization, retrieve the lesser possible changesets... so 100 by 100
+            while (true)
+            {
+                Trace.WriteLine("Looking for the changeset between changeset id " + lowerBound + " and " + upperBound);
+                var firstBranchChangesetIds = VersionControl.QueryHistory(tfsPathParentBranch, VersionSpec.Latest, 0, RecursionType.Full,
+                                null, new ChangesetVersionSpec(lowerBound), new ChangesetVersionSpec(upperBound), int.MaxValue, true,
+                                false, false).Cast<Changeset>().Select(c => c.ChangesetId).ToList();
+                if (firstBranchChangesetIds.Count != 0)
+                    return firstBranchChangesetIds.First(cId => cId < changesetIdsFirstChangesetInMainBranch);
+                else
+                {
+                    if (upperBound == 1)
+                    {
+                        throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find a previous changeset to changeset n°" + changesetIdsFirstChangesetInMainBranch + " in the branch!!!");
+                    }
+                    upperBound = Math.Max(upperBound - step, 1);
+                    lowerBound = Math.Max(upperBound - step, 1);
+                }
+            }
         }
 
         private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
