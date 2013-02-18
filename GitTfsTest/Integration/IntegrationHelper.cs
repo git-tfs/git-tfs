@@ -152,6 +152,18 @@ namespace Sep.Git.Tfs.Test.Integration
                 });
                 return this;
             }
+
+            public FakeChangesetBuilder Rename(TfsItemType itemType, string from, string to)
+            {
+                _changeset.Changes.Add(new ScriptedChange
+                {
+                    ChangeType = TfsChangeType.Rename,
+                    ItemType = itemType,
+                    RepositoryPath = to,
+                    RenamedFrom = from,
+                });
+                return this;
+            }
         }
 
         #endregion

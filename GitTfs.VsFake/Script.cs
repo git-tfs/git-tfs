@@ -53,6 +53,7 @@ namespace Sep.Git.Tfs.VsFake
         public TfsChangeType ChangeType { get; set; }
         public TfsItemType ItemType { get; set; }
         public string RepositoryPath { get; set; }
+        public string RenamedFrom { get; set; }
         public string Content { get; set; }
     }
 }
