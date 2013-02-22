@@ -276,15 +276,16 @@ namespace Sep.Git.Tfs.Core
                 var match = GitTfsConstants.CommitRegex.Match(line);
                 if (match.Success)
                 {
-                    if (lastChangesetInfo != null && currentCommit != null)
+                    if (lastChangesetInfo != null)
                     {
                         tfsCommits.Add(lastChangesetInfo);
-                        currentCommit = null;
                         lastChangesetInfo = null;
                     }
+
                     currentCommit = match.Groups[1].Value;
                     continue;
                 }
+
                 var changesetInfo = TryParseChangesetInfo(line, currentCommit, includeStubRemotes);
                 if (changesetInfo != null)
                 {
@@ -294,7 +295,7 @@ namespace Sep.Git.Tfs.Core
 
             // Add the final changesetinfo object; it won't be handled in the loop
             // if it was part of the last commit message.
-            if (lastChangesetInfo != null && currentCommit != null)
+            if (lastChangesetInfo != null)
                 tfsCommits.Add(lastChangesetInfo);
 
             //stdout.Close();
