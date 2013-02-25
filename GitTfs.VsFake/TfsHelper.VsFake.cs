@@ -25,7 +25,8 @@ namespace Sep.Git.Tfs.VsFake
             _container = container;
             _stdout = stdout;
             _script = script;
-            InitializeItemIds();
+            if(_script != null)
+                InitializeItemIds();
         }
 
         public string TfsClientLibraryVersion { get { return "(FAKE)"; } }
@@ -396,12 +397,12 @@ namespace Sep.Git.Tfs.VsFake
             var current = new IdMap();
             foreach (var changeset in _script.Changesets)
             {
-                current.Unchanged();
                 foreach (var change in changeset.Changes)
                 {
                     current.Update(change);
                 }
-                _itemIds.Add(changeset.Id, current.Clone());
+                _itemIds.Add(changeset.Id, current);
+                current = new IdMap(current);
             }
         }
 
@@ -409,21 +410,17 @@ namespace Sep.Git.Tfs.VsFake
         {
             static int lastItemId = 0;
 
+            IdMap previousMap;
             Dictionary<int, string> idToPath = new Dictionary<int, string>();
             Dictionary<string, int> pathToId = new Dictionary<string, int>();
-            List<int> changedItems = new List<int>();
 
             public int this[ScriptedChange change] { get { return this[change.RepositoryPath]; } }
-            public int this[string path] { get { return pathToId[path]; } }
-            public string this[int id] { get { return idToPath[id]; } }
-            //public IEnumerable<string> ChangedPaths { get
+            public int this[string path] { get { return pathToId.ContainsKey(path) ? pathToId[path] : previousMap[path]; } }
+            public string this[int id] { get { return idToPath.ContainsKey(id) ? idToPath[id] : previousMap[id]; } }
 
-            /// <summary>
-            /// Resets all the change indicators.
-            /// </summary>
-            public void Unchanged()
+            public IdMap(IdMap previousMap = null)
             {
-                changedItems = new List<int>();
+                this.previousMap = previousMap;
             }
 
             /// <summary>
@@ -437,31 +434,24 @@ namespace Sep.Git.Tfs.VsFake
                     var id = ++lastItemId;
                     pathToId.Add(change.RepositoryPath, id);
                     idToPath.Add(id, change.RepositoryPath);
-                    changedItems.Add(id);
                 }
                 else if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
                 {
-                    var renamedItemId = pathToId[change.RenamedFrom];
-                    pathToId.Remove(change.RenamedFrom);
+                    var renamedItemId = previousMap[change.RenamedFrom];
                     pathToId.Add(change.RepositoryPath, renamedItemId);
-                    changedItems.Add(renamedItemId);
+                    idToPath.Add(renamedItemId, change.RepositoryPath);
                 }
                 else if (change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
                 {
-                    var deletedItemId = pathToId[change.RepositoryPath];
-                    pathToId.Remove(change.RepositoryPath);
-                    idToPath.Remove(deletedItemId);
-                    changedItems.Add(deletedItemId);
+                    // Do nothing.
+                    // This isn't strictly "correct", but it is good enough for the tests.
                 }
             }
 
-            public IdMap Clone()
+            public string Inspect()
             {
-                var clone = new IdMap();
-                clone.idToPath = new Dictionary<int, string>(idToPath);
-                clone.pathToId = new Dictionary<string, int>(pathToId);
-                clone.changedItems = new List<int>(changedItems);
-                return clone;
+                var s = idToPath.Select(x => String.Format("{0} - {1}\n", x.Key, x.Value)).Aggregate("", (s1, s2) => s1 + s2);
+                return (previousMap == null ? "" : previousMap.Inspect() + "^^^^\n") + s;
             }
         }
 
