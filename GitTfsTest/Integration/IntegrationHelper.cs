@@ -276,6 +276,53 @@ namespace Sep.Git.Tfs.Test.Integration
             AssertEqual(contents, actual, "Contents of " + path);
         }
 
+        public void AssertTreeEntries(string repodir, string[] files)
+        {
+            AssertTreeEntries(repodir, "HEAD", files);
+        }
+
+        public void AssertTreeEntries(string repodir, string gitref, string[] files)
+        {
+            var entries = ReadAllTreeEntries(repodir, gitref).OrderBy(s => s).ToArray();
+            Assert.Equal(files, entries);
+        }
+
+        private IEnumerable<string> ReadAllTreeEntries(string repodir, string gitref)
+        {
+            var trees = new Queue<Tuple<string, Tree>>();
+            trees.Enqueue(Tuple.Create("", GetTree(repodir, gitref)));
+            while (trees.Any())
+            {
+                var info = trees.Dequeue();
+                var prefix = info.Item1;
+                var tree = info.Item2;
+                foreach (var entry in tree)
+                {
+                    var path = prefix + entry.Name;
+                    switch (entry.Type)
+                    {
+                        case LibGit2Sharp.GitObjectType.Blob:
+                            yield return path;
+                            break;
+                        case LibGit2Sharp.GitObjectType.Tree:
+                            trees.Enqueue(Tuple.Create(path + "/", (Tree)entry.Target));
+                            break;
+                    }
+                }
+            }
+        }
+
+        private Tree GetTree(string repodir, string treeish)
+        {
+            var repository = Repository(repodir);
+            var obj = repository.Lookup(treeish);
+            if(obj is Tree)
+                return (Tree) obj;
+            if(obj is Commit)
+                return ((Commit)obj).Tree;
+            return null;
+        }
+
         public void AssertCommitMessage(string repodir, string commitish, string message)
         {
             var commit = Repository(repodir).Lookup<Commit>(commitish);
