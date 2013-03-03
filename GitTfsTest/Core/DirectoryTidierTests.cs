@@ -113,13 +113,33 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         [Fact]
-        public void MovingAFileOutRemovesAllEmptyParents()
+        //TFS don't permit to delete an empty directory when the directory was emptied by moving outside a file (i.e. renaming)
+        //Until the changeset is done, tfs consider the file still belongs to the folder :( 
+        public void MovingAFileOutDontRemovesAllEmptyParents()
         {
             mockWorkspace.Expect(x => x.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant));
-            mockWorkspace.Expect(x => x.Delete("dir1/dir2/dir3"));
-            mockWorkspace.Expect(x => x.Delete("dir1/dir2"));
-            mockWorkspace.Expect(x => x.Delete("dir1"));
             Tidy.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant);
+            Tidy.Dispose();
+            mockWorkspace.Replay();
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dir1/dir2/dir3"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dir1/dir2"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dir1"));
+        }
+
+        [Fact]
+        //TFS don't permit to delete an empty directory when the directory was emptied by moving outside a file (i.e. renaming)
+        //Until the changeset is done, tfs consider the file still belongs to the folder :( 
+        public void MovingAFileOutLeavesAllEmptyParentsEvenIfLastFileDeleted()
+        {
+            mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file1.txt", "otherdir/otherdir2/newName1.txt", ScoreIsIrrelevant));
+            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
+            Tidy.Rename("topDir/midDir/bottomDir/file1.txt", "otherdir/otherdir2/newName1.txt", ScoreIsIrrelevant);
+            Tidy.Delete("topDir/midDir/bottomDir/file2.txt");
+            Tidy.Dispose();
+            mockWorkspace.Replay();
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("topDir/midDir/bottomDir"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("topDir/midDir"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("topDir"));
         }
 
         [Fact]
