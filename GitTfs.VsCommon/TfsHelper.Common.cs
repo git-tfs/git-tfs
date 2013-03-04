@@ -220,23 +220,23 @@ namespace Sep.Git.Tfs.VsCommon
             Workspace workspace = null;
             try
             {
-               workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
-               workspace.CreateMapping(new WorkingFolder(repositoryPath, localDirectory));
-               return workspace;
+                workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
+                workspace.CreateMapping(new WorkingFolder(repositoryPath, localDirectory));
+                return workspace;
             }
             catch (MappingConflictException e)
             {
-               if (workspace != null) workspace.Delete();
-               throw new GitTfsException(e.Message, new[] { "Run 'git tfs cleanup-workspaces' to remove the workspace." }, e);
+                if (workspace != null) workspace.Delete();
+                throw new GitTfsException(e.Message, new[] { "Run 'git tfs cleanup-workspaces' to remove the workspace." }, e);
             }
             catch
             {
-               if (workspace != null) workspace.Delete();
-               throw;
+                if (workspace != null) workspace.Delete();
+                throw;
             }
         }
 
-       private string GenerateWorkspaceName()
+        private string GenerateWorkspaceName()
         {
             return "git-tfs-" + Guid.NewGuid();
         }
