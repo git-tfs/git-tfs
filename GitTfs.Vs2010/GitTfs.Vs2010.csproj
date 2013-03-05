@@ -104,6 +104,9 @@
     <Compile Include="..\GitTfs.VsCommon\Wrappers.cs">
       <Link>Wrappers.cs</Link>
     </Compile>
+    <Compile Include="..\GitTfs.VsCommon\Wrappers.PostVs2010.cs">
+      <Link>Wrappers.PostVs2010.cs</Link>
+    </Compile>
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>

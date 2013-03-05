@@ -5,11 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using LibGit2Sharp;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsFake;
 using Xunit;
 using Xunit.Sdk;
+using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
@@ -34,6 +36,12 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public void Dispose()
         {
+            while (!_repositories.Empty())
+            {
+                var repo = _repositories.First();
+                repo.Value.Dispose();
+                _repositories.Remove(repo.Key);
+            }
             if (_workdir != null)
             {
                 try
@@ -44,6 +52,48 @@ namespace Sep.Git.Tfs.Test.Integration
                 catch (Exception e)
                 {
                 }
+            }
+        }
+
+        private Dictionary<string, Repository> _repositories = new Dictionary<string,Repository>();
+        public Repository Repository(string path)
+        {
+            path = Path.Combine(Workdir, path);
+            if (!_repositories.ContainsKey(path))
+                _repositories.Add(path, new Repository(path));
+            return _repositories[path];
+        }
+
+        #endregion
+
+        #region set up a git repository
+
+        public void SetConfig<T>(string repodir, string key, T value)
+        {
+            Repository(repodir).Config.Set(key, value);
+        }
+
+        public void SetupGitRepo(string path, Action<RepoBuilder> buildIt)
+        {
+            using (var repo = LibGit2Sharp.Repository.Init(Path.Combine(Workdir, path)))
+                buildIt(new RepoBuilder(repo));
+        }
+
+        public class RepoBuilder
+        {
+            private Repository _repo;
+
+            public RepoBuilder(Repository repo)
+            {
+                _repo = repo;
+            }
+
+            public string Commit(string message)
+            {
+                File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
+                _repo.Index.Stage("README.txt");
+                var committer = new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
+                return _repo.Commit(message, committer, committer).Id.Sha;
             }
         }
 
@@ -71,7 +121,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             public FakeChangesetBuilder Changeset(int changesetId, string message, DateTime checkinDate)
             {
-                var changeset =new ScriptedChangeset
+                var changeset = new ScriptedChangeset
                 {
                     Id = changesetId,
                     Comment = message,
@@ -110,22 +160,46 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public string TfsUrl { get { return "http://does/not/matter"; } }
 
-        public void Run(params string[] args)
+        public int Run(params string[] args)
         {
-            var startInfo = new ProcessStartInfo();
-            startInfo.WorkingDirectory = Workdir;
-            startInfo.EnvironmentVariables["GIT_TFS_CLIENT"] = "Fake";
-            startInfo.EnvironmentVariables[Script.EnvVar] = FakeScript;
-            startInfo.EnvironmentVariables["Path"] = CurrentBuildPath + ";" + Environment.GetEnvironmentVariable("Path");
-            startInfo.FileName = "cmd";
-            startInfo.Arguments = "/c git tfs --debug " + String.Join(" ", args);
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardOutput = true;
-            Console.WriteLine("PATH: " + startInfo.EnvironmentVariables["Path"]);
-            Console.WriteLine(">> " + startInfo.FileName + " " + startInfo.Arguments);
-            var process = Process.Start(startInfo);
-            Console.Out.Write(process.StandardOutput.ReadToEnd());
-            process.WaitForExit();
+            return RunIn(".", args);
+        }
+
+        public int RunIn(string workPath, params string[] args)
+        {
+            var origPwd = Environment.CurrentDirectory;
+            var origClient = Environment.GetEnvironmentVariable("GIT_TFS_CLIENT");
+            var origScript = Environment.GetEnvironmentVariable(Script.EnvVar);
+            try
+            {
+                Environment.CurrentDirectory = Path.Combine(Workdir, workPath);
+                Environment.SetEnvironmentVariable("GIT_TFS_CLIENT", "Fake");
+                Environment.SetEnvironmentVariable(Script.EnvVar, FakeScript);
+                Console.WriteLine(">> git tfs " + QuoteArgs(args));
+                var argsWithDebug = new List<string>();
+                argsWithDebug.Add("--debug");
+                argsWithDebug.AddRange(args);
+                return Program.MainCore(argsWithDebug.ToArray());
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("GIT_TFS_CLIENT", origClient);
+                Environment.SetEnvironmentVariable(Script.EnvVar, origScript);
+                Environment.CurrentDirectory = origPwd;
+            }
+        }
+
+        private string QuoteArgs(string[] args)
+        {
+            return string.Join(" ", args.Select(arg => QuoteArg(arg)).ToArray());
+        }
+
+        private string QuoteArg(string arg)
+        {
+            // This is not complete, but it is adequate for these tests.
+            if (arg.Contains(' '))
+                return '"' + arg + '"';
+            return arg;
         }
 
         private string CurrentBuildPath
@@ -137,9 +211,21 @@ namespace Sep.Git.Tfs.Test.Integration
             }
         }
 
+        public void ChangeConfigSetting(string repodir, string key, string value)
+        {
+            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
+            repo.Config.Set(key, value);
+        }
+
         #endregion
 
         #region assertions
+
+        public int GetCommitCount(string repodir)
+        {
+            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
+            return repo.Commits.Count();
+        }
 
         public void AssertGitRepo(string repodir)
         {
@@ -148,21 +234,21 @@ namespace Sep.Git.Tfs.Test.Integration
             Assert.True(Directory.Exists(Path.Combine(path, ".git")), path + " should have a .git dir inside of it");
         }
 
+        public void AssertNoRef(string repodir, string gitref)
+        {
+            AssertEqual(null, RevParse(repodir, gitref), "Expected no ref " + gitref);
+        }
+
         public void AssertRef(string repodir, string gitref, string expectedSha)
         {
+            Assert.NotNull(expectedSha);
             AssertEqual(expectedSha, RevParse(repodir, gitref), "Expected " + gitref + " to be " + expectedSha);
         }
 
         private string RevParse(string repodir, string gitref)
         {
-            // This really should delegate to libgit2, which isn't yet a part of GitTfs.
-            var gitpath = Path.Combine(Workdir, repodir, ".git");
-            var resolved = ReadIfPresent(Path.Combine(gitpath, gitref)) ??
-                ReadIfPresent(Path.Combine(gitpath, "refs", "heads", gitref)) ??
-                ReadIfPresent(Path.Combine(gitpath, "refs", "remotes", gitref));
-            if (resolved != null && resolved.StartsWith("ref:"))
-                return RevParse(repodir, resolved.Replace("ref:", "").Trim());
-            return resolved;
+            var parsed = Repository(repodir).Lookup<Commit>(gitref);
+            return parsed == null ? null : parsed.Sha;
         }
 
         private string ReadIfPresent(string path)
@@ -173,16 +259,13 @@ namespace Sep.Git.Tfs.Test.Integration
         public void AssertEmptyWorkspace(string repodir)
         {
             var entries = new List<string>(Directory.GetFileSystemEntries(Path.Combine(Workdir, repodir)));
-            entries.Remove(".");
-            entries.Remove("..");
-            entries.Remove(".git");
+            entries = entries.Where(f => Path.GetFileName(f) != ".git").ToList();
             AssertEqual(new List<string>(), entries, "entries in " + repodir);
         }
 
         public void AssertCleanWorkspace(string repodir)
         {
-            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
-            var status = repo.Index.RetrieveStatus();
+            var status = Repository(repodir).Index.RetrieveStatus();
             AssertEqual(new List<string>(), status.Select(statusEntry => "" + statusEntry.State + ": " + statusEntry.FilePath).ToList(), "repo status");
         }
 
@@ -191,6 +274,19 @@ namespace Sep.Git.Tfs.Test.Integration
             var path = Path.Combine(Workdir, repodir, file);
             var actual = File.ReadAllText(path, Encoding.UTF8);
             AssertEqual(contents, actual, "Contents of " + path);
+        }
+
+        public void AssertCommitMessage(string repodir, string commitish, string message)
+        {
+            var commit = Repository(repodir).Lookup<Commit>(commitish);
+            AssertEqual(message, commit.Message, "Commit message of " + commitish);
+        }
+
+        public void AssertConfig<T>(string repodir, string key, T expectedValue)
+        {
+            var config = Repository(repodir).Config.Get<T>(key);
+            Assert.NotNull(config);
+            Assert.Equal(expectedValue, config.Value);
         }
 
         private void AssertEqual<T>(T expected, T actual, string message)

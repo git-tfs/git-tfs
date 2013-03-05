@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -46,13 +47,6 @@ namespace Sep.Git.Tfs.VsCommon
         public abstract void EnsureAuthenticated();
 
         private string[] _legacyUrls;
-
-
-        public string[] LegacyUrls
-        {
-            get { return _legacyUrls ?? (_legacyUrls = new string[0]); }
-            set { _legacyUrls = value; }
-        }
 
         protected NetworkCredential GetCredential()
         {
@@ -108,19 +102,33 @@ namespace Sep.Git.Tfs.VsCommon
             get { return GetService<IGroupSecurityService>(); }
         }
 
+        private ILinking _linking;
+        private ILinking Linking
+        {
+            get { return _linking ?? (_linking = GetService<ILinking>()); }
+        }
+
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                                                          null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
                                                          true, true);
+
             return changesets.Cast<Changeset>()
                 .OrderBy(changeset => changeset.ChangesetId)
                 .Select(changeset => BuildTfsChangeset(changeset, remote));
         }
 
-        public virtual IEnumerable<string> GetAllTfsBranchesOrderedByCreation()
+        public virtual bool CanGetBranchInformation { get { return false; } }
+
+        public virtual IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
-            throw new GitTfsException("This version of TFS Server doesn't permit to use this command :(");
+            throw new NotImplementedException();
+        }
+
+        public virtual IEnumerable<IBranchObject> GetBranches()
+        {
+            throw new NotImplementedException();
         }
 
         public virtual int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
@@ -171,12 +179,25 @@ namespace Sep.Git.Tfs.VsCommon
         private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
         {
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
-            tfsChangeset.Summary = new TfsChangesetInfo {ChangesetId = changeset.ChangesetId, Remote = remote};
+            tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };
+
+            if (changeset.WorkItems != null)
+            {
+                tfsChangeset.Summary.Workitems = changeset.WorkItems.Select(wi => new TfsWorkitem
+                    {
+                        Id = wi.Id,
+                        Title = wi.Title,
+                        Description = wi.Description,
+                        Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
+                    });
+            }
+
             return tfsChangeset;
         }
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
+            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
             var workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath);
             try
             {
@@ -296,7 +317,7 @@ namespace Sep.Git.Tfs.VsCommon
                         shelvesets = shelvesets.OrderBy(s => s.CreationDate);
                         break;
                     case "owner":
-                        shelvesets = shelvesets.OrderBy(s => s.OwnerName);
+                        shelvesets = shelvesets.OrderBy(s => s.OwnerName).ThenBy(s => s.CreationDate);
                         break;
                     case "name":
                         shelvesets = shelvesets.OrderBy(s => s.Name);
@@ -309,6 +330,9 @@ namespace Sep.Git.Tfs.VsCommon
                         return GitTfsExitCodes.InvalidArguments;
                 }
             }
+            else
+                shelvesets = shelvesets.OrderBy(s => s.CreationDate);
+
             if (shelveList.FullFormat)
                 WriteShelvesetsToStdoutDetailed(shelvesets);
             else
@@ -320,7 +344,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             foreach (var shelveset in shelvesets)
             {
-                _stdout.WriteLine("  {0,-20} {1,-20}", shelveset.OwnerName, shelveset.Name);
+                _stdout.WriteLine("{0,-22} {1,-20}", shelveset.OwnerName, shelveset.Name);
             }
         }
 
@@ -537,11 +561,6 @@ namespace Sep.Git.Tfs.VsCommon
             return BuildTfsChangeset(VersionControl.GetChangeset(changesetId), remote);
         }
 
-        public bool MatchesUrl(string tfsUrl)
-        {
-            return Url == tfsUrl || LegacyUrls.Contains(tfsUrl);
-        }
-
         public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
         {
             return
@@ -595,5 +614,27 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return new WorkItemCheckedInfo(Convert.ToInt32(workitem), true, checkinAction);
         }
+
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
+        {
+            var labels = VersionControl.QueryLabels(nameFilter, tfsPathBranch, null, true, tfsPathBranch, VersionSpec.Latest);
+
+            return labels.Select(e => new TfsLabel {
+                Id = e.LabelId,
+                Name = e.Name,
+                Comment = e.Comment,
+                ChangesetId = e.Items.Where(i=>i.ServerItem.IndexOf(tfsPathBranch) == 0).OrderByDescending(i=>i.ChangesetId).First().ChangesetId,
+                Owner = e.OwnerName,
+                Date = e.LastModifiedDate,
+                IsTransBranch = (e.Items.FirstOrDefault(i => i.ServerItem.IndexOf(tfsPathBranch) != 0) != null)
+            });
+        }
+
+        public virtual void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)
+        {
+            throw new NotImplementedException();
+            
+        }
+
     }
 }

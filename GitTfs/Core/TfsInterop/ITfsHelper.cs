@@ -10,7 +10,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         string Url { get; set; }
         string Username { get; set; }
         string Password { get; set; }
-        string[] LegacyUrls { get; set; }
         IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
         IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);
@@ -21,7 +20,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         ITfsChangeset GetLatestChangeset(GitTfsRemote remote);
         ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote);
         IChangeset GetChangeset(int changesetId);
-        bool MatchesUrl(string tfsUrl);
         bool HasShelveset(string shelvesetName);
         ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName);
         int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote);
@@ -29,7 +27,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
         void CleanupWorkspaces(string workingDirectory);
         int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null);
-        IEnumerable<string> GetAllTfsBranchesOrderedByCreation();
+        IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null);
+        bool CanGetBranchInformation { get; }
+        IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation();
+        IEnumerable<IBranchObject> GetBranches();
         void EnsureAuthenticated();
+        void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
     }
 }

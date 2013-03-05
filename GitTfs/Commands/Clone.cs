@@ -8,27 +8,37 @@ using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 using Sep.Git.Tfs.Util;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("clone")]
-    [Description("clone [options] tfs-url-or-instance-name repository-path <git-repository-path>")]
+    [Description("clone [options] tfs-url-or-instance-name repository-path <git-repository-path>\n  ex : git tfs clone http://myTfsServer:8080/tfs/TfsRepository $/ProjectName/ProjectBranch\n")]
     public class Clone : GitTfsCommand
     {
         private readonly Fetch fetch;
         private readonly Init init;
         private readonly Globals globals;
+        private readonly InitBranch initBranch;
+        private bool withBranches;
+        private TextWriter stdout;
 
-        public Clone(Globals globals, Fetch fetch, Init init)
+        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout)
         {
             this.fetch = fetch;
             this.init = init;
             this.globals = globals;
+            this.initBranch = initBranch;
+            this.stdout = stdout;
         }
 
         public OptionSet OptionSet
         {
-            get { return init.OptionSet.Merge(fetch.OptionSet); }
+            get
+            {
+                return init.OptionSet.Merge(fetch.OptionSet)
+                           .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null);
+            }
         }
 
         public int Run(string tfsUrl, string tfsRepositoryPath)
@@ -41,12 +51,22 @@ namespace Sep.Git.Tfs.Commands
             var currentDir = Environment.CurrentDirectory;
             var repositoryDirCreated = InitGitDir(gitRepositoryPath);
 
+            // TFS string representations of repository paths do not end in trailing slashes
+            tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
+
             try
             {
-                var retVal = 0;
-                retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+                var retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+
+                VerifyTfsPathToClone(tfsRepositoryPath);
+
                 if (retVal == 0) retVal = fetch.Run();
-                if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadAllTfsRemotes().First().RemoteRef);
+                if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+                if (retVal == 0 && withBranches && initBranch != null)
+                {
+                    initBranch.CloneAllBranches = true;
+                    retVal = initBranch.Run();
+                }
                 return retVal;
             }
             catch
@@ -74,6 +94,40 @@ namespace Sep.Git.Tfs.Commands
                 }
 
                 throw;
+            }
+        }
+
+        private void VerifyTfsPathToClone(string tfsRepositoryPath)
+        {
+            if (initBranch != null)
+            {
+                var remote = globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
+                if (!remote.Tfs.CanGetBranchInformation)
+                    return;
+                var tfsTrunkRepository = remote.Tfs.GetRootTfsBranchForRemotePath(tfsRepositoryPath, false);
+                if (tfsTrunkRepository == null)
+                {
+                    var tfsRootBranches = remote.Tfs.GetAllTfsRootBranchesOrderedByCreation();
+                    var cloneMsg = "   => If you want to manage branches with git-tfs, clone one of this branch instead :\n"
+                                    + " - " + tfsRootBranches.Aggregate((s1, s2) => s1 + @"\n - " + s2);
+                    
+                    if (withBranches)
+                        throw new GitTfsException("error: cloning the whole repository or too high in the repository path doesn't permit to manage branches!\n" + cloneMsg);
+                    stdout.WriteLine("warning: you are going to clone the whole repository or too high in the repository path !\n" + cloneMsg);
+                }
+
+                var tfsBranchesPath = tfsTrunkRepository.GetAllChildren();
+                var tfsPathToClone = tfsRepositoryPath.TrimEnd('/').ToLower();
+                var tfsTrunkRepositoryPath = tfsTrunkRepository.Path;
+                if (tfsPathToClone != tfsTrunkRepositoryPath.ToLower())
+                {
+                    if (tfsBranchesPath.Select(e=>e.Path.ToLower()).Contains(tfsPathToClone))
+                        stdout.WriteLine("info: you are going to clone a branch instead of the trunk ( {0} )\n"
+                            + "   => If you want to manage branches with git-tfs, clone {0} with '--with-branches' option instead...)", tfsTrunkRepositoryPath);
+                    else
+                        stdout.WriteLine("warning: you are going to clone a subdirectory of a branch and won't be able to manage branches :(\n"
+                            + "   => If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " with '--with-branches' option instead...)");
+                }
             }
         }
 

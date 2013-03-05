@@ -81,9 +81,13 @@ namespace Sep.Git.Tfs.Commands
 
         private void GitTfsInit(string tfsUrl, string tfsRepositoryPath)
         {
-            gitHelper.SetConfig("core.autocrlf", initOptions.GitInitAutoCrlf);
-            gitHelper.SetConfig("core.ignorecase", "false");
-            globals.Repository.CreateTfsRemote(globals.RemoteId, tfsUrl, tfsRepositoryPath, remoteOptions);
+            globals.Repository.CreateTfsRemote(new RemoteInfo
+            {
+                Id = globals.RemoteId,
+                Url = tfsUrl,
+                Repository = tfsRepositoryPath,
+                RemoteOptions = remoteOptions,
+            });
         }
     }
 
@@ -105,5 +109,17 @@ namespace Sep.Git.Tfs.Commands
             else
                 yield return "Try using $/" + tfsPath;
         }
+
+        public static string ToGitRefName(this string expectedRefName)
+        {
+            expectedRefName = System.Text.RegularExpressions.Regex.Replace(expectedRefName, @"[!~$?[*^: \\]", string.Empty);
+            expectedRefName = expectedRefName.Replace("@{", string.Empty);
+            expectedRefName = expectedRefName.Replace("..", string.Empty);
+            expectedRefName = expectedRefName.Replace("//", string.Empty);
+            expectedRefName = expectedRefName.Replace("/.", "/");
+            expectedRefName = expectedRefName.TrimEnd('.', '/');
+            return expectedRefName.Trim('/');
+        }
+
     }
 }

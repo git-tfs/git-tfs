@@ -13,10 +13,12 @@ namespace Sep.Git.Tfs.Commands
     public class Cleanup : GitTfsCommand
     {
         private readonly CleanupWorkspaces _cleanupWorkspaces;
+        private readonly CleanupWorkspaceLocal _cleanupWorkspaceLocal;
 
-        public Cleanup(CleanupWorkspaces cleanupWorkspaces)
+        public Cleanup(CleanupWorkspaces cleanupWorkspaces, CleanupWorkspaceLocal cleanupWorkspaceLocal)
         {
             _cleanupWorkspaces = cleanupWorkspaces;
+            _cleanupWorkspaceLocal = cleanupWorkspaceLocal;
         }
 
         public OptionSet OptionSet
@@ -24,15 +26,21 @@ namespace Sep.Git.Tfs.Commands
             get { return _cleanupWorkspaces.OptionSet; }
         }
 
-
         public int Run()
         {
-            return Choose(_cleanupWorkspaces.Run());
+            return RunAll(_cleanupWorkspaces.Run, _cleanupWorkspaceLocal.Run);
         }
 
-        private int Choose(params int[] results)
+        private int RunAll(params Func<int>[] cleaners)
         {
-            return results.Where(x => x != GitTfsExitCodes.OK).FirstOr(GitTfsExitCodes.OK);
+            var result = GitTfsExitCodes.OK;
+            foreach (var cleaner in cleaners)
+            {
+                result = cleaner();
+                if (result != GitTfsExitCodes.OK)
+                    return result;
+            }
+            return GitTfsExitCodes.OK;
         }
     }
 }

@@ -7,6 +7,7 @@ using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
 using Sep.Git.Tfs.Util;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -25,14 +26,14 @@ namespace Sep.Git.Tfs.Commands
         public string TfsPassword { get; set; }
         public string ParentBranch { get; set; }
         public bool CloneAllBranches { get; set; }
-        string AuthorsFilePath { get; set; }
+        public string AuthorsFilePath { get; set; }
 
         public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
         {
-            this._stdout = stdout;
-            this._globals = globals;
-            this._helper = helper;
-            this._authors = authors;
+            _stdout = stdout;
+            _globals = globals;
+            _helper = helper;
+            _authors = authors;
         }
 
         public OptionSet OptionSet
@@ -57,8 +58,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsBranchPath, string gitBranchNameExpected)
         {
-
             var defaultRemote = InitFromDefaultRemote();
+
+            // TFS representations of repository paths do not have trailing slashes
+            tfsBranchPath = (tfsBranchPath ?? string.Empty).TrimEnd('/');
 
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
@@ -78,26 +81,23 @@ namespace Sep.Git.Tfs.Commands
 
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
-            bool first = true;
-            var allTfsBranches = defaultRemote.Tfs.GetAllTfsBranchesOrderedByCreation();
+            var rootBranch = defaultRemote.Tfs.GetRootTfsBranchForRemotePath(defaultRemote.TfsRepositoryPath);
+            if (rootBranch == null)
+                throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '{0}' is not a TFS branch!", defaultRemote.TfsRepositoryPath));
+            if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
+               throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
+
+            var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path).ToList();
 
             _stdout.WriteLine("Tfs branches found:");
-            foreach (var tfsBranch in allTfsBranches)
+            foreach (var tfsBranchPath in childBranchPaths)
             {
-                _stdout.WriteLine("- " + tfsBranch);
+                _stdout.WriteLine("- " + tfsBranchPath);
             }
 
-            foreach (var tfsBranch in allTfsBranches)
+            foreach (var tfsBranchPath in childBranchPaths)
             {
-                if (first)
-                {
-                    if (defaultRemote.TfsRepositoryPath.ToLower() != tfsBranch.ToLower())
-                        throw new GitTfsException("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from the trunk...");
-
-                    first = false;
-                    continue;
-                }
-                var result = CreateBranch(defaultRemote, tfsBranch, allRemotes);
+                var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
                 if (result < 0)
                     return result;
             }
@@ -130,6 +130,9 @@ namespace Sep.Git.Tfs.Commands
         public int CreateBranch(IGitTfsRemote defaultRemote, string tfsRepositoryPath, IEnumerable<IGitTfsRemote> allRemotes, string gitBranchNameExpected = null, string tfsRepositoryPathParentBranch = null)
         {
             Trace.WriteLine("=> Working on TFS branch : " + tfsRepositoryPath);
+
+            // TFS string representations of repository paths do not end in trailing slashes
+            tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
             if (allRemotes.Count(r => r.TfsRepositoryPath.ToLower() == tfsRepositoryPath.ToLower()) != 0)
             {
@@ -169,8 +172,7 @@ namespace Sep.Git.Tfs.Commands
             Trace.WriteLine("Commit found! sha1 : " + sha1RootCommit);
 
             Trace.WriteLine("Try creating remote...");
-            _globals.Repository.CreateTfsRemote(gitBranchName, defaultRemote.TfsUrl, tfsRepositoryPath, _remoteOptions);
-            var tfsRemote = _globals.Repository.ReadTfsRemote(gitBranchName);
+            var tfsRemote = _globals.Repository.CreateTfsRemote(new RemoteInfo { Id = gitBranchName, Url = defaultRemote.TfsUrl, Repository = tfsRepositoryPath, RemoteOptions = _remoteOptions });
             if (!_globals.Repository.CreateBranch(tfsRemote.RemoteRef, sha1RootCommit))
                 throw new GitTfsException("error: Fail to create remote branch ref file!");
             Trace.WriteLine("Remote created!");
@@ -188,17 +190,6 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.OK;
         }
 
-        private string RemoveNotAllowedChars(string expectedBranchName)
-        {
-            expectedBranchName = expectedBranchName.Replace("@{", string.Empty);
-            expectedBranchName = expectedBranchName.Replace("..", string.Empty);
-            expectedBranchName = expectedBranchName.Replace("//", string.Empty);
-            expectedBranchName = expectedBranchName.Replace("/.", "/");
-            expectedBranchName = expectedBranchName.TrimEnd('.');
-            expectedBranchName = expectedBranchName.Trim('/');
-            return System.Text.RegularExpressions.Regex.Replace(expectedBranchName, @"[!~$?[*^: \\]", string.Empty);
-        }
-
         protected string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
         {
             string gitBranchNameExpected;
@@ -210,8 +201,8 @@ namespace Sep.Git.Tfs.Commands
             {
                 gitBranchNameExpected = tfsRepositoryPath;
             }
-            gitBranchNameExpected = gitBranchNameExpected.TrimEnd('/', '.');
-            var gitBranchName = _globals.Repository.AssertValidBranchName(RemoveNotAllowedChars(gitBranchNameExpected.Trim()));
+            gitBranchNameExpected = gitBranchNameExpected.ToGitRefName();
+            var gitBranchName = _globals.Repository.AssertValidBranchName(gitBranchNameExpected);
             _stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
             return gitBranchName;
         }

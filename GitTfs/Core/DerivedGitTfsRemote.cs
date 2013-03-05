@@ -207,6 +207,11 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
+        public void CleanupWorkspaceDirectory()
+        {
+            throw new NotImplementedException();
+        }
+
         public ITfsChangeset GetChangeset(long changesetId)
         {
             throw new NotImplementedException();
@@ -222,6 +227,17 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
+        public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
+
+
+        public RemoteInfo RemoteInfo
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }
