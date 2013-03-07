@@ -54,6 +54,9 @@ namespace Sep.Git.Tfs.Commands
             var tfsRemote = parentChangeset.Remote;
             var repo = tfsRemote.Repository;
 
+            if (repo.IsBare)
+                AutoRebase = false;
+
             if (repo.WorkingCopyHasUnstagedOrUncommitedChanges)
             {
                 throw new GitTfsException("error: You have local changes; rebase-workflow checkin only possible with clean working directory.")
@@ -71,6 +74,9 @@ namespace Sep.Git.Tfs.Commands
                 }
                 else
                 {
+                    if(repo.IsBare)
+                        repo.CommandNoisy("update-ref", "HEAD", parentChangeset.Remote.MaxCommitHash);
+
                     throw new GitTfsException("error: New TFS changesets were found.")
                         .WithRecommendation("Try to rebase HEAD onto latest TFS checkin and repeat rcheckin or alternatively checkin s");
                 }
