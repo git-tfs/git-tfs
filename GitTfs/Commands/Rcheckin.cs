@@ -83,7 +83,7 @@ namespace Sep.Git.Tfs.Commands
             if (!String.IsNullOrWhiteSpace(repo.CommandOneline("rev-list", tfsLatest, "^HEAD")))
                 throw new GitTfsException("error: latest TFS commit should be parent of commits being checked in");
 
-            return Quick ? _PerformRCheckinQuick(parentChangeset) : _PerformRCheckin(parentChangeset);
+            return (Quick || repo.IsBare) ? _PerformRCheckinQuick(parentChangeset) : _PerformRCheckin(parentChangeset);
         }
 
         private int _PerformRCheckinQuick(TfsChangesetInfo parentChangeset)
@@ -143,6 +143,9 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
 
+                if(repo.IsBare)
+                    repo.CommandNoisy("update-ref", "HEAD", tfsRemote.MaxCommitHash);
+                else
             repo.Reset(tfsRemote.MaxCommitHash, ResetOptions.Hard);
             _stdout.WriteLine("No more to rcheckin.");
 

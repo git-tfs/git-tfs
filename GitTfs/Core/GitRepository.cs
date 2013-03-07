@@ -413,6 +413,8 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
+                if (_repository.Info.IsBare)
+                    return false;
                 return (from 
                             entry in _repository.Index.RetrieveStatus()
                         where 
@@ -492,5 +494,7 @@ namespace Sep.Git.Tfs.Core
         {
             _repository.Reset(resetOptions, sha);
         }
+
+        public bool IsBare { get { return _repository.Info.IsBare; } }
     }
 }
