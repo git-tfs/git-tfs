@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -48,12 +48,17 @@ namespace Sep.Git.Tfs.Core
             if (dirName == null)
                 return;
             var downcasedDirName = dirName.ToLowerInvariant();
-            if (!HasEntryInDir(downcasedDirName) && !deletedDirs.Contains(downcasedDirName) && !cantDeleteDirs.Contains(downcasedDirName))
+            if (!HasEntryInDir(downcasedDirName) && !IsDirDeletedAlready(downcasedDirName, deletedDirs) && !cantDeleteDirs.Contains(downcasedDirName))
             {
                 _workspace.Delete(dirName);
                 deletedDirs.Add(downcasedDirName);
                 DeleteEmptyDir(GetDirectoryName(dirName), deletedDirs, cantDeleteDirs);
             }
+        }
+
+        bool IsDirDeletedAlready(string downcasedDirName, IEnumerable<string> deletedDirs)
+        {
+            return deletedDirs.Any(t => downcasedDirName.StartsWith(t + "/") || t == downcasedDirName);
         }
 
         string GetDirectoryName(string path)
