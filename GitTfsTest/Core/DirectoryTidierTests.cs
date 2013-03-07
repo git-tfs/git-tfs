@@ -26,6 +26,10 @@ namespace Sep.Git.Tfs.Test.Core
                 item(TfsItemType.Folder, "topDir/midDir/bottomDir"),
                 item(TfsItemType.File,   "topDir/midDir/bottomDir/file1.txt"),
                 item(TfsItemType.File,   "topDir/midDir/bottomDir/file2.txt"),
+                item(TfsItemType.Folder, "dirA"),
+                item(TfsItemType.Folder, "dirA/dirB"),
+                item(TfsItemType.File  , "dirA/dirB/file.txt"),
+                item(TfsItemType.File  , "dirA/file.txt"),
                 item(TfsItemType.Folder, "dir1"),
                 item(TfsItemType.Folder, "dir1/dir2"),
                 item(TfsItemType.Folder, "dir1/dir2/dir3"),
@@ -120,6 +124,23 @@ namespace Sep.Git.Tfs.Test.Core
             mockWorkspace.Expect(x => x.Delete("dir1/dir2"));
             mockWorkspace.Expect(x => x.Delete("dir1"));
             Tidy.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant);
+        }
+
+        [Fact]
+        public void DeletingFilesFromLessNestedDirToMostNestedDoesntRuinDirectoryTidying()
+        {
+            using (mocks.Ordered())
+            {
+                mockWorkspace.Expect(x => x.Delete("dirA/file.txt"));
+                mockWorkspace.Expect(x => x.Delete("dirA/dirB/file.txt"));
+                // With next line uncommented it is also a correct order,
+                // but right now tidying is done in the same order as files are deleted
+                // Important thing is not to have dirA/dirB deletion after dirA already died
+                //mockWorkspace.Expect(x => x.Delete("dirA/dirB"));
+                mockWorkspace.Expect(x => x.Delete("dirA"));
+            }
+            Tidy.Delete("dirA/file.txt");
+            Tidy.Delete("dirA/dirB/file.txt");
         }
 
         [Fact]
