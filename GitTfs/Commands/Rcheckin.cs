@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Commands
 
         private bool Quick { get; set; }
         private bool AutoRebase { get; set; }
+        private bool ForceIfBare { get; set; }
 
         public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Globals globals)
         {
@@ -39,6 +40,7 @@ namespace Sep.Git.Tfs.Commands
                         { "q|no-rebase|quick", "omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
                         v => Quick = v != null },
                         {"a|autorebase", "continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
+                        {"bare", "force working in bare repository", v => ForceIfBare = v != null},
                     }.Merge(_checkinOptions.OptionSet);
             }
         }
@@ -53,6 +55,10 @@ namespace Sep.Git.Tfs.Commands
         {
             var tfsRemote = parentChangeset.Remote;
             var repo = tfsRemote.Repository;
+
+            if (repo.IsBare && !ForceIfBare)
+                throw new GitTfsException("error: You are trying to use rcheckin in a bare repository which is very dangerous.")
+                    .WithRecommendation("If you still want to continue, use the '--bare' flag.");
 
             if (repo.IsBare)
                 AutoRebase = false;
