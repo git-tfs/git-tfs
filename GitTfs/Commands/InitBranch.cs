@@ -92,6 +92,9 @@ namespace Sep.Git.Tfs.Commands
         {
             if (ShouldBeInteractive)
             {
+                if (!Environment.UserInteractive)
+                    throw new GitTfsException("error: interactive mode can't be used when not in user interactive mode!");
+
                 return Run(tfsBranchPath, GetBranchNames(tfsBranchPath));
             }
             return Run(tfsBranchPath, null);
