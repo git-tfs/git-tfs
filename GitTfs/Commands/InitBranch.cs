@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals _globals;
         private readonly Help _helper;
         private readonly AuthorsFile _authors;
+        private readonly Dialog _dialog;
 
         private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
@@ -30,12 +31,13 @@ namespace Sep.Git.Tfs.Commands
         public string AuthorsFilePath { get; set; }
         public bool ShouldBeInteractive { get; set; }
 
-        public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
+        public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors, Dialog dialog)
         {
             _stdout = stdout;
             _globals = globals;
             _helper = helper;
             _authors = authors;
+            _dialog = dialog;
         }
 
         public OptionSet OptionSet
@@ -62,11 +64,10 @@ namespace Sep.Git.Tfs.Commands
             do
             {
                 if (!firstTime)
-                    Console.WriteLine("Wrong branch name! Choose another one...");
+                    _dialog.Say("Wrong branch name! Choose another one...");
                 else
                     firstTime = false;
-                Console.Write("Git remote name for tfs path " + tfsRepositoryPath + " (" + expectedBranchName + ")?");
-                expectedName = Console.ReadLine();
+                expectedName = _dialog.Ask("Git remote name for tfs path " + tfsRepositoryPath + " (" + expectedBranchName + ")?");
                 if (string.IsNullOrWhiteSpace(expectedName))
                 {
                     return expectedBranchName;
@@ -117,7 +118,7 @@ namespace Sep.Git.Tfs.Commands
                 return GitTfsExitCodes.Help;
             }
 
-            Console.WriteLine("Loading datas...");
+            _stdout.WriteLine("Loading datas...");
 
             var defaultRemote = InitFromDefaultRemote();
 
@@ -149,13 +150,12 @@ namespace Sep.Git.Tfs.Commands
                     branchesWithExpectedNames = GetBranchNames(childBranchPathsNotAlreadyFetched);
                     if (!ControlBranchNaming(branchesWithExpectedNames, allRemotes))
                         continue;
-                    Console.WriteLine("Names that will be used for the tfs branches :");
+                    _dialog.Say("Names that will be used for the tfs branches :");
                     foreach (var tfsBranchPath in branchesWithExpectedNames.Keys)
                     {
                         _stdout.WriteLine("- " + tfsBranchPath + " => " + branchesWithExpectedNames[tfsBranchPath]);
                     }
-                    Console.Write("Are name ok?(Yes/No/Quit)");
-                    var answer = (string.Empty + Console.ReadLine()).ToLower();
+                    var answer = (_dialog.Ask("Are names ok?(Yes/No/Quit)")??string.Empty).ToLower();
                     if (answer == "q") return GitTfsExitCodes.OK;
                     if (answer == "y") break;
                 }
@@ -180,14 +180,14 @@ namespace Sep.Git.Tfs.Commands
             var duplicates = branchesNames.GroupBy(b => b).Where(g => g.Count() > 1).Select(g => g.Key);
             if (duplicates.Any())
             {
-                Console.WriteLine("Some name(s) you choose are duplicates: " + duplicates.Aggregate((d1, d2) => d1 + ", " + d2));
+                _dialog.Say("Some name(s) you choose are duplicates: " + duplicates.Aggregate((d1, d2) => d1 + ", " + d2));
                 return false;
             }
             var remotes = allRemotes.Select(r => r.Id.ToLower());
             var conflicts = branchesNames.Where(b => remotes.Contains(b));
             if (conflicts.Any())
             {
-                Console.WriteLine("Some name(s) you choose are already used in existing remotes: " + conflicts.Aggregate((c1, c2) => c1 + ", " + c2));
+                _dialog.Say("Some name(s) you choose are already used in existing remotes: " + conflicts.Aggregate((c1, c2) => c1 + ", " + c2));
                 return false;
             }
 
