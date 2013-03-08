@@ -204,7 +204,7 @@ namespace Sep.Git.Tfs.Core
                 }
                 var commitSha = Commit(log);
                 UpdateRef(commitSha, changeset.Summary.ChangesetId);
-                if(changeset.Summary.Workitems.Count() != 0)
+                if(changeset.Summary.Workitems.Any())
                 {
                     string workitemNote = "Workitems:\n";
                     foreach(var workitem in changeset.Summary.Workitems)
