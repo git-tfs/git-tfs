@@ -400,9 +400,9 @@ namespace Sep.Git.Tfs.Core
                 return (from 
                             entry in _repository.Index.RetrieveStatus()
                         where 
-                             entry.State != FileStatus.Ignored &&
-                             entry.State != FileStatus.Untracked
-                        select entry).Count() > 0;
+                            entry.State != FileStatus.Ignored &&
+                            entry.State != FileStatus.Untracked
+                        select entry).Any();
             }
         }
 
