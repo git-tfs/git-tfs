@@ -48,7 +48,7 @@ namespace Sep.Git.Tfs.Core
             if (dirName == null)
                 return;
             var downcasedDirName = dirName.ToLowerInvariant();
-            if (!HasEntryInDir(downcasedDirName) && !IsDirDeletedAlready(downcasedDirName, deletedDirs) && !cantDeleteDirs.Contains(downcasedDirName))
+            if (!HasEntryInDir(downcasedDirName) && !IsDirDeletedAlready(downcasedDirName, deletedDirs) && !CannotBeDeletedBecauseRenames(downcasedDirName, cantDeleteDirs))
             {
                 _workspace.Delete(dirName);
                 deletedDirs.Add(downcasedDirName);
@@ -59,6 +59,11 @@ namespace Sep.Git.Tfs.Core
         bool IsDirDeletedAlready(string downcasedDirName, IEnumerable<string> deletedDirs)
         {
             return deletedDirs.Any(t => downcasedDirName.StartsWith(t + "/") || t == downcasedDirName);
+        }
+
+        bool CannotBeDeletedBecauseRenames(string downcasedDirName, List<string> cantDeleteDirs)
+        {
+            return cantDeleteDirs.Any(t => t.StartsWith(downcasedDirName + "/") || t == downcasedDirName);
         }
 
         string GetDirectoryName(string path)

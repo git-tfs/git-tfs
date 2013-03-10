@@ -147,6 +147,21 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         [Fact]
+        //TFS don't permit to delete an empty directory when the directory was emptied by moving outside a file (i.e. renaming)
+        //Until the changeset is done, tfs consider the file still belongs to the folder :( 
+        public void MovingFileAndDeletingFileInAParentDirectoryShouldLeaveAllDirectories()
+        {
+            mockWorkspace.Expect(x => x.Delete("dirA/file.txt"));
+            mockWorkspace.Expect(x => x.Rename("dirA/dirB/file.txt", "otherdir/otherdir2/newName1.txt", ScoreIsIrrelevant));
+            Tidy.Delete("dirA/file.txt");
+            Tidy.Rename("dirA/dirB/file.txt", "otherdir/otherdir2/newName1.txt", ScoreIsIrrelevant);
+            Tidy.Dispose();
+            mockWorkspace.Replay();
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dirA/dirB"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dirA"));
+        }
+
+        [Fact]
         public void DeletingFilesFromLessNestedDirToMostNestedDoesntRuinDirectoryTidying()
         {
             using (mocks.Ordered())
