@@ -95,9 +95,7 @@ namespace Sep.Git.Tfs.Core
                             .WithRecommendation("Try setting a legacy-url for an existing remote.");
                     return new DerivedGitTfsRemote(tfsUrl, tfsRepositoryPath);
                 case 1:
-                    Trace.WriteLine("One remote matched");
                     var remote = matchingRemotes.First();
-                    remote.EnsureTfsAuthenticated();
                     return remote;
                 default:
                     Trace.WriteLine("More than one remote matched!");
