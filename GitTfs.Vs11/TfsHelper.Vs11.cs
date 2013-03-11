@@ -69,6 +69,7 @@ namespace Sep.Git.Tfs.Vs11
 
         protected override T GetService<T>()
         {
+            if (_server == null) EnsureAuthenticated();
             return (T) _server.GetService(typeof (T));
         }
 
