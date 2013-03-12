@@ -90,6 +90,9 @@ namespace Sep.Git.Tfs.Commands
 
             Trace.WriteLine("Cleaning...");
             remote.CleanupWorkspaceDirectory();
+
+            if(remote.Repository.IsBare)
+                remote.Repository.CommandNoisy("update-ref", "HEAD", remote.MaxCommitHash);
         }
 
         private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)
