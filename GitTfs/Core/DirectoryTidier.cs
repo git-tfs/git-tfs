@@ -37,12 +37,25 @@ namespace Sep.Git.Tfs.Core
             if (dirName == null)
                 return;
             var downcasedDirName = dirName.ToLowerInvariant();
-            if (!HasEntryInDir(downcasedDirName) && !deletedDirs.Contains(downcasedDirName))
+            if (!HasEntryInDir(downcasedDirName) && !IsDeletedDirectory(downcasedDirName, deletedDirs))
             {
                 _workspace.Delete(dirName);
                 deletedDirs.Add(downcasedDirName);
                 DeleteEmptyDir(GetDirectoryName(dirName), deletedDirs);
             }
+        }
+
+        bool IsDeletedDirectory(string downcasedDirName, List<string> deletedDirs)
+        {
+            // this directory is deleted if it or an ancestor directory is deleted
+            foreach (var deletedDir in deletedDirs)
+            {
+                if (downcasedDirName == deletedDir || downcasedDirName.StartsWith(deletedDir + "/"))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         string GetDirectoryName(string path)
