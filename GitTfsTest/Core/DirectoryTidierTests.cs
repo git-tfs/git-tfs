@@ -26,6 +26,10 @@ namespace Sep.Git.Tfs.Test.Core
                 item(TfsItemType.Folder, "topDir/midDir/bottomDir"),
                 item(TfsItemType.File,   "topDir/midDir/bottomDir/file1.txt"),
                 item(TfsItemType.File,   "topDir/midDir/bottomDir/file2.txt"),
+                item(TfsItemType.Folder, "dirA"),
+                item(TfsItemType.Folder, "dirA/dirB"),
+                item(TfsItemType.File  , "dirA/dirB/file.txt"),
+                item(TfsItemType.File  , "dirA/file.txt"),
                 item(TfsItemType.Folder, "dir1"),
                 item(TfsItemType.Folder, "dir1/dir2"),
                 item(TfsItemType.Folder, "dir1/dir2/dir3"),
@@ -113,13 +117,65 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         [Fact]
-        public void MovingAFileOutRemovesAllEmptyParents()
+        //TFS don't permit to delete an empty directory when the directory was emptied by moving outside a file (i.e. renaming)
+        //Until the changeset is done, tfs consider the file still belongs to the folder :( 
+        public void MovingAFileOutDontRemovesAllEmptyParents()
         {
             mockWorkspace.Expect(x => x.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant));
-            mockWorkspace.Expect(x => x.Delete("dir1/dir2/dir3"));
-            mockWorkspace.Expect(x => x.Delete("dir1/dir2"));
-            mockWorkspace.Expect(x => x.Delete("dir1"));
             Tidy.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant);
+            Tidy.Dispose();
+            mockWorkspace.Replay();
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dir1/dir2/dir3"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dir1/dir2"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dir1"));
+        }
+
+        [Fact]
+        //TFS don't permit to delete an empty directory when the directory was emptied by moving outside a file (i.e. renaming)
+        //Until the changeset is done, tfs consider the file still belongs to the folder :( 
+        public void MovingAFileOutLeavesAllEmptyParentsEvenIfLastFileDeleted()
+        {
+            mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file1.txt", "otherdir/otherdir2/newName1.txt", ScoreIsIrrelevant));
+            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
+            Tidy.Rename("topDir/midDir/bottomDir/file1.txt", "otherdir/otherdir2/newName1.txt", ScoreIsIrrelevant);
+            Tidy.Delete("topDir/midDir/bottomDir/file2.txt");
+            Tidy.Dispose();
+            mockWorkspace.Replay();
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("topDir/midDir/bottomDir"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("topDir/midDir"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("topDir"));
+        }
+
+        [Fact]
+        //TFS don't permit to delete an empty directory when the directory was emptied by moving outside a file (i.e. renaming)
+        //Until the changeset is done, tfs consider the file still belongs to the folder :( 
+        public void MovingFileAndDeletingFileInAParentDirectoryShouldLeaveAllDirectories()
+        {
+            mockWorkspace.Expect(x => x.Delete("dirA/file.txt"));
+            mockWorkspace.Expect(x => x.Rename("dirA/dirB/file.txt", "otherdir/otherdir2/newName1.txt", ScoreIsIrrelevant));
+            Tidy.Delete("dirA/file.txt");
+            Tidy.Rename("dirA/dirB/file.txt", "otherdir/otherdir2/newName1.txt", ScoreIsIrrelevant);
+            Tidy.Dispose();
+            mockWorkspace.Replay();
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dirA/dirB"));
+            mockWorkspace.AssertWasNotCalled(x => x.Delete("dirA"));
+        }
+
+        [Fact]
+        public void DeletingFilesFromLessNestedDirToMostNestedDoesntRuinDirectoryTidying()
+        {
+            using (mocks.Ordered())
+            {
+                mockWorkspace.Expect(x => x.Delete("dirA/file.txt"));
+                mockWorkspace.Expect(x => x.Delete("dirA/dirB/file.txt"));
+                // With next line uncommented it is also a correct order,
+                // but right now tidying is done in the same order as files are deleted
+                // Important thing is not to have dirA/dirB deletion after dirA already died
+                //mockWorkspace.Expect(x => x.Delete("dirA/dirB"));
+                mockWorkspace.Expect(x => x.Delete("dirA"));
+            }
+            Tidy.Delete("dirA/file.txt");
+            Tidy.Delete("dirA/dirB/file.txt");
         }
 
         [Fact]

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -10,6 +10,7 @@ namespace Sep.Git.Tfs.Core
         ITfsWorkspaceModifier _workspace;
         List<string> _filesInTfs;
         List<string> _filesRemovedFromTfs;
+        List<string> _filesRenamedInTfs;
         bool _disposed;
 
         public DirectoryTidier(ITfsWorkspaceModifier workspace, IEnumerable<TfsTreeEntry> initialTfsTree)
@@ -17,6 +18,7 @@ namespace Sep.Git.Tfs.Core
             _workspace = workspace;
             _filesInTfs = initialTfsTree.Where(entry => entry.Item.ItemType == TfsItemType.File).Select(entry => entry.FullName.ToLowerInvariant()).ToList();
             _filesRemovedFromTfs = new List<string>();
+            _filesRenamedInTfs = new List<string>();
         }
 
 
@@ -26,23 +28,42 @@ namespace Sep.Git.Tfs.Core
                 return;
             _disposed = true;
             var deletedDirs = new List<string>();
+            //TFS don't permit to delete an empty directory when the directory was emptied by moving outside a file (i.e. renaming)
+            //Until the changeset is done, tfs consider the file still belongs to the folder :( 
+            var cantDeleteDirsWithCase = _filesRenamedInTfs.Select(f => GetDirectoryName(f)).Distinct().ToList();
+
+            var cantDeleteDirs = cantDeleteDirsWithCase.Select(f => f.ToLowerInvariant()).Distinct().ToList();
+
             foreach (var removedFile in _filesRemovedFromTfs)
             {
-                DeleteEmptyDir(GetDirectoryName(removedFile), deletedDirs);
+                DeleteEmptyDir(GetDirectoryName(removedFile), deletedDirs, cantDeleteDirs);
             }
+
+            //TODO : we have here the list of the directories that we should delete in the future...
+            var shouldDeleteDirectoriesAfter = cantDeleteDirsWithCase.Where(d => !HasEntryInDir(d));
         }
 
-        void DeleteEmptyDir(string dirName, List<string> deletedDirs)
+        void DeleteEmptyDir(string dirName, List<string> deletedDirs, List<string> cantDeleteDirs)
         {
             if (dirName == null)
                 return;
             var downcasedDirName = dirName.ToLowerInvariant();
-            if (!HasEntryInDir(downcasedDirName) && !deletedDirs.Contains(downcasedDirName))
+            if (!HasEntryInDir(downcasedDirName) && !IsDirDeletedAlready(downcasedDirName, deletedDirs) && !CannotBeDeletedBecauseRenames(downcasedDirName, cantDeleteDirs))
             {
                 _workspace.Delete(dirName);
                 deletedDirs.Add(downcasedDirName);
-                DeleteEmptyDir(GetDirectoryName(dirName), deletedDirs);
+                DeleteEmptyDir(GetDirectoryName(dirName), deletedDirs, cantDeleteDirs);
             }
+        }
+
+        bool IsDirDeletedAlready(string downcasedDirName, IEnumerable<string> deletedDirs)
+        {
+            return deletedDirs.Any(t => downcasedDirName.StartsWith(t + "/") || t == downcasedDirName);
+        }
+
+        bool CannotBeDeletedBecauseRenames(string downcasedDirName, List<string> cantDeleteDirs)
+        {
+            return cantDeleteDirs.Any(t => t.StartsWith(downcasedDirName + "/") || t == downcasedDirName);
         }
 
         string GetDirectoryName(string path)
@@ -86,7 +107,7 @@ namespace Sep.Git.Tfs.Core
         public void Rename(string pathFrom, string pathTo, string score)
         {
             _workspace.Rename(pathFrom, pathTo, score);
-            _filesRemovedFromTfs.Add(pathFrom);
+            _filesRenamedInTfs.Add(pathFrom);
             _filesInTfs.Remove(pathFrom.ToLowerInvariant());
             _filesInTfs.Add(pathTo.ToLowerInvariant());
         }
