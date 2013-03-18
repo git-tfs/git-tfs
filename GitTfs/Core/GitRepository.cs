@@ -95,9 +95,7 @@ namespace Sep.Git.Tfs.Core
                             .WithRecommendation("Try setting a legacy-url for an existing remote.");
                     return new DerivedGitTfsRemote(tfsUrl, tfsRepositoryPath);
                 case 1:
-                    Trace.WriteLine("One remote matched");
                     var remote = matchingRemotes.First();
-                    remote.EnsureTfsAuthenticated();
                     return remote;
                 default:
                     Trace.WriteLine("More than one remote matched!");
@@ -400,9 +398,9 @@ namespace Sep.Git.Tfs.Core
                 return (from 
                             entry in _repository.Index.RetrieveStatus()
                         where 
-                             entry.State != FileStatus.Ignored &&
-                             entry.State != FileStatus.Untracked
-                        select entry).Count() > 0;
+                            entry.State != FileStatus.Ignored &&
+                            entry.State != FileStatus.Untracked
+                        select entry).Any();
             }
         }
 
@@ -466,6 +464,11 @@ namespace Sep.Git.Tfs.Core
         {
             Signature author = new Signature(owner, emailOwner, creationDate);
             _repository.Notes.Add(new ObjectId(sha), content, author, author, "commits");
+        }
+
+        public void Reset(string sha, ResetOptions resetOptions)
+        {
+            _repository.Reset(resetOptions, sha);
         }
     }
 }
