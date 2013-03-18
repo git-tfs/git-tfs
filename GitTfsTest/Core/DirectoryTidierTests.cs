@@ -51,7 +51,7 @@ namespace Sep.Git.Tfs.Test.Core
                 if (_tidy == null)
                 {
                     mocks.ReplayAll();
-                    _tidy = new DirectoryTidier(new LogThis(mockWorkspace), initialTfsTree);
+                    _tidy = new DirectoryTidier(mockWorkspace, initialTfsTree);
                 }
                 return _tidy;
             }
@@ -202,45 +202,5 @@ namespace Sep.Git.Tfs.Test.Core
         /// The score argument is passed through by DirectoryTidier, so its value doesn't matter.
         /// </summary>
         const string ScoreIsIrrelevant = "irrelevant";
-
-
-        public class LogThis : ITfsWorkspaceModifier
-        {
-            ITfsWorkspaceModifier _modifier;
-
-            public LogThis(ITfsWorkspaceModifier modifier)
-            {
-                _modifier = modifier;
-            }
-
-            string ITfsWorkspaceModifier.GetLocalPath(string path)
-            {
-                return _modifier.GetLocalPath(path);
-            }
-
-            void ITfsWorkspaceModifier.Add(string path)
-            {
-                Console.WriteLine("ADD " + path);
-                _modifier.Add(path);
-            }
-
-            void ITfsWorkspaceModifier.Edit(string path)
-            {
-                Console.WriteLine("EDIT " + path);
-                _modifier.Edit(path);
-            }
-
-            void ITfsWorkspaceModifier.Delete(string path)
-            {
-                Console.WriteLine("DELETE " + path);
-                _modifier.Delete(path);
-            }
-
-            void ITfsWorkspaceModifier.Rename(string pathFrom, string pathTo, string score)
-            {
-                Console.WriteLine("RENAME " + pathFrom + " -> " + pathTo);
-                _modifier.Rename(pathFrom, pathTo, score);
-            }
-        }
     }
 }
