@@ -26,9 +26,9 @@ namespace Sep.Git.Tfs.Core
                 return;
             _disposed = true;
             var deletedDirs = new List<string>();
-            foreach (var removedFile in _filesRemovedFromTfs)
+            foreach (var dir in _filesRemovedFromTfs.Select(f => GetDirectoryName(f)).OrderBy(d => d, StringComparer.InvariantCultureIgnoreCase))
             {
-                DeleteEmptyDir(GetDirectoryName(removedFile), deletedDirs);
+                DeleteEmptyDir(dir, deletedDirs);
             }
         }
 
@@ -37,11 +37,14 @@ namespace Sep.Git.Tfs.Core
             if (dirName == null)
                 return;
             var downcasedDirName = dirName.ToLowerInvariant();
-            if (!HasEntryInDir(downcasedDirName) && !IsDirDeletedAlready(downcasedDirName, deletedDirs))
+            if (!HasEntryInDir(downcasedDirName))
             {
-                _workspace.Delete(dirName);
-                deletedDirs.Add(downcasedDirName);
                 DeleteEmptyDir(GetDirectoryName(dirName), deletedDirs);
+                if (!IsDirDeletedAlready(downcasedDirName, deletedDirs))
+                {
+                    _workspace.Delete(dirName);
+                    deletedDirs.Add(downcasedDirName);
+                }
             }
         }
 
@@ -65,34 +68,40 @@ namespace Sep.Git.Tfs.Core
         }
 
 
-        public string GetLocalPath(string path)
+        string ITfsWorkspaceModifier.GetLocalPath(string path)
         {
             return _workspace.GetLocalPath(path);
         }
 
-        public void Add(string path)
+        void ITfsWorkspaceModifier.Add(string path)
         {
             _workspace.Add(path);
             _filesInTfs.Add(path.ToLowerInvariant());
         }
 
-        public void Edit(string path)
+        void ITfsWorkspaceModifier.Edit(string path)
         {
             _workspace.Edit(path);
         }
 
-        public void Delete(string path)
+        void ITfsWorkspaceModifier.Delete(string path)
         {
             _workspace.Delete(path);
             _filesRemovedFromTfs.Add(path);
             _filesInTfs.Remove(path.ToLowerInvariant());
         }
 
-        public void Rename(string pathFrom, string pathTo, string score)
+        void ITfsWorkspaceModifier.Rename(string pathFrom, string pathTo, string score)
         {
             _workspace.Rename(pathFrom, pathTo, score);
+            /*
+            // Even though this may have been removed from a directory, we'll
+            // make it look like it wasn't, because TFS doesn't allow these
+            // directories to be removed.
+            // See https://github.com/git-tfs/git-tfs/issues/313
             _filesRemovedFromTfs.Add(pathFrom);
             _filesInTfs.Remove(pathFrom.ToLowerInvariant());
+            */
             _filesInTfs.Add(pathTo.ToLowerInvariant());
         }
     }
