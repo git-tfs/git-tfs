@@ -133,18 +133,11 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         [Fact]
-        public void DeletingFilesFromLessNestedDirToMostNestedDoesntRuinDirectoryTidying()
+        public void DeleteOnlyTheTopOfEmptyDirTree()
         {
-            using (mocks.Ordered())
-            {
-                mockWorkspace.Expect(x => x.Delete("dirA/file.txt"));
-                mockWorkspace.Expect(x => x.Delete("dirA/dirB/file.txt"));
-                // With next line uncommented it is also a correct order,
-                // but right now tidying is done in the same order as files are deleted
-                // Important thing is not to have dirA/dirB deletion after dirA already died
-                //mockWorkspace.Expect(x => x.Delete("dirA/dirB"));
-                mockWorkspace.Expect(x => x.Delete("dirA"));
-            }
+            mockWorkspace.Expect(x => x.Delete("dirA/file.txt"));
+            mockWorkspace.Expect(x => x.Delete("dirA/dirB/file.txt"));
+            mockWorkspace.Expect(x => x.Delete("dirA"));
             Tidy.Delete("dirA/file.txt");
             Tidy.Delete("dirA/dirB/file.txt");
         }
@@ -175,8 +168,6 @@ namespace Sep.Git.Tfs.Test.Core
             mockWorkspace.Expect(x => x.Delete("topDir/midDir/midFile.txt"));
             mockWorkspace.Expect(x => x.Delete("topDir/topFile.txt"));
             mockWorkspace.Expect(x => x.Delete("rootFile.txt"));
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir"));
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir"));
             mockWorkspace.Expect(x => x.Delete("topDir"));
             Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
             Tidy.Delete("topDir/midDir/bottomDir/file2.txt");
@@ -192,8 +183,6 @@ namespace Sep.Git.Tfs.Test.Core
             mockWorkspace.Expect(x => x.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE2.TXT"));
             mockWorkspace.Expect(x => x.Delete("TOPDIR/MIDDIR/MIDFILE.TXT"));
             mockWorkspace.Expect(x => x.Delete("TOPDIR/TOPFILE.TXT"));
-            mockWorkspace.Expect(x => x.Delete("TOPDIR/MIDDIR/BOTTOMDIR"));
-            mockWorkspace.Expect(x => x.Delete("TOPDIR/MIDDIR"));
             mockWorkspace.Expect(x => x.Delete("TOPDIR"));
             Tidy.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE1.TXT");
             Tidy.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE2.TXT");
