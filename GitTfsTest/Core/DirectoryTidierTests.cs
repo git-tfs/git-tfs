@@ -117,12 +117,18 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         [Fact]
-        public void MovingAFileOutRemovesAllEmptyParents()
+        public void RemovingAndDeletingAllFilesFromDirectoryLeavesEmptyParent()
+        {
+            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file1.txt");
+            mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant);
+            Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
+            Tidy.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant);
+        }
+
+        [Fact]
+        public void MovingAFileOutLeavesAllEmptyParents()
         {
             mockWorkspace.Expect(x => x.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant));
-            mockWorkspace.Expect(x => x.Delete("dir1/dir2/dir3"));
-            mockWorkspace.Expect(x => x.Delete("dir1/dir2"));
-            mockWorkspace.Expect(x => x.Delete("dir1"));
             Tidy.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant);
         }
 
