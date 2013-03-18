@@ -119,8 +119,8 @@ namespace Sep.Git.Tfs.Test.Core
         [Fact]
         public void RemovingAndDeletingAllFilesFromDirectoryLeavesEmptyParent()
         {
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file1.txt");
-            mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant);
+            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
+            mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant));
             Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
             Tidy.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant);
         }
