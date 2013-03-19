@@ -132,7 +132,15 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                return Repository.GetConfig("git-tfs.workspace-dir") ?? Path.Combine(Dir, "workspace");
+                return Repository.GetConfig("git-tfs.workspace-dir") ?? DefaultWorkingDirectory;
+            }
+        }
+
+        private string DefaultWorkingDirectory
+        {
+            get
+            {
+                return Path.Combine(Dir, "workspace");
             }
         }
 
@@ -340,7 +348,7 @@ namespace Sep.Git.Tfs.Core
         private LogEntry Apply(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(() => Tfs.WithWorkspace(WorkingDirectory, this, changeset.Summary, workspace =>
+            WithTemporaryIndex(() => WithWorkspace(changeset.Summary, workspace =>
             {
                 GitIndexInfo.Do(Repository, index => result = changeset.Apply(lastCommit, index, workspace));
                 result.Tree = Repository.CommandOneline("write-tree");
@@ -352,7 +360,7 @@ namespace Sep.Git.Tfs.Core
         private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(() => Tfs.WithWorkspace(WorkingDirectory, this, changeset.Summary, workspace => {
+            WithTemporaryIndex(() => WithWorkspace(changeset.Summary, workspace => {
                 GitIndexInfo.Do(Repository, index => result = changeset.CopyTree(index, workspace));
                 result.Tree = Repository.CommandOneline("write-tree");
             }));
@@ -478,8 +486,7 @@ namespace Sep.Git.Tfs.Core
 
         public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
         {
-            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => Shelve(shelvesetName, head, parentChangeset, evaluateCheckinPolicies, workspace));
+            WithWorkspace(parentChangeset, workspace => Shelve(shelvesetName, head, parentChangeset, evaluateCheckinPolicies, workspace));
         }
 
         public bool HasShelveset(string shelvesetName)
@@ -496,8 +503,7 @@ namespace Sep.Git.Tfs.Core
         public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
         {
             var changeset = 0L;
-            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = CheckinTool(head, parentChangeset, workspace));
+            WithWorkspace(parentChangeset, workspace => changeset = CheckinTool(head, parentChangeset, workspace));
             return changeset;
         }
 
@@ -521,17 +527,26 @@ namespace Sep.Git.Tfs.Core
         public long Checkin(string head, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             var changeset = 0L;
-            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options));
+            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options));
             return changeset;
         }
 
         public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             var changeset = 0L;
-            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset,
-                              workspace => changeset = Checkin(head, parent, workspace, options));
+            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parent, workspace, options));
             return changeset;
+        }
+
+        private void WithWorkspace(TfsChangesetInfo parentChangeset, Action<ITfsWorkspace> action)
+        {
+            // If there isn't a custom workspace, and a workspace is lingering from a previous
+            // git-tfs run, clean it up. If the user is using a custom workspace dir, leave
+            // it for them to explicitly clean up, in case they're doing something unsupported
+            // with it.
+            Tfs.CleanupWorkspaces(DefaultWorkingDirectory);
+
+            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
         }
 
         private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options)

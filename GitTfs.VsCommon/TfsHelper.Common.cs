@@ -217,9 +217,21 @@ namespace Sep.Git.Tfs.VsCommon
 
         private Workspace GetWorkspace(string localDirectory, string repositoryPath)
         {
-            CleanupWorkspaces(localDirectory);
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
-            workspace.CreateMapping(new WorkingFolder(repositoryPath, localDirectory));
+            try
+            {
+                workspace.CreateMapping(new WorkingFolder(repositoryPath, localDirectory));
+            }
+            catch (MappingConflictException e)
+            {
+                workspace.Delete();
+                throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
+            }
+            catch
+            {
+                workspace.Delete();
+                throw;
+            }
             return workspace;
         }
 
