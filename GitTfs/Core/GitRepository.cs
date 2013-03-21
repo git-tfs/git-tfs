@@ -344,8 +344,7 @@ namespace Sep.Git.Tfs.Core
 
         public string GetCommitMessage(string commitish)
         {
-            var commit = _repository.Lookup<Commit>(commitish);
-            return GitTfsConstants.TfsCommitInfoRegex.Replace(commit.Message, "").Trim(' ', '\r', '\n');
+            return GetCommitMessage(commitish, commitish + "^");
         }
 
         private static string NormalizeLineEndings(string input)
