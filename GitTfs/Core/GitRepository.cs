@@ -342,6 +342,11 @@ namespace Sep.Git.Tfs.Core
             return GitTfsConstants.TfsCommitInfoRegex.Replace(message.ToString(), "").Trim(' ', '\r', '\n');
         }
 
+        public string GetCommitMessage(string commitish)
+        {
+            return GetCommitMessage(commitish, commitish + "^");
+        }
+
         private static string NormalizeLineEndings(string input)
         {
             return string.IsNullOrEmpty(input)

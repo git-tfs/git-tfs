@@ -96,7 +96,9 @@ namespace Sep.Git.Tfs.Commands
                     string target = strs[0];
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != currentParent).ToArray();
 
-                    string commitMessage = repo.GetCommitMessage(target, currentParent).Trim(' ', '\r', '\n');
+                    string commitMessage = _checkinOptions.NoGenerateCheckinComment
+                                               ? repo.GetCommitMessage(target)
+                                               : repo.GetCommitMessage(target, currentParent);
                     var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, commitMessage);
 
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
@@ -153,7 +155,9 @@ namespace Sep.Git.Tfs.Commands
                     string target = strs[0];
                     string[] gitParents = strs.AsEnumerable().Skip(1).Where(hash => hash != tfsLatest).ToArray();
 
-                    string commitMessage = repo.GetCommitMessage(target, tfsLatest).Trim(' ', '\r', '\n');
+                    string commitMessage = _checkinOptions.NoGenerateCheckinComment 
+                        ? repo.GetCommitMessage(target)
+                        : repo.GetCommitMessage(target, tfsLatest);
                     var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, commitMessage);
                     _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
                     long newChangesetId = tfsRemote.Checkin(target, parentChangeset, commitSpecificCheckinOptions);
