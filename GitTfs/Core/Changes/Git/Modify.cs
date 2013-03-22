@@ -15,7 +15,7 @@ namespace Sep.Git.Tfs.Core.Changes.Git
             Path = changeInfo.path;
         }
 
-        public void Apply(ITfsWorkspace workspace)
+        public void Apply(ITfsWorkspaceModifier workspace)
         {
             workspace.Edit(Path);
             var workspaceFile = workspace.GetLocalPath(Path);

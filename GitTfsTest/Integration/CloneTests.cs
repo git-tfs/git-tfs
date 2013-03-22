@@ -26,7 +26,7 @@ namespace Sep.Git.Tfs.Test.Integration
         {
         }
 
-        [FactExceptOnUnix(Skip="eventually")]
+        [FactExceptOnUnix]
         public void ClonesEmptyProject()
         {
             h.SetupFake(r =>
@@ -36,10 +36,10 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
-            const string expectedSha = "tbd";
+            const string expectedSha = "4053764b2868a2be71ae7f5f113ad84dff8a052a";
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "tfs/default", expectedSha);
+            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
             h.AssertEmptyWorkspace("MyProject");
         }
 
@@ -57,10 +57,10 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
-            const string expectedSha = "72a03802ac5f864a40a9bee13608f85e0e2ad05b";
+            const string expectedSha = "d64d883266eca65bede947c79529318718a0d8eb";
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "tfs/default", expectedSha);
+            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
         }
@@ -78,7 +78,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
-            AssertRefs("ea7ed178fb4cce7f46d2c84b907a88fa9d194014");
+            AssertRefs("4faa9a5f32e6af118b84071a537228d3f7da7d9d");
             h.AssertFileInWorkspace("MyProject", "ÆØÅ/äöü.txt", "File contents");
         }
 
@@ -95,7 +95,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
-            AssertRefs("78f0490e22ae245a63238744de2d96f0675880a0");
+            AssertRefs("5bd7660fa145ce0c38b5c279502478ce205a0cfb");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "Blåbærsyltetøy er godt!");
         }
 
@@ -112,7 +112,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
-            AssertRefs("9a73fe007130ca91517283aafe1d442f406df973");
+            AssertRefs("cd14e6e28abffd625412dae36d9d9659bf6cb68c");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
 
             var expectedCommitMessage = new System.Text.StringBuilder();
@@ -127,7 +127,7 @@ namespace Sep.Git.Tfs.Test.Integration
         {
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "tfs/default", expectedSha);
+            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
         }
 
         [FactExceptOnUnix]
@@ -148,7 +148,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
             h.AssertCleanWorkspace("MyProject");
-            AssertRefs("70cdbdca83c3808e60bc1f8cde7e155055447df7");
+            AssertRefs("175420603e41cd0175e3c25581754726bd21cb96");
         }
     }
 }

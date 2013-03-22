@@ -11,6 +11,18 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitChangeInfo
     {
+        public struct ChangeType
+        {
+            public const string ADD = "A";
+            public const string COPY = "C";
+            public const string MODIFY = "M";
+            public const string DELETE = "D";
+            public const string RENAMEEDIT = "R";
+            //public const string TYPECHANGE="T";
+            //public const string UNMERGED="U";
+            //public const string UNKNOWN="X";
+        }
+
         public static readonly Regex DiffTreePattern = new Regex(
             // See http://www.kernel.org/pub/software/scm/git/docs/git-diff-tree.html#_raw_output_format
             "^:" +

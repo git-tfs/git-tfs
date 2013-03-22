@@ -107,8 +107,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ExtTest.cs" />
     <Compile Include="Commands\InitOptionsTest.cs" />
     <Compile Include="Commands\InitBranchTest.cs" />
+    <Compile Include="Core\DirectoryTidierTests.cs" />
+    <Compile Include="Core\GitTfsRemoteTests.cs" />
+    <Compile Include="Core\BranchVisitors\BranchContainsPathVisitorTest.cs" />
+    <Compile Include="Core\RemoteConfigConverterTests.cs" />
+    <Compile Include="Core\TfsInterop\BranchExtensionsTest.cs" />
     <Compile Include="FactExceptOnUnix.cs" />
     <Compile Include="Commands\HelpTest.cs" />
     <Compile Include="Commands\ShelveTest.cs" />
@@ -120,7 +126,10 @@
     <Compile Include="Core\StubbedCheckinEvaluationResult.cs" />
     <Compile Include="Core\TfsWorkspaceTests.cs" />
     <Compile Include="GitTfsRegexTests.cs" />
+    <Compile Include="Integration\BootstrapTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
+    <Compile Include="Integration\FetchTests.cs" />
+    <Compile Include="Integration\InitTests.cs" />
     <Compile Include="Integration\IntegrationHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHelpers\ExtensionMethods.cs" />

@@ -26,6 +26,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		CI.proj = CI.proj
 		Release.proj = Release.proj
 		Releasing.md = Releasing.md
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{4A46FEEE-B8A2-4445-B9D1-8160520C7301}"
+	ProjectSection(SolutionItems) = preProject
+		docs\config.md = docs\config.md
 	EndProjectSection
 EndProject
 Global

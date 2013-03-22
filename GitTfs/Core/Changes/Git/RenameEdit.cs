@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Core.Changes.Git
             Score = changeInfo.score;
         }
 
-        public void Apply(ITfsWorkspace workspace)
+        public void Apply(ITfsWorkspaceModifier workspace)
         {
             workspace.Edit(Path);
             workspace.Rename(Path, PathTo, Score);

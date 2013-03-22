@@ -52,6 +52,13 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public static T GetOrAdd<K, T>(this Dictionary<K, T> dictionary, K key) where T : new()
+        {
+            if (!dictionary.ContainsKey(key))
+                dictionary.Add(key, new T());
+            return dictionary[key];
+        }
+
         public static T FirstOr<T>(this IEnumerable<T> e, T defaultValue)
         {
             foreach (var x in e) return x;
@@ -129,6 +136,11 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         public static StreamWriter WithEncoding(this StreamWriter stream, Encoding encoding) {
             return new StreamWriter(stream.BaseStream, encoding);
+        }
+
+        public static bool Contains(this IEnumerable<string> list, string toCheck, StringComparison comp)
+        {
+            return list.Any(listMember => listMember.IndexOf(toCheck, comp) >= 0);
         }
     }
 }
