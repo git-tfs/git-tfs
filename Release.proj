@@ -7,6 +7,7 @@
     <PackagedDir>$(SolutionDir)/Releases</PackagedDir>
     <TargetPlatform>AnyCPU</TargetPlatform>
     <TargetPlatform Condition="Exists('$(SolutionDir)/GitTfs.Vs2008/GitTfs.Vs2008.csproj')">x86</TargetPlatform>
+	<VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -24,7 +25,8 @@
     <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />
   </Target>
 
-  <Target Name="Release" DependsOnTargets="Build; Package">
+  <Target Name="Release" DependsOnTargets="UpdateVersion; Build; PushVersion; Package">
+	<Error Text="You should specify a version number!" Condition="'$(Version)' == ''" />
   </Target>
 
   <Target Name="Build">
@@ -46,12 +48,46 @@
   </Target>
 
   <Target Name="Version">
-    <ReadLinesFromFile File="$(SolutionDir)\VERSION">
+    <!--<ReadLinesFromFile File="$(SolutionDir)\VERSION">
       <Output TaskParameter="Lines" PropertyName="Version" />
-    </ReadLinesFromFile>
+    </ReadLinesFromFile>-->
     <PropertyGroup>
       <Archive>$(PackagedDir)/GitTfs-$(Version).zip</Archive>
     </PropertyGroup>
   </Target>
+  <Target Name="UpdateVersion">
+	<UpdateApplicationRevision VersionFilePath="$(VersionFilePath)" Version="$(Version)" />
+  </Target>
+  <Target Name="PushVersion">
+	<Exec Command="git add $(VersionFilePath)" />
+	<Exec Command="git commit -m %22v$(Version)%22" />
+	<Exec Command="git push origin master" />
+	<Exec Command="git tag v$(Version)" />
+  </Target>
+
+  <UsingTask TaskName="UpdateApplicationRevision" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+   <ParameterGroup>
+        <VersionFilePath ParameterType="System.String" Required="true" />
+        <Version ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+        <Task>
+          <Reference Include="$(MSBuildToolsPath)\Microsoft.Build.dll" />
+          <Reference Include="System.Text.RegularExpressions" />
+          <Reference Include="System.IO" />
+        <Code Type="Fragment" Language="cs">
+            <![CDATA[
+	StreamReader reader = new StreamReader( VersionFilePath );
+    string content = reader.ReadToEnd();
+    reader.Close();
+
+    content = System.Text.RegularExpressions.Regex.Replace( content, "string Version *= *\"(.+)\" *;", "string Version = \""+ Version +"\";" );
+
+    StreamWriter writer = new StreamWriter( VersionFilePath );
+    writer.Write( content );
+    writer.Close();
+]]>
+        </Code>
+    </Task>
+</UsingTask>
 
 </Project>
