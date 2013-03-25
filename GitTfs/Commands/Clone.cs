@@ -114,6 +114,7 @@ namespace Sep.Git.Tfs.Commands
                     if (withBranches)
                         throw new GitTfsException("error: cloning the whole repository or too high in the repository path doesn't permit to manage branches!\n" + cloneMsg);
                     stdout.WriteLine("warning: you are going to clone the whole repository or too high in the repository path !\n" + cloneMsg);
+                    return;
                 }
 
                 var tfsBranchesPath = tfsTrunkRepository.GetAllChildren();
