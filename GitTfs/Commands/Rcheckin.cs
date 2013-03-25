@@ -35,7 +35,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 return new OptionSet
                     {
-                        { "no-rebase|quick", "omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
+                        { "q|no-rebase|quick", "omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
                         v => Quick = v != null },
                         {"a|autorebase", "continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
                     }.Merge(_checkinOptions.OptionSet);
