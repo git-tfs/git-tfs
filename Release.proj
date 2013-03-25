@@ -8,6 +8,7 @@
     <TargetPlatform>AnyCPU</TargetPlatform>
     <TargetPlatform Condition="Exists('$(SolutionDir)/GitTfs.Vs2008/GitTfs.Vs2008.csproj')">x86</TargetPlatform>
 	<VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
+    <Archive>$(PackagedDir)/GitTfs-$(Version).zip</Archive>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -42,15 +43,10 @@
     <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
     <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
   </ItemGroup>
-  <Target Name="Package" DependsOnTargets="RestorePackages; Version">
+  <Target Name="Package" DependsOnTargets="RestorePackages">
     <Zip Files="@(ReleaseFiles)" ZipFileName="$(Archive)" WorkingDirectory="$(BuildDir)" />
   </Target>
 
-  <Target Name="Version">
-    <PropertyGroup>
-      <Archive>$(PackagedDir)/GitTfs-$(Version).zip</Archive>
-    </PropertyGroup>
-  </Target>
   <Target Name="UpdateVersion">
 	<Error Text="You should specify a version number!" Condition="'$(Version)' == ''" />
     <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties ; { ; public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="Unicode"/>
