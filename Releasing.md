@@ -3,11 +3,15 @@ BUILDING AND RELEASING GIT-TFS
 
 Normally, you should do this:
 
-1. Update the version in VERSION and Version.cs, commit, tag.
+1. Make sure your HEAD is clean and that it is the same as the upstream master!
 
-2. Build the release:
+    git ls-remote https://github.com/git-tfs/git-tfs.git refs/heads/master
+    git rev-parse HEAD
+    git status
 
-    msbuild Release.proj /t:Release
+2. Build the release and include the version (e.g. X.Y.Z).
+
+    msbuild Release.proj /t:Release /p:Version=vX.Y.Z
 
 3. Upload the release somewhere.
 
