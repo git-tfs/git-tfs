@@ -2,6 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Help" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+	<OriginUrl>https://github.com/git-tfs/git-tfs.git</OriginUrl>
     <SolutionDir>.</SolutionDir>
     <BuildDir>$(SolutionDir)/GitTfs/bin/Release</BuildDir>
     <PackagedDir>$(SolutionDir)/Releases</PackagedDir>
@@ -57,6 +58,6 @@
 	<Exec Command="git tag v$(Version)" />
   </Target>
   <Target Name="PushSource">
-	<Exec Command="git push origin master v$(Version)" />
+	<Exec Command="git push $(OriginUrl) master v$(Version)" />
   </Target>
 </Project>
