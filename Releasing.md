@@ -11,7 +11,7 @@ Normally, you should do this:
 
 2. Build the release and include the version (e.g. X.Y.Z).
 
-    msbuild Release.proj /t:Release /p:Version=vX.Y.Z
+    msbuild Release.proj /t:Release /p:Version=X.Y.Z
 
 3. Upload the release somewhere.
 
