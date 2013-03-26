@@ -43,14 +43,12 @@ namespace Sep.Git.Tfs.Util
             }
         }
 
-        // we use a concatenation of trimmed name+email strings
-        // as git user id, which is used as key to look up if an
-        // author is known.
+        // we only use the trimmed email address as identity 
+        // (dictionary key) to avoid mismatches because of 
+        // active directory name formatting rules.
         private void _BuildGitUserId()
         {
-            string n = Name.Trim();
-            string e = Email.Trim();
-            _gitUserId = n + e;
+            _gitUserId = Email.Trim(); 
         }
 
         #region (private)
