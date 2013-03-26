@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" DefaultTargets="Help" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-	<OriginUrl>https://github.com/git-tfs/git-tfs.git</OriginUrl>
+    <OriginUrl>https://github.com/git-tfs/git-tfs.git</OriginUrl>
     <SolutionDir>.</SolutionDir>
     <BuildDir>$(SolutionDir)/GitTfs/bin/Release</BuildDir>
     <PackagedDir>$(SolutionDir)/Releases</PackagedDir>
     <TargetPlatform>AnyCPU</TargetPlatform>
     <TargetPlatform Condition="Exists('$(SolutionDir)/GitTfs.Vs2008/GitTfs.Vs2008.csproj')">x86</TargetPlatform>
-	<VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
+    <VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
     <Archive>$(PackagedDir)/GitTfs-$(Version).zip</Archive>
   </PropertyGroup>
 
@@ -49,15 +49,17 @@
   </Target>
 
   <Target Name="UpdateVersion">
-	<Error Text="You should specify a version number!" Condition="'$(Version)' == ''" />
+    <Error Text="You should specify a version number!" Condition="'$(Version)' == ''" />
     <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties { public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="ASCII"/>
-	<Exec Command="git add $(VersionFilePath)" />
-	<Exec Command="git commit -m v$(Version)" />
+    <Exec Command="git add $(VersionFilePath)" />
+    <Exec Command="git commit -m v$(Version)" />
   </Target>
+
   <Target Name="TagSource">
-	<Exec Command="git tag v$(Version)" />
+    <Exec Command="git tag v$(Version)" />
   </Target>
+
   <Target Name="PushSource">
-	<Exec Command="git push $(OriginUrl) master v$(Version)" />
+    <Exec Command="git push $(OriginUrl) master v$(Version)" />
   </Target>
 </Project>
