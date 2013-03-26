@@ -16,5 +16,19 @@ namespace Sep.Git.Tfs.VsCommon
                 _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges),
                 ToTfs(policyOverrideInfo));
         }
+
+        public int Checkin(IPendingChange[] changes, string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges,
+                           TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
+        {
+            return _workspace.CheckIn(
+                _bridge.Unwrap<PendingChange>(changes),
+                comment,
+                author,
+                _bridge.Unwrap<CheckinNote>(checkinNote),
+                _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges),
+                ToTfs(policyOverrideInfo));
+        }
+
+
     }
 }

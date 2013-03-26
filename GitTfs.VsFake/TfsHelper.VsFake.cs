@@ -248,6 +248,11 @@ namespace Sep.Git.Tfs.VsFake
                 throw new NotImplementedException();
             }
 
+            public int Checkin(IPendingChange[] changes, string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
+            {
+                throw new NotImplementedException();
+            }
+
             public int PendAdd(string path)
             {
                 throw new NotImplementedException();
