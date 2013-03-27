@@ -53,19 +53,19 @@ namespace Sep.Git.Tfs.Test.Util
         [Fact]
         public void AuthorsFileMultiLineRecord()
         {
-            string author = 
+            string author =
 @"Domain\Test.User = Test User <TestUser@example.com>
 Domain\Different.User = Three Name User < TestUser@example.com >";
             AuthorsFile authFile = new AuthorsFile();
             authFile.Parse(new StreamReader(new MemoryStream(Encoding.ASCII.GetBytes(author))));
             Assert.NotNull(authFile.Authors);
             Assert.Equal<int>(2, authFile.Authors.Count);
-            
+
             Assert.True(authFile.Authors.ContainsKey(@"Domain\Test.User"));
             Author auth = authFile.Authors[@"Domain\Test.User"];
             Assert.Equal<string>("Test User", auth.Name);
             Assert.Equal<string>("TestUser@example.com", auth.Email);
-            
+
             Assert.True(authFile.Authors.ContainsKey(@"Domain\Different.User"));
             auth = authFile.Authors[@"Domain\Different.User"];
             Assert.Equal<string>("Three Name User", auth.Name);
@@ -166,6 +166,116 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
             Assert.NotNull(authFile.Authors);
             Assert.Equal<int>(1, authFile.Authors.Count);
             Assert.True(authFile.Authors.ContainsKey(@"domain\Blåbærsyltetøy"));
+        }
+
+
+        private string _MergeAuthorsIntoString(string[] authors)
+        {
+            string result = @"";
+
+            for (int i = 0; i < authors.Length; ++i)
+            {
+                if (i != 0)
+                    result += Environment.NewLine;
+
+                result += authors[i];
+            }
+            return result;
+        }
+
+
+        private AuthorsFile _SetupAuthorsFile(string[] authors)
+        {
+            string author = _MergeAuthorsIntoString(authors);
+
+            AuthorsFile authFile = new AuthorsFile();
+            authFile.Parse(new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(author))));
+            return authFile;
+        }
+
+        [Fact]
+        public void AuthorsFileMultipleUsers()
+        {
+            string[] authors = {
+                @"Domain\Test.User = Test User <TestUser@example.com>",
+                @"Domain\Different.User = Three Name User < DiffUser@example.com >",
+                @"Domain\Yet.Another.User = Mr. 3 <yau@example.com>"
+            };
+
+            AuthorsFile authFile = _SetupAuthorsFile(authors);
+
+            Assert.Equal<int>(authors.Length, authFile.Authors.Count);
+            Assert.Equal<int>(authors.Length, authFile.AuthorsByGitUserId.Count);
+
+            // contains all tfs users
+            Assert.True(authFile.Authors.ContainsKey(@"Domain\Test.User"));
+            Assert.True(authFile.Authors.ContainsKey(@"Domain\Different.User"));
+            Assert.True(authFile.Authors.ContainsKey(@"Domain\Yet.Another.User"));
+
+            // contains all git users
+            Assert.True(authFile.AuthorsByGitUserId.ContainsKey(Author.BuildGitUserId("TestUser@example.com")));
+            Assert.True(authFile.AuthorsByGitUserId.ContainsKey(Author.BuildGitUserId("DiffUser@example.com")));
+            Assert.True(authFile.AuthorsByGitUserId.ContainsKey(Author.BuildGitUserId("YAU@example.com")));
+        }
+
+
+        [Fact]
+        public void AuthorsFileDifferentIdsForUsersWithSameEmail()
+        {
+            string[] authors = {
+                @"Domain\Test.User = Test User <TestUser@example.com>",
+                @"Domain\Different.User = Three Name User < TestUser@example.com >",
+                @"Domain\Yet.Another.User = Mr. 3 <testuser@example.com>"
+            };
+
+            AuthorsFile authFile = _SetupAuthorsFile(authors); 
+
+            Assert.NotNull(authFile.AuthorsByGitUserId);
+
+            // multiple users with the same email -> 3 tfs users, 1 git user
+            Assert.Equal<int>(authors.Length, authFile.Authors.Count);
+            Assert.Equal<int>(1, authFile.AuthorsByGitUserId.Count);
+
+            // contains all tfs users
+            Assert.True(authFile.Authors.ContainsKey(@"Domain\Test.User"));
+            Assert.True(authFile.Authors.ContainsKey(@"Domain\Different.User"));
+            Assert.True(authFile.Authors.ContainsKey(@"Domain\Yet.Another.User"));
+
+            // contains all git users
+            Assert.True(authFile.AuthorsByGitUserId.ContainsKey(Author.BuildGitUserId("TestUser@example.com")));
+
+            // return the first tfs user id in the authors file when multiple
+            // match to the same git id.
+            Author a;
+            Tuple<string, string> git_author = new Tuple<string, string>("Test User", "TestUser@example.com");
+            Assert.True(authFile.TryGetValue(git_author, out a));
+            Assert.Equal(a.TfsUserId, @"Domain\Test.User");
+
+        }
+
+
+
+        [Fact]
+        public void AuthorsFileFindAuthors()
+        {
+            string[] authors = {
+                @"Domain\Test.User = Test User <TestUser@example.com>",
+                @"Domain\Different.User = Three Name User < TestUser@example.com >",
+                @"Domain\Yet.Another.User = Mr. 3 <testuser@example.com>"
+            };
+
+            AuthorsFile authFile = _SetupAuthorsFile(authors); 
+
+            Author a;
+
+            // find existing author
+            Tuple<string, string> git_author = new Tuple<string, string>("Test User", "TestUser@example.com");
+            Assert.True(authFile.TryGetValue(git_author, out a));
+
+            // try to find unknown author
+            Tuple<string, string> git_unknown_author = new Tuple<string, string>("Test User", "TestFailUser@example.com");
+            Assert.False(authFile.TryGetValue(git_unknown_author, out a));
+
         }
     }
 }
