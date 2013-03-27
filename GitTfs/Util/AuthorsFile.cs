@@ -69,7 +69,7 @@ namespace Sep.Git.Tfs.Util
         private readonly Dictionary<string, Author> _authorsByGitUserId = new Dictionary<string, Author>(StringComparer.OrdinalIgnoreCase);
 
         public AuthorsFile()
-        { }
+        {}
 
 
         public Dictionary<string, Author> Authors
@@ -80,6 +80,7 @@ namespace Sep.Git.Tfs.Util
             }
         }
 
+
         public Dictionary<string, Author> AuthorsByGitUserId
         {
             get
@@ -88,11 +89,14 @@ namespace Sep.Git.Tfs.Util
             }
         }
 
-        public bool TryGetValue(Tuple<string,string> gitUserId, out Author value)
+
+        public Author FindAuthor(Tuple<string,string> gitUser)
         {
-            string key = Author.BuildGitUserId(gitUserId); 
-            return _authorsByGitUserId.TryGetValue(key, out value);
+            string key = Author.BuildGitUserId(gitUser);
+            Author a;
+            return _authorsByGitUserId.TryGetValue(key, out a) ? a : null;
         }
+
 
         // The first time a tfs user id or a git id is encountered, it is used as lookup key.
         public void Parse(TextReader authorsFileStream)

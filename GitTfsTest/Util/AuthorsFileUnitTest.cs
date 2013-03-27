@@ -246,9 +246,9 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
 
             // return the first tfs user id in the authors file when multiple
             // match to the same git id.
-            Author a;
             Tuple<string, string> git_author = new Tuple<string, string>("Test User", "TestUser@example.com");
-            Assert.True(authFile.TryGetValue(git_author, out a));
+            Author a = authFile.FindAuthor(git_author);
+            Assert.NotNull(a);
             Assert.Equal(a.TfsUserId, @"Domain\Test.User");
 
         }
@@ -266,16 +266,15 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
 
             AuthorsFile authFile = _SetupAuthorsFile(authors); 
 
-            Author a;
-
             // find existing author
-            Tuple<string, string> git_author = new Tuple<string, string>("Test User", "TestUser@example.com");
-            Assert.True(authFile.TryGetValue(git_author, out a));
+            Tuple<string, string> gitAuthor = new Tuple<string, string>("Test User", "TestUser@example.com");
+            Author existingAuthor = authFile.FindAuthor(gitAuthor);
+            Assert.NotNull(existingAuthor);
 
             // try to find unknown author
-            Tuple<string, string> git_unknown_author = new Tuple<string, string>("Test User", "TestFailUser@example.com");
-            Assert.False(authFile.TryGetValue(git_unknown_author, out a));
-
+            Tuple<string, string> gitUnknownAuthor = new Tuple<string, string>("Test User", "TestFailUser@example.com");
+            Author unknownAuthor = authFile.FindAuthor(gitUnknownAuthor);
+            Assert.Null(unknownAuthor);
         }
     }
 }

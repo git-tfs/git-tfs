@@ -163,16 +163,15 @@ namespace Sep.Git.Tfs.Util
             TextReader tr = new StreamReader(checkinOptions.AuthorsFilePath);
             af.Parse(tr);
 
-            Author a;
-            if (af.TryGetValue(commit.AuthorAndEmail, out a))
-            {
-                checkinOptions.AuthorTfsUserId = a.TfsUserId;
-                writer.WriteLine("Commit was authored by git user {0} {1} ({2})", a.Name, a.Email, a.TfsUserId);
-            }
-            else
+            Author a = af.FindAuthor(commit.AuthorAndEmail);
+            if (a == null)
             {
                 checkinOptions.AuthorTfsUserId = null;
+                return;
             }
+
+            checkinOptions.AuthorTfsUserId = a.TfsUserId;
+            writer.WriteLine("Commit was authored by git user {0} {1} ({2})", a.Name, a.Email, a.TfsUserId);
         }
 
     }
