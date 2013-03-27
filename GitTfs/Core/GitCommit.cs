@@ -43,8 +43,7 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                var a = _commit.Author;
-                return new Tuple<string,string>(a.Name, a.Email);
+                return new Tuple<string,string>(_commit.Author.Name, _commit.Author.Email);
             }
         }
     }
