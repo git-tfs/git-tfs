@@ -1,0 +1,14 @@
+#!/bin/sh -x
+
+git submodule update --init
+cd lib/libgit2sharp
+ git submodule update --init
+ mkdir cmake-build
+ cd cmake-build
+  cmake -DTHREADSAFE=ON -DCMAKE_BUILD_TYPE=Release -DBUILD_CLAR=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=./libgit2-bin ../libgit2
+  export LD_LIBRARY_PATH=$PWD/libgit2-bin/lib
+  cmake --build . --target install
+  cp -Rpv libgit2-bin/lib ../Lib/NativeBinaries/
+ cd ..
+cd ../..
+xbuild CI.proj
