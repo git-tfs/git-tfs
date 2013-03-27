@@ -13,7 +13,7 @@ namespace Sep.Git.Tfs.Util
         {
             TfsUserId = tfsUserId;
             _gitAuthor = new Tuple<string, string>(name, email);
-            _BuildGitUserId();
+            _gitUserId = BuildGitUserId(_gitAuthor);
         }
 
         public string Name 
@@ -46,9 +46,14 @@ namespace Sep.Git.Tfs.Util
         // we only use the trimmed email address as identity 
         // (dictionary key) to avoid mismatches because of 
         // active directory name formatting rules.
-        private void _BuildGitUserId()
+        public static string BuildGitUserId(string email)
         {
-            _gitUserId = Email.Trim(); 
+            return email.Trim(); 
+        }
+
+        public static string BuildGitUserId(Tuple<string,string> gitUser)
+        {
+            return BuildGitUserId(gitUser.Item2);
         }
 
         #region (private)
@@ -85,10 +90,11 @@ namespace Sep.Git.Tfs.Util
 
         public bool TryGetValue(Tuple<string,string> gitUserId, out Author value)
         {
-            string key = gitUserId.Item1.Trim() + gitUserId.Item2.Trim();
+            string key = Author.BuildGitUserId(gitUserId); 
             return _authorsByGitUserId.TryGetValue(key, out value);
         }
 
+        // The first time a tfs user id or a git id is encountered, it is used as lookup key.
         public void Parse(TextReader authorsFileStream)
         {
             if (authorsFileStream != null)
