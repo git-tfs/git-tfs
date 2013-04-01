@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata>
+    <id>gittfs</id>
+    <title>GitTfs</title>
+    <version>{{PackageVersion}}</version>
+    <authors>Matt Burke</authors>
+    <owners>Rob Reynolds</owners>
+    <summary>Git Tfs - Work smarter</summary>
+    <description>git-tfs is a two-way bridge between TFS and git, similar to git-svn. It fetches TFS commits into a git repository, and lets you push your updates back to TFS.</description>
+    <projectUrl>https://github.com/git-tfs/git-tfs</projectUrl>
+    <tags>git tfs git-tfs sourceControl</tags>
+    <licenseUrl>https://github.com/git-tfs/git-tfs/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <dependencies>
+      <dependency id="msysgit" />
+    </dependencies>
+  </metadata>
+</package>
