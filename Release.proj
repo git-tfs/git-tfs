@@ -118,7 +118,11 @@
     <Exec Command="cpack" WorkingDirectory="$(ChocolateyBuildDir)" />
   </Target>
 
-  <Target Name="PushChocolateyPackage" DependsOnTargets="BuildChocolateyPackage">
+  <Target Name="TestChocolateyPackage" DependsOnTargets="BuildChocolateyPackage">
+    <Exec Command="cinst $(ChocolateyNupkg)" Condition="'$(SkipChocolateyTest)' != 'Yes'" />
+  </Target>
+
+  <Target Name="PushChocolateyPackage" DependsOnTargets="TestChocolateyPackage">
     <Exec Command="cpush $(ChocolateyNupkg)" />
   </Target>
 </Project>
