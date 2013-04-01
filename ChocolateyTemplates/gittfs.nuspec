@@ -3,9 +3,9 @@
   <metadata>
     <id>gittfs</id>
     <title>GitTfs</title>
-    <version>{{PackageVersion}}</version>
+    <version>${PackageVersion}</version>
     <authors>Matt Burke</authors>
-    <owners>Rob Reynolds</owners>
+    <owners>Matt Burke</owners>
     <summary>Git Tfs - Work smarter</summary>
     <description>git-tfs is a two-way bridge between TFS and git, similar to git-svn. It fetches TFS commits into a git repository, and lets you push your updates back to TFS.</description>
     <projectUrl>https://github.com/git-tfs/git-tfs</projectUrl>
