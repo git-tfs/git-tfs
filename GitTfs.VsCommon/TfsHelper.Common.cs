@@ -256,7 +256,8 @@ namespace Sep.Git.Tfs.VsCommon
                 }
                 else
                 {
-                    foreach (var mapping in workspace.Folders.Where(f => Path.GetFullPath(f.LocalItem).ToLower() == Path.GetFullPath(workingDirectory).ToLower()))
+						  var dirPath = Path.GetFullPath(workingDirectory);
+                    foreach (var mapping in workspace.Folders.Where(f => dirPath.StartsWith(Path.GetFullPath(f.LocalItem), StringComparison.CurrentCultureIgnoreCase)))
                     {
                         _stdout.WriteLine("Removing @\"" + mapping.LocalItem + "\" from workspace \"" + workspace.DisplayName + "\".");
                         workspace.DeleteMapping(mapping);
