@@ -244,6 +244,10 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void CleanupWorkspaces(string workingDirectory)
         {
+            // workingDirectory is the path to a TFS workspace managed by git-tfs.
+            // By default, this will be something like `.git/tfs/default/workspace`.
+            // If `git-tfs.workspace-dir` is set, workingDirectory will be that path.
+
             Trace.WriteLine("Looking for workspaces mapped to @\"" + workingDirectory + "\"...", "cleanup-workspaces");
             var workspace = VersionControl.TryGetWorkspace(workingDirectory);
             if (workspace != null)
@@ -251,11 +255,17 @@ namespace Sep.Git.Tfs.VsCommon
                 Trace.WriteLine("Found mapping in workspace \"" + workspace.DisplayName + "\".", "cleanup-workspaces");
                 if (workspace.Folders.Length == 1)
                 {
+                    // Normally, the workspace will have one mapping, mapped to the git-tfs
+                    // workspace folder. In that case, we just delete the workspace.
                     _stdout.WriteLine("Removing workspace \"" + workspace.DisplayName + "\".");
                     workspace.Delete();
                 }
                 else
                 {
+                    // If something outside of git-tfs set up a workspace, the workspace
+                    // might be set at a higher directory. If there is more than one mapping
+                    // in the workspace, we only need to remove the one that includes the working
+                    // directory that we want to set.
                     var fullWorkingDirectoryPath = Path.GetFullPath(workingDirectory);
                     foreach (var mapping in workspace.Folders.Where(f => fullWorkingDirectoryPath.StartsWith(Path.GetFullPath(f.LocalItem), StringComparison.CurrentCultureIgnoreCase)))
                     {
