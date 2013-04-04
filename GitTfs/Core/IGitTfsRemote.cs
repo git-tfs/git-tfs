@@ -41,7 +41,7 @@ namespace Sep.Git.Tfs.Core
         void CleanupWorkspace();
         void CleanupWorkspaceDirectory();
         ITfsChangeset GetChangeset(long changesetId);
-        void UpdateRef(string commitHash, long changesetId);
+        void UpdateTfsHead(string commitHash, long changesetId);
         void EnsureTfsAuthenticated();
         bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath);
     }

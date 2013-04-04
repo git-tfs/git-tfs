@@ -51,7 +51,7 @@ namespace Sep.Git.Tfs.Commands
                         Repository = parent.Remote.TfsRepositoryPath,
                         RemoteOptions = _remoteOptions,
                     });
-                    remote.UpdateRef(parent.GitCommit, parent.ChangesetId);
+                    remote.UpdateTfsHead(parent.GitCommit, parent.ChangesetId);
                     _stdout.WriteLine("-> new remote " + remote.Id);
                 }
                 else

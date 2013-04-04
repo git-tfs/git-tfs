@@ -219,8 +219,8 @@ namespace Sep.Git.Tfs.Core
                                          select cs;
             foreach (var cs in untrackedTfsChangesets)
             {
-                // UpdateRef sets tag with TFS changeset id on each commit so we can't just update to latest
-                remote.UpdateRef(cs.GitCommit, cs.ChangesetId);
+                // UpdateTfsHead sets tag with TFS changeset id on each commit so we can't just update to latest
+                remote.UpdateTfsHead(cs.GitCommit, cs.ChangesetId);
             }
         }
 
