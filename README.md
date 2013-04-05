@@ -4,6 +4,8 @@ git-tfs is a two-way bridge between TFS and git, similar to git-svn.
 
 ## Usage
 
+You will find there a very short help. For more help, please look at the [wiki](https://github.com/git-tfs/git-tfs/wiki)
+
 ### Cloning a repository
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/some_project
