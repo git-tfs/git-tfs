@@ -291,6 +291,10 @@ namespace Sep.Git.Tfs.VsFake
             #endregion
         }
 
+        public void CleanupWorkspaces(string workingDirectory)
+        {
+        }
+
         #endregion
 
         #region unimplemented
@@ -336,11 +340,6 @@ namespace Sep.Git.Tfs.VsFake
         }
 
         public int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CleanupWorkspaces(string workingDirectory)
         {
             throw new NotImplementedException();
         }
