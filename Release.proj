@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<Project ToolsVersion="4.0" DefaultTargets="Help" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <OriginUrl>https://github.com/git-tfs/git-tfs.git</OriginUrl>
+    <SolutionDir>.</SolutionDir>
+    <BuildDir>$(SolutionDir)/GitTfs/bin/Release</BuildDir>
+    <PackagedDir>$(SolutionDir)/Releases</PackagedDir>
+    <TargetPlatform>AnyCPU</TargetPlatform>
+    <TargetPlatform Condition="Exists('$(SolutionDir)/GitTfs.Vs2008/GitTfs.Vs2008.csproj')">x86</TargetPlatform>
+    <VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
+    <Archive>$(PackagedDir)/GitTfs-$(Version).zip</Archive>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackagesConfig>$(SolutionDir)/.nuget/packages.config</PackagesConfig>
+    <RequireRestoreConsent>false</RequireRestoreConsent>
+    <MSBuildCommunityTasksPath>$(SolutionDir)/packages/MSBuildTasks.1.4.0.45/tools</MSBuildCommunityTasksPath>
+    <MSBuildCommunityTasksLib>$(MSBuildCommunityTasksPath)/MSBuild.Community.Tasks.dll</MSBuildCommunityTasksLib>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)/.nuget/nuget.targets" />
+
+  <Target Name="Help">
+    <ReadLinesFromFile File="Releasing.md">
+      <Output TaskParameter="Lines" ItemName="DeployInstructions"/>
+    </ReadLinesFromFile>
+    <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />
+  </Target>
+
+  <Target Name="Release" DependsOnTargets="UpdateVersion; TagSource; Build; PushSource; Package">
+  </Target>
+
+  <Target Name="Build">
+    <MSBuild Projects="GitTfs.sln" Targets="Rebuild" Properties="Configuration=Release;Platform=$(TargetPlatform);WarningLevel=0" />
+  </Target>
+
+  <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Zip" />
+  <ItemGroup>
+    <ReleaseFiles Include="$(SolutionDir)\README.md" />
+    <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
+    <ReleaseFiles Include="$(SolutionDir)\NOTICE" />
+    <ReleaseFiles Include="$(BuildDir)\git-tfs.exe" />
+    <ReleaseFiles Include="$(BuildDir)\*.config" />
+    <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
+    <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
+  </ItemGroup>
+  <Target Name="Package" DependsOnTargets="RestorePackages">
+    <Zip Files="@(ReleaseFiles)" ZipFileName="$(Archive)" WorkingDirectory="$(BuildDir)" />
+  </Target>
+
+  <Target Name="UpdateVersion">
+    <Error Text="You should specify a version number!" Condition="'$(Version)' == ''" />
+    <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties { public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="ASCII"/>
+    <Exec Command="git add $(VersionFilePath)" />
+    <Exec Command="git commit -m v$(Version)" />
+  </Target>
+
+  <Target Name="TagSource">
+    <Exec Command="git tag v$(Version)" />
+  </Target>
+
+  <Target Name="PushSource">
+    <Exec Command="git push $(OriginUrl) master v$(Version)" />
+  </Target>
+</Project>
