@@ -331,9 +331,19 @@ namespace Sep.Git.Tfs.Core
         public string GetCommitMessage(string head, string parentCommitish)
         {
             var message = new System.Text.StringBuilder();
+
+            var parentCommit = (Commit)_repository.Lookup(parentCommitish, GitObjectType.Commit);
+
             foreach (LibGit2Sharp.Commit comm in
                 _repository.Commits.QueryBy(new LibGit2Sharp.Filter { Since = head, Until = parentCommitish }))
             {
+                // Filter out irrelevant commit messages. 
+                // This is needed if the parentCommit is not on the same branch as the head.
+                if (comm.Committer.When < parentCommit.Committer.When)
+                {
+                    break;
+                }
+
                 // Normalize commit message line endings to CR+LF style, so that message
                 // would be correctly shown in TFS commit dialog.
                 message.AppendLine(NormalizeLineEndings(comm.Message));
