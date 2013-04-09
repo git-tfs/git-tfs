@@ -229,6 +229,11 @@ namespace Sep.Git.Tfs.Core
             return new GitCommit(_repository.Lookup<Commit>(commitish));
         }
 
+        public String GetCurrentCommit()
+        {
+            return _repository.Head.Commits.First().Sha;
+        }
+
         public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head)
         {
             return GetLastParentTfsCommits(head, false);

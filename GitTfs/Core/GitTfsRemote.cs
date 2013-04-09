@@ -586,7 +586,7 @@ namespace Sep.Git.Tfs.Core
 
         public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
         {
-            return MatchesTfsUrl(tfsUrl) && TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
+            return MatchesTfsUrl(tfsUrl) && TfsRepositoryPath != null && TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
         }
 
         private bool MatchesTfsUrl(string tfsUrl)

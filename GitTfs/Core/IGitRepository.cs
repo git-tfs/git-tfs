@@ -27,6 +27,7 @@ namespace Sep.Git.Tfs.Core
         bool WorkingCopyHasUnstagedOrUncommitedChanges { get; }
         void CopyBlob(string sha, string outputFile);
         GitCommit GetCommit(string commitish);
+        string GetCurrentCommit();
         Dictionary<string, GitObject> GetObjects();
         string GetCommitMessage(string head, string parentCommitish);
         string GetCommitMessage(string commitish);

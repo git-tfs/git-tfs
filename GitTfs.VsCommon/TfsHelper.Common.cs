@@ -108,7 +108,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _linking ?? (_linking = GetService<ILinking>()); }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                                                          null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,

@@ -55,7 +55,7 @@ namespace Sep.Git.Tfs.VsFake
             return _script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
         {
             return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
         }

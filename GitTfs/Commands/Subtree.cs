@@ -90,6 +90,7 @@ namespace Sep.Git.Tfs.Commands
 
             var fetch = Squash ? this._quickFetch : this._fetch;
 
+            bool didCreate = false;
             var tfsUri = new Uri(tfsUrl);
             IGitTfsRemote owner = _globals.Repository.ReadAllTfsRemotes().FirstOrDefault(x => string.IsNullOrEmpty(x.TfsRepositoryPath) && !x.Id.StartsWith("subtree/") && tfsUri.Equals(x.TfsUrl));
             if (owner == null)
@@ -102,6 +103,7 @@ namespace Sep.Git.Tfs.Commands
                     RemoteOptions = _remoteOptions
                 });
                 _stdout.WriteLine("-> new owning remote " + owner.Id);
+                didCreate = true;
             }
             else
             {
@@ -124,19 +126,27 @@ namespace Sep.Git.Tfs.Commands
             _stdout.WriteLine("-> new remote " + remote.Id);
             
             int result = fetch.Run(remote.Id);
-
+            
             if (result == GitTfsExitCodes.OK)
             {
+
                 var p = Prefix.Replace(" ", "\\ ");
-                List<string> args = new List<string>(){"subtree", "add", "--prefix=" + p, remote.RemoteRef};
-                if (Squash)
-                {
-                    args.Add("--squash");
-                }
+
+                List<string> args = new List<string>(){"subtree", "add", 
+                    "--prefix=" + p,
+                    remote.RemoteRef
+                    };
                 command(args);
+
+                //update the owner remote to point at the commit where the newly created subtree was merged.
+                var commit = _globals.Repository.GetCurrentCommit();
+                owner.UpdateRef(commit, remote.MaxChangesetId);
 
                 result = GitTfsExitCodes.OK;
             }
+
+            
+            
 
             return result;
         }
@@ -157,10 +167,6 @@ namespace Sep.Git.Tfs.Commands
             {
                 var p = Prefix.Replace(" ", "\\ ");
                 List<string> args = new List<string>(){ "subtree", "merge", "--prefix=" + p, remote.RemoteRef };
-                if(Squash)
-                {
-                    args.Add("--squash");
-                }
                 command(args);
                 result = GitTfsExitCodes.OK;
             }
