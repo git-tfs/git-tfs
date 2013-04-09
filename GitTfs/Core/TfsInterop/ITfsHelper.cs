@@ -33,5 +33,16 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IEnumerable<IBranchObject> GetBranches();
         void EnsureAuthenticated();
         void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
+
+        /// <summary>
+        /// Creates and maps a workspace for the given remote with the given local -> server directory mappings, at the given Tfs version,
+        /// and then performs the action.
+        /// </summary>
+        /// <param name="localDirectory">The local base directory containing all the mappings</param>
+        /// <param name="remote">The owning remote</param>
+        /// <param name="mappings">The workspace mappings to create.  Item1 is the relative path from the localDirectory, and Item2 is the TfsRepositoryPath</param>
+        /// <param name="versionToFetch">The TFS version to fetch from the server</param>
+        /// <param name="action">The action to perform</param>
+        void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
     }
 }

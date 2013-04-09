@@ -546,7 +546,16 @@ namespace Sep.Git.Tfs.Core
             // with it.
             Tfs.CleanupWorkspaces(DefaultWorkingDirectory);
 
-            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
+            //are there any subtrees?
+            var subtrees = globals.Repository.GetSubtrees(this);
+            if (subtrees.Any())
+            {
+                Tfs.WithWorkspace(WorkingDirectory, this, subtrees.Select(x => new Tuple<string, string>(x.Id.Substring("subtree/".Length), x.TfsRepositoryPath)), parentChangeset, action);
+            }
+            else
+            {
+                Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
+            }
         }
 
         private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options)

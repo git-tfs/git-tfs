@@ -90,26 +90,48 @@ namespace Sep.Git.Tfs.Commands
 
             var fetch = Squash ? this._quickFetch : this._fetch;
 
-            string remoteId = "subtree/" + Prefix;
-            IGitTfsRemote remote;
-            if (_globals.Repository.HasRemote(remoteId))
-            {
-                remote = _globals.Repository.ReadTfsRemote(remoteId);
-            }
-            else
-            {
-                //create a remote for the new subtree
-                remote = _globals.Repository.CreateTfsRemote(new RemoteInfo
-                {
-                    Id = remoteId,
-                    Url = tfsUrl,
-                    Repository = tfsRepositoryPath,
-                    RemoteOptions = _remoteOptions,
-                });
-                _stdout.WriteLine("-> new remote " + remote.Id);
-            }
             
+            //create a remote for the new subtree
+            string remoteId = "subtree/" + Prefix;
+            IGitTfsRemote remote = _globals.Repository.CreateTfsRemote(new RemoteInfo
+            {
+                Id = remoteId,
+                Url = tfsUrl,
+                Repository = tfsRepositoryPath,
+                RemoteOptions = _remoteOptions,
+            });
+            _stdout.WriteLine("-> new remote " + remote.Id);
 
+            var tfsUri = new Uri(tfsUrl);
+            IGitTfsRemote owner = _globals.Repository.ReadAllTfsRemotes().FirstOrDefault(x => !x.Id.StartsWith("subtree/") && tfsUri.Equals(x.TfsUrl));
+            if (owner == null)
+            {
+                try
+                {
+                    owner = _globals.Repository.CreateTfsRemote(new RemoteInfo
+                    {
+                        Id = "origin",
+                        Url = tfsUrl,
+                        Repository = "",
+                        RemoteOptions = _remoteOptions
+                    });
+                }
+                catch (Exception)
+                {
+                    //need to clean up our subtree
+                    try
+                    {
+                        _globals.Repository.DeleteTfsRemote(remote);
+                    }
+                    catch
+                    {
+
+                    }
+
+                    throw;
+                }
+            }
+                
             int result = fetch.Run(remote.Id);
 
             if (result == GitTfsExitCodes.OK)

@@ -475,5 +475,19 @@ namespace Sep.Git.Tfs.Core
         {
             _repository.Reset(resetOptions, sha);
         }
+
+        /// <summary>
+        /// Gets all configured "subtree" remotes which point to the same Tfs URL as the given remote.
+        /// If the given remote is itself a subtree, an empty enumerable is returned.
+        /// </summary>
+        public IEnumerable<IGitTfsRemote> GetSubtrees(IGitTfsRemote owner)
+        {
+            //a subtree remote cannot have subtrees itself.
+            if (owner.Id.StartsWith("subtree/"))
+                return Enumerable.Empty<IGitTfsRemote>();
+
+            var uri = new Uri(owner.TfsUrl);
+            return ReadAllTfsRemotes().Where(x => x.Id.StartsWith("subtree/") && uri.Equals(x.TfsUrl));
+        }
     }
 }
