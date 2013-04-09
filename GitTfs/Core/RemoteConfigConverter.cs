@@ -36,7 +36,7 @@ namespace Sep.Git.Tfs.Core
                         remote.Autotag = bool.Parse(entry.Value);
                 }
             }
-            return remotes.Values.Where(r => !string.IsNullOrWhiteSpace(r.Url) && !string.IsNullOrWhiteSpace(r.Repository));
+            return remotes.Values.Where(r => !string.IsNullOrWhiteSpace(r.Url));
         }
 
         public IEnumerable<KeyValuePair<string, string>> Dump(RemoteInfo remote)

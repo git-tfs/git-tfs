@@ -9,7 +9,7 @@ using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
 {
-    public class TfsChangeset : ITfsChangeset
+    public class TfsChangeset : ITfsChangeset, IEquatable<TfsChangeset>
     {
         private readonly ITfsHelper _tfs;
         private readonly IChangeset _changeset;
@@ -286,6 +286,28 @@ namespace Sep.Git.Tfs.Core
                            CommitterEmail = email,
                            AuthorEmail = email
                        };
+        }
+
+
+        public bool Equals(TfsChangeset other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+
+            return this.Summary.ChangesetId == other.Summary.ChangesetId;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (TfsChangeset)) return false;
+            return Equals((TfsChangeset) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Summary != null ? Summary.ChangesetId.GetHashCode() : 0);
         }
     }
 }

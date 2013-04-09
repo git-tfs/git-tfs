@@ -234,7 +234,7 @@ namespace Sep.Git.Tfs.Core
 
         public void QuickFetch()
         {
-            var changeset = Tfs.GetLatestChangeset(this);
+            var changeset = GetLatestChangeset();
             quickFetch(changeset);
         }
 
@@ -256,14 +256,34 @@ namespace Sep.Git.Tfs.Core
         {
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
             // TFS 2010 doesn't like when we ask for history past its last changeset.
-            if (MaxChangesetId == Tfs.GetLatestChangeset(this).Summary.ChangesetId)
+            if (MaxChangesetId == GetLatestChangeset().Summary.ChangesetId)
                 return Enumerable.Empty<ITfsChangeset>();
-            return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
+            
+            if(!string.IsNullOrEmpty(TfsRepositoryPath))
+                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
+
+            return globals.Repository.GetSubtrees(this)
+                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, x.MaxChangesetId + 1, x))
+                .Distinct()
+                .OrderBy(x => x.Summary.ChangesetId);
         }
 
         public ITfsChangeset GetChangeset(long changesetId)
         {
             return Tfs.GetChangeset((int)changesetId, this);
+        }
+
+        private ITfsChangeset GetLatestChangeset()
+        {
+            if (!string.IsNullOrEmpty(this.TfsRepositoryPath))
+            {
+                return Tfs.GetLatestChangeset(this);
+            }
+            else
+            {
+                var changesetId = globals.Repository.GetSubtrees(this).Select(x => Tfs.GetLatestChangeset(x)).Max(x => x.Summary.ChangesetId);
+                return GetChangeset(changesetId);
+            }
         }
 
         public void UpdateRef(string commitHash, long changesetId)
@@ -550,7 +570,7 @@ namespace Sep.Git.Tfs.Core
             var subtrees = globals.Repository.GetSubtrees(this);
             if (subtrees.Any())
             {
-                Tfs.WithWorkspace(WorkingDirectory, this, subtrees.Select(x => new Tuple<string, string>(x.Id.Substring("subtree/".Length), x.TfsRepositoryPath)), parentChangeset, action);
+                Tfs.WithWorkspace(WorkingDirectory, this, subtrees.Select(x => new Tuple<string, string>(x.TfsRepositoryPath, x.Id.Substring("subtree/".Length))), parentChangeset, action);
             }
             else
             {

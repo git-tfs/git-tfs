@@ -90,48 +90,39 @@ namespace Sep.Git.Tfs.Commands
 
             var fetch = Squash ? this._quickFetch : this._fetch;
 
+            var tfsUri = new Uri(tfsUrl);
+            IGitTfsRemote owner = _globals.Repository.ReadAllTfsRemotes().FirstOrDefault(x => string.IsNullOrEmpty(x.TfsRepositoryPath) && !x.Id.StartsWith("subtree/") && tfsUri.Equals(x.TfsUrl));
+            if (owner == null)
+            {
+                owner = _globals.Repository.CreateTfsRemote(new RemoteInfo
+                {
+                    Id = "origin",
+                    Url = tfsUrl,
+                    Repository = null,
+                    RemoteOptions = _remoteOptions
+                });
+                _stdout.WriteLine("-> new owning remote " + owner.Id);
+            }
+            else
+            {
+                _stdout.WriteLine("Attaching subtree to owning remote " + owner.Id);
+            }
+            
             
             //create a remote for the new subtree
             string remoteId = "subtree/" + Prefix;
-            IGitTfsRemote remote = _globals.Repository.CreateTfsRemote(new RemoteInfo
-            {
-                Id = remoteId,
-                Url = tfsUrl,
-                Repository = tfsRepositoryPath,
-                RemoteOptions = _remoteOptions,
-            });
+            IGitTfsRemote remote = _globals.Repository.HasRemote(remoteId) ? 
+                _globals.Repository.ReadTfsRemote(remoteId) :
+                _globals.Repository.CreateTfsRemote(new RemoteInfo
+                 {
+                     Id = remoteId,
+                     Url = tfsUrl,
+                     Repository = tfsRepositoryPath,
+                     RemoteOptions = _remoteOptions,
+                 });
+            
             _stdout.WriteLine("-> new remote " + remote.Id);
-
-            var tfsUri = new Uri(tfsUrl);
-            IGitTfsRemote owner = _globals.Repository.ReadAllTfsRemotes().FirstOrDefault(x => !x.Id.StartsWith("subtree/") && tfsUri.Equals(x.TfsUrl));
-            if (owner == null)
-            {
-                try
-                {
-                    owner = _globals.Repository.CreateTfsRemote(new RemoteInfo
-                    {
-                        Id = "origin",
-                        Url = tfsUrl,
-                        Repository = "",
-                        RemoteOptions = _remoteOptions
-                    });
-                }
-                catch (Exception)
-                {
-                    //need to clean up our subtree
-                    try
-                    {
-                        _globals.Repository.DeleteTfsRemote(remote);
-                    }
-                    catch
-                    {
-
-                    }
-
-                    throw;
-                }
-            }
-                
+            
             int result = fetch.Run(remote.Id);
 
             if (result == GitTfsExitCodes.OK)
