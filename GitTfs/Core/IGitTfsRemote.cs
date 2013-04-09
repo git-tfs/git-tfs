@@ -12,6 +12,11 @@ namespace Sep.Git.Tfs.Core
         string Id { get; set; }
         string TfsUrl { get; set; }
         string TfsRepositoryPath { get; set; }
+        /// <summary>
+        /// Gets the TFS server-side paths of all subtrees of this remote.
+        /// Valid if the remote has subtrees, which occurs when <see cref="TfsRepositoryPath"/> is null.
+        /// </summary>
+        string[] TfsSubtreePaths { get; }
         string IgnoreRegexExpression { get; set; }
         bool Autotag { get; set; }
         string TfsUsername { get; set; }

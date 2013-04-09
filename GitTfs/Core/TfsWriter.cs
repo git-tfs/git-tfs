@@ -22,6 +22,7 @@ namespace Sep.Git.Tfs.Core
             var tfsParents = _globals.Repository.GetLastParentTfsCommits(refToWrite);
             if (_globals.UserSpecifiedRemoteId != null)
                 tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == _globals.UserSpecifiedRemoteId);
+
             switch (tfsParents.Count())
             {
                 case 1:

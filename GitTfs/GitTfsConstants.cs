@@ -19,7 +19,7 @@ namespace Sep.Git.Tfs
                           GitTfsPrefix +
                           "-id:\\s+" +
                           "\\[(?<url>.+)\\]" +
-                          "(?<repository>.+);" +
+                          "(?<repository>.+)?;" +
                           "C(?<changeset>\\d+)" +
                           "\\s*$", RegexOptions.Multiline);
         // e.g. git-tfs-work-item: 24 associate

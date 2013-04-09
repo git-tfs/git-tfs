@@ -79,6 +79,23 @@ namespace Sep.Git.Tfs.Core
         }
 
         public string TfsRepositoryPath { get; set; }
+
+        /// <summary>
+        /// Gets the TFS server-side paths of all subtrees of this remote.
+        /// Valid if the remote has subtrees, which occurs when <see cref="TfsRepositoryPath"/> is null.
+        /// </summary>
+        public string[] TfsSubtreePaths 
+        { 
+            get
+            {
+                if (tfsSubtreePaths == null)
+                    tfsSubtreePaths = globals.Repository.GetSubtrees(this).Select(x => x.TfsRepositoryPath).ToArray();
+
+                return tfsSubtreePaths;
+            } 
+        }
+        private string[] tfsSubtreePaths = null;
+
         public string IgnoreRegexExpression { get; set; }
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
@@ -185,8 +202,19 @@ namespace Sep.Git.Tfs.Core
         public string GetPathInGitRepo(string tfsPath)
         {
             if (tfsPath == null) return null;
-            if (!tfsPath.StartsWith(TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)) return null;
-            tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
+
+            if (TfsRepositoryPath != null)
+            {
+                if (!tfsPath.StartsWith(TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)) return null;
+                tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
+            }
+            else
+            {
+                var p = this.TfsSubtreePaths.FirstOrDefault(x => tfsPath.StartsWith(x, StringComparison.InvariantCultureIgnoreCase));
+                if (p == null) return null;
+                tfsPath = tfsPath.Substring(p.Length);
+            }
+            
             while (tfsPath.StartsWith("/"))
                 tfsPath = tfsPath.Substring(1);
             return tfsPath;
@@ -535,7 +563,7 @@ namespace Sep.Git.Tfs.Core
 
         private void PendChangesToWorkspace(string head, string parent, ITfsWorkspaceModifier workspace)
         {
-            using (var tidyWorkspace = new DirectoryTidier(workspace, Tfs.GetLatestChangeset(this).GetFullTree()))
+            using (var tidyWorkspace = new DirectoryTidier(workspace, GetLatestChangeset().GetFullTree()))
             {
                 foreach (var change in Repository.GetChangedFiles(parent, head))
                 {
@@ -586,7 +614,13 @@ namespace Sep.Git.Tfs.Core
 
         public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
         {
-            return MatchesTfsUrl(tfsUrl) && TfsRepositoryPath != null && TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
+            if(!MatchesTfsUrl(tfsUrl))
+                return false;
+
+            if(TfsRepositoryPath == null)
+                return tfsRepositoryPath == null;
+            
+            return TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
         }
 
         private bool MatchesTfsUrl(string tfsUrl)

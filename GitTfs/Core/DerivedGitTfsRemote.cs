@@ -68,6 +68,14 @@ namespace Sep.Git.Tfs.Core
             set { throw new NotImplementedException(); }
         }
 
+        public string[] TfsSubtreePaths
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         #region Equality
 
         public override bool Equals(object obj)

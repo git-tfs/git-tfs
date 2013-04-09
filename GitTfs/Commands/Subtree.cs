@@ -129,23 +129,29 @@ namespace Sep.Git.Tfs.Commands
             
             if (result == GitTfsExitCodes.OK)
             {
-
                 var p = Prefix.Replace(" ", "\\ ");
+
+                
+
+                long latest = Math.Max(owner.MaxChangesetId, remote.MaxChangesetId);
+                string msg = string.Format(GitTfsConstants.TfsCommitInfoFormat, owner.TfsUrl, owner.TfsRepositoryPath, latest);
+                msg = string.Format(@"Add '{0}/' from commit '{1}'
+
+{2}", Prefix, remote.MaxCommitHash, msg);
 
                 List<string> args = new List<string>(){"subtree", "add", 
                     "--prefix=" + p,
+                    string.Format("-m {0}", msg),
                     remote.RemoteRef
                     };
                 command(args);
 
                 //update the owner remote to point at the commit where the newly created subtree was merged.
                 var commit = _globals.Repository.GetCurrentCommit();
-                owner.UpdateRef(commit, remote.MaxChangesetId);
+                owner.UpdateRef(commit, latest);
 
                 result = GitTfsExitCodes.OK;
             }
-
-            
             
 
             return result;
