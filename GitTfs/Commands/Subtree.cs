@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -71,9 +71,11 @@ namespace Sep.Git.Tfs.Commands
                 case "pull":
                     return DoPull(args.ElementAtOrDefault(1));
 
+                case "split":
+                    return DoSplit();
 
                 default:
-                    _stdout.WriteLine("Expected one of [add, pull, merge, split]");
+                    _stdout.WriteLine("Expected one of [add, pull, split]");
                     return GitTfsExitCodes.InvalidArguments;
                     break;
             }
@@ -173,11 +175,7 @@ namespace Sep.Git.Tfs.Commands
     
         public int DoPull(string remoteId)
         {
-            if (!Directory.Exists(Prefix))
-            {
-                _stdout.WriteLine("You must first add the subtree using 'git tfs subtree add -p=<prefix> [tfs-server] [tfs-repository]'");
-                return GitTfsExitCodes.InvalidArguments;
-            }
+            ValidatePrefix();
 
             remoteId = remoteId ?? string.Format(GitTfsConstants.RemoteSubtreeFormat, _globals.RemoteId ?? GitTfsConstants.DefaultRepositoryId, Prefix);
             IGitTfsRemote remote = _globals.Repository.ReadTfsRemote(remoteId);
@@ -193,6 +191,40 @@ namespace Sep.Git.Tfs.Commands
 
             return result;
         }
+
+        public int DoSplit()
+        {
+            ValidatePrefix();
+
+            var p = Prefix.Replace(" ", "\\ ");
+            List<string> args = new List<string>() { "subtree", "split", "--prefix=" + p, "-b", p };
+            command(args);
+            args = new List<string>() { "checkout", p };
+            command(args);
+
+            //update subtree refs if needed
+            var owners = _globals.Repository.GetLastParentTfsCommits("HEAD").Where(x => !x.Remote.IsSubtree && x.Remote.TfsRepositoryPath == null).ToList();
+            foreach (var subtree in _globals.Repository.ReadAllTfsRemotes().Where(x => x.IsSubtree && string.Equals(x.Prefix, Prefix)))
+            {
+                var updateTo = owners.FirstOrDefault(x => string.Equals(x.Remote.Id, subtree.OwningRemoteId));
+                if (updateTo != null && updateTo.ChangesetId > subtree.MaxChangesetId)
+                {
+                    subtree.UpdateRef(updateTo.GitCommit, updateTo.ChangesetId);
+                }
+            }
+
+            return GitTfsExitCodes.OK;
+        }
+
+        private void ValidatePrefix()
+        {
+            if (!Directory.Exists(Prefix))
+            {
+                throw new GitTfsException(string.Format("Directory {0} does not exist", Prefix))
+                    .WithRecommendation("Add the subtree using 'git tfs subtree add -p=<prefix> [tfs-server] [tfs-repository]'");
+            }
+        }
+
 
         private void command(List<string> args)
         {
