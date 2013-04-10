@@ -23,15 +23,26 @@ namespace Sep.Git.Tfs.Core
             if (_globals.UserSpecifiedRemoteId != null)
                 tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == _globals.UserSpecifiedRemoteId);
 
-            switch (tfsParents.Count())
+            return WriteWith(tfsParents.ToList(), write);
+        }
+
+        private int WriteWith(List<TfsChangesetInfo> tfsParents, Func<TfsChangesetInfo, int> write)
+        {
+            switch (tfsParents.Count)
             {
                 case 1:
-                    var changeset = tfsParents.First();
+                    var changeset = tfsParents[0];
                     return write(changeset);
                 case 0:
                     _stdout.WriteLine("No TFS parents found!");
                     return GitTfsExitCodes.InvalidArguments;
                 default:
+                    //try looking for the non-subtree changesets
+                    if (tfsParents.Any(x => x.Remote.IsSubtree))
+                    {
+                        return WriteWith(tfsParents.Where(x => !x.Remote.IsSubtree).ToList(), write);
+                    }
+
                     _stdout.WriteLine("More than one parent found! Use -i to choose the correct parent from: ");
                     foreach (var parent in tfsParents)
                     {

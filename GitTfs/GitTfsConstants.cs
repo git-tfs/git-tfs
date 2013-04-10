@@ -33,5 +33,17 @@ namespace Sep.Git.Tfs
         // e.g. git-tfs-force: override reason
         public static readonly Regex TfsForceRegex =
                 new Regex(GitTfsPrefix + @"-force:\s*(?<reason>.+)\s*$");
+
+        /// <summary>
+        /// Applied to a remote ID to determine if it is a subtree
+        /// </summary>
+        public static readonly Regex RemoteSubtreeRegex =
+                new Regex("(?<owner>[^/]+)_subtree/(?<prefix>.+)");
+
+        /// <summary>
+        /// The format for remote IDs that are sutbrees,
+        /// where {0} is the owning remote and {1} is the prefix
+        /// </summary>
+        public const string RemoteSubtreeFormat = "{0}_subtree/{1}";
     }
 }

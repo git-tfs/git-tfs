@@ -27,6 +27,9 @@ namespace Sep.Git.Tfs.Core
         long MaxChangesetId { get; set; }
         string MaxCommitHash { get; set; }
         string RemoteRef { get; }
+        bool IsSubtree { get; }
+        string OwningRemoteId { get; }
+        string Prefix { get; }
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
         void Fetch();

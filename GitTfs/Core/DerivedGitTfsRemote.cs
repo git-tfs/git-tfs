@@ -150,6 +150,21 @@ namespace Sep.Git.Tfs.Core
             get { throw new NotImplementedException(); }
         }
 
+        public bool IsSubtree
+        {
+            get { return false; }
+        }
+
+        public string OwningRemoteId
+        {
+            get { return null; }
+        }
+
+        public string Prefix
+        {
+            get { return null; }
+        }
+
         public bool ShouldSkip(string path)
         {
             throw new NotImplementedException();

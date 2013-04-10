@@ -136,17 +136,19 @@ namespace Sep.Git.Tfs.Core
 
         public void Edit(string path)
         {
+            path = GetLocalPath(path);
             _stdout.WriteLine(" edit " + path);
             GetFromTfs(path);
-            var edited = _workspace.PendEdit(GetLocalPath(path));
+            var edited = _workspace.PendEdit(path);
             if (edited != 1) throw new Exception("One item should have been edited, but actually edited " + edited + " items.");
         }
 
         public void Delete(string path)
         {
+            path = GetLocalPath(path);
             _stdout.WriteLine(" delete " + path);
             GetFromTfs(path);
-            var deleted = _workspace.PendDelete(GetLocalPath(path));
+            var deleted = _workspace.PendDelete(path);
             if (deleted != 1) throw new Exception("One item should have been deleted, but actually deleted " + deleted + " items.");
         }
 
@@ -160,7 +162,7 @@ namespace Sep.Git.Tfs.Core
 
         private void GetFromTfs(string path)
         {
-            _workspace.ForceGetFile(_remote.TfsRepositoryPath + "/" + path, (int)_contextVersion.ChangesetId);
+            _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), (int)_contextVersion.ChangesetId);
         }
 
         public void Get(int changesetId)

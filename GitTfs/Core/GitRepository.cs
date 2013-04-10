@@ -488,11 +488,10 @@ namespace Sep.Git.Tfs.Core
         public IEnumerable<IGitTfsRemote> GetSubtrees(IGitTfsRemote owner)
         {
             //a subtree remote cannot have subtrees itself.
-            if (owner.Id.StartsWith("subtree/"))
+            if (owner.IsSubtree)
                 return Enumerable.Empty<IGitTfsRemote>();
 
-            var uri = new Uri(owner.TfsUrl);
-            return ReadAllTfsRemotes().Where(x => x.Id.StartsWith("subtree/") && uri.Equals(x.TfsUrl));
+            return ReadAllTfsRemotes().Where(x => x.IsSubtree && string.Equals(x.OwningRemoteId, owner.Id, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

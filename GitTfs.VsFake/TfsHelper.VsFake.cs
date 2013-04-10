@@ -296,6 +296,11 @@ namespace Sep.Git.Tfs.VsFake
                 throw new NotImplementedException();
             }
 
+            public string GetServerItemForLocalItem(string localItem)
+            {
+                throw new NotImplementedException();
+            }
+
             public string OwnerName
             {
                 get { throw new NotImplementedException(); }

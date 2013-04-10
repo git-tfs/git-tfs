@@ -39,6 +39,21 @@ namespace Sep.Git.Tfs.Core
             Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
             IgnoreRegexExpression = info.IgnoreRegex;
             Autotag = info.Autotag;
+
+            this.IsSubtree = CheckSubtree();
+        }
+
+        private bool CheckSubtree()
+        {
+            var m = GitTfsConstants.RemoteSubtreeRegex.Match(this.Id);
+            if (m.Success)
+            {
+                this.OwningRemoteId = m.Groups["owner"].Value;
+                this.Prefix = m.Groups["prefix"].Value;
+                return true;
+            }
+
+            return false;
         }
 
         public void EnsureTfsAuthenticated()
@@ -53,6 +68,8 @@ namespace Sep.Git.Tfs.Core
         {
             get { return false; }
         }
+
+        public bool IsSubtree { get; private set; }
 
         public string Id { get; set; }
 
@@ -100,6 +117,10 @@ namespace Sep.Git.Tfs.Core
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
 
+        public string OwningRemoteId { get; private set; }
+
+        public string Prefix { get; private set; }
+
         public long MaxChangesetId
         {
             get { InitHistory(); return maxChangesetId.Value; }
@@ -145,11 +166,26 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        
+
         private string WorkingDirectory
         {
             get
             {
-                return Repository.GetConfig("git-tfs.workspace-dir") ?? DefaultWorkingDirectory;
+                var dir = Repository.GetConfig("git-tfs.workspace-dir");
+
+                if (this.IsSubtree)
+                {
+                    if(dir != null)
+                    {
+                        return Path.Combine(dir, this.Prefix);
+                    }
+
+                    //find the relative path to the owning remote
+                    return Ext.CombinePaths(globals.GitDir, "tfs", this.OwningRemoteId, "workspace", this.Prefix);
+                }
+
+                return dir ?? DefaultWorkingDirectory;
             }
         }
 
@@ -598,7 +634,7 @@ namespace Sep.Git.Tfs.Core
             var subtrees = globals.Repository.GetSubtrees(this);
             if (subtrees.Any())
             {
-                Tfs.WithWorkspace(WorkingDirectory, this, subtrees.Select(x => new Tuple<string, string>(x.TfsRepositoryPath, x.Id.Substring("subtree/".Length))), parentChangeset, action);
+                Tfs.WithWorkspace(WorkingDirectory, this, subtrees.Select(x => new Tuple<string, string>(x.TfsRepositoryPath, x.Prefix)), parentChangeset, action);
             }
             else
             {
