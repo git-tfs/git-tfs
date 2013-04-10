@@ -95,6 +95,13 @@ namespace Sep.Git.Tfs.Core
             set { maxCommitHash = value; }
         }
 
+        private TfsChangesetInfo GetTfsChangesetById(int id)
+        {
+            var result = Repository.FilterParentTfsCommits(RemoteRef, false,
+                                                           c => c.ChangesetId == id);
+            return result.IsEmpty() ? null : result.First();
+        }
+
         private void InitHistory()
         {
             if (maxChangesetId == null)
@@ -489,9 +496,13 @@ namespace Sep.Git.Tfs.Core
 
             var shelvesetChangeset = Tfs.GetShelvesetData(this, shelvesetOwner, shelvesetName);
 
-            long ch = shelvesetChangeset.BaseChangesetId;
+            var parentId = shelvesetChangeset.BaseChangesetId;
+            var ch = GetTfsChangesetById(parentId);
+            if (ch == null)
+                throw new GitTfsException("ERROR: Parent changeset C" + parentId  + " not found."
+                                         +" Try fetching the latest changes from TFS");
 
-            var commit = CommitChangeset(shelvesetChangeset, MaxCommitHash);
+            var commit = CommitChangeset(shelvesetChangeset, ch.GitCommit);
             UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
         }
 

@@ -243,6 +243,13 @@ namespace Sep.Git.Tfs.Core
                    select remotes.OrderBy(commit => -commit.ChangesetId).First();
         }
 
+        public IEnumerable<TfsChangesetInfo> FilterParentTfsCommits(string head, bool includeStubRemotes,
+                                                                    Predicate<TfsChangesetInfo> pred)
+        {
+            return from commit in GetParentTfsCommits(head, includeStubRemotes)
+                   where pred(commit) select commit;
+        }
+
         private List<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes)
         {
             var tfsCommits = new List<TfsChangesetInfo>();
