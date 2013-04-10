@@ -488,6 +488,9 @@ namespace Sep.Git.Tfs.Core
                 throw new GitTfsException("ERROR: Destination branch (" + destinationBranch + ") already exists!");
 
             var shelvesetChangeset = Tfs.GetShelvesetData(this, shelvesetOwner, shelvesetName);
+
+            long ch = shelvesetChangeset.BaseChangesetId;
+
             var commit = CommitChangeset(shelvesetChangeset, MaxCommitHash);
             UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
         }
