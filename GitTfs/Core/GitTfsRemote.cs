@@ -243,6 +243,13 @@ namespace Sep.Git.Tfs.Core
             {
                 if (!tfsPath.StartsWith(TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)) return null;
                 tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
+                if (this.IsSubtree)
+                {
+                    if (tfsPath.StartsWith("/"))
+                        tfsPath = this.Prefix + tfsPath;
+                    else
+                        tfsPath = Path.Combine(this.Prefix, tfsPath);
+                }
             }
             else
             {

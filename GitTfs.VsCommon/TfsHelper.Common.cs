@@ -197,7 +197,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            Trace.WriteLine("Setting up a TFS workspace for multiple remotes");
+            Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
             var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
             var workspace = GetWorkspace(folders);
             try
