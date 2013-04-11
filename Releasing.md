@@ -16,3 +16,7 @@ Normally, you should do this:
 3. Upload the release somewhere.
 
 4. Update [the download button](https://github.com/git-tfs/git-tfs.github.com/blob/master/_includes/download_button.html) on the website.
+
+5. Build the chocolatey package. (For this to work, you need to [set an API key](https://github.com/chocolatey/chocolatey/wiki/CommandsPush#note-to-use-this-command-you-must-have-your-api-key-saved-for-chocolateyorg-or-the-source-you-want-to-push-to).)
+
+    msbuild Release.proj /t:Chocolatey /v:Version=X.Y.Z /p:DownloadUrl=https://whatever/path/to/GitTfs-X.Y.Z.zip
