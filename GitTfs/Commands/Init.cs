@@ -35,6 +35,11 @@ namespace Sep.Git.Tfs.Commands
             get { return initOptions.OptionSet.Merge(remoteOptions.OptionSet); }
         }
 
+        public bool IsBare
+        {
+            get { return initOptions.IsBare; }
+        }
+
         public int Run(string tfsUrl, string tfsRepositoryPath)
         {
             tfsRepositoryPath.AssertValidTfsPath();
@@ -46,7 +51,13 @@ namespace Sep.Git.Tfs.Commands
         public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
         {
             tfsRepositoryPath.AssertValidTfsPath();
-            InitSubdir(gitRepositoryPath);
+            if (!initOptions.IsBare)
+                InitSubdir(gitRepositoryPath);
+            else
+            {
+                Environment.CurrentDirectory = gitRepositoryPath;
+                globals.GitDir = ".";
+            }
             return Run(tfsUrl, tfsRepositoryPath);
         }
 
@@ -60,7 +71,7 @@ namespace Sep.Git.Tfs.Commands
 
         private void DoGitInitDb()
         {
-            if(!Directory.Exists(globals.GitDir))
+            if(!Directory.Exists(globals.GitDir) || initOptions.IsBare)
             {
                 gitHelper.CommandNoisy(BuildInitCommand());
             }
@@ -72,6 +83,8 @@ namespace Sep.Git.Tfs.Commands
             var initCommand = new List<string> {"init"};
             if(initOptions.GitInitTemplate!= null)
                 initCommand.Add("--template=" + initOptions.GitInitTemplate);
+            if(initOptions.IsBare)
+                initCommand.Add("--bare");
             if(initOptions.GitInitShared is string)
                 initCommand.Add("--shared=" + initOptions.GitInitShared);
             else if(initOptions.GitInitShared != null)
