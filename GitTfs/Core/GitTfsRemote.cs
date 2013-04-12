@@ -253,9 +253,11 @@ namespace Sep.Git.Tfs.Core
             }
             else
             {
-                var p = this.TfsSubtreePaths.FirstOrDefault(x => tfsPath.StartsWith(x, StringComparison.InvariantCultureIgnoreCase));
+                var p = this.globals.Repository.GetSubtrees(this)
+                            .Where(x => x.IsSubtree)
+                            .FirstOrDefault(x => tfsPath.StartsWith(x.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase));
                 if (p == null) return null;
-                tfsPath = tfsPath.Substring(p.Length);
+                return p.GetPathInGitRepo(tfsPath);
             }
             
             while (tfsPath.StartsWith("/"))
