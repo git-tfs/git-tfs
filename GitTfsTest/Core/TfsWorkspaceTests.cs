@@ -61,12 +61,14 @@ namespace Sep.Git.Tfs.Test.Core
                                     Arg<IPendingChange[]>.Is.Anything,
                                     Arg<IPendingChange[]>.Is.Anything,
                                     Arg<string>.Is.Anything,
+                                    Arg<string>.Is.Anything,
                                     Arg<ICheckinNote>.Is.Anything,
                                     Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything))
                     .Return(checkinEvaluationResult);
 
             workspace.Expect(w => w.Checkin(
                                     Arg<IPendingChange[]>.Is.Anything,
+                                    Arg<string>.Is.Anything,
                                     Arg<string>.Is.Anything,
                                     Arg<ICheckinNote>.Is.Anything,
                                     Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything,
@@ -109,12 +111,14 @@ namespace Sep.Git.Tfs.Test.Core
                                     Arg<IPendingChange[]>.Is.Anything,
                                     Arg<IPendingChange[]>.Is.Anything,
                                     Arg<string>.Is.Anything,
+                                    Arg<string>.Is.Anything,
                                     Arg<ICheckinNote>.Is.Anything,
                                     Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything))
                     .Return(checkinEvaluationResult);
 
             workspace.Expect(w => w.Checkin(
                                     Arg<IPendingChange[]>.Is.Anything,
+                                    Arg<string>.Is.Anything,
                                     Arg<string>.Is.Anything,
                                     Arg<ICheckinNote>.Is.Anything,
                                     Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything,
@@ -160,12 +164,14 @@ namespace Sep.Git.Tfs.Test.Core
                                     Arg<IPendingChange[]>.Is.Anything,
                                     Arg<IPendingChange[]>.Is.Anything,
                                     Arg<string>.Is.Anything,
+                                    Arg<string>.Is.Anything,
                                     Arg<ICheckinNote>.Is.Anything,
                                     Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything))
                     .Return(checkinEvaluationResult);
 
             workspace.Expect(w => w.Checkin(
                                     Arg<IPendingChange[]>.Is.Anything,
+                                    Arg<string>.Is.Anything,
                                     Arg<string>.Is.Anything,
                                     Arg<ICheckinNote>.Is.Anything,
                                     Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything,
@@ -212,12 +218,14 @@ namespace Sep.Git.Tfs.Test.Core
                                     Arg<IPendingChange[]>.Is.Anything,
                                     Arg<IPendingChange[]>.Is.Anything,
                                     Arg<string>.Is.Anything,
+                                    Arg<string>.Is.Anything,
                                     Arg<ICheckinNote>.Is.Anything,
                                     Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything))
                     .Return(checkinEvaluationResult);
 
             workspace.Expect(w => w.Checkin(
                                     Arg<IPendingChange[]>.Is.Anything,
+                                    Arg<string>.Is.Anything,
                                     Arg<string>.Is.Anything,
                                     Arg<ICheckinNote>.Is.Anything,
                                     Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything,

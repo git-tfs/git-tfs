@@ -238,12 +238,17 @@ namespace Sep.Git.Tfs.VsFake
                 throw new NotImplementedException();
             }
 
+            public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, string authors, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
+            {
+                throw new NotImplementedException();
+            }
+
             public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
             {
                 throw new NotImplementedException();
             }
 
-            public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
+            public int Checkin(IPendingChange[] changes, string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
             {
                 throw new NotImplementedException();
             }

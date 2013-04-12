@@ -416,8 +416,9 @@ namespace Sep.Git.Tfs.VsCommon
                                           _bridge.Unwrap<PolicyFailure>(policyOverrideInfo.Failures));
         }
 
+
         public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes,
-                                                        string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
+                                                        string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
         {
             return _bridge.Wrap<WrapperForCheckinEvaluationResult, CheckinEvaluationResult>(_workspace.EvaluateCheckin(
                 _bridge.Convert<CheckinEvaluationOptions>(options),
