@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using LibGit2Sharp;
@@ -37,5 +38,14 @@ namespace Sep.Git.Tfs.Core
                 }
             }
         }
+
+        public Tuple<string,string> AuthorAndEmail
+        {
+            get
+            {
+                return new Tuple<string,string>(_commit.Author.Name, _commit.Author.Email);
+            }
+        }
     }
 }
+
