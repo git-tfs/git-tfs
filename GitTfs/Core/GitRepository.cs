@@ -42,6 +42,11 @@ namespace Sep.Git.Tfs.Core
             _repository.Refs.Add(gitRefName, shaCommit, allowOverwrite: true, logMessage: message);
         }
 
+        public static string GetRefForHeadBranch(string branchName)
+        {
+            return "refs/heads/" + branchName;
+        }
+
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }

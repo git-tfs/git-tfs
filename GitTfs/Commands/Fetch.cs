@@ -36,6 +36,7 @@ namespace Sep.Git.Tfs.Commands
         bool FetchLabels { get; set; }
         bool FetchParents { get; set; }
         string AuthorsFilePath { get; set; }
+        string BareBranch { get; set; }
         public virtual OptionSet OptionSet
         {
             get
@@ -50,6 +51,8 @@ namespace Sep.Git.Tfs.Commands
                         v => AuthorsFilePath = v },
                     { "l|with-labels|fetch-labels", "Fetch the labels also when fetching TFS changesets",
                         v => FetchLabels = v != null },
+                    { "bare=", "The name of the branch on which the fetch will be done for a bare repository",
+                        v => BareBranch = v },
 //                    { "r|revision=",
 //                        v => RevisionToFetch = Convert.ToInt32(v) },
                 }.Merge(remoteOptions.OptionSet);
@@ -63,6 +66,9 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(params string[] args)
         {
+            if(!string.IsNullOrEmpty(BareBranch))
+                BareBranch = "refs/heads/" + BareBranch;
+
             authors.Parse(AuthorsFilePath, globals.GitDir);
 
             foreach (var remote in GetRemotesToFetch(args))
@@ -80,6 +86,13 @@ namespace Sep.Git.Tfs.Commands
 
         protected virtual void DoFetch(IGitTfsRemote remote)
         {
+            if (remote.Repository.IsBare)
+            {
+                if(string.IsNullOrEmpty(BareBranch))
+                    throw new GitTfsException("error : specify a git branch to fetch on...");
+                if(!remote.Repository.HasRef(BareBranch))
+                    throw new GitTfsException("error : the specified git branch doesn't exist...");
+            }
             // It is possible that we have outdated refs/remotes/tfs/<id>.
             // E.g. someone already fetched changesets from TFS into another git repository and we've pulled it since
             // in that case tfs fetch will retrieve same changes again unnecessarily. To prevent it we will scan tree from HEAD and see if newer changesets from
@@ -92,7 +105,7 @@ namespace Sep.Git.Tfs.Commands
             remote.CleanupWorkspaceDirectory();
 
             if(remote.Repository.IsBare)
-                remote.Repository.CommandNoisy("update-ref", "HEAD", remote.MaxCommitHash);
+                remote.Repository.CommandNoisy("update-ref", BareBranch, remote.MaxCommitHash);
         }
 
         private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)
