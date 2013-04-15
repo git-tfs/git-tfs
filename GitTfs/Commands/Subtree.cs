@@ -155,12 +155,11 @@ namespace Sep.Git.Tfs.Commands
 
 {2}", Prefix, remote.MaxCommitHash, msg);
 
-                List<string> args = new List<string>(){"subtree", "add", 
+                _globals.Repository.CommandNoisy(
+                    "subtree", "add",
                     "--prefix=" + p,
                     string.Format("-m {0}", msg),
-                    remote.RemoteRef
-                    };
-                command(args);
+                    remote.RemoteRef);
 
                 //update the owner remote to point at the commit where the newly created subtree was merged.
                 var commit = _globals.Repository.GetCurrentCommit();
@@ -184,8 +183,7 @@ namespace Sep.Git.Tfs.Commands
             if (result == GitTfsExitCodes.OK)
             {
                 var p = Prefix.Replace(" ", "\\ ");
-                List<string> args = new List<string>(){ "subtree", "merge", "--prefix=" + p, remote.RemoteRef };
-                command(args);
+                _globals.Repository.CommandNoisy("subtree", "merge", "--prefix=" + p, remote.RemoteRef);
                 result = GitTfsExitCodes.OK;
             }
 
@@ -197,10 +195,8 @@ namespace Sep.Git.Tfs.Commands
             ValidatePrefix();
 
             var p = Prefix.Replace(" ", "\\ ");
-            List<string> args = new List<string>() { "subtree", "split", "--prefix=" + p, "-b", p };
-            command(args);
-            args = new List<string>() { "checkout", p };
-            command(args);
+            _globals.Repository.CommandNoisy("subtree", "split", "--prefix=" + p, "-b", p);
+            _globals.Repository.CommandNoisy("checkout", p);
 
             //update subtree refs if needed
             var owners = _globals.Repository.GetLastParentTfsCommits("HEAD").Where(x => !x.Remote.IsSubtree && x.Remote.TfsRepositoryPath == null).ToList();
@@ -223,13 +219,6 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException(string.Format("Directory {0} does not exist", Prefix))
                     .WithRecommendation("Add the subtree using 'git tfs subtree add -p=<prefix> [tfs-server] [tfs-repository]'");
             }
-        }
-
-
-        private void command(List<string> args)
-        {
-            _stdout.WriteLine("git " + string.Join(" ", args));
-            _globals.Repository.CommandNoisy(args.ToArray());
         }
     }
 }
