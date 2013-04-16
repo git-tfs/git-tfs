@@ -336,7 +336,7 @@ namespace Sep.Git.Tfs.Core
                 return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
 
             return globals.Repository.GetSubtrees(this)
-                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, x.MaxChangesetId + 1, x))
+                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, x))
                 .OrderBy(x => x.Summary.ChangesetId);
         }
 
