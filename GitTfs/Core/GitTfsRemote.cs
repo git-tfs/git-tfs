@@ -259,7 +259,7 @@ namespace Sep.Git.Tfs.Core
                 while (tfsPath.StartsWith("/"))
                     tfsPath = tfsPath.Substring(1);
 
-                tfsPath = Path.Combine(this.Prefix, tfsPath);
+                tfsPath = Path.Combine(p.Prefix, tfsPath);
             }
             
             while (tfsPath.StartsWith("/"))
