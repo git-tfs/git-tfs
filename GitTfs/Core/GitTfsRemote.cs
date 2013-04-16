@@ -243,21 +243,23 @@ namespace Sep.Git.Tfs.Core
             {
                 if (!tfsPath.StartsWith(TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)) return null;
                 tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
-                if (this.IsSubtree)
-                {
-                    if (tfsPath.StartsWith("/"))
-                        tfsPath = this.Prefix + tfsPath;
-                    else
-                        tfsPath = Path.Combine(this.Prefix, tfsPath);
-                }
+
             }
             else
             {
+                //look through the subtrees
                 var p = this.globals.Repository.GetSubtrees(this)
                             .Where(x => x.IsSubtree)
                             .FirstOrDefault(x => tfsPath.StartsWith(x.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase));
                 if (p == null) return null;
-                return p.GetPathInGitRepo(tfsPath);
+
+                tfsPath = p.GetPathInGitRepo(tfsPath);
+
+                //we must prepend the prefix in order to get the correct directory
+                while (tfsPath.StartsWith("/"))
+                    tfsPath = tfsPath.Substring(1);
+
+                tfsPath = Path.Combine(this.Prefix, tfsPath);
             }
             
             while (tfsPath.StartsWith("/"))
