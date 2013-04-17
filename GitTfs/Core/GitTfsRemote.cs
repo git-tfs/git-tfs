@@ -362,7 +362,9 @@ namespace Sep.Git.Tfs.Core
             LogEntry result = null;
             WithTemporaryIndex(() => WithWorkspace(changeset.Summary, workspace =>
             {
-                Repository.CommandOneline("read-tree", parent);
+                //Make sure the index is first updated to look like the parent commit, if any
+                if (!string.IsNullOrEmpty(parent))
+                    Repository.CommandOneline("read-tree", parent);
                 GitIndexInfo.Do(Repository, index => result = changeset.Apply(parent, index, workspace));
                 result.Tree = Repository.CommandOneline("write-tree");
             }));
