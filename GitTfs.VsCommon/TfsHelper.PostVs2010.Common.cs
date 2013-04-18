@@ -48,7 +48,10 @@ namespace Sep.Git.Tfs.VsCommon
                 var allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full);
                 var tfsBranchToCreate = allTfsBranches.FirstOrDefault(b => b.Properties.RootItem.Item.ToLower() == tfsPathBranchToCreate.ToLower());
                 if (tfsBranchToCreate == null)
+                {
+                    Trace.WriteLine("error: TFS branches "+ tfsPathBranchToCreate +" not found!");
                     return -1;
+                }
                 tfsPathParentBranch = tfsBranchToCreate.Properties.ParentBranch.Item;
                 Trace.WriteLine("Found parent branch : " + tfsPathParentBranch);
 
