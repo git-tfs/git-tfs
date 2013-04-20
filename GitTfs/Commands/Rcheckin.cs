@@ -88,7 +88,7 @@ namespace Sep.Git.Tfs.Commands
                 else
                 {
                     if(repo.IsBare)
-                        repo.CommandNoisy("update-ref", GitRepository.GetRefForHeadBranch(BareBranch), parentChangeset.Remote.MaxCommitHash);
+                        repo.UpdateRef(GitRepository.GetRefForHeadBranch(BareBranch), parentChangeset.Remote.MaxCommitHash);
 
                     throw new GitTfsException("error: New TFS changesets were found.")
                         .WithRecommendation("Try to rebase HEAD onto latest TFS checkin and repeat rcheckin or alternatively checkin s");
@@ -163,7 +163,7 @@ namespace Sep.Git.Tfs.Commands
                 }
 
                 if(repo.IsBare)
-                    repo.CommandNoisy("update-ref", GitRepository.GetRefForHeadBranch(BareBranch), tfsRemote.MaxCommitHash);
+                    repo.UpdateRef(GitRepository.GetRefForHeadBranch(BareBranch), tfsRemote.MaxCommitHash);
                 else
                 repo.Reset(tfsRemote.MaxCommitHash, ResetOptions.Hard);
                 _stdout.WriteLine("No more to rcheckin.");

@@ -220,7 +220,7 @@ namespace Sep.Git.Tfs.Commands
             
             
             Trace.WriteLine("Try creating the local branch...");
-            if (!_globals.Repository.CreateBranch("refs/heads/" + gitBranchName, tfsRemote.MaxCommitHash))
+            if (!_globals.Repository.CreateBranch(GitRepository.GetRefForHeadBranch(gitBranchName), tfsRemote.MaxCommitHash))
                 _stdout.WriteLine("warning: Fail to create local branch ref file!");
             else
                 Trace.WriteLine("Local branch created!");

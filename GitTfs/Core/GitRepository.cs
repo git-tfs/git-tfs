@@ -166,10 +166,10 @@ namespace Sep.Git.Tfs.Core
 
         public void MoveRemote(string oldRemoteName, string newRemoteName)
         {
-            if (!_repository.Refs.IsValidName("refs/heads/" + oldRemoteName))
+            if (!_repository.Refs.IsValidName(GetRefForHeadBranch(oldRemoteName)))
                 throw new GitTfsException("error: the name of the remote to move is invalid!");
 
-            if (!_repository.Refs.IsValidName("refs/heads/" + newRemoteName))
+            if (!_repository.Refs.IsValidName(GetRefForHeadBranch(newRemoteName)))
                 throw new GitTfsException("error: the new name of the remote is invalid!");
 
             if (HasRemote(newRemoteName))
@@ -452,7 +452,7 @@ namespace Sep.Git.Tfs.Core
 
         public string AssertValidBranchName(string gitBranchName)
         {
-            if (!_repository.Refs.IsValidName("refs/heads/" + gitBranchName))
+            if (!_repository.Refs.IsValidName(GetRefForHeadBranch(gitBranchName)))
                 throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
             return gitBranchName;
         }
