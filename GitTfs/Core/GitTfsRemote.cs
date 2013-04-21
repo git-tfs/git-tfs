@@ -203,6 +203,15 @@ namespace Sep.Git.Tfs.Core
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
+                if (changeset.IsMergeChangeset)
+                {
+                    var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
+                    var shaParent = Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
+                    if(shaParent != null)
+                        log.CommitParents.Add(shaParent);
+                    else //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
+                        stdout.WriteLine("warning: there is not yet a git commit for the parent changset " + parentChangesetId + "! Fetch the corresponding branch before...");
+                }
                 if (changeset.Summary.ChangesetId == mergeChangesetId)
                 {
                     foreach (var parent in parentCommitsHashes)

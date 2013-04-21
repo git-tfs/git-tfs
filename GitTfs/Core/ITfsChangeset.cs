@@ -17,5 +17,10 @@ namespace Sep.Git.Tfs.Core
         /// Get all files that git-tfs should copy from the source TFS repository. (skips folders and ignored files)
         /// </summary>
         IEnumerable<TfsTreeEntry> GetTree();
+
+        /// <summary>
+        /// Get if this changeset is a merge changeset
+        /// </summary>
+        bool IsMergeChangeset { get; }
     }
 }

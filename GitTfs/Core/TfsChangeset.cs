@@ -132,6 +132,16 @@ namespace Sep.Git.Tfs.Core
             return GetFullTree().Where(item => item.Item.ItemType == TfsItemType.File && !Summary.Remote.ShouldSkip(item.FullName));
         }
 
+        public bool IsMergeChangeset
+        {
+            get
+            {
+                if (_changeset == null || _changeset.Changes == null || !_changeset.Changes.Any())
+                    return false;
+                return _changeset.Changes.Any(c => c.ChangeType.IncludesOneOf(TfsChangeType.Merge));
+            }
+        }
+
         public IEnumerable<TfsTreeEntry> GetFullTree()
         {
             var treeInfo = Summary.Remote.Repository.GetObjects();

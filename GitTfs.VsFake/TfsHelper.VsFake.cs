@@ -60,6 +60,11 @@ namespace Sep.Git.Tfs.VsFake
             return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
         }
 
+        public int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
+        {
+            throw new NotImplementedException();
+        }
+
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)
         {
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(changeset)).GetInstance<TfsChangeset>();

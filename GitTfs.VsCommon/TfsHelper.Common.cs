@@ -119,6 +119,12 @@ namespace Sep.Git.Tfs.VsCommon
                 .Select(changeset => BuildTfsChangeset(changeset, remote));
         }
 
+        public int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
+        {
+            return VersionControl.QueryMerges(null, null, new ItemSpec(path, RecursionType.Full), LatestVersionSpec.Latest,
+              null, new ChangesetVersionSpec((int)firstChangeset)).Max(x=>x.SourceVersion); 
+        }
+
         public virtual bool CanGetBranchInformation { get { return false; } }
 
         public virtual IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
