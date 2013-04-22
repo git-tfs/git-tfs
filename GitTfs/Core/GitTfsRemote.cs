@@ -229,7 +229,7 @@ namespace Sep.Git.Tfs.Core
         {
             var log = Apply(MaxCommitHash, changeset);
             var commit = Commit(log);
-            Repository.CommandNoisy("update-ref", destinationRef, commit);
+            Repository.UpdateRef(destinationRef, commit);
         }
 
         public void QuickFetch()
@@ -272,7 +272,7 @@ namespace Sep.Git.Tfs.Core
             MaxChangesetId = changesetId;
             Repository.CommandNoisy("update-ref", "-m", "C" + MaxChangesetId, RemoteRef, MaxCommitHash);
             if (Autotag)
-                Repository.CommandNoisy("update-ref", TagPrefix + "C" + MaxChangesetId, MaxCommitHash);
+                Repository.UpdateRef(TagPrefix + "C" + MaxChangesetId, MaxCommitHash);
             LogCurrentMapping();
         }
 

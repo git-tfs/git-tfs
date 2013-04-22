@@ -37,6 +37,11 @@ namespace Sep.Git.Tfs.Core
                 _repository.Dispose();
         }
 
+        public void UpdateRef(string gitRefName, string shaCommit)
+        {
+            _repository.Refs.UpdateTarget(gitRefName, shaCommit);
+        }
+
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
