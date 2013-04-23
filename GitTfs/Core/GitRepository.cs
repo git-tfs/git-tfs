@@ -423,6 +423,10 @@ namespace Sep.Git.Tfs.Core
 
         public string HashAndInsertObject(string filename)
         {
+            if (_repository.Info.IsBare)
+            {
+                filename = Path.GetFullPath(filename);
+            }
             return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
         }
 
