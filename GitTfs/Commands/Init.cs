@@ -52,7 +52,9 @@ namespace Sep.Git.Tfs.Commands
         {
             tfsRepositoryPath.AssertValidTfsPath();
             if (!initOptions.IsBare)
+            {
                 InitSubdir(gitRepositoryPath);
+            }
             else
             {
                 Environment.CurrentDirectory = gitRepositoryPath;

@@ -22,10 +22,7 @@ namespace Sep.Git.Tfs.Commands
 
         private bool Quick { get; set; }
         private bool AutoRebase { get; set; }
-        private string BareBranch { get; set; }
-        private bool IsBareMode { get { return !string.IsNullOrWhiteSpace(BareBranch); } }
-
-        private string _refToCheckin;
+        private string RefToCheckin { get; set; }
 
         public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Globals globals)
         {
@@ -45,27 +42,36 @@ namespace Sep.Git.Tfs.Commands
                         { "q|no-rebase|quick", "omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
                         v => Quick = v != null },
                         {"a|autorebase", "continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
-                        {"bare=", "branch name of the bare repository that should be checked in", v => BareBranch = v},
                     }.Merge(_checkinOptions.OptionSet);
             }
         }
 
-        // uses rebase and works only with HEAD in a none bare repository
+        // uses rebase and works only with HEAD
         public int Run()
         {
-            _refToCheckin = IsBareMode ? GitRepository.GetRefForHeadBranch(BareBranch) : "HEAD";
+            if (_globals.Repository.IsBare)
+                throw new GitTfsException("error: you should specify the local branch to checkin for a bare repository.");
 
-            return _writer.Write(_refToCheckin, PerformRCheckin);
+            RefToCheckin = "HEAD";
+
+            return _writer.Write(RefToCheckin, PerformRCheckin);
+        }
+
+        // uses rebase and works only with HEAD in a none bare repository
+        public int Run(string localBranch)
+        {
+            if (!_globals.Repository.IsBare)
+                throw new GitTfsException("error: This syntax with one parameter is only allowed in bare repository.");
+
+            RefToCheckin = GitRepository.ShortToLocalName(localBranch);
+
+            return _writer.Write(RefToCheckin, PerformRCheckin);
         }
 
         private int PerformRCheckin(TfsChangesetInfo parentChangeset)
         {
             var tfsRemote = parentChangeset.Remote;
             var repo = tfsRemote.Repository;
-
-            if (repo.IsBare && !IsBareMode)
-                throw new GitTfsException("error: You are trying to use rcheckin in a bare repository which is very dangerous.")
-                    .WithRecommendation("If you still want to continue, use the '--bare' flag.");
 
             if (repo.IsBare)
                 AutoRebase = false;
@@ -88,7 +94,7 @@ namespace Sep.Git.Tfs.Commands
                 else
                 {
                     if(repo.IsBare)
-                        repo.UpdateRef(GitRepository.GetRefForHeadBranch(BareBranch), parentChangeset.Remote.MaxCommitHash);
+                        repo.UpdateRef(RefToCheckin, parentChangeset.Remote.MaxCommitHash);
 
                     throw new GitTfsException("error: New TFS changesets were found.")
                         .WithRecommendation("Try to rebase HEAD onto latest TFS checkin and repeat rcheckin or alternatively checkin s");
@@ -99,7 +105,7 @@ namespace Sep.Git.Tfs.Commands
 
             // we could rcheckin only if tfsLatest changeset is a parent of HEAD
             // so that we could rebase after each single checkin without conflicts
-            if (!String.IsNullOrWhiteSpace(repo.CommandOneline("rev-list", tfsLatest, "^" + _refToCheckin)))
+            if (!String.IsNullOrWhiteSpace(repo.CommandOneline("rev-list", tfsLatest, "^" + RefToCheckin)))
                 throw new GitTfsException("error: latest TFS commit should be parent of commits being checked in");
 
             return (Quick || repo.IsBare) ? _PerformRCheckinQuick(parentChangeset) : _PerformRCheckin(parentChangeset);
@@ -113,7 +119,7 @@ namespace Sep.Git.Tfs.Commands
 
                 string[] revList = null;
                 repo.CommandOutputPipe(tr => revList = tr.ReadToEnd().Split('\n').Where(s => !String.IsNullOrWhiteSpace(s)).ToArray(),
-                                       "rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + ".." + _refToCheckin);
+                                       "rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + ".." + RefToCheckin);
 
                 string currentParent = tfsLatest;
                 long newChangesetId = 0;
@@ -163,7 +169,7 @@ namespace Sep.Git.Tfs.Commands
                 }
 
                 if(repo.IsBare)
-                    repo.UpdateRef(GitRepository.GetRefForHeadBranch(BareBranch), tfsRemote.MaxCommitHash);
+                    repo.UpdateRef(RefToCheckin, tfsRemote.MaxCommitHash);
                 else
                 repo.Reset(tfsRemote.MaxCommitHash, ResetOptions.Hard);
                 _stdout.WriteLine("No more to rcheckin.");
@@ -185,7 +191,7 @@ namespace Sep.Git.Tfs.Commands
                 while (true)
                 {
                     // determine first descendant of tfsLatest
-                    string revList = repo.CommandOneline("rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + ".." + _refToCheckin);
+                    string revList = repo.CommandOneline("rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + ".." + RefToCheckin);
                     if (String.IsNullOrWhiteSpace(revList))
                     {
                         _stdout.WriteLine("No more to rcheckin.");

@@ -87,7 +87,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 if(string.IsNullOrEmpty(BareBranch))
                     throw new GitTfsException("error : specify a git branch to fetch on...");
-                if (!remote.Repository.HasRef(GitRepository.GetRefForHeadBranch(BareBranch)))
+                if (!remote.Repository.HasRef(GitRepository.ShortToLocalName(BareBranch)))
                     throw new GitTfsException("error : the specified git branch doesn't exist...");
             }
             // It is possible that we have outdated refs/remotes/tfs/<id>.
@@ -102,7 +102,7 @@ namespace Sep.Git.Tfs.Commands
             remote.CleanupWorkspaceDirectory();
 
             if(remote.Repository.IsBare)
-                remote.Repository.UpdateRef(GitRepository.GetRefForHeadBranch(BareBranch), remote.MaxCommitHash);
+                remote.Repository.UpdateRef(GitRepository.ShortToLocalName(BareBranch), remote.MaxCommitHash);
         }
 
         private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)
