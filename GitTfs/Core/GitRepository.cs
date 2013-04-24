@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 using LibGit2Sharp;
 using Branch = LibGit2Sharp.Branch;

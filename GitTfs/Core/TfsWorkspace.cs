@@ -13,21 +13,23 @@ namespace Sep.Git.Tfs.Core
         private readonly string _localDirectory;
         private readonly TextWriter _stdout;
         private readonly TfsChangesetInfo _contextVersion;
-        private readonly IGitTfsRemote _remote;
         private readonly CheckinOptions _checkinOptions;
         private readonly ITfsHelper _tfsHelper;
         private readonly CheckinPolicyEvaluator _policyEvaluator;
+
+        public IGitTfsRemote Remote { get; private set; }
 
         public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper, CheckinPolicyEvaluator policyEvaluator)
         {
             _workspace = workspace;
             _policyEvaluator = policyEvaluator;
             _contextVersion = contextVersion;
-            _remote = remote;
             _checkinOptions = checkinOptions;
             _tfsHelper = tfsHelper;
             _localDirectory = localDirectory;
             _stdout = stdout;
+
+            this.Remote = remote;
         }
 
         public void Shelve(string shelvesetName, bool evaluateCheckinPolicies, Func<string> generateCheckinComment)

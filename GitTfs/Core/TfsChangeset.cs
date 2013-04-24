@@ -27,7 +27,7 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)
         {
-            var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
+            var initialTree = workspace.Remote.Repository.GetObjects(lastCommit);
             workspace.Get(_changeset);
             foreach (var change in Sort(_changeset.Changes))
             {
@@ -42,7 +42,7 @@ namespace Sep.Git.Tfs.Core
             // and git doesn't really care if you add or delete empty dirs.
             if (change.Item.ItemType == TfsItemType.File)
             {
-                var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, initialTree);
+                var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, workspace.Remote, initialTree);
                 if (pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
                     return;
                 if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
@@ -60,9 +60,9 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private string GetPathInGitRepo(string tfsPath, IDictionary<string, GitObject> initialTree)
+        private string GetPathInGitRepo(string tfsPath, IGitTfsRemote remote, IDictionary<string, GitObject> initialTree)
         {
-            var pathInGitRepo = Summary.Remote.GetPathInGitRepo(tfsPath);
+            var pathInGitRepo = remote.GetPathInGitRepo(tfsPath);
             if (pathInGitRepo == null)
                 return null;
             return UpdateToMatchExtantCasing(pathInGitRepo, initialTree);
@@ -70,7 +70,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Rename(IChange change, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
-            var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Item), initialTree);
+            var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Item), workspace.Remote, initialTree);
             if (oldPath != null)
             {
                 Delete(oldPath, index, initialTree);
@@ -145,7 +145,7 @@ namespace Sep.Git.Tfs.Core
             {
                 tfsItems = Summary.Remote.TfsSubtreePaths.SelectMany(x => _changeset.VersionControlServer.GetItems(x, _changeset.ChangesetId, TfsRecursionType.Full)).ToArray();
             }
-            var tfsItemsWithGitPaths = tfsItems.Select(item => new { item, gitPath = GetPathInGitRepo(item.ServerItem, treeInfo) });
+            var tfsItemsWithGitPaths = tfsItems.Select(item => new { item, gitPath = GetPathInGitRepo(item.ServerItem, this.Summary.Remote, treeInfo) });
             return tfsItemsWithGitPaths.Where(x => x.gitPath != null).Select(x => new TfsTreeEntry(x.gitPath, x.item));
         }
 
@@ -209,7 +209,7 @@ namespace Sep.Git.Tfs.Core
             return Mode.NewFile;
         }
 
-        private static readonly Regex SplitDirnameFilename = new Regex("(?<dir>.*)/(?<file>[^/]+)");
+        private static readonly Regex SplitDirnameFilename = new Regex(@"(?<dir>.*)[/\\](?<file>[^/\\]+)");
 
         private string UpdateToMatchExtantCasing(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
         {

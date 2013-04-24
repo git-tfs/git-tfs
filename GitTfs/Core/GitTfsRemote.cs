@@ -256,10 +256,10 @@ namespace Sep.Git.Tfs.Core
                 tfsPath = p.GetPathInGitRepo(tfsPath);
 
                 //we must prepend the prefix in order to get the correct directory
-                while (tfsPath.StartsWith("/"))
-                    tfsPath = tfsPath.Substring(1);
-
-                tfsPath = Path.Combine(p.Prefix, tfsPath);
+                if (tfsPath.StartsWith("/"))
+                    tfsPath = p.Prefix + tfsPath;
+                else
+                    tfsPath = p.Prefix + "/" + tfsPath;
             }
             
             while (tfsPath.StartsWith("/"))
