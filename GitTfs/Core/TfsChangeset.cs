@@ -16,7 +16,10 @@ namespace Sep.Git.Tfs.Core
         private readonly TextWriter _stdout;
         private readonly AuthorsFile _authors;
         public TfsChangesetInfo Summary { get; set; }
-        public int BaseChangesetId { get; set; }
+        public IChange[] Changes
+        { 
+            get { return _changeset.Changes; }
+        }
 
         public TfsChangeset(ITfsHelper tfs, IChangeset changeset, TextWriter stdout, AuthorsFile authors)
         {
@@ -24,7 +27,6 @@ namespace Sep.Git.Tfs.Core
             _changeset = changeset;
             _stdout = stdout;
             _authors = authors;
-            BaseChangesetId = _changeset.Changes.Max(c => c.Item.ChangesetId) - 1;
         }
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)

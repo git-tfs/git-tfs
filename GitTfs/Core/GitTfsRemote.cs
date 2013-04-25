@@ -490,6 +490,65 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        private string FindCommonGitCommit(ITfsChangeset changeset)
+        {
+            var inrepo = " could not be found in the repository.";
+            var sha1ByPath = new Dictionary<string, string>();
+
+            Func<GitCommit, string, LibGit2Sharp.TreeEntry> findFile = (commit, path) =>
+            {
+                return (from c in commit.GetTree()
+                        where c.FullName.Equals(path, StringComparison.InvariantCultureIgnoreCase)
+                        select c.Entry).First();
+            };
+
+            //Lookup the original commit for each changed file and store
+            //a ref to it along with its SHA1
+
+            var allIds = (from c in changeset.Changes select c.Item.ChangesetId - 1).Distinct();
+
+            var tfsCommits = Repository.FilterParentTfsCommits(RemoteRef, false,
+                                    c => allIds.Contains((int)c.ChangesetId));
+
+            //Find base commit for each of the files in the changeset
+            foreach(var change in changeset.Changes)
+            {
+                var id = change.Item.ChangesetId - 1;
+
+                //Check only changed files
+                if (id > 0)
+                {
+                    var c = (from t in tfsCommits
+                             where t.ChangesetId == id select t).FirstOrDefault();
+
+                    if (c == null)
+                        throw new GitTfsException("ERROR: Changeset C" + id + inrepo);
+
+                    var commit = Repository.GetCommit(c.GitCommit);
+                    var path = GetPathInGitRepo(change.Item.ServerItem).Replace("/", "\\");
+                    var entry = findFile(commit, path);
+
+                    if (entry.Type == LibGit2Sharp.GitObjectType.Blob)
+                    {
+                        sha1ByPath[path] = entry.Target.Sha;
+                    }
+                }
+            }
+
+            //Stop at the first commit for which all files match the SHA1 present
+            //in their original TFS commits.
+            var common = tfsCommits.OrderByDescending(t => t.ChangesetId).FirstOrDefault(commit =>
+            {
+                return sha1ByPath.All(file => findFile(Repository.GetCommit(commit.GitCommit),
+                                                       file.Key).Target.Sha == file.Value);
+            });
+
+            if (common == null)
+                throw new GitTfsException("ERROR: The changes in the shelveset are from different commits.");
+
+            return common.GitCommit;
+        }
+
         public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch)
         {
             var destinationRef = "refs/heads/" + destinationBranch;
@@ -498,13 +557,8 @@ namespace Sep.Git.Tfs.Core
 
             var shelvesetChangeset = Tfs.GetShelvesetData(this, shelvesetOwner, shelvesetName);
 
-            var parentId = shelvesetChangeset.BaseChangesetId;
-            var ch = GetTfsChangesetById(parentId);
-            if (ch == null)
-                throw new GitTfsException("ERROR: Parent changeset C" + parentId  + " not found."
-                                         +" Try fetching the latest changes from TFS");
 
-            var commit = CommitChangeset(shelvesetChangeset, ch.GitCommit);
+            var commit = CommitChangeset(shelvesetChangeset, FindCommonGitCommit(shelvesetChangeset));
             UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
         }
 
