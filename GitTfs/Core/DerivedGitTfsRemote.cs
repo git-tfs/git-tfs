@@ -217,7 +217,7 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public void UpdateRef(string commitHash, long changesetId)
+        public void UpdateTfsHead(string commitHash, long changesetId)
         {
             throw new NotImplementedException();
         }

@@ -16,6 +16,10 @@ namespace Sep.Git.Tfs.Core
         private readonly TextWriter _stdout;
         private readonly AuthorsFile _authors;
         public TfsChangesetInfo Summary { get; set; }
+        public IChange[] Changes
+        { 
+            get { return _changeset.Changes; }
+        }
 
         public TfsChangeset(ITfsHelper tfs, IChangeset changeset, TextWriter stdout, AuthorsFile authors)
         {

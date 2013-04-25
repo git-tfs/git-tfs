@@ -219,8 +219,8 @@ namespace Sep.Git.Tfs.Core
                                          select cs;
             foreach (var cs in untrackedTfsChangesets)
             {
-                // UpdateRef sets tag with TFS changeset id on each commit so we can't just update to latest
-                remote.UpdateRef(cs.GitCommit, cs.ChangesetId);
+                // UpdateTfsHead sets tag with TFS changeset id on each commit so we can't just update to latest
+                remote.UpdateTfsHead(cs.GitCommit, cs.ChangesetId);
             }
         }
 
@@ -241,6 +241,13 @@ namespace Sep.Git.Tfs.Core
                    group commit by commit.Remote
                    into remotes
                    select remotes.OrderBy(commit => -commit.ChangesetId).First();
+        }
+
+        public IEnumerable<TfsChangesetInfo> FilterParentTfsCommits(string head, bool includeStubRemotes,
+                                                                    Predicate<TfsChangesetInfo> pred)
+        {
+            return from commit in GetParentTfsCommits(head, includeStubRemotes)
+                   where pred(commit) select commit;
         }
 
         private List<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes)

@@ -95,6 +95,13 @@ namespace Sep.Git.Tfs.Core
             set { maxCommitHash = value; }
         }
 
+        private TfsChangesetInfo GetTfsChangesetById(int id)
+        {
+            var result = Repository.FilterParentTfsCommits(RemoteRef, false,
+                                                           c => c.ChangesetId == id);
+            return result.IsEmpty() ? null : result.First();
+        }
+
         private void InitHistory()
         {
             if (maxChangesetId == null)
@@ -211,7 +218,7 @@ namespace Sep.Git.Tfs.Core
                     }
                 }
                 var commitSha = Commit(log);
-                UpdateRef(commitSha, changeset.Summary.ChangesetId);
+                UpdateTfsHead(commitSha, changeset.Summary.ChangesetId);
                 if(changeset.Summary.Workitems.Any())
                 {
                     string workitemNote = "Workitems:\n";
@@ -225,11 +232,10 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public void Apply(ITfsChangeset changeset, string destinationRef)
+        private string CommitChangeset(ITfsChangeset changeset, string parent)
         {
-            var log = Apply(MaxCommitHash, changeset);
-            var commit = Commit(log);
-            Repository.CommandNoisy("update-ref", destinationRef, commit);
+            var log = Apply(parent, changeset);
+            return Commit(log);
         }
 
         public void QuickFetch()
@@ -248,7 +254,7 @@ namespace Sep.Git.Tfs.Core
         {
             AssertTemporaryIndexEmpty();
             var log = CopyTree(MaxCommitHash, changeset);
-            UpdateRef(Commit(log), changeset.Summary.ChangesetId);
+            UpdateTfsHead(Commit(log), changeset.Summary.ChangesetId);
             DoGcIfNeeded();
         }
 
@@ -266,14 +272,20 @@ namespace Sep.Git.Tfs.Core
             return Tfs.GetChangeset((int)changesetId, this);
         }
 
-        public void UpdateRef(string commitHash, long changesetId)
+        public void UpdateTfsHead(string commitHash, long changesetId)
         {
             MaxCommitHash = commitHash;
             MaxChangesetId = changesetId;
-            Repository.CommandNoisy("update-ref", "-m", "C" + MaxChangesetId, RemoteRef, MaxCommitHash);
+            string changesetName = "C" + MaxChangesetId;
+            UpdateRef(RemoteRef, MaxCommitHash, changesetName);
             if (Autotag)
-                Repository.CommandNoisy("update-ref", TagPrefix + "C" + MaxChangesetId, MaxCommitHash);
+                UpdateRef(TagPrefix + changesetName, MaxCommitHash, "Autotag " + changesetName);
             LogCurrentMapping();
+        }
+
+        private void UpdateRef(string name, string commitHash, string reason)
+        {
+            Repository.CommandNoisy("update-ref", "-m", reason, name, commitHash);
         }
 
         private void LogCurrentMapping()
@@ -345,15 +357,18 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private LogEntry Apply(string lastCommit, ITfsChangeset changeset)
+        private LogEntry Apply(string parent, ITfsChangeset changeset)
         {
             LogEntry result = null;
             WithTemporaryIndex(() => WithWorkspace(changeset.Summary, workspace =>
             {
-                GitIndexInfo.Do(Repository, index => result = changeset.Apply(lastCommit, index, workspace));
+                //Make sure the index is first updated to look like the parent commit, if any
+                if (!string.IsNullOrEmpty(parent))
+                    Repository.CommandOneline("read-tree", parent);
+                GitIndexInfo.Do(Repository, index => result = changeset.Apply(parent, index, workspace));
                 result.Tree = Repository.CommandOneline("write-tree");
             }));
-            if(!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
+            if (!String.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);
             return result;
         }
 
@@ -460,7 +475,7 @@ namespace Sep.Git.Tfs.Core
                 PushEnvironment(oldEnvironment);
             }
         }
-
+        
         private void PushEnvironment(IDictionary<string, string> desiredEnvironment)
         {
             PushEnvironment(desiredEnvironment, new Dictionary<string, string>());
@@ -475,13 +490,76 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        private string FindCommonGitCommit(ITfsChangeset changeset)
+        {
+            var inrepo = " could not be found in the repository.";
+            var sha1ByPath = new Dictionary<string, string>();
+
+            Func<GitCommit, string, LibGit2Sharp.TreeEntry> findFile = (commit, path) =>
+            {
+                return (from c in commit.GetTree()
+                        where c.FullName.Equals(path, StringComparison.InvariantCultureIgnoreCase)
+                        select c.Entry).First();
+            };
+
+            //Lookup the original commit for each changed file and store
+            //a ref to it along with its SHA1
+
+            var allIds = (from c in changeset.Changes select c.Item.ChangesetId - 1).Distinct();
+
+            var tfsCommits = Repository.FilterParentTfsCommits(RemoteRef, false,
+                                    c => allIds.Contains((int)c.ChangesetId));
+
+            //Find base commit for each of the files in the changeset
+            foreach(var change in changeset.Changes)
+            {
+                var id = change.Item.ChangesetId - 1;
+
+                //Check only changed files
+                if (id > 0)
+                {
+                    var c = (from t in tfsCommits
+                             where t.ChangesetId == id select t).FirstOrDefault();
+
+                    if (c == null)
+                        throw new GitTfsException("ERROR: Changeset C" + id + inrepo);
+
+                    var commit = Repository.GetCommit(c.GitCommit);
+                    var path = GetPathInGitRepo(change.Item.ServerItem).Replace("/", "\\");
+                    var entry = findFile(commit, path);
+
+                    if (entry.Type == LibGit2Sharp.GitObjectType.Blob)
+                    {
+                        sha1ByPath[path] = entry.Target.Sha;
+                    }
+                }
+            }
+
+            //Stop at the first commit for which all files match the SHA1 present
+            //in their original TFS commits.
+            var common = tfsCommits.OrderByDescending(t => t.ChangesetId).FirstOrDefault(commit =>
+            {
+                return sha1ByPath.All(file => findFile(Repository.GetCommit(commit.GitCommit),
+                                                       file.Key).Target.Sha == file.Value);
+            });
+
+            if (common == null)
+                throw new GitTfsException("ERROR: The changes in the shelveset are from different commits.");
+
+            return common.GitCommit;
+        }
+
         public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch)
         {
             var destinationRef = "refs/heads/" + destinationBranch;
             if(Repository.HasRef(destinationRef))
                 throw new GitTfsException("ERROR: Destination branch (" + destinationBranch + ") already exists!");
+
             var shelvesetChangeset = Tfs.GetShelvesetData(this, shelvesetOwner, shelvesetName);
-            Apply(shelvesetChangeset, destinationRef);
+
+
+            var commit = CommitChangeset(shelvesetChangeset, FindCommonGitCommit(shelvesetChangeset));
+            UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
         }
 
         public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
