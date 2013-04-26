@@ -157,7 +157,7 @@ namespace Sep.Git.Tfs.Core
         public void Rename(string pathFrom, string pathTo, string score)
         {
             _stdout.WriteLine(" rename " + pathFrom + " to " + pathTo + " (score: " + score + ")");
-            GetFromTfs(pathFrom);
+            GetFromTfs(GetLocalPath(pathFrom));
             var result = _workspace.PendRename(GetLocalPath(pathFrom), GetLocalPath(pathTo));
             if (result != 1) throw new ApplicationException("Unable to rename item from " + pathFrom + " to " + pathTo);
         }
