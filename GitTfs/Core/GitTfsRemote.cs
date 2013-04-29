@@ -270,7 +270,7 @@ namespace Sep.Git.Tfs.Core
         {
             MaxCommitHash = commitHash;
             MaxChangesetId = changesetId;
-            Repository.CommandNoisy("update-ref", "-m", "C" + MaxChangesetId, RemoteRef, MaxCommitHash);
+            Repository.UpdateRef(RemoteRef, MaxCommitHash, "C" + MaxChangesetId);
             if (Autotag)
                 Repository.UpdateRef(TagPrefix + "C" + MaxChangesetId, MaxCommitHash);
             LogCurrentMapping();

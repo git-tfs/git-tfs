@@ -37,9 +37,21 @@ namespace Sep.Git.Tfs.Core
                 _repository.Dispose();
         }
 
-        public void UpdateRef(string gitRefName, string shaCommit)
+        public void UpdateRef(string gitRefName, string shaCommit, string message = null)
         {
-            _repository.Refs.Add(gitRefName, new ObjectId(shaCommit), true);
+            if (message == null)
+            {
+                _repository.Refs.Add(gitRefName, new ObjectId(shaCommit), true);
+            }
+            else
+            {
+                if (_repository.Refs[gitRefName] == null)
+                {
+                    _repository.Refs.Add(gitRefName, new ObjectId(shaCommit));
+                }
+
+                _repository.Refs.UpdateTarget(gitRefName, shaCommit, message);
+            }
         }
 
         public string GitDir { get; set; }
