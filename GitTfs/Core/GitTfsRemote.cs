@@ -192,13 +192,21 @@ namespace Sep.Git.Tfs.Core
             return tfsPath;
         }
 
-        public void Fetch()
+        public class FetchResult : IFetchResult
         {
-            FetchWithMerge(-1);
+             public bool IsSuccess { get; set; }
+             public long LastFetchedChangesetId { get; set; }
+             public string ParentBranchTfsPath { get; set; }
         }
 
-        public void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes)
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
         {
+            return FetchWithMerge(-1, stopOnFailMergeCommit);
+        }
+
+        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        {
+            var fr = new FetchResult{IsSuccess = true};
             foreach (var changeset in FetchChangesets())
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
@@ -207,11 +215,21 @@ namespace Sep.Git.Tfs.Core
                 {
                     var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
                     var shaParent = Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
-                    if(shaParent != null)
+                    if (shaParent != null)
                         log.CommitParents.Add(shaParent);
-                    else //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
-                        stdout.WriteLine("warning: there is not yet a git commit for the parent changset " + parentChangesetId + "! Fetch the corresponding branch before...");
-                }
+                    else
+                    {
+                            if (stopOnFailMergeCommit)
+                            {
+                                fr.IsSuccess = false;
+                                fr.LastFetchedChangesetId = MaxChangesetId;
+                                return fr;
+                            }
+                            //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
+                        stdout.WriteLine("warning: found merge changeset "+ changeset.Summary.ChangesetId +" but unable to manage it due to lack of local commit for changeset " + parentChangesetId +
+                                             "! Fetch the corresponding branch before...");
+                        }
+                        }
                 if (changeset.Summary.ChangesetId == mergeChangesetId)
                 {
                     foreach (var parent in parentCommitsHashes)
@@ -232,6 +250,7 @@ namespace Sep.Git.Tfs.Core
                 }
                 DoGcIfNeeded();
             }
+            return fr;
         }
 
         public void Apply(ITfsChangeset changeset, string destinationRef)

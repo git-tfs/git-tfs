@@ -152,12 +152,12 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public void Fetch()
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
         {
             throw new NotImplementedException();
         }
 
-        public void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes)
+        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             throw new NotImplementedException();
         }

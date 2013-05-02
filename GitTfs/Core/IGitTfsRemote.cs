@@ -5,6 +5,14 @@ using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
 {
+
+    public interface IFetchResult
+    {
+        bool IsSuccess { get; set; }
+        long LastFetchedChangesetId { get; set; }
+        string ParentBranchTfsPath { get; set; }
+    }
+
     public interface IGitTfsRemote
     {
         bool IsDerived { get; }
@@ -24,8 +32,8 @@ namespace Sep.Git.Tfs.Core
         string RemoteRef { get; }
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
-        void Fetch();
-        void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes);
+        IFetchResult Fetch(bool stopOnFailMergeCommit = false);
+        IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes);
         void QuickFetch();
         void QuickFetch(int changesetId);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch);
