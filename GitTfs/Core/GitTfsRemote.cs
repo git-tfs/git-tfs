@@ -215,8 +215,12 @@ namespace Sep.Git.Tfs.Core
                 {
                     var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
                     var shaParent = Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
+                    if (shaParent == null)
+                        shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit);
                     if (shaParent != null)
+                    {
                         log.CommitParents.Add(shaParent);
+                    }
                     else
                     {
                         if (stopOnFailMergeCommit)
@@ -225,9 +229,10 @@ namespace Sep.Git.Tfs.Core
                             fr.LastFetchedChangesetId = MaxChangesetId;
                             return fr;
                         }
-                        //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
-                        stdout.WriteLine("warning: found merge changeset "+ changeset.Summary.ChangesetId +" but unable to manage it due to lack of local commit for changeset " + parentChangesetId +
-                                         "! Fetch the corresponding branch before...");
+#warning //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
+                        stdout.WriteLine("warning: found merge changeset " + changeset.Summary.ChangesetId +
+                                            " but unable to manage it due to lack of local commit for changeset " + parentChangesetId +
+                                            "! Fetch the corresponding branch before...");
                     }
                 }
                 if (changeset.Summary.ChangesetId == mergeChangesetId)
@@ -251,6 +256,22 @@ namespace Sep.Git.Tfs.Core
                 DoGcIfNeeded();
             }
             return fr;
+        }
+
+        private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit)
+        {
+            var tfsRemote = FindTfsRemoteOfChangeset(Tfs.GetChangeset(parentChangesetId));
+            if (tfsRemote == null)
+                return null;
+            var fr2 = tfsRemote.Fetch(stopOnFailMergeCommit);
+            return Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
+        }
+
+        private IGitTfsRemote FindTfsRemoteOfChangeset(IChangeset changeset)
+        {
+            //Don't know if there is a way to extract remote tfs repository path from changeset datas! Should be better!!!
+            var filePath = changeset.Changes.First().Item.ServerItem;
+            return globals.Repository.ReadAllTfsRemotes().FirstOrDefault(tfsRemote => filePath.StartsWith(tfsRemote.TfsRepositoryPath));
         }
 
         public void Apply(ITfsChangeset changeset, string destinationRef)
