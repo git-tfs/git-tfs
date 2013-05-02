@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Commands
 
         private int? InitialChangeset { get; set; }
 
-        protected override void DoFetch(IGitTfsRemote remote)
+        protected override void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
             if (InitialChangeset.HasValue)
                 remote.QuickFetch(InitialChangeset.Value);

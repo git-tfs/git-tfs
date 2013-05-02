@@ -219,17 +219,17 @@ namespace Sep.Git.Tfs.Core
                         log.CommitParents.Add(shaParent);
                     else
                     {
-                            if (stopOnFailMergeCommit)
-                            {
-                                fr.IsSuccess = false;
-                                fr.LastFetchedChangesetId = MaxChangesetId;
-                                return fr;
-                            }
-                            //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
+                        if (stopOnFailMergeCommit)
+                        {
+                            fr.IsSuccess = false;
+                            fr.LastFetchedChangesetId = MaxChangesetId;
+                            return fr;
+                        }
+                        //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
                         stdout.WriteLine("warning: found merge changeset "+ changeset.Summary.ChangesetId +" but unable to manage it due to lack of local commit for changeset " + parentChangesetId +
-                                             "! Fetch the corresponding branch before...");
-                        }
-                        }
+                                         "! Fetch the corresponding branch before...");
+                    }
+                }
                 if (changeset.Summary.ChangesetId == mergeChangesetId)
                 {
                     foreach (var parent in parentCommitsHashes)

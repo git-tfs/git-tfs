@@ -61,24 +61,42 @@ namespace Sep.Git.Tfs.Commands
             return Run(globals.RemoteId);
         }
 
+        public void Run(bool stopOnFailMergeCommit)
+        {
+            authors.Parse(AuthorsFilePath, globals.GitDir);
+
+            var remote = GetRemotesToFetch(new List<string>{globals.RemoteId}).First();
+            FetchRemote(stopOnFailMergeCommit, remote);
+        }
+
         public int Run(params string[] args)
+        {
+            return Run(false, args);
+        }
+
+        private int Run(bool stopOnFailMergeCommit, params string[] args)
         {
             authors.Parse(AuthorsFilePath, globals.GitDir);
 
             foreach (var remote in GetRemotesToFetch(args))
             {
+                FetchRemote(stopOnFailMergeCommit, remote);
+            }
+            return 0;
+        }
+
+        private void FetchRemote(bool stopOnFailMergeCommit, IGitTfsRemote remote)
+        {
                 Trace.WriteLine("Fetching from TFS remote " + remote.Id);
-                DoFetch(remote);
+            DoFetch(remote, stopOnFailMergeCommit);
                 if (labels != null && FetchLabels)
                 {
                     Trace.WriteLine("Fetching labels from TFS remote " + remote.Id);
                     labels.Run(remote);
                 }
             }
-            return 0;
-        }
 
-        protected virtual void DoFetch(IGitTfsRemote remote)
+        protected virtual void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
             // It is possible that we have outdated refs/remotes/tfs/<id>.
             // E.g. someone already fetched changesets from TFS into another git repository and we've pulled it since
@@ -86,7 +104,7 @@ namespace Sep.Git.Tfs.Commands
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
             globals.Repository.MoveTfsRefForwardIfNeeded(remote);
-            remote.Fetch();
+            remote.Fetch(stopOnFailMergeCommit);
 
             Trace.WriteLine("Cleaning...");
             remote.CleanupWorkspaceDirectory();

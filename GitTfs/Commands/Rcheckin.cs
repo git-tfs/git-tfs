@@ -114,7 +114,7 @@ namespace Sep.Git.Tfs.Commands
                 try
                 {
                     newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                    tfsRemote.FetchWithMerge(newChangesetId, rc.Parents);
+                    tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
                     if (tfsRemote.MaxChangesetId != newChangesetId)
                     {
                         var lastCommit = repo.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + newChangesetId + "[^0-9]");
@@ -130,7 +130,7 @@ namespace Sep.Git.Tfs.Commands
                     }
 
                     currentParent = target;
-                    parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote };
+                    parentChangeset = new TfsChangesetInfo {ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote};
                     _stdout.WriteLine("Done with {0}.", target);
                 }
                 catch (Exception)
@@ -184,12 +184,12 @@ namespace Sep.Git.Tfs.Commands
 
                 _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
                 long newChangesetId = tfsRemote.Checkin(rc.Sha, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                tfsRemote.FetchWithMerge(newChangesetId, rc.Parents);
+                tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
                 if (tfsRemote.MaxChangesetId != newChangesetId)
                     throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
 
                 tfsLatest = tfsRemote.MaxCommitHash;
-                parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote };
+                parentChangeset = new TfsChangesetInfo {ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote};
                 _stdout.WriteLine("Done with {0}, rebasing tail onto new TFS-commit...", target);
 
                 RebaseOnto(repo, tfsLatest, target);
