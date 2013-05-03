@@ -39,19 +39,7 @@ namespace Sep.Git.Tfs.Core
 
         public void UpdateRef(string gitRefName, string shaCommit, string message = null)
         {
-            if (message == null)
-            {
-                _repository.Refs.Add(gitRefName, new ObjectId(shaCommit), true);
-            }
-            else
-            {
-                if (_repository.Refs[gitRefName] == null)
-                {
-                    _repository.Refs.Add(gitRefName, new ObjectId(shaCommit));
-                }
-
-                _repository.Refs.UpdateTarget(gitRefName, shaCommit, message);
-            }
+            _repository.Refs.Add(gitRefName, shaCommit, allowOverwrite: true, logMessage: message);
         }
 
         public string GitDir { get; set; }
