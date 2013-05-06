@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Sep.Git.Tfs.Vs2010
+namespace Sep.Git.Tfs.VsCommon
 {
     public class ParentForm : Form
     {
@@ -16,7 +16,6 @@ namespace Sep.Git.Tfs.Vs2010
             ShowIcon = false;
             FormBorderStyle = FormBorderStyle.None;
             StartPosition = FormStartPosition.CenterParent;
-
         }
 
         protected override void OnLoad(EventArgs e)
