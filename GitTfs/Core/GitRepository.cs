@@ -37,6 +37,23 @@ namespace Sep.Git.Tfs.Core
                 _repository.Dispose();
         }
 
+        public void UpdateRef(string gitRefName, string shaCommit, string message = null)
+        {
+            if (message == null)
+            {
+                _repository.Refs.Add(gitRefName, new ObjectId(shaCommit), true);
+            }
+            else
+            {
+                if (_repository.Refs[gitRefName] == null)
+                {
+                    _repository.Refs.Add(gitRefName, new ObjectId(shaCommit));
+                }
+
+                _repository.Refs.UpdateTarget(gitRefName, shaCommit, message);
+            }
+        }
+
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
@@ -58,7 +75,8 @@ namespace Sep.Git.Tfs.Core
 
         public string GetConfig(string key)
         {
-            return _repository.Config.Get<string>(key, null);
+            var entry = _repository.Config.Get<string>(key);
+            return entry == null ? null : entry.Value;
         }
 
         public IEnumerable<IGitTfsRemote> ReadAllTfsRemotes()
@@ -442,7 +460,7 @@ namespace Sep.Git.Tfs.Core
             Reference reference;
             try
             {
-                reference = _repository.Refs.Create(gitBranchName, target);
+                reference = _repository.Refs.Add(gitBranchName, target);
             }
             catch (Exception)
             {
