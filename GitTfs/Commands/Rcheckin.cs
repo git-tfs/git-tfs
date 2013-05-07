@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Commands
 
         private bool Quick { get; set; }
         private bool AutoRebase { get; set; }
+        private bool ForceCheckin { get; set; }
 
         public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
         {
@@ -39,6 +40,7 @@ namespace Sep.Git.Tfs.Commands
                         { "q|no-rebase|quick", "omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
                         v => Quick = v != null },
                         {"a|autorebase", "continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
+                        {"ignore-merge", "force check in ignoring parent tfs branches in merge commits", v => ForceCheckin = v != null},
                     }.Merge(_checkinOptions.OptionSet);
             }
         }
@@ -106,7 +108,7 @@ namespace Sep.Git.Tfs.Commands
                 rc.ExtractCommit(commitWithParents, currentParent);
                 rc.BuildCommitMessage(!_checkinOptions.NoGenerateCheckinComment, currentParent);
                 string target = rc.Sha;
-                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(repo, rc.Parents);
+                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(tfsRemote, rc.Parents, target);
 
                 var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, rc.Message, rc.Commit);
 
@@ -178,7 +180,7 @@ namespace Sep.Git.Tfs.Commands
                 rc.ExtractCommit(revList, tfsLatest);
                 rc.BuildCommitMessage(!_checkinOptions.NoGenerateCheckinComment, tfsLatest);
                 string target = rc.Sha;
-                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(repo, rc.Parents);
+                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(tfsRemote, rc.Parents, target);
 
                 var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, rc.Message, rc.Commit);
 
@@ -232,22 +234,32 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        private string FindTfsRepositoryPathOfMergedBranch(IGitRepository repo, string[] gitParents)
+        private string FindTfsRepositoryPathOfMergedBranch(IGitTfsRemote remoteToCheckin, string[] gitParents, string target)
         {
+            var repo = remoteToCheckin.Repository;
             if (gitParents.Length != 0)
             {
+                _stdout.WriteLine("Working on the merge commit: " + target);
                 if (gitParents.Length > 1)
-                    _stdout.WriteLine("warning: only 1 parent is supported by TFS for a merge changeset. The other parents won't be materialized on the TFS merge!");
+                    _stdout.WriteLine("warning: only 1 parent is supported by TFS for a merge changeset. The other parents won't be materialized in the TFS merge!");
                 foreach (var gitParent in gitParents)
                 {
                     var tfsCommit = repo.GetTfsCommit(gitParent);
                     if (tfsCommit != null)
                         return tfsCommit.Remote.TfsRepositoryPath;
-                    _stdout.WriteLine("warning: the parent " + gitParent + " of the merge commit was not checked in TFS and will be ignored!");
+                    var lastCheckinCommit = repo.GetLastParentTfsCommits(gitParent).First();
+                    if (lastCheckinCommit != null)
+                    {
+                        if(!ForceCheckin && lastCheckinCommit.Remote.Id != remoteToCheckin.Id)
+                            throw new GitTfsException("error: the merged branch '" + lastCheckinCommit.Remote.Id
+                                + "'\n is a TFS tracked branch ("+lastCheckinCommit.Remote.TfsRepositoryPath
+                                + ") with some commits not checked in.\nIn this case, the local merge won't be materialized as a merge in tfs...")
+                                .WithRecommendation("check in all the commits of the tfs merged branch in TFS before trying to check in a merge commit",
+                                "use --ignore-merge option to ignore merged TFS branch and check in commit as a normal changeset (not a merge).");
+                    }
+
+                    _stdout.WriteLine("warning: the parent " + gitParent + " does not belong to a TFS tracked branch (not checked in TFS) and will be ignored!");
                 }
-                //Local merge where didn't found a checked in commit (strange!)
-                //TODO (IMO) Find if that's TFS branches that are not completely checked in
-                //If that's the case, we should fail and ask for rcheckin the merged branch before
             }
             return null;
         }
