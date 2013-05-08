@@ -83,7 +83,7 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void NoConfig()
             {
-                var remotes = _loader.Load(Enumerable.Empty<ConfigurationEntry>());
+                var remotes = _loader.Load(Enumerable.Empty<ConfigurationEntry<string>>());
                 Assert.Empty(remotes);
             }
 
