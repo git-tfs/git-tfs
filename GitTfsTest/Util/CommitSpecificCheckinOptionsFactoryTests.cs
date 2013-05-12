@@ -13,7 +13,7 @@ namespace Sep.Git.Tfs.Test.Util
         public void Sets_commit_message_as_checkin_comments()
         {
             TextWriter writer = new StringWriter();
-            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(writer);
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(writer, new Globals());
 
             string originalCheckinComment = "command-line input";
             CheckinOptions singletonCheckinOptions = new CheckinOptions()
@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Test.Util
         public void Adds_work_item_to_associate_and_removes_checkin_command_comment()
         {
             StringWriter textWriter = new StringWriter();
-            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter);
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
 
             CheckinOptions singletonCheckinOptions = new CheckinOptions();
 
@@ -63,7 +63,7 @@ namespace Sep.Git.Tfs.Test.Util
         public void Adds_work_item_to_resolve_and_removes_checkin_command_comment()
         {
             StringWriter textWriter = new StringWriter();
-            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter);
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
 
             CheckinOptions singletonCheckinOptions = new CheckinOptions();
 
@@ -91,7 +91,7 @@ namespace Sep.Git.Tfs.Test.Util
         public void Adds_multiple_work_items_and_removes_checkin_command_comment()
         {
             StringWriter textWriter = new StringWriter();
-            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter);
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
 
             CheckinOptions singletonCheckinOptions = new CheckinOptions();
 
@@ -124,7 +124,7 @@ namespace Sep.Git.Tfs.Test.Util
         public void Adds_reviewers_and_removes_checkin_command_comment()
         {
             StringWriter textWriter = new StringWriter();
-            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter);
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
 
             CheckinOptions checkinOptions = new CheckinOptions();
 
