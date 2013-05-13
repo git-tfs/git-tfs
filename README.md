@@ -38,9 +38,11 @@ You will find there a very short help. For more help, please look at the [wiki](
 
 ## Installing
 
-Using [Chocolatey](http://chocolatey.org/):
+Using [Chocolatey](http://chocolatey.org/) :
 
 ``` cinst GitTfs ```
+
+or [download a binary](http://git-tfs.com/)...
 
 You need .NET 4 and either the 2008 or 2010 version of Team Explorer installed.
 
