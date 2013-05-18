@@ -70,7 +70,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.CreateTfsRemote(null)).Callback<RemoteInfo>((info) => info.Id == GIT_BRANCH_TO_INIT && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == "$/MyProject/MyBranch").Return(newBranchRemote).Repeat.Once();
 
             newBranchRemote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT).Repeat.Once();
-            newBranchRemote.Expect(r => r.Fetch()).Repeat.Once();
+            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
             newBranchRemote.MaxCommitHash = "sha1AfterFetch";
 
             gitRepository.Expect(x => x.CreateBranch("refs/remote/tfs/" + GIT_BRANCH_TO_INIT, "sha1BeforeFetch")).Return(true).Repeat.Once();
@@ -148,8 +148,8 @@ namespace Sep.Git.Tfs.Test.Commands
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
-            gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Return(GIT_BRANCH_TO_INIT).Repeat.Once();
             gitRepository.Expect(x => x.CommandOneline(Arg<string[]>.Is.Anything)).Return("foo!").Repeat.Never();
+            gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Return(GIT_BRANCH_TO_INIT).Repeat.Never();
             gitRepository.Expect(x => x.CreateTfsRemote(null)).Callback<RemoteInfo>((info) => info.Id == GIT_BRANCH_TO_INIT && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == "$/MyProject/MyBranch").Repeat.Never();
             gitRepository.Expect(x => x.ReadTfsRemote(GIT_BRANCH_TO_INIT)).Return(newBranchRemote).Repeat.Never();
 
@@ -171,13 +171,14 @@ namespace Sep.Git.Tfs.Test.Commands
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
-            gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Return(GIT_BRANCH_TO_INIT).Repeat.Once();
             gitRepository.Expect(x => x.FindCommitHashByCommitMessage(Arg<string>.Is.Anything)).Return("").Repeat.Once();
+            gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Return(GIT_BRANCH_TO_INIT).Repeat.Never();
             gitRepository.Expect(x => x.CreateTfsRemote(null)).Callback<RemoteInfo>((info) => info.Id == GIT_BRANCH_TO_INIT && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == "$/MyProject/MyBranch").Repeat.Never();
             gitRepository.Expect(x => x.ReadTfsRemote(GIT_BRANCH_TO_INIT)).Return(newBranchRemote).Repeat.Never();
 
 
-            Assert.Throws(typeof(GitTfsException), ()=>mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
+            var ex = Assert.Throws(typeof(GitTfsException), ()=>mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
+            Assert.Equal("error: The root changeset 2010 have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n", ex.Message);
 
             gitRepository.VerifyAllExpectations();
         }
@@ -204,7 +205,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.CreateTfsRemote(null)).Callback<RemoteInfo>((info) => info.Id == GIT_BRANCH_TO_INIT && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == "$/MyProject/MyBranch").Return(newBranchRemote).Repeat.Once();
 
             newBranchRemote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT).Repeat.Once();
-            newBranchRemote.Expect(r => r.Fetch()).Repeat.Once();
+            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             newBranchRemote.MaxCommitHash = "sha1AfterFetch";
 
             gitRepository.Expect(x => x.CreateBranch("refs/remote/tfs/" + GIT_BRANCH_TO_INIT, "sha1BeforeFetch")).Return(true).Repeat.Once();
@@ -230,8 +231,8 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.ClassUnderTest.ParentBranch = "$/MyProject/MyParentBranchNotAlreadyCloned";
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
-            gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Return(GIT_BRANCH_TO_INIT).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
+            gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Return(GIT_BRANCH_TO_INIT).Repeat.Never();
             gitRepository.Expect(x => x.FindCommitHashByCommitMessage(Arg<string>.Is.Anything)).Return("9ee6a5ab4abd0a96a5e90a6a99988ce59af7964a").Repeat.Never();
             gitRepository.Expect(x => x.CreateTfsRemote(null)).Callback<RemoteInfo>((info) => info.Id == GIT_BRANCH_TO_INIT && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == "$/MyProject/MyBranch").Repeat.Never();
             gitRepository.Expect(x => x.ReadTfsRemote(GIT_BRANCH_TO_INIT)).Return(newBranchRemote).Repeat.Never();
@@ -275,7 +276,7 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs.Stub(t => t.GetAllTfsRootBranchesOrderedByCreation()).Return(new List<string> { remote.TfsRepositoryPath });
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
-            gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
+            gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Never();
 
             #region Branch1
             var rootChangeSetB1 = 1000;
@@ -286,7 +287,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.CreateTfsRemote(null)).Callback<RemoteInfo>((info) => info.Id == GIT_BRANCH_TO_INIT1 && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == tfsPathBranch1).Return(newBranch1Remote).Repeat.Once();
 
             newBranch1Remote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT1).Repeat.Once();
-            newBranch1Remote.Expect(r => r.Fetch()).Repeat.Once();
+            newBranch1Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
             newBranch1Remote.MaxCommitHash = "ShaAfterFetch_Branch1";
 
             gitRepository.Expect(x => x.CreateBranch("refs/remote/tfs/" + GIT_BRANCH_TO_INIT1, "ShaBeforeFetch_Branch1")).Return(true).Repeat.Once();
@@ -305,13 +306,14 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.CreateTfsRemote(null)).Callback<RemoteInfo>((info) => info.Id == GIT_BRANCH_TO_INIT2 && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == tfsPathBranch2).Return(newBranch2Remote).Repeat.Once();
 
             newBranch2Remote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT2).Repeat.Once();
-            newBranch2Remote.Expect(r => r.Fetch()).Repeat.Once();
+            newBranch2Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             newBranch2Remote.MaxCommitHash = "ShaAfterFetch_Branch2";
 
             gitRepository.Expect(x => x.CreateBranch("refs/remote/tfs/" + GIT_BRANCH_TO_INIT2, "ShaBeforeFetch_Branch2")).Return(true).Repeat.Once();
             gitRepository.Expect(x => x.CreateBranch("refs/heads/" + GIT_BRANCH_TO_INIT2, "ShaAfterFetch_Branch2")).Return(true).Repeat.Once();
             #endregion
 
+            remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run());
 
             gitRepository.VerifyAllExpectations();
@@ -340,7 +342,7 @@ namespace Sep.Git.Tfs.Test.Commands
             });
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
-            gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
+            gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Never();
 
             #region Branch1
             var rootChangeSetB1 = 1000;
@@ -394,7 +396,7 @@ namespace Sep.Git.Tfs.Test.Commands
             });
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
-            gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
+            gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Never();
 
             #region Branch1
             var rootChangeSetB1 = 1000;
