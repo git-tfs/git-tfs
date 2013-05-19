@@ -93,7 +93,7 @@ namespace Sep.Git.Tfs.Commands
                 }
                 else
                 {
-                    if(repo.IsBare)
+                    if (repo.IsBare)
                         repo.UpdateRef(RefToCheckin, parentChangeset.Remote.MaxCommitHash);
 
                     throw new GitTfsException("error: New TFS changesets were found.")
@@ -154,7 +154,7 @@ namespace Sep.Git.Tfs.Commands
                         }
 
                         currentParent = target;
-                        parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote };
+                    parentChangeset = new TfsChangesetInfo {ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote};
                         _stdout.WriteLine("Done with {0}.", target);
                     }
                     catch (Exception)
@@ -168,7 +168,7 @@ namespace Sep.Git.Tfs.Commands
                     }
                 }
 
-                if(repo.IsBare)
+            if (repo.IsBare)
                     repo.UpdateRef(RefToCheckin, tfsRemote.MaxCommitHash);
                 else
                 repo.Reset(tfsRemote.MaxCommitHash, ResetOptions.Hard);
@@ -215,7 +215,7 @@ namespace Sep.Git.Tfs.Commands
                         throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
 
                     tfsLatest = tfsRemote.MaxCommitHash;
-                    parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote };
+                parentChangeset = new TfsChangesetInfo {ChangesetId = newChangesetId, GitCommit = tfsLatest, Remote = tfsRemote};
                     _stdout.WriteLine("Done with {0}, rebasing tail onto new TFS-commit...", target);
 
                     RebaseOnto(repo, tfsLatest, target);
@@ -223,14 +223,14 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
 
-        struct RCheckinCommit
+        private struct RCheckinCommit
         {
             public GitCommit Commit { get; private set; }
             public string Sha { get; private set; }
             public string Message { get; private set; }
             public string[] Parents { get; private set;  }
 
-            IGitRepository repo;
+            private IGitRepository repo;
 
             public RCheckinCommit(IGitRepository repo)
                 : this()
@@ -252,8 +252,8 @@ namespace Sep.Git.Tfs.Commands
 
             public void BuildCommitMessage(bool generateCheckinComment, string latest)
             {
-                this.Message = generateCheckinComment ?  
-                          repo.GetCommitMessage(this.Sha, latest)
+                this.Message = generateCheckinComment
+                                   ? repo.GetCommitMessage(this.Sha, latest)
                           : repo.GetCommitMessage(this.Sha);
             }
         }
