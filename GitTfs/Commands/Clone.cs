@@ -20,16 +20,19 @@ namespace Sep.Git.Tfs.Commands
         private readonly Init init;
         private readonly Globals globals;
         private readonly InitBranch initBranch;
-        private bool withBranches;
-        private TextWriter stdout;
+        private readonly CleanupWorkspaceLocal cleanupWorkspaceDirectory;
+        private readonly TextWriter stdout;
 
-        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout)
+        private bool withBranches;
+
+        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout, CleanupWorkspaceLocal cleanupWorkspaceDirectory)
         {
             this.fetch = fetch;
             this.init = init;
             this.globals = globals;
             this.initBranch = initBranch;
             this.stdout = stdout;
+            this.cleanupWorkspaceDirectory = cleanupWorkspaceDirectory;
         }
 
         public OptionSet OptionSet
@@ -67,6 +70,7 @@ namespace Sep.Git.Tfs.Commands
                     initBranch.CloneAllBranches = true;
                     retVal = initBranch.Run();
                 }
+                cleanupWorkspaceDirectory.Run();
                 return retVal;
             }
             catch
