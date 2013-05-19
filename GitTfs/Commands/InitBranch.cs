@@ -20,6 +20,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals _globals;
         private readonly Help _helper;
         private readonly AuthorsFile _authors;
+        private readonly CleanupWorkspaceLocal _cleanupWorkspaceDirectory;
 
         private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
@@ -28,12 +29,13 @@ namespace Sep.Git.Tfs.Commands
         public bool CloneAllBranches { get; set; }
         public string AuthorsFilePath { get; set; }
 
-        public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
+        public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors, CleanupWorkspaceLocal cleanupWorkspaceDirectory)
         {
             _stdout = stdout;
             _globals = globals;
             _helper = helper;
             _authors = authors;
+            _cleanupWorkspaceDirectory = cleanupWorkspaceDirectory;
         }
 
         public OptionSet OptionSet
@@ -66,7 +68,12 @@ namespace Sep.Git.Tfs.Commands
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
             tfsBranchPath.AssertValidTfsPath();
-            return CreateBranch(defaultRemote, tfsBranchPath, allRemotes, gitBranchNameExpected, ParentBranch);
+
+            var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes, gitBranchNameExpected, ParentBranch);
+
+            _cleanupWorkspaceDirectory.Run();
+
+            return result;
         }
 
         public int Run()
@@ -101,6 +108,7 @@ namespace Sep.Git.Tfs.Commands
                 if (result < 0)
                     return result;
             }
+            _cleanupWorkspaceDirectory.Run();
             return GitTfsExitCodes.OK;
         }
 
