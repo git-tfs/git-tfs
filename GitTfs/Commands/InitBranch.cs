@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -20,6 +21,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals _globals;
         private readonly Help _helper;
         private readonly AuthorsFile _authors;
+        private readonly Dialog _dialog;
 
         private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
@@ -27,13 +29,15 @@ namespace Sep.Git.Tfs.Commands
         public string ParentBranch { get; set; }
         public bool CloneAllBranches { get; set; }
         public string AuthorsFilePath { get; set; }
+        public bool ShouldBeInteractive { get; set; }
 
-        public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
+        public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors, Dialog dialog)
         {
             _stdout = stdout;
             _globals = globals;
             _helper = helper;
             _authors = authors;
+            _dialog = dialog;
         }
 
         public OptionSet OptionSet
@@ -44,6 +48,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "all", "Clone all the TFS branches (For TFS 2010 and later)", v => CloneAllBranches = (v.ToLower() == "all") },
                     { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
+                    { "interactive", "Run command in interactive mode", v => ShouldBeInteractive = (v != null) },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
@@ -51,8 +56,47 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
+        private string GetBranchNames(string tfsRepositoryPath)
+        {
+            var expectedBranchName = ExtractGitBranchNameFromTfsRepositoryPath(tfsRepositoryPath);
+            string expectedName;
+            bool firstTime = true;
+            do
+            {
+                if (!firstTime)
+                    _dialog.Say("Wrong branch name! Choose another one...");
+                else
+                    firstTime = false;
+                expectedName = _dialog.Ask("Git remote name for tfs path " + tfsRepositoryPath + " (" + expectedBranchName + ")?");
+                if (string.IsNullOrWhiteSpace(expectedName))
+                {
+                    return expectedBranchName;
+                }
+                expectedName = expectedName.Trim();
+            } while (!_globals.Repository.IsValidBranchName(expectedName));
+
+            return expectedName;
+        }
+
+        private Dictionary<string, string> GetBranchNames(IEnumerable<string> tfsRepositoryPathes)
+        {
+            var tmp = new Dictionary<string, string>(tfsRepositoryPathes.Count());
+            foreach (var tfsRepositoryPath in tfsRepositoryPathes)
+            {
+                tmp.Add(tfsRepositoryPath, GetBranchNames(tfsRepositoryPath));
+            }
+            return tmp;
+        }
+
         public int Run(string tfsBranchPath)
         {
+            if (ShouldBeInteractive)
+            {
+                if (!Environment.UserInteractive)
+                    throw new GitTfsException("error: interactive mode can't be used when not in user interactive mode!");
+
+                return Run(tfsBranchPath, GetBranchNames(tfsBranchPath));
+            }
             return Run(tfsBranchPath, null);
         }
 
@@ -77,6 +121,8 @@ namespace Sep.Git.Tfs.Commands
                 return GitTfsExitCodes.Help;
             }
 
+            _stdout.WriteLine("Loading datas...");
+
             var defaultRemote = InitFromDefaultRemote();
 
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
@@ -87,21 +133,68 @@ namespace Sep.Git.Tfs.Commands
             if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
                throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
 
-            var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path).ToList();
+            var childBranchPaths = rootBranch.GetAllChildren().Select(b => b.Path);
+            var childBranchPathsNotAlreadyFetched = childBranchPaths.Where(p => !allRemotes.Select(r => r.TfsRepositoryPath.ToLower()).Contains(p.ToLower())).ToList();
 
-            _stdout.WriteLine("Tfs branches found:");
-            foreach (var tfsBranchPath in childBranchPaths)
+            if (!childBranchPathsNotAlreadyFetched.Any())
+                throw new GitTfsException("error: no new tfs branches to init!");
+
+            _stdout.WriteLine("New Tfs branches found:");
+            foreach (var tfsBranchPath in childBranchPathsNotAlreadyFetched)
             {
                 _stdout.WriteLine("- " + tfsBranchPath);
             }
 
-            foreach (var tfsBranchPath in childBranchPaths)
+            Dictionary<string, string> branchesWithExpectedNames = null;
+            if (ShouldBeInteractive)
             {
-                var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
+                while (true)
+                {
+                    branchesWithExpectedNames = GetBranchNames(childBranchPathsNotAlreadyFetched);
+                    if (!ControlBranchNaming(branchesWithExpectedNames, allRemotes))
+                        continue;
+                    _dialog.Say("Names that will be used for the tfs branches :");
+                    foreach (var tfsBranchPath in branchesWithExpectedNames.Keys)
+                    {
+                        _stdout.WriteLine("- " + tfsBranchPath + " => " + branchesWithExpectedNames[tfsBranchPath]);
+                    }
+                    var answer = (_dialog.Ask("Are names ok?(Yes/No/Quit)")??string.Empty).ToLower();
+                    if (answer == "q") return GitTfsExitCodes.OK;
+                    if (answer == "y") break;
+                }
+            }
+
+            foreach (var tfsBranchPath in childBranchPathsNotAlreadyFetched)
+            {
+                int result;
+                if (ShouldBeInteractive)
+                    result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes, branchesWithExpectedNames[tfsBranchPath]);
+                else
+                    result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
                 if (result < 0)
                     return result;
             }
             return GitTfsExitCodes.OK;
+        }
+
+        private bool ControlBranchNaming(Dictionary<string, string> branchesWithExpectedNames, IEnumerable<IGitTfsRemote> allRemotes)
+        {
+            var branchesNames = branchesWithExpectedNames.Values.Select(b => b.ToLower());
+            var duplicates = branchesNames.GroupBy(b => b).Where(g => g.Count() > 1).Select(g => g.Key);
+            if (duplicates.Any())
+            {
+                _dialog.Say("Some name(s) you choose are duplicates: " + duplicates.Aggregate((d1, d2) => d1 + ", " + d2));
+                return false;
+            }
+            var remotes = allRemotes.Select(r => r.Id.ToLower());
+            var conflicts = branchesNames.Where(b => remotes.Contains(b));
+            if (conflicts.Any())
+            {
+                _dialog.Say("Some name(s) you choose are already used in existing remotes: " + conflicts.Aggregate((c1, c2) => c1 + ", " + c2));
+                return false;
+            }
+
+            return true;
         }
 
         private IGitTfsRemote InitFromDefaultRemote()
@@ -145,7 +238,8 @@ namespace Sep.Git.Tfs.Commands
                 gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(gitBranchNameExpected);
             else
                 gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(tfsRepositoryPath);
-            if(string.IsNullOrWhiteSpace(gitBranchName))
+            _stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
+            if (string.IsNullOrWhiteSpace(gitBranchName))
                 throw new GitTfsException("error: The Git branch name '" + gitBranchName + "' is not valid...\n");
             Trace.WriteLine("Git local branch will be :" + gitBranchName);
 
@@ -203,7 +297,6 @@ namespace Sep.Git.Tfs.Commands
             }
             gitBranchNameExpected = gitBranchNameExpected.ToGitRefName();
             var gitBranchName = _globals.Repository.AssertValidBranchName(gitBranchNameExpected);
-            _stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
             return gitBranchName;
         }
     }

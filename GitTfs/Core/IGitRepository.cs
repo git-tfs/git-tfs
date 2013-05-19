@@ -39,5 +39,6 @@ namespace Sep.Git.Tfs.Core
         void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate);
         void MoveRemote(string oldRemoteName, string newRemoteName);
         void Reset(string sha, ResetOptions resetOptions);
+        bool IsValidBranchName(string expectedName);
     }
 }
