@@ -187,6 +187,9 @@ namespace Sep.Git.Tfs.Commands
             else
                 Trace.WriteLine("Local branch created!");
 
+            Trace.WriteLine("Cleaning...");
+            tfsRemote.CleanupWorkspaceDirectory();
+
             return GitTfsExitCodes.OK;
         }
 
