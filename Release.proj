@@ -31,7 +31,7 @@
     <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />
   </Target>
 
-  <Target Name="Release" DependsOnTargets="UpdateVersion; TagSource; Build; PushSource; Package">
+  <Target Name="Release" DependsOnTargets="UpdateVersion; Build; TagSource; PushSource; Package">
   </Target>
 
   <Target Name="Build">
@@ -53,7 +53,7 @@
 
   <Target Name="UpdateVersion">
     <Error Text="You should specify a version number!" Condition="'$(Version)' == ''" />
-    <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties { public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="ASCII"/>
+    <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties ; { ; public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="ASCII"/>
     <Exec Command="git add $(VersionFilePath)" />
     <Exec Command="git commit -m v$(Version)" />
   </Target>
