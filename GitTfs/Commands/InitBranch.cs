@@ -89,17 +89,24 @@ namespace Sep.Git.Tfs.Commands
 
             var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path).ToList();
 
-            _stdout.WriteLine("Tfs branches found:");
-            foreach (var tfsBranchPath in childBranchPaths)
+            if (childBranchPaths.Any())
             {
-                _stdout.WriteLine("- " + tfsBranchPath);
-            }
+                _stdout.WriteLine("Tfs branches found:");
+                foreach (var tfsBranchPath in childBranchPaths)
+                {
+                    _stdout.WriteLine("- " + tfsBranchPath);
+                }
 
-            foreach (var tfsBranchPath in childBranchPaths)
+                foreach (var tfsBranchPath in childBranchPaths)
+                {
+                    var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
+                    if (result < 0)
+                        return result;
+                }
+            }
+            else
             {
-                var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
-                if (result < 0)
-                    return result;
+                _stdout.WriteLine("No other Tfs branches found.");
             }
             return GitTfsExitCodes.OK;
         }
