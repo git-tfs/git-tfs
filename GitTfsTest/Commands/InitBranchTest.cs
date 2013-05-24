@@ -181,6 +181,8 @@ namespace Sep.Git.Tfs.Test.Commands
 
             gitRepository.VerifyAllExpectations();
         }
+
+
         #endregion
 
         #region Init a branch (2008 compatibility mode)
