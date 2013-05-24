@@ -375,6 +375,11 @@ namespace Sep.Git.Tfs.VsFake
         {
             throw new NotImplementedException();
         }
+
+        public bool IsExistingInTfs(string path)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }

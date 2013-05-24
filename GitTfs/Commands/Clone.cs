@@ -102,6 +102,11 @@ namespace Sep.Git.Tfs.Commands
             if (initBranch != null)
             {
                 var remote = globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
+
+                if (!remote.Tfs.IsExistingInTfs(tfsRepositoryPath))
+                    throw new GitTfsException("error: the path " + tfsRepositoryPath + " you want to clone doesn't exist!")
+                        .WithRecommendation("To discover which branch to clone, you could use the command :\ngit tfs list-remote-branches " + remote.TfsUrl);
+
                 if (!remote.Tfs.CanGetBranchInformation)
                     return;
                 var tfsTrunkRepository = remote.Tfs.GetRootTfsBranchForRemotePath(tfsRepositoryPath, false);
