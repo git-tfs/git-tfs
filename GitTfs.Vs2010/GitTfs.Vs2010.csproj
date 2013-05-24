@@ -98,6 +98,7 @@
     </Compile>
     <Compile Include="..\GitTfs.VsCommon\ParentForm.cs">
       <Link>ParentForm.cs</Link>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Common.cs">
       <Link>TfsHelper.Common.cs</Link>
