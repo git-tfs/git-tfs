@@ -38,6 +38,8 @@ namespace Sep.Git.Tfs.Core
             TfsPassword = info.Password;
             Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
             IgnoreRegexExpression = info.IgnoreRegex;
+            IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
+
             Autotag = info.Autotag;
         }
 
@@ -80,6 +82,7 @@ namespace Sep.Git.Tfs.Core
 
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegexExpression { get; set; }
+        public string IgnoreExceptRegexExpression { get; set; }
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
 
@@ -168,13 +171,21 @@ namespace Sep.Git.Tfs.Core
         public bool ShouldSkip(string path)
         {
             return IsInDotGit(path) ||
-                   IsIgnored(path, IgnoreRegexExpression) ||
-                   IsIgnored(path, remoteOptions.IgnoreRegex);
+                   IsIgnored(path, IgnoreRegexExpression, IgnoreExceptRegexExpression) ||
+                   IsIgnored(path, remoteOptions.IgnoreRegex, remoteOptions.ExceptRegex);
         }
 
-        private bool IsIgnored(string path, string expression)
+        private bool IsIgnored(string path, string expression, string except = null)
         {
-            return expression != null && new Regex(expression).IsMatch(path);
+            if (expression == null)
+                return false;
+
+            var skip = (new Regex(expression)).IsMatch(path);
+
+            if (except == null || !skip)
+                return skip;
+
+            return !(new Regex(except)).IsMatch(path);
         }
 
         private bool IsInDotGit(string path)

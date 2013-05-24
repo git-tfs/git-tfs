@@ -113,6 +113,12 @@ namespace Sep.Git.Tfs.Core
             set { throw new NotImplementedException(); }
         }
 
+        public string IgnoreExceptRegexExpression
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
         public IGitRepository Repository
         {
             get { throw new NotImplementedException(); }

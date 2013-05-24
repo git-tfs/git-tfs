@@ -17,6 +17,8 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "ignore-regex=", "a regex of files to ignore",
                         v => IgnoreRegex = v },
+                    { "except-regex=", "a regex of exceptions to ingore-regex",
+                        v => ExceptRegex = v},
                     { "u|username=", "TFS username",
                         v => Username = v },
                     { "p|password=", "TFS password",
@@ -26,6 +28,8 @@ namespace Sep.Git.Tfs.Commands
         }
 
         public string IgnoreRegex { get; set; }
+
+        public string ExceptRegex { get; set; }
 
         public string Username { get; set; }
 
