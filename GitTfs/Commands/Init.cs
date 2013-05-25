@@ -87,7 +87,7 @@ namespace Sep.Git.Tfs.Commands
                 Url = tfsUrl,
                 Repository = tfsRepositoryPath,
                 RemoteOptions = remoteOptions,
-            },initOptions.GitInitAutoCrlf);
+            });
         }
     }
 

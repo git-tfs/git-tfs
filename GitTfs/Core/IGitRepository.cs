@@ -13,7 +13,7 @@ namespace Sep.Git.Tfs.Core
         string GetConfig(string key);
         IEnumerable<IGitTfsRemote> ReadAllTfsRemotes();
         IGitTfsRemote ReadTfsRemote(string remoteId);
-        IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo, string autocrlf = null);
+        IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo);
         void DeleteTfsRemote(IGitTfsRemote remoteId);
         bool HasRemote(string remoteId);
         bool HasRef(string gitRef);
