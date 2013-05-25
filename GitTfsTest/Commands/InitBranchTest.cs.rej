@@ -1,0 +1,10 @@
+diff a/GitTfsTest/Commands/InitBranchTest.cs b/GitTfsTest/Commands/InitBranchTest.cs	(rejected hunks)
+@@ -98,7 +98,7 @@
+ 
+             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Throw(new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!"));
+             gitRepository.Expect(x => x.FindCommitHashByCommitMessage(Arg<string>.Is.Anything)).Return("9ee6a5ab4abd0a96a5e90a6a99988ce59af7964a").Repeat.Never();
+-            gitRepository.Expect(x => x.CreateTfsRemote(null)).Callback<RemoteInfo>((info) => info.Id == "myBranch" && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == "$/MyProject/MyBranch").Repeat.Never();
++            gitRepository.Expect(x => x.CreateTfsRemote(null,null)).Callback<RemoteInfo>((info) => info.Id == "myBranch" && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == "$/MyProject/MyBranch").Repeat.Never();
+ 
+             Assert.Throws(typeof(GitTfsException), ()=>mocks.ClassUnderTest.Run("$/MyProject/MyBranch", GIT_BRANCH_TO_INIT));
+ 
