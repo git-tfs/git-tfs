@@ -252,7 +252,7 @@ namespace Sep.Git.Tfs.Commands
                     {
                         if(!ForceCheckin && lastCheckinCommit.Remote.Id != remoteToCheckin.Id)
                             throw new GitTfsException("error: the merged branch '" + lastCheckinCommit.Remote.Id
-                                + "'\n is a TFS tracked branch ("+lastCheckinCommit.Remote.TfsRepositoryPath
+                                + "' is a TFS tracked branch ("+lastCheckinCommit.Remote.TfsRepositoryPath
                                 + ") with some commits not checked in.\nIn this case, the local merge won't be materialized as a merge in tfs...")
                                 .WithRecommendation("check in all the commits of the tfs merged branch in TFS before trying to check in a merge commit",
                                 "use --ignore-merge option to ignore merged TFS branch and check in commit as a normal changeset (not a merge).");
