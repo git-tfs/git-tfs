@@ -54,6 +54,14 @@ namespace Sep.Git.Tfs.Core
                 return _commit.Sha;
             }
         }
+
+        public string Message
+        {
+            get
+            {
+                return _commit.Message;
+            }
+        }
     }
 }
 
