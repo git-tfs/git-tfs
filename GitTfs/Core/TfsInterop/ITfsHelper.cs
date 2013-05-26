@@ -33,6 +33,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IEnumerable<IBranchObject> GetBranches();
         void EnsureAuthenticated();
         void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
+        void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath);
         bool IsExistingInTfs(string path);
     }
 }
