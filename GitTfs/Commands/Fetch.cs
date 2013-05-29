@@ -87,6 +87,9 @@ namespace Sep.Git.Tfs.Commands
             // The process is similar to bootstrapping.
             globals.Repository.MoveTfsRefForwardIfNeeded(remote);
             remote.Fetch();
+
+            Trace.WriteLine("Cleaning...");
+            remote.CleanupWorkspaceDirectory();
         }
 
         private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)

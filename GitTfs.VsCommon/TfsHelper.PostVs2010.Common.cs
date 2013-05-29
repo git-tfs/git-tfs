@@ -48,11 +48,12 @@ namespace Sep.Git.Tfs.VsCommon
                 var allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full);
                 var tfsBranchToCreate = allTfsBranches.FirstOrDefault(b => b.Properties.RootItem.Item.ToLower() == tfsPathBranchToCreate.ToLower());
                 if (tfsBranchToCreate == null)
+                {
+                    Trace.WriteLine("error: TFS branches "+ tfsPathBranchToCreate +" not found!");
                     return -1;
+                }
                 tfsPathParentBranch = tfsBranchToCreate.Properties.ParentBranch.Item;
                 Trace.WriteLine("Found parent branch : " + tfsPathParentBranch);
-
-                int firstChangesetIdOfParentBranch = ((ChangesetVersionSpec)tfsBranchToCreate.Properties.ParentBranch.Version).ChangesetId;
 
                 var firstChangesetInBranchToCreate = VersionControl.QueryHistory(tfsPathBranchToCreate, VersionSpec.Latest, 0, RecursionType.Full,
                     null, null, null, int.MaxValue, true, false, false).Cast<Changeset>().LastOrDefault();
@@ -113,7 +114,8 @@ namespace Sep.Git.Tfs.VsCommon
                 Trace.WriteLine("Found C" + merge.SourceChangeset.ChangesetId + " on branch " + merge.SourceItem.Item.ServerItem);
                 return merge.SourceChangeset;
             }
-            if(merge.SourceItem.ChangeType.HasFlag(ChangeType.Rename))
+            if (merge.SourceItem.ChangeType.HasFlag(ChangeType.Rename)
+                || merge.SourceItem.ChangeType.HasFlag(ChangeType.SourceRename))
             {
                 Trace.WriteLine("Found C" + merge.TargetChangeset.ChangesetId + " on branch " + merge.TargetItem.Item);
                 return merge.TargetChangeset;

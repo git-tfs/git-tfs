@@ -274,10 +274,9 @@ namespace Sep.Git.Tfs.Core
         {
             MaxCommitHash = commitHash;
             MaxChangesetId = changesetId;
-            string changesetName = "C" + MaxChangesetId;
-            UpdateRef(RemoteRef, MaxCommitHash, changesetName);
+            Repository.UpdateRef(RemoteRef, MaxCommitHash, "C" + MaxChangesetId);
             if (Autotag)
-                UpdateRef(TagPrefix + changesetName, MaxCommitHash, "Autotag " + changesetName);
+                Repository.UpdateRef(TagPrefix + "C" + MaxChangesetId, MaxCommitHash);
             LogCurrentMapping();
         }
 

@@ -27,6 +27,7 @@ namespace Sep.Git.Tfs.Commands
         public string ParentBranch { get; set; }
         public bool CloneAllBranches { get; set; }
         public string AuthorsFilePath { get; set; }
+        public bool NoFetch { get; set; }
 
         public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
         {
@@ -47,6 +48,7 @@ namespace Sep.Git.Tfs.Commands
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
+                    { "nofetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
                 };
             }
         }
@@ -71,6 +73,9 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
+            if (CloneAllBranches && NoFetch)
+                throw new GitTfsException("error: --nofetch cannot be used with --all");
+
             if (!CloneAllBranches)
             {
                 _helper.Run(this);
@@ -89,17 +94,24 @@ namespace Sep.Git.Tfs.Commands
 
             var childBranchPaths = rootBranch.GetAllChildren().Select(b=>b.Path).ToList();
 
-            _stdout.WriteLine("Tfs branches found:");
-            foreach (var tfsBranchPath in childBranchPaths)
+            if (childBranchPaths.Any())
             {
-                _stdout.WriteLine("- " + tfsBranchPath);
-            }
+                _stdout.WriteLine("Tfs branches found:");
+                foreach (var tfsBranchPath in childBranchPaths)
+                {
+                    _stdout.WriteLine("- " + tfsBranchPath);
+                }
 
-            foreach (var tfsBranchPath in childBranchPaths)
+                foreach (var tfsBranchPath in childBranchPaths)
+                {
+                    var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
+                    if (result < 0)
+                        return result;
+                }
+            }
+            else
             {
-                var result = CreateBranch(defaultRemote, tfsBranchPath, allRemotes);
-                if (result < 0)
-                    return result;
+                _stdout.WriteLine("No other Tfs branches found.");
             }
             return GitTfsExitCodes.OK;
         }
@@ -177,15 +189,27 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException("error: Fail to create remote branch ref file!");
             Trace.WriteLine("Remote created!");
 
-            Trace.WriteLine("Try fetching changesets...");
-            tfsRemote.Fetch();
-            Trace.WriteLine("Changesets fetched!");
 
+            if (!NoFetch)
+            {
+                Trace.WriteLine("Try fetching changesets...");
+                tfsRemote.Fetch();
+                Trace.WriteLine("Changesets fetched!");
+            }
+            else
+            {
+                Trace.WriteLine("Not fetching changesets, --nofetch option specified");
+            }
+            
+            
             Trace.WriteLine("Try creating the local branch...");
             if (!_globals.Repository.CreateBranch("refs/heads/" + gitBranchName, tfsRemote.MaxCommitHash))
                 _stdout.WriteLine("warning: Fail to create local branch ref file!");
             else
                 Trace.WriteLine("Local branch created!");
+
+            Trace.WriteLine("Cleaning...");
+            tfsRemote.CleanupWorkspaceDirectory();
 
             return GitTfsExitCodes.OK;
         }

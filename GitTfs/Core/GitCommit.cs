@@ -46,6 +46,14 @@ namespace Sep.Git.Tfs.Core
                 return new Tuple<string,string>(_commit.Author.Name, _commit.Author.Email);
             }
         }
+
+        public string Sha
+        {
+            get
+            {
+                return _commit.Sha;
+            }
+        }
     }
 }
 
