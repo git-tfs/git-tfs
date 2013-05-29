@@ -180,7 +180,7 @@ namespace Sep.Git.Tfs.Core
                    IsIgnored(path, remoteOptions.IgnoreRegex, remoteOptions.ExceptRegex);
         }
 
-        private bool IsIgnored(string path, string expression, string except = null)
+        private bool IsIgnored(string path, string expression, string except)
         {
             if (expression == null)
                 return false;
