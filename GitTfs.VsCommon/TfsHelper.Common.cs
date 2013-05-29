@@ -483,7 +483,10 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 get
                 {
-                    return _pendingChange.Version;
+                    // some operations like applying rename gets previous item state
+                    // via looking at version of item minus 1. So will try to emulate
+                    // that this shelve is real revision.
+                    return _pendingChange.Version + 1;
                 }
             }
 
