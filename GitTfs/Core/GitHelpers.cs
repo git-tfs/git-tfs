@@ -16,7 +16,7 @@ namespace Sep.Git.Tfs.Core
         /// Starting with version 1.7.10, Git uses UTF-8.
         /// Use this encoding for Git input and output.
         /// </summary>
-        private static Encoding _encoding = new UTF8Encoding(false, false);
+        private static Encoding _encoding = new UTF8Encoding(false, true);
 
         public GitHelpers(TextWriter stdout, IContainer container)
         {
