@@ -52,6 +52,7 @@ namespace Sep.Git.Tfs.Test.Core
                     Username = "user",
                     Password = "pass",
                     IgnoreRegex = "abc",
+                    IgnoreExceptRegex = "def",
                     Autotag = true,
                     Aliases = new string[] { "http://abc", "http://def" },
                 };
@@ -61,6 +62,7 @@ namespace Sep.Git.Tfs.Test.Core
                 AssertContainsConfig("tfs-remote.default.username", "user", config);
                 AssertContainsConfig("tfs-remote.default.password", "pass", config);
                 AssertContainsConfig("tfs-remote.default.ignore-paths", "abc", config);
+                AssertContainsConfig("tfs-remote.default.ignore-except", "def", config);
                 AssertContainsConfig("tfs-remote.default.legacy-urls", "http://abc,http://def", config);
                 AssertContainsConfig("tfs-remote.default.autotag", "true", config);
             }
@@ -121,6 +123,7 @@ namespace Sep.Git.Tfs.Test.Core
                     c("tfs-remote.default.username", "theuser"),
                     c("tfs-remote.default.password", "thepassword"),
                     c("tfs-remote.default.ignore-paths", "ignorethis.zip"),
+                    c("tfs-remote.default.ignore-except", "dontignorethis.zip"),
                     c("tfs-remote.default.legacy-urls", "http://old:8080/,http://other/"),
                     c("tfs-remote.default.autotag", "true"));
                 Assert.Equal(1, remotes.Count());
@@ -131,6 +134,7 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal("theuser", remote.Username);
                 Assert.Equal("thepassword", remote.Password);
                 Assert.Equal("ignorethis.zip", remote.IgnoreRegex);
+                Assert.Equal("dontignorethis.zip", remote.IgnoreExceptRegex);
                 Assert.Equal(new string[] { "http://old:8080/", "http://other/" }, remote.Aliases);
                 Assert.True(remote.Autotag);
             }

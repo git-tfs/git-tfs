@@ -13,6 +13,7 @@ namespace Sep.Git.Tfs.Core
         string TfsUrl { get; set; }
         string TfsRepositoryPath { get; set; }
         string IgnoreRegexExpression { get; set; }
+        string IgnoreExceptRegexExpression { get; set; }
         bool Autotag { get; set; }
         string TfsUsername { get; set; }
         string TfsPassword { get; set; }
