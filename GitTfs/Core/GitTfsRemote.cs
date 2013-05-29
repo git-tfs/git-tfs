@@ -280,11 +280,6 @@ namespace Sep.Git.Tfs.Core
             LogCurrentMapping();
         }
 
-        private void UpdateRef(string name, string commitHash, string reason)
-        {
-            Repository.CommandNoisy("update-ref", "-m", reason, name, commitHash);
-        }
-
         private void LogCurrentMapping()
         {
             stdout.WriteLine("C" + MaxChangesetId + " = " + MaxCommitHash);
@@ -502,7 +497,7 @@ namespace Sep.Git.Tfs.Core
                                          +" Try fetching the latest changes from TFS");
 
             var commit = CommitChangeset(shelvesetChangeset, ch.GitCommit);
-            UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
+            Repository.UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
         }
 
         public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
