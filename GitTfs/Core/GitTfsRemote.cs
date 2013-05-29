@@ -97,9 +97,7 @@ namespace Sep.Git.Tfs.Core
 
         private TfsChangesetInfo GetTfsChangesetById(int id)
         {
-            var result = Repository.FilterParentTfsCommits(RemoteRef, false,
-                                                           c => c.ChangesetId == id);
-            return result.IsEmpty() ? null : result.First();
+            return Repository.FilterParentTfsCommits(RemoteRef, false, c => c.ChangesetId == id).FirstOrDefault();
         }
 
         private void InitHistory()
