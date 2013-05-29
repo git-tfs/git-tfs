@@ -98,6 +98,11 @@ namespace Sep.Git.Tfs.Core
             set { maxCommitHash = value; }
         }
 
+        private TfsChangesetInfo GetTfsChangesetById(int id)
+        {
+            return Repository.FilterParentTfsCommits(RemoteRef, false, c => c.ChangesetId == id).FirstOrDefault();
+        }
+
         private void InitHistory()
         {
             if (maxChangesetId == null)
@@ -222,7 +227,7 @@ namespace Sep.Git.Tfs.Core
                     }
                 }
                 var commitSha = Commit(log);
-                UpdateRef(commitSha, changeset.Summary.ChangesetId);
+                UpdateTfsHead(commitSha, changeset.Summary.ChangesetId);
                 if(changeset.Summary.Workitems.Any())
                 {
                     string workitemNote = "Workitems:\n";
@@ -236,11 +241,10 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public void Apply(ITfsChangeset changeset, string destinationRef)
+        private string CommitChangeset(ITfsChangeset changeset, string parent)
         {
-            var log = Apply(MaxCommitHash, changeset);
-            var commit = Commit(log);
-            Repository.UpdateRef(destinationRef, commit);
+            var log = Apply(parent, changeset);
+            return Commit(log);
         }
 
         public void QuickFetch()
@@ -259,7 +263,7 @@ namespace Sep.Git.Tfs.Core
         {
             AssertTemporaryIndexEmpty();
             var log = CopyTree(MaxCommitHash, changeset);
-            UpdateRef(Commit(log), changeset.Summary.ChangesetId);
+            UpdateTfsHead(Commit(log), changeset.Summary.ChangesetId);
             DoGcIfNeeded();
         }
 
@@ -277,7 +281,7 @@ namespace Sep.Git.Tfs.Core
             return Tfs.GetChangeset((int)changesetId, this);
         }
 
-        public void UpdateRef(string commitHash, long changesetId)
+        public void UpdateTfsHead(string commitHash, long changesetId)
         {
             MaxCommitHash = commitHash;
             MaxChangesetId = changesetId;
@@ -356,15 +360,16 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private LogEntry Apply(string lastCommit, ITfsChangeset changeset)
+        private LogEntry Apply(string parent, ITfsChangeset changeset)
         {
             LogEntry result = null;
             WithTemporaryIndex(() => WithWorkspace(changeset.Summary, workspace =>
             {
-                GitIndexInfo.Do(Repository, index => result = changeset.Apply(lastCommit, index, workspace));
+                AssertTemporaryIndexClean(parent);
+                GitIndexInfo.Do(Repository, index => result = changeset.Apply(parent, index, workspace));
                 result.Tree = Repository.CommandOneline("write-tree");
             }));
-            if(!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
+            if (!String.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);
             return result;
         }
 
@@ -471,7 +476,7 @@ namespace Sep.Git.Tfs.Core
                 PushEnvironment(oldEnvironment);
             }
         }
-
+        
         private void PushEnvironment(IDictionary<string, string> desiredEnvironment)
         {
             PushEnvironment(desiredEnvironment, new Dictionary<string, string>());
@@ -491,8 +496,17 @@ namespace Sep.Git.Tfs.Core
             var destinationRef = "refs/heads/" + destinationBranch;
             if(Repository.HasRef(destinationRef))
                 throw new GitTfsException("ERROR: Destination branch (" + destinationBranch + ") already exists!");
+
             var shelvesetChangeset = Tfs.GetShelvesetData(this, shelvesetOwner, shelvesetName);
-            Apply(shelvesetChangeset, destinationRef);
+
+            var parentId = shelvesetChangeset.BaseChangesetId;
+            var ch = GetTfsChangesetById(parentId);
+            if (ch == null)
+                throw new GitTfsException("ERROR: Parent changeset C" + parentId  + " not found."
+                                         +" Try fetching the latest changes from TFS");
+
+            var commit = CommitChangeset(shelvesetChangeset, ch.GitCommit);
+            Repository.UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
         }
 
         public void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)

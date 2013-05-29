@@ -61,6 +61,7 @@ namespace Sep.Git.Tfs.Commands
                     Branch.WriteRemoteTfsBranchStructure(tfsHelper, stdout, branchObject.Path);
                 }
                 stdout.WriteLine("\nCloning root branches (marked by [*]) is recommended!");
+                stdout.WriteLine("\n\nPS:if your branch is not listed here, perhaps you should convert the containing folder to a branch in TFS.");
             }
             return GitTfsExitCodes.OK;
         }
