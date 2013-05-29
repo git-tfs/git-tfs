@@ -99,47 +99,47 @@ namespace Sep.Git.Tfs.Util
 
 
         // The first time a tfs user id or a git id is encountered, it is used as lookup key.
-        public void Parse(TextReader authorsFileStream)
+        public bool Parse(TextReader authorsFileStream)
         {
-            if (authorsFileStream != null)
+            if (authorsFileStream == null)
+                return false;
+            int lineCount = 0;
+            string line = authorsFileStream.ReadLine();
+            while (line != null)
             {
-                int lineCount = 0;
-                string line = authorsFileStream.ReadLine();
-                while (line != null)
+                lineCount++;
+                if (!line.StartsWith("#"))
                 {
-                    lineCount++;
-                    if (!line.StartsWith("#"))
+                    //regex pulled from git svn script here: https://github.com/git/git/blob/master/git-svn.perl
+                    Regex ex = new Regex(@"^(.+?|\(no author\))\s*=\s*(.+?)\s*<(.+)>\s*$");
+                    Match match = ex.Match(line);
+                    if (match.Groups.Count != 4 || String.IsNullOrWhiteSpace(match.Groups[1].Value) || String.IsNullOrWhiteSpace(match.Groups[2].Value) ||
+                        String.IsNullOrWhiteSpace(match.Groups[3].Value))
                     {
-                        //regex pulled from git svn script here: https://github.com/git/git/blob/master/git-svn.perl
-                        Regex ex = new Regex(@"^(.+?|\(no author\))\s*=\s*(.+?)\s*<(.+)>\s*$");
-                        Match match = ex.Match(line);
-                        if (match.Groups.Count != 4 || String.IsNullOrWhiteSpace(match.Groups[1].Value) || String.IsNullOrWhiteSpace(match.Groups[2].Value) || String.IsNullOrWhiteSpace(match.Groups[3].Value))
-                        {
-                            throw new GitTfsException("Invalid format of Authors file on line " + lineCount + ".");
-                        }
-                        else
-                        {
-                            //git svn doesn't trim, but maybe this should?
-                            string tfsUserId    = match.Groups[1].Value;//.Trim();
-                            string name         = match.Groups[2].Value;//.Trim();
-                            string email        = match.Groups[3].Value;//.Trim();
-
-                            Author a = new Author(tfsUserId, name, email);
-
-                            if (!_authorsByTfsUserId.ContainsKey(a.TfsUserId))
-                                _authorsByTfsUserId.Add(a.TfsUserId, a);
-
-                            if (!_authorsByGitUserId.ContainsKey(a.GitUserId))
-                                _authorsByGitUserId.Add(a.GitUserId, a);
-
-                        }
+                        throw new GitTfsException("Invalid format of Authors file on line " + lineCount + ".");
                     }
-                    line = authorsFileStream.ReadLine();
+                    else
+                    {
+                        //git svn doesn't trim, but maybe this should?
+                        string tfsUserId = match.Groups[1].Value; //.Trim();
+                        string name      = match.Groups[2].Value; //.Trim();
+                        string email     = match.Groups[3].Value; //.Trim();
+
+                        Author a = new Author(tfsUserId, name, email);
+
+                        if (!_authorsByTfsUserId.ContainsKey(a.TfsUserId))
+                            _authorsByTfsUserId.Add(a.TfsUserId, a);
+
+                        if (!_authorsByGitUserId.ContainsKey(a.GitUserId))
+                            _authorsByGitUserId.Add(a.GitUserId, a);
+                    }
                 }
+                line = authorsFileStream.ReadLine();
             }
+            return true;
         }
 
-        public void Parse(string authorsFilePath, string gitDir)
+        public bool Parse(string authorsFilePath, string gitDir)
         {
             var savedAuthorFile = Path.Combine(gitDir, "git-tfs_authors");
             if (!String.IsNullOrWhiteSpace(authorsFilePath))
@@ -151,13 +151,15 @@ namespace Sep.Git.Tfs.Util
                 else
                 {
                     Trace.WriteLine("Reading authors file : " + authorsFilePath);
+                    bool parseSuccess;
                     using (StreamReader sr = new StreamReader(authorsFilePath))
                     {
-                        Parse(sr);
+                        parseSuccess = Parse(sr);
                     }
                     try
                     {
                         File.Copy(authorsFilePath, savedAuthorFile, true);
+                        return parseSuccess;
                     }
                     catch (Exception) { }
                 }
@@ -167,11 +169,12 @@ namespace Sep.Git.Tfs.Util
                 Trace.WriteLine("Reading cached authors file (" + savedAuthorFile + ")...");
                 using (StreamReader sr = new StreamReader(savedAuthorFile))
                 {
-                    Parse(sr);
+                    return Parse(sr);
                 }
             }
             else
                 Trace.WriteLine("No authors file used.");
+            return false;
         }
     }
 }
