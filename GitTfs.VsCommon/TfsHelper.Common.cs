@@ -653,5 +653,9 @@ namespace Sep.Git.Tfs.VsCommon
             
         }
 
+        public bool IsExistingInTfs(string path)
+        {
+            return VersionControl.ServerItemExists(path, ItemType.Any);
+        }
     }
 }
