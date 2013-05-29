@@ -18,11 +18,13 @@ namespace Sep.Git.Tfs.Util
     /// </remarks>
     public class CommitSpecificCheckinOptionsFactory
     {
-        TextWriter writer;
+        private readonly TextWriter writer;
+        private readonly Globals globals;
 
-        public CommitSpecificCheckinOptionsFactory(TextWriter writer)
+        public CommitSpecificCheckinOptionsFactory(TextWriter writer, Globals globals)
         {
             this.writer = writer;
+            this.globals = globals;
         }
 
         public CheckinOptions BuildCommitSpecificCheckinOptions(CheckinOptions sourceCheckinOptions, string commitMessage)
@@ -152,16 +154,10 @@ namespace Sep.Git.Tfs.Util
 
         private void ProcessAuthor(CheckinOptions checkinOptions, TextWriter writer, GitCommit commit)
         {
-            if (checkinOptions.AuthorsFilePath == null)
-            {
-                writer.WriteLine("Author file was not set.");
-                return;
-            }
-
             // get authors file FIXME
             AuthorsFile af = new AuthorsFile();
-            TextReader tr = new StreamReader(checkinOptions.AuthorsFilePath);
-            af.Parse(tr);
+            if (!af.Parse(checkinOptions.AuthorsFilePath, globals.GitDir))
+                return;
 
             Author a = af.FindAuthor(commit.AuthorAndEmail);
             if (a == null)
