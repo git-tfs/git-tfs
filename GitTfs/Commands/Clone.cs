@@ -102,6 +102,11 @@ namespace Sep.Git.Tfs.Commands
             if (initBranch != null)
             {
                 var remote = globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
+
+                if (!remote.Tfs.IsExistingInTfs(tfsRepositoryPath))
+                    throw new GitTfsException("error: the path " + tfsRepositoryPath + " you want to clone doesn't exist!")
+                        .WithRecommendation("To discover which branch to clone, you could use the command :\ngit tfs list-remote-branches " + remote.TfsUrl);
+
                 if (!remote.Tfs.CanGetBranchInformation)
                     return;
                 var tfsTrunkRepository = remote.Tfs.GetRootTfsBranchForRemotePath(tfsRepositoryPath, false);
@@ -114,7 +119,8 @@ namespace Sep.Git.Tfs.Commands
                         return;
                     }
                     var cloneMsg = "   => If you want to manage branches with git-tfs, clone one of this branch instead :\n"
-                                    + " - " + tfsRootBranches.Aggregate((s1, s2) => s1 + "\n - " + s2);
+                                    + " - " + tfsRootBranches.Aggregate((s1, s2) => s1 + "\n - " + s2)
+                                    + "\n\nPS:if your branch is not listed here, perhaps you should convert the containing folder in a branch in TFS.";
                     
                     if (withBranches)
                         throw new GitTfsException("error: cloning the whole repository or too high in the repository path doesn't permit to manage branches!\n" + cloneMsg);

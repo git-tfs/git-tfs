@@ -33,5 +33,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IEnumerable<IBranchObject> GetBranches();
         void EnsureAuthenticated();
         void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
+        bool IsExistingInTfs(string path);
     }
 }
