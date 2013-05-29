@@ -76,7 +76,14 @@ namespace Sep.Git.Tfs.Commands
                     // if we appeared to be inside repository dir when exception was thrown - we won't be able to delete it
                     Environment.CurrentDirectory = currentDir;
                     if (repositoryDirCreated)
-                        Directory.Delete(gitRepositoryPath, recursive: true);
+                        try
+                        {
+                            Directory.Delete(gitRepositoryPath, recursive: true);
+                        }
+                        catch (Exception e)
+                        {
+                            Trace.WriteLine("While cleaning up repo: " + e);
+                        }
                     else
                         CleanDirectory(gitRepositoryPath);
                 }

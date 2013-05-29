@@ -62,23 +62,25 @@ namespace Sep.Git.Tfs.VsFake
 
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)
         {
-            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(changeset)).GetInstance<TfsChangeset>();
+            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(this, changeset)).GetInstance<TfsChangeset>();
             tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.Id, Remote = remote };
             return tfsChangeset;
         }
 
         class Changeset : IChangeset
         {
-            private ScriptedChangeset _changeset;
+            TfsHelper _tfs;
+            ScriptedChangeset _changeset;
 
-            public Changeset(ScriptedChangeset changeset)
+            public Changeset(TfsHelper tfs, ScriptedChangeset changeset)
             {
+                _tfs = tfs;
                 _changeset = changeset;
             }
 
             public IChange[] Changes
             {
-                get { return _changeset.Changes.Select(x => new Change(_changeset, x)).ToArray(); }
+                get { return _changeset.Changes.Select(x => new Change(_tfs, _changeset, x)).ToArray(); }
             }
 
             public string Committer
@@ -114,11 +116,13 @@ namespace Sep.Git.Tfs.VsFake
 
         class Change : IChange, IItem
         {
+            TfsHelper _tfs;
             ScriptedChangeset _changeset;
             ScriptedChange _change;
 
-            public Change(ScriptedChangeset changeset, ScriptedChange change)
+            public Change(TfsHelper tfs, ScriptedChangeset changeset, ScriptedChange change)
             {
+                _tfs = tfs;
                 _changeset = changeset;
                 _change = change;
             }
@@ -135,7 +139,7 @@ namespace Sep.Git.Tfs.VsFake
 
             IVersionControlServer IItem.VersionControlServer
             {
-                get { throw new NotImplementedException(); }
+                get { return _tfs.VersionControlServer; }
             }
 
             int IItem.ChangesetId
@@ -160,7 +164,12 @@ namespace Sep.Git.Tfs.VsFake
 
             int IItem.ItemId
             {
-                get { throw new NotImplementedException(); }
+                get
+                {
+                    if (_change.ItemId.HasValue)
+                        return _change.ItemId.Value;
+                    throw new NotImplementedException();
+                }
             }
 
             long IItem.ContentLength
@@ -178,6 +187,52 @@ namespace Sep.Git.Tfs.VsFake
                 using(var writer = new StreamWriter(temp))
                     writer.Write(_change.Content);
                 return temp;
+            }
+        }
+
+        #endregion
+
+        #region VersionControlServer
+
+        public IVersionControlServer VersionControlServer { get { return new FakeVersionControlServer(this, TfsPlugin.Script); } }
+
+        class FakeVersionControlServer : IVersionControlServer
+        {
+            TfsHelper _tfs;
+            Script _script;
+
+            public FakeVersionControlServer(TfsHelper tfs, Script script)
+            {
+                _tfs = tfs;
+                _script = script;
+            }
+
+            public IItem GetItem(int itemId, int changesetNumber)
+            {
+                var match = _script.Changesets.AsEnumerable().Reverse()
+                    .SkipWhile(cs => cs.Id > changesetNumber)
+                    .Select(cs => new { Changeset = cs, ItemChanges = cs.Changes.Where(change => change.ItemId.HasValue && change.ItemId.Value == itemId) })
+                    .FirstOrDefault(x => x.ItemChanges.Any());
+
+                if(match == null)
+                    return null;
+                else
+                    return new Change(_tfs, match.Changeset, match.ItemChanges.First());
+            }
+
+            public IItem GetItem(string itemPath, int changesetNumber)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerable<IChangeset> QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo)
+            {
+                throw new NotImplementedException();
             }
         }
 
