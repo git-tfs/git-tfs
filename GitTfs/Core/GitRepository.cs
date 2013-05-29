@@ -121,7 +121,9 @@ namespace Sep.Git.Tfs.Core
 
             // These help the new (if it's new) git repository to behave more sanely.
             _repository.Config.Set("core.autocrlf", (autocrlf == null)?"false":autocrlf);
-            _repository.Config.Set("core.ignorecase", (ignorecase == null)?"false":ignorecase);
+
+            if (ignorecase != null)
+                _repository.Config.Set("core.ignorecase", ignorecase);
 
             foreach (var entry in _remoteConfigReader.Dump(remote))
             {
