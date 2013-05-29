@@ -120,7 +120,7 @@ namespace Sep.Git.Tfs.Commands
                     }
                     var cloneMsg = "   => If you want to manage branches with git-tfs, clone one of this branch instead :\n"
                                     + " - " + tfsRootBranches.Aggregate((s1, s2) => s1 + "\n - " + s2)
-                                    + "\n\nPS:if your branch is not listed here, perhaps you should convert the containing folder in a branch in TFS.";
+                                    + "\n\nPS:if your branch is not listed here, perhaps you should convert the containing folder to a branch in TFS.";
                     
                     if (withBranches)
                         throw new GitTfsException("error: cloning the whole repository or too high in the repository path doesn't permit to manage branches!\n" + cloneMsg);
