@@ -1,0 +1,1 @@
+See [Contributing.md in the Repo](https://github.com/git-tfs/git-tfs/blob/master/CONTRIBUTING.md)

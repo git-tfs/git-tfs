@@ -1,0 +1,1 @@
+Clean up leftover TFS workspace mappings created by git-tfs (but this should never be the case).
