@@ -260,18 +260,18 @@ namespace Sep.Git.Tfs.Core
 
         private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit)
         {
-            var tfsRemote = FindTfsRemoteOfChangeset(Tfs.GetChangeset(parentChangesetId));
-            if (tfsRemote == null)
-                return null;
-            var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+            var tfsRemotes = FindTfsRemoteOfChangeset(Tfs.GetChangeset(parentChangesetId));
+            foreach (var tfsRemote in tfsRemotes)
+            {
+                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+            }
             return Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
         }
 
-        private IGitTfsRemote FindTfsRemoteOfChangeset(IChangeset changeset)
+        private IEnumerable<IGitTfsRemote> FindTfsRemoteOfChangeset(IChangeset changeset)
         {
             //Don't know if there is a way to extract remote tfs repository path from changeset datas! Should be better!!!
-            var filePath = changeset.Changes.First().Item.ServerItem;
-            return globals.Repository.ReadAllTfsRemotes().FirstOrDefault(tfsRemote => filePath.StartsWith(tfsRemote.TfsRepositoryPath));
+            return globals.Repository.ReadAllTfsRemotes().Where(r => changeset.Changes.Any(c => c.Item.ServerItem.ToLower().StartsWith(r.TfsRepositoryPath.ToLower())));
         }
 
         public void Apply(ITfsChangeset changeset, string destinationRef)
