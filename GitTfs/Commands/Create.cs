@@ -13,16 +13,17 @@ using Sep.Git.Tfs.Core.TfsInterop;
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("create")]
-    [Description(@"create [options] tfs-url-or-instance-name project-name <trunk-name> <git-repository-path>
-ex : git tfs create http://myTfsServer:8080/tfs/TfsRepository myProjectName myTrunkName
-if 'project-name' doesn't exist it will be created
-if 'trunk-name' is not specified, the default value is 'trunk'")]
+    [Description(@"create [options] tfs-url-or-instance-name project-name -t=trunk-name <git-repository-path>
+ex : git tfs create http://myTfsServer:8080/tfs/TfsRepository myProjectName
+     git tfs create http://myTfsServer:8080/tfs/TfsRepository myProjectName -t=myTrunkName
+if 'project-name' doesn't exist it will be created")]
     public class Create : GitTfsCommand
     {
         private readonly Clone _clone;
         private TextWriter _stdout;
         private readonly ITfsHelper _tfsHelper;
         private readonly RemoteOptions _remoteOptions;
+        string TrunkName { get; set; }
 
         public Create(ITfsHelper tfsHelper, Clone clone, RemoteOptions remoteOptions, TextWriter stdout)
         {
@@ -36,31 +37,28 @@ if 'trunk-name' is not specified, the default value is 'trunk'")]
         {
             get
             {
-                return _clone.OptionSet;
+                return _clone.OptionSet
+                    .Add("t|trunk-name", "name of the main branch that will be create on TFS (if not specified, the default value is 'trunk')", v => TrunkName = v);
             }
         }
 
         public int Run(string tfsUrl, string projectName)
         {
-            return Run(tfsUrl, projectName, "trunk");
+            return Run(tfsUrl, projectName, projectName);
         }
 
-        public int Run(string tfsUrl, string projectName, string mainBranch)
+        public int Run(string tfsUrl, string projectName, string gitRepositoryPath)
         {
-            return Run(tfsUrl, projectName, mainBranch, ".");
-        }
-
-        public int Run(string tfsUrl, string projectName, string mainBranch, string gitRepositoryPath)
-        {
+            var trunkName = string.IsNullOrWhiteSpace(TrunkName) ? "trunk" : TrunkName; 
             _tfsHelper.Url = tfsUrl;
             _tfsHelper.Username = _remoteOptions.Username;
             _tfsHelper.Password = _remoteOptions.Password;
 
             var absoluteGitRepositoryPath = Path.GetFullPath(gitRepositoryPath);
             _stdout.WriteLine("Creating project folder...");
-            _tfsHelper.CreateTfsRootBranch(projectName, mainBranch, absoluteGitRepositoryPath);
+            _tfsHelper.CreateTfsRootBranch(projectName, trunkName, absoluteGitRepositoryPath);
             _stdout.WriteLine("Cloning new project...");
-            _clone.Run(tfsUrl, "$/" + projectName + "/" + mainBranch, gitRepositoryPath);
+            _clone.Run(tfsUrl, "$/" + projectName + "/" + trunkName, gitRepositoryPath);
 
             return GitTfsExitCodes.OK;
         }
