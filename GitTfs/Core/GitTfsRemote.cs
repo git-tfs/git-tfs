@@ -206,7 +206,7 @@ namespace Sep.Git.Tfs.Core
 
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
-            var fr = new FetchResult{IsSuccess = true};
+            var fetchResult = new FetchResult{IsSuccess = true};
             foreach (var changeset in FetchChangesets())
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
@@ -225,9 +225,9 @@ namespace Sep.Git.Tfs.Core
                     {
                         if (stopOnFailMergeCommit)
                         {
-                            fr.IsSuccess = false;
-                            fr.LastFetchedChangesetId = MaxChangesetId;
-                            return fr;
+                            fetchResult.IsSuccess = false;
+                            fetchResult.LastFetchedChangesetId = MaxChangesetId;
+                            return fetchResult;
                         }
 #warning //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
                         stdout.WriteLine("warning: found merge changeset " + changeset.Summary.ChangesetId +
@@ -255,7 +255,7 @@ namespace Sep.Git.Tfs.Core
                 }
                 DoGcIfNeeded();
             }
-            return fr;
+            return fetchResult;
         }
 
         private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit)
@@ -263,7 +263,7 @@ namespace Sep.Git.Tfs.Core
             var tfsRemote = FindTfsRemoteOfChangeset(Tfs.GetChangeset(parentChangesetId));
             if (tfsRemote == null)
                 return null;
-            var fr2 = tfsRemote.Fetch(stopOnFailMergeCommit);
+            var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
             return Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
         }
 

@@ -63,10 +63,7 @@ namespace Sep.Git.Tfs.Commands
 
         public void Run(bool stopOnFailMergeCommit)
         {
-            authors.Parse(AuthorsFilePath, globals.GitDir);
-
-            var remote = GetRemotesToFetch(new List<string>{globals.RemoteId}).First();
-            FetchRemote(stopOnFailMergeCommit, remote);
+            Run(stopOnFailMergeCommit, globals.RemoteId);
         }
 
         public int Run(params string[] args)
@@ -87,14 +84,14 @@ namespace Sep.Git.Tfs.Commands
 
         private void FetchRemote(bool stopOnFailMergeCommit, IGitTfsRemote remote)
         {
-                Trace.WriteLine("Fetching from TFS remote " + remote.Id);
+            Trace.WriteLine("Fetching from TFS remote " + remote.Id);
             DoFetch(remote, stopOnFailMergeCommit);
-                if (labels != null && FetchLabels)
-                {
-                    Trace.WriteLine("Fetching labels from TFS remote " + remote.Id);
-                    labels.Run(remote);
-                }
+            if (labels != null && FetchLabels)
+            {
+                Trace.WriteLine("Fetching labels from TFS remote " + remote.Id);
+                labels.Run(remote);
             }
+        }
 
         protected virtual void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {

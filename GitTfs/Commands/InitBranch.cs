@@ -67,7 +67,7 @@ namespace Sep.Git.Tfs.Commands
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
             tfsBranchPath.AssertValidTfsPath();
-            if (allRemotes.Count(r => r.TfsRepositoryPath.ToLower() == tfsBranchPath.ToLower()) != 0)
+            if (allRemotes.Any(r => r.TfsRepositoryPath.ToLower() == tfsBranchPath.ToLower()))
             {
                 _stdout.WriteLine("warning : There is already a remote for this tfs branch. Branch ignored!");
                 return GitTfsExitCodes.InvalidArguments;
@@ -90,13 +90,8 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException("error: The root changeset " + rootChangeSetId +
                                           " have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n");
             var tfsRemote = CreateBranch(defaultRemote, tfsBranchPath, sha1RootCommit, gitBranchNameExpected);
-            if (tfsRemote != null)
-            {
-                FetchRemote(tfsRemote, false);
-                return GitTfsExitCodes.OK;
-            }
-
-            return GitTfsExitCodes.ExceptionThrown;
+            FetchRemote(tfsRemote, false);
+            return GitTfsExitCodes.OK;
         }
 
         class BranchDatas
@@ -126,11 +121,10 @@ namespace Sep.Git.Tfs.Commands
             var childBranchPaths = rootBranch.GetAllChildren().Select(b=>new BranchDatas{TfsRepositoryPath = b.Path}).ToList();
 
             _stdout.WriteLine("Tfs branches found:");
-            for (int iBranch = 0; iBranch < childBranchPaths.Count; iBranch++)
+            foreach (var tfsBranchPath in childBranchPaths)
             {
-                var tfsBranch = childBranchPaths[iBranch];
-                _stdout.WriteLine("- " + tfsBranch.TfsRepositoryPath);
-                tfsBranch.RootChangesetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranch.TfsRepositoryPath);
+                _stdout.WriteLine("- " + tfsBranchPath.TfsRepositoryPath);
+                tfsBranchPath.RootChangesetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath);
             }
             childBranchPaths.Add(new BranchDatas{TfsRepositoryPath = defaultRemote.TfsRepositoryPath, TfsRemote = defaultRemote, RootChangesetId = -1});
 
@@ -147,12 +141,12 @@ namespace Sep.Git.Tfs.Commands
                             tfsBranch.TfsRemote = CreateBranch(defaultRemote, tfsBranch.TfsRepositoryPath, sha1RootCommit);
                     }
                     if (tfsBranch.TfsRemote != null)
-            {
+                    {
                         Trace.WriteLine("Fetching remote :" + tfsBranch.TfsRemote.Id);
-                        var fr = FetchRemote(tfsBranch.TfsRemote, true);
-                        tfsBranch.IsEntirelyFetched = fr.IsSuccess;
+                        var fetchResult = FetchRemote(tfsBranch.TfsRemote, true);
+                        tfsBranch.IsEntirelyFetched = fetchResult.IsSuccess;
                     }
-            }
+                }
             } while (childBranchPaths.Any(b => !b.IsEntirelyFetched));
             return GitTfsExitCodes.OK;
         }
@@ -228,10 +222,10 @@ namespace Sep.Git.Tfs.Commands
         private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit)
         {
             Trace.WriteLine("Try fetching changesets...");
-            var fr = tfsRemote.Fetch(stopOnFailMergeCommit);
+            var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
             Trace.WriteLine("Changesets fetched!");
 
-            if (fr.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
+            if (fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
             {
             Trace.WriteLine("Try creating the local branch...");
                 if (!_globals.Repository.CreateBranch("refs/heads/" + tfsRemote.Id, tfsRemote.MaxCommitHash))
@@ -243,7 +237,7 @@ namespace Sep.Git.Tfs.Commands
             Trace.WriteLine("Cleaning...");
             tfsRemote.CleanupWorkspaceDirectory();
 
-            return fr;
+            return fetchResult;
         }
 
         protected string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
