@@ -175,22 +175,20 @@ namespace Sep.Git.Tfs.Core
 
         public bool ShouldSkip(string path)
         {
-            return IsInDotGit(path) ||
-                   IsIgnored(path, IgnoreRegexExpression, IgnoreExceptRegexExpression) ||
-                   IsIgnored(path, remoteOptions.IgnoreRegex, remoteOptions.ExceptRegex);
+            return IsInDotGit(path) || IsIgnored(path);
         }
 
-        private bool IsIgnored(string path, string expression, string except)
+        private bool IsIgnored(string path)
+        {
+            return (IsMatch(path, IgnoreRegexExpression) || IsMatch(path, remoteOptions.IgnoreRegex)) &&
+                !(IsMatch(path, IgnoreExceptRegexExpression) || IsMatch(path, remoteOptions.ExceptRegex));
+        }
+
+        private bool IsMatch(string path, string expression)
         {
             if (expression == null)
                 return false;
-
-            var skip = (new Regex(expression)).IsMatch(path);
-
-            if (except == null || !skip)
-                return skip;
-
-            return !(new Regex(except)).IsMatch(path);
+            return Regex.IsMatch(path, expression);
         }
 
         private bool IsInDotGit(string path)
