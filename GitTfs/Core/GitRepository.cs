@@ -375,7 +375,7 @@ namespace Sep.Git.Tfs.Core
                 var currentTree = treesToDescend.Dequeue();
                 foreach (var item in currentTree)
                 {
-                    if (item.Type == GitObjectType.Tree)
+                    if (item.TargetType == TreeEntryTargetType.Tree)
                     {
                         treesToDescend.Enqueue((Tree)item.Target);
                     }
@@ -384,7 +384,7 @@ namespace Sep.Git.Tfs.Core
                     {
                         Mode = item.Mode.ToModeString(),
                         Sha = item.Target.Sha,
-                        ObjectType = item.Type.ToString().ToLower(),
+                        ObjectType = item.TargetType.ToString().ToLower(),
                         Path = path,
                         Commit = commit
                     };
