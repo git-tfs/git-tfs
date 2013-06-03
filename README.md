@@ -4,7 +4,10 @@ git-tfs is a two-way bridge between TFS and git, similar to git-svn.
 
 ## Usage
 
-You will find there a very short help. For more help, please look at the [wiki](https://github.com/git-tfs/git-tfs/wiki)
+`git tfs help` lists the available commands.
+`git tfs help <command>` shows a summary of the usage of a given command.
+
+Further documentation is available in the [doc/](doc/README.md) directory.
 
 ### Cloning a repository
 
@@ -67,9 +70,8 @@ You can also do `rake build:debug`.
 
 If you contribute patches, please set `core.autocrlf` to `true`. (`git config core.autocrlf true`)
 
-
-Contributions are always welcome. For more information about contributing,
-please see [the wiki](http://github.com/git-tfs/git-tfs/wiki/Contributing).
+Contributions are always welcome. There are some simple guidelines in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Community
 

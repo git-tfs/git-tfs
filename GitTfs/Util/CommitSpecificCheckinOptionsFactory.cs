@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Util
     /// <remarks>
     /// This class handles the pre-checkin commit message parsing that
     /// enables special git-tfs commands: 
-    /// https://github.com/git-tfs/git-tfs/wiki/Special-actions-in-commit-messages
+    /// https://github.com/git-tfs/git-tfs/blob/master/doc/Special-actions-in-commit-messages.md
     /// </remarks>
     public class CommitSpecificCheckinOptionsFactory
     {

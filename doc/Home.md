@@ -94,10 +94,8 @@ This is the complete list of commands in the master branch on github.
 
 ## Contributing
 
-If you contribute patches, please set `core.autocrlf` to `true`. (`git config core.autocrlf true`)
-
-Contributions are always welcome. For more information about contributing,
-please see [Contributing page](http://github.com/git-tfs/git-tfs/wiki/Contributing).
+Information about contributing is available in
+[CONTRIBUTING.md](https://github.com/git-tfs/git-tfs/blob/master/CONTRIBUTING.md).
 
 ## More information
 
