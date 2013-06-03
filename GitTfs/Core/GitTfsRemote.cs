@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -180,15 +181,24 @@ namespace Sep.Git.Tfs.Core
 
         private bool IsIgnored(string path)
         {
-            return (IsMatch(path, IgnoreRegexExpression) || IsMatch(path, remoteOptions.IgnoreRegex)) &&
-                !(IsMatch(path, IgnoreExceptRegexExpression) || IsMatch(path, remoteOptions.ExceptRegex));
+            return Ignorance.IsIncluded(path);
         }
 
-        private bool IsMatch(string path, string expression)
+        private Bouncer _ignorance;
+        private Bouncer Ignorance
         {
-            if (expression == null)
-                return false;
-            return Regex.IsMatch(path, expression);
+            get
+            {
+                if (_ignorance == null)
+                {
+                    _ignorance = new Bouncer();
+                    _ignorance.Include(IgnoreRegexExpression);
+                    _ignorance.Include(remoteOptions.IgnoreRegex);
+                    _ignorance.Exclude(IgnoreExceptRegexExpression);
+                    _ignorance.Exclude(remoteOptions.ExceptRegex);
+                }
+                return _ignorance;
+            }
         }
 
         private bool IsInDotGit(string path)
