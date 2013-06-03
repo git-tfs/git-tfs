@@ -14,6 +14,7 @@ namespace Sep.Git.Tfs.Core
         public string Username { get; set; }
         public string Password { get; set; }
         public string IgnoreRegex { get; set; }
+        public string IgnoreExceptRegex { get; set; }
         public IEnumerable<string> Aliases { get; set; }
         public bool Autotag { get; set; }
 
