@@ -1,4 +1,10 @@
-## Getting Involved
+## Contributing [documentation](https://github.com/git-tfs/git-tfs/tree/master/doc)
+
+We'll try to review and merge documentation changes quickly.
+
+If you see something easy to change, you can probably even make the change in your browser!
+
+## Contributing code
 
 0. In your git-tfs clone, run `git config core.autocrlf true` so that all the line endings are unix line endings when you commit.
 
@@ -12,7 +18,7 @@
 
 Here are some tips on creating a pull request:
 
-1. Write awesome code. :sparkles:
+1. Write that awesome code. :sparkles:
 
 2. Make sure the existing unit tests don't break. We try to keep the unit tests
 [easy to run](https://github.com/git-tfs/git-tfs/blob/master/doc/Running-the-Unit-Tests.md).
@@ -24,3 +30,5 @@ that runs git-tfs with the VsFake driver, similar to how the clone tests are wri
 
 4. If you modify code in any of the client adapters (GitTfs.Vs*), please try it out with as many versions of the TFS client libraries as you can.
 When you submit the pull request, include a note about which versions you have tried to compile with, and which ones you have tested with.
+
+5. Include [documentation](https://github.com/git-tfs/git-tfs/tree/master/doc) for externally-visible changes.
