@@ -23,11 +23,11 @@ namespace Sep.Git.Tfs.Core
                 var currentTree = treesToDescend.Dequeue();
                 foreach(var entry in currentTree)
                 {
-                    if(entry.Type == GitObjectType.Tree)
+                    if (entry.TargetType == TreeEntryTargetType.Tree)
                     {
                         treesToDescend.Enqueue((Tree)entry.Target);
                     }
-                    else if (entry.Type == GitObjectType.Blob)
+                    else if (entry.TargetType == TreeEntryTargetType.Blob)
                     {
                         yield return new GitTreeEntry(entry);
                     }
