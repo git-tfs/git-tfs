@@ -23,7 +23,7 @@ if 'project-name' doesn't exist it will be created")]
         private TextWriter _stdout;
         private readonly ITfsHelper _tfsHelper;
         private readonly RemoteOptions _remoteOptions;
-        string TrunkName { get; set; }
+        private string _trunkName = "trunk";
 
         public Create(ITfsHelper tfsHelper, Clone clone, RemoteOptions remoteOptions, TextWriter stdout)
         {
@@ -37,28 +37,29 @@ if 'project-name' doesn't exist it will be created")]
         {
             get
             {
-                return _clone.OptionSet
-                    .Add("t|trunk-name", "name of the main branch that will be create on TFS (if not specified, the default value is 'trunk')", v => TrunkName = v);
+                return new OptionSet
+                    {
+                        {"t|trunk-name=", "name of the main branch that will be created on TFS (default: \"trunk\")", v => _trunkName = v},
+                    }.Merge(_clone.OptionSet);
             }
         }
 
         public int Run(string tfsUrl, string projectName)
         {
-            return Run(tfsUrl, projectName, projectName);
+            return Run(tfsUrl, projectName, Path.GetFileName(projectName));
         }
 
         public int Run(string tfsUrl, string projectName, string gitRepositoryPath)
         {
-            var trunkName = string.IsNullOrWhiteSpace(TrunkName) ? "trunk" : TrunkName; 
             _tfsHelper.Url = tfsUrl;
             _tfsHelper.Username = _remoteOptions.Username;
             _tfsHelper.Password = _remoteOptions.Password;
 
             var absoluteGitRepositoryPath = Path.GetFullPath(gitRepositoryPath);
             _stdout.WriteLine("Creating project folder...");
-            _tfsHelper.CreateTfsRootBranch(projectName, trunkName, absoluteGitRepositoryPath);
+            _tfsHelper.CreateTfsRootBranch(projectName, _trunkName, absoluteGitRepositoryPath);
             _stdout.WriteLine("Cloning new project...");
-            _clone.Run(tfsUrl, "$/" + projectName + "/" + trunkName, gitRepositoryPath);
+            _clone.Run(tfsUrl, "$/" + projectName + "/" + _trunkName, gitRepositoryPath);
 
             return GitTfsExitCodes.OK;
         }
