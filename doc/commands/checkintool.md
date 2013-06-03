@@ -2,7 +2,7 @@
 
 This function launches the standard TFS checkin window to commit your changes into TFS. It squashes differences between the last TFS commit and HEAD into one TFS-checkin and mark it as descendant of both previous TFS-checkin and HEAD.
 
-It works similarly to [[checkin]], except [[checkin]] doesn't launches the standard TFS checkin window.
+It works similarly to [checkin](checkin.md), except checkin doesn't launches the standard TFS checkin window.
 
 ## Synopsis
 
@@ -37,5 +37,5 @@ It works similarly to [[checkin]], except [[checkin]] doesn't launches the stand
 
 ## See also
 
-* [[checkin]]
-* [[rcheckin]]
+* [checkin](checkin.md)
+* [rcheckin](rcheckin.md)

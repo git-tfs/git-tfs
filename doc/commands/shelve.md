@@ -62,5 +62,5 @@ Creates a TFS shelveset from a Git branch.
 
 ## See also
 
-* [[unshelve]]
-* [[shelve-list]]
+* [unshelve](unshelve.md)
+* [shelve-list](shelve-list.md)

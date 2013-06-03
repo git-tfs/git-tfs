@@ -1,15 +1,15 @@
-[[git-tfs|http://git-tfs.com/]] is a two-way bridge between TFS and git, similar to git-svn.
+[git-tfs](http://git-tfs.com/) is a two-way bridge between TFS and git, similar to git-svn.
 It fetches TFS commits into a git repository, and lets you push your updates back to TFS.
 
 The most recent version is 0.17.1.
-See [[change history]] for details.
+See the [change history](change-history.md) for details.
 
-If you're having problems, check out the [[troubleshooting]] page.
-And read [[how to report an issue|reporting issues]], before doing so ;)
+If you're having problems, check out the [troubleshooting](TROUBLESHOOTING.md) page.
+And read [how to report an issue](reporting-issues.md), before doing so ;)
 
 ## Get git-tfs
 
-Either [[download a binary|http://git-tfs.com/]] ([[old versions|https://github.com/git-tfs/git-tfs/downloads]]), use [[Chocolatey|http://chocolatey.org/packages/gittfs]] or build from source:
+Either [download a binary](http://git-tfs.com/) ([old versions](https://github.com/git-tfs/git-tfs/downloads)), use [Chocolatey](http://chocolatey.org/packages/gittfs) or build from source:
 
     git clone git://github.com/git-tfs/git-tfs.git
     cd git-tfs
@@ -52,61 +52,57 @@ This is the complete list of commands in the master branch on github.
 
 ### Repository setup
 
-* [[list-remote-branches]] - since 0.17
-* [[clone]] - since 0.9
-* [[quick-clone]] - since 0.9
-* [[bootstrap]] - since [0.11][v0.11]
-* [[init]] - since 0.9
+* [list-remote-branches](commands/list-remote-branches.md) - since 0.17
+* [clone](commands/clone.md) - since 0.9
+* [quick-clone](commands/quick-clone.md) - since 0.9
+* [bootstrap](commands/bootstrap.md) - since [0.11][v0.11]
+* [init](commands/init.md) - since 0.9
 
 ### Pull from TFS
 
-* [[clone]] - since 0.9
-* [[fetch]] - since 0.9
-* [[pull]] - since 0.9
-* [[quick-clone]] - since 0.9
-* [[unshelve]] - since [v0.12]
-* [[shelve-list]] - since [v0.12]
-* [[init-branch]] - since v0.16 ( prefer the [[branch]] command )
-* [[labels]] - since v0.17
+* [clone](commands/clone.md) - since 0.9
+* [fetch](commands/fetch.md) - since 0.9
+* [pull](commands/pull.md) - since 0.9
+* [quick-clone](commands/quick-clone.md) - since 0.9
+* [unshelve](commands/unshelve.md) - since [0.11][v0.12]
+* [shelve-list](commands/shelve-list.md) - since [0.12][v0.12]
+* [init-branch](commands/init-branch.md) - since v0.16 (prefer the [branch](commands/branch.md) command)
+* [labels](commands/labels.md) - since v0.17
 
 ### Push to TFS
 
-* [[rcheckin]] - since [v0.12]
-* [[checkin]] - since 0.10
-* [[checkintool]] - since 0.10
-* [[shelve]] - since 0.9
+* [rcheckin](commands/rcheckin.md) - since [0.12][v0.12]
+* [checkin](commands/checkin.md) - since 0.10
+* [checkintool](commands/checkintool.md) - since 0.10
+* [shelve](commands/shelve.md) - since 0.9
 
 ### Manage TFS branches
 
-* [[list-remote-branches]] - since 0.17
-* [[branch]] - since 0.17
-* [[init-branch]] - since v0.16 ( prefer the [[branch]] command )
+* [list-remote-branches](commands/list-remote-branches.md) - since 0.17
+* [branch](commands/branch.md) - since 0.17
+* [init-branch](commands/init-branch.md) - since v0.16 (prefer the [branch](commands/branch.md) command)
 
 ### Other
 
-* [[info]]
-* [[cleanup]] - since 0.10
-* [[cleanup-workspaces]] - since 0.10
-* [[diagnostics]] - since 0.9
-* [[help]] - since 0.9
-* [[verify]] - since [0.11][v0.11]
-* [[autotag]] option - since [v0.12]
+* [info](commands/info.md)
+* [cleanup](commands/cleanup.md) - since 0.10
+* [cleanup-workspaces](commands/cleanup-workspaces.md) - since 0.10
+* [diagnostics](commands/diagnostics.md) - since 0.9
+* [help](commands/help.md) - since 0.9
+* [verify](commands/verify.md) - since [0.11][v0.11]
+* [autotag](commands/autotag.md) option - since [0.12][v0.12]
 
 ## Contributing
 
 Information about contributing is available in
 [CONTRIBUTING.md](https://github.com/git-tfs/git-tfs/blob/master/CONTRIBUTING.md).
 
-## More information
-
-Check out the [[README|https://github.com/git-tfs/git-tfs#readme]].
-
 ### Migrations 
-If you're migrating a TFS server from 2008 or 2005 to 2010, you might want to [[Specify Alternate TFS URLs]].
+If you're migrating a TFS server from 2008 or 2005 to 2010, you might want to [Specify Alternate TFS URLs](specify-alternate-tfs-urls.md).
 
 [v0.11]: http://mattonrails.wordpress.com/2011/03/11/git-tfs-0-11-0-release-notes/ "0.11 Release notes"
 [v0.12]: http://sparethought.wordpress.com/2011/08/10/git-tfs-bridge-v0-12-released/
 
-If you have questions or suggestions about how we could improve git-tfs you could go to [[google group|http://groups.google.com/group/git-tfs-dev]].
+If you have questions or suggestions about how we could improve git-tfs you could go to [google group](http://groups.google.com/group/git-tfs-dev).
 
-[[Example|http://sparethought.wordpress.com/2011/07/18/how-to-establish-git-central-repository-for-working-against-tfs-with-git-tfs-bridge/]] of setting up central git repository that tracks TFS automatically.
+[Example](http://sparethought.wordpress.com/2011/07/18/how-to-establish-git-central-repository-for-working-against-tfs-with-git-tfs-bridge/) of setting up central git repository that tracks TFS automatically.

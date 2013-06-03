@@ -10,8 +10,8 @@ v0.17.1
 v0.17.0
 -------
 
-- [[branch]]
-- [[labels]] (#256)
+- [branch](commands/branch.md)
+- [labels](commands/labels.md) (#256)
 - git tfs pull --rebase (#254)
 - git tfs clone --with-branches (#255)
 - unicode support (#204)
@@ -32,7 +32,7 @@ v0.16.1
 v0.16.0
 -------
 
-- [[init-branch]]!! (#232)
+- [init-branch](commands/init-branch.md)!! (#232)
 - Faster clone (#226) and quick-clone.
 - Add `git tfs info` (#219)
 - Better metadata processing during rcheckin: remove the flags (#237), ignore whitespace (#238), add `git-tfs-force:` reason (#219).

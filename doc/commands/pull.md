@@ -44,12 +44,12 @@ To pull all the changeset of the `tfs/myBranch` branch:
 
 ### Authentication
 
-For the use of parameters `--username` and `--password`, see the [[clone]] command.
+For the use of parameters `--username` and `--password`, see the [clone](clone.md) command.
 
 ### Map TFS users to git users
 
-For the use of parameter `--authors`, see the [[clone]] command.
+For the use of parameter `--authors`, see the [clone](clone.md) command.
 
 ## See also
 
-* [[fetch]]
+* [fetch](fetch.md)

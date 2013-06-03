@@ -47,8 +47,8 @@ If some of the values are not set, the paths to the corresponding files should b
     - for "Microsoft.TeamFoundation.VersionControl.Controls" :
     C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\PrivateAssemblies\Microsoft.TeamFoundation.VersionControl.Controls.dll
 
-You could also create a reg file using [[this gist|https://gist.github.com/pmiossec/5678176]].
+You could also create a reg file using [this gist](https://gist.github.com/pmiossec/5678176).
 
-See #258 for a [[more informations|https://github.com/git-tfs/git-tfs/issues/258#issuecomment-11247086]] to this problem.
+See [#258](https://github.com/git-tfs/git-tfs/issues/258) for [more information](https://github.com/git-tfs/git-tfs/issues/258#issuecomment-11247086) to this problem.
 
-(Note: this [[may be caused by running git-tfs as a 32-bit executable on some 64-bit systems|https://github.com/git-tfs/git-tfs/issues/258#issuecomment-11588802]].)
+(Note: this [may be caused by running git-tfs as a 32-bit executable on some 64-bit systems](https://github.com/git-tfs/git-tfs/issues/258#issuecomment-11588802).)

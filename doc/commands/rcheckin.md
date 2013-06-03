@@ -3,7 +3,7 @@
 Checkins path of commits from last found TFS-commit to HEAD with comments provided for corresponding git commits. Preserves merge commits.
 
 ## Features
-[[Special actions in commit messages]] can be inserted, to associate or resolve TFS work items or override checkin policies.
+[Special actions in commit messages](../special-actions-in-commit-messages.md) can be inserted, to associate or resolve TFS work items or override checkin policies.
 
 ## Synopsis
 
@@ -70,7 +70,7 @@ To checkins commits on the `tfs/myBranch` branch:
 
 _(feature in the source tree, not yet released)_
 
-You could check in commits of other users in TFS. To be able to do that, you must specify the path toward an author file with the option `--authors` which permit to match TFS users to git users. See [[clone]] command for more informations about the format.
+You could check in commits of other users in TFS. To be able to do that, you must specify the path toward an author file with the option `--authors` which permit to match TFS users to git users. See [clone](clone.md) command for more informations about the format.
 
     git tfs rcheckin --authors="c:\path\to\authors.txt"
 
@@ -100,5 +100,5 @@ Thus, commit B will stay in history as parent of M and equivalent commit B' will
 
 ## See also
 
-* [[checkin]]
-* [[checkintool]]
+* [checkin](checkin.md)
+* [checkintool](checkintool.md)

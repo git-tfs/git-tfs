@@ -1,4 +1,4 @@
-The [[rcheckin]] command reads checkin information from git commit messages
+The [rcheckin](rcheckin.md) command reads checkin information from git commit messages
 with certain git commit messages.
 
 * `git-tfs-work-item: <id>` will link the new changeset with the given work item and the default action type.

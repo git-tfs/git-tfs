@@ -79,7 +79,7 @@ If you want to specify another name (but not recommended), use the command :
 
 ## Init an existing TFS branches
 
-To use this command, you should have cloned only the trunk folder in TFS (and not the whole repository). See [[clone]] command.
+To use this command, you should have cloned only the trunk folder in TFS (and not the whole repository). See [clone](clone.md) command.
 Suppose you have on TFS:
 
     A <- B <- C <- D <- E  $/Repository/ProjectTrunk
@@ -109,11 +109,11 @@ TFS2008 doesn't permit to know the parent of a branch. You should find it yourse
 
 ### Authentication
 
-For the use of parameters `--username` and `--password`, see the [[clone]] command.
+For the use of parameters `--username` and `--password`, see the [clone](clone.md) command.
 
 ### Map TFS users to git users
 
-For the use of parameter `--authors`, see the [[clone]] command.
+For the use of parameter `--authors`, see the [clone](clone.md) command.
 
 ## Rename a remote branch
 
@@ -130,7 +130,7 @@ Note : It will not delete the TFS branch, just the local git remote.
 
 ## See also
 
-* [[clone]]
-* [[fetch]]
-* [[checkin]]
-* [[rcheckin]]
+* [clone](clone.md)
+* [fetch](fetch.md)
+* [checkin](checkin.md)
+* [rcheckin](rcheckin.md)

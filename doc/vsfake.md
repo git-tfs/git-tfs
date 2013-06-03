@@ -1,7 +1,7 @@
 VsFake is a stub TFS connection for git-tfs that allows git-tfs to run in the absence of a TFS server. This should enable a couple of things:
 
 1. Reproduction of bugs in a repeatable and portable fashion.
-2. [Development on non-Windows workstations, running Mono](Develop on Mono).
+2. [Development on non-Windows workstations, running Mono](develop-on-mono.md).
 
 ## Usage
 

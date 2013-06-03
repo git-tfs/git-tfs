@@ -1,21 +1,20 @@
 ## Summary
 
-The `init` command creates a new git repository, initialized from a TFS source tree (without fetching the changesets). Fetching changeset should be done with [[fetch]] command.
-
-Prefer the [[clone]] command to init and fetch changesets from a TFS repository!
+The fetch command fetch all the new changesets from a TFS remote
 
 ## Synopsis
 
-    Usage: git-tfs init [options] tfs-url-or-instance-name repository-path [git-repository]
+    Usage: git-tfs fetch [options] [tfs-remote-id]...
       -h, -H, --help
       -V, --version
       -d, --debug                Show debug output about everything git-tfs does
       -i, --tfs-remote, --remote, --id=VALUE
                                  The remote ID of the TFS to interact with
                                    default: default
-          --template=VALUE       Passed to git-init
-          --shared[=VALUE]       Passed to git-init
-          --autocrlf=VALUE       Normalize line endings (default: false)
+          --all, --fetch-all
+          --parents
+          --authors=VALUE        Path to an Authors file to map TFS users to Git
+                                   users
           --ignore-regex=VALUE   a regex of files to ignore
           --no-metadata          leave out the 'git-tfs-id:' tag in commit
                                    messages
@@ -23,19 +22,28 @@ Prefer the [[clone]] command to init and fetch changesets from a TFS repository!
                                    don't need to put data back into TFS.
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
-
 ## Examples
 
 ### Simple
 
-To init `$/Project1` from your TFS 2010 server `tfs`
-into a new directory `Project1`, do this:
+To fetch all the changeset of the `default` branch:
 
-    git tfs init http://tfs:8080/tfs/DefaultCollection $/Project1
+    git tfs fetch
 
+### Fetch from a branch
+
+To fetch all the changeset of the `tfs/myBranch` branch:
+
+    git tfs fetch -i myBranch
+
+### Authentication
+
+For the use of parameters `--username` and `--password`, see the [clone](clone.md) command.
+
+### Map TFS users to git users
+
+For the use of parameter `--authors`, see the [clone](clone.md) command.
 
 ## See also
 
-* [[clone]]
-* [[quick-clone]]
-* [[fetch]]
+* [clone](clone.md)

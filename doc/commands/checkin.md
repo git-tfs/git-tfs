@@ -2,9 +2,9 @@
 
 This function squashes differences between the last TFS commit and HEAD into one TFS-checkin and mark it as descendant of both previous TFS-checkin and HEAD.
 
-It works similarly to [[checkintool]], except [[checkintool]] launches the standard TFS checkin window.
+It works similarly to [checkintool](checkintool.md), except checkintool launches the standard TFS checkin window.
 
-checkin differs from [[rcheckin]] in that the latter mirrors a series of commits into TFS instead of squashing them into one.
+checkin differs from [rcheckin](rcheckin.md) in that the latter mirrors a series of commits into TFS instead of squashing them into one.
 
 ## Synopsis
 

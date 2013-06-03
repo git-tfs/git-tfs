@@ -34,13 +34,13 @@ into a new directory `Project1`, do this:
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1
 
 ### Clone only the trunk (or a branch)
-Sometimes, it could be interesting to clone only a branch of a TFS repository (for exemple to extract only the trunk of your project and manage branches with `[[branch]]`. Then, do this (the clone will be done in the `MyProject1Directory` directory):
+Sometimes, it could be interesting to clone only a branch of a TFS repository (for exemple to extract only the trunk of your project and manage branches with `[branch](branch.md)`. Then, do this (the clone will be done in the `MyProject1Directory` directory):
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory
 
 ### What repository path to clone?
 
-If you don't know exactly what repository path to clone, see [[list-remote-branches]] command to get a list of the existing repositories.
+If you don't know exactly what repository path to clone, see [list-remote-branches](list-remote-branches.md) command to get a list of the existing repositories.
 
 ### Excludes
 
@@ -73,11 +73,11 @@ Once the clone is done, the file is store in the `.git` folder (with the name gi
 
 It is recommended, especially if the TFS repository is a big one, to run, after a clone :
 * a git garbage collect : `git gc`
-* a [[cleanup]] : `git tfs cleanup`
+* a [cleanup](cleanup.md) : `git tfs cleanup`
 
 ## See also
 
-* [[list-remote-branches]]
-* [[init]]
-* [[fetch]]
-* [[quick-clone]]
+* [list-remote-branches](list-remote-branches.md)
+* [init](init.md)
+* [fetch](fetch.md)
+* [quick-clone](quick-clone.md)

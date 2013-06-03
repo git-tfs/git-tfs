@@ -2,7 +2,7 @@
 
 The `init-branch` command creates a git branch for an existing TFS branch (or all) and fetch all the changeset of the TFS branch.
 
-To use this command, you should have cloned only the trunk folder in TFS (and not the whole repository). See [[clone]] command.
+To use this command, you should have cloned only the trunk folder in TFS (and not the whole repository). See [clone](clone.md) command.
 
 ## Synopsis
     Usage: git-tfs init-branch [$/Repository/path <git-branch-name-wished>|--all]
@@ -47,19 +47,19 @@ TFS2008 doesn't permit to know the parent of a branch. You should find it yourse
 
 ### Authentication
 
-For the use of parameters `--username` and `--password`, see the [[clone]] command.
+For the use of parameters `--username` and `--password`, see the [clone](clone.md) command.
 
 ### Map TFS users to git users
 
-For the use of parameter `--authors`, see the [[clone]] command.
+For the use of parameter `--authors`, see the [clone](clone.md) command.
 
 ## And Now...
 
-After that your branch is created, you should use the commands [[fetch]] and [[checkin]] or [[rcheckin]] with the parameter `-i` to work with the TFS branch.
+After that your branch is created, you should use the commands [fetch](fetch.md) and [checkin](checkin.md) or [rcheckin](rcheckin.md) with the parameter `-i` to work with the TFS branch.
 
 ## See also
 
-* [[clone]]
-* [[fetch]]
-* [[checkin]]
-* [[rcheckin]]
+* [clone](clone.md)
+* [fetch](fetch.md)
+* [checkin](checkin.md)
+* [rcheckin](rcheckin.md)

@@ -84,6 +84,6 @@ clone exes.
 
 ## See also
 
-* [[init]]
-* [[fetch]]
-* [[clone]]
+* [init](init.md)
+* [fetch](fetch.md)
+* [clone](clone.md)

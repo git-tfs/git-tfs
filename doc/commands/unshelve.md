@@ -23,5 +23,5 @@ Unshelves a TFS shelveset into a Git branch.
 
 ## See also
 
-* [[shelve-list]]
-* [[shelve]]
+* [shelve-list](shelve-list.md)
+* [shelve](shelve.md)
