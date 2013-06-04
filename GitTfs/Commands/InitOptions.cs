@@ -23,6 +23,7 @@ namespace Sep.Git.Tfs.Commands
                         v => GitInitShared = v == null ? (object)true : (object)v },
                     { "autocrlf=", "Normalize line endings (default: " + default_autocrlf + ")",
                         v => GitInitAutoCrlf = (v == "") ? default_autocrlf : ValidateCrlfValue(v) },
+                    {"bare", "clone the TFS repository in a bare git repository", v => IsBare = v != null},
                 };
             }
         }
@@ -35,6 +36,7 @@ namespace Sep.Git.Tfs.Commands
             return v;
         }
 
+        public bool IsBare { get; set; }
         public string GitInitTemplate { get; set; }
         public object GitInitShared { get; set; }
         public string GitInitAutoCrlf { get; set; }
