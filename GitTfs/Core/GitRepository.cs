@@ -114,14 +114,16 @@ namespace Sep.Git.Tfs.Core
             return _cachedRemotes ?? (_cachedRemotes = ReadTfsRemotes());
         }
 
-        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote)
+        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote, string autocrlf = null, string ignorecase = null)
         {
             if (HasRemote(remote.Id))
                 throw new GitTfsException("A remote with id \"" + remote.Id + "\" already exists.");
 
             // These help the new (if it's new) git repository to behave more sanely.
-            _repository.Config.Set("core.autocrlf", "false");
-            _repository.Config.Set("core.ignorecase", "false");
+            _repository.Config.Set("core.autocrlf", (autocrlf == null)?"false":autocrlf);
+
+            if (ignorecase != null)
+                _repository.Config.Set("core.ignorecase", ignorecase);
 
             foreach (var entry in _remoteConfigReader.Dump(remote))
             {
