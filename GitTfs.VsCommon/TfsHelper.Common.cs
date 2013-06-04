@@ -660,7 +660,7 @@ namespace Sep.Git.Tfs.VsCommon
             
         }
 
-        public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath)
+        public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder)
         {
             var projectPath = "$/" + projectName;
             var directoryForBranch = Path.Combine(gitRepositoryPath, mainBranch);
@@ -668,7 +668,18 @@ namespace Sep.Git.Tfs.VsCommon
             try
             {
                 if (!VersionControl.ServerItemExists(projectPath, ItemType.Any))
-                    VersionControl.CreateTeamProjectFolder(new TeamProjectFolderOptions(projectName));
+                {
+                    if (createTeamProjectFolder)
+                        VersionControl.CreateTeamProjectFolder(new TeamProjectFolderOptions(projectName));
+                    else
+                        throw new GitTfsException("error: the team project folder '" + projectPath + "' doesn't exist!",
+                            new List<string>()
+                                {
+                                    "Verify that the name of the project '" + projectName +"' is well spelled",
+                                    "Create the team project folder in TFS before (recommanded)",
+                                    "Use the flag '--create-project-folder' to create the team project folder during the process"
+                                });
+                }
 
                 workspace = GetWorkspace(gitRepositoryPath, projectPath);
                 if (!Directory.Exists(directoryForBranch))
@@ -680,9 +691,13 @@ namespace Sep.Git.Tfs.VsCommon
                 workspace.CheckIn(changes, "Creation project folder '" + mainBranch + "'");
                 ConvertFolderIntoBranch(projectPath + "/" + mainBranch);
             }
+            catch (GitTfsException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                throw new GitTfsException("error: impossible to create project folder\n=>"+ ex.Message);
+                throw new GitTfsException("error: impossible to create project folder\n=>" + ex.Message);
             }
             finally
             {

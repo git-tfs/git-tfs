@@ -392,7 +392,7 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath)
+        public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder)
         {
             throw new NotImplementedException();
         }
