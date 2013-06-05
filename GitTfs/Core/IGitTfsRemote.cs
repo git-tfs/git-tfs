@@ -28,6 +28,7 @@ namespace Sep.Git.Tfs.Core
         string MaxCommitHash { get; set; }
         string RemoteRef { get; }
         bool IsSubtree { get; }
+        bool IsSubtreeOwner { get; }
         string OwningRemoteId { get; }
         string Prefix { get; }
         bool ShouldSkip(string path);

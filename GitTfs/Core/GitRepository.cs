@@ -255,7 +255,7 @@ namespace Sep.Git.Tfs.Core
             try
             {
                 CommandOutputPipe(stdout => FindTfsCommits(stdout, tfsCommits, includeStubRemotes),
-                                  "log", "--no-color", "--pretty=medium", head);
+                                  "log", "--no-color", "--pretty=medium", head, "--");
             }
             catch (GitCommandException e)
             {

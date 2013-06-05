@@ -240,10 +240,10 @@ namespace Sep.Git.Tfs.Core
 
         private LogEntry MakeNewLogEntry()
         {
-            return MakeNewLogEntry(_changeset);
+            return MakeNewLogEntry(_changeset, Summary.Remote);
         }
 
-        private LogEntry MakeNewLogEntry(IChangeset changesetToLog)
+        private LogEntry MakeNewLogEntry(IChangeset changesetToLog, IGitTfsRemote remote = null)
         {
             var identity = _tfs.GetIdentity(changesetToLog.Committer);
             var name = changesetToLog.Committer;
@@ -293,7 +293,8 @@ namespace Sep.Git.Tfs.Core
                            CommitterName = name,
                            AuthorName = name,
                            CommitterEmail = email,
-                           AuthorEmail = email
+                           AuthorEmail = email,
+                           Remote = remote
                        };
         }
     }

@@ -71,6 +71,14 @@ namespace Sep.Git.Tfs.Core
 
         public bool IsSubtree { get; private set; }
 
+        public bool IsSubtreeOwner
+        {
+            get
+            {
+                return TfsRepositoryPath == null;
+            }
+        }
+
         public string Id { get; set; }
 
         public string TfsUrl
@@ -106,7 +114,7 @@ namespace Sep.Git.Tfs.Core
             get
             {
                 if (tfsSubtreePaths == null)
-                    tfsSubtreePaths = globals.Repository.GetSubtrees(this).Select(x => x.TfsRepositoryPath).ToArray();
+                    tfsSubtreePaths = Repository.GetSubtrees(this).Select(x => x.TfsRepositoryPath).ToArray();
 
                 return tfsSubtreePaths;
             } 
@@ -239,7 +247,7 @@ namespace Sep.Git.Tfs.Core
         {
             if (tfsPath == null) return null;
 
-            if (TfsRepositoryPath != null)
+            if (!IsSubtreeOwner)
             {
                 if (!tfsPath.StartsWith(TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)) return null;
                 tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
@@ -334,7 +342,7 @@ namespace Sep.Git.Tfs.Core
             if (MaxChangesetId == GetLatestChangeset().Summary.ChangesetId)
                 return Enumerable.Empty<ITfsChangeset>();
             
-            if(!string.IsNullOrEmpty(TfsRepositoryPath))
+            if(!IsSubtreeOwner)
                 return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
 
             return globals.Repository.GetSubtrees(this)
@@ -476,11 +484,14 @@ namespace Sep.Git.Tfs.Core
             //var commitEncoding = Repository.CommandOneline("config", "i18n.commitencoding");
             //var encoding = LookupEncoding(commitEncoding) ?? Encoding.UTF8;
             string commitHash = null;
+
+            //the remote to be associated with the commit might be a subtree, if it's null then it's not from a subtree.
+            var remote = logEntry.Remote ?? this;
             Repository.CommandInputOutputPipe((procIn, procOut) =>
                                                   {
                                                       procIn.WriteLine(logEntry.Log);
-                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl,
-                                                                       TfsRepositoryPath, logEntry.ChangesetId);
+                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, remote.TfsUrl,
+                                                                       remote.TfsRepositoryPath, logEntry.ChangesetId);
                                                       procIn.Close();
                                                       commitHash = ParseCommitInfo(procOut.ReadToEnd());
                                                   }, BuildCommitCommand(logEntry));

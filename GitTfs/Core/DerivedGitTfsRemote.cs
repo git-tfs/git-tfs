@@ -155,6 +155,11 @@ namespace Sep.Git.Tfs.Core
             get { return false; }
         }
 
+        public bool IsSubtreeOwner
+        {
+            get { return false; }
+        }
+
         public string OwningRemoteId
         {
             get { return null; }
