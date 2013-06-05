@@ -90,7 +90,11 @@ You should have done (to clone only the trunk) :
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Repository/ProjectTrunk
 
+Note : It is highly recommanded to clone the root branch ( the branch that has no parents, here $/Repository/ProjectTrunk ) to be able to init the other branches after.
+If you clone the branch $/Repository/ProjectBranch, you will never able to init the root branch $/Repository/ProjectTrunk after.
+
 Then use `branch` like this :
+
 ### Init a TFS branches using auto-naming of your git branch
     git tfs branch --init $/Repository/ProjectBranch
 
