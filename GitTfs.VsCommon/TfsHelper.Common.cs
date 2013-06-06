@@ -62,14 +62,17 @@ namespace Sep.Git.Tfs.VsCommon
 
         protected abstract T GetService<T>();
 
+        private VersionControlServer _versionControl;
         protected VersionControlServer VersionControl
         {
             get
             {
-                var versionControlServer = GetService<VersionControlServer>();
-                versionControlServer.NonFatalError += NonFatalError;
-                versionControlServer.Getting += Getting;
-                return versionControlServer;
+                if (_versionControl != null)
+                    return _versionControl;
+                _versionControl = GetService<VersionControlServer>();
+                _versionControl.NonFatalError += NonFatalError;
+                _versionControl.Getting += Getting;
+                return _versionControl;
             }
         }
 
