@@ -53,7 +53,7 @@ namespace Sep.Git.Tfs.Commands
                         v => AuthorsFilePath = v },
                     { "l|with-labels|fetch-labels", "Fetch the labels also when fetching TFS changesets",
                         v => FetchLabels = v != null },
-                    { "b|bare=", "The name of the branch on which the fetch will be done for a bare repository",
+                    { "b|bare-branch=", "The name of the branch on which the fetch will be done for a bare repository",
                         v => BareBranch = v },
                     { "force", "Force fetch of tfs changesets when there is ahead commits (ahead commits will be lost!)",
                         v => ForceFetchBare = v != null },
