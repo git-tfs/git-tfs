@@ -42,6 +42,11 @@ namespace Sep.Git.Tfs.Core
             _repository.Refs.Add(gitRefName, shaCommit, allowOverwrite: true, logMessage: message);
         }
 
+        public static string ShortToLocalName(string branchName)
+        {
+            return "refs/heads/" + branchName;
+        }
+
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
@@ -161,10 +166,10 @@ namespace Sep.Git.Tfs.Core
 
         public void MoveRemote(string oldRemoteName, string newRemoteName)
         {
-            if (!_repository.Refs.IsValidName("refs/heads/" + oldRemoteName))
+            if (!_repository.Refs.IsValidName(ShortToLocalName(oldRemoteName)))
                 throw new GitTfsException("error: the name of the remote to move is invalid!");
 
-            if (!_repository.Refs.IsValidName("refs/heads/" + newRemoteName))
+            if (!_repository.Refs.IsValidName(ShortToLocalName(newRemoteName)))
                 throw new GitTfsException("error: the new name of the remote is invalid!");
 
             if (HasRemote(newRemoteName))
@@ -225,8 +230,8 @@ namespace Sep.Git.Tfs.Core
                                          select cs;
             foreach (var cs in untrackedTfsChangesets)
             {
-                // UpdateRef sets tag with TFS changeset id on each commit so we can't just update to latest
-                remote.UpdateRef(cs.GitCommit, cs.ChangesetId);
+                // UpdateTfsHead sets tag with TFS changeset id on each commit so we can't just update to latest
+                remote.UpdateTfsHead(cs.GitCommit, cs.ChangesetId);
             }
         }
 
@@ -247,6 +252,13 @@ namespace Sep.Git.Tfs.Core
                    group commit by commit.Remote
                    into remotes
                    select remotes.OrderBy(commit => -commit.ChangesetId).First();
+        }
+
+        public IEnumerable<TfsChangesetInfo> FilterParentTfsCommits(string head, bool includeStubRemotes,
+                                                                    Predicate<TfsChangesetInfo> pred)
+        {
+            return from commit in GetParentTfsCommits(head, includeStubRemotes)
+                   where pred(commit) select commit;
         }
 
         private List<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes)
@@ -373,7 +385,7 @@ namespace Sep.Git.Tfs.Core
                 var currentTree = treesToDescend.Dequeue();
                 foreach (var item in currentTree)
                 {
-                    if (item.Type == GitObjectType.Tree)
+                    if (item.TargetType == TreeEntryTargetType.Tree)
                     {
                         treesToDescend.Enqueue((Tree)item.Target);
                     }
@@ -382,7 +394,7 @@ namespace Sep.Git.Tfs.Core
                     {
                         Mode = item.Mode.ToModeString(),
                         Sha = item.Target.Sha,
-                        ObjectType = item.Type.ToString().ToLower(),
+                        ObjectType = item.TargetType.ToString().ToLower(),
                         Path = path,
                         Commit = commit
                     };
@@ -411,6 +423,8 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
+                if (IsBare)
+                    return false;
                 return (from 
                             entry in _repository.Index.RetrieveStatus()
                         where 
@@ -443,7 +457,7 @@ namespace Sep.Git.Tfs.Core
 
         public string AssertValidBranchName(string gitBranchName)
         {
-            if (!_repository.Refs.IsValidName("refs/heads/" + gitBranchName))
+            if (!_repository.Refs.IsValidName(ShortToLocalName(gitBranchName)))
                 throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
             return gitBranchName;
         }
@@ -490,5 +504,7 @@ namespace Sep.Git.Tfs.Core
         {
             _repository.Reset(resetOptions, sha);
         }
+
+        public bool IsBare { get { return _repository.Info.IsBare; } }
     }
 }

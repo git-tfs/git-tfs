@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Core
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head, bool includeStubRemotes);
+        IEnumerable<TfsChangesetInfo> FilterParentTfsCommits(string head, bool includeStubRemotes, Predicate<TfsChangesetInfo> pred);
         TfsChangesetInfo GetTfsCommit(string sha);
         TfsChangesetInfo GetCurrentTfsCommit();
         IDictionary<string, GitObject> GetObjects(string commit);
@@ -40,5 +41,6 @@ namespace Sep.Git.Tfs.Core
         void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate);
         void MoveRemote(string oldRemoteName, string newRemoteName);
         void Reset(string sha, ResetOptions resetOptions);
+        bool IsBare { get; }
     }
 }

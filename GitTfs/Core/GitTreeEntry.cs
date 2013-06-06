@@ -22,7 +22,7 @@ namespace Sep.Git.Tfs.Core
 
         public Stream OpenRead()
         {
-            if (_entry.Type == GitObjectType.Blob)
+            if (_entry.TargetType == TreeEntryTargetType.Blob)
             {
                 return ((Blob)_entry.Target).ContentStream;
             }

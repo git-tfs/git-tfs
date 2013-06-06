@@ -310,6 +310,22 @@ namespace Sep.Git.Tfs.VsFake
         {
         }
 
+        public bool IsExistingInTfs(string path)
+        {
+            var exists = false;
+            foreach (var changeset in _script.Changesets)
+            {
+                foreach (var change in changeset.Changes)
+                {
+                    if (change.RepositoryPath == path)
+                    {
+                        exists = !change.ChangeType.IncludesOneOf(TfsChangeType.Delete);
+                    }
+                }
+            }
+            return exists;
+        }
+
         #endregion
 
         #region unimplemented
@@ -385,6 +401,7 @@ namespace Sep.Git.Tfs.VsFake
         {
             throw new NotImplementedException();
         }
+
         #endregion
     }
 }

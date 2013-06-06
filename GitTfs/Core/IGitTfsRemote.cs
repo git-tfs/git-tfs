@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Core
         string TfsUrl { get; set; }
         string TfsRepositoryPath { get; set; }
         string IgnoreRegexExpression { get; set; }
+        string IgnoreExceptRegexExpression { get; set; }
         bool Autotag { get; set; }
         string TfsUsername { get; set; }
         string TfsPassword { get; set; }
@@ -49,7 +50,7 @@ namespace Sep.Git.Tfs.Core
         void CleanupWorkspace();
         void CleanupWorkspaceDirectory();
         ITfsChangeset GetChangeset(long changesetId);
-        void UpdateRef(string commitHash, long changesetId);
+        void UpdateTfsHead(string commitHash, long changesetId);
         void EnsureTfsAuthenticated();
         bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath);
     }

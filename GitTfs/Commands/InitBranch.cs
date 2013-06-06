@@ -25,9 +25,12 @@ namespace Sep.Git.Tfs.Commands
         private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
+        public string IgnoreRegex { get; set; }
+        public string ExceptRegex { get; set; }
         public string ParentBranch { get; set; }
         public bool CloneAllBranches { get; set; }
         public string AuthorsFilePath { get; set; }
+        public bool NoFetch { get; set; }
 
         public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
         {
@@ -48,6 +51,9 @@ namespace Sep.Git.Tfs.Commands
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
+                    { "ignore-regex=", "a regex of files to ignore", v => IgnoreRegex = v },
+                    { "except-regex=", "a regex of exceptions to ingore-regex", v => ExceptRegex = v},
+                    { "nofetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
                 };
             }
         }
@@ -104,6 +110,9 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
+            if (CloneAllBranches && NoFetch)
+                throw new GitTfsException("error: --nofetch cannot be used with --all");
+
             if (!CloneAllBranches)
             {
                 _helper.Run(this);
@@ -120,34 +129,41 @@ namespace Sep.Git.Tfs.Commands
 
             var childBranchPaths = rootBranch.GetAllChildren().Select(b=>new BranchDatas{TfsRepositoryPath = b.Path}).ToList();
 
-            _stdout.WriteLine("Tfs branches found:");
-            foreach (var tfsBranchPath in childBranchPaths)
+            if (childBranchPaths.Any())
             {
-                _stdout.WriteLine("- " + tfsBranchPath.TfsRepositoryPath);
-                tfsBranchPath.RootChangesetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath);
-            }
-            childBranchPaths.Add(new BranchDatas{TfsRepositoryPath = defaultRemote.TfsRepositoryPath, TfsRemote = defaultRemote, RootChangesetId = -1});
-
-            do
-            {
-                var branchesToFetch = childBranchPaths.Where(b => !b.IsEntirelyFetched).ToList();
-                foreach (var tfsBranch in branchesToFetch)
+                _stdout.WriteLine("Tfs branches found:");
+                foreach (var tfsBranchPath in childBranchPaths)
                 {
-                    Trace.WriteLine("=> Working on TFS branch : " + tfsBranch.TfsRepositoryPath);
-                    if (tfsBranch.TfsRemote == null)
-                    {
-                        var sha1RootCommit = FindChangesetInGitRepository(tfsBranch.RootChangesetId);
-                        if (sha1RootCommit != null)
-                            tfsBranch.TfsRemote = CreateBranch(defaultRemote, tfsBranch.TfsRepositoryPath, sha1RootCommit);
-                    }
-                    if (tfsBranch.TfsRemote != null)
-                    {
-                        Trace.WriteLine("Fetching remote :" + tfsBranch.TfsRemote.Id);
-                        var fetchResult = FetchRemote(tfsBranch.TfsRemote, true);
-                        tfsBranch.IsEntirelyFetched = fetchResult.IsSuccess;
-                    }
+                    _stdout.WriteLine("- " + tfsBranchPath.TfsRepositoryPath);
+                    tfsBranchPath.RootChangesetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath);
                 }
-            } while (childBranchPaths.Any(b => !b.IsEntirelyFetched));
+                childBranchPaths.Add(new BranchDatas{TfsRepositoryPath = defaultRemote.TfsRepositoryPath, TfsRemote = defaultRemote, RootChangesetId = -1});
+
+                do
+                {
+                    var branchesToFetch = childBranchPaths.Where(b => !b.IsEntirelyFetched).ToList();
+                    foreach (var tfsBranch in branchesToFetch)
+                    {
+                        Trace.WriteLine("=> Working on TFS branch : " + tfsBranch.TfsRepositoryPath);
+                        if (tfsBranch.TfsRemote == null)
+                        {
+                            var sha1RootCommit = FindChangesetInGitRepository(tfsBranch.RootChangesetId);
+                            if (sha1RootCommit != null)
+                                tfsBranch.TfsRemote = CreateBranch(defaultRemote, tfsBranch.TfsRepositoryPath, sha1RootCommit);
+                        }
+                        if (tfsBranch.TfsRemote != null)
+                        {
+                            Trace.WriteLine("Fetching remote :" + tfsBranch.TfsRemote.Id);
+                            var fetchResult = FetchRemote(tfsBranch.TfsRemote, true);
+                            tfsBranch.IsEntirelyFetched = fetchResult.IsSuccess;
+                        }
+                    }
+                } while (childBranchPaths.Any(b => !b.IsEntirelyFetched));
+            }
+            else
+            {
+                _stdout.WriteLine("No other Tfs branches found.");
+            }
             return GitTfsExitCodes.OK;
         }
 
@@ -169,6 +185,16 @@ namespace Sep.Git.Tfs.Commands
                 _remoteOptions.Username = defaultRemote.TfsUsername;
                 _remoteOptions.Password = defaultRemote.TfsPassword;
             }
+
+            if (IgnoreRegex != null)
+                _remoteOptions.IgnoreRegex = IgnoreRegex;
+            else
+                _remoteOptions.IgnoreRegex = defaultRemote.IgnoreRegexExpression;
+
+            if (ExceptRegex != null)
+                _remoteOptions.ExceptRegex = ExceptRegex;
+            else
+                _remoteOptions.ExceptRegex = defaultRemote.IgnoreExceptRegexExpression;
 
             _authors.Parse(AuthorsFilePath, _globals.GitDir);
 

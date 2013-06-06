@@ -69,6 +69,7 @@
     </Compile>
     <Compile Include="..\GitTfs.VsCommon\ParentForm.cs">
       <Link>ParentForm.cs</Link>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="..\GitTfs.VsCommon\Wrappers.PostVs2010.cs">
       <Link>Wrappers.PostVs2010.cs</Link>

@@ -376,6 +376,16 @@ namespace Sep.Git.Tfs.Test.Commands
         }
 
         [Fact]
+        public void ShouldFailInitAllBranchesBecauseNoFetchWasSpecified()
+        {
+            mocks.ClassUnderTest.CloneAllBranches = true;
+            mocks.ClassUnderTest.NoFetch = true;
+
+            var ex = Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run());
+            Assert.Equal("error: --nofetch cannot be used with --all", ex.Message);
+        }
+
+        [Fact]
         public void ShouldFailInitAllBranchesBecauseCloneWasNotMadeFromABranch()
         {
             const string GIT_BRANCH_TO_INIT1 = "MyBranch1";
