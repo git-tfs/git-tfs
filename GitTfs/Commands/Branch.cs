@@ -31,6 +31,7 @@ namespace Sep.Git.Tfs.Commands
         public bool ShouldRenameRemote { get; set; }
         public bool ShouldDeleteRemote { get; set; }
         public bool ShouldInitBranch { get; set; }
+        public bool NoFetch { get; set; }
         public string Comment { get; set; }
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
@@ -48,6 +49,7 @@ namespace Sep.Git.Tfs.Commands
                     { "m|move", "Rename a TFS remote", v => ShouldRenameRemote = (v != null) },
                     { "delete", "Delete a TFS remote", v => ShouldDeleteRemote = (v != null) },
                     { "init", "Initialize an existing TFS branch", v => ShouldInitBranch = (v != null) },
+                    { "no-fetch", "Don't fetch changeset for inited branch(es)", v => NoFetch = (v != null) },
                     { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
@@ -73,6 +75,7 @@ namespace Sep.Git.Tfs.Commands
             initBranch.AuthorsFilePath = AuthorsFilePath;
             initBranch.CloneAllBranches = ManageAll;
             initBranch.ParentBranch = ParentBranch;
+            initBranch.NoFetch = NoFetch;
         }
 
         public bool IsCommandWellUsed()
