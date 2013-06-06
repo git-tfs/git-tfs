@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string refToCheckin)
         {
-            return _writer.Write(refToCheckin, changeset => PerformCheckin(changeset, refToCheckin));
+            return _writer.Write(refToCheckin, PerformCheckin);
         }
 
         private int PerformCheckin(TfsChangesetInfo parentChangeset, string refToCheckin)

@@ -42,6 +42,11 @@ namespace Sep.Git.Tfs.Core
             _repository.Refs.Add(gitRefName, shaCommit, allowOverwrite: true, logMessage: message);
         }
 
+        public static string ShortToLocalName(string branchName)
+        {
+            return "refs/heads/" + branchName;
+        }
+
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
@@ -161,10 +166,10 @@ namespace Sep.Git.Tfs.Core
 
         public void MoveRemote(string oldRemoteName, string newRemoteName)
         {
-            if (!_repository.Refs.IsValidName("refs/heads/" + oldRemoteName))
+            if (!_repository.Refs.IsValidName(ShortToLocalName(oldRemoteName)))
                 throw new GitTfsException("error: the name of the remote to move is invalid!");
 
-            if (!_repository.Refs.IsValidName("refs/heads/" + newRemoteName))
+            if (!_repository.Refs.IsValidName(ShortToLocalName(newRemoteName)))
                 throw new GitTfsException("error: the new name of the remote is invalid!");
 
             if (HasRemote(newRemoteName))
@@ -413,6 +418,8 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
+                if (IsBare)
+                    return false;
                 return (from 
                             entry in _repository.Index.RetrieveStatus()
                         where 
@@ -445,7 +452,7 @@ namespace Sep.Git.Tfs.Core
 
         public string AssertValidBranchName(string gitBranchName)
         {
-            if (!_repository.Refs.IsValidName("refs/heads/" + gitBranchName))
+            if (!_repository.Refs.IsValidName(ShortToLocalName(gitBranchName)))
                 throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
             return gitBranchName;
         }
@@ -492,5 +499,7 @@ namespace Sep.Git.Tfs.Core
         {
             _repository.Reset(resetOptions, sha);
         }
+
+        public bool IsBare { get { return _repository.Info.IsBare; } }
     }
 }

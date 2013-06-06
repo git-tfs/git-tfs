@@ -61,7 +61,7 @@ namespace Sep.Git.Tfs.Commands
                 VerifyTfsPathToClone(tfsRepositoryPath);
 
                 if (retVal == 0) retVal = fetch.Run();
-                if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+                if (retVal == 0 && !init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
                 if (retVal == 0 && withBranches && initBranch != null)
                 {
                     initBranch.CloneAllBranches = true;

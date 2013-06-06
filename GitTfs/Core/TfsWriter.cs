@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Core
             _globals = globals;
         }
 
-        public int Write(string refToWrite, Func<TfsChangesetInfo, int> write)
+        public int Write(string refToWrite, Func<TfsChangesetInfo, string, int> write)
         {
             var tfsParents = _globals.Repository.GetLastParentTfsCommits(refToWrite);
             if (_globals.UserSpecifiedRemoteId != null)
@@ -26,7 +26,7 @@ namespace Sep.Git.Tfs.Core
             {
                 case 1:
                     var changeset = tfsParents.First();
-                    return write(changeset);
+                    return write(changeset, refToWrite);
                 case 0:
                     _stdout.WriteLine("No TFS parents found!");
                     return GitTfsExitCodes.InvalidArguments;
