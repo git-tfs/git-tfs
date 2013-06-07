@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using LibGit2Sharp;
@@ -168,10 +167,6 @@ namespace Sep.Git.Tfs.Commands
             else
                 repo.Reset(tfsRemote.MaxCommitHash, ResetOptions.Hard);
             _stdout.WriteLine("No more to rcheckin.");
-
-            Trace.WriteLine("Cleaning...");
-            tfsRemote.CleanupWorkspaceDirectory();
-
             return GitTfsExitCodes.OK;
         }
 
@@ -190,10 +185,6 @@ namespace Sep.Git.Tfs.Commands
                 if (String.IsNullOrWhiteSpace(revList))
                 {
                     _stdout.WriteLine("No more to rcheckin.");
-
-                    Trace.WriteLine("Cleaning...");
-                    tfsRemote.CleanupWorkspaceDirectory();
-
                     return GitTfsExitCodes.OK;
                 }
 

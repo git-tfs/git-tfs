@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
@@ -52,10 +51,6 @@ namespace Sep.Git.Tfs.Commands
                 if (refToCheckin == "HEAD")
                     parentChangeset.Remote.Repository.CommandNoisy("merge", parentChangeset.Remote.MaxCommitHash);
             }
-
-            Trace.WriteLine("Cleaning...");
-            parentChangeset.Remote.CleanupWorkspaceDirectory();
-
             return GitTfsExitCodes.OK;
         }
 
