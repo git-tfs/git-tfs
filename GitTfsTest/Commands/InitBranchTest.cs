@@ -466,7 +466,7 @@ namespace Sep.Git.Tfs.Test.Commands
         [Fact]
         public void ShouldHaveGoodName()
         {
-           Globals globals = new Globals();
+           Globals globals = new Globals(null);
            globals.Repository = mocks.Get<IGitRepository>();
            globals.Repository.Stub(t => t.AssertValidBranchName("")).IgnoreArguments().Do ( (Func<string, string>) delegate (string value) { return value; });
 
