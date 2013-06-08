@@ -53,7 +53,6 @@ namespace Sep.Git.Tfs.Commands
                     parentChangeset.Remote.Repository.CommandNoisy("merge", parentChangeset.Remote.MaxCommitHash);
             }
 
-            Trace.WriteLine("Cleaning...");
             parentChangeset.Remote.CleanupWorkspaceDirectory();
 
             return GitTfsExitCodes.OK;

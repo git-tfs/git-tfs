@@ -155,11 +155,13 @@ namespace Sep.Git.Tfs.Core
 
         public void CleanupWorkspace()
         {
+            Trace.WriteLine("Removing TFS workspaces mappings for " + WorkingDirectory);
             Tfs.CleanupWorkspaces(WorkingDirectory);
         }
 
         public void CleanupWorkspaceDirectory()
         {
+            Trace.WriteLine("Removing local workspace directory " + WorkingDirectory);
             try
             {
                 var allFiles = Directory.EnumerateFiles(WorkingDirectory, "*", SearchOption.AllDirectories);
