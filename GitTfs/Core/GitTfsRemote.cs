@@ -155,23 +155,23 @@ namespace Sep.Git.Tfs.Core
 
         public void CleanupWorkspace()
         {
-            Tfs.CleanupWorkspaces(WorkingDirectory);
+            //Tfs.CleanupWorkspaces(WorkingDirectory);
         }
 
         public void CleanupWorkspaceDirectory()
         {
-            try
-            {
-                var allFiles = Directory.EnumerateFiles(WorkingDirectory, "*", SearchOption.AllDirectories);
-                foreach (var file in allFiles)
-                    File.SetAttributes(file, File.GetAttributes(file) & ~FileAttributes.ReadOnly);
+            //try
+            //{
+            //    var allFiles = Directory.EnumerateFiles(WorkingDirectory, "*", SearchOption.AllDirectories);
+            //    foreach (var file in allFiles)
+            //        File.SetAttributes(file, File.GetAttributes(file) & ~FileAttributes.ReadOnly);
 
-                Directory.Delete(WorkingDirectory, true);
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message);
-            }
+            //    Directory.Delete(WorkingDirectory, true);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Trace.WriteLine(ex.Message);
+            //}
         }
 
         public bool ShouldSkip(string path)
