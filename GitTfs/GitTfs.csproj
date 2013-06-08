@@ -221,6 +221,7 @@
     <Compile Include="Util\GitTfsCommandFactory.cs" />
     <Compile Include="Util\GitTfsCommandRunner.cs" />
     <Compile Include="Core\IGitTfsVersionProvider.cs" />
+    <Compile Include="Util\GitTfsDebugTraceListener.cs" />
     <Compile Include="Util\TemporaryFile.cs" />
     <Compile Include="Util\WhenDynamicDoesntWork.cs" />
     <Compile Include="Util\PluggableWithAliases.cs" />

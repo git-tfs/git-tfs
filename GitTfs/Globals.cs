@@ -10,6 +10,13 @@ namespace Sep.Git.Tfs
     [StructureMapSingleton]
     public class Globals
     {
+        TraceListener _listener;
+
+        public Globals(GitTfsDebugTraceListener listener)
+        {
+            _listener = listener;
+        }
+
         public OptionSet OptionSet
         {
             get
@@ -40,7 +47,7 @@ namespace Sep.Git.Tfs
                 {
                     if (_debugTraceListener == null)
                     {
-                        _debugTraceListener = Trace.Listeners.Add(new ConsoleTraceListener());
+                        _debugTraceListener = Trace.Listeners.Add(_listener);
                     }
                 }
                 else
