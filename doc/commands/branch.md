@@ -41,6 +41,7 @@ The `branch` command permit to manage TFS branches. With this command, you can d
 	  -m, --move                 Rename a TFS remote
 		  --delete               Delete a TFS remote
 		  --init                 Initialize an existing TFS branch
+		  --nofetch              Don't fetch changeset for inited branch(es)
 	  -b, --tfs-parent-branch=VALUE
 								 TFS Parent branch of the TFS branch to clone
 								   (TFS 2008 only! And required!!) ex:
@@ -110,6 +111,10 @@ This command init all the branches not already done and ignore existing ones.
 TFS2008 doesn't permit to know the parent of a branch. You should find it yourself with TFS and use the parameter `--tfs-parent-branch` to give it to the `init-branch` command:
 
     git tfs branch --init --tfs-parent-branch=$/Repository/ProjectParentBranch $/Repository/ProjectBranch
+
+### Init a branch without fetching changesets
+
+You could use the parameter `--nofetch`, to init the branch by creating its remote but without fetching the changesets of the branch.
 
 ### Authentication
 

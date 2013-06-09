@@ -16,7 +16,13 @@ To use this command, you should have cloned only the trunk folder in TFS (and no
                                  (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
-
+      -a, --authors=VALUE        Path to an Authors file to map TFS users to Git
+                                   users
+          --ignore-regex=VALUE   a regex of files to ignore
+          --except-regex=VALUE   a regex of exceptions to ingore-regex
+          --nofetch              Create the new TFS remote but don't fetch any
+                                   changesets
+  
 ## Examples
 
 Suppose you have on TFS:
@@ -57,6 +63,10 @@ For the use of parameters `--username` and `--password`, see the [clone](clone.m
 ### Map TFS users to git users
 
 For the use of parameter `--authors`, see the [clone](clone.md) command.
+
+### Init a branch without fetching changesets
+
+You could use the parameter `--nofetch`, to init the branch by creating its remote but without fetching the changesets of the branch.
 
 ## And Now...
 
