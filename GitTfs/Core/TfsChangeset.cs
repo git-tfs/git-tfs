@@ -35,6 +35,8 @@ namespace Sep.Git.Tfs.Core
             {
                 Apply(change, index, workspace, initialTree);
             }
+
+            initialTree.Clear();
             return MakeNewLogEntry();
         }
 
