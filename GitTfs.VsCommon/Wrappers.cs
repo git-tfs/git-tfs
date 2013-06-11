@@ -59,7 +59,7 @@ namespace Sep.Git.Tfs.VsCommon
     public class WrapperForChangeset : WrapperFor<Changeset>, IChangeset
     {
         private readonly TfsApiBridge _bridge;
-        private readonly Changeset _changeset;
+        private Changeset _changeset;
 
         public WrapperForChangeset(TfsApiBridge bridge, Changeset changeset) : base(changeset)
         {
@@ -110,6 +110,11 @@ namespace Sep.Git.Tfs.VsCommon
         public void Get(IWorkspace workspace)
         {
             workspace.GetSpecificVersion(this);
+        }
+
+        public void Dispose()
+        {
+            _changeset = null;
         }
     }
 

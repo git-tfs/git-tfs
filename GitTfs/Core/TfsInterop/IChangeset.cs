@@ -2,7 +2,7 @@ using System;
 
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
-    public interface IChangeset
+    public interface IChangeset : IDisposable
     {
         IChange [] Changes { get; }
         string Committer { get; }

@@ -12,7 +12,7 @@ namespace Sep.Git.Tfs.Core
     public class TfsChangeset : ITfsChangeset
     {
         private readonly ITfsHelper _tfs;
-        private readonly IChangeset _changeset;
+        private IChangeset _changeset;
         private readonly TextWriter _stdout;
         private readonly AuthorsFile _authors;
         public TfsChangesetInfo Summary { get; set; }
@@ -288,6 +288,18 @@ namespace Sep.Git.Tfs.Core
                            CommitterEmail = email,
                            AuthorEmail = email
                        };
+        }
+
+        public void Dispose()
+        {
+            if (_changeset != null)
+                _changeset.Dispose();
+
+            if (Summary != null)
+                Summary.Dispose();
+
+            _changeset = null;
+            Summary = null;
         }
     }
 }
