@@ -113,16 +113,16 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
-            var queryParameters = new QueryHistoryParameters(path, RecursionType.Full);
-            queryParameters.ItemVersion = VersionSpec.Latest;
-            queryParameters.Author = null;
-            queryParameters.VersionStart = new ChangesetVersionSpec((int) startVersion);
-            queryParameters.VersionEnd = VersionSpec.Latest;
-            queryParameters.MaxResults = int.MaxValue;
-            queryParameters.IncludeChanges = true;
-            queryParameters.SlotMode = true;
-            queryParameters.IncludeDownloadInfo = true;
-            var changesets = VersionControl.QueryHistory(queryParameters);
+            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest,
+                                    deletionId:          0,
+                                    recursion:           RecursionType.Full,
+                                    user:                null,
+                                    versionFrom:         new ChangesetVersionSpec((int)startVersion),
+                                    versionTo:           VersionSpec.Latest,
+                                    maxCount:            int.MaxValue,
+                                    includeChanges:      true,
+                                    slotMode:            true,
+                                    includeDownloadInfo: true);
 
             return changesets.Cast<Changeset>()
                 .OrderBy(changeset => changeset.ChangesetId)
