@@ -124,9 +124,10 @@ namespace Sep.Git.Tfs.VsCommon
                                     slotMode:            true,
                                     includeDownloadInfo: true);
 
-            return changesets.Cast<Changeset>()
-                .OrderBy(changeset => changeset.ChangesetId)
-                .Select(changeset => BuildTfsChangeset(changeset, remote));
+            foreach (var changeset in changesets.Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId))
+            {
+                yield return BuildTfsChangeset(changeset, remote);
+            }
         }
 
         public virtual bool CanGetBranchInformation { get { return false; } }
