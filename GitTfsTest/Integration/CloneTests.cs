@@ -150,5 +150,32 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertCleanWorkspace("MyProject");
             AssertRefs("175420603e41cd0175e3c25581754726bd21cb96");
         }
+
+        [FactExceptOnUnix]
+        public void IgnoreSomeThings()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/A")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/A/file1.txt", "file 1")
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/B")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/B/file2.txt", "file 2")
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/C")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/C/file3.txt", "file 3")
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/D")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/D/file4.txt", "file 4")
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/E")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/E/file5.txt", "file 5")
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/F")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/F/file6.txt", "file 6");
+            });
+            h.Run("clone", "--ignore-regex", "B|C|D|E", h.TfsUrl, "$/MyProject");
+            h.AssertGitRepo("MyProject");
+            h.AssertCleanWorkspace("MyProject");
+            h.AssertTreeEntries("MyProject", new[] { "A/file1.txt", "F/file6.txt" });
+        }
     }
 }
