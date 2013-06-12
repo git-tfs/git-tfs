@@ -52,6 +52,13 @@ namespace Sep.Git.Tfs.VsCommon
                     Trace.WriteLine("error: TFS branches "+ tfsPathBranchToCreate +" not found!");
                     return -1;
                 }
+
+                if (tfsBranchToCreate.Properties.ParentBranch == null)
+                {
+                    throw new GitTfsException("error : the branch you try to init '" + tfsPathBranchToCreate + "' is a root branch (e.g. has no parents).",
+                        new List<string> { "Clone this branch from Tfs instead of trying to init it!\n   Command: git tfs clone " + Url + " " + tfsPathBranchToCreate });
+                }
+                
                 tfsPathParentBranch = tfsBranchToCreate.Properties.ParentBranch.Item;
                 Trace.WriteLine("Found parent branch : " + tfsPathParentBranch);
 

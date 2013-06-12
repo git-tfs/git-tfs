@@ -16,6 +16,7 @@ To use this command, you should have cloned only the trunk folder in TFS (and no
                                  (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
+
 ## Examples
 
 Suppose you have on TFS:
@@ -28,7 +29,11 @@ You should have done (to clone only the trunk) :
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Repository/ProjectTrunk
 
+Note : It is highly recommanded to clone the root branch ( the branch that has no parents, here $/Repository/ProjectTrunk ) to be able to init the other branches after.
+If you clone the branch $/Repository/ProjectBranch, you will never able to init the root branch $/Repository/ProjectTrunk after.
+
 Then use `init-branch` like this :
+
 ### Init a TFS branches using auto-naming of your git branch
     git tfs init-branch $/Repository/ProjectBranch
 
