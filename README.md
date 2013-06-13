@@ -1,77 +1,9 @@
 ## Introduction
 
-git-tfs is a two-way bridge between TFS and git, similar to git-svn.
+[git-tfs](http://git-tfs.com/) is a two-way bridge between TFS (Team Foundation Server) and git, similar to git-svn.
+It fetches TFS commits into a git repository, and lets you push your updates back to TFS.
 
-## Usage
-
-`git tfs help` lists the available commands.
-`git tfs help <command>` shows a summary of the usage of a given command.
-
-Further documentation is available in the [doc/](doc/README.md) directory.
-
-### Cloning a repository
-
-    git tfs clone http://tfs:8080/tfs/DefaultCollection $/some_project
-    (wait for git-tfs to pull your history)
-
--or-
-
-    git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/some_project
-
-(`cd some_project` and hack away, using only git, until you need to share with TFS...)
-
-### Pushing your changes to TFS
-
-#### Check-in
-
-    git tfs checkintool 
-
--or-
-
-    git tfs checkin -m "Did stuff"
-
-#### Shelveset
-
-    git tfs shelve A_SHELVESET_NAME
-
-### Other commands
-
-    git tfs help
-
-
-## Installing
-
-Using [Chocolatey](http://chocolatey.org/) :
-
-``` cinst GitTfs ```
-
-or [download a binary](http://git-tfs.com/)...
-
-You need .NET 4 and either the 2008 or 2010 version of Team Explorer installed.
-
-## Building
-
-### Prerequisites 
-
-* [Visual Studio 2010 SDK](http://www.microsoft.com/downloads/en/details.aspx?FamilyID=21307C23-F0FF-4EF2-A0A4-DCA54DDB1E21&displaylang=en)
-* [Visual Studio 2008 SDK](http://www.microsoft.com/download/en/details.aspx?id=21827)
-* MSBuild (included in .NET 4) 
-
-### Building
-
-#### Building With MSBuild
-1. Update submodules. `git submodule update`  to get the libgit2sharp dependencies.
-2. Build with `msbuild GitTfs.sln /p:Configuration=debug` for the default debug build.
-
-####Building With Rake
-You can also do `rake build:debug`.
-
-## Contributing
-
-If you contribute patches, please set `core.autocrlf` to `true`. (`git config core.autocrlf true`)
-
-Contributions are always welcome. There are some simple guidelines in
-[CONTRIBUTING.md](CONTRIBUTING.md).
+Please find all the documentation (usage, getting and building sources, commands documentation,...) [here](doc/README.md).
 
 ### Community
 

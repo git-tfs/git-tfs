@@ -1,7 +1,9 @@
-[git-tfs](http://git-tfs.com/) is a two-way bridge between TFS and git, similar to git-svn.
+## Introduction
+
+[git-tfs](http://git-tfs.com/) is a two-way bridge between TFS (Team Foundation Server) and git, similar to git-svn.
 It fetches TFS commits into a git repository, and lets you push your updates back to TFS.
 
-The most recent version is 0.17.1.
+The most recent version is 0.17.2.
 See the [change history](change-history.md) for details.
 
 If you're having problems, check out the [troubleshooting](TROUBLESHOOTING.md) page.
@@ -9,25 +11,45 @@ And read [how to report an issue](reporting-issues.md), before doing so ;)
 
 ## Get git-tfs
 
-Either [download a binary](http://git-tfs.com/) ([old versions](https://github.com/git-tfs/git-tfs/downloads)), use [Chocolatey](http://chocolatey.org/packages/gittfs) or build from source:
+Three differents ways to get git-tfs:
 
-    git clone git://github.com/git-tfs/git-tfs.git
-    cd git-tfs
-    msbuild GitTfs.sln
+* Download a binary. Find it on the [git-tfs web site](http://git-tfs.com/) (or [old versions](https://github.com/git-tfs/git-tfs/downloads)),
+* Using Chocolatey. If [Chocolatey](http://chocolatey.org/) is already installed on your computer, run `cinst gittfs` to install the [Chocolatey package](http://chocolatey.org/packages/gittfs)
+* Build from source code. See §[Building](#building) for more informations...
+
+__Whatever the way you get git-tfs, you should have git-tfs.exe in your path (and git, too)__.
+
+Add the git-tfs folder path to your PATH. You could also set it temporary (the time of your current terminal session) using :
+
     set PATH=%PATH%;%cd%\GitTfs\bin\Debug
-
-The last step adds git-tfs.exe to your path. If you download a package, you'll need to complete this step, too.
 
 ## Use git-tfs
 
-    # [optional] find a repository path to clone :
+You need .NET 4 and either the 2008, 2010 or 2012 version of Team Explorer installed.
+
+### Help
+
+    #lists the available commands
+    git tfs help
+
+    #shows a summary of the usage of a given command
+    git tfs help <command>
+
+### Cloning
+
+    # [optional] find a tfs repository path to clone :
     git tfs list-remote-branches http://tfs:8080/tfs/DefaultCollection
 
     # clone the whole repository (wait for a while...) :
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/some_project
 
-    # or, if you're impatient (only last changeset) :
+    # or, if you're impatient (and want to work from the last changeset) :
     git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/some_project
+
+    # or, if you're impatient (and want a specific changeset) :
+    git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/some_project -c=145
+
+### Working
 
     cd some_project
     git log # shows your TFS history, unless you did quick-clone
@@ -37,8 +59,16 @@ The last step adds git-tfs.exe to your path. If you download a package, you'll n
     # gets latest from TFS to the branch tfs/default :
     git tfs fetch
 
-    # commit on TFS :
+### Checkin
+
+    # report all the commits on TFS :
     git tfs rcheckin
+
+    # or commit using the tfs checkin window
+    git tfs checkintool 
+
+    # or commit with a message
+    git tfs checkin -m "Did stuff"
 
     # or shelve your changes :
     git tfs shelve MY_AWESOME_CHANGES
@@ -92,12 +122,46 @@ This is the complete list of commands in the master branch on github.
 * [verify](commands/verify.md) - since [0.11][v0.11]
 * [autotag](commands/autotag.md) option - since [0.12][v0.12]
 
+## Building
+
+### Prerequisites 
+
+* MSBuild (included in .NET 4) 
+
+And depending of the version of TFS you use :
+
+* [Visual Studio 2012 SDK](http://www.microsoft.com/en-us/download/details.aspx?id=30668)
+* [Visual Studio 2010 SDK](http://www.microsoft.com/downloads/en/details.aspx?FamilyID=21307C23-F0FF-4EF2-A0A4-DCA54DDB1E21&displaylang=en)
+* [Visual Studio 2008 SDK](http://www.microsoft.com/download/en/details.aspx?id=21827)
+
+### Get the source code and build
+
+    #get the source code
+    git clone --recursive git://github.com/git-tfs/git-tfs.git
+    cd git-tfs
+
+    #building with MSBuild (with the default configuration)
+    msbuild GitTfs.sln
+
+    #or building with MSBuild in debug
+    msbuild GitTfs.sln /p:Configuration=debug
+
+    #or building with MSBuild in release
+    msbuild GitTfs.sln /p:Configuration=release
+
+    #or with Rake (Ruby)
+    rake build:debug
+
+Note : if the build fails because it can't find libgit2sharp dependency, update submodules with `git submodule update`
+
 ## Contributing
+Contributions are always welcome.
 
-Information about contributing is available in
-[CONTRIBUTING.md](https://github.com/git-tfs/git-tfs/blob/master/CONTRIBUTING.md).
+There are some simple guidelines in [CONTRIBUTING.md](https://github.com/git-tfs/git-tfs/blob/master/CONTRIBUTING.md).
 
-### Migrations 
+Especially, don't forget to set `core.autocrlf` to `true`. (`git config core.autocrlf true`)
+
+## Migrations 
 If you're migrating a TFS server from 2008 or 2005 to 2010, you might want to [Specify Alternate TFS URLs](specify-alternate-tfs-urls.md).
 
 [v0.11]: http://mattonrails.wordpress.com/2011/03/11/git-tfs-0-11-0-release-notes/ "0.11 Release notes"
