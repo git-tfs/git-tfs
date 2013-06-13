@@ -125,9 +125,9 @@ namespace Sep.Git.Tfs.Commands
             if (rootBranch == null)
                 throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '{0}' is not a TFS branch!", defaultRemote.TfsRepositoryPath));
             if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
-               throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
+                throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
 
-            var childBranchPaths = rootBranch.GetAllChildren().Select(b=>new BranchDatas{TfsRepositoryPath = b.Path}).ToList();
+            var childBranchPaths = rootBranch.GetAllChildren().Select(b => new BranchDatas {TfsRepositoryPath = b.Path}).ToList();
 
             if (childBranchPaths.Any())
             {
@@ -137,7 +137,7 @@ namespace Sep.Git.Tfs.Commands
                     _stdout.WriteLine("- " + tfsBranchPath.TfsRepositoryPath);
                     tfsBranchPath.RootChangesetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath);
                 }
-                childBranchPaths.Add(new BranchDatas{TfsRepositoryPath = defaultRemote.TfsRepositoryPath, TfsRemote = defaultRemote, RootChangesetId = -1});
+                childBranchPaths.Add(new BranchDatas {TfsRepositoryPath = defaultRemote.TfsRepositoryPath, TfsRemote = defaultRemote, RootChangesetId = -1});
 
                 do
                 {
@@ -218,12 +218,12 @@ namespace Sep.Git.Tfs.Commands
 
             Trace.WriteLine("Try creating remote...");
             var tfsRemote = _globals.Repository.CreateTfsRemote(new RemoteInfo
-                    {
-                        Id = gitBranchName,
-                        Url = defaultRemote.TfsUrl,
-                        Repository = tfsRepositoryPath,
-                        RemoteOptions = _remoteOptions
-                    });
+                {
+                    Id = gitBranchName,
+                    Url = defaultRemote.TfsUrl,
+                    Repository = tfsRepositoryPath,
+                    RemoteOptions = _remoteOptions
+                });
             if (!_globals.Repository.CreateBranch(tfsRemote.RemoteRef, sha1RootCommit))
                 throw new GitTfsException("error: Fail to create remote branch ref file!");
             Trace.WriteLine("Remote created!");
@@ -239,7 +239,7 @@ namespace Sep.Git.Tfs.Commands
             string sha1RootCommit = _globals.Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + rootChangeSetId + "[^0-9]");
             //sha1RootCommit = _globals.Repository.FindCommitByCommitMessage("git-tfs-id: .*\\$\\/" + tfsProject + "\\/.*;C" + rootChangeSetId + "[^0-9]");
             if (sha1RootCommit != null)
-            Trace.WriteLine("Commit found! sha1 : " + sha1RootCommit);
+                Trace.WriteLine("Commit found! sha1 : " + sha1RootCommit);
             else
                 Trace.WriteLine("Commit not found!");
             return sha1RootCommit;
@@ -253,11 +253,11 @@ namespace Sep.Git.Tfs.Commands
 
             if (fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
             {
-            Trace.WriteLine("Try creating the local branch...");
+                Trace.WriteLine("Try creating the local branch...");
                 if (!_globals.Repository.CreateBranch("refs/heads/" + tfsRemote.Id, tfsRemote.MaxCommitHash))
-                _stdout.WriteLine("warning: Fail to create local branch ref file!");
-            else
-                Trace.WriteLine("Local branch created!");
+                    _stdout.WriteLine("warning: Fail to create local branch ref file!");
+                else
+                    Trace.WriteLine("Local branch created!");
             }
 
             Trace.WriteLine("Cleaning...");
