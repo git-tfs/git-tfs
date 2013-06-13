@@ -96,7 +96,10 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException("error: The root changeset " + rootChangeSetId +
                                           " have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n");
             var tfsRemote = CreateBranch(defaultRemote, tfsBranchPath, sha1RootCommit, gitBranchNameExpected);
-            FetchRemote(tfsRemote, false);
+            if (!NoFetch)
+                FetchRemote(tfsRemote, false);
+            else
+                Trace.WriteLine("Not fetching changesets, --nofetch option specified");
             return GitTfsExitCodes.OK;
         }
 
