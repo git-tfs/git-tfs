@@ -111,7 +111,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _linking ?? (_linking = GetService<ILinking>()); }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
+        public void EachChangeset(string path, long startVersion, GitTfsRemote remote, Action<ITfsChangeset> f)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest,
                                     deletionId:          0,
@@ -126,7 +126,7 @@ namespace Sep.Git.Tfs.VsCommon
 
             foreach (var changeset in changesets.Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId))
             {
-                yield return BuildTfsChangeset(changeset, remote);
+                f(BuildTfsChangeset(changeset, remote));
             }
         }
 

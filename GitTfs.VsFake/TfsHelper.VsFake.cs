@@ -60,6 +60,12 @@ namespace Sep.Git.Tfs.VsFake
             return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
         }
 
+        public void EachChangeset(string path, long startVersion, GitTfsRemote remote, Action<ITfsChangeset> f)
+        {
+            foreach (var changeset in GetChangesets(path, startVersion, remote))
+                f(changeset);
+        }
+
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)
         {
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(changeset)).GetInstance<TfsChangeset>();

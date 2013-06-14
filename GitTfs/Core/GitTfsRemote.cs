@@ -223,7 +223,7 @@ namespace Sep.Git.Tfs.Core
 
         public void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes)
         {
-            foreach (var changeset in FetchChangesets())
+            EachChangeset(changeset =>
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
@@ -236,17 +236,17 @@ namespace Sep.Git.Tfs.Core
                 }
                 var commitSha = Commit(log);
                 UpdateTfsHead(commitSha, changeset.Summary.ChangesetId);
-                if(changeset.Summary.Workitems.Any())
+                if (changeset.Summary.Workitems.Any())
                 {
                     string workitemNote = "Workitems:\n";
-                    foreach(var workitem in changeset.Summary.Workitems)
+                    foreach (var workitem in changeset.Summary.Workitems)
                     {
                         workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitem.Id, workitem.Title, workitem.Url);
                     }
                     Repository.CreateNote(commitSha, workitemNote, log.AuthorName, log.AuthorEmail, log.Date);
                 }
                 DoGcIfNeeded();
-            }
+            });
         }
 
         private string CommitChangeset(ITfsChangeset changeset, string parent)
@@ -275,13 +275,13 @@ namespace Sep.Git.Tfs.Core
             DoGcIfNeeded();
         }
 
-        private IEnumerable<ITfsChangeset> FetchChangesets()
+        private void EachChangeset(Action<ITfsChangeset> f)
         {
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId == Tfs.GetLatestChangeset(this).Summary.ChangesetId)
-                return Enumerable.Empty<ITfsChangeset>();
-            return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
+                return;
+            Tfs.EachChangeset(TfsRepositoryPath, MaxChangesetId + 1, this, f);
         }
 
         public ITfsChangeset GetChangeset(long changesetId)
