@@ -245,8 +245,6 @@ namespace Sep.Git.Tfs.Core
                     }
                     Repository.CreateNote(commitSha, workitemNote, log.AuthorName, log.AuthorEmail, log.Date);
                 }
-
-                changeset.Dispose();
                 DoGcIfNeeded();
             }
         }

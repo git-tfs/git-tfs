@@ -110,11 +110,6 @@ namespace Sep.Git.Tfs.VsFake
             {
                 workspace.GetSpecificVersion(this);
             }
-
-            public void Dispose()
-            {
-                _changeset = null;
-            }
         }
 
         class Change : IChange, IItem

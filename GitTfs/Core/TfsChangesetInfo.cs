@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Sep.Git.Tfs.Core
 {
-    public class TfsChangesetInfo : IDisposable
+    public class TfsChangesetInfo
     {
         public IGitTfsRemote Remote { get; set; }
         public long ChangesetId { get; set; }
@@ -14,11 +13,6 @@ namespace Sep.Git.Tfs.Core
         public TfsChangesetInfo()
         {
             Workitems = Enumerable.Empty<ITfsWorkitem>();
-        }
-
-        public void Dispose()
-        {
-            Workitems = null;
         }
     }
 }

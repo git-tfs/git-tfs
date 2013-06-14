@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Sep.Git.Tfs.Core
 {
-    public interface ITfsChangeset : IDisposable
+    public interface ITfsChangeset
     {
         TfsChangesetInfo Summary { get; }
         int BaseChangesetId { get; }
