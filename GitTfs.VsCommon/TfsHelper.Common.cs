@@ -114,12 +114,16 @@ namespace Sep.Git.Tfs.VsCommon
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                         null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
-                                                         true, true);
+                null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true, true, true)
+                .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
 
-            return changesets.Cast<Changeset>()
-                .OrderBy(changeset => changeset.ChangesetId)
-                .Select(changeset => BuildTfsChangeset(changeset, remote));
+            // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 
+            // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
+            for (int i = 0; i < changesets.Length; i++)
+            {
+                yield return BuildTfsChangeset(changesets[i], remote);
+                changesets[i] = null;
+            } 
         }
 
         public virtual bool CanGetBranchInformation { get { return false; } }
