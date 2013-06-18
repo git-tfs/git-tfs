@@ -5,6 +5,7 @@ using Rhino.Mocks;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.VsFake;
 using StructureMap.AutoMocking;
 using Xunit;
 using Sep.Git.Tfs.Util;
@@ -244,15 +245,6 @@ namespace Sep.Git.Tfs.Test.Commands
         #endregion
 
         #region Init All branches
-
-        public class MockBranchObject : IBranchObject
-        {
-            public string Path { get; set; }
-
-            public string ParentPath { get; set; }
-
-            public bool IsRoot { get; set; }
-        }
 
         [Fact]
         public void ShouldInitAllBranches()

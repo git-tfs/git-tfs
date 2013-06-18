@@ -11,6 +11,15 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.VsFake
 {
+    public class MockBranchObject : IBranchObject
+    {
+        public string Path { get; set; }
+
+        public string ParentPath { get; set; }
+
+        public bool IsRoot { get; set; }
+    }
+
     public class TfsHelper : ITfsHelper
     {
         #region misc/null
@@ -57,12 +66,18 @@ namespace Sep.Git.Tfs.VsFake
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
-            return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
+            if(_script.Branches == null)
+                return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
+            return _script.Changesets
+                .Where(x => x.Id >= startVersion && x.Changes.Any(c => c.RepositoryPath.ToLower().IndexOf(path.ToLower()) == 0 || path.ToLower().IndexOf(c.RepositoryPath.ToLower()) == 0))
+                .Select(x => BuildTfsChangeset(x, remote));
         }
 
         public int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
         {
-            throw new NotImplementedException();
+            if(_script.Branches != null)
+                return _script.Branches.First(b => b.ParentBranch == path && b.BeforeMergeChangesetId < firstChangeset).BeforeMergeChangesetId;
+            return -1;
         }
 
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)
@@ -326,6 +341,32 @@ namespace Sep.Git.Tfs.VsFake
             return exists;
         }
 
+        public bool CanGetBranchInformation { get { return false; } }
+
+        public IChangeset GetChangeset(int changesetId)
+        {
+            return new Changeset(_script.Changesets.First(c => c.Id == changesetId));
+        }
+
+        public int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
+        {
+            if (_script.Branches != null)
+                return _script.Branches.First(b => b.BranchPath == tfsPathBranchToCreate).RootChangesetId;
+            return -1;
+        }
+
+        public IEnumerable<IBranchObject> GetBranches()
+        {
+            var branches = new List<IBranchObject>();
+            if (_script.Branches != null)
+            {
+                foreach (var branch in _script.Branches)
+                {
+                    branches.Add(new MockBranchObject {IsRoot = (branch.ParentBranch == null), Path = branch.BranchPath, ParentPath = branch.ParentBranch});
+                }
+            }
+            return branches;
+        }
         #endregion
 
         #region unimplemented
@@ -354,12 +395,6 @@ namespace Sep.Git.Tfs.VsFake
         {
             throw new NotImplementedException();
         }
-
-        public IChangeset GetChangeset(int changesetId)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool HasShelveset(string shelvesetName)
         {
             throw new NotImplementedException();
@@ -375,19 +410,7 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public bool CanGetBranchInformation { get { return false; } }
-
-        public int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<IBranchObject> GetBranches()
         {
             throw new NotImplementedException();
         }

@@ -130,6 +130,18 @@ namespace Sep.Git.Tfs.Test.Integration
                 _script.Changesets.Add(changeset);
                 return new FakeChangesetBuilder(changeset);
             }
+
+            public void Branch(int idRoot, int idBeforeMerge, string pathBranch, string parentBranch)
+            {
+                var branch = new ScriptedBranch
+                {
+                    RootChangesetId = idRoot,
+                    BranchPath = pathBranch,
+                    BeforeMergeChangesetId = idBeforeMerge,
+                    ParentBranch = parentBranch
+                };
+                _script.Branches.Add(branch);
+            }
         }
 
         public class FakeChangesetBuilder

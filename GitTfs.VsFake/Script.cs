@@ -22,18 +22,27 @@ namespace Sep.Git.Tfs.VsFake
         {
             var formatter = new BinaryFormatter();
             using (var stream = File.OpenRead(path))
+            {
                 script.Changesets.AddRange((List<ScriptedChangeset>)formatter.Deserialize(stream));
+                script.Branches.AddRange((List<ScriptedBranch>)formatter.Deserialize(stream));
+            }
         }
 
         public void Save(string path)
         {
             var formatter = new BinaryFormatter();
             using (var stream = File.Create(path))
+            {
                 formatter.Serialize(stream, Changesets);
+                formatter.Serialize(stream, Branches);
+            }
         }
 
         List<ScriptedChangeset> _changesets = new List<ScriptedChangeset>();
         public List<ScriptedChangeset> Changesets { get { return _changesets; } }
+
+        List<ScriptedBranch> _branches = new List<ScriptedBranch>();
+        public List<ScriptedBranch> Branches { get { return _branches; } }
     }
 
     [Serializable]
@@ -54,5 +63,14 @@ namespace Sep.Git.Tfs.VsFake
         public TfsItemType ItemType { get; set; }
         public string RepositoryPath { get; set; }
         public string Content { get; set; }
+    }
+
+    [Serializable]
+    public class ScriptedBranch
+    {
+        public int RootChangesetId { get; set; }
+        public int BeforeMergeChangesetId { get; set; }
+        public string BranchPath { get; set; }
+        public string ParentBranch { get; set; }
     }
 }
