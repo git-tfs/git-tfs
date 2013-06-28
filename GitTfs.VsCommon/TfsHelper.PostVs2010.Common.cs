@@ -116,7 +116,8 @@ namespace Sep.Git.Tfs.VsCommon
 
             if (merge.SourceItem.ChangeType.HasFlag(ChangeType.Branch)
                 || merge.SourceItem.ChangeType.HasFlag(ChangeType.Merge)
-                || merge.SourceItem.ChangeType.HasFlag(ChangeType.Add))
+                || merge.SourceItem.ChangeType.HasFlag(ChangeType.Add)
+                || merge.SourceItem.ChangeType.HasFlag(ChangeType.Rollback))
             {
                 Trace.WriteLine("Found C" + merge.SourceChangeset.ChangesetId + " on branch " + merge.SourceItem.Item.ServerItem);
                 return merge.SourceChangeset;
