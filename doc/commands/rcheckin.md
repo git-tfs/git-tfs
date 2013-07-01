@@ -60,6 +60,22 @@ Comments on B, C and E are preserved. Comment on D will have following structure
 
 TFS can't see M and N, so in order to preserve commit messages in its history rcheckin formats messages in this way.
 
+### Checkin a merge changeset
+
+To checkin a merge commit (done with git) as a merge changeset, the merge commit should be done on top of the 2 tfs remotes like that :
+
+    A [C1] <- B [C2] <- C [C4] <- D [tfs/default, C6] <- E [master, HEAD]
+     \                                                  /
+       M [C3] <--------------- N [tfs/branch, branch, C5]
+
+`E` is the merge commit that should be checked in as a merge changeset.
+
+After the `rcheckin` of `tfs/default`, you should have an history that looks like that :
+
+    A [C1] <- B [C2] <- C [C4] <- D [C6] <-------------- E [tfs/default, master, HEAD, C7]
+     \                                                  /
+       M [C3] <--------------- N [tfs/branch, branch, C5]
+
 ### Rcheckin on a branch
 
 To checkins commits on the `tfs/myBranch` branch:
