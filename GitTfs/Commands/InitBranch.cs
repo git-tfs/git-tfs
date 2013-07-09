@@ -51,7 +51,7 @@ namespace Sep.Git.Tfs.Commands
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
                     { "ignore-regex=", "a regex of files to ignore", v => IgnoreRegex = v },
-                    { "except-regex=", "a regex of exceptions to ingore-regex", v => ExceptRegex = v},
+                    { "except-regex=", "a regex of exceptions to ignore-regex", v => ExceptRegex = v},
                     { "nofetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
                 };
             }
