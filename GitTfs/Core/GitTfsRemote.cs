@@ -253,7 +253,7 @@ namespace Sep.Git.Tfs.Core
                             fetchResult.LastFetchedChangesetId = MaxChangesetId;
                             return fetchResult;
                         }
-#warning //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
+//TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
                         stdout.WriteLine("warning: found merge changeset " + changeset.Summary.ChangesetId +
                                             " but unable to manage it due to lack of local commit for changeset " + parentChangesetId +
                                             "! Fetch the corresponding branch before...");
@@ -295,7 +295,7 @@ namespace Sep.Git.Tfs.Core
         private IEnumerable<IGitTfsRemote> FindTfsRemoteOfChangeset(IChangeset changeset)
         {
             //Don't know if there is a way to extract remote tfs repository path from changeset datas! Should be better!!!
-            return globals.Repository.ReadAllTfsRemotes().Where(r => changeset.Changes.Any(c => c.Item.ServerItem.ToLower().StartsWith(r.TfsRepositoryPath.ToLower())));
+            return Repository.ReadAllTfsRemotes().Where(r => changeset.Changes.Any(c => c.Item.ServerItem.ToLower().StartsWith(r.TfsRepositoryPath.ToLower())));
         }
 
         private string CommitChangeset(ITfsChangeset changeset, string parent)
