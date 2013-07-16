@@ -3,7 +3,7 @@
 [git-tfs](http://git-tfs.com/) is a two-way bridge between TFS (Team Foundation Server) and git, similar to git-svn.
 It fetches TFS commits into a git repository, and lets you push your updates back to TFS.
 
-The most recent version is __0.17.2__. See the [change history](doc/change-history.md) for details.
+The most recent version is __0.17.2__. See the [change history](https://github.com/git-tfs/git-tfs/releases) for details.
 
 If you're having problems, check out the [troubleshooting](doc/TROUBLESHOOTING.md) page.
 And read [how to report an issue](doc/reporting-issues.md), before doing so ;)
@@ -12,9 +12,9 @@ And read [how to report an issue](doc/reporting-issues.md), before doing so ;)
 
 Three differents ways to get git-tfs:
 
-* Download a binary. Find it on the [git-tfs web site](http://git-tfs.com/) (or [old versions](https://github.com/git-tfs/git-tfs/downloads)),
+* Download a binary. Find it on the [release page](https://github.com/git-tfs/git-tfs/releases),
 * Using Chocolatey. If [Chocolatey](http://chocolatey.org/) is already installed on your computer, run `cinst gittfs` to install the [Chocolatey package](http://chocolatey.org/packages/gittfs)
-* Build from source code. See §[Building](#building) for more informations...
+* Build from source code. See ï¿½[Building](#building) for more informations...
 
 __Whatever the way you get git-tfs, you should have git-tfs.exe in your path (and git, too)__.
 
