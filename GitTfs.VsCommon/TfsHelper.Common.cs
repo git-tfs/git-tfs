@@ -214,7 +214,7 @@ namespace Sep.Git.Tfs.VsCommon
             Workspace workspace;
             if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
-                workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath);
+                _workspaces.Add(remote.Id, workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath));
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
                     Trace.WriteLine("Deleting workspace " + workspace.Name);

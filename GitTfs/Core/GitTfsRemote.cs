@@ -170,7 +170,7 @@ namespace Sep.Git.Tfs.Core
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex.Message);
+                Trace.WriteLine("CleanupWorkspaceDirectory: " + ex.Message);
             }
         }
 
