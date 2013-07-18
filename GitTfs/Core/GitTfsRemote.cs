@@ -573,12 +573,6 @@ namespace Sep.Git.Tfs.Core
 
         private void WithWorkspace(TfsChangesetInfo parentChangeset, Action<ITfsWorkspace> action)
         {
-            // If there isn't a custom workspace, and a workspace is lingering from a previous
-            // git-tfs run, clean it up. If the user is using a custom workspace dir, leave
-            // it for them to explicitly clean up, in case they're doing something unsupported
-            // with it.
-            Tfs.CleanupWorkspaces(DefaultWorkingDirectory);
-
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
         }
 

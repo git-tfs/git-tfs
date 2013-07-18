@@ -202,24 +202,41 @@ namespace Sep.Git.Tfs.VsCommon
             return tfsChangeset;
         }
 
+        Dictionary<string, MagicallyManagedWorkspace> _workspaces = new Dictionary<string, MagicallyManagedWorkspace>();
+
+        class MagicallyManagedWorkspace
+        {
+            Workspace _workspace;
+            public MagicallyManagedWorkspace(Workspace workspace)
+            {
+                _workspace = workspace;
+            }
+            ~MagicallyManagedWorkspace()
+            {
+                Trace.WriteLine("Delete workspace " + _workspace.Name);
+                _workspace.Delete();
+            }
+            public static implicit operator Workspace(MagicallyManagedWorkspace w)
+            {
+                return w._workspace;
+            }
+        }
+
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath);
-            try
+            MagicallyManagedWorkspace workspace;
+            if (_workspaces.TryGetValue(remote.Id, out workspace))
             {
-                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
-                    .With("remote").EqualTo(remote)
-                    .With("contextVersion").EqualTo(versionToFetch)
-                    .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
-                    .With("tfsHelper").EqualTo(this)
-                    .GetInstance<TfsWorkspace>();
-                action(tfsWorkspace);
+                _workspaces.Add(remote.Id, workspace = new MagicallyManagedWorkspace(GetWorkspace(localDirectory, remote.TfsRepositoryPath)));
             }
-            finally
-            {
-                workspace.Delete();
-            }
+            var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
+                .With("remote").EqualTo(remote)
+                .With("contextVersion").EqualTo(versionToFetch)
+                .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                .With("tfsHelper").EqualTo(this)
+                .GetInstance<TfsWorkspace>();
+            action(tfsWorkspace);
         }
 
         private Workspace GetWorkspace(string localDirectory, string repositoryPath)
