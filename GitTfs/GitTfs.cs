@@ -56,7 +56,14 @@ namespace Sep.Git.Tfs
             }
             else
             {
-                return _runner.Run(command, unparsedArgs);
+                try
+                {
+                    return _runner.Run(command, unparsedArgs);
+                }
+                finally
+                {
+                    _container.GetInstance<Janitor>().Dispose();
+                }
             }
         }
 
