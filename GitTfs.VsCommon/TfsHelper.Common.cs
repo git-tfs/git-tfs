@@ -14,6 +14,7 @@ using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using StructureMap;
+using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.Server.ChangeType;
 
 namespace Sep.Git.Tfs.VsCommon
@@ -30,6 +31,9 @@ namespace Sep.Git.Tfs.VsCommon
             _bridge = bridge;
             _container = container;
         }
+
+        [SetterProperty]
+        public Janitor Janitor { get; set; }
 
         public abstract string TfsClientLibraryVersion { get; }
 
@@ -202,33 +206,20 @@ namespace Sep.Git.Tfs.VsCommon
             return tfsChangeset;
         }
 
-        Dictionary<string, MagicallyManagedWorkspace> _workspaces = new Dictionary<string, MagicallyManagedWorkspace>();
-
-        class MagicallyManagedWorkspace
-        {
-            Workspace _workspace;
-            public MagicallyManagedWorkspace(Workspace workspace)
-            {
-                _workspace = workspace;
-            }
-            ~MagicallyManagedWorkspace()
-            {
-                Trace.WriteLine("Delete workspace " + _workspace.Name);
-                _workspace.Delete();
-            }
-            public static implicit operator Workspace(MagicallyManagedWorkspace w)
-            {
-                return w._workspace;
-            }
-        }
+        Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            MagicallyManagedWorkspace workspace;
+            Workspace workspace;
             if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
-                _workspaces.Add(remote.Id, workspace = new MagicallyManagedWorkspace(GetWorkspace(localDirectory, remote.TfsRepositoryPath)));
+                workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath);
+                Janitor.CleanThisUpWhenWeClose(() =>
+                {
+                    Trace.WriteLine("Deleting workspace " + workspace.Name);
+                    workspace.Delete();
+                });
             }
             var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
                 .With("remote").EqualTo(remote)
