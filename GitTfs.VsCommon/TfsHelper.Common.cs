@@ -210,10 +210,10 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
             Workspace workspace;
             if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
+                Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
                 _workspaces.Add(remote.Id, workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath));
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
