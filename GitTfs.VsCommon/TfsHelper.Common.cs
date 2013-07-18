@@ -226,7 +226,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
             MagicallyManagedWorkspace workspace;
-            if (_workspaces.TryGetValue(remote.Id, out workspace))
+            if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
                 _workspaces.Add(remote.Id, workspace = new MagicallyManagedWorkspace(GetWorkspace(localDirectory, remote.TfsRepositoryPath)));
             }
