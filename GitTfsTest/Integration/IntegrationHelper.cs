@@ -125,22 +125,57 @@ namespace Sep.Git.Tfs.Test.Integration
                 {
                     Id = changesetId,
                     Comment = message,
-                    CheckinDate = checkinDate
+                    CheckinDate = checkinDate,
+                    IsBranchChangeset = false,
+                    IsMergeChangeset = false,
                 };
                 _script.Changesets.Add(changeset);
                 return new FakeChangesetBuilder(changeset);
             }
 
-            public void Branch(int idRoot, int idBeforeMerge, string pathBranch, string parentBranch)
+            public FakeChangesetBuilder BranchChangeset(int changesetId, string message, DateTime checkinDate, string fromBranch, string toBranch, int rootChangesetId)
             {
-                var branch = new ScriptedBranch
+                var branchChangeset = new ScriptedChangeset
                 {
-                    RootChangesetId = idRoot,
-                    BranchPath = pathBranch,
-                    BeforeMergeChangesetId = idBeforeMerge,
-                    ParentBranch = parentBranch
+                    Id = changesetId,
+                    Comment = message,
+                    CheckinDate = checkinDate,
+                    IsBranchChangeset = true,
+                    IsMergeChangeset = false,
+                    BranchChangesetDatas = new BranchChangesetDatas
+                    {
+                        RootChangesetId = rootChangesetId,
+                        BranchPath = toBranch,
+                        ParentBranch = fromBranch
+                    }
                 };
-                _script.Branches.Add(branch);
+                _script.Changesets.Add(branchChangeset);
+                return new FakeChangesetBuilder(branchChangeset);
+            }
+
+            public FakeChangesetBuilder MergeChangeset(int changesetId, string message, DateTime checkinDate, string fromBranch, string intoBranch, int lastChangesetId)
+            {
+                var mergeChangeset = new ScriptedChangeset
+                {
+                    Id = changesetId,
+                    Comment = message,
+                    CheckinDate = checkinDate,
+                    IsBranchChangeset = false,
+                    IsMergeChangeset = true,
+                    MergeChangesetDatas = new MergeChangesetDatas
+                    {
+                        BeforeMergeChangesetId = lastChangesetId,
+                        BranchPath = fromBranch,
+                        MergeIntoBranch = intoBranch
+                    }
+                };
+                _script.Changesets.Add(mergeChangeset);
+                return new FakeChangesetBuilder(mergeChangeset);
+            }
+
+            public void SetRootBranch(string rootBranchPath)
+            {
+                _script.RootBranches.Add(new ScriptedRootBranch(){BranchPath = rootBranchPath});
             }
         }
 

@@ -23,8 +23,8 @@ namespace Sep.Git.Tfs.VsFake
             var formatter = new BinaryFormatter();
             using (var stream = File.OpenRead(path))
             {
+                script.RootBranches.AddRange((List<ScriptedRootBranch>)formatter.Deserialize(stream));
                 script.Changesets.AddRange((List<ScriptedChangeset>)formatter.Deserialize(stream));
-                script.Branches.AddRange((List<ScriptedBranch>)formatter.Deserialize(stream));
             }
         }
 
@@ -33,16 +33,16 @@ namespace Sep.Git.Tfs.VsFake
             var formatter = new BinaryFormatter();
             using (var stream = File.Create(path))
             {
+                formatter.Serialize(stream, RootBranches);
                 formatter.Serialize(stream, Changesets);
-                formatter.Serialize(stream, Branches);
             }
         }
 
         List<ScriptedChangeset> _changesets = new List<ScriptedChangeset>();
         public List<ScriptedChangeset> Changesets { get { return _changesets; } }
 
-        List<ScriptedBranch> _branches = new List<ScriptedBranch>();
-        public List<ScriptedBranch> Branches { get { return _branches; } }
+        List<ScriptedRootBranch> _rootBranches = new List<ScriptedRootBranch>();
+        public List<ScriptedRootBranch> RootBranches { get { return _rootBranches; } }
     }
 
     [Serializable]
@@ -52,6 +52,12 @@ namespace Sep.Git.Tfs.VsFake
         public string Comment { get; set; }
         public DateTime CheckinDate { get; set; }
         public List<ScriptedChange> Changes { get { return _changes; } }
+
+        public bool IsBranchChangeset { get; set; }
+        public BranchChangesetDatas BranchChangesetDatas { get; set; }
+
+        public bool IsMergeChangeset { get; set; }
+        public MergeChangesetDatas MergeChangesetDatas { get; set; }
 
         List<ScriptedChange> _changes = new List<ScriptedChange>();
     }
@@ -66,11 +72,24 @@ namespace Sep.Git.Tfs.VsFake
     }
 
     [Serializable]
-    public class ScriptedBranch
+    public class BranchChangesetDatas
     {
         public int RootChangesetId { get; set; }
-        public int BeforeMergeChangesetId { get; set; }
         public string BranchPath { get; set; }
         public string ParentBranch { get; set; }
+    }
+
+    [Serializable]
+    public class MergeChangesetDatas
+    {
+        public int BeforeMergeChangesetId { get; set; }
+        public string BranchPath { get; set; }
+        public string MergeIntoBranch { get; set; }
+    }
+
+    [Serializable]
+    public class ScriptedRootBranch
+    {
+        public string BranchPath { get; set; }
     }
 }
