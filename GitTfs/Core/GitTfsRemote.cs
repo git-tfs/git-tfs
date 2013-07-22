@@ -294,8 +294,9 @@ namespace Sep.Git.Tfs.Core
 
         private IEnumerable<IGitTfsRemote> FindTfsRemoteOfChangeset(IChangeset changeset)
         {
+            //I think you want something that uses GetPathInGitRepo and ShouldSkip. See TfsChangeset.Apply.
             //Don't know if there is a way to extract remote tfs repository path from changeset datas! Should be better!!!
-            return Repository.ReadAllTfsRemotes().Where(r => changeset.Changes.Any(c => c.Item.ServerItem.ToLower().StartsWith(r.TfsRepositoryPath.ToLower())));
+            return Repository.ReadAllTfsRemotes().Where(r => changeset.Changes.Any(c => r.GetPathInGitRepo(c.Item.ServerItem) != null));
         }
 
         private string CommitChangeset(ITfsChangeset changeset, string parent)
