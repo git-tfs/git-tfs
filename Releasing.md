@@ -13,7 +13,7 @@ Normally, you should do this:
 
     msbuild Release.proj /t:Release /p:Version=X.Y.Z
 
-3. Upload the release somewhere.
+3. Find the new [tag](https://github.com/git-tfs/git-tfs/tags) and create a release for it.
 
 4. Update [the download button](https://github.com/git-tfs/git-tfs.github.com/edit/master/_includes/download_button.html) on the website.
 
