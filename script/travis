@@ -12,7 +12,7 @@ SHORTSHA=`echo $LIBGIT2SHA | cut -c 1-7`
 
 mkdir lib/libgit2sharp/cmake-build
 cd lib/libgit2sharp/cmake-build
-if ! cmake -DTHREADSAFE=ON -DCMAKE_BUILD_TYPE=Release -DBUILD_CLAR=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=./libgit2-bin -DSONAME_APPEND=$SHORTSHA ../libgit2
+if ! cmake -DTHREADSAFE=ON -DCMAKE_BUILD_TYPE=Release -DBUILD_CLAR=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=./libgit2-bin -DLIBGIT2_FILENAME=git2-$SHORTSHA ../libgit2
 then
   exit 2
 fi
