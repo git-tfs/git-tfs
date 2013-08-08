@@ -23,9 +23,11 @@ namespace Sep.Git.Tfs.Commands
         {
             _globals = globals;
             _stdout = stdout;
+            Branch = _globals.RemoteId;
         }
 
         public string Owner { get; set; }
+        public string Branch { get; set; }
 
         public OptionSet OptionSet
         {
@@ -35,13 +37,15 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to search all shelvesets.",
                         v => Owner = v },
+                    { "b|branch=", "GIT Branch for Shelfset(default: default)", 
+                        v => Branch = v },                
                 };
             }
         }
 
         public int Run(string shelvesetName, string destinationBranch)
         {
-            var remote = _globals.Repository.ReadTfsRemote(_globals.RemoteId);
+            var remote = _globals.Repository.ReadTfsRemote(Branch);
             remote.Unshelve(Owner, shelvesetName, destinationBranch);
             _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
             return GitTfsExitCodes.OK;
