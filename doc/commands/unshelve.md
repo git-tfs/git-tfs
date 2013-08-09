@@ -10,7 +10,7 @@ Unshelves a TFS shelveset into a Git branch.
                                    default: default
       -u, --user=VALUE           Shelveset owner (default: current user)
                                    Use 'all' to search all shelvesets.
-      -b, --branch=VALUE         Git branch to branch from (default: default)
+      -b, --branch=VALUE         Git branch to branch from (default: TFS default branch)
                                    Used to work with TFS Branches in the Git
                                    repository.  Shelfset becomes a branch of
                                    the virtual TFS branch in GIT.
