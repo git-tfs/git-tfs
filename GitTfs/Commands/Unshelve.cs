@@ -23,11 +23,11 @@ namespace Sep.Git.Tfs.Commands
         {
             _globals = globals;
             _stdout = stdout;
-            Branch = _globals.RemoteId;
+            TfsBranch = null;
         }
 
         public string Owner { get; set; }
-        public string Branch { get; set; }
+        public string TfsBranch { get; set; }
 
         public OptionSet OptionSet
         {
@@ -37,15 +37,26 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to search all shelvesets.",
                         v => Owner = v },
-                    { "b|branch=", "GIT Branch to apply Shelfset to? (default: TFS default branch)", 
-                        v => Branch = v },                
+                    { "b|branch=", "GIT Branch to apply Shelveset to? (default: TFS default branch)", 
+                        v => TfsBranch = v },                
                 };
             }
         }
 
         public int Run(string shelvesetName, string destinationBranch)
         {
-            var remote = _globals.Repository.ReadTfsRemote(Branch);
+            if (string.IsNullOrEmpty(TfsBranch))//If destination not on command line, set up defaults.
+            {
+                TfsBranch = _globals.RemoteId;  //Default to main remote id.
+                //Get the current checkout
+                TfsChangesetInfo mostRecentUpdate = _globals.Repository.GetLastParentTfsCommits("HEAD").FirstOrDefault();
+                if (mostRecentUpdate != null)
+                {
+                    TfsBranch = mostRecentUpdate.Remote.Id;
+                }
+            }
+
+            var remote = _globals.Repository.ReadTfsRemote(TfsBranch);
             remote.Unshelve(Owner, shelvesetName, destinationBranch);
             _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
             return GitTfsExitCodes.OK;
