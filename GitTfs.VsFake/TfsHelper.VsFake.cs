@@ -11,19 +11,22 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.VsFake
 {
-    public class TfsHelper : ITfsHelper
+    public class TfsHelper : ITfsHelper, IVersionControlServer
     {
         #region misc/null
 
         IContainer _container;
         TextWriter _stdout;
         Script _script;
+        Dictionary<int, IdMap> _itemIds;
 
         public TfsHelper(IContainer container, TextWriter stdout, Script script)
         {
             _container = container;
             _stdout = stdout;
             _script = script;
+            if(_script != null)
+                InitializeItemIds();
         }
 
         public string TfsClientLibraryVersion { get { return "(FAKE)"; } }
@@ -62,7 +65,7 @@ namespace Sep.Git.Tfs.VsFake
 
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)
         {
-            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(changeset)).GetInstance<TfsChangeset>();
+            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(changeset, this, _itemIds[changeset.Id])).GetInstance<TfsChangeset>();
             tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.Id, Remote = remote };
             return tfsChangeset;
         }
@@ -70,15 +73,19 @@ namespace Sep.Git.Tfs.VsFake
         class Changeset : IChangeset
         {
             private ScriptedChangeset _changeset;
+            private TfsHelper _server;
+            private IdMap _itemIds;
 
-            public Changeset(ScriptedChangeset changeset)
+            public Changeset(ScriptedChangeset changeset, TfsHelper server, IdMap itemIds)
             {
                 _changeset = changeset;
+                _server = server;
+                _itemIds = itemIds;
             }
 
             public IChange[] Changes
             {
-                get { return _changeset.Changes.Select(x => new Change(_changeset, x)).ToArray(); }
+                get { return _changeset.Changes.Select(x => new Change(_changeset, x, _server, _itemIds[x])).ToArray(); }
             }
 
             public string Committer
@@ -103,7 +110,7 @@ namespace Sep.Git.Tfs.VsFake
 
             public IVersionControlServer VersionControlServer
             {
-                get { throw new NotImplementedException(); }
+                get { return _server; }
             }
 
             public void Get(IWorkspace workspace)
@@ -116,11 +123,15 @@ namespace Sep.Git.Tfs.VsFake
         {
             ScriptedChangeset _changeset;
             ScriptedChange _change;
+            TfsHelper _server;
+            int _itemId;
 
-            public Change(ScriptedChangeset changeset, ScriptedChange change)
+            public Change(ScriptedChangeset changeset, ScriptedChange change, TfsHelper server, int itemId)
             {
                 _changeset = changeset;
                 _change = change;
+                _server = server;
+                _itemId = itemId;
             }
 
             TfsChangeType IChange.ChangeType
@@ -135,7 +146,7 @@ namespace Sep.Git.Tfs.VsFake
 
             IVersionControlServer IItem.VersionControlServer
             {
-                get { throw new NotImplementedException(); }
+                get { return _server; }
             }
 
             int IItem.ChangesetId
@@ -160,7 +171,7 @@ namespace Sep.Git.Tfs.VsFake
 
             int IItem.ItemId
             {
-                get { throw new NotImplementedException(); }
+                get { return _itemId; }
             }
 
             long IItem.ContentLength
@@ -175,9 +186,17 @@ namespace Sep.Git.Tfs.VsFake
             TemporaryFile IItem.DownloadFile()
             {
                 var temp = new TemporaryFile();
-                using(var writer = new StreamWriter(temp))
-                    writer.Write(_change.Content);
+                using (var writer = new StreamWriter(temp))
+                    writer.Write(Content);
                 return temp;
+            }
+
+            public string Content
+            {
+                get
+                {
+                    return _server.GetContent(_changeset, _change);
+                }
             }
         }
 
@@ -318,6 +337,151 @@ namespace Sep.Git.Tfs.VsFake
 
         #endregion
 
+        #region item ids, history, continuity, etc.
+
+        IItem IVersionControlServer.GetItem(int itemId, int changesetNumber)
+        {
+            return new HistoricalItem(_itemIds[changesetNumber][itemId]);
+        }
+
+        public string GetContent(ScriptedChangeset changeset, ScriptedChange change)
+        {
+            if(change.Content != null)
+            {
+                return change.Content;
+            }
+            if(change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
+            {
+                var itemId = _itemIds[changeset.Id][change];
+                var previousChangesets = _script.Changesets.Where(cs => cs.Id < changeset.Id).OrderByDescending(cs => cs.Id);
+                foreach(var previousChangeset in previousChangesets)
+                {
+                    var previousChange = previousChangeset.Changes.Where(c => itemId == _itemIds[previousChangeset.Id][c]).FirstOrDefault();
+                    if(previousChange != null)
+                    {
+                        return GetContent(previousChangeset, previousChange);
+                    }
+                }
+            }
+            return null;
+        }
+
+        class HistoricalItem : IItem
+        {
+            string _path;
+
+            public HistoricalItem(string path)
+            {
+                _path = path;
+            }
+
+            public string ServerItem
+            {
+                get { return _path; }
+            }
+
+            public IVersionControlServer VersionControlServer
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public int ChangesetId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public int DeletionId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public TfsItemType ItemType
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public int ItemId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public long ContentLength
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public TemporaryFile DownloadFile()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private void InitializeItemIds()
+        {
+            _itemIds = new Dictionary<int, IdMap>();
+            var current = new IdMap();
+            foreach (var changeset in _script.Changesets)
+            {
+                foreach (var change in changeset.Changes)
+                {
+                    current.Update(change);
+                }
+                _itemIds.Add(changeset.Id, current);
+                current = new IdMap(current);
+            }
+        }
+
+        class IdMap
+        {
+            static int lastItemId = 0;
+
+            IdMap previousMap;
+            Dictionary<int, string> idToPath = new Dictionary<int, string>();
+            Dictionary<string, int> pathToId = new Dictionary<string, int>();
+
+            public int this[ScriptedChange change] { get { return this[change.RepositoryPath]; } }
+            public int this[string path] { get { return pathToId.ContainsKey(path) ? pathToId[path] : previousMap[path]; } }
+            public string this[int id] { get { return idToPath.ContainsKey(id) ? idToPath[id] : previousMap[id]; } }
+
+            public IdMap(IdMap previousMap = null)
+            {
+                this.previousMap = previousMap;
+            }
+
+            /// <summary>
+            /// Update this IdMap with the provided change.
+            /// </summary>
+            /// <param name="change"></param>
+            public void Update(ScriptedChange change)
+            {
+                if (change.ChangeType.IncludesOneOf(TfsChangeType.Add))
+                {
+                    var id = ++lastItemId;
+                    pathToId.Add(change.RepositoryPath, id);
+                    idToPath.Add(id, change.RepositoryPath);
+                }
+                else if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
+                {
+                    var renamedItemId = previousMap[change.RenamedFrom];
+                    pathToId.Add(change.RepositoryPath, renamedItemId);
+                    idToPath.Add(renamedItemId, change.RepositoryPath);
+                }
+                else if (change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
+                {
+                    // Do nothing.
+                    // This isn't strictly "correct", but it is good enough for the tests.
+                }
+            }
+
+            public string Inspect()
+            {
+                var s = idToPath.Select(x => String.Format("{0} - {1}\n", x.Key, x.Value)).Aggregate("", (s1, s2) => s1 + s2);
+                return (previousMap == null ? "" : previousMap.Inspect() + "^^^^\n") + s;
+            }
+        }
+
+        #endregion
+
         #region unimplemented
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
@@ -388,6 +552,25 @@ namespace Sep.Git.Tfs.VsFake
         }
 
         public void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region IVersionControlServer
+
+        IItem IVersionControlServer.GetItem(string itemPath, int changesetNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        IItem[] IVersionControlServer.GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<IChangeset> IVersionControlServer.QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo)
         {
             throw new NotImplementedException();
         }

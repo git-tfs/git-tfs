@@ -150,5 +150,45 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertCleanWorkspace("MyProject");
             AssertRefs("175420603e41cd0175e3c25581754726bd21cb96");
         }
+
+        [FactExceptOnUnix]
+        public void CloneWithRenames()
+        {
+            h.SetupFake(r =>
+                {
+                    r.Changeset(1, "Project created from template", DateTime.Now)
+                        .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                    r.Changeset(2, "Add A and B", DateTime.Now)
+                        .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/A", "original contents of A")
+                        .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/B", "original contents of B");
+                    r.Changeset(3, "Rename A->C, B->A", DateTime.Now)
+                        .Rename(TfsItemType.File, from: "$/MyProject/A", to: "$/MyProject/C")
+                        .Rename(TfsItemType.File, from: "$/MyProject/B", to: "$/MyProject/A");
+                });
+            h.Run("clone", h.TfsUrl, "$/MyProject");
+            h.AssertGitRepo("MyProject");
+            h.AssertFileInWorkspace("MyProject", "C", "original contents of A");
+            h.AssertFileInWorkspace("MyProject", "A", "original contents of B");
+        }
+
+        [FactExceptOnUnix]
+        public void CloneWithRenamesInTheOtherOrder()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Now)
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Add A and B", DateTime.Now)
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/A", "original contents of A")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/B", "original contents of B");
+                r.Changeset(3, "Rename A->B, B->C", DateTime.Now)
+                    .Rename(TfsItemType.File, from: "$/MyProject/A", to: "$/MyProject/B")
+                    .Rename(TfsItemType.File, from: "$/MyProject/B", to: "$/MyProject/C");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject");
+            h.AssertGitRepo("MyProject");
+            h.AssertFileInWorkspace("MyProject", "B", "original contents of A");
+            h.AssertFileInWorkspace("MyProject", "C", "original contents of B");
+        }
     }
 }

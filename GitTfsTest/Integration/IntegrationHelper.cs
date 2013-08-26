@@ -153,6 +153,18 @@ namespace Sep.Git.Tfs.Test.Integration
                 });
                 return this;
             }
+
+            public FakeChangesetBuilder Rename(TfsItemType itemType, string from, string to)
+            {
+                _changeset.Changes.Add(new ScriptedChange
+                {
+                    ChangeType = TfsChangeType.Rename,
+                    ItemType = itemType,
+                    RepositoryPath = to,
+                    RenamedFrom = from,
+                });
+                return this;
+            }
         }
 
         #endregion
@@ -225,7 +237,17 @@ namespace Sep.Git.Tfs.Test.Integration
         public int GetCommitCount(string repodir)
         {
             var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
-            return repo.Commits.Count();
+            return Repository(repodir).Commits.Count();
+        }
+
+        public void WhatChanged(string repodir, bool showDiff = false)
+        {
+            var whatchanged = new ProcessStartInfo();
+            whatchanged.UseShellExecute = false;
+            whatchanged.FileName = "git";
+            whatchanged.Arguments = "--git-dir=" + Repository(repodir).Info.Path + " whatchanged" + (showDiff ? " -p" : "");
+            var p = Process.Start(whatchanged);
+            p.WaitForExit();
         }
 
         public void AssertGitRepo(string repodir)
