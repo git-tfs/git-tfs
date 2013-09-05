@@ -23,9 +23,9 @@ namespace Sep.Git.Tfs.Commands
                     { "shared:", "Passed to git-init",
                         v => GitInitShared = v == null ? (object)true : (object)v },
                     { "autocrlf=", "Normalize line endings (default: " + default_autocrlf + ")",
-                        v => GitInitAutoCrlf = (v == "") ? default_autocrlf : ValidateCrlfValue(v) },
+                        v => GitInitAutoCrlf = ValidateCrlfValue(v) },
                     { "ignorecase=", "Ignore case in file paths (default: " + default_ignorecase + ")",
-                        v => GitInitIgnoreCase = (v == "") ? default_ignorecase : ValidateIgnoreCaseValue(v) }
+                        v => GitInitIgnoreCase = ValidateIgnoreCaseValue(v) }
 
                 };
             }
