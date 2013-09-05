@@ -23,10 +23,10 @@ namespace Sep.Git.Tfs.Core
             if (_globals.UserSpecifiedRemoteId != null)
                 tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == _globals.UserSpecifiedRemoteId);
 
-            return WriteWith(tfsParents, write);
+            return WriteWith(tfsParents, refToWrite, write);
         }
 
-        private int WriteWith(IEnumerable<TfsChangesetInfo> tfsParents, Func<TfsChangesetInfo, int> write)
+        private int WriteWith(IEnumerable<TfsChangesetInfo> tfsParents, string refToWrite, Func<TfsChangesetInfo, string, int> write)
         {
             switch (tfsParents.Count())
             {
@@ -46,7 +46,7 @@ namespace Sep.Git.Tfs.Core
                         if(cs.Remote.IsSubtree)
                             cs.Remote = _globals.Repository.ReadTfsRemote(cs.Remote.OwningRemoteId);
                         _stdout.WriteLine(string.Format("Basing from parent '{0}', use -i to override", cs.Remote.Id));
-                        return write(cs);
+                        return write(cs, refToWrite);
                     }
 
                     _stdout.WriteLine("More than one parent found! Use -i to choose the correct parent from: ");

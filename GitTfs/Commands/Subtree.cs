@@ -163,7 +163,7 @@ namespace Sep.Git.Tfs.Commands
 
                 //update the owner remote to point at the commit where the newly created subtree was merged.
                 var commit = _globals.Repository.GetCurrentCommit();
-                owner.UpdateRef(commit, latest);
+                owner.UpdateTfsHead(commit, latest);
 
                 result = GitTfsExitCodes.OK;
             }
@@ -205,7 +205,7 @@ namespace Sep.Git.Tfs.Commands
                 var updateTo = owners.FirstOrDefault(x => string.Equals(x.Remote.Id, subtree.OwningRemoteId));
                 if (updateTo != null && updateTo.ChangesetId > subtree.MaxChangesetId)
                 {
-                    subtree.UpdateRef(updateTo.GitCommit, updateTo.ChangesetId);
+                    subtree.UpdateTfsHead(updateTo.GitCommit, updateTo.ChangesetId);
                 }
             }
 
