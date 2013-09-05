@@ -49,8 +49,7 @@ namespace Sep.Git.Tfs.VsCommon
                 var tfsBranchToCreate = allTfsBranches.FirstOrDefault(b => b.Properties.RootItem.Item.ToLower() == tfsPathBranchToCreate.ToLower());
                 if (tfsBranchToCreate == null)
                 {
-                    Trace.WriteLine("error: TFS branches "+ tfsPathBranchToCreate +" not found!");
-                    return -1;
+                    throw new GitTfsException("error: TFS branches "+ tfsPathBranchToCreate +" not found!");
                 }
 
                 if (tfsBranchToCreate.Properties.ParentBranch == null)

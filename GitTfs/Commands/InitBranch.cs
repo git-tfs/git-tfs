@@ -186,8 +186,6 @@ namespace Sep.Git.Tfs.Commands
 
                 rootChangeSetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsRepositoryPath, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
             }
-            if (rootChangeSetId == -1)
-                throw new GitTfsException("error: No root changeset found :( \n");
             Trace.WriteLine("Found root changeset : " + rootChangeSetId);
 
             Trace.WriteLine("Try to find changeset in git repository...");
