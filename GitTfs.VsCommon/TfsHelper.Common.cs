@@ -697,7 +697,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
             catch (Exception ex)
             {
-                throw new GitTfsException("error: impossible to create project folder\n=>" + ex.Message);
+                throw new GitTfsException("error: Unable to create project folder!", ex);
             }
             finally
             {
