@@ -20,6 +20,10 @@
   </PropertyGroup>
   <Import Project="$(SolutionDir)/.nuget/nuget.targets" />
 
+  <Target Name="MSBuildCommunityTasks" DependsOnTargets="RestorePackages" />
+  <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.TemplateFile" />
+  <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Zip" />
+
   <Target Name="Help">
     <ReadLinesFromFile File="Releasing.md">
       <Output TaskParameter="Lines" ItemName="DeployInstructions"/>
@@ -27,14 +31,13 @@
     <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />
   </Target>
 
-  <Target Name="Release" DependsOnTargets="UpdateVersion; TagSource; Build; PushSource; Package">
+  <Target Name="Release" DependsOnTargets="UpdateVersion; Build; TagSource; PushSource; Package">
   </Target>
 
   <Target Name="Build">
     <MSBuild Projects="GitTfs.sln" Targets="Rebuild" Properties="Configuration=Release;Platform=$(TargetPlatform);WarningLevel=0" />
   </Target>
 
-  <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Zip" />
   <ItemGroup>
     <ReleaseFiles Include="$(SolutionDir)\README.md" />
     <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
@@ -44,13 +47,13 @@
     <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
     <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
   </ItemGroup>
-  <Target Name="Package" DependsOnTargets="RestorePackages">
+  <Target Name="Package" DependsOnTargets="MSBuildCommunityTasks">
     <Zip Files="@(ReleaseFiles)" ZipFileName="$(Archive)" WorkingDirectory="$(BuildDir)" />
   </Target>
 
   <Target Name="UpdateVersion">
     <Error Text="You should specify a version number!" Condition="'$(Version)' == ''" />
-    <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties { public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="ASCII"/>
+    <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties ; { ; public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="ASCII"/>
     <Exec Command="git add $(VersionFilePath)" />
     <Exec Command="git commit -m v$(Version)" />
   </Target>
@@ -61,5 +64,61 @@
 
   <Target Name="PushSource">
     <Exec Command="git push $(OriginUrl) master v$(Version)" />
+  </Target>
+
+  <Target Name="Chocolatey" DependsOnTargets="CleanChocolateyTempDir; PushChocolateyPackage">
+  </Target>
+
+  <PropertyGroup>
+    <ChocolateyBuildDir>$(SolutionDir)\tmp\choc</ChocolateyBuildDir>
+    <ChocolateyTemplateDir>$(SolutionDir)\ChocolateyTemplates</ChocolateyTemplateDir>
+    <ChocolateyNupkg>$(ChocolateyBuildDir)\gittfs.$(Version).nupkg</ChocolateyNupkg>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ChocolateyTokens Include="PackageVersion">
+      <ReplacementValue>$(Version)</ReplacementValue>
+    </ChocolateyTokens>
+    <ChocolateyTokens Include="DownloadUrl">
+      <ReplacementValue>$(DownloadUrl)</ReplacementValue>
+    </ChocolateyTokens>
+    <!-- TemplateFile needs a full path, so we define the output files here so that MSBuild can resolve the paths. -->
+    <ChocolateyNuspec        Include="$(ChocolateyBuildDir)\gittfs.nuspec" />
+    <ChocolateyInstallScript Include="$(ChocolateyBuildDir)/tools/chocolateyInstall.ps1" />
+  </ItemGroup>
+
+  <Target Name="ChocolateyProperties">
+    <Error Text="You should specify a version number! (/p:Version=X.Y.Z)" Condition="'$(Version)' == ''" />
+    <Error Text="You should specify a download url! (/p:DownloadUrl=http://host/path/GitTfs-X.Y.Z.zip)" Condition="'$(DownloadUrl)' == ''" />
+  </Target>
+
+  <Target Name="CleanChocolateyTempDir">
+    <RemoveDir Directories="$(ChocolateyBuildDir)" />
+  </Target>
+
+  <Target Name="ChocolateyTempDir">
+    <MakeDir Directories="$(ChocolateyBuildDir)\tools" />
+  </Target>
+
+  <Target Name="ChocolateyNuspec" DependsOnTargets="ChocolateyProperties; MSBuildCommunityTasks; ChocolateyTempDir">
+    <TemplateFile
+      Template="$(ChocolateyTemplateDir)\gittfs.nuspec"
+      OutputFilename="%(ChocolateyNuspec.FullPath)"
+      Tokens="@(ChocolateyTokens)" />
+  </Target>
+
+  <Target Name="ChocolateyInstallScript" DependsOnTargets="ChocolateyProperties; MSBuildCommunityTasks; ChocolateyTempDir">
+    <TemplateFile
+      Template="$(ChocolateyTemplateDir)\chocolateyInstall.ps1"
+      OutputFilename="%(ChocolateyInstallScript.FullPath)"
+      Tokens="@(ChocolateyTokens)" />
+  </Target>
+
+  <Target Name="BuildChocolateyPackage" DependsOnTargets="ChocolateyNuspec; ChocolateyInstallScript">
+    <Exec Command="cpack" WorkingDirectory="$(ChocolateyBuildDir)" />
+  </Target>
+
+  <Target Name="PushChocolateyPackage" DependsOnTargets="BuildChocolateyPackage">
+    <Exec Command="cpush $(ChocolateyNupkg)" />
   </Target>
 </Project>

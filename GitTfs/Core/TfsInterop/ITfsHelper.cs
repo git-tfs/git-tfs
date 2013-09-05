@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IEnumerable<IBranchObject> GetBranches();
         void EnsureAuthenticated();
         void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
-
+        bool IsExistingInTfs(string path);
         /// <summary>
         /// Creates and maps a workspace for the given remote with the given local -> server directory mappings, at the given Tfs version,
         /// and then performs the action.

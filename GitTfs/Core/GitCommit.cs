@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using LibGit2Sharp;
@@ -22,11 +23,11 @@ namespace Sep.Git.Tfs.Core
                 var currentTree = treesToDescend.Dequeue();
                 foreach(var entry in currentTree)
                 {
-                    if(entry.Type == GitObjectType.Tree)
+                    if (entry.TargetType == TreeEntryTargetType.Tree)
                     {
                         treesToDescend.Enqueue((Tree)entry.Target);
                     }
-                    else if (entry.Type == GitObjectType.Blob)
+                    else if (entry.TargetType == TreeEntryTargetType.Blob)
                     {
                         yield return new GitTreeEntry(entry);
                     }
@@ -37,5 +38,22 @@ namespace Sep.Git.Tfs.Core
                 }
             }
         }
+
+        public Tuple<string,string> AuthorAndEmail
+        {
+            get
+            {
+                return new Tuple<string,string>(_commit.Author.Name, _commit.Author.Email);
+            }
+        }
+
+        public string Sha
+        {
+            get
+            {
+                return _commit.Sha;
+            }
+        }
     }
 }
+

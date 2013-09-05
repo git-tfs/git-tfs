@@ -9,7 +9,7 @@ namespace Sep.Git.Tfs.Core
         public CheckinPolicyEvaluationResult EvaluateCheckin(IWorkspace workspace, IPendingChange[] pendingChanges, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemInfo)
         {
             var result = workspace.EvaluateCheckin(TfsCheckinEvaluationOptions.All, pendingChanges,
-                                                   pendingChanges, comment, checkinNote,
+                                                   pendingChanges, comment, null, checkinNote,
                                                    workItemInfo);
             return new CheckinPolicyEvaluationResult(result);
         }

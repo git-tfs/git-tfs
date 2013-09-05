@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using Sep.Git.Tfs.Commands;
+using Sep.Git.Tfs.Core;
 using System.Text.RegularExpressions;
+using StructureMap;
 
 namespace Sep.Git.Tfs.Util
 {
@@ -12,15 +14,17 @@ namespace Sep.Git.Tfs.Util
     /// <remarks>
     /// This class handles the pre-checkin commit message parsing that
     /// enables special git-tfs commands: 
-    /// https://github.com/git-tfs/git-tfs/wiki/Special-actions-in-commit-messages
+    /// https://github.com/git-tfs/git-tfs/blob/master/doc/Special-actions-in-commit-messages.md
     /// </remarks>
     public class CommitSpecificCheckinOptionsFactory
     {
-        TextWriter writer;
+        private readonly TextWriter writer;
+        private readonly Globals globals;
 
-        public CommitSpecificCheckinOptionsFactory(TextWriter writer)
+        public CommitSpecificCheckinOptionsFactory(TextWriter writer, Globals globals)
         {
             this.writer = writer;
+            this.globals = globals;
         }
 
         public CheckinOptions BuildCommitSpecificCheckinOptions(CheckinOptions sourceCheckinOptions, string commitMessage)
@@ -38,6 +42,23 @@ namespace Sep.Git.Tfs.Util
             return customCheckinOptions;
         }
 
+        public CheckinOptions BuildCommitSpecificCheckinOptions(CheckinOptions sourceCheckinOptions, string commitMessage, GitCommit commit)
+        {
+            var customCheckinOptions = Clone(sourceCheckinOptions);
+
+            customCheckinOptions.CheckinComment = commitMessage;
+
+            ProcessWorkItemCommands(customCheckinOptions, writer);
+
+            ProcessCheckinNoteCommands(customCheckinOptions, writer);
+
+            ProcessForceCommand(customCheckinOptions, writer);
+
+            ProcessAuthor(customCheckinOptions, writer, commit);
+
+            return customCheckinOptions;
+        }
+
         private CheckinOptions Clone(CheckinOptions source)
         {
             CheckinOptions clone = new CheckinOptions();
@@ -50,6 +71,8 @@ namespace Sep.Git.Tfs.Util
             clone.OverrideGatedCheckIn = source.OverrideGatedCheckIn;
             clone.WorkItemsToAssociate.AddRange(source.WorkItemsToAssociate);
             clone.WorkItemsToResolve.AddRange(source.WorkItemsToResolve);
+            clone.AuthorsFilePath = source.AuthorsFilePath;
+            clone.AuthorTfsUserId = source.AuthorTfsUserId;
             foreach (var note in source.CheckinNotes)
             {
                 clone.CheckinNotes[note.Key] = note.Value;
@@ -108,6 +131,8 @@ namespace Sep.Git.Tfs.Util
             checkinOptions.CheckinComment = GitTfsConstants.TfsReviewerRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
         }
 
+
+
         private void ProcessForceCommand(CheckinOptions checkinOptions, TextWriter writer)
         {
             MatchCollection workitemMatches;
@@ -124,5 +149,26 @@ namespace Sep.Git.Tfs.Util
                 checkinOptions.CheckinComment = GitTfsConstants.TfsForceRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
             }
         }
+
+
+
+        private void ProcessAuthor(CheckinOptions checkinOptions, TextWriter writer, GitCommit commit)
+        {
+            // get authors file FIXME
+            AuthorsFile af = new AuthorsFile();
+            if (!af.Parse(checkinOptions.AuthorsFilePath, globals.GitDir))
+                return;
+
+            Author a = af.FindAuthor(commit.AuthorAndEmail);
+            if (a == null)
+            {
+                checkinOptions.AuthorTfsUserId = null;
+                return;
+            }
+
+            checkinOptions.AuthorTfsUserId = a.TfsUserId;
+            writer.WriteLine("Commit was authored by git user {0} {1} ({2})", a.Name, a.Email, a.TfsUserId);
+        }
+
     }
 }

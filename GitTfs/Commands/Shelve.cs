@@ -48,14 +48,14 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string shelvesetName, string refToShelve)
         {
-            return _writer.Write(refToShelve, changeset =>
+            return _writer.Write(refToShelve, (changeset, referenceToShelve) =>
             {
                 if (!_checkinOptions.Force && changeset.Remote.HasShelveset(shelvesetName))
                 {
                     _stdout.WriteLine("Shelveset \"" + shelvesetName + "\" already exists. Use -f to replace it.");
                     return GitTfsExitCodes.ForceRequired;
                 }
-                changeset.Remote.Shelve(shelvesetName, refToShelve, changeset, EvaluateCheckinPolicies);
+                changeset.Remote.Shelve(shelvesetName, referenceToShelve, changeset, EvaluateCheckinPolicies);
                 return GitTfsExitCodes.OK;
             });
         }

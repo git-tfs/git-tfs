@@ -33,6 +33,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Releasing.md = Releasing.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChocolateyTemplates", "ChocolateyTemplates", "{AC0FE25D-D76B-4EE7-9EA8-470204451C9F}"
+	ProjectSection(SolutionItems) = preProject
+		ChocolateyTemplates\chocolateyInstall.ps1 = ChocolateyTemplates\chocolateyInstall.ps1
+		ChocolateyTemplates\gittfs.nuspec = ChocolateyTemplates\gittfs.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = GitTfs1.vsmdi

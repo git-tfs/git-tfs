@@ -17,9 +17,11 @@ namespace Sep.Git.Tfs.Core
         void DeleteTfsRemote(IGitTfsRemote remoteId);
         bool HasRemote(string remoteId);
         bool HasRef(string gitRef);
+        void UpdateRef(string gitRefName, string commitSha, string message = null);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head, bool includeStubRemotes);
+        IEnumerable<TfsChangesetInfo> FilterParentTfsCommits(string head, bool includeStubRemotes, Predicate<TfsChangesetInfo> pred);
         TfsChangesetInfo GetCurrentTfsCommit();
         IDictionary<string, GitObject> GetObjects(string commit);
         string HashAndInsertObject(string filename);
@@ -39,7 +41,7 @@ namespace Sep.Git.Tfs.Core
         void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate);
         void MoveRemote(string oldRemoteName, string newRemoteName);
         void Reset(string sha, ResetOptions resetOptions);
-        /// <summary>
+        bool IsBare { get; }
         /// Gets all configured "subtree" remotes which point to the same Tfs URL as the given remote.
         /// If the given remote is itself a subtree, an empty enumerable is returned.
         /// </summary>

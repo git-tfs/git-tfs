@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
@@ -31,7 +32,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string refToCheckin)
         {
-            return _writer.Write(refToCheckin, changeset => PerformCheckin(changeset, refToCheckin));
+            return _writer.Write(refToCheckin, PerformCheckin);
         }
 
         private int PerformCheckin(TfsChangesetInfo parentChangeset, string refToCheckin)
@@ -51,6 +52,10 @@ namespace Sep.Git.Tfs.Commands
                 if (refToCheckin == "HEAD")
                     parentChangeset.Remote.Repository.CommandNoisy("merge", parentChangeset.Remote.MaxCommitHash);
             }
+
+            Trace.WriteLine("Cleaning...");
+            parentChangeset.Remote.CleanupWorkspaceDirectory();
+
             return GitTfsExitCodes.OK;
         }
 

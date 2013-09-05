@@ -214,7 +214,9 @@
     <Compile Include="Core\TfsWorkspace.cs" />
     <Compile Include="Core\TfsWriter.cs" />
     <Compile Include="Core\GitTfsException.cs" />
+    <Compile Include="Core\Janitor.cs" />
     <Compile Include="Util\AuthorsFile.cs" />
+    <Compile Include="Util\Bouncer.cs" />
     <Compile Include="Util\CommitSpecificCheckinOptionsFactory.cs" />
     <Compile Include="Core\GitTfsVersionProvider.cs" />
     <Compile Include="Util\ExceptionFormattingExtensions.cs" />

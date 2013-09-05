@@ -61,7 +61,7 @@ namespace Sep.Git.Tfs.Commands
                 VerifyTfsPathToClone(tfsRepositoryPath);
 
                 if (retVal == 0) retVal = fetch.Run();
-                if (retVal == 0) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+                if (retVal == 0 && !init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
                 if (retVal == 0 && withBranches && initBranch != null)
                 {
                     initBranch.CloneAllBranches = true;
@@ -102,14 +102,25 @@ namespace Sep.Git.Tfs.Commands
             if (initBranch != null)
             {
                 var remote = globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
+
+                if (!remote.Tfs.IsExistingInTfs(tfsRepositoryPath))
+                    throw new GitTfsException("error: the path " + tfsRepositoryPath + " you want to clone doesn't exist!")
+                        .WithRecommendation("To discover which branch to clone, you could use the command :\ngit tfs list-remote-branches " + remote.TfsUrl);
+
                 if (!remote.Tfs.CanGetBranchInformation)
                     return;
                 var tfsTrunkRepository = remote.Tfs.GetRootTfsBranchForRemotePath(tfsRepositoryPath, false);
                 if (tfsTrunkRepository == null)
                 {
                     var tfsRootBranches = remote.Tfs.GetAllTfsRootBranchesOrderedByCreation();
+                    if (!tfsRootBranches.Any())
+                    {
+                        stdout.WriteLine("info: no TFS root found !\n\nPS:perhaps you should convert your trunk folder into a branch in TFS.");
+                        return;
+                    }
                     var cloneMsg = "   => If you want to manage branches with git-tfs, clone one of this branch instead :\n"
-                                    + " - " + tfsRootBranches.Aggregate((s1, s2) => s1 + @"\n - " + s2);
+                                    + " - " + tfsRootBranches.Aggregate((s1, s2) => s1 + "\n - " + s2)
+                                    + "\n\nPS:if your branch is not listed here, perhaps you should convert the containing folder to a branch in TFS.";
                     
                     if (withBranches)
                         throw new GitTfsException("error: cloning the whole repository or too high in the repository path doesn't permit to manage branches!\n" + cloneMsg);

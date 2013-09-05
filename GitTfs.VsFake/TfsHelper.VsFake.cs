@@ -251,12 +251,17 @@ namespace Sep.Git.Tfs.VsFake
                 throw new NotImplementedException();
             }
 
+            public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, string authors, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
+            {
+                throw new NotImplementedException();
+            }
+
             public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
             {
                 throw new NotImplementedException();
             }
 
-            public int Checkin(IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
+            public int Checkin(IPendingChange[] changes, string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
             {
                 throw new NotImplementedException();
             }
@@ -311,6 +316,22 @@ namespace Sep.Git.Tfs.VsFake
 
         public void CleanupWorkspaces(string workingDirectory)
         {
+        }
+
+        public bool IsExistingInTfs(string path)
+        {
+            var exists = false;
+            foreach (var changeset in _script.Changesets)
+            {
+                foreach (var change in changeset.Changes)
+                {
+                    if (change.RepositoryPath == path)
+                    {
+                        exists = !change.ChangeType.IncludesOneOf(TfsChangeType.Delete);
+                    }
+                }
+            }
+            return exists;
         }
 
         #endregion
@@ -388,6 +409,7 @@ namespace Sep.Git.Tfs.VsFake
         {
             throw new NotImplementedException();
         }
+
         #endregion
     }
 }

@@ -144,7 +144,7 @@ namespace Sep.Git.Tfs.Test.Commands
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out gitRepository, out remote, out newBranchRemote);
 
             remote.Tfs = mocks.Get<ITfsHelper>();
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(-1);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Throw(new GitTfsException(""));
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
@@ -371,6 +371,16 @@ namespace Sep.Git.Tfs.Test.Commands
 
             newBranch1Remote.VerifyAllExpectations();
             newBranch2Remote.VerifyAllExpectations();
+        }
+
+        [Fact]
+        public void ShouldFailInitAllBranchesBecauseNoFetchWasSpecified()
+        {
+            mocks.ClassUnderTest.CloneAllBranches = true;
+            mocks.ClassUnderTest.NoFetch = true;
+
+            var ex = Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run());
+            Assert.Equal("error: --nofetch cannot be used with --all", ex.Message);
         }
 
         [Fact]
