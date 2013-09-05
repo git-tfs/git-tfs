@@ -124,8 +124,12 @@ namespace Sep.Git.Tfs.Core
             if (HasRemote(remote.Id))
                 throw new GitTfsException("A remote with id \"" + remote.Id + "\" already exists.");
 
-            // These help the new (if it's new) git repository to behave more sanely.
-            _repository.Config.Set("core.autocrlf", (autocrlf == null)?"false":autocrlf);
+            // The autocrlf default (as indicated by a null) is false and is set to override the system-wide setting.
+            // When creating branches we use the empty string to indicate that we do not want to set the value at all.
+            if (autocrlf == null)
+                autocrlf = "false";
+            if (autocrlf != String.Empty)
+                _repository.Config.Set("core.autocrlf", autocrlf);
 
             if (ignorecase != null)
                 _repository.Config.Set("core.ignorecase", ignorecase);
