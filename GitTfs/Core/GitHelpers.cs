@@ -197,12 +197,13 @@ namespace Sep.Git.Tfs.Core
         {
             // if caller doesn't read entire stdout to the EOF - it is possible that 
             // child process will hang waiting until there will be free space in stdout
-            // buffer to write the rest of the output. To prevent such situation we'll
-            // close stdout to indicate we're no more interested in it, thus allowing
-            // child process to proceed.
+            // buffer to write the rest of the output.
             // See https://github.com/git-tfs/git-tfs/issues/121 for details.
             if (process.StartInfo.RedirectStandardOutput)
+            {
+                process.StandardOutput.BaseStream.CopyTo(Stream.Null);
                 process.StandardOutput.Close();
+            }
 
             if (!process.WaitForExit((int)TimeSpan.FromSeconds(10).TotalMilliseconds))
                 throw new GitCommandException("Command did not terminate.", process);
@@ -240,6 +241,7 @@ namespace Sep.Git.Tfs.Core
             startInfo.SetArguments(command);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
+            startInfo.EnvironmentVariables.Add("GIT_PAGER", "cat");
             RedirectStderr(startInfo);
             initialize(startInfo);
             Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments, "git command");

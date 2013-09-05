@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -38,6 +39,8 @@ namespace Sep.Git.Tfs.Core
             TfsPassword = info.Password;
             Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
             IgnoreRegexExpression = info.IgnoreRegex;
+            IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
+
             Autotag = info.Autotag;
         }
 
@@ -80,6 +83,7 @@ namespace Sep.Git.Tfs.Core
 
         public string TfsRepositoryPath { get; set; }
         public string IgnoreRegexExpression { get; set; }
+        public string IgnoreExceptRegexExpression { get; set; }
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
 
@@ -166,20 +170,35 @@ namespace Sep.Git.Tfs.Core
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex.Message);
+                Trace.WriteLine("CleanupWorkspaceDirectory: " + ex.Message);
             }
         }
 
         public bool ShouldSkip(string path)
         {
-            return IsInDotGit(path) ||
-                   IsIgnored(path, IgnoreRegexExpression) ||
-                   IsIgnored(path, remoteOptions.IgnoreRegex);
+            return IsInDotGit(path) || IsIgnored(path);
         }
 
-        private bool IsIgnored(string path, string expression)
+        private bool IsIgnored(string path)
         {
-            return expression != null && new Regex(expression).IsMatch(path);
+            return Ignorance.IsIncluded(path);
+        }
+
+        private Bouncer _ignorance;
+        private Bouncer Ignorance
+        {
+            get
+            {
+                if (_ignorance == null)
+                {
+                    _ignorance = new Bouncer();
+                    _ignorance.Include(IgnoreRegexExpression);
+                    _ignorance.Include(remoteOptions.IgnoreRegex);
+                    _ignorance.Exclude(IgnoreExceptRegexExpression);
+                    _ignorance.Exclude(remoteOptions.ExceptRegex);
+                }
+                return _ignorance;
+            }
         }
 
         private bool IsInDotGit(string path)
@@ -482,7 +501,7 @@ namespace Sep.Git.Tfs.Core
 
         public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch)
         {
-            var destinationRef = "refs/heads/" + destinationBranch;
+            var destinationRef = GitRepository.ShortToLocalName(destinationBranch);
             if(Repository.HasRef(destinationRef))
                 throw new GitTfsException("ERROR: Destination branch (" + destinationBranch + ") already exists!");
 
@@ -554,12 +573,6 @@ namespace Sep.Git.Tfs.Core
 
         private void WithWorkspace(TfsChangesetInfo parentChangeset, Action<ITfsWorkspace> action)
         {
-            // If there isn't a custom workspace, and a workspace is lingering from a previous
-            // git-tfs run, clean it up. If the user is using a custom workspace dir, leave
-            // it for them to explicitly clean up, in case they're doing something unsupported
-            // with it.
-            Tfs.CleanupWorkspaces(DefaultWorkingDirectory);
-
             Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
         }
 

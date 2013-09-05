@@ -25,8 +25,8 @@ namespace Sep.Git.Tfs.Commands
                     { "autocrlf=", "Normalize line endings (default: " + default_autocrlf + ")",
                         v => GitInitAutoCrlf = ValidateCrlfValue(v) },
                     { "ignorecase=", "Ignore case in file paths (default: " + default_ignorecase + ")",
-                        v => GitInitIgnoreCase = ValidateIgnoreCaseValue(v) }
-
+                        v => GitInitIgnoreCase = ValidateIgnoreCaseValue(v) },
+                    {"bare", "clone the TFS repository in a bare git repository", v => IsBare = v != null},
                 };
             }
         }
@@ -48,6 +48,7 @@ namespace Sep.Git.Tfs.Commands
         }
 
 
+        public bool IsBare { get; set; }
         public string GitInitTemplate { get; set; }
         public object GitInitShared { get; set; }
         public string GitInitAutoCrlf { get; set; }

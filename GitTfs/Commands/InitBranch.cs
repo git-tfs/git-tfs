@@ -24,6 +24,8 @@ namespace Sep.Git.Tfs.Commands
         private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
+        public string IgnoreRegex { get; set; }
+        public string ExceptRegex { get; set; }
         public string ParentBranch { get; set; }
         public bool CloneAllBranches { get; set; }
         public string AuthorsFilePath { get; set; }
@@ -48,6 +50,8 @@ namespace Sep.Git.Tfs.Commands
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
+                    { "ignore-regex=", "a regex of files to ignore", v => IgnoreRegex = v },
+                    { "except-regex=", "a regex of exceptions to ignore-regex", v => ExceptRegex = v},
                     { "nofetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
                 };
             }
@@ -134,6 +138,16 @@ namespace Sep.Git.Tfs.Commands
                 _remoteOptions.Password = defaultRemote.TfsPassword;
             }
 
+            if (IgnoreRegex != null)
+                _remoteOptions.IgnoreRegex = IgnoreRegex;
+            else
+                _remoteOptions.IgnoreRegex = defaultRemote.IgnoreRegexExpression;
+
+            if (ExceptRegex != null)
+                _remoteOptions.ExceptRegex = ExceptRegex;
+            else
+                _remoteOptions.ExceptRegex = defaultRemote.IgnoreExceptRegexExpression;
+
             _authors.Parse(AuthorsFilePath, _globals.GitDir);
 
             return defaultRemote;
@@ -172,8 +186,6 @@ namespace Sep.Git.Tfs.Commands
 
                 rootChangeSetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsRepositoryPath, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
             }
-            if (rootChangeSetId == -1)
-                throw new GitTfsException("error: No root changeset found :( \n");
             Trace.WriteLine("Found root changeset : " + rootChangeSetId);
 
             Trace.WriteLine("Try to find changeset in git repository...");
@@ -189,6 +201,9 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException("error: Fail to create remote branch ref file!");
             Trace.WriteLine("Remote created!");
 
+            Trace.WriteLine("Try fetching changesets...");
+            tfsRemote.Fetch();
+            Trace.WriteLine("Changesets fetched!");
 
             if (!NoFetch)
             {
@@ -203,7 +218,7 @@ namespace Sep.Git.Tfs.Commands
             
             
             Trace.WriteLine("Try creating the local branch...");
-            if (!_globals.Repository.CreateBranch("refs/heads/" + gitBranchName, tfsRemote.MaxCommitHash))
+            if (!_globals.Repository.CreateBranch(GitRepository.ShortToLocalName(gitBranchName), tfsRemote.MaxCommitHash))
                 _stdout.WriteLine("warning: Fail to create local branch ref file!");
             else
                 Trace.WriteLine("Local branch created!");
