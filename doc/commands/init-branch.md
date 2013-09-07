@@ -16,6 +16,13 @@ To use this command, you should have cloned only the trunk folder in TFS (and no
                                  (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
+      -a, --authors=VALUE        Path to an Authors file to map TFS users to Git
+                                   users
+          --ignore-regex=VALUE   a regex of files to ignore
+          --except-regex=VALUE   a regex of exceptions to ignore-regex
+          --nofetch              Create the new TFS remote but don't fetch any
+                                   changesets
+  
 ## Examples
 
 Suppose you have on TFS:
@@ -28,7 +35,11 @@ You should have done (to clone only the trunk) :
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Repository/ProjectTrunk
 
+Note : It is highly recommanded to clone the root branch ( the branch that has no parents, here $/Repository/ProjectTrunk ) to be able to init the other branches after.
+If you clone the branch $/Repository/ProjectBranch, you will never able to init the root branch $/Repository/ProjectTrunk after.
+
 Then use `init-branch` like this :
+
 ### Init a TFS branches using auto-naming of your git branch
     git tfs init-branch $/Repository/ProjectBranch
 
@@ -52,6 +63,20 @@ For the use of parameters `--username` and `--password`, see the [clone](clone.m
 ### Map TFS users to git users
 
 For the use of parameter `--authors`, see the [clone](clone.md) command.
+
+### Ignore files when fetching changesets
+
+You could use the parameter `--ignore-regex`, to ignore some file when fetching the changesets of the branch.
+
+    git tfs init-branch $/Repository/ProjectBranch --ignore-regex=*.bin
+
+You could use the parameter `--except-regex`, to add an exception to the parameter  `--ignore-regex`.
+
+    git tfs init-branch $/Repository/ProjectBranch --ignore-regex=*.bin --except-regex=important.bin
+
+### Init a branch without fetching changesets
+
+You could use the parameter `--nofetch`, to init the branch by creating its remote but without fetching the changesets of the branch.
 
 ## And Now...
 

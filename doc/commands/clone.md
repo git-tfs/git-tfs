@@ -36,9 +36,20 @@ into a new directory `Project1`, do this:
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1
 
 ### Clone only the trunk (or a branch)
-Sometimes, it could be interesting to clone only a branch of a TFS repository (for exemple to extract only the trunk of your project and manage branches with `[branch](branch.md)`. Then, do this (the clone will be done in the `MyProject1Directory` directory):
+Sometimes, it could be interesting to clone only a branch of a TFS repository (for exemple to extract only the trunk of your project and manage branches with `[branch](branch.md)`. 
+
+Suppose you have on TFS:
+
+    A <- B <- C <- D <- E  $/Project1/Trunk
+               \                              
+                M <- N     $/Project1/Branch
+
+Then, do this (the clone will be done in the `MyProject1Directory` directory):
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory
+
+Note : It is highly recommanded to clone the root branch ( the branch that has no parents, here $/Project1/Trunk ) to be able to init the other branches after.
+If you clone the branch $/Project1/Branch, you will never able to init the root branch $/Project1/Trunk after.
 
 ### What repository path to clone?
 

@@ -115,7 +115,7 @@ namespace Sep.Git.Tfs.Commands
                     var tfsRootBranches = remote.Tfs.GetAllTfsRootBranchesOrderedByCreation();
                     if (!tfsRootBranches.Any())
                     {
-                        stdout.WriteLine("info: no TFS root found !\n");
+                        stdout.WriteLine("info: no TFS root found !\n\nPS:perhaps you should convert your trunk folder into a branch in TFS.");
                         return;
                     }
                     var cloneMsg = "   => If you want to manage branches with git-tfs, clone one of this branch instead :\n"

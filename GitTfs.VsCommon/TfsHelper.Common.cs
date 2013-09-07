@@ -14,6 +14,7 @@ using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using StructureMap;
+using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.Server.ChangeType;
 
 namespace Sep.Git.Tfs.VsCommon
@@ -30,6 +31,9 @@ namespace Sep.Git.Tfs.VsCommon
             _bridge = bridge;
             _container = container;
         }
+
+        [SetterProperty]
+        public Janitor Janitor { get; set; }
 
         public abstract string TfsClientLibraryVersion { get; }
 
@@ -114,12 +118,16 @@ namespace Sep.Git.Tfs.VsCommon
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                         null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue, true,
-                                                         true, true);
+                null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true, true, true)
+                .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
 
-            return changesets.Cast<Changeset>()
-                .OrderBy(changeset => changeset.ChangesetId)
-                .Select(changeset => BuildTfsChangeset(changeset, remote));
+            // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 
+            // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
+            for (int i = 0; i < changesets.Length; i++)
+            {
+                yield return BuildTfsChangeset(changesets[i], remote);
+                changesets[i] = null;
+            } 
         }
 
         public virtual int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
@@ -204,24 +212,28 @@ namespace Sep.Git.Tfs.VsCommon
             return tfsChangeset;
         }
 
+        Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
+
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath);
-            try
+            Workspace workspace;
+            if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
-                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
-                    .With("remote").EqualTo(remote)
-                    .With("contextVersion").EqualTo(versionToFetch)
-                    .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
-                    .With("tfsHelper").EqualTo(this)
-                    .GetInstance<TfsWorkspace>();
-                action(tfsWorkspace);
+                Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
+                _workspaces.Add(remote.Id, workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath));
+                Janitor.CleanThisUpWhenWeClose(() =>
+                {
+                    Trace.WriteLine("Deleting workspace " + workspace.Name);
+                    workspace.Delete();
+                });
             }
-            finally
-            {
-                workspace.Delete();
-            }
+            var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
+                .With("remote").EqualTo(remote)
+                .With("contextVersion").EqualTo(versionToFetch)
+                .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                .With("tfsHelper").EqualTo(this)
+                .GetInstance<TfsWorkspace>();
+            action(tfsWorkspace);
         }
 
         private Workspace GetWorkspace(string localDirectory, string repositoryPath)

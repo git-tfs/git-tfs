@@ -52,7 +52,7 @@ namespace Sep.Git.Tfs.Commands
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
                     { "ignore-regex=", "a regex of files to ignore", v => IgnoreRegex = v },
-                    { "except-regex=", "a regex of exceptions to ingore-regex", v => ExceptRegex = v},
+                    { "except-regex=", "a regex of exceptions to ignore-regex", v => ExceptRegex = v},
                     { "nofetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
                 };
             }
@@ -128,7 +128,7 @@ namespace Sep.Git.Tfs.Commands
             if (rootBranch == null)
                 throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '{0}' is not a TFS branch!", defaultRemote.TfsRepositoryPath));
             if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
-                throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
+               throw new GitTfsException(string.Format("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
 
             var childBranchPaths = rootBranch.GetAllChildren().Select(b => new BranchDatas {TfsRepositoryPath = b.Path}).ToList();
 
@@ -235,8 +235,6 @@ namespace Sep.Git.Tfs.Commands
 
         private string FindChangesetInGitRepository(long rootChangeSetId)
         {
-            if (rootChangeSetId == -1)
-                throw new GitTfsException("error: No root changeset found :( \n");
             Trace.WriteLine("Found root changeset : " + rootChangeSetId);
             Trace.WriteLine("Try to find changeset " + rootChangeSetId + " in git repository...");
             string sha1RootCommit = _globals.Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + rootChangeSetId + "[^0-9]");
