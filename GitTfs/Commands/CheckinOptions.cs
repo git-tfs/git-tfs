@@ -35,6 +35,7 @@ namespace Sep.Git.Tfs.Commands
                     { "no-gate", "Disables gated checkin.",
                         v => { OverrideGatedCheckIn = true; } },
                     { "A|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
+                    { "author=", "TFS User ID to check in on behalf of", var => AuthorTfsUserId = var },
                 };
             }
         }
