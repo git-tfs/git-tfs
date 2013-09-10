@@ -9,6 +9,7 @@ namespace Sep.Git.Tfs.Commands
     public class InitOptions
     {
         private const string default_autocrlf = "false";
+
         public InitOptions() { GitInitAutoCrlf = default_autocrlf; }
 
         public OptionSet OptionSet
@@ -22,7 +23,9 @@ namespace Sep.Git.Tfs.Commands
                     { "shared:", "Passed to git-init",
                         v => GitInitShared = v == null ? (object)true : (object)v },
                     { "autocrlf=", "Normalize line endings (default: " + default_autocrlf + ")",
-                        v => GitInitAutoCrlf = (v == "") ? default_autocrlf : ValidateCrlfValue(v) },
+                        v => GitInitAutoCrlf = ValidateCrlfValue(v) },
+                    { "ignorecase=", "Ignore case in file paths (default: system default)",
+                        v => GitInitIgnoreCase = ValidateIgnoreCaseValue(v) },
                     {"bare", "clone the TFS repository in a bare git repository", v => IsBare = v != null},
                 };
             }
@@ -36,10 +39,19 @@ namespace Sep.Git.Tfs.Commands
             return v;
         }
 
+        string ValidateIgnoreCaseValue(string v)
+        {
+            string[] valid = { "false", "true" };
+            if (!Array.Exists(valid, s => v == s))
+                throw new OptionException("error: ignorecase value must be true or false", "ignorecase");
+            return v;
+        }
+
+
         public bool IsBare { get; set; }
         public string GitInitTemplate { get; set; }
         public object GitInitShared { get; set; }
         public string GitInitAutoCrlf { get; set; }
-
+        public string GitInitIgnoreCase { get; set; }
     }
 }
