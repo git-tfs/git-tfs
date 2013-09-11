@@ -668,9 +668,61 @@ namespace Sep.Git.Tfs.VsCommon
             
         }
 
+        public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder)
+        {
+            var projectPath = "$/" + projectName;
+            var directoryForBranch = Path.Combine(gitRepositoryPath, mainBranch);
+            Workspace workspace = null;
+            try
+            {
+                if (!VersionControl.ServerItemExists(projectPath, ItemType.Any))
+                {
+                    if (createTeamProjectFolder)
+                        VersionControl.CreateTeamProjectFolder(new TeamProjectFolderOptions(projectName));
+                    else
+                        throw new GitTfsException("error: the team project folder '" + projectPath + "' doesn't exist!",
+                            new List<string>()
+                                {
+                                    "Verify that the name of the project '" + projectName +"' is well spelled",
+                                    "Create the team project folder in TFS before (recommanded)",
+                                    "Use the flag '--create-project-folder' to create the team project folder during the process"
+                                });
+                }
+
+                workspace = GetWorkspace(gitRepositoryPath, projectPath);
+                if (!Directory.Exists(directoryForBranch))
+                    Directory.CreateDirectory(directoryForBranch);
+                workspace.PendAdd(directoryForBranch);
+                var changes = workspace.GetPendingChanges();
+                if (!changes.Any())
+                    return;
+                workspace.CheckIn(changes, "Creation project folder '" + mainBranch + "'");
+                ConvertFolderIntoBranch(projectPath + "/" + mainBranch);
+            }
+            catch (GitTfsException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new GitTfsException("error: Unable to create project folder!", ex);
+            }
+            finally
+            {
+                if (Directory.Exists(directoryForBranch))
+                    Directory.Delete(directoryForBranch);
+                if (workspace != null)
+                    workspace.DeleteMapping(workspace.GetWorkingFolderForLocalItem(gitRepositoryPath));
+            }
+        }
+
         public bool IsExistingInTfs(string path)
         {
             return VersionControl.ServerItemExists(path, ItemType.Any);
+        }
+
+        protected virtual void ConvertFolderIntoBranch(string tfsRepositoryPath)
+        {
         }
     }
 }
