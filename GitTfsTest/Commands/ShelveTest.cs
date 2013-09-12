@@ -33,12 +33,12 @@ namespace Sep.Git.Tfs.Test.Commands
         }
 
         [Fact]
-        public void ShouldFailWithMoreThanOneParents()
+        public void ShouldFailWithMoreThanOneNonSubtreeParents()
         {
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
-            var parentChangesets = new TfsChangesetInfo() {Remote = mocks.Get<IGitTfsRemote>()};
+
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("my-head"))
-                .Return(new[] {parentChangesets, parentChangesets});
+                .Return(new[] { ChangesetForRemote("good-choice"), ChangesetForRemote("another-good-choice") });
 
             Assert.NotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }
@@ -63,6 +63,20 @@ namespace Sep.Git.Tfs.Test.Commands
             globals.UserSpecifiedRemoteId = "good-choice";
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("my-head"))
                 .Return(new[] { ChangesetForRemote("ok-choice"), ChangesetForRemote("good-choice") });
+
+            Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
+        }
+
+        [Fact]
+        public void ShouldSucceedWithParentsFromSubtreeAndOwner()
+        {
+            mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
+
+            var subtree = ChangesetForRemote("good-choice_subtree/good");
+            subtree.Remote.Stub(x => x.IsSubtree).Return(true);
+            subtree.Remote.Stub(x => x.OwningRemoteId).Return("good-choice");
+            mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("my-head"))
+                .Return(new[] { ChangesetForRemote("good-choice"),  subtree});
 
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
         }

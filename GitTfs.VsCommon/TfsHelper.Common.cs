@@ -115,7 +115,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _linking ?? (_linking = GetService<ILinking>()); }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                 null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true, true, true)
@@ -187,7 +187,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
+        private ITfsChangeset BuildTfsChangeset(Changeset changeset, IGitTfsRemote remote)
         {
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
             tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };
@@ -208,13 +208,15 @@ namespace Sep.Git.Tfs.VsCommon
 
         Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
-        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
+        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Workspace workspace;
             if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
-                Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-                _workspaces.Add(remote.Id, workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath));
+	            Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
+	            var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
+	            var workspace = GetWorkspace(folders);
+                _workspaces.Add(remote.Id, workspace);
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
                     Trace.WriteLine("Deleting workspace " + workspace.Name);
@@ -230,12 +232,33 @@ namespace Sep.Git.Tfs.VsCommon
             action(tfsWorkspace);
         }
 
-        private Workspace GetWorkspace(string localDirectory, string repositoryPath)
+        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
+        {
+            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
+            var workspace = GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory));
+            try
+            {
+                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
+                    .With("remote").EqualTo(remote)
+                    .With("contextVersion").EqualTo(versionToFetch)
+                    .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                    .With("tfsHelper").EqualTo(this)
+                    .GetInstance<TfsWorkspace>();
+                action(tfsWorkspace);
+            }
+            finally
+            {
+                workspace.Delete();
+            }
+        }
+
+        private Workspace GetWorkspace(params WorkingFolder[] folders)
         {
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
             try
             {
-                workspace.CreateMapping(new WorkingFolder(repositoryPath, localDirectory));
+                foreach(WorkingFolder folder in folders)
+                    workspace.CreateMapping(folder);
             }
             catch (MappingConflictException e)
             {
@@ -571,7 +594,7 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForIdentity, Identity>(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
         }
 
-        public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
+        public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
         {
             var history = VersionControl.QueryHistory(remote.TfsRepositoryPath, VersionSpec.Latest, 0,
                                                       RecursionType.Full, null, null, VersionSpec.Latest, 1, true, false,
@@ -588,7 +611,7 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForChangeset, Changeset>(VersionControl.GetChangeset(changesetId));
         }
 
-        public ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote)
+        public ITfsChangeset GetChangeset(int changesetId, IGitTfsRemote remote)
         {
             return BuildTfsChangeset(VersionControl.GetChangeset(changesetId), remote);
         }

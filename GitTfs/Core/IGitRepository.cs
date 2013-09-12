@@ -29,6 +29,7 @@ namespace Sep.Git.Tfs.Core
         bool WorkingCopyHasUnstagedOrUncommitedChanges { get; }
         void CopyBlob(string sha, string outputFile);
         GitCommit GetCommit(string commitish);
+        string GetCurrentCommit();
         Dictionary<string, GitObject> GetObjects();
         string GetCommitMessage(string head, string parentCommitish);
         string GetCommitMessage(string commitish);
@@ -41,5 +42,9 @@ namespace Sep.Git.Tfs.Core
         void MoveRemote(string oldRemoteName, string newRemoteName);
         void Reset(string sha, ResetOptions resetOptions);
         bool IsBare { get; }
+        /// Gets all configured "subtree" remotes which point to the same Tfs URL as the given remote.
+        /// If the given remote is itself a subtree, an empty enumerable is returned.
+        /// </summary>
+        IEnumerable<IGitTfsRemote> GetSubtrees(IGitTfsRemote owner);
     }
 }

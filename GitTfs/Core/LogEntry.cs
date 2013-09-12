@@ -26,5 +26,7 @@ namespace Sep.Git.Tfs.Core
         public string CommitterName { get; set; }
 
         public string CommitterEmail { get; set; }
+
+        public IGitTfsRemote Remote { get; set; }
     }
 }

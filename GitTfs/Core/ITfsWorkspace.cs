@@ -39,5 +39,10 @@ namespace Sep.Git.Tfs.Core
         void Get(IChangeset changeset);
 
         long CheckinTool(Func<string> generateCheckinComment);
+
+        /// <summary>
+        /// Gets the remote for which this workspace was created.
+        /// </summary>
+        IGitTfsRemote Remote { get; }
     }
 }
