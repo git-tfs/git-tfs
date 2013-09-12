@@ -51,6 +51,7 @@ namespace Sep.Git.Tfs.Test.Core
                 legacyUrls = new string[0];
             var info = new RemoteInfo
             {
+                Id = "test",
                 Url = url,
                 Repository = repository,
                 Aliases = legacyUrls,

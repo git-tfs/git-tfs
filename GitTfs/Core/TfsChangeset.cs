@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)
         {
-            var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
+            var initialTree = workspace.Remote.Repository.GetObjects(lastCommit);
             workspace.Get(_changeset);
             foreach (var change in Sort(_changeset.Changes))
             {
@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Core
             // and git doesn't really care if you add or delete empty dirs.
             if (change.Item.ItemType == TfsItemType.File)
             {
-                var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, initialTree);
+                var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, workspace.Remote, initialTree);
                 if (pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
                     return;
                 if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
@@ -62,9 +62,9 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private string GetPathInGitRepo(string tfsPath, IDictionary<string, GitObject> initialTree)
+        private string GetPathInGitRepo(string tfsPath, IGitTfsRemote remote, IDictionary<string, GitObject> initialTree)
         {
-            var pathInGitRepo = Summary.Remote.GetPathInGitRepo(tfsPath);
+            var pathInGitRepo = remote.GetPathInGitRepo(tfsPath);
             if (pathInGitRepo == null)
                 return null;
             return UpdateToMatchExtantCasing(pathInGitRepo, initialTree);
@@ -72,7 +72,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Rename(IChange change, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
-            var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Item), initialTree);
+            var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Item), workspace.Remote, initialTree);
             if (oldPath != null)
             {
                 Delete(oldPath, index, initialTree);
@@ -137,8 +137,17 @@ namespace Sep.Git.Tfs.Core
         public IEnumerable<TfsTreeEntry> GetFullTree()
         {
             var treeInfo = Summary.Remote.Repository.GetObjects();
-            var tfsItems = _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full);
-            var tfsItemsWithGitPaths = tfsItems.Select(item => new { item, gitPath = GetPathInGitRepo(item.ServerItem, treeInfo) });
+            
+            IItem[] tfsItems;
+            if(Summary.Remote.TfsRepositoryPath != null)
+            {
+                tfsItems = _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full);   
+            }
+            else
+            {
+                tfsItems = Summary.Remote.TfsSubtreePaths.SelectMany(x => _changeset.VersionControlServer.GetItems(x, _changeset.ChangesetId, TfsRecursionType.Full)).ToArray();
+            }
+            var tfsItemsWithGitPaths = tfsItems.Select(item => new { item, gitPath = GetPathInGitRepo(item.ServerItem, this.Summary.Remote, treeInfo) });
             return tfsItemsWithGitPaths.Where(x => x.gitPath != null).Select(x => new TfsTreeEntry(x.gitPath, x.item));
         }
 
@@ -202,7 +211,7 @@ namespace Sep.Git.Tfs.Core
             return Mode.NewFile;
         }
 
-        private static readonly Regex SplitDirnameFilename = new Regex("(?<dir>.*)/(?<file>[^/]+)");
+        private static readonly Regex SplitDirnameFilename = new Regex(@"(?<dir>.*)[/\\](?<file>[^/\\]+)");
 
         private string UpdateToMatchExtantCasing(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
         {
@@ -233,10 +242,10 @@ namespace Sep.Git.Tfs.Core
 
         private LogEntry MakeNewLogEntry()
         {
-            return MakeNewLogEntry(_changeset);
+            return MakeNewLogEntry(_changeset, Summary.Remote);
         }
 
-        private LogEntry MakeNewLogEntry(IChangeset changesetToLog)
+        private LogEntry MakeNewLogEntry(IChangeset changesetToLog, IGitTfsRemote remote = null)
         {
             var identity = _tfs.GetIdentity(changesetToLog.Committer);
             var name = changesetToLog.Committer;
@@ -286,7 +295,8 @@ namespace Sep.Git.Tfs.Core
                            CommitterName = name,
                            AuthorName = name,
                            CommitterEmail = email,
-                           AuthorEmail = email
+                           AuthorEmail = email,
+                           Remote = remote
                        };
         }
     }

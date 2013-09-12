@@ -10,15 +10,15 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         string Url { get; set; }
         string Username { get; set; }
         string Password { get; set; }
-        IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote);
+        IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
         IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);
         IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
         IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
         ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes);
         IIdentity GetIdentity(string username);
-        ITfsChangeset GetLatestChangeset(GitTfsRemote remote);
-        ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote);
+        ITfsChangeset GetLatestChangeset(IGitTfsRemote remote);
+        ITfsChangeset GetChangeset(int changesetId, IGitTfsRemote remote);
         IChangeset GetChangeset(int changesetId);
         bool HasShelveset(string shelvesetName);
         ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName);
@@ -35,5 +35,15 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
         void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder);
         bool IsExistingInTfs(string path);
+        /// <summary>
+        /// Creates and maps a workspace for the given remote with the given local -> server directory mappings, at the given Tfs version,
+        /// and then performs the action.
+        /// </summary>
+        /// <param name="localDirectory">The local base directory containing all the mappings</param>
+        /// <param name="remote">The owning remote</param>
+        /// <param name="mappings">The workspace mappings to create.  Item1 is the relative path from the localDirectory, and Item2 is the TfsRepositoryPath</param>
+        /// <param name="versionToFetch">The TFS version to fetch from the server</param>
+        /// <param name="action">The action to perform</param>
+        void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
     }
 }

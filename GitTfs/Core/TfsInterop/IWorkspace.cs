@@ -16,6 +16,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         void GetSpecificVersion(int changeset);
         void GetSpecificVersion(IChangeset changeset);
         string GetLocalItemForServerItem(string serverItem);
+        string GetServerItemForLocalItem(string localItem);
         string OwnerName { get; }
     }
 }
