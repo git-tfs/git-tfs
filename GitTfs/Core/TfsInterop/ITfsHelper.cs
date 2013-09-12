@@ -28,7 +28,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         void CleanupWorkspaces(string workingDirectory);
         int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null);
         IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null);
-        bool CanGetBranchInformation { get; }
+        bool CanGetBranchInformation();
         IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation();
         IEnumerable<IBranchObject> GetBranches();
         void EnsureAuthenticated();

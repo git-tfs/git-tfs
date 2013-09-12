@@ -36,20 +36,17 @@ namespace Sep.Git.Tfs.VsCommon
             _bridge = bridge;
         }
 
-        public override bool CanGetBranchInformation
+        public override bool CanGetBranchInformation()
         {
-            get
-            {
-                if (_server.IsTfsServerSupportingBranches())
-                    return true;
-                throw new GitTfsException("error: the version of the tfs dlls on your computer used by git-tfs doesn't match the version of the TFS Server!",
-                    new List<string>
-                        {
-                            "Add an environment variable \"GIT_TFS_CLIENT\" with the correct value : 2008",
-                            "Perhaps you will have to install the corresponding sdk (See https://github.com/git-tfs/git-tfs#prerequisites )",
-                            "See https://github.com/git-tfs/git-tfs/doc/troubleshooting-GIT_TFS_CLIENT.md for more details..."
-                        });
-            }
+            if (_server.IsTfsServerSupportingBranches())
+                return true;
+            throw new GitTfsException("error: the version of the tfs dlls on your computer used by git-tfs doesn't match the version of the TFS Server!",
+                new List<string>
+                    {
+                        "Add an environment variable \"GIT_TFS_CLIENT\" with the correct value : 2008",
+                        "Perhaps you will have to install the corresponding sdk (See https://github.com/git-tfs/git-tfs#prerequisites )",
+                        "See https://github.com/git-tfs/git-tfs/doc/troubleshooting-GIT_TFS_CLIENT.md for more details..."
+                    });
         }
 
         public override IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
