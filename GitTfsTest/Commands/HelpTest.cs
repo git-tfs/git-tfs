@@ -22,27 +22,29 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.Inject<TextWriter>(outputWriter);
         }
 
-        [Fact(Skip="Not sure why this doesn't work.")]
+        [Fact]
         public void ShouldWriteGeneralHelp()
         {
-            mocks.ClassUnderTest.Run(new string[0]);
+            mocks.Container.PluginGraph.CreateFamily(typeof(GitTfsCommand));
+            mocks.Container.PluginGraph.FindFamily(typeof(GitTfsCommand)).AddType(typeof(TestCommand), "test");
+            mocks.Container.Inject<GitTfsCommand>("test", new TestCommand());
+            mocks.ClassUnderTest.Run();
 
             var output = outputWriter.GetStringBuilder().ToString();
-            output.AssertStartsWith("Usage: git-tfs [command]");
+            output.AssertStartsWith("Usage: git-tfs [command] [options]");
             output.TrimEnd().AssertEndsWith(" (use 'git-tfs help [command]' for more information)");
         }
 
-        [Fact(Skip = "Not sure why this doesn't work.")]
+        [Fact]
         public void ShouldWriteCommandHelp()
         {
             mocks.Container.PluginGraph.CreateFamily(typeof (GitTfsCommand));
             mocks.Container.PluginGraph.FindFamily(typeof (GitTfsCommand)).AddType(typeof (TestCommand), "test");
-            //mocks.Container.Inject<GitTfsCommand>("test", new TestCommand());
+            mocks.Container.Inject<GitTfsCommand>("test", new TestCommand());
             mocks.ClassUnderTest.Run(new[]{"test"});
 
             var output = outputWriter.GetStringBuilder().ToString();
-            output = Regex.Replace(output, "\r\n?|\n", "~");
-            Assert.Equal("abc", output);
+            output.AssertStartsWith("Usage: git-tfs test [options]");
         }
 
         public class TestCommand : GitTfsCommand
