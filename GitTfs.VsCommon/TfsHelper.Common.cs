@@ -130,10 +130,7 @@ namespace Sep.Git.Tfs.VsCommon
             } 
         }
 
-        public virtual bool CanGetBranchInformation()
-        {
-            return false;
-        }
+        public virtual bool CanGetBranchInformation { get { return false; } }
 
         public virtual IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {

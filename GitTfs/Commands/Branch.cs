@@ -217,7 +217,7 @@ namespace Sep.Git.Tfs.Commands
                 else
                 {
                     var remote = tfsRemotes.First(r => r.Id == remoteId);
-                    if (!remote.Tfs.CanGetBranchInformation())
+                    if (!remote.Tfs.CanGetBranchInformation)
                     {
                         throw new GitTfsException("error: this version of TFS doesn't support this functionality");
                     }
@@ -239,7 +239,7 @@ namespace Sep.Git.Tfs.Commands
         {
             var root = tfsHelper.GetRootTfsBranchForRemotePath(tfsRepositoryPath);
 
-            if (!tfsHelper.CanGetBranchInformation())
+            if (!tfsHelper.CanGetBranchInformation)
             {
                 throw new GitTfsException("error: this version of TFS doesn't support this functionality");
             }

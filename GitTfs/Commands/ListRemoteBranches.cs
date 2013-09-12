@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Commands
             tfsHelper.Password = remoteOptions.Password;
             tfsHelper.EnsureAuthenticated();
 
-            if (!tfsHelper.CanGetBranchInformation())
+            if (!tfsHelper.CanGetBranchInformation)
             {
                 throw new GitTfsException("error: this version of TFS doesn't support this functionality");
             }
