@@ -215,8 +215,7 @@ namespace Sep.Git.Tfs.VsCommon
             {
 	            Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
 	            var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
-	            var workspace = GetWorkspace(folders);
-                _workspaces.Add(remote.Id, workspace);
+                _workspaces.Add(remote.Id, GetWorkspace(folders));
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
                     Trace.WriteLine("Deleting workspace " + workspace.Name);
@@ -712,7 +711,7 @@ namespace Sep.Git.Tfs.VsCommon
                                 });
                 }
 
-                workspace = GetWorkspace(gitRepositoryPath, projectPath);
+                workspace = GetWorkspace(new WorkingFolder(projectPath, gitRepositoryPath));
                 if (!Directory.Exists(directoryForBranch))
                     Directory.CreateDirectory(directoryForBranch);
                 workspace.PendAdd(directoryForBranch);
