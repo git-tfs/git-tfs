@@ -23,7 +23,6 @@ namespace Sep.Git.Tfs.Vs11
     public class TfsHelper : TfsHelperVs2010Base
     {
         private readonly TfsApiBridge _bridge;
-        private TfsTeamProjectCollection _server;
 
         public TfsHelper(TextWriter stdout, TfsApiBridge bridge, IContainer container) : base(stdout, bridge, container)
         {
