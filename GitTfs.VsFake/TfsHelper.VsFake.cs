@@ -365,13 +365,7 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public bool CanGetBranchInformation
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool CanGetBranchInformation { get { return false; } }
 
         public int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
         {
