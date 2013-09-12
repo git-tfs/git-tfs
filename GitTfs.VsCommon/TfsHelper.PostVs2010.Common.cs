@@ -149,6 +149,11 @@ namespace Sep.Git.Tfs.VsCommon
                 changeset.Update();
             }
         }
+
+        protected override void ConvertFolderIntoBranch(string tfsRepositoryPath)
+        {
+            VersionControl.CreateBranchObject(new BranchProperties(new ItemIdentifier(tfsRepositoryPath)));
+        }
     }
 
 }
