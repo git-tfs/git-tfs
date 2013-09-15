@@ -50,6 +50,12 @@ namespace Sep.Git.Tfs.VsCommon
         {
             try
             {
+                if (!CanGetBranchInformation)
+                {
+                    Trace.WriteLine("Try TFS2008 compatibility mode...");
+                    return base.GetRootChangesetForBranch(tfsPathBranchToCreate, tfsPathParentBranch);
+                }
+
                 if (!string.IsNullOrWhiteSpace(tfsPathParentBranch))
                     Trace.WriteLine("Parameter about parent branch will be ignored because this version of TFS is able to find the parent!");
 
