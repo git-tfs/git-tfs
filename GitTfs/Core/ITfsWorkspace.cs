@@ -40,5 +40,10 @@ namespace Sep.Git.Tfs.Core
 
         long CheckinTool(Func<string> generateCheckinComment);
         void Merge(string sourceTfsPath, string tfsRepositoryPath);
+
+        /// <summary>
+        /// Gets the remote for which this workspace was created.
+        /// </summary>
+        IGitTfsRemote Remote { get; }
     }
 }

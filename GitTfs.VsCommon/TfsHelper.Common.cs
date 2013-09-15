@@ -115,7 +115,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _linking ?? (_linking = GetService<ILinking>()); }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                 null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true, true, true)
@@ -193,7 +193,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        private ITfsChangeset BuildTfsChangeset(Changeset changeset, GitTfsRemote remote)
+        private ITfsChangeset BuildTfsChangeset(Changeset changeset, IGitTfsRemote remote)
         {
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
             tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };
@@ -214,13 +214,14 @@ namespace Sep.Git.Tfs.VsCommon
 
         Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
-        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
+        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Workspace workspace;
             if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
-                Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-                _workspaces.Add(remote.Id, workspace = GetWorkspace(localDirectory, remote.TfsRepositoryPath));
+                Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
+                var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
+                _workspaces.Add(remote.Id, workspace = GetWorkspace(folders));
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
                     Trace.WriteLine("Deleting workspace " + workspace.Name);
@@ -236,12 +237,33 @@ namespace Sep.Git.Tfs.VsCommon
             action(tfsWorkspace);
         }
 
-        private Workspace GetWorkspace(string localDirectory, string repositoryPath)
+        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
+        {
+            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
+            var workspace = GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory));
+            try
+            {
+                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
+                    .With("remote").EqualTo(remote)
+                    .With("contextVersion").EqualTo(versionToFetch)
+                    .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                    .With("tfsHelper").EqualTo(this)
+                    .GetInstance<TfsWorkspace>();
+                action(tfsWorkspace);
+            }
+            finally
+            {
+                workspace.Delete();
+            }
+        }
+
+        private Workspace GetWorkspace(params WorkingFolder[] folders)
         {
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
             try
             {
-                workspace.CreateMapping(new WorkingFolder(repositoryPath, localDirectory));
+                foreach(WorkingFolder folder in folders)
+                    workspace.CreateMapping(folder);
             }
             catch (MappingConflictException e)
             {
@@ -577,7 +599,7 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForIdentity, Identity>(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
         }
 
-        public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
+        public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
         {
             var history = VersionControl.QueryHistory(remote.TfsRepositoryPath, VersionSpec.Latest, 0,
                                                       RecursionType.Full, null, null, VersionSpec.Latest, 1, true, false,
@@ -594,7 +616,7 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForChangeset, Changeset>(VersionControl.GetChangeset(changesetId));
         }
 
-        public ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote)
+        public ITfsChangeset GetChangeset(int changesetId, IGitTfsRemote remote)
         {
             return BuildTfsChangeset(VersionControl.GetChangeset(changesetId), remote);
         }
@@ -674,9 +696,61 @@ namespace Sep.Git.Tfs.VsCommon
             
         }
 
+        public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder)
+        {
+            var projectPath = "$/" + projectName;
+            var directoryForBranch = Path.Combine(gitRepositoryPath, mainBranch);
+            Workspace workspace = null;
+            try
+            {
+                if (!VersionControl.ServerItemExists(projectPath, ItemType.Any))
+                {
+                    if (createTeamProjectFolder)
+                        VersionControl.CreateTeamProjectFolder(new TeamProjectFolderOptions(projectName));
+                    else
+                        throw new GitTfsException("error: the team project folder '" + projectPath + "' doesn't exist!",
+                            new List<string>()
+                                {
+                                    "Verify that the name of the project '" + projectName +"' is well spelled",
+                                    "Create the team project folder in TFS before (recommanded)",
+                                    "Use the flag '--create-project-folder' to create the team project folder during the process"
+                                });
+                }
+
+                workspace = GetWorkspace(new WorkingFolder(projectPath, gitRepositoryPath));
+                if (!Directory.Exists(directoryForBranch))
+                    Directory.CreateDirectory(directoryForBranch);
+                workspace.PendAdd(directoryForBranch);
+                var changes = workspace.GetPendingChanges();
+                if (!changes.Any())
+                    return;
+                workspace.CheckIn(changes, "Creation project folder '" + mainBranch + "'");
+                ConvertFolderIntoBranch(projectPath + "/" + mainBranch);
+            }
+            catch (GitTfsException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new GitTfsException("error: Unable to create project folder!", ex);
+            }
+            finally
+            {
+                if (Directory.Exists(directoryForBranch))
+                    Directory.Delete(directoryForBranch);
+                if (workspace != null)
+                    workspace.DeleteMapping(workspace.GetWorkingFolderForLocalItem(gitRepositoryPath));
+            }
+        }
+
         public bool IsExistingInTfs(string path)
         {
             return VersionControl.ServerItemExists(path, ItemType.Any);
+        }
+
+        protected virtual void ConvertFolderIntoBranch(string tfsRepositoryPath)
+        {
         }
     }
 }

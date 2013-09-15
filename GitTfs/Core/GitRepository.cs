@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 using LibGit2Sharp;
 using Branch = LibGit2Sharp.Branch;
@@ -119,14 +120,20 @@ namespace Sep.Git.Tfs.Core
             return _cachedRemotes ?? (_cachedRemotes = ReadTfsRemotes());
         }
 
-        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote)
+        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote, string autocrlf = null, string ignorecase = null)
         {
             if (HasRemote(remote.Id))
                 throw new GitTfsException("A remote with id \"" + remote.Id + "\" already exists.");
 
-            // These help the new (if it's new) git repository to behave more sanely.
-            _repository.Config.Set("core.autocrlf", "false");
-            _repository.Config.Set("core.ignorecase", "false");
+            // The autocrlf default (as indicated by a null) is false and is set to override the system-wide setting.
+            // When creating branches we use the empty string to indicate that we do not want to set the value at all.
+            if (autocrlf == null)
+                autocrlf = "false";
+            if (autocrlf != String.Empty)
+                _repository.Config.Set("core.autocrlf", autocrlf);
+
+            if (ignorecase != null)
+                _repository.Config.Set("core.ignorecase", ignorecase);
 
             foreach (var entry in _remoteConfigReader.Dump(remote))
             {
@@ -240,6 +247,11 @@ namespace Sep.Git.Tfs.Core
             return new GitCommit(_repository.Lookup<Commit>(commitish));
         }
 
+        public String GetCurrentCommit()
+        {
+            return _repository.Head.Commits.First().Sha;
+        }
+
         public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head)
         {
             return GetLastParentTfsCommits(head, false);
@@ -267,7 +279,7 @@ namespace Sep.Git.Tfs.Core
             try
             {
                 CommandOutputPipe(stdout => FindTfsCommits(stdout, tfsCommits, includeStubRemotes),
-                                  "log", "--no-color", "--pretty=medium", head);
+                                  "log", "--no-color", "--pretty=medium", head, "--");
             }
             catch (GitCommandException e)
             {
@@ -328,7 +340,7 @@ namespace Sep.Git.Tfs.Core
             if (match.Success)
             {
                 var commitInfo = _container.GetInstance<TfsChangesetInfo>();
-                commitInfo.Remote = ReadTfsRemote(match.Groups["url"].Value, match.Groups["repository"].Value, includeStubRemotes);
+                commitInfo.Remote = ReadTfsRemote(match.Groups["url"].Value, match.Groups["repository"].Success ? match.Groups["repository"].Value : null, includeStubRemotes);
                 commitInfo.ChangesetId = Convert.ToInt32(match.Groups["changeset"].Value);
                 commitInfo.GitCommit = commit;
                 return commitInfo;
@@ -506,5 +518,18 @@ namespace Sep.Git.Tfs.Core
         }
 
         public bool IsBare { get { return _repository.Info.IsBare; } }
+
+        /// <summary>
+        /// Gets all configured "subtree" remotes which point to the same Tfs URL as the given remote.
+        /// If the given remote is itself a subtree, an empty enumerable is returned.
+        /// </summary>
+        public IEnumerable<IGitTfsRemote> GetSubtrees(IGitTfsRemote owner)
+        {
+            //a subtree remote cannot have subtrees itself.
+            if (owner.IsSubtree)
+                return Enumerable.Empty<IGitTfsRemote>();
+
+            return ReadAllTfsRemotes().Where(x => x.IsSubtree && string.Equals(x.OwningRemoteId, owner.Id, StringComparison.InvariantCultureIgnoreCase));
+        }
     }
 }

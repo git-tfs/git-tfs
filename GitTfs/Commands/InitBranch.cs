@@ -89,7 +89,7 @@ namespace Sep.Git.Tfs.Commands
                     throw new GitTfsException("error: The Tfs parent branch '" + ParentBranch + "' can not be found in the Git repository\nPlease init it first and try again...\n");
 
                 rootChangeSetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
-            }
+        }
 
             var sha1RootCommit = FindChangesetInGitRepository(rootChangeSetId);
             if (string.IsNullOrWhiteSpace(sha1RootCommit))
@@ -153,7 +153,7 @@ namespace Sep.Git.Tfs.Commands
                             var sha1RootCommit = FindChangesetInGitRepository(tfsBranch.RootChangesetId);
                             if (sha1RootCommit != null)
                                 tfsBranch.TfsRemote = CreateBranch(defaultRemote, tfsBranch.TfsRepositoryPath, sha1RootCommit);
-                        }
+                }
                         if (tfsBranch.TfsRemote != null)
                         {
                             Trace.WriteLine("Fetching remote :" + tfsBranch.TfsRemote.Id);
@@ -221,12 +221,12 @@ namespace Sep.Git.Tfs.Commands
 
             Trace.WriteLine("Try creating remote...");
             var tfsRemote = _globals.Repository.CreateTfsRemote(new RemoteInfo
-                {
+            {
                     Id = gitBranchName,
                     Url = defaultRemote.TfsUrl,
                     Repository = tfsRepositoryPath,
                     RemoteOptions = _remoteOptions
-                });
+                }, System.String.Empty);
             if (!_globals.Repository.CreateBranch(tfsRemote.RemoteRef, sha1RootCommit))
                 throw new GitTfsException("error: Fail to create remote branch ref file!");
             Trace.WriteLine("Remote created!");
@@ -240,7 +240,7 @@ namespace Sep.Git.Tfs.Commands
             string sha1RootCommit = _globals.Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + rootChangeSetId + "[^0-9]");
             //sha1RootCommit = _globals.Repository.FindCommitByCommitMessage("git-tfs-id: .*\\$\\/" + tfsProject + "\\/.*;C" + rootChangeSetId + "[^0-9]");
             if (sha1RootCommit != null)
-                Trace.WriteLine("Commit found! sha1 : " + sha1RootCommit);
+            Trace.WriteLine("Commit found! sha1 : " + sha1RootCommit);
             else
                 Trace.WriteLine("Commit not found!");
             return sha1RootCommit;
@@ -254,11 +254,11 @@ namespace Sep.Git.Tfs.Commands
 
             if (fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
             {
-                Trace.WriteLine("Try creating the local branch...");
+            Trace.WriteLine("Try creating the local branch...");
                 if (!_globals.Repository.CreateBranch("refs/heads/" + tfsRemote.Id, tfsRemote.MaxCommitHash))
-                    _stdout.WriteLine("warning: Fail to create local branch ref file!");
-                else
-                    Trace.WriteLine("Local branch created!");
+                _stdout.WriteLine("warning: Fail to create local branch ref file!");
+            else
+                Trace.WriteLine("Local branch created!");
             }
 
             Trace.WriteLine("Cleaning...");

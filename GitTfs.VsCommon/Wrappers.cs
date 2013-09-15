@@ -475,6 +475,11 @@ namespace Sep.Git.Tfs.VsCommon
             return _workspace.GetLocalItemForServerItem(serverItem);
         }
 
+        public string GetServerItemForLocalItem(string localItem)
+        {
+            return _workspace.GetServerItemForLocalItem(localItem);
+        }
+
         public string OwnerName
         {
             get { return _workspace.OwnerName; }

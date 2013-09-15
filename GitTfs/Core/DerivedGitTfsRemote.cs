@@ -68,6 +68,14 @@ namespace Sep.Git.Tfs.Core
             set { throw new NotImplementedException(); }
         }
 
+        public string[] TfsSubtreePaths
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         #region Equality
 
         public override bool Equals(object obj)
@@ -146,6 +154,26 @@ namespace Sep.Git.Tfs.Core
         public string RemoteRef
         {
             get { throw new NotImplementedException(); }
+        }
+
+        public bool IsSubtree
+        {
+            get { return false; }
+        }
+
+        public bool IsSubtreeOwner
+        {
+            get { return false; }
+        }
+
+        public string OwningRemoteId
+        {
+            get { return null; }
+        }
+
+        public string Prefix
+        {
+            get { return null; }
         }
 
         public bool ShouldSkip(string path)

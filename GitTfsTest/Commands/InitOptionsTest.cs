@@ -15,6 +15,8 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks = new RhinoAutoMocker<InitOptions>();
         }
 
+        #region autocrlf option tests
+
         [Fact]
         public void AutoCrlfDefault()
         {
@@ -52,6 +54,59 @@ namespace Sep.Git.Tfs.Test.Commands
             Assert.Throws<OptionException>(() => mocks.ClassUnderTest.OptionSet.Parse(args));
             Assert.Equal("false", mocks.ClassUnderTest.GitInitAutoCrlf);
         }
+
+        [Fact]
+        public void AutoCrlfProvidedNoArg()
+        {
+            string[] args = { "init", "--autocrlf", "http://example.com/tfs", "$/Junk" };
+            Assert.Throws<OptionException>(() => mocks.ClassUnderTest.OptionSet.Parse(args));
+            Assert.Equal("false", mocks.ClassUnderTest.GitInitAutoCrlf);
+        }
+
+        #endregion
+
+        #region ignorecase option tests
+
+        [Fact]
+        public void IgnorecaseDefault()
+        {
+            // depends on global setting..
+            Assert.Null(mocks.ClassUnderTest.GitInitIgnoreCase);
+        }
+
+        [Fact]
+        public void IgnoreCaseProvideTrue()
+        {
+            string[] args = { "init", "--ignorecase=true", "http://example.com/tfs", "$/Junk" };
+            mocks.ClassUnderTest.OptionSet.Parse(args);
+            Assert.Equal("true", mocks.ClassUnderTest.GitInitIgnoreCase);
+        }
+
+        [Fact]
+        public void IgnoreCaseProvideFalse()
+        {
+            string[] args = { "init", "--ignorecase=false", "http://example.com/tfs", "$/Junk" };
+            mocks.ClassUnderTest.OptionSet.Parse(args);
+            Assert.Equal("false", mocks.ClassUnderTest.GitInitIgnoreCase);
+        }
+
+        [Fact]
+        public void IgnoreCaseProvideInvalidOption()
+        {
+            string[] args = { "init", "--ignorecase=windows", "http://example.com/tfs", "$/Junk" };
+            Assert.Throws<OptionException>(() => mocks.ClassUnderTest.OptionSet.Parse(args));
+            Assert.Null(mocks.ClassUnderTest.GitInitIgnoreCase);
+        }
+
+        [Fact]
+        public void IgnoreCaseProvideNoArg()
+        {
+            string[] args = { "init", "--ignorecase", "http://example.com/tfs", "$/Junk" };
+            Assert.Throws<OptionException>(() => mocks.ClassUnderTest.OptionSet.Parse(args));
+            Assert.Null(mocks.ClassUnderTest.GitInitIgnoreCase);
+        }
+
+        #endregion
 
     }
 }

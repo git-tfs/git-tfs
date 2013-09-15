@@ -42,6 +42,21 @@ namespace Sep.Git.Tfs.Core
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
 
             Autotag = info.Autotag;
+
+            this.IsSubtree = CheckSubtree();
+        }
+
+        private bool CheckSubtree()
+        {
+            var m = GitTfsConstants.RemoteSubtreeRegex.Match(this.Id);
+            if (m.Success)
+            {
+                this.OwningRemoteId = m.Groups["owner"].Value;
+                this.Prefix = m.Groups["prefix"].Value;
+                return true;
+            }
+
+            return false;
         }
 
         public void EnsureTfsAuthenticated()
@@ -55,6 +70,16 @@ namespace Sep.Git.Tfs.Core
         public bool IsDerived
         {
             get { return false; }
+        }
+
+        public bool IsSubtree { get; private set; }
+
+        public bool IsSubtreeOwner
+        {
+            get
+            {
+                return TfsRepositoryPath == null;
+            }
         }
 
         public string Id { get; set; }
@@ -82,10 +107,31 @@ namespace Sep.Git.Tfs.Core
         }
 
         public string TfsRepositoryPath { get; set; }
+
+        /// <summary>
+        /// Gets the TFS server-side paths of all subtrees of this remote.
+        /// Valid if the remote has subtrees, which occurs when <see cref="TfsRepositoryPath"/> is null.
+        /// </summary>
+        public string[] TfsSubtreePaths 
+        { 
+            get
+            {
+                if (tfsSubtreePaths == null)
+                    tfsSubtreePaths = Repository.GetSubtrees(this).Select(x => x.TfsRepositoryPath).ToArray();
+
+                return tfsSubtreePaths;
+            } 
+        }
+        private string[] tfsSubtreePaths = null;
+
         public string IgnoreRegexExpression { get; set; }
         public string IgnoreExceptRegexExpression { get; set; }
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
+
+        public string OwningRemoteId { get; private set; }
+
+        public string Prefix { get; private set; }
 
         public long MaxChangesetId
         {
@@ -137,11 +183,26 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        
+
         private string WorkingDirectory
         {
             get
             {
-                return Repository.GetConfig("git-tfs.workspace-dir") ?? DefaultWorkingDirectory;
+                var dir = Repository.GetConfig("git-tfs.workspace-dir");
+
+                if (this.IsSubtree)
+                {
+                    if(dir != null)
+                    {
+                        return Path.Combine(dir, this.Prefix);
+                    }
+
+                    //find the relative path to the owning remote
+                    return Ext.CombinePaths(globals.GitDir, "tfs", this.OwningRemoteId, "workspace", this.Prefix);
+                }
+
+                return dir ?? DefaultWorkingDirectory;
             }
         }
 
@@ -209,8 +270,30 @@ namespace Sep.Git.Tfs.Core
         public string GetPathInGitRepo(string tfsPath)
         {
             if (tfsPath == null) return null;
-            if (!tfsPath.StartsWith(TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)) return null;
-            tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
+
+            if (!IsSubtreeOwner)
+            {
+                if (!tfsPath.StartsWith(TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)) return null;
+                tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
+
+            }
+            else
+            {
+                //look through the subtrees
+                var p = this.globals.Repository.GetSubtrees(this)
+                            .Where(x => x.IsSubtree)
+                            .FirstOrDefault(x => tfsPath.StartsWith(x.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase));
+                if (p == null) return null;
+
+                tfsPath = p.GetPathInGitRepo(tfsPath);
+
+                //we must prepend the prefix in order to get the correct directory
+                if (tfsPath.StartsWith("/"))
+                    tfsPath = p.Prefix + tfsPath;
+                else
+                    tfsPath = p.Prefix + "/" + tfsPath;
+            }
+            
             while (tfsPath.StartsWith("/"))
                 tfsPath = tfsPath.Substring(1);
             return tfsPath;
@@ -307,7 +390,7 @@ namespace Sep.Git.Tfs.Core
 
         public void QuickFetch()
         {
-            var changeset = Tfs.GetLatestChangeset(this);
+            var changeset = GetLatestChangeset();
             quickFetch(changeset);
         }
 
@@ -329,14 +412,33 @@ namespace Sep.Git.Tfs.Core
         {
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
             // TFS 2010 doesn't like when we ask for history past its last changeset.
-            if (MaxChangesetId == Tfs.GetLatestChangeset(this).Summary.ChangesetId)
+            if (MaxChangesetId == GetLatestChangeset().Summary.ChangesetId)
                 return Enumerable.Empty<ITfsChangeset>();
-            return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
+            
+            if(!IsSubtreeOwner)
+                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
+
+            return globals.Repository.GetSubtrees(this)
+                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, x))
+                .OrderBy(x => x.Summary.ChangesetId);
         }
 
         public ITfsChangeset GetChangeset(long changesetId)
         {
             return Tfs.GetChangeset((int)changesetId, this);
+        }
+
+        private ITfsChangeset GetLatestChangeset()
+        {
+            if (!string.IsNullOrEmpty(this.TfsRepositoryPath))
+            {
+                return Tfs.GetLatestChangeset(this);
+            }
+            else
+            {
+                var changesetId = globals.Repository.GetSubtrees(this).Select(x => Tfs.GetLatestChangeset(x)).Max(x => x.Summary.ChangesetId);
+                return GetChangeset(changesetId);
+            }
         }
 
         public void UpdateTfsHead(string commitHash, long changesetId)
@@ -456,11 +558,14 @@ namespace Sep.Git.Tfs.Core
             //var commitEncoding = Repository.CommandOneline("config", "i18n.commitencoding");
             //var encoding = LookupEncoding(commitEncoding) ?? Encoding.UTF8;
             string commitHash = null;
+
+            //the remote to be associated with the commit might be a subtree, if it's null then it's not from a subtree.
+            var remote = logEntry.Remote ?? this;
             Repository.CommandInputOutputPipe((procIn, procOut) =>
                                                   {
                                                       procIn.WriteLine(logEntry.Log);
-                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl,
-                                                                       TfsRepositoryPath, logEntry.ChangesetId);
+                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, remote.TfsUrl,
+                                                                       remote.TfsRepositoryPath, logEntry.ChangesetId);
                                                       procIn.Close();
                                                       commitHash = ParseCommitInfo(procOut.ReadToEnd());
                                                   }, BuildCommitCommand(logEntry));
@@ -598,7 +703,7 @@ namespace Sep.Git.Tfs.Core
 
         private void PendChangesToWorkspace(string head, string parent, ITfsWorkspaceModifier workspace)
         {
-            using (var tidyWorkspace = new DirectoryTidier(workspace, Tfs.GetLatestChangeset(this).GetFullTree()))
+            using (var tidyWorkspace = new DirectoryTidier(workspace, GetLatestChangeset().GetFullTree()))
             {
                 foreach (var change in Repository.GetChangedFiles(parent, head))
                 {
@@ -623,7 +728,16 @@ namespace Sep.Git.Tfs.Core
 
         private void WithWorkspace(TfsChangesetInfo parentChangeset, Action<ITfsWorkspace> action)
         {
-            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
+            //are there any subtrees?
+            var subtrees = globals.Repository.GetSubtrees(this);
+            if (subtrees.Any())
+            {
+                Tfs.WithWorkspace(WorkingDirectory, this, subtrees.Select(x => new Tuple<string, string>(x.TfsRepositoryPath, x.Prefix)), parentChangeset, action);
+            }
+            else
+            {
+                Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
+            }
         }
 
         private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options, string sourceTfsPath)
@@ -636,7 +750,13 @@ namespace Sep.Git.Tfs.Core
 
         public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
         {
-            return MatchesTfsUrl(tfsUrl) && TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
+            if(!MatchesTfsUrl(tfsUrl))
+                return false;
+
+            if(TfsRepositoryPath == null)
+                return tfsRepositoryPath == null;
+            
+            return TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
         }
 
         private bool MatchesTfsUrl(string tfsUrl)

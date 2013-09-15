@@ -13,21 +13,23 @@ namespace Sep.Git.Tfs.Core
         private readonly string _localDirectory;
         private readonly TextWriter _stdout;
         private readonly TfsChangesetInfo _contextVersion;
-        private readonly IGitTfsRemote _remote;
         private readonly CheckinOptions _checkinOptions;
         private readonly ITfsHelper _tfsHelper;
         private readonly CheckinPolicyEvaluator _policyEvaluator;
+
+        public IGitTfsRemote Remote { get; private set; }
 
         public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper, CheckinPolicyEvaluator policyEvaluator)
         {
             _workspace = workspace;
             _policyEvaluator = policyEvaluator;
             _contextVersion = contextVersion;
-            _remote = remote;
             _checkinOptions = checkinOptions;
             _tfsHelper = tfsHelper;
             _localDirectory = localDirectory;
             _stdout = stdout;
+
+            this.Remote = remote;
         }
 
         public void Shelve(string shelvesetName, bool evaluateCheckinPolicies, Func<string> generateCheckinComment)
@@ -141,31 +143,33 @@ namespace Sep.Git.Tfs.Core
 
         public void Edit(string path)
         {
+            path = GetLocalPath(path);
             _stdout.WriteLine(" edit " + path);
             GetFromTfs(path);
-            var edited = _workspace.PendEdit(GetLocalPath(path));
+            var edited = _workspace.PendEdit(path);
             if (edited != 1) throw new Exception("One item should have been edited, but actually edited " + edited + " items.");
         }
 
         public void Delete(string path)
         {
+            path = GetLocalPath(path);
             _stdout.WriteLine(" delete " + path);
             GetFromTfs(path);
-            var deleted = _workspace.PendDelete(GetLocalPath(path));
+            var deleted = _workspace.PendDelete(path);
             if (deleted != 1) throw new Exception("One item should have been deleted, but actually deleted " + deleted + " items.");
         }
 
         public void Rename(string pathFrom, string pathTo, string score)
         {
             _stdout.WriteLine(" rename " + pathFrom + " to " + pathTo + " (score: " + score + ")");
-            GetFromTfs(pathFrom);
+            GetFromTfs(GetLocalPath(pathFrom));
             var result = _workspace.PendRename(GetLocalPath(pathFrom), GetLocalPath(pathTo));
             if (result != 1) throw new ApplicationException("Unable to rename item from " + pathFrom + " to " + pathTo);
         }
 
         private void GetFromTfs(string path)
         {
-            _workspace.ForceGetFile(_remote.TfsRepositoryPath + "/" + path, (int)_contextVersion.ChangesetId);
+            _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), (int)_contextVersion.ChangesetId);
         }
 
         public void Get(int changesetId)

@@ -148,14 +148,6 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal(0, remotes.Count());
             }
 
-            [Fact]
-            public void ShouldNotReturnLackingTfsRepositoryRemote()
-            {
-                var remotes = Load(
-                    c("tfs-remote.default.url", "http://server/path"));
-                Assert.Equal(0, remotes.Count());
-            }
-
         }
 
         RemoteConfigConverter _converter = new RemoteConfigConverter();

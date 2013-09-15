@@ -59,12 +59,12 @@ namespace Sep.Git.Tfs.VsFake
 
         #region read changesets
 
-        public ITfsChangeset GetLatestChangeset(GitTfsRemote remote)
+        public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
         {
             return _script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, GitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
         {
             if (!_script.Changesets.Any(c => c.IsBranchChangeset) && _script.Changesets.Any(c => c.IsMergeChangeset))
                 return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
@@ -82,7 +82,7 @@ namespace Sep.Git.Tfs.VsFake
 
         }
 
-        private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, GitTfsRemote remote)
+        private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, IGitTfsRemote remote)
         {
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(changeset)).GetInstance<TfsChangeset>();
             tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.Id, Remote = remote };
@@ -207,6 +207,19 @@ namespace Sep.Git.Tfs.VsFake
 
         #region workspaces
 
+         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
+         {
+             Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
+             var fakeWorkspace = new FakeWorkspace(localDirectory, remote.TfsRepositoryPath);
+             var workspace = _container.With("localDirectory").EqualTo(localDirectory)
+                 .With("remote").EqualTo(remote)
+                 .With("contextVersion").EqualTo(versionToFetch)
+                 .With("workspace").EqualTo(fakeWorkspace)
+                 .With("tfsHelper").EqualTo(this)
+                 .GetInstance<TfsWorkspace>();
+             action(workspace);
+         }
+
         public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Trace.WriteLine("Setting up a TFS workspace at " + directory);
@@ -315,6 +328,11 @@ namespace Sep.Git.Tfs.VsFake
                 throw new NotImplementedException();
             }
 
+            public string GetServerItemForLocalItem(string localItem)
+            {
+                throw new NotImplementedException();
+            }
+
             public string OwnerName
             {
                 get { throw new NotImplementedException(); }
@@ -394,7 +412,7 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public ITfsChangeset GetChangeset(int changesetId, GitTfsRemote remote)
+        public ITfsChangeset GetChangeset(int changesetId, IGitTfsRemote remote)
         {
             throw new NotImplementedException();
         }
@@ -424,6 +442,11 @@ namespace Sep.Git.Tfs.VsFake
         }
 
         public void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder)
         {
             throw new NotImplementedException();
         }
