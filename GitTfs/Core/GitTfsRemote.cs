@@ -299,17 +299,49 @@ namespace Sep.Git.Tfs.Core
             return tfsPath;
         }
 
-        public void Fetch()
+        public class FetchResult : IFetchResult
         {
-            FetchWithMerge(-1);
+             public bool IsSuccess { get; set; }
+             public long LastFetchedChangesetId { get; set; }
+             public string ParentBranchTfsPath { get; set; }
         }
 
-        public void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes)
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
         {
+            return FetchWithMerge(-1, stopOnFailMergeCommit);
+        }
+
+        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        {
+            var fetchResult = new FetchResult{IsSuccess = true};
             foreach (var changeset in FetchChangesets())
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
+                if (changeset.IsMergeChangeset)
+                {
+                    var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
+                    var shaParent = Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
+                    if (shaParent == null)
+                        shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit);
+                    if (shaParent != null)
+                    {
+                        log.CommitParents.Add(shaParent);
+                    }
+                    else
+                    {
+                        if (stopOnFailMergeCommit)
+                        {
+                            fetchResult.IsSuccess = false;
+                            fetchResult.LastFetchedChangesetId = MaxChangesetId;
+                            return fetchResult;
+                        }
+//TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
+                        stdout.WriteLine("warning: found merge changeset " + changeset.Summary.ChangesetId +
+                                            " but unable to manage it due to lack of local commit for changeset " + parentChangesetId +
+                                            "! Fetch the corresponding branch before...");
+                    }
+                }
                 if (changeset.Summary.ChangesetId == mergeChangesetId)
                 {
                     foreach (var parent in parentCommitsHashes)
@@ -330,6 +362,24 @@ namespace Sep.Git.Tfs.Core
                 }
                 DoGcIfNeeded();
             }
+            return fetchResult;
+        }
+
+        private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit)
+        {
+            var tfsRemotes = FindTfsRemoteOfChangeset(Tfs.GetChangeset(parentChangesetId));
+            foreach (var tfsRemote in tfsRemotes)
+            {
+                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+            }
+            return Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
+        }
+
+        private IEnumerable<IGitTfsRemote> FindTfsRemoteOfChangeset(IChangeset changeset)
+        {
+            //I think you want something that uses GetPathInGitRepo and ShouldSkip. See TfsChangeset.Apply.
+            //Don't know if there is a way to extract remote tfs repository path from changeset datas! Should be better!!!
+            return Repository.ReadAllTfsRemotes().Where(r => changeset.Changes.Any(c => r.GetPathInGitRepo(c.Item.ServerItem) != null));
         }
 
         private string CommitChangeset(ITfsChangeset changeset, string parent)
@@ -662,17 +712,17 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public long Checkin(string head, TfsChangesetInfo parentChangeset, CheckinOptions options)
+        public long Checkin(string head, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             var changeset = 0L;
-            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options));
+            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options, sourceTfsPath));
             return changeset;
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options)
+        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             var changeset = 0L;
-            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parent, workspace, options));
+            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parent, workspace, options, sourceTfsPath));
             return changeset;
         }
 
@@ -690,9 +740,11 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options)
+        private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options, string sourceTfsPath)
         {
             PendChangesToWorkspace(head, parent, workspace);
+            if (!string.IsNullOrWhiteSpace(sourceTfsPath))
+                workspace.Merge(sourceTfsPath, TfsRepositoryPath);
             return workspace.Checkin(options);
         }
 

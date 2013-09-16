@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Commands;
 
@@ -186,12 +186,12 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public void Fetch()
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
         {
             throw new NotImplementedException();
         }
 
-        public void FetchWithMerge(long mergeChangesetId, params string[] parentCommitsHashes)
+        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             throw new NotImplementedException();
         }
@@ -226,12 +226,12 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options)
+        public long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             throw new NotImplementedException();
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options)
+        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             throw new NotImplementedException();
         }
@@ -266,12 +266,16 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        #endregion
-
 
         public RemoteInfo RemoteInfo
         {
             get { throw new NotImplementedException(); }
         }
+
+        public void Merge(string sourceTfsPath, string targetTfsPath)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }
