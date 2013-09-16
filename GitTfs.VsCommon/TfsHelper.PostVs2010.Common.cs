@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.BranchVisitors;
@@ -14,6 +15,7 @@ namespace Sep.Git.Tfs.VsCommon
     public abstract class TfsHelperVs2010Base : TfsHelperBase
     {
         TfsApiBridge _bridge;
+        protected TfsTeamProjectCollection _server;
 
         public TfsHelperVs2010Base(TextWriter stdout, TfsApiBridge bridge, IContainer container)
             : base(stdout, bridge, container)
@@ -21,7 +23,14 @@ namespace Sep.Git.Tfs.VsCommon
             _bridge = bridge;
         }
 
-        public override bool CanGetBranchInformation { get { return true; } }
+        public override bool CanGetBranchInformation
+        {
+            get
+            {
+                var is2008OrOlder = (_server.ConfigurationServer == null);
+                return !is2008OrOlder;
+            }
+        }
 
         public override int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
         {
@@ -47,6 +56,12 @@ namespace Sep.Git.Tfs.VsCommon
         {
             try
             {
+                if (!CanGetBranchInformation)
+                {
+                    Trace.WriteLine("Try TFS2008 compatibility mode...");
+                    return base.GetRootChangesetForBranch(tfsPathBranchToCreate, tfsPathParentBranch);
+                }
+
                 if (!string.IsNullOrWhiteSpace(tfsPathParentBranch))
                     Trace.WriteLine("Parameter about parent branch will be ignored because this version of TFS is able to find the parent!");
 
