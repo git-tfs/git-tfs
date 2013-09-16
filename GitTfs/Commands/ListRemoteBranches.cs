@@ -39,15 +39,16 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsUrl)
         {
-            if (!tfsHelper.CanGetBranchInformation)
-            {
-                throw new GitTfsException("error: this version of TFS doesn't support this functionnality");
-            }
-
             tfsHelper.Url = tfsUrl;
             tfsHelper.Username = remoteOptions.Username;
             tfsHelper.Password = remoteOptions.Password;
             tfsHelper.EnsureAuthenticated();
+
+            if (!tfsHelper.CanGetBranchInformation)
+            {
+                throw new GitTfsException("error: this version of TFS doesn't support this functionality");
+            }
+
             var branches = tfsHelper.GetBranches().Where(b => b.IsRoot).ToList();
             if (branches.IsEmpty())
             {
