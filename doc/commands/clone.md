@@ -24,6 +24,8 @@ a TFS source tree and fetch all the changesets
           --all, --fetch-all
           --parents
           --authors=VALUE        Path to an Authors file to map TFS users to Git users
+          --with-branches        init all the TFS branches during the clone
+
 ## Examples
 
 ### Simple
@@ -52,6 +54,14 @@ If you clone the branch $/Project1/Branch, you will never able to init the root 
 ### What repository path to clone?
 
 If you don't know exactly what repository path to clone, see [list-remote-branches](list-remote-branches.md) command to get a list of the existing repositories.
+
+### Clone all the branches (and merge changesets)
+
+If you want to clone your entire repository with all the branches or that the tfs branches are merged througth merge changeset, perhaps you should use the option `--with-branches`:
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk --with-branches
+
+All the tfs history (and all the branches) and the merge changesets will consequently be fetched from TFS and created in the git repository!
 
 ### Excludes
 

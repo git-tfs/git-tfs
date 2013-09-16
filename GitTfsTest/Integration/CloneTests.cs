@@ -150,5 +150,50 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertCleanWorkspace("MyProject");
             AssertRefs("175420603e41cd0175e3c25581754726bd21cb96");
         }
+
+        [FactExceptOnUnix]
+        public void CloneProjectWithMergeChangeset()
+        {
+            //History of changesets:
+            //6
+            //|\
+            //| 5
+            //| |
+            //3 4
+            //| /
+            //2
+            //|
+            //1
+            h.SetupFake(r =>
+            {
+                r.SetRootBranch("$/MyProject/Main");
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Main")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Main/File.txt", "File contents");
+                r.Changeset(3, "commit in main", DateTime.Parse("2012-01-02 12:12:13 -05:00"))
+                    .Change(TfsChangeType.Edit, TfsItemType.File, "$/MyProject/Main/File.txt", "File contents_main");
+                r.BranchChangeset(4, "create branch", DateTime.Parse("2012-01-02 12:12:14 -05:00"), fromBranch: "$/MyProject/Main", toBranch: "$/MyProject/Branch", rootChangesetId: 2)
+                    .Change(TfsChangeType.Branch, TfsItemType.Folder, "$/MyProject/Branch")
+                    .Change(TfsChangeType.Branch, TfsItemType.File, "$/MyProject/Branch/File.txt", "File contents");
+                r.Changeset(5, "commit in branch", DateTime.Parse("2012-01-02 12:12:15 -05:00"))
+                    .Change(TfsChangeType.Edit, TfsItemType.File, "$/MyProject/Branch/File.txt", "File contents_branch");
+                r.MergeChangeset(6, "merge in main", DateTime.Parse("2012-01-02 12:12:16 -05:00"), fromBranch: "$/MyProject/Branch", intoBranch: "$/MyProject/Main", lastChangesetId: 5)
+                    .Change(TfsChangeType.Edit | TfsChangeType.Merge, TfsItemType.File, "$/MyProject/Main/File.txt", "File contents_main_branch=>_merge");
+            });
+
+            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--with-branches");
+
+            h.AssertGitRepo("MyProject");
+            const string expectedSha = "be59d37d08a0cc78916f04a256dc52f6722f800c";
+            h.AssertRef("MyProject", "HEAD", expectedSha);
+            h.AssertRef("MyProject", "master", expectedSha);
+            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
+            const string expectedShaBranch = "0df2815a74403cfe96ccb96e3f995970f55df2b4";
+            h.AssertRef("MyProject", "Branch", expectedShaBranch);
+            h.AssertRef("MyProject", "refs/remotes/tfs/Branch", expectedShaBranch);
+            h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
+        }
     }
 }

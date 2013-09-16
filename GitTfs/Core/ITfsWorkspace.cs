@@ -39,6 +39,7 @@ namespace Sep.Git.Tfs.Core
         void Get(IChangeset changeset);
 
         long CheckinTool(Func<string> generateCheckinComment);
+        void Merge(string sourceTfsPath, string tfsRepositoryPath);
 
         /// <summary>
         /// Gets the remote for which this workspace was created.

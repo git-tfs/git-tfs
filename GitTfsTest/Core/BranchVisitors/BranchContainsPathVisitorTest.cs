@@ -3,6 +3,7 @@ using System.Linq;
 using Sep.Git.Tfs.Core.BranchVisitors;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Test.Commands;
+using Sep.Git.Tfs.VsFake;
 using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core.BranchVisitors
@@ -13,7 +14,7 @@ namespace Sep.Git.Tfs.Test.Core.BranchVisitors
 
         public BranchContainsPathVisitorTest()
         {
-            branch = new BranchTree(new InitBranchTest.MockBranchObject { Path = @"$/Scratch/Source/Main" });
+            branch = new BranchTree(new MockBranchObject { Path = @"$/Scratch/Source/Main" });
         }
 
         [Fact]

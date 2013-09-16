@@ -18,5 +18,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         string GetLocalItemForServerItem(string serverItem);
         string GetServerItemForLocalItem(string localItem);
         string OwnerName { get; }
+        void Merge(string sourceTfsPath, string tfsRepositoryPath);
     }
 }
