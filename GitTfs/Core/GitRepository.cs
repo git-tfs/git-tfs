@@ -361,8 +361,8 @@ namespace Sep.Git.Tfs.Core
         public string GetCommitMessage(string head, string parentCommitish)
         {
             var message = new System.Text.StringBuilder();
-            foreach (LibGit2Sharp.Commit comm in
-                _repository.Commits.QueryBy(new LibGit2Sharp.Filter { Since = head, Until = parentCommitish }))
+            foreach (Commit comm in
+                _repository.Commits.QueryBy(new CommitFilter { Since = head, Until = parentCommitish }))
             {
                 // Normalize commit message line endings to CR+LF style, so that message
                 // would be correctly shown in TFS commit dialog.
