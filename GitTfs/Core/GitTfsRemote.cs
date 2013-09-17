@@ -368,7 +368,7 @@ namespace Sep.Git.Tfs.Core
         private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit)
         {
             var tfsRemotes = FindTfsRemoteOfChangeset(Tfs.GetChangeset(parentChangesetId));
-            foreach (var tfsRemote in tfsRemotes)
+            foreach (var tfsRemote in tfsRemotes.Where(r=>string.Compare(r.TfsRepositoryPath, this.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase) != 0))
             {
                 var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
             }
