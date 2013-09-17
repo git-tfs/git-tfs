@@ -78,6 +78,11 @@ namespace Sep.Git.Tfs.Vs11
             return VersionControl.AuthorizedUser;
         }
 
+        protected override bool HasWorkItems(Changeset changeset)
+        {
+            return changeset.AssociatedWorkItems.Length > 0;
+        }
+
         public override bool CanShowCheckinDialog { get { return true; } }
 
         public override long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
