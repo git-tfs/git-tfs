@@ -212,7 +212,25 @@ namespace Sep.Git.Tfs.VsCommon
             return tfsChangeset;
         }
 
-        protected abstract bool HasWorkItems(Changeset changeset);
+        protected virtual bool HasWorkItems(Changeset changeset)
+        {
+            // This method wraps changeset.WorkItems, because
+            // changeset.WorkItems might result to ConnectionException: TF26175: Team Foundation Core Services attribute 'AttachmentServerUrl' not found.
+            // in this case assume that it is initialized to null
+            // NB: in VS2011 a new property appeared (AssociatedWorkItems), which works correctly
+            WorkItem[] result = null;
+            try
+            {
+                result = changeset.WorkItems;
+            }
+            catch (ConnectionException exception)
+            {
+                if (!exception.Message.StartsWith("TF26175:"))
+                    throw;
+            }
+
+            return result != null && result.Length > 0;
+        }
 
         Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 

@@ -76,25 +76,6 @@ namespace Sep.Git.Tfs.Vs2010
             return VersionControl.AuthorizedUser;
         }
 
-        protected override bool HasWorkItems(Changeset changeset)
-        {
-            // This method wraps changeset.WorkItems, because
-            // changeset.WorkItems might result to ConnectionException: TF26175: Team Foundation Core Services attribute 'AttachmentServerUrl' not found.
-            // in this case assume that it is initialized to null
-            // NB: in VS2011 a new property appeared (AssociatedWorkItems), which works correctly
-            WorkItem[] result = null;
-            try
-            {
-                result = changeset.WorkItems;
-            }
-            catch (ConnectionException exception)
-            {
-                Debug.Assert(exception.Message.StartsWith("TF26175:"), "Not expected exception from TFS.");
-            }
-
-            return result != null && result.Length > 0;
-        }
-
         public override bool CanShowCheckinDialog { get { return true; } }
 
         public override long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
