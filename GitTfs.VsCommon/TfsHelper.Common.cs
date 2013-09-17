@@ -198,7 +198,7 @@ namespace Sep.Git.Tfs.VsCommon
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
             tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };
 
-            if (changeset.WorkItems != null)
+            if (HasWorkItems(changeset))
             {
                 tfsChangeset.Summary.Workitems = changeset.WorkItems.Select(wi => new TfsWorkitem
                     {
@@ -211,6 +211,8 @@ namespace Sep.Git.Tfs.VsCommon
 
             return tfsChangeset;
         }
+
+        protected abstract bool HasWorkItems(Changeset changeset);
 
         Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
