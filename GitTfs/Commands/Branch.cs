@@ -27,6 +27,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly Help helper;
         private readonly Cleanup cleanup;
         private readonly InitBranch initBranch;
+        private readonly Rcheckin rcheckin;
         public bool DisplayRemotes { get; set; }
         public bool ManageAll { get; set; }
         public bool ShouldRenameRemote { get; set; }
@@ -64,13 +65,14 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public Branch(Globals globals, TextWriter stdout, Help helper, Cleanup cleanup, InitBranch initBranch)
+        public Branch(Globals globals, TextWriter stdout, Help helper, Cleanup cleanup, InitBranch initBranch, Rcheckin rcheckin)
         {
             this.globals = globals;
             this.stdout = stdout;
             this.helper = helper;
             this.cleanup = cleanup;
             this.initBranch = initBranch;
+            this.rcheckin = rcheckin;
             //[Temporary] Remove in the next version!
             initBranch.DontDisplayObsoleteMessage = true;
         }
@@ -174,16 +176,31 @@ namespace Sep.Git.Tfs.Commands
 
         private int CreateRemote(string tfsPath, string gitBranchNameExpected = null)
         {
+            bool checkInCurrentBranch = false;
             tfsPath.AssertValidTfsPath();
             Trace.WriteLine("Getting commit informations...");
             var commit = globals.Repository.GetCurrentTfsCommit();
-            if(commit == null)
-                throw new GitTfsException("error : the current commit is not checked in TFS!");
+            if (commit == null)
+            {
+                checkInCurrentBranch = true;
+                var parents = globals.Repository.GetLastParentTfsCommits(globals.Repository.GetCurrentCommit());
+                if(!parents.Any())
+                    throw new GitTfsException("error : no tfs remote parent found!");
+                commit = parents.First();
+            }
             var remote = commit.Remote;
             Trace.WriteLine("Creating branch in TFS...");
             remote.Tfs.CreateBranch(remote.TfsRepositoryPath, tfsPath, (int)commit.ChangesetId, Comment ?? "Creation branch " + tfsPath);
             Trace.WriteLine("Init branch in local repository...");
-            return initBranch.Run(tfsPath, gitBranchNameExpected);
+            initBranch.DontCreateGitBranch = true;
+            var returnCode = initBranch.Run(tfsPath, gitBranchNameExpected);
+            
+            if (returnCode != GitTfsExitCodes.OK || !checkInCurrentBranch)
+                return returnCode;
+            
+            rcheckin.RebaseOnto(globals.Repository, initBranch.RemoteCreated.RemoteRef, commit.GitCommit);
+            globals.UserSpecifiedRemoteId = initBranch.RemoteCreated.Id;
+            return rcheckin.Run();
         }
 
         private int DeleteRemote(string remoteName)
