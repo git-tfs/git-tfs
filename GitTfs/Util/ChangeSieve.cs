@@ -84,6 +84,11 @@ namespace Sep.Git.Tfs.Util
             };
             foreach (var change in NamedChanges)
             {
+                if (change.Change.Item.ItemType == TfsItemType.Folder
+                   && change.GitPath == string.Empty
+                   && change.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
+                    return new List<ApplicableChange>();
+
                 // We only need the file changes because git only cares about files and if you make
                 // changes to a folder in TFS, the changeset includes changes for all the descendant files anyway.
                 if (change.Change.Item.ItemType != TfsItemType.File)
