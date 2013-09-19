@@ -256,8 +256,10 @@ namespace Sep.Git.Tfs.Commands
                     Repository = tfsRepositoryPath,
                     RemoteOptions = _remoteOptions
                 }, System.String.Empty);
+
             if (!_globals.Repository.CreateBranch(tfsRemote.RemoteRef, sha1RootCommit))
                 throw new GitTfsException("error: Fail to create remote branch ref file!");
+
             Trace.WriteLine("Remote created!");
             return tfsRemote;
         }

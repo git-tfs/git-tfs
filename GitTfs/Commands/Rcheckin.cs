@@ -287,9 +287,9 @@ namespace Sep.Git.Tfs.Commands
             return null;
         }
 
-        public void RebaseOnto(IGitRepository repository, string tfsLatest, string target)
+        public void RebaseOnto(IGitRepository repository, string newBaseCommit, string oldBaseCommit)
         {
-            repository.CommandNoisy("rebase", "--preserve-merges", "--onto", tfsLatest, target);
+            repository.CommandNoisy("rebase", "--preserve-merges", "--onto", newBaseCommit, oldBaseCommit);
         }
     }
 }
