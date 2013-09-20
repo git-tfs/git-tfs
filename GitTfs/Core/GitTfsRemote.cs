@@ -368,10 +368,10 @@ namespace Sep.Git.Tfs.Core
                         log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.CodeReviewer;
 
                     if (!string.IsNullOrWhiteSpace(changeset.Summary.SecurityReviewer))
-                        log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.SecurityReviewer;
+                        log.Log += "\n" + GitTfsConstants.GitTfsSecurityReviewerPrefix + changeset.Summary.SecurityReviewer;
 
                     if (!string.IsNullOrWhiteSpace(changeset.Summary.PerformanceReviewer))
-                        log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.PerformanceReviewer;
+                        log.Log += "\n" + GitTfsConstants.GitTfsPerformanceReviewerPrefix + changeset.Summary.PerformanceReviewer;
                 }
 
                 var commitSha = Commit(log);
