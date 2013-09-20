@@ -351,12 +351,24 @@ namespace Sep.Git.Tfs.Core
                     }
                 }
 
-                if (ExportMetadatas && changeset.Summary.Workitems.Any())
+                if (ExportMetadatas)
                 {
-                    string workitems = "\n";
-                    foreach (var workitem in changeset.Summary.Workitems)
-                        workitems += GitTfsConstants.GitTfsWorkItemPrefix + workitem.Id + " associate\n";
-                    log.Log += workitems;
+                    if (changeset.Summary.Workitems.Any())
+                    {
+                        string workitems = string.Empty;
+                        foreach (var workitem in changeset.Summary.Workitems)
+                            workitems += "\n" + GitTfsConstants.GitTfsWorkItemPrefix + workitem.Id + " associate";
+                        log.Log += workitems;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(changeset.Summary.CodeReviewer))
+                        log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.CodeReviewer;
+
+                    if (!string.IsNullOrWhiteSpace(changeset.Summary.SecurityReviewer))
+                        log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.SecurityReviewer;
+
+                    if (!string.IsNullOrWhiteSpace(changeset.Summary.PerformanceReviewer))
+                        log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.PerformanceReviewer;
                 }
 
                 var commitSha = Commit(log);
