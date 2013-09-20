@@ -122,7 +122,16 @@ namespace Sep.Git.Tfs.Commands
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
             globals.Repository.MoveTfsRefForwardIfNeeded(remote);
-            remote.ExportMetadatas = ExportMetadatas;
+            if (ExportMetadatas)
+            {
+                remote.ExportMetadatas = true;
+                remote.Repository.SetConfig(GitTfsConstants.ExportMetadatasConfigKey, "true");
+            }
+            else
+            {
+                if(remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true")
+                    remote.ExportMetadatas = true;
+            }
             remote.Fetch(stopOnFailMergeCommit);
 
             Trace.WriteLine("Cleaning...");

@@ -54,5 +54,7 @@ namespace Sep.Git.Tfs
         public const string CodeReviewer = "Code Reviewer";
         public const string SecurityReviewer = "Security Reviewer"; 
         public const string PerformanceReviewer = "Performance Reviewer";
+
+        public const string ExportMetadatasConfigKey = GitTfsPrefix + ".export-metadatas";
     }
 }
