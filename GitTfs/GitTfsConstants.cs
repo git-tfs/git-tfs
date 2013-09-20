@@ -16,6 +16,7 @@ namespace Sep.Git.Tfs
         public const string GitTfsCodeReviewerPrefix = GitTfsPrefix + "-code-reviewer:";
         public const string GitTfsSecurityReviewerPrefix = GitTfsPrefix + "-security-reviewer:";
         public const string GitTfsPerformanceReviewerPrefix = GitTfsPrefix + "-performance-reviewer:";
+        public const string GitTfsPolicyOverrideCommentPrefix = GitTfsPrefix + "-force:";
        // e.g. git-tfs-id: [http://team:8080/]$/sandbox;C123
         public const string TfsCommitInfoFormat = "git-tfs-id: [{0}]{1};C{2}";
         public static readonly Regex TfsCommitInfoRegex =
@@ -36,7 +37,7 @@ namespace Sep.Git.Tfs
 
         // e.g. git-tfs-force: override reason
         public static readonly Regex TfsForceRegex =
-                new Regex(GitTfsPrefix + @"-force:\s*(?<reason>.+)\s*$");
+                new Regex(GitTfsPolicyOverrideCommentPrefix + @"\s*(?<reason>.+)\s*$");
 
         /// <summary>
         /// Applied to a remote ID to determine if it is a subtree

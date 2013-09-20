@@ -14,6 +14,8 @@ namespace Sep.Git.Tfs.Core
         public string SecurityReviewer { get; set; }
         public string PerformanceReviewer { get; set; }
 
+        public string PolicyOverrideComment { get; set; }
+
         public TfsChangesetInfo()
         {
             Workitems = Enumerable.Empty<ITfsWorkitem>();

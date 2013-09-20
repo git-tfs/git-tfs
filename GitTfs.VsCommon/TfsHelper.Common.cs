@@ -223,6 +223,7 @@ namespace Sep.Git.Tfs.VsCommon
                         break;
                 }
             }
+            tfsChangeset.Summary.PolicyOverrideComment = changeset.PolicyOverride.Comment;
             
             return tfsChangeset;
         }

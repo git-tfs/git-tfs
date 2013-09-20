@@ -361,6 +361,9 @@ namespace Sep.Git.Tfs.Core
                         log.Log += workitems;
                     }
 
+                    if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
+                        log.Log += "\n" + GitTfsConstants.GitTfsPolicyOverrideCommentPrefix + changeset.Summary.PolicyOverrideComment;
+
                     if (!string.IsNullOrWhiteSpace(changeset.Summary.CodeReviewer))
                         log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.CodeReviewer;
 
