@@ -40,6 +40,7 @@ namespace Sep.Git.Tfs.Core
         bool IsSubtreeOwner { get; }
         string OwningRemoteId { get; }
         string Prefix { get; }
+        bool ExportMetadatas { get; set; }
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
         IFetchResult Fetch(bool stopOnFailMergeCommit = false);

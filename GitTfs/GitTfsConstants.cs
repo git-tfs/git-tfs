@@ -12,7 +12,8 @@ namespace Sep.Git.Tfs
         public const string DefaultRepositoryId = "default";
 
         public const string GitTfsPrefix = "git-tfs";
-        // e.g. git-tfs-id: [http://team:8080/]$/sandbox;C123
+        public const string GitTfsWorkItemPrefix = GitTfsPrefix + "-work-item:";
+       // e.g. git-tfs-id: [http://team:8080/]$/sandbox;C123
         public const string TfsCommitInfoFormat = "git-tfs-id: [{0}]{1};C{2}";
         public static readonly Regex TfsCommitInfoRegex =
                 new Regex("^\\s*" +
@@ -24,7 +25,7 @@ namespace Sep.Git.Tfs
                           "\\s*$", RegexOptions.Multiline);
         // e.g. git-tfs-work-item: 24 associate
         public static readonly Regex TfsWorkItemRegex =
-                new Regex(GitTfsPrefix + @"-work-item:\s*(?<item_id>\d+)\s*(?<action>associate|resolve)");
+                new Regex(GitTfsWorkItemPrefix + @"\s*(?<item_id>\d+)\s*(?<action>associate|resolve)");
 
         // e.g. git-tfs-code-reviewer: John Smith
         public static readonly Regex TfsReviewerRegex =

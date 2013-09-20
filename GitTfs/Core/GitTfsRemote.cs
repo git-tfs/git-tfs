@@ -132,6 +132,7 @@ namespace Sep.Git.Tfs.Core
         public string OwningRemoteId { get; private set; }
 
         public string Prefix { get; private set; }
+        public bool ExportMetadatas { get; set; }
 
         public long MaxChangesetId
         {
@@ -349,6 +350,15 @@ namespace Sep.Git.Tfs.Core
                         log.CommitParents.Add(parent);
                     }
                 }
+
+                if (ExportMetadatas && changeset.Summary.Workitems.Any())
+                {
+                    string workitems = "\n";
+                    foreach (var workitem in changeset.Summary.Workitems)
+                        workitems += GitTfsConstants.GitTfsWorkItemPrefix + workitem.Id + " associate\n";
+                    log.Log += workitems;
+                }
+
                 var commitSha = Commit(log);
                 UpdateTfsHead(commitSha, changeset.Summary.ChangesetId);
                 if(changeset.Summary.Workitems.Any())

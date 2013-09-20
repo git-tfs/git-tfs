@@ -38,6 +38,7 @@ namespace Sep.Git.Tfs.Commands
         string AuthorsFilePath { get; set; }
         string BareBranch { get; set; }
         bool ForceFetchBare { get; set; }
+        bool ExportMetadatas { get; set; }
 
         public virtual OptionSet OptionSet
         {
@@ -57,6 +58,8 @@ namespace Sep.Git.Tfs.Commands
                         v => BareBranch = v },
                     { "force", "Force fetch of tfs changesets when there is ahead commits (ahead commits will be lost!)",
                         v => ForceFetchBare = v != null },
+                    { "x|export", "Export metadatas",
+                        v => ExportMetadatas = v != null },
 //                    { "r|revision=",
 //                        v => RevisionToFetch = Convert.ToInt32(v) },
                 }.Merge(remoteOptions.OptionSet);
@@ -119,6 +122,7 @@ namespace Sep.Git.Tfs.Commands
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
             globals.Repository.MoveTfsRefForwardIfNeeded(remote);
+            remote.ExportMetadatas = ExportMetadatas;
             remote.Fetch(stopOnFailMergeCommit);
 
             Trace.WriteLine("Cleaning...");
