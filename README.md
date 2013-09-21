@@ -72,7 +72,8 @@ You need .NET 4 and either the 2008, 2010 or 2012 version of Team Explorer insta
     # or shelve your changes :
     git tfs shelve MY_AWESOME_CHANGES
 
-
+You could find more interesting [uses cases](doc/usecases/usecases.md) on how to use git-tfs.
+	
 git-tfs is designed to work outside of any existing TFS workspaces.
 
 ## Available commands / options
