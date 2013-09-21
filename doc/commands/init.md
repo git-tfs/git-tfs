@@ -45,3 +45,4 @@ Note: [pull] is here prefered to [fetch], otherwise the git branch `master` won'
 * [quick-clone](quick-clone.md)
 * [pull](pull.md)
 * [fetch](fetch.md)
+* [Set custom workspace to bypass errors due to NTFS length path limits of 259 characters](../Set-custom-workspace.md)
