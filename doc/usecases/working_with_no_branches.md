@@ -79,7 +79,7 @@ You could also merge your commits into the ones fetch with the command:
 
 but this solution is discouraged because merged commits couldn't be push to tfs as this and you will finish with strange git history!
 
-# Check in TFS
+## Check in TFS
 
 Once you've rebased your commits onto the newly fetched changesets, you could check them in TFS:
 
