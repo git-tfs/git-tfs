@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -376,6 +377,7 @@ namespace Sep.Git.Tfs.Core
 
                 var commitSha = Commit(log);
                 UpdateTfsHead(commitSha, changeset.Summary.ChangesetId);
+                StringBuilder metadatas = new StringBuilder();
                 if(changeset.Summary.Workitems.Any())
                 {
                     string workitemNote = "Workitems:\n";
@@ -383,8 +385,22 @@ namespace Sep.Git.Tfs.Core
                     {
                         workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitem.Id, workitem.Title, workitem.Url);
                     }
-                    Repository.CreateNote(commitSha, workitemNote, log.AuthorName, log.AuthorEmail, log.Date);
+                    metadatas.Append(workitemNote);
                 }
+
+                if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
+                    metadatas.Append("\nPolicy Override Comment:" + changeset.Summary.PolicyOverrideComment);
+
+                if (!string.IsNullOrWhiteSpace(changeset.Summary.CodeReviewer))
+                    metadatas.Append("\nCode Reviewer:" + changeset.Summary.CodeReviewer);
+
+                if (!string.IsNullOrWhiteSpace(changeset.Summary.SecurityReviewer))
+                    metadatas.Append("\nSecurity Reviewer:" + changeset.Summary.SecurityReviewer);
+
+                if (!string.IsNullOrWhiteSpace(changeset.Summary.PerformanceReviewer))
+                    metadatas.Append("\nPerformance Reviewer:" + changeset.Summary.PerformanceReviewer);
+                if (metadatas.Length != 0)
+                    Repository.CreateNote(commitSha, metadatas.ToString(), log.AuthorName, log.AuthorEmail, log.Date);
                 DoGcIfNeeded();
             }
             return fetchResult;
