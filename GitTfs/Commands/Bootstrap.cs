@@ -40,7 +40,12 @@ namespace Sep.Git.Tfs.Commands
             var tfsParents = _globals.Repository.GetLastParentTfsCommits(commitish, true);
             foreach (var parent in tfsParents)
             {
-                _globals.Repository.CommandNoisy("log", "-1", parent.GitCommit);
+                GitCommit commit = _globals.Repository.GetCommit(parent.GitCommit);
+                _stdout.WriteLine("commit {0}\nAuthor: {1} <{2}>\nDate:   {3}\n\n    {4}",
+                    commit.Sha,
+                    commit.AuthorAndEmail.Item1, commit.AuthorAndEmail.Item2,
+                    commit.When.ToString("ddd MMM d HH:mm:ss zzz"),
+                    commit.Message.Replace("\n","\n    ").TrimEnd(' '));
                 if (parent.Remote.IsDerived)
                 {
                     var remoteId = GetRemoteId(parent);
