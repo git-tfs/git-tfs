@@ -33,9 +33,16 @@ into a new directory `Project1`, do this:
 
     git tfs init http://tfs:8080/tfs/DefaultCollection $/Project1
 
+then, to retrieve tfs changesets do this :
+
+    git tfs pull
+
+Note: [pull] is here prefered to [fetch], otherwise the git branch `master` won't be created :(	
 
 ## See also
 
 * [clone](clone.md)
 * [quick-clone](quick-clone.md)
+* [pull](pull.md)
 * [fetch](fetch.md)
+* [Set custom workspace to bypass errors due to NTFS length path limits of 259 characters](../Set-custom-workspace.md)
