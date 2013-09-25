@@ -73,6 +73,12 @@ namespace Sep.Git.Tfs.Core
             return entry == null ? null : entry.Value;
         }
 
+        public void SetConfig(string key, string value)
+        {
+            _repository.Config.Set<string>(key, value, ConfigurationLevel.Local);
+        }
+
+
         public IEnumerable<IGitTfsRemote> ReadAllTfsRemotes()
         {
             var remotes = GetTfsRemotes().Values;

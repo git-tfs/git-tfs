@@ -176,6 +176,8 @@ namespace Sep.Git.Tfs.Core
             get { return null; }
         }
 
+        public bool ExportMetadatas { get; set; }
+
         public bool ShouldSkip(string path)
         {
             throw new NotImplementedException();
