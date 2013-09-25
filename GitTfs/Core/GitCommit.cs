@@ -47,6 +47,14 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public DateTimeOffset When
+        {
+            get
+            {
+                return _commit.Author.When;
+            }
+        }
+
         public string Sha
         {
             get
