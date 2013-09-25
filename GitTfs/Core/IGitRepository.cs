@@ -11,6 +11,7 @@ namespace Sep.Git.Tfs.Core
     {
         string GitDir { get; set; }
         string GetConfig(string key);
+        void SetConfig(string key, string value);
         IEnumerable<IGitTfsRemote> ReadAllTfsRemotes();
         IGitTfsRemote ReadTfsRemote(string remoteId);
         IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo, string autocrlf = null, string ignorecase = null);

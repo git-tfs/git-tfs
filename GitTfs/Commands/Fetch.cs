@@ -30,14 +30,13 @@ namespace Sep.Git.Tfs.Commands
             this.labels = labels;
         }
 
-//        public int? RevisionToFetch { get; set; }
-
         bool FetchAll { get; set; }
         bool FetchLabels { get; set; }
         bool FetchParents { get; set; }
         string AuthorsFilePath { get; set; }
         string BareBranch { get; set; }
         bool ForceFetchBare { get; set; }
+        bool ExportMetadatas { get; set; }
 
         public virtual OptionSet OptionSet
         {
@@ -57,8 +56,8 @@ namespace Sep.Git.Tfs.Commands
                         v => BareBranch = v },
                     { "force", "Force fetch of tfs changesets when there is ahead commits (ahead commits will be lost!)",
                         v => ForceFetchBare = v != null },
-//                    { "r|revision=",
-//                        v => RevisionToFetch = Convert.ToInt32(v) },
+                    { "x|export", "Export metadatas",
+                        v => ExportMetadatas = v != null },
                 }.Merge(remoteOptions.OptionSet);
             }
         }
@@ -119,6 +118,16 @@ namespace Sep.Git.Tfs.Commands
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
             globals.Repository.MoveTfsRefForwardIfNeeded(remote);
+            if (ExportMetadatas)
+            {
+                remote.ExportMetadatas = true;
+                remote.Repository.SetConfig(GitTfsConstants.ExportMetadatasConfigKey, "true");
+            }
+            else
+            {
+                if(remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true")
+                    remote.ExportMetadatas = true;
+            }
             remote.Fetch(stopOnFailMergeCommit);
 
             Trace.WriteLine("Cleaning...");
