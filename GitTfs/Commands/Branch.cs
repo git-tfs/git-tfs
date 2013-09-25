@@ -13,6 +13,7 @@ namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("branch")]
     [Description("branch\n\n" +
+        "       * Display inited remote TFS branches:\n       git tfs branch\n\n" +
         "       * Display remote TFS branches:\n       git tfs branch -r\n       git tfs branch -r -all\n\n" +
         "       * Create a TFS branch from current commit:\n       git tfs branch $/Repository/ProjectBranchToCreate <myWishedRemoteName> --comment=\"Creation of my branch\"\n\n" +
         "       * Rename a remote branch:\n       git tfs branch --move oldTfsRemoteName newTfsRemoteName\n\n" +

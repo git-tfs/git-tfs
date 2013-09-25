@@ -8,12 +8,10 @@ Here are some things I'd like to do with git-tfs:
 * Use a newer build of henon/gitsharp to fix [the out of memory problem](https://github.com/git-tfs/git-tfs/issues/22).
 * Use [libgit2/libgit2sharp](https://github.com/libgit2/libgit2sharp) for more git operations
 * Clean up the object model.
-* Translate TFS branches into git branches.
 * Translate TFS labels into git tags.
 * Faster import (clone and/or quick-clone) ([in progress](https://github.com/git-tfs/git-tfs/issues/173))
   * git-fast-import?
   * TFS get specific version, then add?
 * Config params to support a more concise notation for TFS server URLs and/or a default server URL.
 * A more nuanced fetch spec, similar to working directory specs from TFS.
-* Work in bare repositories.
 * make tfs a "real" remote with git-remote-&lt;vcs&gt; ?
