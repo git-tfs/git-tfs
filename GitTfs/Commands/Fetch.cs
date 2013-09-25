@@ -30,8 +30,6 @@ namespace Sep.Git.Tfs.Commands
             this.labels = labels;
         }
 
-//        public int? RevisionToFetch { get; set; }
-
         bool FetchAll { get; set; }
         bool FetchLabels { get; set; }
         bool FetchParents { get; set; }
@@ -60,8 +58,6 @@ namespace Sep.Git.Tfs.Commands
                         v => ForceFetchBare = v != null },
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
-//                    { "r|revision=",
-//                        v => RevisionToFetch = Convert.ToInt32(v) },
                 }.Merge(remoteOptions.OptionSet);
             }
         }
