@@ -6,14 +6,14 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.Commands
 {
-    [Pluggable("reset")]
-    [Description("reset commit-sha1-ref")]
+    [Pluggable("reset-remote")]
+    [Description("reset-remote commit-sha1-ref\n ex : git tfs reset-remote 3dcce821d7a20e6b2499cdd6f2f52ffbe8507be7")]
     [RequiresValidGitRepository]
-    public class Reset : GitTfsCommand
+    public class ResetRemote : GitTfsCommand
     {
         private readonly Globals globals;
 
-        public Reset(Globals globals)
+        public ResetRemote(Globals globals)
         {
             this.globals = globals;
         }
@@ -28,10 +28,12 @@ namespace Sep.Git.Tfs.Commands
 
             var targetCommit = globals.Repository.GetTfsCommit(commitRef);
             if (targetCommit == null)
-                throw new GitTfsException("error : the commit where you want to reset the tfs remote \"" + currentTfsCommit.Remote.Id + "\" does not belong to a tfs remote!");
+                throw new GitTfsException("error : the commit where you want to reset the tfs remote \""
+                + currentTfsCommit.Remote.Id + "\" does not belong to a tfs remote!");
 
             if (targetCommit.Remote.Id != currentTfsCommit.Remote.Id)
-                throw new GitTfsException("error : the commit where you want to reset the tfs remote \"" + currentTfsCommit.Remote.Id + "\" does not belong to the same tfs remote!");
+                throw new GitTfsException("error : the commit where you want to reset the tfs remote \""
+                + currentTfsCommit.Remote.Id + "\" does not belong to the same tfs remote!");
 
             globals.Repository.ResetRemote(currentTfsCommit.Remote, targetCommit.GitCommit);
 
