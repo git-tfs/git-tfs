@@ -537,5 +537,10 @@ namespace Sep.Git.Tfs.Core
 
             return ReadAllTfsRemotes().Where(x => x.IsSubtree && string.Equals(x.OwningRemoteId, owner.Id, StringComparison.InvariantCultureIgnoreCase));
         }
+
+        public void ResetRemote(IGitTfsRemote remoteToReset, string target)
+        {
+            _repository.Refs.UpdateTarget(remoteToReset.RemoteRef, target);
+        }
     }
 }
