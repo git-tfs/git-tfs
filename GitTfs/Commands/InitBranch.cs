@@ -88,8 +88,14 @@ namespace Sep.Git.Tfs.Commands
 
                 creationBranchData = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
             }
+
+            _stdout.WriteLine("Branches to Initialize successively :");
+            foreach (var branch in creationBranchData)
+                _stdout.WriteLine("-" + branch.TfsBranchPath + " (" + branch.RootChangeset + ")");
+
             foreach (var rootBranch in creationBranchData)
             {
+                Trace.WriteLine("Processing " + (rootBranch.IsRenamedBranch ? "renamed " : string.Empty) + "branch :" + rootBranch.TfsBranchPath + " (" + rootBranch.RootChangeset + ")");
                 var cbd = new BranchCreationDatas() { RootChangesetId = rootBranch.RootChangeset, TfsRepositoryPath = rootBranch.TfsBranchPath };
                 if (cbd.TfsRepositoryPath == tfsBranchPath)
                     cbd.GitBranchNameExpected = gitBranchNameExpected;
@@ -98,6 +104,9 @@ namespace Sep.Git.Tfs.Commands
                 if (string.IsNullOrWhiteSpace(cbd.Sha1RootCommit))
                     throw new GitTfsException("error: The root changeset " + cbd.RootChangesetId +
                                           " have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n");
+
+                Trace.WriteLine("Found commit " + cbd.Sha1RootCommit + " for changeset :" + cbd.RootChangesetId);
+
                 var tfsRemote = CreateBranch(defaultRemote, cbd.TfsRepositoryPath, cbd.Sha1RootCommit, cbd.GitBranchNameExpected);
                 RemoteCreated = tfsRemote;
                 if (rootBranch.IsRenamedBranch || !NoFetch)
