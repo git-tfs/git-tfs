@@ -87,6 +87,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         private void GetRootChangesetForBranch(IList<RootBranch> rootBranches, string tfsPathBranchToCreate, string tfsPathParentBranch = null)
         {
+            Trace.WriteLine("Looking for root changeset for branch:" + tfsPathBranchToCreate);
             try
             {
                 if (!CanGetBranchInformation)
@@ -201,13 +202,36 @@ namespace Sep.Git.Tfs.VsCommon
         {
             renameFromBranch = null;
             merges = (merges ?? new ExtendedMerge[] {}).ToArray();
-            var merge = merges.LastOrDefault(m => m.SourceItem.Item.ServerItem.Equals(tfsPathParentBranch, StringComparison.InvariantCultureIgnoreCase))
-                     ?? merges.LastOrDefault();
+            var merge = merges.LastOrDefault(m => m.SourceItem.Item.ServerItem.Equals(tfsPathParentBranch, StringComparison.InvariantCultureIgnoreCase));
+            if (merge == null)
+            {
+                Trace.WriteLine("Took last merge found because no one satisfying conditions!");
+                merge = merges.LastOrDefault();
+            }
 
             if (merge == null)
             {
                 throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find root changeset for " + tfsPathBranchToCreate + " branch in " + tfsPathParentBranch + " branch");
             }
+
+            var changes = "Merge changetype:";
+            bool first = true;
+            foreach (ChangeType changeType in Enum.GetValues(typeof(ChangeType)))
+            {
+                if (merge.SourceItem.ChangeType.HasFlag(changeType))
+                {
+                    if (first)
+                        first = false;
+                    else
+                        changes += " | ";
+                    changes += changeType.ToString("G");
+                }
+            }
+            Trace.WriteLine("Merge ChangesetId:" + merge.SourceChangeset.ChangesetId);
+            Trace.WriteLine(changes);
+            Trace.WriteLine("Merge ServerItem:" + merge.SourceItem.Item.ServerItem);
+            if (merge.TargetItem.Item != null)
+                Trace.WriteLine("Merge TargetItem:" + merge.TargetItem.Item);
 
             if (merge.SourceItem.ChangeType.HasFlag(ChangeType.Rename))
                 renameFromBranch = merge.TargetItem.Item;
