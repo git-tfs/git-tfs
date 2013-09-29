@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -12,10 +13,12 @@ namespace Sep.Git.Tfs.Commands
     public class ResetRemote : GitTfsCommand
     {
         private readonly Globals globals;
+        private readonly TextWriter stdout;
 
-        public ResetRemote(Globals globals)
+        public ResetRemote(Globals globals, TextWriter stdout)
         {
             this.globals = globals;
+            this.stdout = stdout;
         }
 
         public virtual OptionSet OptionSet { get { return new OptionSet { }; } }
@@ -37,6 +40,8 @@ namespace Sep.Git.Tfs.Commands
 
             globals.Repository.ResetRemote(currentTfsCommit.Remote, targetCommit.GitCommit);
 
+            stdout.WriteLine("Remote 'tfs/" + currentTfsCommit.Remote.Id + "' reset successfully.");
+            stdout.WriteLine("Note: remember to use the '--force' option when doing the next 'fetch' to force git-tfs to fetch again the changesets!");
             return GitTfsExitCodes.OK;
         }
     }
