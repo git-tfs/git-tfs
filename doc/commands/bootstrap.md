@@ -38,3 +38,10 @@ The bootstrap command allows you to quickly configure a cloned git repository fo
     [user 2] git tfs bootstrap
 
 At this point, `user2` will be able to use all the normal git-tfs commands.
+
+## Using bootstrap in a repository with TFS branches
+
+If you cloned a git tfs repository where TFS branches has already been initialized, and that you planned to use `bootstrap`, you _MUST_ `bootstrap` first the trunk also named 'master' (that will be bootstraped as `tfs/default`).
+Then, you should `bootstrap` all the missing tfs remotes.
+
+Note: When you `bootstrap` one branch, the `boostrap` command will automatically bootstrap also all the TFS remotes that was merged in this TFS branches. So, perhaps, you won't have to `boostrap` all the TFS remotes.  
