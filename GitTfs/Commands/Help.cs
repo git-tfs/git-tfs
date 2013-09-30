@@ -74,6 +74,7 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
             output.WriteLine(" (use 'git-tfs help [command]' for more information)");
+            output.WriteLine("\nFind more help in our online help : https://github.com/git-tfs/git-tfs");
             return GitTfsExitCodes.Help;
         }
 
@@ -87,6 +88,8 @@ namespace Sep.Git.Tfs.Commands
 
             output.WriteLine("Usage: git-tfs " + GetCommandUsage(command));
             command.GetAllOptions(_container).WriteOptionDescriptions(output);
+
+            output.WriteLine("\nFind more help in our online help : https://github.com/git-tfs/git-tfs/blob/master/doc/commands/" + GetCommandName(command)+".md");
 
             return GitTfsExitCodes.Help;
         }

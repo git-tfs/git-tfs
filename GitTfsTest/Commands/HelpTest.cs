@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Rhino.Mocks;
@@ -32,7 +33,9 @@ namespace Sep.Git.Tfs.Test.Commands
 
             var output = outputWriter.GetStringBuilder().ToString();
             output.AssertStartsWith("Usage: git-tfs [command] [options]");
-            output.TrimEnd().AssertEndsWith(" (use 'git-tfs help [command]' for more information)");
+            output.TrimEnd()
+                  .AssertEndsWith(" (use 'git-tfs help [command]' for more information)" + Environment.NewLine +
+                                  "\nFind more help in our online help : https://github.com/git-tfs/git-tfs");
         }
 
         [Fact]
