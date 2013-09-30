@@ -82,11 +82,15 @@ namespace Sep.Git.Tfs.Commands
             if (IsAvailable(GitTfsConstants.DefaultRepositoryId))
                 return GitTfsConstants.DefaultRepositoryId;
 
-            var hostname = new Uri(parent.Remote.TfsUrl).Host.Replace(".", "-");
-            var remoteId = hostname;
+            //Remove '$/'!
+            var expectedRemoteId = parent.Remote.TfsRepositoryPath.Substring(2).Trim('/');
+            var indexOfSlash = expectedRemoteId.IndexOf('/');
+            if (indexOfSlash != 0)
+                expectedRemoteId = expectedRemoteId.Substring(indexOfSlash + 1);
+            var remoteId = expectedRemoteId;
             var suffix = 0;
             while (!IsAvailable(remoteId))
-                remoteId = hostname + "-" + (suffix++);
+                remoteId = expectedRemoteId + "-" + (suffix++);
             return remoteId;
         }
 
