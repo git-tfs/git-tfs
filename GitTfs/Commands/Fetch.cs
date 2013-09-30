@@ -35,7 +35,7 @@ namespace Sep.Git.Tfs.Commands
         bool FetchParents { get; set; }
         string AuthorsFilePath { get; set; }
         string BareBranch { get; set; }
-        bool ForceFetchBare { get; set; }
+        bool ForceFetch { get; set; }
         bool ExportMetadatas { get; set; }
 
         public virtual OptionSet OptionSet
@@ -55,7 +55,7 @@ namespace Sep.Git.Tfs.Commands
                     { "b|bare-branch=", "The name of the branch on which the fetch will be done for a bare repository",
                         v => BareBranch = v },
                     { "force", "Force fetch of tfs changesets when there is ahead commits (ahead commits will be lost!)",
-                        v => ForceFetchBare = v != null },
+                        v => ForceFetch = v != null },
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
                 }.Merge(remoteOptions.OptionSet);
@@ -107,7 +107,7 @@ namespace Sep.Git.Tfs.Commands
                     throw new GitTfsException("error : specify a git branch to fetch on...");
                 if (!remote.Repository.HasRef(GitRepository.ShortToLocalName(BareBranch)))
                     throw new GitTfsException("error : the specified git branch doesn't exist...");
-                if (!ForceFetchBare && remote.MaxCommitHash != remote.Repository.GetCommit(BareBranch).Sha)
+                if (!ForceFetch && remote.MaxCommitHash != remote.Repository.GetCommit(BareBranch).Sha)
                     throw new GitTfsException("error : fetch is not allowed when there is ahead commits!",
                         new List<string>() {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
             }
@@ -117,6 +117,7 @@ namespace Sep.Git.Tfs.Commands
             // in that case tfs fetch will retrieve same changes again unnecessarily. To prevent it we will scan tree from HEAD and see if newer changesets from
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
+            if (!ForceFetch)
             globals.Repository.MoveTfsRefForwardIfNeeded(remote);
             if (ExportMetadatas)
             {
