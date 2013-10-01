@@ -49,7 +49,7 @@ For the use of parameter `--authors`, see the [clone](clone.md) command.
 Merge changesets will be automatically fetched and created as a merge commit if the tfs branch merged has already inited in the git repository.
 If the tfs branch merged has not be inited, the merge changeset will be created as a normal commit (not a merged one) and this warning message will be created :
 
-    warning: found merge changeset 34 but unable to manage it due to lack of local commit for changeset 33! Fetch the corresponding branch before...
+    warning: this changeset 34 is a merge changeset. But it can't have been managed accordingly because one of the parent changeset 33 is not present in the repository! If you want to do it, fetch the branch containing this changeset before retrying...
 
 ## See also
 
