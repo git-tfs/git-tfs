@@ -87,7 +87,7 @@ namespace Sep.Git.Tfs.Commands
             var indexOfSlash = expectedRemoteId.IndexOf('/');
             if (indexOfSlash != 0)
                 expectedRemoteId = expectedRemoteId.Substring(indexOfSlash + 1);
-            var remoteId = expectedRemoteId;
+            var remoteId = expectedRemoteId.Replace(' ', '-');
             var suffix = 0;
             while (!IsAvailable(remoteId))
                 remoteId = expectedRemoteId + "-" + (suffix++);
