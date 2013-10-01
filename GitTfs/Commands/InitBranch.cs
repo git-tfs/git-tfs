@@ -32,6 +32,9 @@ namespace Sep.Git.Tfs.Commands
         public string AuthorsFilePath { get; set; }
         public bool NoFetch { get; set; }
 
+        //[Temporary] Remove in the next version!
+        public bool DontDisplayObsoleteMessage { get; set; }
+
         public InitBranch(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors)
         {
             _stdout = stdout;
@@ -65,6 +68,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsBranchPath, string gitBranchNameExpected)
         {
+            //[Temporary] Remove in the next version!
+            if (!DontDisplayObsoleteMessage)
+                _stdout.WriteLine("WARNING: This command is obsolete and will be removed in the next version. Use 'branch --init' instead!");
+
             var defaultRemote = InitFromDefaultRemote();
 
             // TFS representations of repository paths do not have trailing slashes
@@ -113,6 +120,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
+            //[Temporary] Remove in the next version!
+            if (!DontDisplayObsoleteMessage)
+                _stdout.WriteLine("WARNING: This command is obsolete and will be removed in the next version. Use 'branch --init' instead!");
+
             if (CloneAllBranches && NoFetch)
                 throw new GitTfsException("error: --nofetch cannot be used with --all");
 
