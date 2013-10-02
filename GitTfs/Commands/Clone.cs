@@ -29,6 +29,8 @@ namespace Sep.Git.Tfs.Commands
             this.init = init;
             this.globals = globals;
             this.initBranch = initBranch;
+            //[Temporary] Remove in the next version!
+            initBranch.DontDisplayObsoleteMessage = true;
             this.stdout = stdout;
         }
 
