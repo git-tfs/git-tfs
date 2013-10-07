@@ -248,7 +248,7 @@ namespace Sep.Git.Tfs.Commands
         {
             Trace.WriteLine("Found root changeset : " + rootChangeSetId);
             Trace.WriteLine("Try to find changeset " + rootChangeSetId + " in git repository...");
-            string sha1RootCommit = _globals.Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + rootChangeSetId + "[^0-9]");
+            string sha1RootCommit = _globals.Repository.FindCommitHashByChangesetId(rootChangeSetId);
             //sha1RootCommit = _globals.Repository.FindCommitByCommitMessage("git-tfs-id: .*\\$\\/" + tfsProject + "\\/.*;C" + rootChangeSetId + "[^0-9]");
             if (sha1RootCommit != null)
             Trace.WriteLine("Commit found! sha1 : " + sha1RootCommit);

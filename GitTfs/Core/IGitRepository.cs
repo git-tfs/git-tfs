@@ -38,7 +38,7 @@ namespace Sep.Git.Tfs.Core
         string AssertValidBranchName(string gitBranchName);
         bool CreateBranch(string gitBranchName, string target);
         Branch RenameBranch(string oldName, string newName);
-        string FindCommitHashByCommitMessage(string patternToFind);
+        string FindCommitHashByChangesetId(long changesetId);
         void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate);
         void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate);
         void MoveRemote(string oldRemoteName, string newRemoteName);

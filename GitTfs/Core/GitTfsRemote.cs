@@ -323,7 +323,7 @@ namespace Sep.Git.Tfs.Core
                 if (changeset.IsMergeChangeset)
                 {
                     var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
-                    var shaParent = Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
+                    var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
                     if (shaParent == null)
                         shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit);
                     if (shaParent != null)
@@ -413,7 +413,7 @@ namespace Sep.Git.Tfs.Core
             {
                 var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
             }
-            return Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + parentChangesetId + "[^0-9]");
+            return Repository.FindCommitHashByChangesetId(parentChangesetId);
         }
 
         private IEnumerable<IGitTfsRemote> FindTfsRemoteOfChangeset(IChangeset changeset)
