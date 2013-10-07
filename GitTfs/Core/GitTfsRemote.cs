@@ -334,7 +334,7 @@ namespace Sep.Git.Tfs.Core
                 if (changeset.Summary.ChangesetId == mergeChangesetId)
                 {
                     foreach (var parent in parentCommitsHashes)
-                    {
+                {
                         log.CommitParents.Add(parent);
                     }
                 }
@@ -367,18 +367,26 @@ namespace Sep.Git.Tfs.Core
                 {
                     return false;
                 }
-                //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
-                stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
-                                 " is a merge changeset. But it can't have been managed accordingly because one of the parent changeset "
-                                 + parentChangesetId +
-                                 " is not present in the repository! If you want to do it, fetch the branch containing this changeset before retrying...");
-            }
+                var ToDoSupportBranches = true;
+                if (ToDoSupportBranches)
+                {
+                    if (!Tfs.CanGetBranchInformation)
+                        throw new GitTfsException("TODO :This version of TFS can't manage branches");
+                    Repository.FindCommitHashByChangesetId(-1);
+                }
+                else
+                {
+//TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
+                    stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
+                    " is a merge changeset. But it can't have been managed accordingly because one of the parent changeset "
+                    + parentChangesetId +
+                    " is not present in the repository! If you want to do it, fetch the branch containing this changeset before retrying...");
+                }
             return true;
         }
 
         private string ProcessChangeset(ITfsChangeset changeset, LogEntry log)
         {
-
             if (ExportMetadatas)
             {
                 if (changeset.Summary.Workitems.Any())
