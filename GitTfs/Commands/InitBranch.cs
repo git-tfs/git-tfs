@@ -121,7 +121,7 @@ namespace Sep.Git.Tfs.Commands
 
                 Trace.WriteLine("Found commit " + cbd.Sha1RootCommit + " for changeset :" + cbd.RootChangesetId);
 
-                tfsRemote = CreateBranch(defaultRemote, cbd.TfsRepositoryPath, cbd.Sha1RootCommit, cbd.GitBranchNameExpected);
+                tfsRemote = defaultRemote.InitBranch(_remoteOptions, cbd.TfsRepositoryPath, cbd.Sha1RootCommit, cbd.GitBranchNameExpected);
                 RemoteCreated = tfsRemote;
                 if (rootBranch.IsRenamedBranch || !NoFetch)
                 {
@@ -313,48 +313,6 @@ namespace Sep.Git.Tfs.Commands
             return defaultRemote;
         }
 
-        private IGitTfsRemote CreateBranch(IGitTfsRemote defaultRemote, string tfsRepositoryPath, string sha1RootCommit, string gitBranchNameExpected = null)
-        {
-            Trace.WriteLine("Begin process of creating branch for remote :" + tfsRepositoryPath);
-            // TFS string representations of repository paths do not end in trailing slashes
-            tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
-
-            string gitBranchName;
-            if (!string.IsNullOrWhiteSpace(gitBranchNameExpected))
-                gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(gitBranchNameExpected);
-            else
-                gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(tfsRepositoryPath);
-            if (string.IsNullOrWhiteSpace(gitBranchName))
-                throw new GitTfsException("error: The Git branch name '" + gitBranchName + "' is not valid...\n");
-            Trace.WriteLine("Git local branch will be :" + gitBranchName);
-
-            if (_globals.Repository.HasRemote(gitBranchName))
-            {
-                Trace.WriteLine("Remote already exist");
-                var remote = _globals.Repository.ReadTfsRemote(gitBranchName);
-                if (remote.TfsUrl != defaultRemote.TfsUrl)
-                    Trace.WriteLine("warning: Url is different");
-                if (remote.TfsRepositoryPath != tfsRepositoryPath)
-                    Trace.WriteLine("warning: TFS repository path is different");
-                return remote;
-            }
-
-            Trace.WriteLine("Try creating remote...");
-            var tfsRemote = _globals.Repository.CreateTfsRemote(new RemoteInfo
-                {
-                    Id = gitBranchName,
-                    Url = defaultRemote.TfsUrl,
-                    Repository = tfsRepositoryPath,
-                    RemoteOptions = _remoteOptions
-                }, String.Empty);
-
-            if (!_globals.Repository.CreateBranch(tfsRemote.RemoteRef, sha1RootCommit))
-                throw new GitTfsException("error: Fail to create remote branch ref file!");
-
-            Trace.WriteLine("Remote created!");
-            return tfsRemote;
-        }
-
         private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true)
         {
             try
@@ -378,23 +336,6 @@ namespace Sep.Git.Tfs.Commands
                 Trace.WriteLine("Cleaning...");
                 tfsRemote.CleanupWorkspaceDirectory();
             }
-        }
-
-        protected string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
-        {
-            string gitBranchNameExpected;
-            if (tfsRepositoryPath.IndexOf("$/") == 0)
-            {
-                gitBranchNameExpected = tfsRepositoryPath.Remove(0, tfsRepositoryPath.IndexOf('/', 2) + 1);
-            }
-            else
-            {
-                gitBranchNameExpected = tfsRepositoryPath;
-            }
-            gitBranchNameExpected = gitBranchNameExpected.ToGitRefName();
-            var gitBranchName = _globals.Repository.AssertValidBranchName(gitBranchNameExpected);
-            _stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
-            return gitBranchName;
         }
     }
 }
