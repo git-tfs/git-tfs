@@ -109,7 +109,7 @@ namespace Sep.Git.Tfs.Commands
 
                 Trace.WriteLine("LabelId:" + label.Id + "/ChangesetId:" + label.ChangesetId + "/LabelName:" + label.Name + "/Owner:" + label.Owner);
                 Trace.WriteLine("Try to find changeset in git repository...");
-                string sha1TagCommit = _globals.Repository.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + label.ChangesetId + "[^0-9]");
+                string sha1TagCommit = _globals.Repository.FindCommitHashByChangesetId(label.ChangesetId);
                 if (string.IsNullOrWhiteSpace(sha1TagCommit))
                 {
                     Trace.WriteLine("This label does not match an existing commit...");

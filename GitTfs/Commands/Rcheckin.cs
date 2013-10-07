@@ -139,7 +139,7 @@ namespace Sep.Git.Tfs.Commands
                     tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
                     if (tfsRemote.MaxChangesetId != newChangesetId)
                     {
-                        var lastCommit = repo.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + newChangesetId + "[^0-9]");
+                        var lastCommit = repo.FindCommitHashByChangesetId(newChangesetId);
                         RebaseOnto(repo, lastCommit, target);
                         if (AutoRebase)
                         {
@@ -159,7 +159,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     if (newChangesetId != 0)
                     {
-                        var lastCommit = repo.FindCommitHashByCommitMessage("git-tfs-id: .*;C" + newChangesetId + "[^0-9]");
+                        var lastCommit = repo.FindCommitHashByChangesetId(newChangesetId);
                         RebaseOnto(repo, lastCommit, currentParent);
                     }
                     throw;

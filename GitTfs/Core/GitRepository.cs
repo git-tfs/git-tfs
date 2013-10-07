@@ -494,12 +494,13 @@ namespace Sep.Git.Tfs.Core
             return reference != null;
         }
 
-        public string FindCommitHashByCommitMessage(string patternToFind)
+        public string FindCommitHashByChangesetId(long changesetId)
         {
+            var patternToFind = "git-tfs-id: .*;C" + changesetId + "[^0-9]";
             var regex = new Regex(patternToFind);
             foreach (var branch in _repository.Branches.Where(p => p.IsRemote).ToList())
             {
-                var commit = branch.Commits.SingleOrDefault(c => regex.IsMatch(c.Message));
+                var commit = branch.Commits.FirstOrDefault(c => regex.IsMatch(c.Message));
                 if (commit != null)
                     return commit.Sha;
             }
