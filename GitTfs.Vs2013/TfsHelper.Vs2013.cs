@@ -120,13 +120,13 @@ namespace Sep.Git.Tfs.Vs2013
 
         private static string GetDialogAssemblyPath()
         {
-            return Path.Combine(GetVs2012InstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
+            return Path.Combine(GetVs2013InstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
 
-        private static string GetVs2012InstallDir()
+        private static string GetVs2013InstallDir()
         {
-            return TryGetRegString(@"Software\Microsoft\VisualStudio\11.0", "InstallDir")
-                ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\11.0", "InstallDir");
+            return TryGetRegString(@"Software\Microsoft\VisualStudio\12.0", "InstallDir")
+                ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\12.0", "InstallDir");
         }
 
         private static string TryGetRegString(string path, string name)
