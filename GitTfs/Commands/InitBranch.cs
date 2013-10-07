@@ -98,7 +98,7 @@ namespace Sep.Git.Tfs.Commands
                 rootChangeSetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
             }
 
-            var sha1RootCommit = FindChangesetInGitRepository(rootChangeSetId);
+            var sha1RootCommit = _globals.Repository.FindCommitHashByChangesetId(rootChangeSetId);
             if (string.IsNullOrWhiteSpace(sha1RootCommit))
                 throw new GitTfsException("error: The root changeset " + rootChangeSetId +
                                           " have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n");
@@ -163,7 +163,7 @@ namespace Sep.Git.Tfs.Commands
                         Trace.WriteLine("=> Working on TFS branch : " + tfsBranch.TfsRepositoryPath);
                         if (tfsBranch.TfsRemote == null)
                         {
-                            var sha1RootCommit = FindChangesetInGitRepository(tfsBranch.RootChangesetId);
+                            var sha1RootCommit = _globals.Repository.FindCommitHashByChangesetId(tfsBranch.RootChangesetId);
                             if (sha1RootCommit != null)
                             {
                                 tfsBranch.TfsRemote = CreateBranch(defaultRemote, tfsBranch.TfsRepositoryPath, sha1RootCommit);
@@ -260,19 +260,6 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException("error: Fail to create remote branch ref file!");
             Trace.WriteLine("Remote created!");
             return tfsRemote;
-        }
-
-        private string FindChangesetInGitRepository(long rootChangeSetId)
-        {
-            Trace.WriteLine("Found root changeset : " + rootChangeSetId);
-            Trace.WriteLine("Try to find changeset " + rootChangeSetId + " in git repository...");
-            string sha1RootCommit = _globals.Repository.FindCommitHashByChangesetId(rootChangeSetId);
-            //sha1RootCommit = _globals.Repository.FindCommitByCommitMessage("git-tfs-id: .*\\$\\/" + tfsProject + "\\/.*;C" + rootChangeSetId + "[^0-9]");
-            if (sha1RootCommit != null)
-            Trace.WriteLine("Commit found! sha1 : " + sha1RootCommit);
-            else
-                Trace.WriteLine("Commit not found!");
-            return sha1RootCommit;
         }
 
         private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit)
