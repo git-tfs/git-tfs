@@ -13,6 +13,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         {
             var x = new PluginLoader();
             var explicitVersion = Environment.GetEnvironmentVariable("GIT_TFS_CLIENT");
+            if (explicitVersion == "11") explicitVersion = "2012"; // GitTfs.Vs2012 was formerly called GitTfs.Vs11
             if(!String.IsNullOrEmpty(explicitVersion))
             {
                 return x.Try("GitTfs.Vs" + explicitVersion, "Sep.Git.Tfs.Vs" + explicitVersion + ".TfsPlugin") ??
