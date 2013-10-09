@@ -14,17 +14,13 @@ using Sep.Git.Tfs.Util;
 using Sep.Git.Tfs.VsCommon;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Vs11
+namespace Sep.Git.Tfs.VsCommon
 {
-    using System.Net;
-
-    using Microsoft.TeamFoundation.Framework.Client;
-
-    public class TfsHelper : TfsHelperVs2010Base
+    public abstract class TfsHelperVs2012Base : TfsHelperVs2010Base
     {
         private readonly TfsApiBridge _bridge;
 
-        public TfsHelper(TextWriter stdout, TfsApiBridge bridge, IContainer container) : base(stdout, bridge, container)
+        public TfsHelperVs2012Base(TextWriter stdout, TfsApiBridge bridge, IContainer container) : base(stdout, bridge, container)
         {
             _bridge = bridge;
         }
@@ -108,28 +104,24 @@ namespace Sep.Git.Tfs.Vs11
 
         private const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
 
-        private static Type GetCheckinDialogType()
+        private Type GetCheckinDialogType()
         {
             return GetDialogAssembly().GetType(DialogAssemblyName + ".CheckinDialog");
         }
 
-        private static Assembly GetDialogAssembly()
+        private Assembly GetDialogAssembly()
         {
             return Assembly.LoadFrom(GetDialogAssemblyPath());
         }
 
-        private static string GetDialogAssemblyPath()
+        private string GetDialogAssemblyPath()
         {
-            return Path.Combine(GetVs11InstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
+            return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
 
-        private static string GetVs11InstallDir()
-        {
-            return TryGetRegString(@"Software\Microsoft\VisualStudio\11.0", "InstallDir")
-                ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\11.0", "InstallDir");
-        }
+        protected abstract string GetVsInstallDir();
 
-        private static string TryGetRegString(string path, string name)
+        protected string TryGetRegString(string path, string name)
         {
             try
             {
