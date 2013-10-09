@@ -153,8 +153,10 @@ namespace Sep.Git.Tfs.Commands
                 }
                 childBranchPaths.Add(new BranchDatas {TfsRepositoryPath = defaultRemote.TfsRepositoryPath, TfsRemote = defaultRemote, RootChangesetId = -1});
 
+                bool isSomethingDone;
                 do
                 {
+                    isSomethingDone = false;
                     var branchesToFetch = childBranchPaths.Where(b => !b.IsEntirelyFetched).ToList();
                     foreach (var tfsBranch in branchesToFetch)
                     {
@@ -163,16 +165,32 @@ namespace Sep.Git.Tfs.Commands
                         {
                             var sha1RootCommit = FindChangesetInGitRepository(tfsBranch.RootChangesetId);
                             if (sha1RootCommit != null)
+                            {
                                 tfsBranch.TfsRemote = CreateBranch(defaultRemote, tfsBranch.TfsRepositoryPath, sha1RootCommit);
+                                isSomethingDone = true;
+                            }
                         }
                         if (tfsBranch.TfsRemote != null)
                         {
+                            var lastFetchedChangesetId = tfsBranch.TfsRemote.MaxChangesetId;
                             Trace.WriteLine("Fetching remote :" + tfsBranch.TfsRemote.Id);
                             var fetchResult = FetchRemote(tfsBranch.TfsRemote, true);
                             tfsBranch.IsEntirelyFetched = fetchResult.IsSuccess;
+                            if (lastFetchedChangesetId != fetchResult.LastFetchedChangesetId)
+                                isSomethingDone = true;
                         }
                     }
-                } while (childBranchPaths.Any(b => !b.IsEntirelyFetched));
+                } while (childBranchPaths.Any(b => !b.IsEntirelyFetched) && isSomethingDone);
+
+                if (childBranchPaths.Any(b => !b.IsEntirelyFetched))
+                {
+                    _stdout.WriteLine("warning: Some Tfs branches could not have been initialized:");
+                    foreach (var branchNotInited in childBranchPaths.Where(b => !b.IsEntirelyFetched))
+                    {
+                        _stdout.WriteLine("- " + branchNotInited.TfsRepositoryPath);
+                    }
+                    _stdout.WriteLine("\nPlease report this case to the git-tfs developpers! (report here : https://github.com/git-tfs/git-tfs/issues/461 )");
+                }
             }
             else
             {
