@@ -14,7 +14,7 @@ using Sep.Git.Tfs.Util;
 using Sep.Git.Tfs.VsCommon;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Vs11
+namespace Sep.Git.Tfs.Vs2013
 {
     using System.Net;
 
@@ -120,13 +120,13 @@ namespace Sep.Git.Tfs.Vs11
 
         private static string GetDialogAssemblyPath()
         {
-            return Path.Combine(GetVs11InstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
+            return Path.Combine(GetVs2013InstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
 
-        private static string GetVs11InstallDir()
+        private static string GetVs2013InstallDir()
         {
-            return TryGetRegString(@"Software\Microsoft\VisualStudio\11.0", "InstallDir")
-                ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\11.0", "InstallDir");
+            return TryGetRegString(@"Software\Microsoft\VisualStudio\12.0", "InstallDir")
+                ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\12.0", "InstallDir");
         }
 
         private static string TryGetRegString(string path, string name)
