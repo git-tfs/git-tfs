@@ -98,14 +98,18 @@ If you clone the branch $/Repository/ProjectBranch, you will never able to init 
 
 Then use `branch` like this :
 
-### Init a TFS branches using auto-naming of your git branch
+### Init a TFS branch using auto-naming of your git branch
+
     git tfs branch --init $/Repository/ProjectBranch
 
-### Init a TFS branches naming yourself the git branch
+### Init a TFS branch with customised git branch name
+
     git tfs branch --init $/Repository/ProjectBranch myNewBranch
 
 ### Init all the TFS branches
+
     git tfs branch --init --all
+	
 This command init all the branches not already done and ignore existing ones.
 
 ### Init a branch with TFS2008
