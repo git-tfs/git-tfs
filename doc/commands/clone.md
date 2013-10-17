@@ -14,6 +14,11 @@ a TFS source tree and fetch all the changesets
                                    default: default
           --template=VALUE       Passed to git-init
           --shared[=VALUE]       Passed to git-init
+          --autocrlf=VALUE       Normalize line endings (default: false)
+          --ignorecase=VALUE     Ignore case in file paths (default: system default)
+          --bare                 clone the TFS repository in a bare git repository
+          --workspace=VALUE      set tfs workspace to a specific folder (a
+                                   shorter path is better!)
           --ignore-regex=VALUE   a regex of files to ignore
           --no-metadata          leave out the 'git-tfs-id:' tag in commit
                                    messages
@@ -88,6 +93,16 @@ The clone command will be :
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --authors="c:\project_file\authors.txt"
 
 Once the clone is done, the file is store in the `.git` folder (with the name git-tfs_authors) and used with later `fetch`. You could overwrite it by specifting another file (or go delete it).
+
+
+### Set a custom Tfs Workspace directory
+
+By default, git-tfs use as a Tfs workspace an internal directory and you shouldn't care about ;)
+But, due to [file system limitations](../Set-custom-workspace.md), it could be usefull to set a custom directory (with a path as short as possible) as a tfs wordspace.
+You could do it with the _--workspace_ parameter:
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --workspace="c:\ws"
+
 
 
 ## After cloning a repository
