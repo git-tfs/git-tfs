@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using NDesk.Options;
@@ -78,6 +79,23 @@ namespace Sep.Git.Tfs.Commands
                 gitHelper.CommandNoisy(BuildInitCommand());
             }
             globals.Repository = gitHelper.MakeRepository(globals.GitDir);
+
+            if (!string.IsNullOrWhiteSpace(initOptions.WorkspacePath))
+            {
+                Trace.WriteLine("workspace path:" + initOptions.WorkspacePath);
+
+                try
+                {
+                    var dir = Directory.CreateDirectory(initOptions.WorkspacePath);
+                    globals.Repository.SetConfig(GitTfsConstants.WorkspaceConfigKey, initOptions.WorkspacePath);
+
+                }
+                catch (Exception)
+                {
+                    throw new GitTfsException("error: workspace path is invalid!");
+                }
+            }
+
         }
 
         private string[] BuildInitCommand()

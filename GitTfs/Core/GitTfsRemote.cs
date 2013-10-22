@@ -191,7 +191,7 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                var dir = Repository.GetConfig("git-tfs.workspace-dir");
+                var dir = Repository.GetConfig(GitTfsConstants.WorkspaceConfigKey);
 
                 if (this.IsSubtree)
                 {

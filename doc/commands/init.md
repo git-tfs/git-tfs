@@ -16,6 +16,11 @@ Prefer the [clone](clone.md) command to init and fetch changesets from a TFS rep
           --template=VALUE       Passed to git-init
           --shared[=VALUE]       Passed to git-init
           --autocrlf=VALUE       Normalize line endings (default: false)
+          --ignorecase=VALUE     Ignore case in file paths (default: system
+                                     default)
+          --bare                 clone the TFS repository in a bare git repository
+          --workspace=VALUE      set tfs workspace to a specific folder (a
+                                   shorter path is better!)
           --ignore-regex=VALUE   a regex of files to ignore
           --no-metadata          leave out the 'git-tfs-id:' tag in commit
                                    messages

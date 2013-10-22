@@ -27,6 +27,7 @@ namespace Sep.Git.Tfs.Commands
                     { "ignorecase=", "Ignore case in file paths (default: system default)",
                         v => GitInitIgnoreCase = ValidateIgnoreCaseValue(v) },
                     {"bare", "clone the TFS repository in a bare git repository", v => IsBare = v != null},
+                    {"workspace=", "set tfs workspace to a specific folder (a shorter path is better!)", v => WorkspacePath = v},
                 };
             }
         }
@@ -49,6 +50,7 @@ namespace Sep.Git.Tfs.Commands
 
 
         public bool IsBare { get; set; }
+        public string WorkspacePath { get; set; }
         public string GitInitTemplate { get; set; }
         public object GitInitShared { get; set; }
         public string GitInitAutoCrlf { get; set; }
