@@ -56,20 +56,14 @@ namespace Sep.Git.Tfs.Commands
             // TFS string representations of repository paths do not end in trailing slashes
             tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
+            int retVal;
             try
             {
-                var retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+                retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
 
                 if (retVal == 0) fetch.Run(withBranches);
-                if (withBranches && initBranch != null)
-                {
-                    initBranch.CloneAllBranches = true;
-                    retVal = initBranch.Run();
-                }
-                if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
-                return retVal;
             }
             catch
             {
@@ -97,6 +91,13 @@ namespace Sep.Git.Tfs.Commands
 
                 throw;
             }
+            if (withBranches && initBranch != null)
+            {
+                initBranch.CloneAllBranches = true;
+                retVal = initBranch.Run();
+            }
+            if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+            return retVal;
         }
 
         private void VerifyTfsPathToClone(string tfsRepositoryPath)
