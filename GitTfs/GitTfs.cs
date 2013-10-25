@@ -36,10 +36,11 @@ namespace Sep.Git.Tfs
         public int Run(IList<string> args)
         {
             InitializeGlobals();
+            var commandLineRun = "git tfs " + string.Join(" ", args);
             var command = ExtractCommand(args);
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
-            Trace.WriteLine("Command run:git tfs " + string.Join(" ", args)); 
+            Trace.WriteLine("Command run:" + commandLineRun); 
             return Main(command, unparsedArgs);
         }
 
