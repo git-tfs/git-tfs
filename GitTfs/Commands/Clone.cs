@@ -56,20 +56,14 @@ namespace Sep.Git.Tfs.Commands
             // TFS string representations of repository paths do not end in trailing slashes
             tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
+            int retVal;
             try
             {
-                var retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+                retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
 
                 if (retVal == 0) fetch.Run(withBranches);
-                if (withBranches && initBranch != null)
-                {
-                    initBranch.CloneAllBranches = true;
-                    retVal = initBranch.Run();
-                }
-                if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
-                return retVal;
             }
             catch
             {
@@ -85,18 +79,25 @@ namespace Sep.Git.Tfs.Commands
                 catch (IOException e)
                 {
                     // swallow IOException. Smth went wrong before this and we're much more interested in that error
-                    string msg = String.Format("Something went wrong, can't cleanup files because of IOException:\n{0}\n", e.IndentExceptionMessage());
+                    string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of IOException:\n{0}\n", e.IndentExceptionMessage());
                     Trace.WriteLine(msg);
                 }
                 catch (UnauthorizedAccessException e)
                 {
                     // swallow it also
-                    string msg = String.Format("Something went wrong, can't cleanup files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
+                    string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
                     Trace.WriteLine(msg);
                 }
 
                 throw;
             }
+            if (withBranches && initBranch != null)
+            {
+                initBranch.CloneAllBranches = true;
+                retVal = initBranch.Run();
+            }
+            if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+            return retVal;
         }
 
         private void VerifyTfsPathToClone(string tfsRepositoryPath)
