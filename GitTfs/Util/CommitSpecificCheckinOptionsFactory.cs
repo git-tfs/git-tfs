@@ -88,16 +88,13 @@ namespace Sep.Git.Tfs.Util
             {
                 foreach (Match match in workitemMatches)
                 {
-                    switch (match.Groups["action"].Value)
+                    if (match.Groups["action"].Value == "resolve")
                     {
-                        case "associate":
-                            writer.WriteLine("Associating with work item {0}", match.Groups["item_id"]);
-                            checkinOptions.WorkItemsToAssociate.Add(match.Groups["item_id"].Value);
-                            break;
-                        case "resolve":
-                            writer.WriteLine("Resolving work item {0}", match.Groups["item_id"]);
-                            checkinOptions.WorkItemsToResolve.Add(match.Groups["item_id"].Value);
-                            break;
+                        writer.WriteLine("Resolving work item {0}", match.Groups["item_id"]);
+                        checkinOptions.WorkItemsToResolve.Add(match.Groups["item_id"].Value);
+                    }else{
+                        writer.WriteLine("Associating with work item {0}", match.Groups["item_id"]);
+                        checkinOptions.WorkItemsToAssociate.Add(match.Groups["item_id"].Value);
                     }
                 }
                 checkinOptions.CheckinComment = GitTfsConstants.TfsWorkItemRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
