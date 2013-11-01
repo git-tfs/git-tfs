@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs
                           "\\s*$", RegexOptions.Multiline);
         // e.g. git-tfs-work-item: 24 associate
         public static readonly Regex TfsWorkItemRegex =
-                new Regex(GitTfsWorkItemPrefix + @"\s*(?<item_id>\d+)\s*(?<action>associate|resolve)");
+                new Regex(GitTfsWorkItemPrefix + @"\s*(?<item_id>\d+)(\s*(?<action>associate|resolve))?");
 
         // e.g. git-tfs-code-reviewer: John Smith
         public static readonly Regex TfsReviewerRegex =

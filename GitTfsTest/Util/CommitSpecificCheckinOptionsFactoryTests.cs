@@ -60,6 +60,24 @@ namespace Sep.Git.Tfs.Test.Util
         }
 
         [Fact]
+        public void Checkin_regex_does_not_require_action()
+        {
+            StringWriter textWriter = new StringWriter();
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
+
+            CheckinOptions singletonCheckinOptions = new CheckinOptions();
+
+            string commitMessage =
+@"test message
+                formatted git commit message
+
+                git-tfs-work-item: 1234";
+
+            var specificCheckinOptions = factory.BuildCommitSpecificCheckinOptions(singletonCheckinOptions, commitMessage);
+            Assert.Equal(1, specificCheckinOptions.WorkItemsToAssociate.Count);
+        }
+
+        [Fact]
         public void Adds_work_item_to_resolve_and_removes_checkin_command_comment()
         {
             StringWriter textWriter = new StringWriter();
