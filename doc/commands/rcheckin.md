@@ -2,6 +2,9 @@
 
 Checkins path of commits from last found TFS-commit to HEAD with comments provided for corresponding git commits. Preserves merge commits.
 
+rcheckin differs from [checkin](checkin.md) in that the latter squashes the commits into a single TFS checkin, while rcheckin uses a series of commits.
+
+
 ## Features
 [Special actions in commit messages](../special-actions-in-commit-messages.md) can be inserted, to associate or resolve TFS work items or override checkin policies.
 
