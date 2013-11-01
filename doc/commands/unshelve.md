@@ -1,5 +1,5 @@
 ## Summary
-Unshelves a TFS shelveset into a Git branch.
+Unshelves a TFS shelveset into a new Git branch.
 
     Usage: git-tfs unshelve -u <shelve-owner-name> <shelve-name> <git-branch-name>
       -h, -H, --help
@@ -16,6 +16,8 @@ Unshelves a TFS shelveset into a Git branch.
                                    the virtual TFS branch in GIT.
 
 ## Examples
+
+Note: These commands will fail if the branch specified by `git-branch-name` already exists locally.
 
 ### Create a branch from a shelveset under the current TFS user
 
