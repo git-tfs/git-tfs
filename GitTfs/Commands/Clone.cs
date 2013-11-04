@@ -30,7 +30,8 @@ namespace Sep.Git.Tfs.Commands
             this.globals = globals;
             this.initBranch = initBranch;
             //[Temporary] Remove in the next version!
-            initBranch.DontDisplayObsoleteMessage = true;
+            if (initBranch != null)
+                initBranch.DontDisplayObsoleteMessage = true;
             this.stdout = stdout;
         }
 
