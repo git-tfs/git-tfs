@@ -55,6 +55,10 @@ namespace Sep.Git.Tfs
                 e = e.InnerException;
             while (e != null)
             {
+                var gitCommandException = e as GitCommandException;
+                if (gitCommandException != null)
+                    Console.WriteLine("error running command: " + gitCommandException.Process.StartInfo.FileName + " " + gitCommandException.Process.StartInfo.Arguments);
+
                 Console.WriteLine(e.Message);
                 e = e.InnerException;
             }
