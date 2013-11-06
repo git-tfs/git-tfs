@@ -48,7 +48,7 @@ namespace Sep.Git.Tfs.Core
         /// If the given remote is itself a subtree, an empty enumerable is returned.
         /// </summary>
         IEnumerable<IGitTfsRemote> GetSubtrees(IGitTfsRemote owner);
-
         void ResetRemote(IGitTfsRemote remoteToReset, string target);
+        string GetCurrentBranch();
     }
 }

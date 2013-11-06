@@ -31,6 +31,9 @@ namespace Sep.Git.Tfs.Commands
         public bool CloneAllBranches { get; set; }
         public string AuthorsFilePath { get; set; }
         public bool NoFetch { get; set; }
+        public bool DontCreateGitBranch { get; set; }
+
+        public IGitTfsRemote RemoteCreated { get; private set; }
 
         //[Temporary] Remove in the next version!
         public bool DontDisplayObsoleteMessage { get; set; }
@@ -103,8 +106,9 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException("error: The root changeset " + rootChangeSetId +
                                           " have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n");
             var tfsRemote = CreateBranch(defaultRemote, tfsBranchPath, sha1RootCommit, gitBranchNameExpected);
+            RemoteCreated = tfsRemote;
             if (!NoFetch)
-                FetchRemote(tfsRemote, false);
+                FetchRemote(tfsRemote, false, !DontCreateGitBranch);
             else
                 Trace.WriteLine("Not fetching changesets, --nofetch option specified");
             return GitTfsExitCodes.OK;
@@ -264,13 +268,13 @@ namespace Sep.Git.Tfs.Commands
             return tfsRemote;
         }
 
-        private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit)
+        private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true)
         {
             Trace.WriteLine("Try fetching changesets...");
             var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
             Trace.WriteLine("Changesets fetched!");
 
-            if (fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
+            if (createBranch && fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
             {
                 Trace.WriteLine("Try creating the local branch...");
                 if (!_globals.Repository.CreateBranch("refs/heads/" + tfsRemote.Id, tfsRemote.MaxCommitHash))

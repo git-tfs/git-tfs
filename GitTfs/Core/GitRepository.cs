@@ -549,5 +549,10 @@ namespace Sep.Git.Tfs.Core
         {
             _repository.Refs.UpdateTarget(remoteToReset.RemoteRef, target);
         }
+
+        public string GetCurrentBranch()
+        {
+            return _repository.Head.CanonicalName;
+        }
     }
 }
