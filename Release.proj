@@ -2,14 +2,19 @@
 <Project ToolsVersion="4.0" DefaultTargets="Help" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <OriginUrl>https://github.com/git-tfs/git-tfs.git</OriginUrl>
+    <GitHubUser>git-tfs</GitHubUser>
+    <GitHubProject>git-tfs</GitHubProject>
+    <OriginUrl>https://github.com/$(GitHubUser)/$(GitHubProject).git</OriginUrl>
     <SolutionDir>.</SolutionDir>
     <BuildDir>$(SolutionDir)/GitTfs/bin/Release</BuildDir>
     <PackagedDir>$(SolutionDir)/Releases</PackagedDir>
     <TargetPlatform>AnyCPU</TargetPlatform>
     <TargetPlatform Condition="Exists('$(SolutionDir)/GitTfs.Vs2008/GitTfs.Vs2008.csproj')">x86</TargetPlatform>
     <VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
-    <Archive>$(PackagedDir)/GitTfs-$(Version).zip</Archive>
+    <PackageFile>GitTfs-$(Version).zip</PackageFile>
+    <Archive>$(PackagedDir)/$(PackageFile)</Archive>
+    <WebSiteDir>.\git-tfs.github.com</WebSiteDir>
+    <Authentication>--user $(User)</Authentication><!-- -H %22Authorization: token PUT_OAUTH_KEY_HERE%22 -->
   </PropertyGroup>
 
   <PropertyGroup>
@@ -31,7 +36,7 @@
     <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />
   </Target>
 
-  <Target Name="Release" DependsOnTargets="UpdateVersion; Build; TagSource; PushSource; Package">
+  <Target Name="Release" DependsOnTargets="UpdateVersion; Build; TagSource; PushSource; Package; GitHubRelease;">
   </Target>
 
   <Target Name="Build">
@@ -120,5 +125,41 @@
 
   <Target Name="PushChocolateyPackage" DependsOnTargets="BuildChocolateyPackage">
     <Exec Command="cpush $(ChocolateyNupkg)" />
+  </Target>
+
+  <Target Name="GitHubRelease" DependsOnTargets="GitHubCreateRelease; GitHubUploadPackage; UpdateWebSite;">
+  </Target>
+  <!-- http://developer.github.com/v3/repos/releases/ -->
+  <Target Name="GitHubCreateRelease">
+    <Exec ConsoleToMSBuild="true" Command="curl -X POST $(Authentication) -H %22Content-Type: application/json%22 -d %22{ \%22tag_name\%22: \%22v$(Version)\%22, \%22name\%22: \%22v$(Version)\%22 }%22 https://api.github.com/repos/$(GitHubUser)/$(GitHubProject)/releases">
+      <Output TaskParameter="ConsoleOutput" PropertyName="CreateReleaseOutput" />
+    </Exec>
+    <PropertyGroup>
+      <IdString>$([System.Text.RegularExpressions.Regex]::Match($(CreateReleaseOutput), `"id": *(\d+),`))</IdString>
+    </PropertyGroup>
+    <PropertyGroup>
+      <IdRelease>$([System.Text.RegularExpressions.Regex]::Match($(IdString), `\d+`))</IdRelease>
+    </PropertyGroup>
+    <Message Text="Id : $(IdRelease)"/>
+    <Error Text="Fail to create a release!" Condition="'$(IdRelease)' == ''" />
+  </Target>
+  
+  <Target Name="GitHubUploadPackage">
+    <Exec Command="curl -X POST $(Authentication) -H %22Content-Type: application/zip%22 --data @$(Archive) https://uploads.github.com/repos/$(GitHubUser)/$(GitHubProject)/releases/$(IdRelease)/assets?name=$(PackageFile)" />
+  </Target>
+  
+  <Target Name="UpdateWebSite">
+    <Exec Command="git clone https://github.com/$(GitHubUser)/git-tfs.github.com.git" />
+    <Exec Command="echo ^&lt;a href=%22https://github.com/git-tfs/git-tfs/releases/download/v$(Version)/$(PackageFile)%22 class=%22download-button%22^&gt;Download v$(Version)^&lt;/a^&gt; &gt; $(WebSiteDir)\_includes\download_button.html" />
+    <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -a -m %22v$(Version)%22" />
+    <Exec WorkingDirectory="$(WebSiteDir)" Command="git push origin master" />
+    <CallTarget Targets="_CleanWebsiteFolder;" />
+    <OnError ExecuteTargets="_CleanWebsiteFolder" />
+  </Target>
+  <Target Name="_CleanWebsiteFolder">
+  <RemoveDir Directories="$(WebSiteDir)" />
+  </Target>
+  <Target Name="_DeleteRelease">
+      <Exec Command="curl -X DELETE $(Authentication) https://api.github.com/repos/$(GitHubUser)/$(GitHubProject)/releases/$(IdRelease)" />
   </Target>
 </Project>
