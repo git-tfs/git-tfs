@@ -28,6 +28,7 @@
   <Target Name="MSBuildCommunityTasks" DependsOnTargets="RestorePackages" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.TemplateFile" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Zip" />
+  <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.FileUpdate" />
 
   <Target Name="Help">
     <ReadLinesFromFile File="Releasing.md">
@@ -60,6 +61,8 @@
     <Error Text="You should specify a version number!" Condition="'$(Version)' == ''" />
     <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties ; { ; public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="ASCII"/>
     <Exec Command="git add $(VersionFilePath)" />
+    <FileUpdate Files="README.md" Regex="The most recent version is __.*__\." ReplacementText="The most recent version is __$(Version)__." />
+    <Exec Command="git add README.md" />
     <Exec Command="git commit -m v$(Version)" />
   </Target>
 
