@@ -5,31 +5,33 @@ a TFS source tree and fetch all the changesets
 
 ## Synopsis
 
-    Usage: git-tfs clone [options] tfs-url-or-instance-name repository-path <git-repository-path>
-      -h, -H, --help
-      -V, --version
-      -d, --debug                Show debug output about everything git-tfs does
-      -i, --tfs-remote, --remote, --id=VALUE
-                                 The remote ID of the TFS to interact with
-                                   default: default
-          --template=VALUE       Passed to git-init
-          --shared[=VALUE]       Passed to git-init
-          --autocrlf=VALUE       Normalize line endings (default: false)
-          --ignorecase=VALUE     Ignore case in file paths (default: system default)
-          --bare                 clone the TFS repository in a bare git repository
-          --workspace=VALUE      set tfs workspace to a specific folder (a
-                                   shorter path is better!)
-          --ignore-regex=VALUE   a regex of files to ignore
-          --no-metadata          leave out the 'git-tfs-id:' tag in commit
-                                   messages
-                                   Use this when you're exporting from TFS and
-                                   don't need to put data back into TFS.
-      -u, --username=VALUE       TFS username
-      -p, --password=VALUE       TFS password
-          --all, --fetch-all
-          --parents
-          --authors=VALUE        Path to an Authors file to map TFS users to Git users
-          --with-branches        init all the TFS branches during the clone
+	Usage: git-tfs clone [options] tfs-url-or-instance-name repository-path <git-repository-path>
+	  ex : git tfs clone http://myTfsServer:8080/tfs/TfsRepository $/ProjectName/ProjectBranch
+
+	  -h, -H, --help
+	  -V, --version
+	  -d, --debug                Show debug output about everything git-tfs does
+	  -i, --tfs-remote, --remote, --id=VALUE
+								 The remote ID of the TFS to interact with
+								   default: default
+		  --template=VALUE       Passed to git-init
+		  --shared[=VALUE]       Passed to git-init
+		  --autocrlf=VALUE       Normalize line endings (default: false)
+		  --ignorecase=VALUE     Ignore case in file paths (default: system default)
+		  --bare                 clone the TFS repository in a bare git repository
+		  --workspace=VALUE      set tfs workspace to a specific folder (a shorter path is better!)
+		  --ignore-regex=VALUE   a regex of files to ignore
+		  --except-regex=VALUE   a regex of exceptions to ingore-regex
+	  -u, --username=VALUE       TFS username
+	  -p, --password=VALUE       TFS password
+		  --all, --fetch-all
+		  --parents
+		  --authors=VALUE        Path to an Authors file to map TFS users to Git
+								   users
+	  -l, --with-labels, --fetch-labels
+								 Fetch the labels also when fetching TFS changesets
+	  -x, --export               Export metadatas
+		  --with-branches        init all the TFS branches during the clone
 
 ## Examples
 
