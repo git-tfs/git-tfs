@@ -13,6 +13,7 @@
     <VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
     <PackageFile>GitTfs-$(Version).zip</PackageFile>
     <Archive>$(PackagedDir)/$(PackageFile)</Archive>
+    <DownloadUrl>https://github.com/git-tfs/git-tfs/releases/download/v$(Version)/$(PackageFile)</DownloadUrl>
     <WebSiteDir>.\git-tfs.github.com</WebSiteDir>
     <Authentication>--user $(User)</Authentication><!-- -H %22Authorization: token PUT_OAUTH_KEY_HERE%22 -->
   </PropertyGroup>
@@ -97,7 +98,6 @@
 
   <Target Name="ChocolateyProperties">
     <Error Text="You should specify a version number! (/p:Version=X.Y.Z)" Condition="'$(Version)' == ''" />
-    <Error Text="You should specify a download url! (/p:DownloadUrl=http://host/path/GitTfs-X.Y.Z.zip)" Condition="'$(DownloadUrl)' == ''" />
   </Target>
 
   <Target Name="CleanChocolateyTempDir">
@@ -153,7 +153,7 @@
   
   <Target Name="UpdateWebSite">
     <Exec Command="git clone https://github.com/$(GitHubUser)/git-tfs.github.com.git" />
-    <Exec Command="echo ^&lt;a href=%22https://github.com/git-tfs/git-tfs/releases/download/v$(Version)/$(PackageFile)%22 class=%22download-button%22^&gt;Download v$(Version)^&lt;/a^&gt; &gt; $(WebSiteDir)\_includes\download_button.html" />
+    <Exec Command="echo ^&lt;a href=%22$(DownloadUrl)%22 class=%22download-button%22^&gt;Download v$(Version)^&lt;/a^&gt; &gt; $(WebSiteDir)\_includes\download_button.html" />
     <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -a -m %22v$(Version)%22" />
     <Exec WorkingDirectory="$(WebSiteDir)" Command="git push origin master" />
     <CallTarget Targets="_CleanWebsiteFolder;" />
