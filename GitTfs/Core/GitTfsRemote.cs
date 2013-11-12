@@ -487,7 +487,19 @@ namespace Sep.Git.Tfs.Core
                 return new List<IGitTfsRemote>();
             }
 
-            remote = InitBranch(this.remoteOptions, tfsPath, "0caef023ec4314e90ed3278e6a47cd411e7800ed");
+            var branchesDatas = Tfs.GetRootChangesetForBranch(tfsPath);
+
+            if(branchesDatas.Count > 1)
+                throw new NotImplementedException("TODO: Manage renamed branch by integrating IniTBranch.InitBranchSupportingRename() here");
+
+
+            var sha1RootCommit = Repository.FindCommitHashByChangesetId(branchesDatas.First().RootChangeset);
+            if (string.IsNullOrWhiteSpace(sha1RootCommit))
+            {
+                return null;
+            }
+
+            remote = InitBranch(this.remoteOptions, tfsPath, sha1RootCommit);
 
             return new List<IGitTfsRemote>(){remote};
         }
