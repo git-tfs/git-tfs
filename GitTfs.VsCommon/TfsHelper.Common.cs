@@ -143,7 +143,7 @@ namespace Sep.Git.Tfs.VsCommon
             throw new NotImplementedException();
         }
 
-        public virtual IEnumerable<IBranchObject> GetBranches()
+        public virtual IEnumerable<IBranchObject> GetBranches(bool getDeletedBranches = false)
         {
             throw new NotImplementedException();
         }

@@ -389,7 +389,7 @@ namespace Sep.Git.Tfs.VsFake
             return new List<RootBranch> { new RootBranch(-1, tfsPathBranchToCreate) };
         }
 
-        public IEnumerable<IBranchObject> GetBranches()
+        public IEnumerable<IBranchObject> GetBranches(bool getDeletedBranches = false)
         {
             var branches = new List<IBranchObject>();
             branches.AddRange(_script.RootBranches.Select(b => new MockBranchObject { IsRoot = true, Path = b.BranchPath, ParentPath = null }));
