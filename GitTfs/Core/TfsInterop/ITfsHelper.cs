@@ -30,7 +30,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null);
         bool CanGetBranchInformation { get; }
         IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation();
-        IEnumerable<IBranchObject> GetBranches();
+        IEnumerable<IBranchObject> GetBranches(bool getDeletedBranches = false);
         void EnsureAuthenticated();
         void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
         void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder);

@@ -71,11 +71,12 @@ namespace Sep.Git.Tfs.VsCommon
                 .Select(b => b.Properties.RootItem.Item);
         }
 
-        public override IEnumerable<IBranchObject> GetBranches()
+        public override IEnumerable<IBranchObject> GetBranches(bool getAlsoDeletedBranches = false)
         {
-            var branches = VersionControl.QueryRootBranchObjects(RecursionType.Full)
-                .Where(b => b.Properties.RootItem.IsDeleted == false);
-            return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches);
+            var branches = VersionControl.QueryRootBranchObjects(RecursionType.Full);
+            if (getAlsoDeletedBranches)
+                return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches);
+            return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches.Where(b => !b.Properties.RootItem.IsDeleted));
         }
 
         public override IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
