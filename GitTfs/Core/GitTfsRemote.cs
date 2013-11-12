@@ -471,11 +471,25 @@ namespace Sep.Git.Tfs.Core
             return Repository.FindCommitHashByChangesetId(parentChangesetId);
         }
 
-        private IEnumerable<IGitTfsRemote> FindTfsRemoteOfChangeset(IChangeset changeset)
+        private IEnumerable<IGitTfsRemote> FindTfsRemoteOfChangeset(IChangeset parentChangeset)
         {
             //I think you want something that uses GetPathInGitRepo and ShouldSkip. See TfsChangeset.Apply.
             //Don't know if there is a way to extract remote tfs repository path from changeset datas! Should be better!!!
-            return Repository.ReadAllTfsRemotes().Where(r => changeset.Changes.Any(c => r.GetPathInGitRepo(c.Item.ServerItem) != null));
+            var remote = Repository.ReadAllTfsRemotes().FirstOrDefault(r => parentChangeset.Changes.Any(c => r.GetPathInGitRepo(c.Item.ServerItem) != null));
+            if (remote != null)
+                return new List<IGitTfsRemote>(){remote};
+            var tfsPath = Tfs.GetBranches(true).Select(b=>b.Path).SingleOrDefault(b =>
+                parentChangeset.Changes.First().Item.ServerItem.StartsWith(b.EndsWith("/") ? b : b + "/"));
+
+            if (tfsPath == null)
+            {
+                stdout.WriteLine("error: branch not found. Verify that all the folders have been converted to branches (or something else :().");
+                return new List<IGitTfsRemote>();
+            }
+
+            remote = InitBranch(this.remoteOptions, tfsPath, "0caef023ec4314e90ed3278e6a47cd411e7800ed");
+
+            return new List<IGitTfsRemote>(){remote};
         }
 
         private string CommitChangeset(ITfsChangeset changeset, string parent)
