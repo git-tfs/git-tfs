@@ -189,8 +189,16 @@ namespace Sep.Git.Tfs.Commands
                     var branchDatas = new BranchDatas
                         {
                             TfsRepositoryPath = tfsBranchPath.TfsRepositoryPath,
-                            CreationBranchData = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath)
                         };
+                    try
+                    {
+                        branchDatas.CreationBranchData = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        branchDatas.Error = ex;
+                    }
+                    
                     branchesToProcess.Add(branchDatas);
                 }
                 branchesToProcess.Add(new BranchDatas {TfsRepositoryPath = defaultRemote.TfsRepositoryPath, TfsRemote = defaultRemote, RootChangesetId = -1});
