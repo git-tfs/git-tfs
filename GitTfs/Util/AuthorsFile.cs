@@ -103,6 +103,9 @@ namespace Sep.Git.Tfs.Util
         {
             if (authorsFileStream == null)
                 return false;
+
+            _authorsByTfsUserId.Clear();
+            _authorsByGitUserId.Clear();
             int lineCount = 0;
             string line = authorsFileStream.ReadLine();
             while (line != null)
@@ -166,6 +169,8 @@ namespace Sep.Git.Tfs.Util
             }
             else if (File.Exists(savedAuthorFile))
             {
+                if (Authors.Count != 0)
+                    return true;
                 Trace.WriteLine("Reading cached authors file (" + savedAuthorFile + ")...");
                 using (StreamReader sr = new StreamReader(savedAuthorFile))
                 {

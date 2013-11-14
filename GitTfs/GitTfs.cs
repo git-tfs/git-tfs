@@ -41,6 +41,14 @@ namespace Sep.Git.Tfs
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
             Trace.WriteLine("Command run:" + commandLineRun); 
+            try
+            {
+                _container.GetInstance<AuthorsFile>().Parse(null, _globals.GitDir);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine("warning: a problem occured when reading author file :\n\t" + ex.Message); 
+            }
             return Main(command, unparsedArgs);
         }
 

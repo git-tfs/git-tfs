@@ -55,8 +55,6 @@ namespace Sep.Git.Tfs.Commands
             if (_globals.Repository.IsBare)
                 throw new GitTfsException("error: you should specify the local branch to checkin for a bare repository.");
 
-            _authors.Parse(null, _globals.GitDir);
-
             return _writer.Write("HEAD", PerformRCheckin);
         }
 
