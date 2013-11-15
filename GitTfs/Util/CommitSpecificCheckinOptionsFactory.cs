@@ -99,6 +99,20 @@ namespace Sep.Git.Tfs.Util
                 }
                 checkinOptions.CheckinComment = GitTfsConstants.TfsWorkItemRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
             }
+
+            var workitemAssociatedMatches = GitTfsConstants.TfsWorkItemAssociateRegex.Matches(checkinOptions.CheckinComment);
+            if (workitemAssociatedMatches.Count != 0)
+            {
+                foreach (Match match in workitemAssociatedMatches)
+                {
+                    var workitem = match.Groups["item_id"].Value;
+                    if (!checkinOptions.WorkItemsToAssociate.Contains(workitem))
+                    {
+                        writer.WriteLine("Associating with work item {0}", workitem);
+                        checkinOptions.WorkItemsToAssociate.Add(workitem);
+                    }
+                }
+            }
         }
 
         private void ProcessCheckinNoteCommands(CheckinOptions checkinOptions, TextWriter writer)

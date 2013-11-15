@@ -78,6 +78,101 @@ namespace Sep.Git.Tfs.Test.Util
         }
 
         [Fact]
+        public void Checkin_regex_with_hash()
+        {
+            StringWriter textWriter = new StringWriter();
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
+
+            CheckinOptions singletonCheckinOptions = new CheckinOptions();
+
+            string commitMessage =
+@"test message
+                formatted git commit message
+
+#5676";
+
+            var specificCheckinOptions = factory.BuildCommitSpecificCheckinOptions(singletonCheckinOptions, commitMessage);
+            Assert.Equal(1, specificCheckinOptions.WorkItemsToAssociate.Count);
+            Assert.Contains("5676", specificCheckinOptions.WorkItemsToAssociate);
+        }
+
+        [Fact]
+        public void Checkin_regex_with_hash2()
+        {
+            StringWriter textWriter = new StringWriter();
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
+
+            CheckinOptions singletonCheckinOptions = new CheckinOptions();
+
+            string commitMessage =
+@"test message
+                formatted git commit message
+
+#56p76";
+
+            var specificCheckinOptions = factory.BuildCommitSpecificCheckinOptions(singletonCheckinOptions, commitMessage);
+            Assert.Equal(1, specificCheckinOptions.WorkItemsToAssociate.Count);
+            Assert.Contains("56", specificCheckinOptions.WorkItemsToAssociate);
+        }
+
+        [Fact]
+        public void Checkin_regex_with_hash_wrong_format()
+        {
+            StringWriter textWriter = new StringWriter();
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
+
+            CheckinOptions singletonCheckinOptions = new CheckinOptions();
+
+            string commitMessage =
+@"test message
+                formatted git commit message
+
+#f5676";
+
+            var specificCheckinOptions = factory.BuildCommitSpecificCheckinOptions(singletonCheckinOptions, commitMessage);
+            Assert.Equal(0, specificCheckinOptions.WorkItemsToAssociate.Count);
+        }
+
+        [Fact]
+        public void Checkin_regex_with_hash_2_styles()
+        {
+            StringWriter textWriter = new StringWriter();
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
+
+            CheckinOptions singletonCheckinOptions = new CheckinOptions();
+
+            string commitMessage =
+@"test message #5676
+                formatted git commit message
+                git-tfs-work-item: 1234";
+
+            var specificCheckinOptions = factory.BuildCommitSpecificCheckinOptions(singletonCheckinOptions, commitMessage);
+            Assert.Equal(2, specificCheckinOptions.WorkItemsToAssociate.Count);
+            Assert.Contains("1234", specificCheckinOptions.WorkItemsToAssociate);
+            Assert.Contains("5676", specificCheckinOptions.WorkItemsToAssociate);
+        }
+
+        [Fact]
+        public void Checkin_regex_with_hash_same_workitems()
+        {
+            StringWriter textWriter = new StringWriter();
+            CommitSpecificCheckinOptionsFactory factory = new CommitSpecificCheckinOptionsFactory(textWriter, new Globals());
+
+            CheckinOptions singletonCheckinOptions = new CheckinOptions();
+
+            string commitMessage =
+@"test message
+                formatted git commit message
+
+#5676
+                git-tfs-work-item: 5676";
+
+            var specificCheckinOptions = factory.BuildCommitSpecificCheckinOptions(singletonCheckinOptions, commitMessage);
+            Assert.Equal(1, specificCheckinOptions.WorkItemsToAssociate.Count);
+            Assert.Contains("5676", specificCheckinOptions.WorkItemsToAssociate);
+        }
+
+        [Fact]
         public void Adds_work_item_to_resolve_and_removes_checkin_command_comment()
         {
             StringWriter textWriter = new StringWriter();
