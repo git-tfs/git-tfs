@@ -15,7 +15,6 @@
     <Archive>$(PackagedDir)/$(PackageFile)</Archive>
     <DownloadUrl>https://github.com/git-tfs/git-tfs/releases/download/v$(Version)/$(PackageFile)</DownloadUrl>
     <WebSiteDir>.\git-tfs.github.com</WebSiteDir>
-    <Authentication>--user $(User)</Authentication><!-- -H %22Authorization: token PUT_OAUTH_KEY_HERE%22 -->
   </PropertyGroup>
 
   <PropertyGroup>
@@ -23,6 +22,7 @@
     <RequireRestoreConsent>false</RequireRestoreConsent>
     <MSBuildCommunityTasksPath>$(SolutionDir)/packages/MSBuildTasks.1.4.0.45/tools</MSBuildCommunityTasksPath>
     <MSBuildCommunityTasksLib>$(MSBuildCommunityTasksPath)/MSBuild.Community.Tasks.dll</MSBuildCommunityTasksLib>
+    <MSBuildGitTfsTasksLib>$(SolutionDir)/packages/MSBuildGitTfsTasks/GitTfsTasks.dll</MSBuildGitTfsTasksLib>
   </PropertyGroup>
   <Import Project="$(SolutionDir)/.nuget/nuget.targets" />
 
@@ -30,6 +30,7 @@
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.TemplateFile" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Zip" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.FileUpdate" />
+  <UsingTask AssemblyFile="$(MSBuildGitTfsTasksLib)" TaskName="GitTfsTasks.CreateRelease" />
 
   <Target Name="Help">
     <ReadLinesFromFile File="Releasing.md">
@@ -129,26 +130,24 @@
   <Target Name="PushChocolateyPackage" DependsOnTargets="BuildChocolateyPackage">
     <Exec Command="cpush $(ChocolateyNupkg)" />
   </Target>
-
-  <Target Name="GitHubRelease" DependsOnTargets="GitHubCreateRelease; GitHubUploadPackage; UpdateWebSite;">
-  </Target>
-  <!-- http://developer.github.com/v3/repos/releases/ -->
-  <Target Name="GitHubCreateRelease">
-    <Exec ConsoleToMSBuild="true" Command="curl -X POST $(Authentication) -H %22Content-Type: application/json%22 -d %22{ \%22tag_name\%22: \%22v$(Version)\%22, \%22name\%22: \%22v$(Version)\%22 }%22 https://api.github.com/repos/$(GitHubUser)/$(GitHubProject)/releases">
-      <Output TaskParameter="ConsoleOutput" PropertyName="CreateReleaseOutput" />
-    </Exec>
-    <PropertyGroup>
-      <IdString>$([System.Text.RegularExpressions.Regex]::Match($(CreateReleaseOutput), `"id": *(\d+),`))</IdString>
-    </PropertyGroup>
-    <PropertyGroup>
-      <IdRelease>$([System.Text.RegularExpressions.Regex]::Match($(IdString), `\d+`))</IdRelease>
-    </PropertyGroup>
-    <Message Text="Id : $(IdRelease)"/>
-    <Error Text="Fail to create a release!" Condition="'$(IdRelease)' == ''" />
-  </Target>
   
-  <Target Name="GitHubUploadPackage">
-    <Exec Command="curl -X POST $(Authentication) -H %22Content-Type: application/zip%22 --data @$(Archive) https://uploads.github.com/repos/$(GitHubUser)/$(GitHubProject)/releases/$(IdRelease)/assets?name=$(PackageFile)" />
+  <!-- The zip. -->
+  <ItemGroup>
+    <ArchiveFile Include="$(Archive)">
+      <ContentType>application/zip</ContentType>
+    </ArchiveFile>
+  </ItemGroup>
+
+  <Target Name="GitHubRelease" DependsOnTargets="GitHubCreateRelease; UpdateWebSite;">
+  </Target>
+  <Import Project="Auth.targets" />
+  <Target Name="GitHubCreateRelease" DependsOnTargets="MSBuildCommunityTasks">
+    <Error Text="You must set a github.com auth token in auth.targets (see auth.targets.example)" Condition="'$(GitHubAuthToken)' == ''" />
+    <CreateRelease Repository="$(GitHubUser)/$(GitHubProject)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" >
+      <Output TaskParameter="IdRelease" PropertyName="IdRelease" />
+    </CreateRelease>
+    <Message Text="Id : $(IdRelease)"/>
+    <Error Text="Fail to create a release!" Condition="'$(IdRelease)' == '0'" />
   </Target>
   
   <Target Name="UpdateWebSite">
