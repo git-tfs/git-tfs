@@ -152,7 +152,7 @@
   
   <Target Name="UpdateWebSite">
     <Exec Command="git clone https://github.com/$(GitHubUser)/git-tfs.github.com.git" />
-    <Exec Command="echo ^&lt;a href=%22$(DownloadUrl)%22 class=%22download-button%22^&gt;Download v$(Version)^&lt;/a^&gt; &gt; $(WebSiteDir)\_includes\download_button.html" />
+    <WriteLinesToFile File="$(WebSiteDir)\_includes\download_button.html" Lines="&lt;a href=%22$(DownloadUrl)%22 class=%22download-button%22&gt;Download v$(Version)&lt;/a&gt;" Overwrite="true" Encoding="ASCII"/>
     <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -a -m %22v$(Version)%22" />
     <Exec WorkingDirectory="$(WebSiteDir)" Command="git push origin master" />
     <CallTarget Targets="_CleanWebsiteFolder;" />
