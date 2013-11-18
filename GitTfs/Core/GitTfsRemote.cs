@@ -356,10 +356,7 @@ namespace Sep.Git.Tfs.Core
                 {
                     if (changeset.Summary.Workitems.Any())
                     {
-                        string workitems = string.Empty;
-                        foreach (var workitem in changeset.Summary.Workitems)
-                            workitems += "\n" + GitTfsConstants.GitTfsWorkItemPrefix + workitem.Id + " associate";
-                        log.Log += workitems;
+                        log.Log += "\nwork-items: " + string.Join(", ", changeset.Summary.Workitems.Select(wi => "#" + wi.Id)); ;
                     }
 
                     if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
