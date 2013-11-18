@@ -31,6 +31,9 @@ namespace Sep.Git.Tfs
         public static readonly Regex TfsWorkItemRegex =
                 new Regex(GitTfsWorkItemPrefix + @"\s*(?<item_id>\d+)(\s*(?<action>associate|resolve))?");
 
+        // e.g. #24
+        public static readonly Regex TfsWorkItemAssociateRegex = new Regex(@"#(?<item_id>\d+)");
+
         // e.g. git-tfs-code-reviewer: John Smith
         public static readonly Regex TfsReviewerRegex =
                 new Regex(GitTfsPrefix + @"-(?<type>code|security|performance)-reviewer:\s*(?<reviewer>.+)");
