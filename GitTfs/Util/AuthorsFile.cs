@@ -73,6 +73,8 @@ namespace Sep.Git.Tfs.Util
 
         public bool IsParseSuccessfull { get; set; }
 
+        public static string GitTfsCachedAuthorsFileName = "git-tfs_authors";
+
         public Dictionary<string, Author> Authors
         {
             get
@@ -146,7 +148,7 @@ namespace Sep.Git.Tfs.Util
 
         public bool Parse(string authorsFilePath, string gitDir)
         {
-            var savedAuthorFile = Path.Combine(gitDir, "git-tfs_authors");
+            var savedAuthorFile = Path.Combine(gitDir, GitTfsCachedAuthorsFileName);
             if (!String.IsNullOrWhiteSpace(authorsFilePath))
             {
                 if (!File.Exists(authorsFilePath))
