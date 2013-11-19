@@ -140,7 +140,7 @@
 
   <Target Name="GitHubRelease" DependsOnTargets="GitHubCreateRelease; UpdateWebSite;">
   </Target>
-  <Import Project="Auth.targets" />
+  <Import Project="Auth.targets" Condition="Exists('Auth.targets')" />
   <Target Name="GitHubCreateRelease" DependsOnTargets="MSBuildCommunityTasks">
     <Error Text="You must set a github.com auth token in auth.targets (see auth.targets.example)" Condition="'$(GitHubAuthToken)' == ''" />
     <CreateRelease Repository="$(GitHubUser)/$(GitHubProject)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" >
