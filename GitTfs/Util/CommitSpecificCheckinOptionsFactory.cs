@@ -20,11 +20,13 @@ namespace Sep.Git.Tfs.Util
     {
         private readonly TextWriter writer;
         private readonly Globals globals;
+        private AuthorsFile authors;
 
-        public CommitSpecificCheckinOptionsFactory(TextWriter writer, Globals globals)
+        public CommitSpecificCheckinOptionsFactory(TextWriter writer, Globals globals, AuthorsFile authors)
         {
             this.writer = writer;
             this.globals = globals;
+            this.authors = authors;
         }
 
         public CheckinOptions BuildCommitSpecificCheckinOptions(CheckinOptions sourceCheckinOptions, string commitMessage)
@@ -71,7 +73,6 @@ namespace Sep.Git.Tfs.Util
             clone.OverrideGatedCheckIn = source.OverrideGatedCheckIn;
             clone.WorkItemsToAssociate.AddRange(source.WorkItemsToAssociate);
             clone.WorkItemsToResolve.AddRange(source.WorkItemsToResolve);
-            clone.AuthorsFilePath = source.AuthorsFilePath;
             clone.AuthorTfsUserId = source.AuthorTfsUserId;
             foreach (var note in source.CheckinNotes)
             {
@@ -165,12 +166,10 @@ namespace Sep.Git.Tfs.Util
 
         private void ProcessAuthor(CheckinOptions checkinOptions, TextWriter writer, GitCommit commit)
         {
-            // get authors file FIXME
-            AuthorsFile af = new AuthorsFile();
-            if (!af.Parse(checkinOptions.AuthorsFilePath, globals.GitDir))
+            if (!authors.IsParseSuccessfull)
                 return;
 
-            Author a = af.FindAuthor(commit.AuthorAndEmail);
+            Author a = authors.FindAuthor(commit.AuthorAndEmail);
             if (a == null)
             {
                 checkinOptions.AuthorTfsUserId = null;

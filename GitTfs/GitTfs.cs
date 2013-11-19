@@ -43,7 +43,7 @@ namespace Sep.Git.Tfs
             Trace.WriteLine("Command run:" + commandLineRun); 
             try
             {
-                _container.GetInstance<AuthorsFile>().Parse(null, _globals.GitDir);
+                _container.GetInstance<AuthorsFile>().Parse(_globals.AuthorsFilePath, _globals.GitDir);
             }
             catch (Exception ex)
             {

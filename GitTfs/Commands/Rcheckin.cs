@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Commands
         {
             _stdout = stdout;
             _checkinOptions = checkinOptions;
-            _checkinOptionsFactory = new CommitSpecificCheckinOptionsFactory(_stdout, globals);
+            _checkinOptionsFactory = new CommitSpecificCheckinOptionsFactory(_stdout, globals, authors);
             _writer = writer;
             _globals = globals;
             _authors = authors;

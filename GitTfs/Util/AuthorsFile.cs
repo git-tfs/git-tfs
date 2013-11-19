@@ -71,6 +71,7 @@ namespace Sep.Git.Tfs.Util
         public AuthorsFile()
         {}
 
+        public bool IsParseSuccessfull { get; set; }
 
         public Dictionary<string, Author> Authors
         {
@@ -139,6 +140,7 @@ namespace Sep.Git.Tfs.Util
                 }
                 line = authorsFileStream.ReadLine();
             }
+            IsParseSuccessfull = true;
             return true;
         }
 
