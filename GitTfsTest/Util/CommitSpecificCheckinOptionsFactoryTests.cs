@@ -11,7 +11,7 @@ namespace Sep.Git.Tfs.Test.Util
     {
         private CommitSpecificCheckinOptionsFactory GetCommitSpecificCheckinOptions()
         {
-            return new CommitSpecificCheckinOptionsFactory(new StringWriter(), new Globals());
+            return new CommitSpecificCheckinOptionsFactory(new StringWriter(), new Globals(), new AuthorsFile());
         }
 
         [Fact]

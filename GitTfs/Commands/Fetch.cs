@@ -33,7 +33,6 @@ namespace Sep.Git.Tfs.Commands
         bool FetchAll { get; set; }
         bool FetchLabels { get; set; }
         bool FetchParents { get; set; }
-        string AuthorsFilePath { get; set; }
         string BareBranch { get; set; }
         bool ForceFetch { get; set; }
         bool ExportMetadatas { get; set; }
@@ -48,8 +47,6 @@ namespace Sep.Git.Tfs.Commands
                         v => FetchAll = v != null },
                     { "parents",
                         v => FetchParents = v != null },
-                    { "authors=", "Path to an Authors file to map TFS users to Git users",
-                        v => AuthorsFilePath = v },
                     { "l|with-labels|fetch-labels", "Fetch the labels also when fetching TFS changesets",
                         v => FetchLabels = v != null },
                     { "b|bare-branch=", "The name of the branch on which the fetch will be done for a bare repository",
@@ -79,8 +76,6 @@ namespace Sep.Git.Tfs.Commands
 
         private int Run(bool stopOnFailMergeCommit, params string[] args)
         {
-            authors.Parse(AuthorsFilePath, globals.GitDir);
-
             foreach (var remote in GetRemotesToFetch(args))
             {
                 FetchRemote(stopOnFailMergeCommit, remote);

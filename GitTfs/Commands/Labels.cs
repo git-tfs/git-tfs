@@ -27,7 +27,6 @@ namespace Sep.Git.Tfs.Commands
         public bool LabelAllBranches { get; set; }
         public string NameFilter { get; set; }
         public string ExcludeNameFilter { get; set; }
-        string AuthorsFilePath { get; set; }
 
         public Labels(TextWriter stdout, Globals globals, AuthorsFile authors)
         {
@@ -47,7 +46,6 @@ namespace Sep.Git.Tfs.Commands
                     { "e|exclude-label-name=", "Exclude all the labels respecting this regex name filter", v => ExcludeNameFilter = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
-                    { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
                 };
             }
         }
@@ -63,8 +61,6 @@ namespace Sep.Git.Tfs.Commands
             if (tfsRemote == null)
                 throw new GitTfsException("error: No git-tfs repository found. Please try to clone first...\n");
 
-            _authors.Parse(AuthorsFilePath, _globals.GitDir);
-
             return CreateLabelsForTfsBranch(tfsRemote);
         }
 
@@ -76,8 +72,6 @@ namespace Sep.Git.Tfs.Commands
             }
 
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
-
-            _authors.Parse(AuthorsFilePath, _globals.GitDir);
 
             foreach (var tfsRemote in allRemotes)
             {

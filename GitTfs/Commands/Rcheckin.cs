@@ -19,18 +19,20 @@ namespace Sep.Git.Tfs.Commands
         private readonly CommitSpecificCheckinOptionsFactory _checkinOptionsFactory;
         private readonly TfsWriter _writer;
         private readonly Globals _globals;
+        private readonly AuthorsFile _authors;
 
         private bool Quick { get; set; }
         private bool AutoRebase { get; set; }
         private bool ForceCheckin { get; set; }
 
-        public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Globals globals)
+        public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Globals globals, AuthorsFile authors)
         {
             _stdout = stdout;
             _checkinOptions = checkinOptions;
-            _checkinOptionsFactory = new CommitSpecificCheckinOptionsFactory(_stdout, globals);
+            _checkinOptionsFactory = new CommitSpecificCheckinOptionsFactory(_stdout, globals, authors);
             _writer = writer;
             _globals = globals;
+            _authors = authors;
         }
 
         public OptionSet OptionSet
@@ -61,6 +63,8 @@ namespace Sep.Git.Tfs.Commands
         {
             if (!_globals.Repository.IsBare)
                 throw new GitTfsException("error: This syntax with one parameter is only allowed in bare repository.");
+
+            _authors.Parse(null, _globals.GitDir);
 
             return _writer.Write(GitRepository.ShortToLocalName(localBranch), PerformRCheckin);
         }

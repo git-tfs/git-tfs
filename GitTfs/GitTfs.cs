@@ -21,8 +21,9 @@ namespace Sep.Git.Tfs
         private readonly IContainer _container;
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
+        private TextWriter _stdout;
 
-        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals)
+        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals , TextWriter stdout)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
@@ -31,6 +32,7 @@ namespace Sep.Git.Tfs
             _gitTfsVersionProvider = gitTfsVersionProvider;
             _runner = runner;
             _globals = globals;
+            _stdout = stdout;
         }
 
         public int Run(IList<string> args)
@@ -41,6 +43,17 @@ namespace Sep.Git.Tfs
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
             Trace.WriteLine("Command run:" + commandLineRun); 
+            try
+            {
+                _container.GetInstance<AuthorsFile>().Parse(_globals.AuthorsFilePath, _globals.GitDir);
+            }
+            catch (Exception ex)
+            {
+                if (!string.IsNullOrEmpty(_globals.AuthorsFilePath))
+                    throw;
+                _stdout.WriteLine("warning: author file ignored due to a problem occuring when reading it :\n\t" + ex.Message); 
+                _stdout.WriteLine("         Verify the file :" + Path.Combine(_globals.GitDir, AuthorsFile.GitTfsCachedAuthorsFileName));
+            }
             return Main(command, unparsedArgs);
         }
 

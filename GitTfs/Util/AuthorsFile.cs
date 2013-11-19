@@ -71,6 +71,9 @@ namespace Sep.Git.Tfs.Util
         public AuthorsFile()
         {}
 
+        public bool IsParseSuccessfull { get; set; }
+
+        public static string GitTfsCachedAuthorsFileName = "git-tfs_authors";
 
         public Dictionary<string, Author> Authors
         {
@@ -103,6 +106,9 @@ namespace Sep.Git.Tfs.Util
         {
             if (authorsFileStream == null)
                 return false;
+
+            _authorsByTfsUserId.Clear();
+            _authorsByGitUserId.Clear();
             int lineCount = 0;
             string line = authorsFileStream.ReadLine();
             while (line != null)
@@ -136,12 +142,13 @@ namespace Sep.Git.Tfs.Util
                 }
                 line = authorsFileStream.ReadLine();
             }
+            IsParseSuccessfull = true;
             return true;
         }
 
         public bool Parse(string authorsFilePath, string gitDir)
         {
-            var savedAuthorFile = Path.Combine(gitDir, "git-tfs_authors");
+            var savedAuthorFile = Path.Combine(gitDir, GitTfsCachedAuthorsFileName);
             if (!String.IsNullOrWhiteSpace(authorsFilePath))
             {
                 if (!File.Exists(authorsFilePath))
@@ -166,6 +173,8 @@ namespace Sep.Git.Tfs.Util
             }
             else if (File.Exists(savedAuthorFile))
             {
+                if (Authors.Count != 0)
+                    return true;
                 Trace.WriteLine("Reading cached authors file (" + savedAuthorFile + ")...");
                 using (StreamReader sr = new StreamReader(savedAuthorFile))
                 {
