@@ -140,7 +140,9 @@
 
   <Target Name="GitHubRelease" DependsOnTargets="GitHubCreateRelease; UpdateWebSite;">
   </Target>
+
   <Import Project="Auth.targets" Condition="Exists('Auth.targets')" />
+
   <Target Name="GitHubCreateRelease" DependsOnTargets="MSBuildCommunityTasks">
     <Error Text="You must set a github.com auth token in auth.targets (see auth.targets.example)" Condition="'$(GitHubAuthToken)' == ''" />
     <CreateRelease Repository="$(GitHubUser)/$(GitHubProject)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" >
@@ -158,10 +160,12 @@
     <CallTarget Targets="_CleanWebsiteFolder;" />
     <OnError ExecuteTargets="_CleanWebsiteFolder" />
   </Target>
+
   <Target Name="_CleanWebsiteFolder">
-  <RemoveDir Directories="$(WebSiteDir)" />
+    <RemoveDir Directories="$(WebSiteDir)" />
   </Target>
+
   <Target Name="_DeleteRelease">
-      <Exec Command="curl -X DELETE $(Authentication) https://api.github.com/repos/$(GitHubUser)/$(GitHubProject)/releases/$(IdRelease)" />
+    <Exec Command="curl -X DELETE $(Authentication) https://api.github.com/repos/$(GitHubUser)/$(GitHubProject)/releases/$(IdRelease)" />
   </Target>
 </Project>
