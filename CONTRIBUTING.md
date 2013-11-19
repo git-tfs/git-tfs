@@ -35,3 +35,5 @@ that runs git-tfs with the VsFake driver, similar to how the clone tests are wri
 When you submit the pull request, include a note about which versions you have tried to compile with, and which ones you have tested with.
 
 5. Include [documentation](https://github.com/git-tfs/git-tfs/tree/master/doc) for externally-visible changes.
+
+6. Update the [release notes for the next version](https://github.com/git-tfs/git-tfs/tree/master/doc/release-notes).
