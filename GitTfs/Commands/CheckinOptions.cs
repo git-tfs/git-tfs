@@ -34,7 +34,6 @@ namespace Sep.Git.Tfs.Commands
                         (reviewer) => { CheckinNotes["Performance Reviewer"] = reviewer; } },
                     { "no-gate", "Disables gated checkin.",
                         v => { OverrideGatedCheckIn = true; } },
-                    { "A|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
                     { "author=", "TFS User ID to check in on behalf of", var => AuthorTfsUserId = var },
                 };
             }
@@ -55,7 +54,6 @@ namespace Sep.Git.Tfs.Commands
         public List<string> WorkItemsToResolve { get { return _workItemsToResolve; } }
         public Dictionary<string, string> CheckinNotes { get { return _checkinNotes; } }
 
-        public string AuthorsFilePath { get; set; }
         public string AuthorTfsUserId { get; set; }
 
     }

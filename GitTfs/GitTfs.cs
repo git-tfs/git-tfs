@@ -21,8 +21,9 @@ namespace Sep.Git.Tfs
         private readonly IContainer _container;
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
+        private TextWriter _stdout;
 
-        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals)
+        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals , TextWriter stdout)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
@@ -31,6 +32,7 @@ namespace Sep.Git.Tfs
             _gitTfsVersionProvider = gitTfsVersionProvider;
             _runner = runner;
             _globals = globals;
+            _stdout = stdout;
         }
 
         public int Run(IList<string> args)
@@ -40,7 +42,8 @@ namespace Sep.Git.Tfs
             var command = ExtractCommand(args);
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
-            Trace.WriteLine("Command run:" + commandLineRun); 
+            ParseAuthors();
+            Trace.WriteLine("Command run:" + commandLineRun);
             return Main(command, unparsedArgs);
         }
 
@@ -72,6 +75,22 @@ namespace Sep.Git.Tfs
         public bool RequiresValidGitRepository(GitTfsCommand command)
         {
             return ! command.GetType().GetCustomAttributes(typeof (RequiresValidGitRepositoryAttribute), false).IsEmpty();
+        }
+
+        private void ParseAuthors()
+        {
+            try
+            {
+                _container.GetInstance<AuthorsFile>().Parse(_globals.AuthorsFilePath, _globals.GitDir);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                if (!string.IsNullOrEmpty(_globals.AuthorsFilePath))
+                    throw;
+                _stdout.WriteLine("warning: author file ignored due to a problem occuring when reading it :\n\t" + ex.Message);
+                _stdout.WriteLine("         Verify the file :" + Path.Combine(_globals.GitDir, AuthorsFile.GitTfsCachedAuthorsFileName));
+            }
         }
 
         public void InitializeGlobals()

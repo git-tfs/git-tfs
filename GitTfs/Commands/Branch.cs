@@ -39,7 +39,6 @@ namespace Sep.Git.Tfs.Commands
         public string Comment { get; set; }
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
-        public string AuthorsFilePath { get; set; }
         public string ParentBranch { get; set; }
 
         public OptionSet OptionSet
@@ -59,7 +58,6 @@ namespace Sep.Git.Tfs.Commands
                     { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
-                    { "a|authors=", "Path to an Authors file to map TFS users to Git users", v => AuthorsFilePath = v },
                 }
                 .Merge(globals.OptionSet); 
             }
@@ -81,7 +79,6 @@ namespace Sep.Git.Tfs.Commands
         {
             initBranch.TfsUsername = TfsUsername;
             initBranch.TfsPassword = TfsPassword;
-            initBranch.AuthorsFilePath = AuthorsFilePath;
             initBranch.CloneAllBranches = ManageAll;
             initBranch.ParentBranch = ParentBranch;
             initBranch.IgnoreRegex = IgnoreRegex;
