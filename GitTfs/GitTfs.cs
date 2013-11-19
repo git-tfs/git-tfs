@@ -42,18 +42,8 @@ namespace Sep.Git.Tfs
             var command = ExtractCommand(args);
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
-            Trace.WriteLine("Command run:" + commandLineRun); 
-            try
-            {
-                _container.GetInstance<AuthorsFile>().Parse(_globals.AuthorsFilePath, _globals.GitDir);
-            }
-            catch (Exception ex)
-            {
-                if (!string.IsNullOrEmpty(_globals.AuthorsFilePath))
-                    throw;
-                _stdout.WriteLine("warning: author file ignored due to a problem occuring when reading it :\n\t" + ex.Message); 
-                _stdout.WriteLine("         Verify the file :" + Path.Combine(_globals.GitDir, AuthorsFile.GitTfsCachedAuthorsFileName));
-            }
+            ParseAuthors();
+            Trace.WriteLine("Command run:" + commandLineRun);
             return Main(command, unparsedArgs);
         }
 
@@ -85,6 +75,22 @@ namespace Sep.Git.Tfs
         public bool RequiresValidGitRepository(GitTfsCommand command)
         {
             return ! command.GetType().GetCustomAttributes(typeof (RequiresValidGitRepositoryAttribute), false).IsEmpty();
+        }
+
+        private void ParseAuthors()
+        {
+            try
+            {
+                _container.GetInstance<AuthorsFile>().Parse(_globals.AuthorsFilePath, _globals.GitDir);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                if (!string.IsNullOrEmpty(_globals.AuthorsFilePath))
+                    throw;
+                _stdout.WriteLine("warning: author file ignored due to a problem occuring when reading it :\n\t" + ex.Message);
+                _stdout.WriteLine("         Verify the file :" + Path.Combine(_globals.GitDir, AuthorsFile.GitTfsCachedAuthorsFileName));
+            }
         }
 
         public void InitializeGlobals()
