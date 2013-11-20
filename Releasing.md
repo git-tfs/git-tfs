@@ -14,7 +14,3 @@ Normally, you should do this:
 3. Build the release and include the version (e.g. X.Y.Z) and the name of a changelog file (optional).
 
     msbuild Release.proj /t:Release /p:Version=X.Y.Z /p:ReleaseNotes="ReleaseNoteFile.md"
-
-4. Build the chocolatey package. (For this to work, you need to [set an API key](https://github.com/chocolatey/chocolatey/wiki/CommandsPush#note-to-use-this-command-you-must-have-your-api-key-saved-for-chocolateyorg-or-the-source-you-want-to-push-to).)
-
-    msbuild Release.proj /t:Chocolatey /p:Version=X.Y.Z
