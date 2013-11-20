@@ -4,14 +4,14 @@
 *.gpState
 _ReSharper.*
 .*.swp
-
-#
+/Auth.targets
 
 # Build outputs
 bin
 obj
-pkg
+/Releases
+/tmp
 
 # 3rd-party stuff copied during build
-packages/
+/packages
 GitTfs/git2.*
