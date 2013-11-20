@@ -2,21 +2,41 @@
 <Project ToolsVersion="4.0" DefaultTargets="Help" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+    <!-- The owner of the GitHub repository -->
     <GitHubUser>git-tfs</GitHubUser>
+
+    <!-- The name of the GitHub repository -->
     <GitHubProject>git-tfs</GitHubProject>
+
+    <!-- Where to push the release tag. -->
     <OriginUrl>https://github.com/$(GitHubUser)/$(GitHubProject).git</OriginUrl>
+
+    <!-- Where the solution lives, relative to this file. -->
     <SolutionDir>.</SolutionDir>
+
+    <!-- Where git-tfs.exe and its dependencies are built. -->
     <BuildDir>$(SolutionDir)/GitTfs/bin/Release</BuildDir>
-    <PackagedDir>$(SolutionDir)/Releases</PackagedDir>
+
+    <!-- If we support VS2008, we need to build as x86. Otherwise, build for any platform. -->
     <TargetPlatform>AnyCPU</TargetPlatform>
     <TargetPlatform Condition="Exists('$(SolutionDir)/GitTfs.Vs2008/GitTfs.Vs2008.csproj')">x86</TargetPlatform>
+
+    <!-- The file that includes the AssemblyVersionAttribute. -->
     <VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
+
+    <!-- The name of the output zip file. -->
+    <PackagedDir>$(SolutionDir)/Releases</PackagedDir>
     <PackageFile>GitTfs-$(Version).zip</PackageFile>
     <Archive>$(PackagedDir)/$(PackageFile)</Archive>
+
+    <!-- The API doesn't provide this, but it follows a pattern that we can mimic. -->
     <DownloadUrl>https://github.com/git-tfs/git-tfs/releases/download/v$(Version)/$(PackageFile)</DownloadUrl>
+
+    <!-- A directory to use when changing the download button on the website. -->
     <WebSiteDir>.\git-tfs.github.com</WebSiteDir>
   </PropertyGroup>
 
+  <!-- Load nuget, so we can get dependencies. (Dependencies are not checked in to git.) -->
   <PropertyGroup>
     <PackagesConfig>$(SolutionDir)/.nuget/packages.config</PackagesConfig>
     <RequireRestoreConsent>false</RequireRestoreConsent>
@@ -26,12 +46,14 @@
   </PropertyGroup>
   <Import Project="$(SolutionDir)/.nuget/nuget.targets" />
 
+  <!-- Load some extra tasks. -->
   <Target Name="MSBuildCommunityTasks" DependsOnTargets="RestorePackages" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.TemplateFile" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Zip" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.FileUpdate" />
   <UsingTask AssemblyFile="$(MSBuildGitTfsTasksLib)" TaskName="GitTfsTasks.CreateRelease" />
 
+  <!-- Default: Show the howto. -->
   <Target Name="Help">
     <ReadLinesFromFile File="Releasing.md">
       <Output TaskParameter="Lines" ItemName="DeployInstructions"/>
@@ -39,13 +61,16 @@
     <Message Text="@(DeployInstructions->'%(Identity)','%0a%0d')" />
   </Target>
 
+  <!-- Public: Build the release and put it on github.com -->
   <Target Name="Release" DependsOnTargets="UpdateVersion; Build; TagSource; PushSource; Package; GitHubRelease;">
   </Target>
 
+  <!-- Internal: Called by release to compile git-tfs.exe -->
   <Target Name="Build">
     <MSBuild Projects="GitTfs.sln" Targets="Rebuild" Properties="Configuration=Release;Platform=$(TargetPlatform);WarningLevel=0" />
   </Target>
 
+  <!-- The contents of the zip. -->
   <ItemGroup>
     <ReleaseFiles Include="$(SolutionDir)\README.md" />
     <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
@@ -55,10 +80,13 @@
     <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
     <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
   </ItemGroup>
+
+  <!-- Internal: Called by Release to create the zip. -->
   <Target Name="Package" DependsOnTargets="MSBuildCommunityTasks">
     <Zip Files="@(ReleaseFiles)" ZipFileName="$(Archive)" WorkingDirectory="$(BuildDir)" />
   </Target>
 
+  <!-- Internal: Called by Release to set the new version. -->
   <Target Name="UpdateVersion">
     <Error Text="You should specify a version number!" Condition="'$(Version)' == ''" />
     <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties ; { ; public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="ASCII"/>
@@ -68,23 +96,28 @@
     <Exec Command="git commit -m v$(Version)" />
   </Target>
 
+  <!-- Internal: Called by Release to tag the git-tfs repository. -->
   <Target Name="TagSource">
     <Exec Command="git tag v$(Version)" />
   </Target>
 
+  <!-- Internal: Called by Release to push the release tag to github.com -->
   <Target Name="PushSource">
     <Exec Command="git push $(OriginUrl) master v$(Version)" />
   </Target>
 
+  <!-- Public: Build and upload a chocolatey package. -->
   <Target Name="Chocolatey" DependsOnTargets="CleanChocolateyTempDir; PushChocolateyPackage">
   </Target>
 
+  <!-- Chocolatey-releated properties. -->
   <PropertyGroup>
     <ChocolateyBuildDir>$(SolutionDir)\tmp\choc</ChocolateyBuildDir>
     <ChocolateyTemplateDir>$(SolutionDir)\ChocolateyTemplates</ChocolateyTemplateDir>
     <ChocolateyNupkg>$(ChocolateyBuildDir)\gittfs.$(Version).nupkg</ChocolateyNupkg>
   </PropertyGroup>
 
+  <!-- Chocolatey-related files. -->
   <ItemGroup>
     <ChocolateyTokens Include="PackageVersion">
       <ReplacementValue>$(Version)</ReplacementValue>
@@ -97,18 +130,22 @@
     <ChocolateyInstallScript Include="$(ChocolateyBuildDir)/tools/chocolateyInstall.ps1" />
   </ItemGroup>
 
+  <!-- Internal: Exits with error when required chocolatey properties are not defined. -->
   <Target Name="ChocolateyProperties">
     <Error Text="You should specify a version number! (/p:Version=X.Y.Z)" Condition="'$(Version)' == ''" />
   </Target>
 
+  <!-- Internal. -->
   <Target Name="CleanChocolateyTempDir">
     <RemoveDir Directories="$(ChocolateyBuildDir)" />
   </Target>
 
+  <!-- Internal. -->
   <Target Name="ChocolateyTempDir">
     <MakeDir Directories="$(ChocolateyBuildDir)\tools" />
   </Target>
 
+  <!-- Internal: Generate a nuspec file for the chocolatey package. -->
   <Target Name="ChocolateyNuspec" DependsOnTargets="ChocolateyProperties; MSBuildCommunityTasks; ChocolateyTempDir">
     <TemplateFile
       Template="$(ChocolateyTemplateDir)\gittfs.nuspec"
@@ -116,6 +153,7 @@
       Tokens="@(ChocolateyTokens)" />
   </Target>
 
+  <!-- Internal: Generate an install script for the chocolatey package. -->
   <Target Name="ChocolateyInstallScript" DependsOnTargets="ChocolateyProperties; MSBuildCommunityTasks; ChocolateyTempDir">
     <TemplateFile
       Template="$(ChocolateyTemplateDir)\chocolateyInstall.ps1"
@@ -123,10 +161,12 @@
       Tokens="@(ChocolateyTokens)" />
   </Target>
 
+  <!-- Internal. -->
   <Target Name="BuildChocolateyPackage" DependsOnTargets="ChocolateyNuspec; ChocolateyInstallScript">
     <Exec Command="cpack" WorkingDirectory="$(ChocolateyBuildDir)" />
   </Target>
 
+  <!-- Internal. -->
   <Target Name="PushChocolateyPackage" DependsOnTargets="BuildChocolateyPackage">
     <Exec Command="cpush $(ChocolateyNupkg)" />
   </Target>
@@ -138,11 +178,14 @@
     </ArchiveFile>
   </ItemGroup>
 
+  <!-- Internal: Called by Release to create the release record on github.com and update the web site -->
   <Target Name="GitHubRelease" DependsOnTargets="GitHubCreateRelease; UpdateWebSite;">
   </Target>
 
+  <!-- Try to load the oauth token -->
   <Import Project="Auth.targets" Condition="Exists('Auth.targets')" />
 
+  <!-- Internal: Create a release on github.com -->
   <Target Name="GitHubCreateRelease" DependsOnTargets="MSBuildCommunityTasks">
     <Error Text="You must set a github.com auth token in auth.targets (see auth.targets.example)" Condition="'$(GitHubAuthToken)' == ''" />
     <CreateRelease Repository="$(GitHubUser)/$(GitHubProject)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" >
@@ -152,6 +195,7 @@
     <Error Text="Fail to create a release!" Condition="'$(IdRelease)' == '0'" />
   </Target>
   
+  <!-- Internal: Update the "download" button on git-tfs.com -->
   <Target Name="UpdateWebSite">
     <Exec Command="git clone https://github.com/$(GitHubUser)/git-tfs.github.com.git" />
     <WriteLinesToFile File="$(WebSiteDir)\_includes\download_button.html" Lines="&lt;a href=%22$(DownloadUrl)%22 class=%22download-button%22&gt;Download v$(Version)&lt;/a&gt;" Overwrite="true" Encoding="ASCII"/>
@@ -161,11 +205,8 @@
     <OnError ExecuteTargets="_CleanWebsiteFolder" />
   </Target>
 
+  <!-- Internal: Remove the website folder. -->
   <Target Name="_CleanWebsiteFolder">
     <RemoveDir Directories="$(WebSiteDir)" />
-  </Target>
-
-  <Target Name="_DeleteRelease">
-    <Exec Command="curl -X DELETE $(Authentication) https://api.github.com/repos/$(GitHubUser)/$(GitHubProject)/releases/$(IdRelease)" />
   </Target>
 </Project>
