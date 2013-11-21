@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -136,13 +137,21 @@ namespace Sep.Git.Tfs.VsFake
 
         class Change : IChange, IItem
         {
+            private struct ChangeContentInfo
+            {
+                public long ContentLength;
+                public byte[] HashValue;
+            }
+
             ScriptedChangeset _changeset;
             ScriptedChange _change;
+            Lazy<ChangeContentInfo> _changeContentInfo;
 
             public Change(ScriptedChangeset changeset, ScriptedChange change)
             {
                 _changeset = changeset;
                 _change = change;
+                _changeContentInfo = new Lazy<ChangeContentInfo>(() => GetChangeContentInfo(this));
             }
 
             TfsChangeType IChange.ChangeType
@@ -187,19 +196,38 @@ namespace Sep.Git.Tfs.VsFake
 
             long IItem.ContentLength
             {
-                get
-                {
-                    using (var temp = ((IItem)this).DownloadFile())
-                        return new FileInfo(temp).Length;
-                }
+                get { return _changeContentInfo.Value.ContentLength; }
             }
 
+            IEnumerable<byte> IItem.HashValue
+            {
+                get { return _changeContentInfo.Value.HashValue; }
+            }
+            
             TemporaryFile IItem.DownloadFile()
             {
                 var temp = new TemporaryFile();
                 using(var writer = new StreamWriter(temp))
                     writer.Write(_change.Content);
                 return temp;
+            }
+
+            static ChangeContentInfo GetChangeContentInfo(IItem item)
+            {
+                long contentLength;
+                byte[] hashValue;
+
+                using (var temp = item.DownloadFile())
+                {
+                    using (var md5 = new MD5CryptoServiceProvider())
+                    using (var reader = new FileStream(temp, FileMode.Open, FileAccess.Read))
+                    {
+                        hashValue = md5.ComputeHash(reader);
+                    }
+                    contentLength = new FileInfo(temp).Length;
+                }
+
+                return new ChangeContentInfo { ContentLength = contentLength, HashValue = hashValue };
             }
         }
 

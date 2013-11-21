@@ -183,6 +183,11 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _item.ContentLength; }
         }
 
+        public IEnumerable<byte> HashValue
+        {
+            get { return _item.HashValue; }
+        }
+
         public TemporaryFile DownloadFile()
         {
             return _downloadStrategy.DownloadFile(this);
