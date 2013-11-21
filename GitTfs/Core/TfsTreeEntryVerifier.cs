@@ -15,6 +15,11 @@ namespace Sep.Git.Tfs.Core
         { }
 
 
+        public void Enable()
+        {
+            IsEnabled = true;
+        }
+
         public bool IsValid(TfsTreeEntry entry)
         {
             bool result;
