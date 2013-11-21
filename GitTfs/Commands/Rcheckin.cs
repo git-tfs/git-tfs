@@ -257,7 +257,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 this.Message = generateCheckinComment
                                    ? repo.GetCommitMessage(this.Sha, latest)
-                                   : repo.GetCommitMessage(this.Sha);
+                                   : repo.GetCommit(this.Sha).Message;
             }
         }
 

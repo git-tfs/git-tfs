@@ -34,7 +34,6 @@ namespace Sep.Git.Tfs.Core
         string GetCurrentCommit();
         Dictionary<string, GitObject> GetObjects();
         string GetCommitMessage(string head, string parentCommitish);
-        string GetCommitMessage(string commitish);
         string AssertValidBranchName(string gitBranchName);
         bool CreateBranch(string gitBranchName, string target);
         Branch RenameBranch(string oldName, string newName);
