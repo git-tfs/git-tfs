@@ -137,7 +137,7 @@ namespace Sep.Git.Tfs.VsFake
 
         class Change : IChange, IItem
         {
-            private struct ChangeContentInfo
+            private class ChangeContentInfo
             {
                 public long ContentLength;
                 public byte[] HashValue;
