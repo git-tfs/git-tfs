@@ -73,6 +73,11 @@ namespace Sep.Git.Tfs.VsFake
                 .Select(x => BuildTfsChangeset(x, remote));
         }
 
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, int maxCount, IGitTfsRemote remote)
+        {
+            return GetChangesets(path, startVersion, remote).Take(maxCount);
+        }
+
         public int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
         {
             var firstChangesetOfBranch = _script.Changesets.FirstOrDefault(c => c.IsMergeChangeset && c.MergeChangesetDatas.MergeIntoBranch == path && c.MergeChangesetDatas.BeforeMergeChangesetId < firstChangeset);
