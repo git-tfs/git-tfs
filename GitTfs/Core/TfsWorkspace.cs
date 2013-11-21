@@ -174,16 +174,6 @@ namespace Sep.Git.Tfs.Core
             _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), (int)_contextVersion.ChangesetId);
         }
 
-        public void Get(int changesetId)
-        {
-            if (_verifier.IsEnabled)
-            {
-                throw new NotImplementedException("get itemsForChangeset and delegate");
-            }
-
-            _workspace.GetSpecificVersion(changesetId);
-        }
-
         public void Get(int changesetId, IEnumerable<IItem> itemsForChangeset)
         {
             _workspace.GetSpecificVersion(changesetId);

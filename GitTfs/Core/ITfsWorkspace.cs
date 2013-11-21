@@ -31,12 +31,8 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         long Checkin(CheckinOptions checkinOptions);
         /// <summary>
-        /// Populates the workspace with a snapshot, as of the given changeset.
-        /// </summary>
-        void Get(int changesetId);
-        /// <summary>
-        /// Populates the workspace with a snapshot, as fo the given changeset, with an already
-        /// known set of entries.
+        /// Populates the workspace with a snapshot at the given changeset.
+        /// The set of affected items must be specified.
         /// </summary>
         void Get(int changesetId, IEnumerable<IItem> itemsForChangeset);
         /// <summary>
