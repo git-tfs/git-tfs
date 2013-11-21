@@ -45,8 +45,9 @@ namespace Sep.Git.Tfs.Core
         Dictionary<string, string> ExportWorkitemsMapping { get; set; }
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
-        IFetchResult Fetch(bool stopOnFailMergeCommit = false);
+        IFetchResult Fetch(bool stopOnFailMergeCommit = false, int maxCount = int.MaxValue);
         IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes);
+        IFetchResult FetchWithMerge(long mergeChangesetId, int maxCount, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes);
         void QuickFetch();
         void QuickFetch(int changesetId);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch);
