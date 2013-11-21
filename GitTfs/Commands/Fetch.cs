@@ -21,13 +21,15 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly AuthorsFile authors;
         private readonly Labels labels;
+        private readonly TfsDownloadVerifier verifier;
 
-        public Fetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
+        public Fetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels, TfsDownloadVerifier verifier)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
             this.authors = authors;
             this.labels = labels;
+            this.verifier = verifier;
             MaxChangesets = int.MaxValue;
         }
 
@@ -59,6 +61,10 @@ namespace Sep.Git.Tfs.Commands
                         v => ExportMetadatas = v != null },
                     { "max-changesets", "A maximum number of changesets to fetch",
                         (int v) => MaxChangesets = v },
+                    { "verify-all", "verify that pulls from TFS are successful",
+                        v => { if (v != null) verifier.Enable(); } },
+                    { "verify-max-retries=", "the maximum number of times to retry pulls from tfs on verification failure",
+                        (int v) => verifier.SetMaxRetries(v) },
                 }.Merge(remoteOptions.OptionSet);
             }
         }

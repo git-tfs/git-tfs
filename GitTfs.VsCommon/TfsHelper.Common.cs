@@ -612,6 +612,11 @@ namespace Sep.Git.Tfs.VsCommon
                 }
             }
 
+            public IEnumerable<byte> HashValue
+            {
+                get { return _pendingChange.HashValue; }
+            }
+
             public TemporaryFile DownloadFile()
             {
                 var temp = new TemporaryFile();

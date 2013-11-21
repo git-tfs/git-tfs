@@ -16,10 +16,11 @@ namespace Sep.Git.Tfs.Core
         private readonly CheckinOptions _checkinOptions;
         private readonly ITfsHelper _tfsHelper;
         private readonly CheckinPolicyEvaluator _policyEvaluator;
+        private readonly TfsDownloadVerifier _verifier;
 
         public IGitTfsRemote Remote { get; private set; }
 
-        public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper, CheckinPolicyEvaluator policyEvaluator)
+        public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper, CheckinPolicyEvaluator policyEvaluator, TfsDownloadVerifier verifier)
         {
             _workspace = workspace;
             _policyEvaluator = policyEvaluator;
@@ -28,6 +29,7 @@ namespace Sep.Git.Tfs.Core
             _tfsHelper = tfsHelper;
             _localDirectory = localDirectory;
             _stdout = stdout;
+            _verifier = verifier;
 
             this.Remote = remote;
         }
@@ -172,14 +174,24 @@ namespace Sep.Git.Tfs.Core
             _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), (int)_contextVersion.ChangesetId);
         }
 
-        public void Get(int changesetId)
+        public void Get(int changesetId, IEnumerable<IItem> itemsForChangeset)
         {
             _workspace.GetSpecificVersion(changesetId);
+
+            if (_verifier.IsEnabled)
+            {
+                _verifier.EnsureValid(_workspace, itemsForChangeset, item => _workspace.ForceGetFile(item.ServerItem, item.ChangesetId));
+            }
         }
 
         public void Get(IChangeset changeset)
         {
             changeset.Get(_workspace);
+
+            if (_verifier.IsEnabled)
+            {
+                _verifier.EnsureValid(_workspace, changeset.Changes.Select(cs => cs.Item), item => _workspace.ForceGetFile(item.ServerItem, item.ChangesetId));
+            }
         }
 
         private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(CheckinOptions options = null)
