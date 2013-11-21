@@ -38,7 +38,7 @@ namespace Sep.Git.Tfs.Core
         /// Populates the workspace with a snapshot, as fo the given changeset, with an already
         /// known set of entries.
         /// </summary>
-        void Get(int changesetId, IEnumerable<TfsTreeEntry> knownTfsTreeEntries);
+        void Get(int changesetId, IEnumerable<IItem> itemsForChangeset);
         /// <summary>
         /// Gets the files changed in a given changeset.
         /// </summary>

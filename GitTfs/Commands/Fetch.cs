@@ -21,9 +21,9 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly AuthorsFile authors;
         private readonly Labels labels;
-        private readonly TfsTreeEntryVerifier verifier;
+        private readonly TfsDownloadVerifier verifier;
 
-        public Fetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels, TfsTreeEntryVerifier verifier)
+        public Fetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels, TfsDownloadVerifier verifier)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
@@ -57,7 +57,7 @@ namespace Sep.Git.Tfs.Commands
                         v => ForceFetch = v != null },
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
-                    { "verify", "verify that pulls from TFS are successful",
+                    { "verify-all", "verify that pulls from TFS are successful",
                         v => { if (v != null) verifier.Enable(); } }
                 }.Merge(remoteOptions.OptionSet);
             }

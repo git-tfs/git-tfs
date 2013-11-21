@@ -75,6 +75,7 @@ namespace Sep.Git.Tfs
             initializer.Scan(x => { Initialize(x); tfsPlugin.Initialize(x); });
             initializer.For<TextWriter>().Use(() => Console.Out);
             initializer.For<IGitRepository>().Add<GitRepository>();
+            initializer.For<TfsDownloadVerifier>().Singleton().Use<TfsDownloadVerifier>();
             AddGitChangeTypes(initializer);
             DoCustomConfiguration(initializer);
             tfsPlugin.Initialize(initializer);

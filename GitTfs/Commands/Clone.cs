@@ -20,17 +20,15 @@ namespace Sep.Git.Tfs.Commands
         private readonly Init init;
         private readonly Globals globals;
         private readonly InitBranch initBranch;
-        private readonly TfsTreeEntryVerifier verifier;
         private bool withBranches;
         private TextWriter stdout;
 
-        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout, TfsTreeEntryVerifier verifier)
+        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout)
         {
             this.fetch = fetch;
             this.init = init;
             this.globals = globals;
             this.initBranch = initBranch;
-            this.verifier = verifier;
             //[Temporary] Remove in the next version!
             if (initBranch != null)
                 initBranch.DontDisplayObsoleteMessage = true;
@@ -41,9 +39,9 @@ namespace Sep.Git.Tfs.Commands
         {
             get
             {
-                return init.OptionSet.Merge(fetch.OptionSet)
-                           .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null)
-                           .Add("verify", "verify that pulls from TFS are successful", v => { if (v != null) verifier.Enable(); });
+                return init.OptionSet
+                    .Merge(fetch.OptionSet)
+                    .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null);
             }
         }
 

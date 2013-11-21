@@ -15,7 +15,7 @@ namespace Sep.Git.Tfs.Commands
     //  2. Load the correct set of extant casing.
     public class QuickFetch : Fetch
     {
-        public QuickFetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, TfsTreeEntryVerifier verifier) 
+        public QuickFetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, TfsDownloadVerifier verifier) 
             : base(globals, remoteOptions, authors, null, verifier)
         {
         }
