@@ -126,7 +126,7 @@
     <Compile Include="Commands\Branch.cs" />
     <Compile Include="Core\BranchVisitors\BranchTreeContainsPathVisitor.cs" />
     <Compile Include="Core\IBranchTreeVisitor.cs" />
-    <Compile Include="Core\TfsTreeEntryVerifier.cs" />
+    <Compile Include="Core\TfsDownloadVerifier.cs" />
     <Compile Include="Core\TfsInterop\IBranch.cs" />
     <Compile Include="Commands\Bootstrap.cs" />
     <Compile Include="Commands\Checkin.cs" />
