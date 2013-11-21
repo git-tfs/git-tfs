@@ -34,6 +34,11 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         void Get(int changesetId);
         /// <summary>
+        /// Populates the workspace with a snapshot, as fo the given changeset, with an already
+        /// known set of entries.
+        /// </summary>
+        void Get(int changesetId, TfsTreeEntry[] knownTfsTreeEntries);
+        /// <summary>
         /// Gets the files changed in a given changeset.
         /// </summary>
         void Get(IChangeset changeset);
