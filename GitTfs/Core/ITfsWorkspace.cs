@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
 
@@ -37,7 +38,7 @@ namespace Sep.Git.Tfs.Core
         /// Populates the workspace with a snapshot, as fo the given changeset, with an already
         /// known set of entries.
         /// </summary>
-        void Get(int changesetId, TfsTreeEntry[] knownTfsTreeEntries);
+        void Get(int changesetId, IEnumerable<TfsTreeEntry> knownTfsTreeEntries);
         /// <summary>
         /// Gets the files changed in a given changeset.
         /// </summary>
