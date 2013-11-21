@@ -144,8 +144,8 @@ namespace Sep.Git.Tfs.Commands
                 try
                 {
                     newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                    tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
-                    if (tfsRemote.MaxChangesetId != newChangesetId)
+                    var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
+                    if (fetchResult.NewChangesetCount != 1)
                     {
                         var lastCommit = repo.FindCommitHashByChangesetId(newChangesetId);
                         RebaseOnto(repo, lastCommit, target);
