@@ -66,6 +66,13 @@ The quick-clone command creates a new git repository, initialized from the last 
 			(Type: Flag, Value Type:[Boolean])
 			parents
 
+		--verify-all
+			(Type: Flag, Value Type:[Boolean])
+			Verifies all files pulled from TFS, and retries the download if they are invalid
+
+		--verify-max-retries
+			(Type: Value optional, Value Type:[Int32])
+			If --verify-all is specified, the maximum number of times that each download may be retried
 ## Examples
 
 ### Simple
