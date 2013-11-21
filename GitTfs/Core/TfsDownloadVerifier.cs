@@ -25,6 +25,11 @@ namespace Sep.Git.Tfs.Core
             IsEnabled = true;
         }
 
+        public void SetMaxRetries(int count)
+        {
+            MaxRetries = count;
+        }
+
         public bool IsValid(IWorkspace workspace, IItem item)
         {
             bool result;

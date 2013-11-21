@@ -58,7 +58,9 @@ namespace Sep.Git.Tfs.Commands
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
                     { "verify-all", "verify that pulls from TFS are successful",
-                        v => { if (v != null) verifier.Enable(); } }
+                        v => { if (v != null) verifier.Enable(); } },
+                    { "verify-max-retries=", "the maximum number of times to retry pulls from tfs on verification failure",
+                        (int v) => verifier.SetMaxRetries(v) }                     
                 }.Merge(remoteOptions.OptionSet);
             }
         }
