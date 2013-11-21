@@ -158,7 +158,7 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
 
-            remote.Fetch(stopOnFailMergeCommit);
+            remote.Fetch(stopOnFailMergeCommit, MaxChangesets);
 
             Trace.WriteLine("Cleaning...");
             remote.CleanupWorkspaceDirectory();
