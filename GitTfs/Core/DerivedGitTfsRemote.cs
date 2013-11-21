@@ -188,12 +188,17 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, int maxCount = int.MaxValue)
         {
             throw new NotImplementedException();
         }
 
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFetchResult FetchWithMerge(long mergeChangesetId, int maxCount, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             throw new NotImplementedException();
         }

@@ -28,6 +28,7 @@ namespace Sep.Git.Tfs.Commands
             this.globals = globals;
             this.authors = authors;
             this.labels = labels;
+            MaxChangesets = int.MaxValue;
         }
 
         bool FetchAll { get; set; }
@@ -36,6 +37,7 @@ namespace Sep.Git.Tfs.Commands
         string BareBranch { get; set; }
         bool ForceFetch { get; set; }
         bool ExportMetadatas { get; set; }
+        int MaxChangesets { get; set; }
 
         public virtual OptionSet OptionSet
         {
@@ -55,6 +57,8 @@ namespace Sep.Git.Tfs.Commands
                         v => ForceFetch = v != null },
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
+                    { "max-changesets", "A maximum number of changesets to fetch",
+                        (int v) => MaxChangesets = v },
                 }.Merge(remoteOptions.OptionSet);
             }
         }
@@ -124,7 +128,7 @@ namespace Sep.Git.Tfs.Commands
                 if(remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true")
                     remote.ExportMetadatas = true;
             }
-            remote.Fetch(stopOnFailMergeCommit);
+            remote.Fetch(stopOnFailMergeCommit, MaxChangesets);
 
             Trace.WriteLine("Cleaning...");
             remote.CleanupWorkspaceDirectory();
