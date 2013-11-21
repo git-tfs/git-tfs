@@ -80,6 +80,19 @@ namespace Sep.Git.Tfs
 
         public int GcCountdown { get; set; }
 
+        private string _gitVersion;
+        public string GitVersion
+        {
+            get
+            {
+                if (_gitVersion != null)
+                    return _gitVersion;
+                if (Repository == null)
+                    return null;
+                return _gitVersion = Repository.CommandOneline("--version");
+            }
+        }
+
         public int GcPeriod
         {
             get { return 200; }
