@@ -43,17 +43,8 @@ namespace Sep.Git.Tfs
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
             Trace.WriteLine("Command run:" + commandLineRun);
-            WarnOnGitVersion();
             ParseAuthors();
             return Main(command, unparsedArgs);
-        }
-
-        private void WarnOnGitVersion()
-        {
-            if (_globals.GitVersion != null && _globals.GitVersion.Contains("git version 1.8.4"))
-                _stdout.WriteLine(@"WARNING!!!! You are using a version of git (1.8.4) that causes problems when using git-tfs!
-If you are experiencing some crashes using git-tfs, perhaps you could get a newer or older version of git.
-For more information, see https://github.com/git-tfs/git-tfs/issues/448 ");
         }
 
         public int Main(GitTfsCommand command, IList<string> unparsedArgs)

@@ -97,6 +97,8 @@ namespace Sep.Git.Tfs.Commands
             if (!IsCommandWellUsed())
                 return helper.Run(this);
 
+            globals.WarnOnGitVersion(stdout);
+
             if (ShouldRenameRemote || ShouldDeleteRemote)
                 return helper.Run(this);
 
@@ -113,6 +115,8 @@ namespace Sep.Git.Tfs.Commands
         {
             if (!IsCommandWellUsed())
                 return helper.Run(this);
+
+            globals.WarnOnGitVersion(stdout);
 
             if (ShouldRenameRemote)
                 return helper.Run(this);
@@ -133,6 +137,8 @@ namespace Sep.Git.Tfs.Commands
         {
             if (!IsCommandWellUsed())
                 return helper.Run(this);
+
+            globals.WarnOnGitVersion(stdout);
 
             if (ShouldDeleteRemote)
                 return helper.Run(this);
