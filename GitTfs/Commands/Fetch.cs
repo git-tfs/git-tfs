@@ -58,7 +58,7 @@ namespace Sep.Git.Tfs.Commands
                         v => ForceFetch = v != null },
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
-                    { "max-changesets", "A maximum number of changesets to fetch",
+                    { "max-changesets=", "A maximum number of changesets to fetch",
                         (int v) => MaxChangesets = v },
                     { "export-work-item-mapping=", "Path to Work-items mapping export file",
                         v => ExportMetadatasFile = v },
