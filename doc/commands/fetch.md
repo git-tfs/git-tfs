@@ -26,6 +26,7 @@ The fetch command fetch all the new changesets from a TFS remote
                                    the download if they are invalid
       --verify-max-retries=VALUE If --verify-all is specified, the maximum number
                                    of times that the download will be retries
+      --max-changesets=VALUE     The maximum number of changesets to fetch
 ## Examples
 
 ### Simple
