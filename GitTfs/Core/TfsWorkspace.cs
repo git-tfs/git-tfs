@@ -180,7 +180,7 @@ namespace Sep.Git.Tfs.Core
 
             if (_verifier.IsEnabled)
             {
-                _verifier.EnsureValid(_workspace, itemsForChangeset, item => _workspace.ForceGetFile(item.ServerItem, item.ChangesetId));
+                _verifier.EnsureValidItems(_workspace, itemsForChangeset, item => _workspace.ForceGetFile(item.ServerItem, item.ChangesetId));
             }
         }
 
@@ -190,7 +190,7 @@ namespace Sep.Git.Tfs.Core
 
             if (_verifier.IsEnabled)
             {
-                _verifier.EnsureValid(_workspace, changeset.Changes.Select(cs => cs.Item), item => _workspace.ForceGetFile(item.ServerItem, item.ChangesetId));
+                _verifier.EnsureValidChanges(_workspace, changeset.Changes, item => _workspace.ForceGetFile(item.ServerItem, item.ChangesetId));
             }
         }
 

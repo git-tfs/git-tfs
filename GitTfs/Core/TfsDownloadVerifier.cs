@@ -49,10 +49,15 @@ namespace Sep.Git.Tfs.Core
             return result;
         }
 
-        public bool EnsureValid(IWorkspace workspace, IEnumerable<IItem> items, Action<IItem> retry)
+        public bool EnsureValidChanges(IWorkspace workspace, IEnumerable<IChange> changes, Action<IItem> retry)
+        {
+            return EnsureValidItems(workspace, changes.Where(c => (c.ChangeType & TfsChangeType.Delete) == 0).Select(c => c.Item), retry);
+        }
+
+        public bool EnsureValidItems(IWorkspace workspace, IEnumerable<IItem> changes, Action<IItem> retry)
         {
             var maxRetries = MaxRetries;
-            var failures = items.Where(item => !IsValid(workspace, item)).ToList();
+            var failures = changes.Where(item => !IsValid(workspace, item)).ToList();
             
             while (failures.Count > 0 && maxRetries-- > 0)
             {
