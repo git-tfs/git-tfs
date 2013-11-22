@@ -469,7 +469,7 @@ namespace Sep.Git.Tfs.Core
 
         private IEnumerable<ITfsChangeset> FetchChangesets(int maxCount)
         {
-            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
+            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current " + (maxCount == int.MaxValue ? string.Empty : "(max " + maxCount + ")") + "...", "info");
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId == GetLatestChangeset().Summary.ChangesetId)
                 return Enumerable.Empty<ITfsChangeset>();
