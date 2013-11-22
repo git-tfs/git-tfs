@@ -22,6 +22,11 @@ The fetch command fetch all the new changesets from a TFS remote
                                    don't need to put data back into TFS.
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
+      --verify-all               Verifies all files pulled from TFS, and retries
+                                   the download if they are invalid
+      --verify-max-retries=VALUE If --verify-all is specified, the maximum number
+                                   of times that the download will be retries
+      --max-changesets=VALUE     The maximum number of changesets to fetch
 ## Examples
 
 ### Simple

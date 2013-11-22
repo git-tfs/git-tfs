@@ -32,7 +32,10 @@ a TFS source tree and fetch all the changesets
 								 Fetch the labels also when fetching TFS changesets
 	  -x, --export               Export metadatas
 		  --with-branches        init all the TFS branches during the clone
-
+      --verify-all               Verifies all files pulled from TFS, and retries
+                                   the download if they are invalid
+      --verify-max-retries=VALUE If --verify-all is specified, the maximum number
+                                   of times that the download will be retries
 ## Examples
 
 ### Simple

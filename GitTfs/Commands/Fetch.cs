@@ -21,13 +21,16 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly AuthorsFile authors;
         private readonly Labels labels;
+        private readonly TfsDownloadVerifier verifier;
 
-        public Fetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
+        public Fetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels, TfsDownloadVerifier verifier)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
             this.authors = authors;
             this.labels = labels;
+            this.verifier = verifier;
+            MaxChangesets = int.MaxValue;
         }
 
         bool FetchAll { get; set; }
@@ -36,6 +39,7 @@ namespace Sep.Git.Tfs.Commands
         string BareBranch { get; set; }
         bool ForceFetch { get; set; }
         bool ExportMetadatas { get; set; }
+        int MaxChangesets { get; set; }
 
         public virtual OptionSet OptionSet
         {
@@ -55,6 +59,12 @@ namespace Sep.Git.Tfs.Commands
                         v => ForceFetch = v != null },
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
+                    { "max-changesets=", "A maximum number of changesets to fetch",
+                        (int v) => MaxChangesets = v },
+                    { "verify-all", "verify that pulls from TFS are successful",
+                        v => { if (v != null) verifier.Enable(); } },
+                    { "verify-max-retries=", "the maximum number of times to retry pulls from tfs on verification failure",
+                        (int v) => verifier.SetMaxRetries(v) },
                 }.Merge(remoteOptions.OptionSet);
             }
         }
@@ -124,7 +134,7 @@ namespace Sep.Git.Tfs.Commands
                 if(remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true")
                     remote.ExportMetadatas = true;
             }
-            remote.Fetch(stopOnFailMergeCommit);
+            remote.Fetch(stopOnFailMergeCommit, MaxChangesets);
 
             Trace.WriteLine("Cleaning...");
             remote.CleanupWorkspaceDirectory();

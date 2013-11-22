@@ -308,15 +308,20 @@ namespace Sep.Git.Tfs.Core
              public string ParentBranchTfsPath { get; set; }
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, int maxCount = int.MaxValue)
         {
-            return FetchWithMerge(-1, stopOnFailMergeCommit);
+            return FetchWithMerge(-1, maxCount, stopOnFailMergeCommit);
         }
 
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
+            return FetchWithMerge(mergeChangesetId, int.MaxValue, stopOnFailMergeCommit, parentCommitsHashes);
+        }
+
+        public IFetchResult FetchWithMerge(long mergeChangesetId, int maxCount, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        {            
             var fetchResult = new FetchResult{IsSuccess = true};
-            foreach (var changeset in FetchChangesets())
+            foreach (var changeset in FetchChangesets(maxCount))
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
@@ -446,18 +451,18 @@ namespace Sep.Git.Tfs.Core
             DoGcIfNeeded();
         }
 
-        private IEnumerable<ITfsChangeset> FetchChangesets()
+        private IEnumerable<ITfsChangeset> FetchChangesets(int maxCount)
         {
-            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
+            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current " + (maxCount == int.MaxValue ? string.Empty : "(max " + maxCount + ")") + "...", "info");
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId == GetLatestChangeset().Summary.ChangesetId)
                 return Enumerable.Empty<ITfsChangeset>();
             
             if(!IsSubtreeOwner)
-                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
+                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, maxCount, this);
 
             return globals.Repository.GetSubtrees(this)
-                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, x))
+                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, maxCount, x))
                 .OrderBy(x => x.Summary.ChangesetId);
         }
 

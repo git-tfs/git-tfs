@@ -1,0 +1,2 @@
+* added --verify-all and --verify-max-retries=N options to commands that get data from TFS
+
