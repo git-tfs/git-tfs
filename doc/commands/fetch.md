@@ -22,6 +22,7 @@ The fetch command fetch all the new changesets from a TFS remote
                                    don't need to put data back into TFS.
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
+      --max-changesets=VALUE     The maximum number of changesets to fetch
 ## Examples
 
 ### Simple
