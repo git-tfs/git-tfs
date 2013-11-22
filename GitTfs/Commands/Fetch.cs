@@ -59,7 +59,7 @@ namespace Sep.Git.Tfs.Commands
                         v => ForceFetch = v != null },
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
-                    { "max-changesets", "A maximum number of changesets to fetch",
+                    { "max-changesets=", "A maximum number of changesets to fetch",
                         (int v) => MaxChangesets = v },
                     { "verify-all", "verify that pulls from TFS are successful",
                         v => { if (v != null) verifier.Enable(); } },
