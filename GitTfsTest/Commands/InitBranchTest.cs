@@ -71,7 +71,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.CreateTfsRemote(null,null,null)).Callback<RemoteInfo,string,string>((info,autocrlf,ignorecase) => info.Id == GIT_BRANCH_TO_INIT && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == "$/MyProject/MyBranch").Return(newBranchRemote).Repeat.Once();
 
             newBranchRemote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT).Repeat.Once();
-            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
+            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<int>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
             newBranchRemote.MaxCommitHash = "sha1AfterFetch";
 
             gitRepository.Expect(x => x.CreateBranch("refs/remote/tfs/" + GIT_BRANCH_TO_INIT, "sha1BeforeFetch")).Return(true).Repeat.Once();
@@ -199,7 +199,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.CreateTfsRemote(null,null,null)).Callback<RemoteInfo,string,string>((info,autocrlf,ignorecase) => info.Id == GIT_BRANCH_TO_INIT && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == "$/MyProject/MyBranch").Return(newBranchRemote).Repeat.Once();
 
             newBranchRemote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT).Repeat.Once();
-            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
+            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<int>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             newBranchRemote.MaxCommitHash = "sha1AfterFetch";
 
             gitRepository.Expect(x => x.CreateBranch("refs/remote/tfs/" + GIT_BRANCH_TO_INIT, "sha1BeforeFetch")).Return(true).Repeat.Once();
@@ -269,7 +269,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.CreateTfsRemote(null,null,null)).Callback<RemoteInfo,string,string>((info,autocrlf,ignorecase) => info.Id == GIT_BRANCH_TO_INIT1 && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == tfsPathBranch1).Return(newBranch1Remote).Repeat.Once();
 
             newBranch1Remote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT1).Repeat.Once();
-            newBranch1Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
+            newBranch1Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<int>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
             newBranch1Remote.MaxCommitHash = "ShaAfterFetch_Branch1";
 
             gitRepository.Expect(x => x.CreateBranch("refs/remote/tfs/" + GIT_BRANCH_TO_INIT1, "ShaBeforeFetch_Branch1")).Return(true).Repeat.Once();
@@ -288,14 +288,14 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.CreateTfsRemote(null,null,null)).Callback<RemoteInfo,string,string>((info,autocrlf,ignorecase) => info.Id == GIT_BRANCH_TO_INIT2 && info.Url == "http://myTfsServer:8080/tfs" && info.Repository == tfsPathBranch2).Return(newBranch2Remote).Repeat.Once();
 
             newBranch2Remote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT2).Repeat.Once();
-            newBranch2Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
+            newBranch2Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<int>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             newBranch2Remote.MaxCommitHash = "ShaAfterFetch_Branch2";
 
             gitRepository.Expect(x => x.CreateBranch("refs/remote/tfs/" + GIT_BRANCH_TO_INIT2, "ShaBeforeFetch_Branch2")).Return(true).Repeat.Once();
             gitRepository.Expect(x => x.CreateBranch("refs/heads/" + GIT_BRANCH_TO_INIT2, "ShaAfterFetch_Branch2")).Return(true).Repeat.Once();
             #endregion
 
-            remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
+            remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<int>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run());
 
             gitRepository.VerifyAllExpectations();
