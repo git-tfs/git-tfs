@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Commands;
 
@@ -177,6 +178,7 @@ namespace Sep.Git.Tfs.Core
         }
 
         public bool ExportMetadatas { get; set; }
+        public Dictionary<string, string> ExportWorkitemsMapping { get; set; }
 
         public bool ShouldSkip(string path)
         {
