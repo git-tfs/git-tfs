@@ -10,6 +10,9 @@
     <description>git-tfs is a two-way bridge between TFS and git, similar to git-svn. It fetches TFS commits into a git repository, and lets you push your updates back to TFS.</description>
     <projectUrl>https://github.com/git-tfs/git-tfs</projectUrl>
     <tags>git tfs git-tfs sourceControl</tags>
+    <releaseNotes>
+${ReleaseNotesContents}
+    </releaseNotes>
     <licenseUrl>https://github.com/git-tfs/git-tfs/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
