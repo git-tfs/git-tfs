@@ -164,12 +164,6 @@
 
   <!-- Chocolatey-related files. -->
   <ItemGroup>
-    <ChocolateyTokens Include="PackageVersion">
-      <ReplacementValue>$(Version)</ReplacementValue>
-    </ChocolateyTokens>
-    <ChocolateyTokens Include="DownloadUrl">
-      <ReplacementValue>$(DownloadUrl)</ReplacementValue>
-    </ChocolateyTokens>
     <!-- TemplateFile needs a full path, so we define the output files here so that MSBuild can resolve the paths. -->
     <ChocolateyNuspec        Include="$(ChocolateyBuildDir)\gittfs.nuspec" />
     <ChocolateyInstallScript Include="$(ChocolateyBuildDir)/tools/chocolateyInstall.ps1" />
@@ -185,8 +179,29 @@
     <MakeDir Directories="$(ChocolateyBuildDir)\tools" />
   </Target>
 
+  <!-- Internal. -->
+  <Target Name="ChocolateyReadReleaseNotes">
+    <ReadLinesFromFile File="$(ReleaseNotes)" Condition="'$(ReleaseNotes)' != ''">
+      <Output TaskParameter="Lines" ItemName="ReleaseNotesContents" />
+    </ReadLinesFromFile>
+    <ItemGroup Condition="'$(ReleaseNotes)' == ''">
+      <ReleaseNotesContents Include="See https://github.com/git-tfs/git-tfs/releases/tag/v$(Version)" />
+    </ItemGroup>
+  </Target>
+
   <!-- Internal: Generate a nuspec file for the chocolatey package. -->
-  <Target Name="ChocolateyNuspec" DependsOnTargets="VersionRequired; MSBuildCommunityTasks; ChocolateyTempDir">
+  <Target Name="ChocolateyNuspec" DependsOnTargets="VersionRequired; MSBuildCommunityTasks; ChocolateyTempDir; ChocolateyReadReleaseNotes">
+    <ItemGroup>
+      <ChocolateyTokens Include="PackageVersion">
+        <ReplacementValue>$(Version)</ReplacementValue>
+      </ChocolateyTokens>
+      <ChocolateyTokens Include="DownloadUrl">
+        <ReplacementValue>$(DownloadUrl)</ReplacementValue>
+      </ChocolateyTokens>
+      <ChocolateyTokens Include="ReleaseNotesContents">
+        <ReplacementValue>@(ReleaseNotesContents, '%0a')</ReplacementValue>
+      </ChocolateyTokens>
+    </ItemGroup>
     <TemplateFile
       Template="$(ChocolateyTemplateDir)\gittfs.nuspec"
       OutputFilename="%(ChocolateyNuspec.FullPath)"
