@@ -12,6 +12,21 @@ The `list-remote-branches` command help you find the branches to clone of a TFS 
 	  -d, --debug                Show debug output about everything git-tfs does
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
+
+## Prerequisite
+
+To be able to return the list of the existing branches, all your source code folders corresponding to branches
+should be converted into branches (a notion introduced by TFS2010).
+
+If none of your branches is converted into branch in your TFS server, the command will return the message :
+
+    No TFS branches were found!
+
+To change that, you should :
+
+- Open 'Source Control Explorer'
+- For each folder corresponding to a branch, right click on your source folder and select 'Branching and Merging' > 'Convert to branch'.
+
 ## Examples
 
 To display all the remotes of a TFS server, do this:
