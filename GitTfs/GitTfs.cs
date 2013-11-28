@@ -42,8 +42,8 @@ namespace Sep.Git.Tfs
             var command = ExtractCommand(args);
             if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
-            ParseAuthors();
             Trace.WriteLine("Command run:" + commandLineRun);
+            ParseAuthors();
             return Main(command, unparsedArgs);
         }
 

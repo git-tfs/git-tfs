@@ -46,7 +46,7 @@ namespace Sep.Git.Tfs.Commands
             stdout.WriteLine();
 
             // show git version
-            globals.Repository.CommandOutputPipe(reader => stdout.Write(reader.ReadToEnd()), "--version");
+            stdout.WriteLine(globals.GitVersion);
         }
 
         private void DescribeGitTfs()

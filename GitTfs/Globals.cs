@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
@@ -79,6 +80,27 @@ namespace Sep.Git.Tfs
         public IGitRepository Repository { get; set; }
 
         public int GcCountdown { get; set; }
+
+        private string _gitVersion;
+        public string GitVersion
+        {
+            get
+            {
+                if (_gitVersion != null)
+                    return _gitVersion;
+                if (Repository == null)
+                    return null;
+                return _gitVersion = Repository.CommandOneline("--version");
+            }
+        }
+
+        public void WarnOnGitVersion(TextWriter stdout)
+        {
+            if (GitVersion != null && GitVersion.Contains("git version 1.8.4"))
+                stdout.WriteLine(@"WARNING!!!! You are using a version of git (1.8.4) that causes problems when using git-tfs!
+If you are experiencing some crashes using git-tfs, perhaps you could get a newer or older version of git.
+For more information, see https://github.com/git-tfs/git-tfs/issues/448 ");
+        }
 
         public int GcPeriod
         {
