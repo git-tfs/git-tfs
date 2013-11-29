@@ -134,6 +134,7 @@ namespace Sep.Git.Tfs.Core
 
         public string Prefix { get; private set; }
         public bool ExportMetadatas { get; set; }
+        public Dictionary<string, string> ExportWorkitemsMapping { get; set; }
 
         public long MaxChangesetId
         {
@@ -359,6 +360,14 @@ namespace Sep.Git.Tfs.Core
                         log.Log += "\nwork-items: " + string.Join(", ", changeset.Summary.Workitems.Select(wi => "#" + wi.Id)); ;
                     }
 
+                    if (ExportWorkitemsMapping.Count != 0)
+                    {
+                        foreach (var mapping in ExportWorkitemsMapping)
+                        {
+                            log.Log = log.Log.Replace("#" + mapping.Key, "#" + mapping.Value);
+                        }
+                    }
+
                     if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
                         log.Log += "\n" + GitTfsConstants.GitTfsPolicyOverrideCommentPrefix + changeset.Summary.PolicyOverrideComment;
 
@@ -380,7 +389,18 @@ namespace Sep.Git.Tfs.Core
                     string workitemNote = "Workitems:\n";
                     foreach(var workitem in changeset.Summary.Workitems)
                     {
-                        workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitem.Id, workitem.Title, workitem.Url);
+                        var workitemId = workitem.Id.ToString();
+                        var workitemUrl = workitem.Url;
+                        if (ExportMetadatas && ExportWorkitemsMapping.Count != 0)
+                        {
+                            if (ExportWorkitemsMapping.ContainsKey(workitemId))
+                            {
+                                var oldWorkitemId = workitemId;
+                                workitemId = ExportWorkitemsMapping[workitemId];
+                                workitemUrl = workitemUrl.Replace(oldWorkitemId, workitemId);
+                            }
+                        }
+                        workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitemId, workitem.Title, workitemUrl);
                     }
                     metadatas.Append(workitemNote);
                 }

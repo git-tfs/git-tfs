@@ -36,6 +36,7 @@ namespace Sep.Git.Tfs.Commands
         string BareBranch { get; set; }
         bool ForceFetch { get; set; }
         bool ExportMetadatas { get; set; }
+        string ExportMetadatasFile { get; set; }
 
         public virtual OptionSet OptionSet
         {
@@ -55,6 +56,8 @@ namespace Sep.Git.Tfs.Commands
                         v => ForceFetch = v != null },
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
+                    { "export-work-item-mapping=", "Path to Work-items mapping export file",
+                        v => ExportMetadatasFile = v },
                 }.Merge(remoteOptions.OptionSet);
             }
         }
@@ -113,17 +116,48 @@ namespace Sep.Git.Tfs.Commands
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
             if (!ForceFetch)
-            globals.Repository.MoveTfsRefForwardIfNeeded(remote);
+                globals.Repository.MoveTfsRefForwardIfNeeded(remote);
+            var exportMetadatasFilePath = Path.Combine(globals.GitDir, "git-tfs_workitem_mapping.txt");
             if (ExportMetadatas)
             {
                 remote.ExportMetadatas = true;
                 remote.Repository.SetConfig(GitTfsConstants.ExportMetadatasConfigKey, "true");
+                if (!string.IsNullOrEmpty(ExportMetadatasFile))
+                {
+                    if (File.Exists(ExportMetadatasFile))
+                    {
+                        File.Copy(ExportMetadatasFile, exportMetadatasFilePath);
+                    }
+                    else
+                        throw new GitTfsException("error: the work items mapping file doesn't exist!");
+                }
             }
             else
             {
                 if(remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true")
                     remote.ExportMetadatas = true;
             }
+            remote.ExportWorkitemsMapping = new Dictionary<string, string>();
+            if (remote.ExportMetadatas && File.Exists(exportMetadatasFilePath))
+            {
+                try
+                {
+                    foreach (var lineRead in File.ReadAllLines(exportMetadatasFilePath))
+                    {
+                        if (string.IsNullOrWhiteSpace(lineRead))
+                            continue;
+                        var values = lineRead.Split('|');
+                        var oldWorkitem = values[0].Trim();
+                        if(!remote.ExportWorkitemsMapping.ContainsKey(oldWorkitem))
+                            remote.ExportWorkitemsMapping.Add(oldWorkitem, values[1].Trim());
+                    }
+                }
+                catch (Exception)
+                {
+                    throw new GitTfsException("error: bad format of workitems mapping file! One line format should be: OldWorkItemId|NewWorkItemId");
+                }
+            }
+
             remote.Fetch(stopOnFailMergeCommit);
 
             Trace.WriteLine("Cleaning...");
