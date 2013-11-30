@@ -95,6 +95,7 @@ namespace Sep.Git.Tfs.Commands
                 if (Quick && AutoRebase)
                 {
                     tfsRemote.Repository.CommandNoisy("rebase", "--preserve-merges", tfsRemote.RemoteRef);
+                    parentChangeset = _globals.Repository.GetTfsCommit(parentChangeset.Remote.MaxCommitHash);
                 }
                 else
                 {
