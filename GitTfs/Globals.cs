@@ -25,6 +25,8 @@ namespace Sep.Git.Tfs
                         v => DebugOutput = v != null },
                     { "i|tfs-remote|remote|id=", "The remote ID of the TFS to interact with\ndefault: default",
                         v => UserSpecifiedRemoteId = v },
+                    { "I|auto-tfs-remote|auto-remote", "Autodetect (from git history) the remote ID of the TFS to interact with",
+                        v => AutoFindRemote = v != null },
                     { "A|authors=", "Path to an Authors file to map TFS users to Git users (will be kept in cache and used for all the following commands)",
                         v => AuthorsFilePath = v },
                 };
@@ -64,6 +66,8 @@ namespace Sep.Git.Tfs
             set { RemoteId = _userSpecifiedRemoteId = value; }
         }
         private string _userSpecifiedRemoteId;
+
+        public bool AutoFindRemote { get; set; }
 
         public string RemoteId { get; set; }
 
