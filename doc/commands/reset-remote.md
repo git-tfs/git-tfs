@@ -23,7 +23,7 @@ into a new directory `Project1`, do this:
 Due to an optimisation of git-tfs, you then have to fetch the changesets with the `--force` option:
 
     git tfs fetch --force
-	
+
 ## Use cases
 
 ### "Rewrite" your TFS history
@@ -38,14 +38,14 @@ Perhaps, you would like to have a better historic, whithout all these merges, an
 You have to reset the `tfs/default` remote to the `A` commit and then fetch to have an history like that:
 
     A[C1] <- B[C2] <- C[C3] <- D[C4] <- E[C5,tfs/default, master, HEAD]
-	  
+  
 
 ### Repair your repository
 
 I don't know how you did it ;) but it could happens that you mess your repository and end with an history like that :
 
     A[C1] <- B <- C <- D[C2,tfs/default, master, HEAD]
-	
+
 with the 2 commits B and C that aren't changesets in TFS.
 
 You have to reset the `tfs/default` remote to the `A` commit and then fetch to have an history like that:
@@ -62,13 +62,13 @@ You have an history looking like that (without the merge):
 
     X[C34] <- ... <- A[C101] <- B[C102] <- C[C112] <- D[C114] <- E[C115,tfs/default, master, HEAD]
        \                                              
-	    ----- ... <- M[C109] <- N[C110] <- O[C111] <- P[C113,tfs/branch]
-	
+        ----- ... <- M[C109] <- N[C110] <- O[C111] <- P[C113,tfs/branch]
+
 instead of (with the merge):
 
     X[C34] <- ... <- A[C101] <- B[C102] <- C[C112] <- D[C114] <- E[C115,tfs/default, master, HEAD]
        \                                                        /
-	    ----- ... <- M[C109] <- N[C110] <- O[C111] <- P[C113,tfs/branch]
+        ----- ... <- M[C109] <- N[C110] <- O[C111] <- P[C113,tfs/branch]
 
 Now that you have initialized this branch `tfs/branch`, you could be interested by managing this merge changeset to have
  the same history than the TFS one!
@@ -78,6 +78,21 @@ Then, you have to reset the `tfs/default` (or another) remote to the last change
 
  and fetch again.
 
+### Reset a remote from a commit not belonging to the tfs remote to reset
+
+If you try to reset a remote from a pure git commit (which not correspond to a fetched tfs changeset)
+ warning you that perhaps you are not doing what you are expecting :
+
+    error : the current commit does not belong to a tfs remote!
+
+You will issue a similar error message if you try to do it from a git commit that correspond to another tfs remote :
+
+    error : the commit where you want to reset the tfs remote does not belong to the current tfs remote "currentRemoteName"!
+
+But, if you want to reset the tfs remote even if you don't satisfy these conditions, you could do it anyway using the `--force` flag!
+You should still remember that the tfs remote that will be reset will always will be the one that contains the commit where you want to
+reset the tfs remote.
+ 
 ## See also
 
 * [fetch](fetch.md)
