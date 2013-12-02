@@ -80,18 +80,17 @@ Then, you have to reset the `tfs/default` (or another) remote to the last change
 
 ### Reset a remote from a commit not belonging to the tfs remote to reset
 
-If you try to reset a remote from a pure git commit (which not correspond to a fetched tfs changeset)
- warning you that perhaps you are not doing what you are expecting :
+If you try to reset a remote to a pure git commit (which does not correspond to a fetched tfs changeset),
+git-tfs will warn you:
 
     error : the current commit does not belong to a tfs remote!
 
-You will issue a similar error message if you try to do it from a git commit that correspond to another tfs remote :
+If you try to reset to a commit from a different TFS remote, you'll see a similar message:
 
     error : the commit where you want to reset the tfs remote does not belong to the current tfs remote "currentRemoteName"!
 
-But, if you want to reset the tfs remote even if you don't satisfy these conditions, you could do it anyway using the `--force` flag!
-You should still remember that the tfs remote that will be reset will always will be the one that contains the commit where you want to
-reset the tfs remote.
+When you see this message, ensure that you're updating the remote that you expect to. You can do this with the `-i <remote>` or `-I` option.
+To reset the tfs remote anyway, use the `--force` flag!
  
 ## See also
 
