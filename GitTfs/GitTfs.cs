@@ -44,7 +44,26 @@ namespace Sep.Git.Tfs
             var unparsedArgs = ParseOptions(command, args);
             Trace.WriteLine("Command run:" + commandLineRun);
             ParseAuthors();
+            AutoDetectRemoteToUse();
             return Main(command, unparsedArgs);
+        }
+
+        private void AutoDetectRemoteToUse()
+        {
+            if (_globals.AutoFindRemote)
+            {
+                if (!string.IsNullOrEmpty(_globals.UserSpecifiedRemoteId))
+                {
+                    throw new Exception("error: you can't use -i and -I option in the same time!");
+                }
+                var remotes = _globals.Repository.GetLastParentTfsCommits("HEAD");
+                if (!remotes.Any())
+                {
+                    throw new Exception("No TFS parents found!");
+                }
+                _globals.UserSpecifiedRemoteId = remotes.First().Remote.Id;
+                _stdout.WriteLine("Working with tfs remote: " + _globals.RemoteId);
+            }
         }
 
         public int Main(GitTfsCommand command, IList<string> unparsedArgs)

@@ -16,6 +16,9 @@ rcheckin differs from [checkin](checkin.md) in that the latter squashes the comm
         -i, --tfs-remote, --id, --remote
             (Type: Value required, Value Type:[String])
             An optional remote ID, useful if this repository will track multiple TFS repositories.
+        -I, --auto-tfs-remote, --auto-remote
+                                   Autodetect (from git history) the remote ID of
+                                     the TFS to interact with
 
         -A, --authors=VALUE        Path to an Authors file to map TFS users to Git users
 
@@ -84,6 +87,15 @@ After the `rcheckin` of `tfs/default`, you should have an history that looks lik
 To checkins commits on the `tfs/myBranch` branch:
 
     git tfs rcheckin -i myBranch
+
+### Rcheckin on current branch
+
+To pull all the changeset of the current branch:
+
+    git tfs rcheckin -I
+
+The current branch depend of the git commit that is currently checkouted. Git-tfs will look in the history
+to find the appropriate branch to rcheckin.
 
 ### Rcheckin commits of other users
 
