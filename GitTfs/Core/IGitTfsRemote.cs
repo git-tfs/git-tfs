@@ -42,6 +42,7 @@ namespace Sep.Git.Tfs.Core
         string OwningRemoteId { get; }
         string Prefix { get; }
         bool ExportMetadatas { get; set; }
+        Dictionary<string, string> ExportWorkitemsMapping { get; set; }
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
         IFetchResult Fetch(bool stopOnFailMergeCommit = false);

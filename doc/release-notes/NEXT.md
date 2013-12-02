@@ -1,4 +1,5 @@
 * Fix `--no-build-default-comment` (#491)
+* Use a workitems mapping file during export to convert work items ids (#498)
 * Add `-I` option to let git-tfs find the good tfs remote to use (#504)
 * Warn on some commands if version of git used is 1.8.4 (#489)
 * Give more help when running list-remote-branches command on why some branches could not be displayed (#499)
