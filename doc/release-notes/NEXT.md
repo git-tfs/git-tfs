@@ -1,1 +1,5 @@
 * Fix `--no-build-default-comment` (#491)
+* Warn on some commands if version of git used is 1.8.4 (#489)
+* Give more help when running list-remote-branches command on why some branches could not be displayed (#499)
+* reset-remote : add a '--force' option when current commit does not belong to a remote or to the good one (#503)
+* rcheckin : correct fail to checkin if changeset has been fetched when using `--quick` and `--autorebase` options (#501)
