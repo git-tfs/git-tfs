@@ -1,6 +1,8 @@
 ## Summary
 
-The `pull` command fetches TFS changesets (like the `fetch` command) and merges (or rebase) the current branch with the commits fetched (creation of a merge commit or rebase all the commits).
+The `pull` command fetches TFS changesets (like the `fetch` command) and merges 
+(or rebase using `r` option) the current branch with the commits fetched 
+(creation of a merge commit or rebase all the commits).
 
 ## Synopsis
 
@@ -11,6 +13,9 @@ The `pull` command fetches TFS changesets (like the `fetch` command) and merges 
       -i, --tfs-remote, --remote, --id=VALUE
                                  The remote ID of the TFS to interact with
                                    default: default
+      -I, --auto-tfs-remote, --auto-remote
+                                 Autodetect (from git history) the remote ID of
+                                   the TFS to interact with
           --all, --fetch-all
           --parents
           --authors=VALUE        Path to an Authors file to map TFS users to Git
@@ -36,11 +41,24 @@ To pull all the changesets of the `default` branch and rebase your modifications
 
     git tfs pull --rebase
 
-### Fetch from a branch
+or 
+
+    git tfs pull -r
+
+### Pull from a branch
 
 To pull all the changeset of the `tfs/myBranch` branch:
 
     git tfs pull -i myBranch
+
+### Pull from the current branch
+
+To pull all the changeset of the current branch:
+
+    git tfs pull -I
+
+The current branch depend of the git commit that is currently checkouted. Git-tfs will look in the history
+to find the appropriate branch to pull.
 
 ### Authentication
 

@@ -96,6 +96,8 @@ Working with branches, for the main commands (`fetch`, `pull` and `rcheckin`), i
     //Check in TFS
     git tfs rcheckin -i branch1
 
+Note : you could also use the option `-I` (instead of `-i` followed by the remote name) and let git-tfs find the good tfs remote to use
+
 All the others actions are done throught the `branch` command
 
 ## List branches
