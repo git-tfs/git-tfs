@@ -64,6 +64,10 @@ If you don't know exactly what repository path to clone, see [list-remote-branch
 
 ### Clone all the branches (and merge changesets)
 
+Prerequisite: To use this feature, all your source code folders corresponding to branches
+should be converted into branches (a notion introduced by TFS2010).
+To change that, you should open 'Source Control Explorer' and then, for each folder corresponding to a branch, right click on your source folder and select 'Branching and Merging' > 'Convert to branch'.
+
 If you want to clone your entire repository with all the branches or that the tfs branches are merged througth merge changeset, perhaps you should use the option `--with-branches`:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk --with-branches

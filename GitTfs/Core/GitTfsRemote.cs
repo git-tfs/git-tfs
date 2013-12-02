@@ -303,9 +303,10 @@ namespace Sep.Git.Tfs.Core
 
         public class FetchResult : IFetchResult
         {
-             public bool IsSuccess { get; set; }
-             public long LastFetchedChangesetId { get; set; }
-             public string ParentBranchTfsPath { get; set; }
+            public bool IsSuccess { get; set; }
+            public long LastFetchedChangesetId { get; set; }
+            public int NewChangesetCount { get; set; }
+            public string ParentBranchTfsPath { get; set; }
         }
 
         public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
@@ -316,7 +317,9 @@ namespace Sep.Git.Tfs.Core
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             var fetchResult = new FetchResult{IsSuccess = true};
-            foreach (var changeset in FetchChangesets())
+            var fetchedChangesets = FetchChangesets().ToList();
+            fetchResult.NewChangesetCount = fetchedChangesets.Count;
+            foreach (var changeset in fetchedChangesets)
             {
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
