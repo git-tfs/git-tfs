@@ -11,6 +11,9 @@ The fetch command fetch all the new changesets from a TFS remote
       -i, --tfs-remote, --remote, --id=VALUE
                                  The remote ID of the TFS to interact with
                                    default: default
+      -I, --auto-tfs-remote, --auto-remote
+                                 Autodetect (from git history) the remote ID of
+                                   the TFS to interact with
           --all, --fetch-all
           --parents
           --authors=VALUE        Path to an Authors file to map TFS users to Git
@@ -35,6 +38,15 @@ To fetch all the changeset of the `default` branch:
 To fetch all the changeset of the `tfs/myBranch` branch:
 
     git tfs fetch -i myBranch
+
+### Fetch from the current branch
+
+To fetch all the changeset of the current branch:
+
+    git tfs fetch -I
+
+The current branch depend of the git commit that is currently checkouted. Git-tfs will look in the history
+to find the appropriate branch to fetch.
 
 ### Authentication
 
