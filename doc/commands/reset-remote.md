@@ -5,11 +5,13 @@ This way, you are able to fetch again the next changesets.
 
 ## Synopsis
 
+```
 Usage: git-tfs reset-remote commit-sha1-ref
   ex : git tfs reset-remote 3dcce821d7a20e6b2499cdd6f2f52ffbe8507be7
   -h, -H, --help
   -V, --version
   -d, --debug                Show debug output about everything git-tfs does
+```
 
 ## Example
 
