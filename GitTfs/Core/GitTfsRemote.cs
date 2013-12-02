@@ -303,8 +303,8 @@ namespace Sep.Git.Tfs.Core
 
         public class FetchResult : IFetchResult
         {
-             public bool IsSuccess { get; set; }
-             public long LastFetchedChangesetId { get; set; }
+            public bool IsSuccess { get; set; }
+            public long LastFetchedChangesetId { get; set; }
             public int NewChangesetCount { get; set; }
             public string ParentBranchTfsPath { get; set; }
         }
