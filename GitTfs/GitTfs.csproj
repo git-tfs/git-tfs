@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -126,6 +126,7 @@
     <Compile Include="Commands\Branch.cs" />
     <Compile Include="Core\BranchVisitors\BranchTreeContainsPathVisitor.cs" />
     <Compile Include="Core\IBranchTreeVisitor.cs" />
+    <Compile Include="Core\TfsDownloadVerifier.cs" />
     <Compile Include="Core\TfsInterop\IBranch.cs" />
     <Compile Include="Commands\Bootstrap.cs" />
     <Compile Include="Commands\Checkin.cs" />

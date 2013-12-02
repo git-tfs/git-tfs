@@ -117,17 +117,32 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
         {
-            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true, true, true)
-                .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
+            return GetChangesets(path, startVersion, int.MaxValue, remote);
+        }
 
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, int maxCount, IGitTfsRemote remote)
+        {
+            var changesets = VersionControl.QueryHistory(
+                path: path,
+                version: VersionSpec.Latest,
+                deletionId: 0,
+                recursion: RecursionType.Full,
+                user: null,
+                versionFrom: new ChangesetVersionSpec((int)startVersion),
+                versionTo: VersionSpec.Latest,
+                maxCount: maxCount,
+                includeChanges: true,
+                slotMode: true,
+                includeDownloadInfo: true,
+                sortAscending: true).Cast<Changeset>().ToArray();
+            
             // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 
             // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
             for (int i = 0; i < changesets.Length; i++)
             {
                 yield return BuildTfsChangeset(changesets[i], remote);
                 changesets[i] = null;
-            } 
+            }
         }
 
         public virtual int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
@@ -605,6 +620,11 @@ namespace Sep.Git.Tfs.VsCommon
                     // With this exception at least it would be evident asap that something went wrong, so we could fix it.
                     return _contentLength;
                 }
+            }
+
+            public IEnumerable<byte> HashValue
+            {
+                get { return _pendingChange.HashValue; }
             }
 
             public TemporaryFile DownloadFile()

@@ -39,8 +39,9 @@ namespace Sep.Git.Tfs.Commands
         {
             get
             {
-                return init.OptionSet.Merge(fetch.OptionSet)
-                           .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null);
+                return init.OptionSet
+                    .Merge(fetch.OptionSet)
+                    .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null);
             }
         }
 

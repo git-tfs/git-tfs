@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
 
@@ -30,9 +31,10 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         long Checkin(CheckinOptions checkinOptions);
         /// <summary>
-        /// Populates the workspace with a snapshot, as of the given changeset.
+        /// Populates the workspace with a snapshot at the given changeset.
+        /// The set of affected items must be specified.
         /// </summary>
-        void Get(int changesetId);
+        void Get(int changesetId, IEnumerable<IItem> itemsForChangeset);
         /// <summary>
         /// Gets the files changed in a given changeset.
         /// </summary>
