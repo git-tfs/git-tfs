@@ -52,6 +52,8 @@ namespace Sep.Git.Tfs.Commands
         // uses rebase and works only with HEAD
         public int Run()
         {
+            _globals.WarnOnGitVersion(_stdout);
+
             if (_globals.Repository.IsBare)
                 throw new GitTfsException("error: you should specify the local branch to checkin for a bare repository.");
 
@@ -61,6 +63,8 @@ namespace Sep.Git.Tfs.Commands
         // uses rebase and works only with HEAD in a none bare repository
         public int Run(string localBranch)
         {
+            _globals.WarnOnGitVersion(_stdout);
+
             if (!_globals.Repository.IsBare)
                 throw new GitTfsException("error: This syntax with one parameter is only allowed in bare repository.");
 
@@ -91,6 +95,7 @@ namespace Sep.Git.Tfs.Commands
                 if (Quick && AutoRebase)
                 {
                     tfsRemote.Repository.CommandNoisy("rebase", "--preserve-merges", tfsRemote.RemoteRef);
+                    parentChangeset = _globals.Repository.GetTfsCommit(parentChangeset.Remote.MaxCommitHash);
                 }
                 else
                 {
@@ -140,8 +145,8 @@ namespace Sep.Git.Tfs.Commands
                 try
                 {
                     newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                    tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
-                    if (tfsRemote.MaxChangesetId != newChangesetId)
+                    var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
+                    if (fetchResult.NewChangesetCount != 1)
                     {
                         var lastCommit = repo.FindCommitHashByChangesetId(newChangesetId);
                         RebaseOnto(repo, lastCommit, target);

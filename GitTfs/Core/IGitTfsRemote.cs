@@ -10,6 +10,7 @@ namespace Sep.Git.Tfs.Core
     {
         bool IsSuccess { get; set; }
         long LastFetchedChangesetId { get; set; }
+        int NewChangesetCount { get; set; }
         string ParentBranchTfsPath { get; set; }
     }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -14,6 +15,7 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly Fetch fetch;
         private readonly Globals globals;
+        private TextWriter stdout;
         private bool _shouldRebase;
 
         public OptionSet OptionSet
@@ -25,10 +27,11 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public Pull(Globals globals, Fetch fetch)
+        public Pull(Globals globals, Fetch fetch, TextWriter stdout)
         {
             this.fetch = fetch;
             this.globals = globals;
+            this.stdout = stdout;
         }
 
         public int Run()
@@ -45,6 +48,8 @@ namespace Sep.Git.Tfs.Commands
                 var remote = globals.Repository.ReadTfsRemote(remoteId);
                 if (_shouldRebase)
                 {
+                    globals.WarnOnGitVersion(stdout);
+
                     if (globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
                     {
                         throw new GitTfsException("error: You have local changes; rebase-workflow only possible with clean working directory.")

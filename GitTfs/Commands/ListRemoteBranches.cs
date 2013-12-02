@@ -53,6 +53,7 @@ namespace Sep.Git.Tfs.Commands
             if (branches.IsEmpty())
             {
                 stdout.WriteLine("No TFS branches were found!");
+                stdout.WriteLine("\n\nPerhaps you should convert your branch folders into a branch in TFS:");
             }
             else
             {
@@ -62,8 +63,9 @@ namespace Sep.Git.Tfs.Commands
                     Branch.WriteRemoteTfsBranchStructure(tfsHelper, stdout, branchObject.Path);
                 }
                 stdout.WriteLine("\nCloning root branches (marked by [*]) is recommended!");
-                stdout.WriteLine("\n\nPS:if your branch is not listed here, perhaps you should convert the containing folder to a branch in TFS.");
+                stdout.WriteLine("\n\nPS:if your branch is not listed here, perhaps you should convert its containing folder into a branch in TFS:");
             }
+            stdout.WriteLine("  -> Open 'Source Control Explorer' and for each folder corresponding to a branch, right click on the folder and select 'Branching and Merging' > 'Convert to branch'.");
             return GitTfsExitCodes.OK;
         }
     }
