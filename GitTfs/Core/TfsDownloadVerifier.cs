@@ -51,7 +51,7 @@ namespace Sep.Git.Tfs.Core
 
         public bool EnsureValidChanges(IWorkspace workspace, IEnumerable<IChange> changes, Action<IItem> retry)
         {
-            return EnsureValidItems(workspace, changes.Where(c => (c.ChangeType & TfsChangeType.Delete) == 0).Select(c => c.Item), retry);
+            return EnsureValidItems(workspace, changes.Where(c => !IsDelete(c)).Select(c => c.Item), retry);
         }
 
         public bool EnsureValidItems(IWorkspace workspace, IEnumerable<IItem> changes, Action<IItem> retry)
@@ -61,13 +61,22 @@ namespace Sep.Git.Tfs.Core
             
             while (failures.Count > 0 && maxRetries-- > 0)
             {
-                failures = failures
-                    .Select(item => { retry(item); return item; })
-                    .Where(item => !IsValid(workspace, item))
-                    .ToList();
+                foreach (var item in failures)
+                {
+                    retry(item);
+                }
+
+                failures = failures.Where(item => !IsValid(workspace, item)).ToList();
             }
 
             return failures.Count == 0;
+        }
+
+        private static bool IsDelete(IChange change)
+        {
+            const TfsChangeType deleteBits = TfsChangeType.Delete | TfsChangeType.SourceRename;
+
+            return (change.ChangeType & deleteBits) != 0;
         }
 
         private static bool EntryIsValid(string file, HashAlgorithm algorithm, long targetContentLength, IEnumerable<byte> targetHashValue)

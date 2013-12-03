@@ -14,6 +14,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         Merge = 0x100,
         None = 1,
         Rename = 0x10,
-        Undelete = 0x40
+        Undelete = 0x40,
+        SourceRename = 0x800
     }
 }
