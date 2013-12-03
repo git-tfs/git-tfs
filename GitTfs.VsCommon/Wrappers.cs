@@ -8,6 +8,7 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
+using Microsoft.TeamFoundation.VersionControl.Common;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -416,7 +417,6 @@ namespace Sep.Git.Tfs.VsCommon
                                           _bridge.Unwrap<PolicyFailure>(policyOverrideInfo.Failures));
         }
 
-
         public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes,
                                                         string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
         {
@@ -436,7 +436,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public int PendEdit(string path)
         {
-            return _workspace.PendEdit(path);
+            return _workspace.PendEdit(new string[] { path }, RecursionType.None, null, LockLevel.Unchanged, false, PendChangesOptions.ForceCheckOutLocalVersion);
         }
 
         public int PendDelete(string path)
