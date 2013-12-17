@@ -1,14 +1,20 @@
-The [rcheckin](commands/rcheckin.md) command reads checkin information from git commit messages
-with certain git commit messages.
+The [rcheckin](commands/rcheckin.md) command examines the commmit message for additional TFS specific
+notifications. The following may be appended as separate lines to the end of the commit message:
 
 * `git-tfs-work-item: <id>` will link the new changeset with the given work item and the default action type.
-* `#<id>` will also link the new changeset with the work item ( but the text is kept and can be put anywhere in the commit message) .
 * `git-tfs-work-item: <id> <action>` will link the new changeset with the given work item and the given action type.
 * `git-tfs-code-reviewer: <name>` sets the Code Reviewer field.
 * `git-tfs-security-reviewer: <name>` sets the Security Reviewer field.
 * `git-tfs-performance-reviewer: <name>` sets the Performance Reviewer field.
 * `git-tfs-force: <reason>` will force the checkin, overriding TFS checkin policies with the given reason.
 
+Additionally the text of the message is searched for work item IDs. If a string matching a # followed
+by a valid work-item ID number is found, then the commit will be associated with the specified TFS work-item.
+For cases where this may be undesirable, the default match may be overridden by setting the
+`git-tfs.work-item-regex` config variable to a suitable alternate regular expression.
+The default is `"#(?<item_id>\d+)"` but if more specificity is required it could be redefined as
+`"workitem #(?<item_id>\d+)"` to require "workitem #" as a prefix, avoiding collision with
+alternative bug trackers.
 
 For example, the following commit message
 produces the checkin comment "Make this change (#456)",
