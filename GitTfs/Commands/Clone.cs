@@ -54,6 +54,9 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
         {
+            init.Token = Token;
+            fetch.Token = Token;
+
             var currentDir = Environment.CurrentDirectory;
             var repositoryDirCreated = InitGitDir(gitRepositoryPath);
 
