@@ -405,9 +405,9 @@ namespace Sep.Git.Tfs.Core
                     var path = item.Path.Replace('\\', '/');
                     entries[path] = new GitObject
                     {
-                        Mode = item.Mode.ToModeString(),
+                        Mode = item.Mode,
                         Sha = item.Target.Sha,
-                        ObjectType = item.TargetType.ToString().ToLower(),
+                        ObjectType = item.TargetType,
                         Path = path,
                         Commit = commit
                     };
