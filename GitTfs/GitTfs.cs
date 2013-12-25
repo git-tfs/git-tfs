@@ -85,6 +85,7 @@ namespace Sep.Git.Tfs
                 Console.CancelKeyPress += delegate(object sender,
                                         ConsoleCancelEventArgs e)
                 {
+                    Trace.WriteLine("The operation has been interrupted.");
                     if (e.SpecialKey == ConsoleSpecialKey.ControlC)
                         e.Cancel = true; // tell the CLR to keep running
                     cts.Cancel();

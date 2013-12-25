@@ -153,6 +153,7 @@ namespace Sep.Git.Tfs.Commands
                 _stdout.WriteLine("Tfs branches found:");
                 foreach (var tfsBranchPath in childBranchPaths)
                 {
+                    Token.ThrowIfCancellationRequested();
                     _stdout.WriteLine("- " + tfsBranchPath.TfsRepositoryPath);
                     tfsBranchPath.RootChangesetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath);
                 }

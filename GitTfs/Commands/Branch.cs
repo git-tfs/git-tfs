@@ -97,6 +97,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
+            cleanup.Token = Token;
+            initBranch.Token = Token;
+            rcheckin.Token = Token;
+
             if (!IsCommandWellUsed())
                 return helper.Run(this);
 
@@ -116,6 +120,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string param)
         {
+            cleanup.Token = Token;
+            initBranch.Token = Token;
+            rcheckin.Token = Token;
+
             if (!IsCommandWellUsed())
                 return helper.Run(this);
 
