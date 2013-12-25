@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 
@@ -25,6 +26,8 @@ namespace Sep.Git.Tfs.Commands
             get { return _checkinOptions.OptionSet; }
         }
 
+        public CancellationToken Token { get; set; }
+
         public int Run()
         {
             return Run("HEAD");
@@ -42,14 +45,14 @@ namespace Sep.Git.Tfs.Commands
             if (_checkinOptions.NoMerge)
             {
                 _stdout.WriteLine("TFS Changeset #" + newChangesetId + " was created.");
-                parentChangeset.Remote.Fetch();
+                parentChangeset.Remote.Fetch(Token);
             }
             else
             {
                 _stdout.WriteLine("TFS Changeset #" + newChangesetId + " was created. Marking it as a merge commit...");
-                parentChangeset.Remote.FetchWithMerge(newChangesetId, false, refToCheckin);
+                parentChangeset.Remote.FetchWithMerge(Token, newChangesetId, false, refToCheckin);
 
-                if (refToCheckin == "HEAD")
+                if (refToCheckin == "HEAD" && !Token.IsCancellationRequested)
                     parentChangeset.Remote.Repository.CommandNoisy("merge", parentChangeset.Remote.MaxCommitHash);
             }
 

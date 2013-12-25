@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
@@ -61,6 +62,8 @@ namespace Sep.Git.Tfs.Commands
                 }.Merge(remoteOptions.OptionSet);
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public int Run()
         {
@@ -158,7 +161,7 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
 
-            remote.Fetch(stopOnFailMergeCommit);
+            remote.Fetch(Token, stopOnFailMergeCommit);
 
             Trace.WriteLine("Cleaning...");
             remote.CleanupWorkspaceDirectory();

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -62,6 +63,8 @@ namespace Sep.Git.Tfs.Commands
                 .Merge(globals.OptionSet); 
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public Branch(Globals globals, TextWriter stdout, Help helper, Cleanup cleanup, InitBranch initBranch, Rcheckin rcheckin)
         {

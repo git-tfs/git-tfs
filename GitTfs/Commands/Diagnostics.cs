@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using NDesk.Options;
 using StructureMap;
 
@@ -22,6 +23,8 @@ namespace Sep.Git.Tfs.Commands
         {
             get { return new OptionSet(); }
         }
+
+        public CancellationToken Token { get; set; }
 
         public int Run()
         {

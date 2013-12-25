@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -40,6 +41,8 @@ namespace Sep.Git.Tfs.Commands
                 }.Merge(_checkinOptions.OptionSet);
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public int Run(string shelvesetName)
         {

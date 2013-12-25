@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -45,6 +46,8 @@ ex : git tfs create http://myTfsServer:8080/tfs/TfsRepository myProjectName
                     }.Merge(_clone.OptionSet);
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public int Run(string tfsUrl, string projectName)
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Commands;
 
@@ -45,8 +46,8 @@ namespace Sep.Git.Tfs.Core
         Dictionary<string, string> ExportWorkitemsMapping { get; set; }
         bool ShouldSkip(string path);
         string GetPathInGitRepo(string tfsPath);
-        IFetchResult Fetch(bool stopOnFailMergeCommit = false);
-        IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes);
+        IFetchResult Fetch(CancellationToken token, bool stopOnFailMergeCommit = false);
+        IFetchResult FetchWithMerge(CancellationToken token, long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes);
         void QuickFetch();
         void QuickFetch(int changesetId);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch);

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using LibGit2Sharp;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
@@ -49,6 +50,8 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
+        public CancellationToken Token { get; set; }
+
         // uses rebase and works only with HEAD
         public int Run()
         {
@@ -89,7 +92,7 @@ namespace Sep.Git.Tfs.Commands
 
             // get latest changes from TFS to minimize possibility of late conflict
             _stdout.WriteLine("Fetching changes from TFS to minimize possibility of late conflict...");
-            parentChangeset.Remote.Fetch();
+            parentChangeset.Remote.Fetch(Token);
             if (parentChangeset.ChangesetId != parentChangeset.Remote.MaxChangesetId)
             {
                 if (Quick && AutoRebase)
@@ -145,7 +148,8 @@ namespace Sep.Git.Tfs.Commands
                 try
                 {
                     newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                    var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
+                    var fetchResult = tfsRemote.FetchWithMerge(Token, newChangesetId, false, rc.Parents);
+                    Token.ThrowIfCancellationRequested();
                     if (fetchResult.NewChangesetCount != 1)
                     {
                         var lastCommit = repo.FindCommitHashByChangesetId(newChangesetId);
@@ -218,7 +222,7 @@ namespace Sep.Git.Tfs.Commands
 
                 _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
                 long newChangesetId = tfsRemote.Checkin(rc.Sha, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
+                tfsRemote.FetchWithMerge(Token, newChangesetId, false, rc.Parents);
                 if (tfsRemote.MaxChangesetId != newChangesetId)
                     throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
 

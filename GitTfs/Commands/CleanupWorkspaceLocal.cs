@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -28,6 +29,8 @@ namespace Sep.Git.Tfs.Commands
         {
             get { return _cleanupOptions.OptionSet; }
         }
+
+        public CancellationToken Token { get; set; }
 
         public int Run()
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -36,6 +37,8 @@ namespace Sep.Git.Tfs.Commands
                 };
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public ShelveList(TextWriter stdout, Globals globals)
         {

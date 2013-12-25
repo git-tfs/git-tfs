@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -61,6 +62,8 @@ namespace Sep.Git.Tfs.Commands
                 };
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public int Run(string tfsBranchPath)
         {
@@ -267,7 +270,7 @@ namespace Sep.Git.Tfs.Commands
         private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true)
         {
             Trace.WriteLine("Try fetching changesets...");
-            var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+            var fetchResult = tfsRemote.Fetch(Token, stopOnFailMergeCommit);
             Trace.WriteLine("Changesets fetched!");
 
             if (createBranch && fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)

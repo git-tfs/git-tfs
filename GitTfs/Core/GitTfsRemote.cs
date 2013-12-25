@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
@@ -310,18 +311,24 @@ namespace Sep.Git.Tfs.Core
             public string ParentBranchTfsPath { get; set; }
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
+        public IFetchResult Fetch(CancellationToken token, bool stopOnFailMergeCommit = false)
         {
-            return FetchWithMerge(-1, stopOnFailMergeCommit);
+            return FetchWithMerge(token, -1, stopOnFailMergeCommit);
         }
 
-        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        public IFetchResult FetchWithMerge(CancellationToken token, long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             var fetchResult = new FetchResult{IsSuccess = true};
             var fetchedChangesets = FetchChangesets().ToList();
             fetchResult.NewChangesetCount = fetchedChangesets.Count;
             foreach (var changeset in fetchedChangesets)
             {
+                if (token.IsCancellationRequested)
+                {
+                    fetchResult.IsSuccess = false;
+                    fetchResult.LastFetchedChangesetId = MaxChangesetId;
+                    return fetchResult;
+                }
                 AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
                 if (changeset.IsMergeChangeset)
@@ -329,7 +336,7 @@ namespace Sep.Git.Tfs.Core
                     var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
                     var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
                     if (shaParent == null)
-                        shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit);
+                        shaParent = FindMergedRemoteAndFetch(token, parentChangesetId, stopOnFailMergeCommit);
                     if (shaParent != null)
                     {
                         log.CommitParents.Add(shaParent);
@@ -426,12 +433,14 @@ namespace Sep.Git.Tfs.Core
             return fetchResult;
         }
 
-        private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit)
+        private string FindMergedRemoteAndFetch(CancellationToken token, int parentChangesetId, bool stopOnFailMergeCommit)
         {
             var tfsRemotes = FindTfsRemoteOfChangeset(Tfs.GetChangeset(parentChangesetId));
             foreach (var tfsRemote in tfsRemotes.Where(r=>string.Compare(r.TfsRepositoryPath, this.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase) != 0))
             {
-                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+                if (token.IsCancellationRequested)
+                    break;
+                var fetchResult = tfsRemote.Fetch(token, stopOnFailMergeCommit);
             }
             return Repository.FindCommitHashByChangesetId(parentChangesetId);
         }
