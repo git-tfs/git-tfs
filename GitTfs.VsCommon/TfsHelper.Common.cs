@@ -178,7 +178,7 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 Trace.WriteLine("Looking for the changeset between changeset id " + lowerBound + " and " + upperBound);
                 var firstBranchChangesetIds = VersionControl.QueryHistory(tfsPathParentBranch, VersionSpec.Latest, 0, RecursionType.Full,
-                                null, new ChangesetVersionSpec(lowerBound), new ChangesetVersionSpec(upperBound), int.MaxValue, true,
+                                null, new ChangesetVersionSpec(lowerBound), new ChangesetVersionSpec(upperBound), int.MaxValue, false,
                                 false, false).Cast<Changeset>().Select(c => c.ChangesetId).ToList();
                 if (firstBranchChangesetIds.Count != 0)
                     return firstBranchChangesetIds.First(cId => cId < changesetIdsFirstChangesetInMainBranch);
