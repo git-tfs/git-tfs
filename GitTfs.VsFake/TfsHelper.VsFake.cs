@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -64,7 +65,7 @@ namespace Sep.Git.Tfs.VsFake
             return _script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesets(CancellationToken token, string path, long startVersion, IGitTfsRemote remote)
         {
             if (!_script.Changesets.Any(c => c.IsBranchChangeset) && _script.Changesets.Any(c => c.IsMergeChangeset))
                 return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
@@ -368,7 +369,7 @@ namespace Sep.Git.Tfs.VsFake
             return new Changeset(_script.Changesets.First(c => c.Id == changesetId));
         }
 
-        public int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
+        public int GetRootChangesetForBranch(CancellationToken token, string tfsPathBranchToCreate, string tfsPathParentBranch = null)
         {
             var firstChangesetOfBranch = _script.Changesets.FirstOrDefault(c => c.IsBranchChangeset && c.BranchChangesetDatas.BranchPath == tfsPathBranchToCreate);
             if (firstChangesetOfBranch != null)

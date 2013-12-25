@@ -319,7 +319,7 @@ namespace Sep.Git.Tfs.Core
         public IFetchResult FetchWithMerge(CancellationToken token, long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             var fetchResult = new FetchResult{IsSuccess = true};
-            var fetchedChangesets = FetchChangesets().ToList();
+            var fetchedChangesets = FetchChangesets(token).ToList();
             fetchResult.NewChangesetCount = fetchedChangesets.Count;
             foreach (var changeset in fetchedChangesets)
             {
@@ -478,7 +478,7 @@ namespace Sep.Git.Tfs.Core
             DoGcIfNeeded();
         }
 
-        private IEnumerable<ITfsChangeset> FetchChangesets()
+        private IEnumerable<ITfsChangeset> FetchChangesets(CancellationToken token)
         {
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
             // TFS 2010 doesn't like when we ask for history past its last changeset.
@@ -486,10 +486,10 @@ namespace Sep.Git.Tfs.Core
                 return Enumerable.Empty<ITfsChangeset>();
             
             if(!IsSubtreeOwner)
-                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
+                return Tfs.GetChangesets(token, TfsRepositoryPath, MaxChangesetId + 1, this);
 
             return globals.Repository.GetSubtrees(this)
-                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, x))
+                .SelectMany(x => Tfs.GetChangesets(token, x.TfsRepositoryPath, this.MaxChangesetId + 1, x))
                 .OrderBy(x => x.Summary.ChangesetId);
         }
 

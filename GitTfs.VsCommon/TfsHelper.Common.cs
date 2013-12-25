@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
@@ -115,16 +116,17 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _linking ?? (_linking = GetService<ILinking>()); }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesets(CancellationToken token, string path, long startVersion, IGitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true, true, true)
-                .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
+                null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true, true, true, true)
+                .WithCancellation(token).Cast<Changeset>().ToArray();
 
             // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 
             // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
             for (int i = 0; i < changesets.Length; i++)
             {
+                token.ThrowIfCancellationRequested();
                 yield return BuildTfsChangeset(changesets[i], remote);
                 changesets[i] = null;
             } 
@@ -148,7 +150,7 @@ namespace Sep.Git.Tfs.VsCommon
             throw new NotImplementedException();
         }
 
-        public virtual int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
+        public virtual int GetRootChangesetForBranch(CancellationToken token, string tfsPathBranchToCreate, string tfsPathParentBranch = null)
         {
             Trace.WriteLine("TFS 2008 Compatible mode!");
             int firstChangesetIdOfParentBranch = 1;
