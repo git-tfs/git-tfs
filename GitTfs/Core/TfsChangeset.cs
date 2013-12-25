@@ -213,10 +213,9 @@ namespace Sep.Git.Tfs.Core
         private string GetMode(IChange change, IDictionary<string, GitObject> initialTree, string pathInGitRepo)
         {
             if (initialTree.ContainsKey(pathInGitRepo) &&
-                !String.IsNullOrEmpty(initialTree[pathInGitRepo].Mode) &&
                 !change.ChangeType.IncludesOneOf(TfsChangeType.Add))
             {
-                return initialTree[pathInGitRepo].Mode;
+                return initialTree[pathInGitRepo].Mode.ToModeString();
             }
             return Mode.NewFile;
         }
