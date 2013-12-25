@@ -33,10 +33,10 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public override int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
+        public override int FindMergeChangesetParent(CancellationToken token, string path, long firstChangeset, GitTfsRemote remote)
         {
             return VersionControl.QueryMerges(null, null, new ItemSpec(path, RecursionType.Full), LatestVersionSpec.Latest,
-              null, new ChangesetVersionSpec((int)firstChangeset)).Max(x => x.SourceVersion);
+              null, new ChangesetVersionSpec((int)firstChangeset)).WithCancellation(token).Max(x => x.SourceVersion);
         }
 
         public override IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()

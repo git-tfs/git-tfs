@@ -74,7 +74,7 @@ namespace Sep.Git.Tfs.VsFake
                 .Select(x => BuildTfsChangeset(x, remote));
         }
 
-        public int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
+        public int FindMergeChangesetParent(CancellationToken token, string path, long firstChangeset, GitTfsRemote remote)
         {
             var firstChangesetOfBranch = _script.Changesets.FirstOrDefault(c => c.IsMergeChangeset && c.MergeChangesetDatas.MergeIntoBranch == path && c.MergeChangesetDatas.BeforeMergeChangesetId < firstChangeset);
             if (firstChangesetOfBranch != null)

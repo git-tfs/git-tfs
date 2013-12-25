@@ -333,7 +333,7 @@ namespace Sep.Git.Tfs.Core
                 var log = Apply(MaxCommitHash, changeset);
                 if (changeset.IsMergeChangeset)
                 {
-                    var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
+                    var parentChangesetId = Tfs.FindMergeChangesetParent(token, TfsRepositoryPath, changeset.Summary.ChangesetId, this);
                     var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
                     if (shaParent == null)
                         shaParent = FindMergedRemoteAndFetch(token, parentChangesetId, stopOnFailMergeCommit);

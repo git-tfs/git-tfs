@@ -63,7 +63,7 @@ namespace Sep.Git.Tfs.Test.Commands
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out gitRepository, out remote, out newBranchRemote);
 
             remote.Tfs = mocks.Get<ITfsHelper>();
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(2010);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, "$/MyProject/MyBranch")).Return(2010);
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
@@ -115,7 +115,7 @@ namespace Sep.Git.Tfs.Test.Commands
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out gitRepository, out remote, out newBranchRemote);
 
             remote.Tfs = mocks.Get<ITfsHelper>();
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(2010);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, "$/MyProject/MyBranch")).Return(2010);
 
             IGitTfsRemote existingBranchRemote = MockRepository.GenerateStub<IGitTfsRemote>();
             existingBranchRemote.TfsUsername = "user";
@@ -143,7 +143,7 @@ namespace Sep.Git.Tfs.Test.Commands
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out gitRepository, out remote, out newBranchRemote);
 
             remote.Tfs = mocks.Get<ITfsHelper>();
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Throw(new GitTfsException(""));
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, "$/MyProject/MyBranch")).Throw(new GitTfsException(""));
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
@@ -163,7 +163,7 @@ namespace Sep.Git.Tfs.Test.Commands
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out gitRepository, out remote, out newBranchRemote);
 
             remote.Tfs = mocks.Get<ITfsHelper>();
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(2010);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, "$/MyProject/MyBranch")).Return(2010);
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
@@ -189,7 +189,7 @@ namespace Sep.Git.Tfs.Test.Commands
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out gitRepository, out remote, out newBranchRemote);
 
             remote.Tfs = mocks.Get<ITfsHelper>();
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", remote.TfsRepositoryPath)).Return(2008);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, "$/MyProject/MyBranch", remote.TfsRepositoryPath)).Return(2008);
 
             mocks.ClassUnderTest.ParentBranch = remote.TfsRepositoryPath;
 
@@ -221,7 +221,7 @@ namespace Sep.Git.Tfs.Test.Commands
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out gitRepository, out remote, out newBranchRemote);
 
             remote.Tfs = mocks.Get<ITfsHelper>();
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(2008);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, "$/MyProject/MyBranch")).Return(2008);
 
             mocks.ClassUnderTest.ParentBranch = "$/MyProject/MyParentBranchNotAlreadyCloned";
 
@@ -263,7 +263,7 @@ namespace Sep.Git.Tfs.Test.Commands
 
             #region Branch1
             var rootChangeSetB1 = 1000;
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch1)).Return(rootChangeSetB1);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, tfsPathBranch1)).Return(rootChangeSetB1);
 
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT1)).Return(GIT_BRANCH_TO_INIT1).Repeat.Once();
             gitRepository.Expect(x => x.FindCommitHashByChangesetId(rootChangeSetB1)).Return("ShaBeforeFetch_Branch1").Repeat.Once();
@@ -282,7 +282,7 @@ namespace Sep.Git.Tfs.Test.Commands
             newBranch2Remote.Id = GIT_BRANCH_TO_INIT2;
 
             var rootChangeSetB2 = 2000;
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch2)).Return(rootChangeSetB2);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, tfsPathBranch2)).Return(rootChangeSetB2);
 
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT2)).Return(GIT_BRANCH_TO_INIT2).Repeat.Once();
             gitRepository.Expect(x => x.FindCommitHashByChangesetId(rootChangeSetB2)).Return("ShaBeforeFetch_Branch2").Repeat.Once();
@@ -329,7 +329,7 @@ namespace Sep.Git.Tfs.Test.Commands
 
             #region Branch1
             var rootChangeSetB1 = 1000;
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch1)).Return(rootChangeSetB1);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, tfsPathBranch1)).Return(rootChangeSetB1);
 
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT1)).Return(GIT_BRANCH_TO_INIT1).Repeat.Never();
             #endregion
@@ -339,7 +339,7 @@ namespace Sep.Git.Tfs.Test.Commands
             newBranch2Remote.Id = GIT_BRANCH_TO_INIT2;
 
             var rootChangeSetB2 = 2000;
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch2)).Return(rootChangeSetB2);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, tfsPathBranch2)).Return(rootChangeSetB2);
 
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT2)).Return(GIT_BRANCH_TO_INIT2).Repeat.Never();
             #endregion
@@ -389,7 +389,7 @@ namespace Sep.Git.Tfs.Test.Commands
 
             #region Branch1
             var rootChangeSetB1 = 1000;
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch1)).Return(rootChangeSetB1);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, tfsPathBranch1)).Return(rootChangeSetB1);
 
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT1)).Return(GIT_BRANCH_TO_INIT1).Repeat.Never();
             #endregion
@@ -399,7 +399,7 @@ namespace Sep.Git.Tfs.Test.Commands
             newBranch2Remote.Id = GIT_BRANCH_TO_INIT2;
 
             var rootChangeSetB2 = 2000;
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch2)).Return(rootChangeSetB2);
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch(CancellationToken.None, tfsPathBranch2)).Return(rootChangeSetB2);
 
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT2)).Return(GIT_BRANCH_TO_INIT2).Repeat.Never();
             #endregion
