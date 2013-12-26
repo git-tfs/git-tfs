@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using LibGit2Sharp;
+﻿using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Core
 {

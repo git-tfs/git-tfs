@@ -455,7 +455,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void GetSpecificVersion(int changeset)
         {
-            _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll);
+            Retry.Do(() => _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll));
         }
 
         public void GetSpecificVersion(IChangeset changeset)
@@ -465,9 +465,15 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void GetSpecificVersion(int changesetId, IEnumerable<IChange> changes)
         {
-            var requests = from change in changes
-                           select new GetRequest(new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId), changesetId);
-            _workspace.Get(requests.ToArray(), GetOptions.Overwrite);
+            Retry.Do(() =>
+            {
+                var requests = from change in changes
+                               select
+                                   new GetRequest(
+                                       new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId),
+                                       changesetId);
+                _workspace.Get(requests.ToArray(), GetOptions.Overwrite);
+            });
         }
 
         public string GetLocalItemForServerItem(string serverItem)

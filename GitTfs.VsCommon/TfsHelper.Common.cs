@@ -258,11 +258,11 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
                 var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
-                _workspaces.Add(remote.Id, workspace = GetWorkspace(folders));
+                _workspaces.Add(remote.Id, workspace = Retry.Do(() =>GetWorkspace(folders)));
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
                     Trace.WriteLine("Deleting workspace " + workspace.Name);
-                    workspace.Delete();
+                    Retry.Do(() => workspace.Delete());
                 });
             }
             var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
@@ -277,7 +277,7 @@ namespace Sep.Git.Tfs.VsCommon
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory));
+            var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
             try
             {
                 var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
@@ -290,7 +290,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
             finally
             {
-                workspace.Delete();
+                Retry.Do(() => workspace.Delete());
             }
         }
 
