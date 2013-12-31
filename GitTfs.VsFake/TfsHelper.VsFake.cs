@@ -246,9 +246,14 @@ namespace Sep.Git.Tfs.VsFake
 
             public void GetSpecificVersion(IChangeset changeset)
             {
+                GetSpecificVersion(changeset.ChangesetId, changeset.Changes);
+            }
+
+            public void GetSpecificVersion(int changeset, IChange [] changes)
+            {
                 var repositoryRoot = _repositoryRoot.ToLower();
                 if(!repositoryRoot.EndsWith("/")) repositoryRoot += "/";
-                foreach (var change in changeset.Changes)
+                foreach (var change in changes)
                 {
                     if (change.Item.ItemType == TfsItemType.File)
                     {

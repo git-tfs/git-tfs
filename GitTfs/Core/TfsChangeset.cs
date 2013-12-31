@@ -30,12 +30,21 @@ namespace Sep.Git.Tfs.Core
         public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)
         {
             var initialTree = workspace.Remote.Repository.GetObjects(lastCommit);
-            workspace.Get(_changeset);
+            workspace.Get(_changeset.ChangesetId, ChangesExceptIgnored(initialTree));
             foreach (var change in Sort(_changeset.Changes))
             {
                 Apply(change, index, workspace, initialTree);
             }
             return MakeNewLogEntry();
+        }
+
+        private IChange[] ChangesExceptIgnored(IDictionary<string, GitObject> initialTree)
+        {
+            return _changeset.Changes.Where(change =>
+            {
+                var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, Summary.Remote, initialTree);
+                return (pathInGitRepo != null) && !Summary.Remote.ShouldSkip(pathInGitRepo);
+            }).ToArray();
         }
 
         private void Apply(IChange change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
