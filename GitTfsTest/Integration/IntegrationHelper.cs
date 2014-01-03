@@ -11,7 +11,6 @@ using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsFake;
 using Xunit;
 using Xunit.Sdk;
-using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
@@ -49,7 +48,7 @@ namespace Sep.Git.Tfs.Test.Integration
                     Directory.Delete(_workdir);
                     _workdir = null;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
             }

@@ -66,7 +66,6 @@ namespace Sep.Git.Tfs.Commands
             {
                 case "add":
                     return DoAdd(args.ElementAtOrDefault(1) ?? "", args.ElementAtOrDefault(2) ?? "");
-                    break;
 
                 case "pull":
                     return DoPull(args.ElementAtOrDefault(1));
@@ -77,7 +76,6 @@ namespace Sep.Git.Tfs.Commands
                 default:
                     _stdout.WriteLine("Expected one of [add, pull, split]");
                     return GitTfsExitCodes.InvalidArguments;
-                    break;
             }
         }
 
