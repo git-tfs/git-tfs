@@ -495,18 +495,25 @@ namespace Sep.Git.Tfs.Core
         public string FindCommitHashByChangesetId(long changesetId)
         {
             Trace.WriteLine("Looking for changeset " + changesetId + " in git repository...");
-            
+
             var patternToFind = "git-tfs-id: .*;C" + changesetId + "[^0-9]";
             var regex = new Regex(patternToFind);
-            foreach (var branch in _repository.Branches.Where(p => p.IsRemote).ToList())
+
+            var reachableFromRemoteBranches = new CommitFilter
             {
-                var commit = branch.Commits.FirstOrDefault(c => regex.IsMatch(c.Message));
-                if (commit != null)
-                {
-                    Trace.WriteLine(" => Commit found! hash: " + commit.Sha);
-                    return commit.Sha;
-                }
+                Since = _repository.Branches.Where(p => p.IsRemote),
+                SortBy = CommitSortStrategies.None
+            };
+
+            var commitsFromRemoteBranches = _repository.Commits.QueryBy(reachableFromRemoteBranches);
+
+            var commit = commitsFromRemoteBranches.FirstOrDefault(c => regex.IsMatch(c.Message));
+            if (commit != null)
+            {
+                Trace.WriteLine(" => Commit found! hash: " + commit.Sha);
+                return commit.Sha;
             }
+
             Trace.WriteLine(" => Commit not found!");
             return null;
         }
