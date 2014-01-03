@@ -189,6 +189,7 @@ namespace Sep.Git.Tfs.Commands
                     var branchDatas = new BranchDatas
                         {
                             TfsRepositoryPath = tfsBranchPath.TfsRepositoryPath,
+                            TfsRemote = _globals.Repository.ReadAllTfsRemotes().FirstOrDefault(r => r.TfsRepositoryPath == tfsBranchPath.TfsRepositoryPath)
                         };
                     try
                     {
