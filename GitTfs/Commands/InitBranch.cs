@@ -237,7 +237,7 @@ namespace Sep.Git.Tfs.Commands
                                 Trace.WriteLine("Fetching remote :" + tfsBranch.TfsRemote.Id);
                                 var fetchResult = FetchRemote(tfsBranch.TfsRemote, true);
                                 tfsBranch.IsEntirelyFetched = fetchResult.IsSuccess;
-                                if (lastFetchedChangesetId != fetchResult.LastFetchedChangesetId)
+                                if ( fetchResult.NewChangesetCount != 0)
                                     isSomethingDone = true;
                             }
                             catch (Exception ex)
