@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 
@@ -30,35 +31,51 @@ namespace Sep.Git.Tfs.Core
         public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)
         {
             var initialTree = workspace.Remote.Repository.GetObjects(lastCommit);
-            workspace.Get(_changeset);
-            foreach (var change in Sort(_changeset.Changes))
+
+            IEnumerable<IChange> changes = _changeset.Changes;
+
+            // We only need the file changes because git only cares about files and if you make
+            // changes to a folder in TFS, the changeset includes changes for all the descendant files anyway.
+            changes = changes.Where(c => c.Item.ItemType == TfsItemType.File);
+
+            // If a change is only a branch operation and we already have a file at the target path,
+            // then there is nothing to do for that change.
+            if (initialTree.Any())
+            {
+                changes = changes.Without(c =>
+                    c.ChangeType == TfsChangeType.Branch
+                    && initialTree.ContainsKey(workspace.Remote.GetPathInGitRepo(c.Item.ServerItem)));
+            }
+
+            if (changes.Any())
+            {
+                workspace.Get(_changeset);
+            }
+
+            foreach (var change in Sort(changes))
             {
                 Apply(change, index, workspace, initialTree);
             }
+
             return MakeNewLogEntry();
         }
 
         private void Apply(IChange change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
-            // If you make updates to a dir in TF, the changeset includes changes for all the children also,
-            // and git doesn't really care if you add or delete empty dirs.
-            if (change.Item.ItemType == TfsItemType.File)
+            var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, workspace.Remote, initialTree);
+            if (pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
+                return;
+            if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
             {
-                var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, workspace.Remote, initialTree);
-                if (pathInGitRepo == null || Summary.Remote.ShouldSkip(pathInGitRepo))
-                    return;
-                if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
-                {
-                    Rename(change, pathInGitRepo, index, workspace, initialTree);
-                }
-                else if (change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
-                {
-                    Delete(pathInGitRepo, index, initialTree);
-                }
-                else
-                {
-                    Update(change, pathInGitRepo, index, workspace, initialTree);
-                }
+                Rename(change, pathInGitRepo, index, workspace, initialTree);
+            }
+            else if (change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
+            {
+                Delete(pathInGitRepo, index, initialTree);
+            }
+            else
+            {
+                Update(change, pathInGitRepo, index, workspace, initialTree);
             }
         }
 

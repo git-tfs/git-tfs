@@ -14,6 +14,11 @@ namespace Sep.Git.Tfs.Core
 {
     public static partial class Ext
     {
+        public static IEnumerable<T> Without<T>(this IEnumerable<T> source, Predicate<T> predicate)
+        {
+            return source.Where(o => !predicate(o));
+        }
+
         public static T Tap<T>(this T o, Action<T> block)
         {
             block(o);
