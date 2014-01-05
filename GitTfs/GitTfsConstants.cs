@@ -62,5 +62,7 @@ namespace Sep.Git.Tfs
         public const string WorkspaceConfigKey = GitTfsPrefix + ".workspace-dir";
 
         public const string WorkItemAssociateRegexConfigKey = GitTfsPrefix + ".work-item-regex";
+
+        public const string AutoInitBranches = GitTfsPrefix + ".auto-init-branch";
     }
 }
