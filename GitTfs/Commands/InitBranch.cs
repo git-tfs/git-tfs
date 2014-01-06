@@ -327,10 +327,18 @@ namespace Sep.Git.Tfs.Commands
                 if (fetchResult.IsSuccess && createBranch && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
                 {
                     Trace.WriteLine("Try creating the local branch...");
-                    if (!_globals.Repository.CreateBranch("refs/heads/" + tfsRemote.Id, tfsRemote.MaxCommitHash))
-                        _stdout.WriteLine("warning: Fail to create local branch ref file!");
-                    else
-                        Trace.WriteLine("Local branch created!");
+                    var branchRef = "refs/heads/" + tfsRemote.Id;
+                    if (!_globals.Repository.HasRef(branchRef))
+                    {
+                        if (!_globals.Repository.CreateBranch(branchRef, tfsRemote.MaxCommitHash))
+                            _stdout.WriteLine("warning: Fail to create local branch ref file!");
+                        else
+                            Trace.WriteLine("Local branch created!");
+                    }
+                }
+                else
+                {
+                    _stdout.WriteLine("info: local branch ref already exists!");
                 }
                 return fetchResult;
             }
