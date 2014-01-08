@@ -271,8 +271,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public int GetCommitCount(string repodir)
         {
-            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
-            return repo.Commits.Count();
+            return Repository(repodir).Commits.Count();
         }
 
         public void AssertGitRepo(string repodir)
@@ -322,6 +321,12 @@ namespace Sep.Git.Tfs.Test.Integration
             var path = Path.Combine(Workdir, repodir, file);
             var actual = File.ReadAllText(path, Encoding.UTF8);
             AssertEqual(contents, actual, "Contents of " + path);
+        }
+
+        public void AssertNoFileInWorkspace(string repodir, string file)
+        {
+            var path = Path.Combine(Workdir, repodir, file);
+            Assert.False(File.Exists(path), "Expect " + file + " to be absent from " + repodir);
         }
 
         public void AssertCommitMessage(string repodir, string commitish, string message)
