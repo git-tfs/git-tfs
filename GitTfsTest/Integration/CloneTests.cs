@@ -213,6 +213,23 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertNoFileInWorkspace("MyProject", "app.exe");
         }
 
+        [FactExceptOnUnix]
+        public void WorksForACommitWithOnlyIgnoredFiles()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Add some files", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Edit, TfsItemType.File, "$/MyProject/README", "tldr\nanother line\n");
+                r.Changeset(3, "Add an ignored file", DateTime.Parse("2012-01-03 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/app.exe", "Do not include");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--ignore-regex=.exe$");
+            h.AssertFileInWorkspace("MyProject", "README", "tldr\nanother line\n");
+            h.AssertNoFileInWorkspace("MyProject", "app.exe");
+        }
+
         #endregion
     }
 }

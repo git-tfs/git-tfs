@@ -30,10 +30,14 @@ namespace Sep.Git.Tfs.Core
         public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)
         {
             var initialTree = workspace.Remote.Repository.GetObjects(lastCommit);
-            workspace.Get(_changeset.ChangesetId, ChangesExceptIgnored(initialTree));
-            foreach (var change in Sort(_changeset.Changes))
+            var changes = ChangesExceptIgnored(initialTree);
+            if (changes.Any())
             {
-                Apply(change, index, workspace, initialTree);
+                workspace.Get(_changeset.ChangesetId, changes);
+                foreach (var change in Sort(changes))
+                {
+                    Apply(change, index, workspace, initialTree);
+                }
             }
             return MakeNewLogEntry();
         }
