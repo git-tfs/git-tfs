@@ -48,8 +48,8 @@ To display all the remotes of a TFS server, do this:
 		
 	Cloning root branches (marked by [*]) is recommended!
 
-Then you can use the `[clone](clone.md)` command with the good remote branch of your choice!
-However, it is recommended to clone the root branch and then use the `[branch](branch.md)` command to manage branches.
+Then you can use the [`clone`](clone.md) command with the good remote branch of your choice!
+However, it is recommended to clone the root branch and then use the [`branch`](branch.md) command to manage branches.
 
 ### Authentication
 
