@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -206,6 +206,7 @@
     <Compile Include="Core\Janitor.cs" />
     <Compile Include="Util\AuthorsFile.cs" />
     <Compile Include="Util\Bouncer.cs" />
+    <Compile Include="Util\ChangeSieve.cs" />
     <Compile Include="Util\CommitSpecificCheckinOptionsFactory.cs" />
     <Compile Include="Core\GitTfsVersionProvider.cs" />
     <Compile Include="Util\ExceptionFormattingExtensions.cs" />

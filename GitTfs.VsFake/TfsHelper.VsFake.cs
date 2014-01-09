@@ -255,7 +255,7 @@ namespace Sep.Git.Tfs.VsFake
                 GetSpecificVersion(changeset.ChangesetId, changeset.Changes);
             }
 
-            public void GetSpecificVersion(int changeset, IChange [] changes)
+            public void GetSpecificVersion(int changeset, IEnumerable<IChange> changes)
             {
                 var repositoryRoot = _repositoryRoot.ToLower();
                 if(!repositoryRoot.EndsWith("/")) repositoryRoot += "/";

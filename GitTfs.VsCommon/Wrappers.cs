@@ -463,7 +463,7 @@ namespace Sep.Git.Tfs.VsCommon
             GetSpecificVersion(changeset.ChangesetId, changeset.Changes);
         }
 
-        public void GetSpecificVersion(int changesetId, IChange [] changes)
+        public void GetSpecificVersion(int changesetId, IEnumerable<IChange> changes)
         {
             var requests = from change in changes
                            select new GetRequest(new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId), changesetId);

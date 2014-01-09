@@ -182,7 +182,7 @@ namespace Sep.Git.Tfs.Core
             _workspace.GetSpecificVersion(changeset);
         }
 
-        public void Get(int changesetId, IChange[] changes)
+        public void Get(int changesetId, IEnumerable<IChange> changes)
         {
             _workspace.GetSpecificVersion(changesetId, changes);
         }

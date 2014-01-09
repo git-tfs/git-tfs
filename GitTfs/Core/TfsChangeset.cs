@@ -29,26 +29,17 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)
         {
-            var initialTree = workspace.Remote.Repository.GetObjects(lastCommit);
-            var changes = ChangesExceptIgnored(initialTree);
-            if (changes.Any())
+            var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
+            var sieve = new ChangeSieve(initialTree, _changeset, Summary.Remote);
+            if (sieve.HasChanges())
             {
-                workspace.Get(_changeset.ChangesetId, changes);
-                foreach (var change in Sort(changes))
+                workspace.Get(_changeset.ChangesetId, sieve.ChangesToFetch());
+                foreach (var change in sieve.ChangesToApply())
                 {
                     Apply(change, index, workspace, initialTree);
                 }
             }
             return MakeNewLogEntry();
-        }
-
-        private IChange[] ChangesExceptIgnored(IDictionary<string, GitObject> initialTree)
-        {
-            return _changeset.Changes.Where(change =>
-            {
-                var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem, Summary.Remote, initialTree);
-                return (pathInGitRepo != null) && !Summary.Remote.ShouldSkip(pathInGitRepo);
-            }).ToArray();
         }
 
         private void Apply(IChange change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
@@ -75,6 +66,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        [Obsolete]
         private string GetPathInGitRepo(string tfsPath, IGitTfsRemote remote, IDictionary<string, GitObject> initialTree)
         {
             var pathInGitRepo = remote.GetPathInGitRepo(tfsPath);
@@ -94,20 +86,6 @@ namespace Sep.Git.Tfs.Core
             {
                 Update(change, pathInGitRepo, index, workspace, initialTree);
             }
-        }
-
-        private IEnumerable<IChange> Sort(IEnumerable<IChange> changes)
-        {
-            return changes.OrderBy(change => Rank(change.ChangeType));
-        }
-
-        private int Rank(TfsChangeType type)
-        {
-            if (type.IncludesOneOf(TfsChangeType.Delete))
-                return 0;
-            if (type.IncludesOneOf(TfsChangeType.Rename))
-                return 1;
-            return 2;
         }
 
         private string GetPathBeforeRename(IItem item)
@@ -234,8 +212,10 @@ namespace Sep.Git.Tfs.Core
             return Mode.NewFile;
         }
 
+        [Obsolete]
         private static readonly Regex SplitDirnameFilename = new Regex(@"(?<dir>.*)[/\\](?<file>[^/\\]+)");
 
+        [Obsolete]
         private string UpdateToMatchExtantCasing(string pathInGitRepo, IDictionary<string, GitObject> initialTree)
         {
             if (initialTree.ContainsKey(pathInGitRepo))
