@@ -3,6 +3,7 @@ using System.ComponentModel;
 using NDesk.Options;
 using Sep.Git.Tfs.Util;
 using System;
+using System.Text.RegularExpressions;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -55,6 +56,7 @@ namespace Sep.Git.Tfs.Commands
         public Dictionary<string, string> CheckinNotes { get { return _checkinNotes; } }
 
         public string AuthorTfsUserId { get; set; }
+        public Regex WorkItemAssociateRegex { get; set; }
 
     }
 }

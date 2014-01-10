@@ -74,6 +74,18 @@ namespace Sep.Git.Tfs.Util
             clone.WorkItemsToAssociate.AddRange(source.WorkItemsToAssociate);
             clone.WorkItemsToResolve.AddRange(source.WorkItemsToResolve);
             clone.AuthorTfsUserId = source.AuthorTfsUserId;
+            try
+            {
+                string re = globals.Repository.GetConfig(GitTfsConstants.WorkItemAssociateRegexConfigKey);
+                if (String.IsNullOrEmpty(re))
+                    clone.WorkItemAssociateRegex = GitTfsConstants.TfsWorkItemAssociateRegex;
+                else
+                    clone.WorkItemAssociateRegex = new Regex(re);
+            }
+            catch (Exception)
+            {
+                clone.WorkItemAssociateRegex = null;
+            }
             foreach (var note in source.CheckinNotes)
             {
                 clone.CheckinNotes[note.Key] = note.Value;
@@ -101,16 +113,19 @@ namespace Sep.Git.Tfs.Util
                 checkinOptions.CheckinComment = GitTfsConstants.TfsWorkItemRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
             }
 
-            var workitemAssociatedMatches = GitTfsConstants.TfsWorkItemAssociateRegex.Matches(checkinOptions.CheckinComment);
-            if (workitemAssociatedMatches.Count != 0)
+            if (checkinOptions.WorkItemAssociateRegex != null)
             {
-                foreach (Match match in workitemAssociatedMatches)
+                var workitemAssociatedMatches = checkinOptions.WorkItemAssociateRegex.Matches(checkinOptions.CheckinComment);
+                if (workitemAssociatedMatches.Count != 0)
                 {
-                    var workitem = match.Groups["item_id"].Value;
-                    if (!checkinOptions.WorkItemsToAssociate.Contains(workitem))
+                    foreach (Match match in workitemAssociatedMatches)
                     {
-                        writer.WriteLine("Associating with work item {0}", workitem);
-                        checkinOptions.WorkItemsToAssociate.Add(workitem);
+                        var workitem = match.Groups["item_id"].Value;
+                        if (!checkinOptions.WorkItemsToAssociate.Contains(workitem))
+                        {
+                            writer.WriteLine("Associating with work item {0}", workitem);
+                            checkinOptions.WorkItemsToAssociate.Add(workitem);
+                        }
                     }
                 }
             }
