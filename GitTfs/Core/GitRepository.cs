@@ -364,6 +364,18 @@ namespace Sep.Git.Tfs.Core
             return entries;
         }
 
+        public IGitTreeBuilder GetTreeBuilder(string commit)
+        {
+            if (commit == null)
+            {
+                return new GitTreeBuilder(_repository.ObjectDatabase);
+            }
+            else
+            {
+                return new GitTreeBuilder(_repository.ObjectDatabase, _repository.Lookup<Commit>(commit).Tree);
+            }
+        }
+
         public Dictionary<string, GitObject> GetObjects()
         {
             return new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);

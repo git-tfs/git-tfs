@@ -584,12 +584,12 @@ namespace Sep.Git.Tfs.Core
         private LogEntry Apply(string parent, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(() => WithWorkspace(changeset.Summary, workspace =>
+            WithWorkspace(changeset.Summary, workspace =>
             {
-                AssertTemporaryIndexClean(parent);
-                GitIndexInfo.Do(Repository, index => result = changeset.Apply(parent, index, workspace));
-                result.Tree = Repository.CommandOneline("write-tree");
-            }));
+                var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(parent);
+                result = changeset.Apply(parent, treeBuilder, workspace);
+                result.Tree = treeBuilder.GetTree();
+            });
             if (!String.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);
             return result;
         }
@@ -597,10 +597,11 @@ namespace Sep.Git.Tfs.Core
         private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithTemporaryIndex(() => WithWorkspace(changeset.Summary, workspace => {
-                GitIndexInfo.Do(Repository, index => result = changeset.CopyTree(index, workspace));
-                result.Tree = Repository.CommandOneline("write-tree");
-            }));
+            WithWorkspace(changeset.Summary, workspace => {
+                var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(null);
+                result = changeset.CopyTree(treeBuilder, workspace);
+                result.Tree = treeBuilder.GetTree();
+            });
             if (!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
             return result;
         }

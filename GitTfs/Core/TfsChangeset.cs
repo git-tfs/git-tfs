@@ -27,18 +27,18 @@ namespace Sep.Git.Tfs.Core
             BaseChangesetId = _changeset.Changes.Max(c => c.Item.ChangesetId) - 1;
         }
 
-        public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)
+        public LogEntry Apply(string lastCommit, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace)
         {
             var initialTree = workspace.Remote.Repository.GetObjects(lastCommit);
             workspace.Get(_changeset);
             foreach (var change in Sort(_changeset.Changes))
             {
-                Apply(change, index, workspace, initialTree);
+                Apply(change, treeBuilder, workspace, initialTree);
             }
             return MakeNewLogEntry();
         }
 
-        private void Apply(IChange change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        private void Apply(IChange change, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             // If you make updates to a dir in TF, the changeset includes changes for all the children also,
             // and git doesn't really care if you add or delete empty dirs.
@@ -49,15 +49,15 @@ namespace Sep.Git.Tfs.Core
                     return;
                 if (change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
                 {
-                    Rename(change, pathInGitRepo, index, workspace, initialTree);
+                    Rename(change, pathInGitRepo, treeBuilder, workspace, initialTree);
                 }
                 else if (change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
                 {
-                    Delete(pathInGitRepo, index, initialTree);
+                    Delete(pathInGitRepo, treeBuilder, initialTree);
                 }
                 else
                 {
-                    Update(change, pathInGitRepo, index, workspace, initialTree);
+                    Update(change, pathInGitRepo, treeBuilder, workspace, initialTree);
                 }
             }
         }
@@ -70,16 +70,16 @@ namespace Sep.Git.Tfs.Core
             return UpdateToMatchExtantCasing(pathInGitRepo, initialTree);
         }
 
-        private void Rename(IChange change, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        private void Rename(IChange change, string pathInGitRepo, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Item), workspace.Remote, initialTree);
             if (oldPath != null)
             {
-                Delete(oldPath, index, initialTree);
+                Delete(oldPath, treeBuilder, initialTree);
             }
             if (!change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
             {
-                Update(change, pathInGitRepo, index, workspace, initialTree);
+                Update(change, pathInGitRepo, treeBuilder, workspace, initialTree);
             }
         }
 
@@ -117,14 +117,14 @@ namespace Sep.Git.Tfs.Core
             return oldItem.ServerItem;
         }
 
-        private void Update(IChange change, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        private void Update(IChange change, string pathInGitRepo, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             if (change.Item.DeletionId == 0)
             {
-                index.Update(
-                    GetMode(change, initialTree, pathInGitRepo),
+                treeBuilder.Add(
                     pathInGitRepo,
-                    workspace.GetLocalPath(pathInGitRepo)
+                    workspace.GetLocalPath(pathInGitRepo),
+                    GetMode(change, initialTree, pathInGitRepo)
                 );
             }
         }
@@ -161,7 +161,7 @@ namespace Sep.Git.Tfs.Core
             return tfsItemsWithGitPaths.Where(x => x.gitPath != null).Select(x => new TfsTreeEntry(x.gitPath, x.item));
         }
 
-        public LogEntry CopyTree(GitIndexInfo index, ITfsWorkspace workspace)
+        public LogEntry CopyTree(IGitTreeBuilder treeBuilder, ITfsWorkspace workspace)
         {
             var startTime = DateTime.Now;
             var itemsCopied = 0;
@@ -176,7 +176,7 @@ namespace Sep.Git.Tfs.Core
                 workspace.Get(_changeset.ChangesetId);
                 foreach (var entry in tfsTreeEntries)
                 {
-                    Add(entry.Item, entry.FullName, index, workspace);
+                    Add(entry.Item, entry.FullName, treeBuilder, workspace);
                     maxChangesetId = Math.Max(maxChangesetId, entry.Item.ChangesetId);
 
                     itemsCopied++;
@@ -190,23 +190,11 @@ namespace Sep.Git.Tfs.Core
             return MakeNewLogEntry(maxChangesetId == _changeset.ChangesetId ? _changeset : _tfs.GetChangeset(maxChangesetId));
         }
 
-        private void Add(IItem item, string pathInGitRepo, GitIndexInfo index)
+        private void Add(IItem item, string pathInGitRepo, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace)
         {
             if (item.DeletionId == 0)
             {
-                // Download the content directly into the git database as a blob:
-                using (var temp = item.DownloadFile())
-                {
-                    index.Update(Mode.NewFile, pathInGitRepo, temp);
-                }
-            }
-        }
-
-        private void Add(IItem item, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace)
-        {
-            if (item.DeletionId == 0)
-            {
-                index.Update(Mode.NewFile, pathInGitRepo, workspace.GetLocalPath(pathInGitRepo));
+                treeBuilder.Add(pathInGitRepo, workspace.GetLocalPath(pathInGitRepo), Mode.NewFile);
             }
         }
 
@@ -241,11 +229,11 @@ namespace Sep.Git.Tfs.Core
             return fullPath;
         }
 
-        private void Delete(string pathInGitRepo, GitIndexInfo index, IDictionary<string, GitObject> initialTree)
+        private void Delete(string pathInGitRepo, IGitTreeBuilder treeBuilder, IDictionary<string, GitObject> initialTree)
         {
             if (initialTree.ContainsKey(pathInGitRepo))
             {
-                index.Remove(initialTree[pathInGitRepo].Path);
+                treeBuilder.Remove(initialTree[pathInGitRepo].Path);
                 Trace.WriteLine("\tD\t" + pathInGitRepo);
             }
         }
