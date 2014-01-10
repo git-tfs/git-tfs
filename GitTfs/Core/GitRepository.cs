@@ -483,8 +483,7 @@ namespace Sep.Git.Tfs.Core
         {
             Trace.WriteLine("Looking for changeset " + changesetId + " in git repository...");
 
-            var patternToFind = "git-tfs-id: .*;C" + changesetId + "[^0-9]";
-            var regex = new Regex(patternToFind);
+            var regex = new Regex("git-tfs-id: .*;C" + changesetId + "[^0-9]", RegexOptions.Singleline | RegexOptions.Compiled);
 
             var reachableFromRemoteBranches = new CommitFilter
             {
