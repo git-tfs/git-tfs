@@ -122,7 +122,9 @@
     <Compile Include="Commands\ListRemoteBranches.cs" />
     <Compile Include="Commands\Subtree.cs" />
     <Compile Include="Core\DirectoryTidier.cs" />
+    <Compile Include="Core\GitTreeInformation.cs" />
     <Compile Include="Core\GitTreeBuilder.cs" />
+    <Compile Include="Core\IGitTreeInformation.cs" />
     <Compile Include="Core\IGitTreeBuilder.cs" />
     <Compile Include="Core\ITfsWorkitem.cs" />
     <Compile Include="Commands\Branch.cs" />

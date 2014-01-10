@@ -16,7 +16,7 @@ namespace Sep.Git.Tfs.Core
         }
 
         public IItem Item { get { return _item; } }
-        public string FullName { get { return _pathInGitRepo; } }
+        public string FullName { get { return _pathInGitRepo; } } // WARNING: this will no longer be the case-corrected path
         public Stream OpenRead()
         {
             return new TemporaryFileStream(_item.DownloadFile());
