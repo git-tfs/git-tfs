@@ -61,6 +61,7 @@ namespace Sep.Git.Tfs.Test.Core
         {
             protected readonly FixtureClass Fixture;
             protected ChangeSieve Subject { get { return Fixture.Subject; } }
+            protected IChange[] Changes { get { return Fixture.Changeset.Changes; } }
 
             public Base()
             {
@@ -183,7 +184,6 @@ namespace Sep.Git.Tfs.Test.Core
             }
         }
 
-        [Trait("focus", "true")]
         public class WithAddsAndDeletes : Base<WithAddsAndDeletes.Fixture>
         {
             public class Fixture : BaseFixture
@@ -199,10 +199,10 @@ namespace Sep.Git.Tfs.Test.Core
                     };
                     Remote.Stub(r => r.GetPathInGitRepo(null))
                         .Constraints(Is.Anything())
-                        .Do((Function<string, string>)delegate(string path) { return path.Replace("$/Project/", ""); });
-                    Remote.Stub(r => r.ShouldSkip(null)).
-                        Constraints(Is.Anything()).
-                        Return(false);
+                        .Do(new Function<string, string>(path => path.Replace("$/Project/", "")));
+                    Remote.Stub(r => r.ShouldSkip(null))
+                        .Constraints(Is.Anything())
+                        .Return(false);
                 }
             }
 
@@ -228,6 +228,58 @@ namespace Sep.Git.Tfs.Test.Core
                     "$/Project/file5.txt",
                     "$/Project/file1.txt",
                     "$/Project/file3.txt",
+                }, toApply.Select(change => change.Item.ServerItem).ToArray());
+            }
+        }
+
+        public class WithIgnoredThings : Base<WithIgnoredThings.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    Changeset.Changes = new IChange[] {
+                        FakeChange.Add("$/Project/0-ignored.txt"),
+                        FakeChange.Delete("$/Project/1-ignored.txt"),
+                        FakeChange.Add("$/Project/2-included.txt"),
+                        FakeChange.Delete("$/Project/3-included.txt"),
+                        FakeChange.Rename("$/Project/4-ignored.txt", from: "$/Project/4-wasignored.txt"),
+                        FakeChange.Rename("$/Project/5-ignored.txt", from: "$/Project/5-wasincluded.txt"),
+                        FakeChange.Rename("$/Project/6-included.txt", from: "$/Project/6-wasignored.txt"),
+                    };
+                    Remote.Stub(r => r.GetPathInGitRepo(null))
+                        .Constraints(Is.Anything())
+                        .Do(new Function<string, string>(path => path.Replace("$/Project/", "")));
+                    Remote.Stub(r => r.ShouldSkip(null))
+                        .Constraints(Is.Anything())
+                        .Do(new Function<string,bool>(s => s.Contains("ignored")));
+                }
+            }
+
+            [Fact]
+            public void HasChanges()
+            {
+                Assert.True(Subject.HasChanges());
+            }
+
+            [Fact]
+            public void FetchesAllExceptIgnored()
+            {
+                var fetchChanges = Subject.ChangesToFetch().ToArray();
+                Assert.Equal(3, fetchChanges.Length);
+                Assert.Contains(Changes[2], fetchChanges);
+                Assert.Contains(Changes[3], fetchChanges);
+                Assert.Contains(Changes[6], fetchChanges);
+            }
+
+            [Fact]
+            public void AppliesDeletesFirst()
+            {
+                var toApply = Subject.ChangesToApply();
+                Assert.Equal(new string [] {
+                    "$/Project/3-included.txt",
+                    "$/Project/6-included.txt",
+                    "$/Project/2-included.txt",
                 }, toApply.Select(change => change.Item.ServerItem).ToArray());
             }
         }
