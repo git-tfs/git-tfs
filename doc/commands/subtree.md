@@ -90,7 +90,7 @@ A Subtree Split extracts an artificial revision history containing only commits 
 
 ## See also
 
-[#350](https://github.com/git-tfs/git-tfs/issues/350)
-[#344](https://github.com/git-tfs/git-tfs/issues/344)
-[Git subtree command](http://git-scm.com/book/ch6-7.html)
-[Original subtree man page](https://github.com/apenwarr/git-subtree/blob/master/git-subtree.txt)
+* [#350](https://github.com/git-tfs/git-tfs/issues/350)
+* [#344](https://github.com/git-tfs/git-tfs/issues/344)
+* [Git subtree command](http://git-scm.com/book/ch6-7.html)
+* [Original subtree man page](https://github.com/apenwarr/git-subtree/blob/master/git-subtree.txt)
