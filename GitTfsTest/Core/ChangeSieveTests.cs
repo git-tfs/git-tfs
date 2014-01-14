@@ -16,6 +16,16 @@ namespace Sep.Git.Tfs.Test.Core
 
         public abstract class BaseFixture
         {
+            public BaseFixture()
+            {
+                Remote.Stub(r => r.GetPathInGitRepo(null))
+                    .Constraints(Is.Anything())
+                    .Do(new Function<string, string>(path => path.Replace("$/Project/", "")));
+                Remote.Stub(r => r.ShouldSkip(null))
+                    .Constraints(Is.Anything())
+                    .Do(new Function<string,bool>(s => s.Contains("ignored")));
+            }
+
             private ChangeSieve _changeSieve;
             public ChangeSieve Subject
             {
@@ -74,32 +84,52 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 Fixture.Mocks.VerifyAll();
             }
+
+            protected void AssertChange(IChangeApplicator change, ChangeType type, string gitPath)
+            {
+                Assert.Equal(type, change.Type);
+                Assert.Equal(gitPath, change.GitPath);
+            }
         }
 
         class FakeChange : IChange, IItem
         {
             public static IChange Add(string serverItem)
             {
-                return new FakeChange(TfsChangeType.Add, serverItem);
+                return new FakeChange(TfsChangeType.Add, TfsItemType.File, serverItem);
             }
 
             public static IChange Delete(string serverItem)
             {
-                return new FakeChange(TfsChangeType.Delete, serverItem);
+                return new FakeChange(TfsChangeType.Delete, TfsItemType.File, serverItem);
             }
 
-            public static IChange Rename(string serverItem, string from)
+            public static IChange Rename(string serverItem, string from, int deletionId = 0)
             {
-                return new FakeChange(TfsChangeType.Rename, serverItem);
+                return new FakeChange(TfsChangeType.Rename, TfsItemType.File, serverItem, deletionId);
+            }
+
+            public static IChange AddDir(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Add, TfsItemType.Folder, serverItem);
             }
 
             TfsChangeType _tfsChangeType;
+            TfsItemType _tfsItemType;
             string _serverItem;
+            int _deletionId;
 
-            public FakeChange(TfsChangeType tfsChangeType, string serverItem)
+            public FakeChange(TfsChangeType tfsChangeType, TfsItemType itemType, string serverItem)
+                : this(tfsChangeType, itemType, serverItem, 0)
+            {
+            }
+
+            public FakeChange(TfsChangeType tfsChangeType, TfsItemType itemType, string serverItem, int deletionId)
             {
                 _tfsChangeType = tfsChangeType;
+                _tfsItemType = itemType;
                 _serverItem = serverItem;
+                _deletionId = deletionId;
             }
 
             TfsChangeType IChange.ChangeType
@@ -129,12 +159,12 @@ namespace Sep.Git.Tfs.Test.Core
 
             int IItem.DeletionId
             {
-                get { throw new NotImplementedException(); }
+                get { return _deletionId; ; }
             }
 
             TfsItemType IItem.ItemType
             {
-                get { throw new NotImplementedException(); }
+                get { return _tfsItemType; }
             }
 
             int IItem.ItemId
@@ -178,9 +208,15 @@ namespace Sep.Git.Tfs.Test.Core
             }
 
             [Fact]
-            public void HasEmptyChangesToApply()
+            public void HasEmptyChangesToApplyOld()
             {
                 Assert.Empty(Subject.ChangesToApply());
+            }
+
+            [Fact]
+            public void HasEmptyChangesToApply()
+            {
+                Assert.Empty(Subject.ChangesToApply2());
             }
         }
 
@@ -197,12 +233,6 @@ namespace Sep.Git.Tfs.Test.Core
                         FakeChange.Delete("$/Project/file4.txt"),
                         FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
                     };
-                    Remote.Stub(r => r.GetPathInGitRepo(null))
-                        .Constraints(Is.Anything())
-                        .Do(new Function<string, string>(path => path.Replace("$/Project/", "")));
-                    Remote.Stub(r => r.ShouldSkip(null))
-                        .Constraints(Is.Anything())
-                        .Return(false);
                 }
             }
 
@@ -230,6 +260,19 @@ namespace Sep.Git.Tfs.Test.Core
                     "$/Project/file3.txt",
                 }, toApply.Select(change => change.Item.ServerItem).ToArray());
             }
+
+            [Fact]
+            public void SplitsRenamesAndPutsDeletesFirst()
+            {
+                var toApply = Subject.ChangesToApply2().ToArray();
+                Assert.Equal(6, toApply.Length);
+                AssertChange(toApply[0], ChangeType.Delete, "file2.txt");
+                AssertChange(toApply[1], ChangeType.Delete, "file4.txt");
+                AssertChange(toApply[2], ChangeType.Delete, "oldfile5.txt");
+                AssertChange(toApply[3], ChangeType.Update, "file1.txt");
+                AssertChange(toApply[4], ChangeType.Update, "file3.txt");
+                AssertChange(toApply[5], ChangeType.Update, "file5.txt");
+            }
         }
 
         public class WithIgnoredThings : Base<WithIgnoredThings.Fixture>
@@ -247,12 +290,6 @@ namespace Sep.Git.Tfs.Test.Core
                         FakeChange.Rename("$/Project/5-ignored.txt", from: "$/Project/5-wasincluded.txt"),
                         FakeChange.Rename("$/Project/6-included.txt", from: "$/Project/6-wasignored.txt"),
                     };
-                    Remote.Stub(r => r.GetPathInGitRepo(null))
-                        .Constraints(Is.Anything())
-                        .Do(new Function<string, string>(path => path.Replace("$/Project/", "")));
-                    Remote.Stub(r => r.ShouldSkip(null))
-                        .Constraints(Is.Anything())
-                        .Do(new Function<string,bool>(s => s.Contains("ignored")));
                 }
             }
 
@@ -281,6 +318,56 @@ namespace Sep.Git.Tfs.Test.Core
                     "$/Project/6-included.txt",
                     "$/Project/2-included.txt",
                 }, toApply.Select(change => change.Item.ServerItem).ToArray());
+            }
+        }
+
+        public class SkipDeletedThings : Base<SkipDeletedThings.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    Changeset.Changes = new IChange [] {
+                        FakeChange.Rename("$/Project/file1.txt", from: "$/Project/oldfile1.txt", deletionId: 33),
+                    };
+                }
+            }
+
+            [Fact]
+            public void DoesNotApplyDeletedRenamedFile()
+            {
+                Assert.Empty(Subject.ChangesToApply2());
+            }
+        }
+
+        public class DirsAndPathsOutsideTheProject : Base<DirsAndPathsOutsideTheProject.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    Changeset.Changes = new IChange[] {
+                        FakeChange.AddDir("$/Project/dir1"),
+                        FakeChange.AddDir("$/Project2/outsidefile.txt"),
+                        FakeChange.Rename("$/Project2/movedoutside.txt", from: "$/Project/startedinside.txt"),
+                        FakeChange.Rename("$/Project/movedinside.txt", from: "$/Project2/startedoutside.txt"),
+                    };
+                }
+            }
+
+            [Fact]
+            public void DoesNotFetchFilesOutside()
+            {
+                Assert.Equal(new string[] { "$/Project/movedinside.txt" }, Subject.ChangesToFetch().Select(c => c.Item.ServerItem));
+            }
+
+            [Fact]
+            public void OnlyAppliesChangesInsideTheProject()
+            {
+                var toApply = Subject.ChangesToApply2().ToArray();
+                Assert.Equal(2, toApply.Length);
+                AssertChange(toApply[0], ChangeType.Delete, "startedinside.txt");
+                AssertChange(toApply[1], ChangeType.Update, "movedinside.txt");
             }
         }
     }

@@ -7,6 +7,18 @@ using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Util
 {
+    public enum ChangeType
+    {
+        Update,
+        Delete,
+    }
+
+    public interface IChangeApplicator
+    {
+        ChangeType Type { get; }
+        string GitPath { get; }
+    }
+
     public class ChangeSieve
     {
         readonly IDictionary<string, GitObject> _initialTree;
@@ -33,6 +45,11 @@ namespace Sep.Git.Tfs.Util
         public IEnumerable<IChange> ChangesToApply()
         {
             return Sort(FilteredChanges);
+        }
+
+        public IEnumerable<IChangeApplicator> ChangesToApply2()
+        {
+            return Enumerable.Empty<IChangeApplicator>();
         }
 
         private IEnumerable<IChange> Sort(IEnumerable<IChange> changes)

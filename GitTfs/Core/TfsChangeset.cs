@@ -42,6 +42,21 @@ namespace Sep.Git.Tfs.Core
             return MakeNewLogEntry();
         }
 
+        private void Apply(IChangeApplicator change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        {
+            switch (change.Type)
+            {
+                case ChangeType.Update:
+                    Update(change, index, workspace, initialTree);
+                    break;
+                case ChangeType.Delete:
+                    Delete(change.GitPath, index, initialTree);
+                    break;
+                default:
+                    throw new NotImplementedException("Unsupported change type: " + change.Type);
+            }
+        }
+
         private void Apply(IChange change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             // If you make updates to a dir in TF, the changeset includes changes for all the children also,
@@ -108,6 +123,7 @@ namespace Sep.Git.Tfs.Core
             return oldItem.ServerItem;
         }
 
+        [Obsolete]
         private void Update(IChange change, string pathInGitRepo, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             if (change.Item.DeletionId == 0)
@@ -118,6 +134,11 @@ namespace Sep.Git.Tfs.Core
                     workspace.GetLocalPath(pathInGitRepo)
                 );
             }
+        }
+
+        private void Update(IChangeApplicator change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        {
+            index.Update(Mode.NewFile, change.GitPath, workspace.GetLocalPath(change.GitPath));
         }
 
         public IEnumerable<TfsTreeEntry> GetTree()
