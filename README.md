@@ -121,6 +121,7 @@ This is the complete list of commands in the master branch on github.
 * [help](doc/commands/help.md) - since 0.9
 * [verify](doc/commands/verify.md) - since [0.11][v0.11]
 * [autotag](doc/commands/autotag.md) option - since [0.12][v0.12]
+* [subtree](doc/commands/subtree.md) - since 0.19
 
 ## Building
 
