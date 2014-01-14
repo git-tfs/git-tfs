@@ -6,8 +6,8 @@ namespace Sep.Git.Tfs.Core
     {
         TfsChangesetInfo Summary { get; }
         int BaseChangesetId { get; }
-        LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace);
-        LogEntry CopyTree(GitIndexInfo index, ITfsWorkspace workspace);
+        LogEntry Apply(string lastCommit, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace);
+        LogEntry CopyTree(IGitTreeBuilder treeBuilder, ITfsWorkspace workspace);
 
         /// <summary>
         /// Get all items (files and folders) in the source TFS repository.

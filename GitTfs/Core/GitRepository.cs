@@ -354,19 +354,28 @@ namespace Sep.Git.Tfs.Core
             return null;
         }
 
-        public IDictionary<string, GitObject> GetObjects(string commit)
+        public IGitTreeInformation GetObjects(string commit)
         {
-            var entries = GetObjects();
-            if (commit != null)
+            if (commit == null)
             {
-                ParseEntries(entries, _repository.Lookup<Commit>(commit).Tree, commit);
+                return new GitTreeInformation();
             }
-            return entries;
+            else
+            {
+                return new GitTreeInformation(_repository.Lookup<Commit>(commit).Tree);
+            }
         }
 
-        public Dictionary<string, GitObject> GetObjects()
+        public IGitTreeBuilder GetTreeBuilder(string commit)
         {
-            return new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
+            if (commit == null)
+            {
+                return new GitTreeBuilder(_repository.ObjectDatabase);
+            }
+            else
+            {
+                return new GitTreeBuilder(_repository.ObjectDatabase, _repository.Lookup<Commit>(commit).Tree);
+            }
         }
 
         public string GetCommitMessage(string head, string parentCommitish)

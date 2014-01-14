@@ -25,14 +25,14 @@ namespace Sep.Git.Tfs.Core
         IEnumerable<TfsChangesetInfo> FilterParentTfsCommits(string head, bool includeStubRemotes, Predicate<TfsChangesetInfo> pred);
         TfsChangesetInfo GetTfsCommit(string sha);
         TfsChangesetInfo GetCurrentTfsCommit();
-        IDictionary<string, GitObject> GetObjects(string commit);
+        IGitTreeInformation GetObjects(string commit);
+        IGitTreeBuilder GetTreeBuilder(string commit);
         string HashAndInsertObject(string filename);
         IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to);
         bool WorkingCopyHasUnstagedOrUncommitedChanges { get; }
         void CopyBlob(string sha, string outputFile);
         GitCommit GetCommit(string commitish);
         string GetCurrentCommit();
-        Dictionary<string, GitObject> GetObjects();
         string GetCommitMessage(string head, string parentCommitish);
         string AssertValidBranchName(string gitBranchName);
         bool CreateBranch(string gitBranchName, string target);
