@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using Xunit;
 using Rhino.Mocks;
+using Rhino.Mocks.Constraints;
 
 namespace Sep.Git.Tfs.Test.Core
 {
@@ -73,14 +75,90 @@ namespace Sep.Git.Tfs.Test.Core
             }
         }
 
+        class FakeChange : IChange, IItem
+        {
+            public static IChange Add(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Add, serverItem);
+            }
+
+            public static IChange Delete(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Delete, serverItem);
+            }
+
+            public static IChange Rename(string serverItem, string from)
+            {
+                return new FakeChange(TfsChangeType.Rename, serverItem);
+            }
+
+            TfsChangeType _tfsChangeType;
+            string _serverItem;
+
+            public FakeChange(TfsChangeType tfsChangeType, string serverItem)
+            {
+                _tfsChangeType = tfsChangeType;
+                _serverItem = serverItem;
+            }
+
+            TfsChangeType IChange.ChangeType
+            {
+                get { return _tfsChangeType; }
+            }
+
+            IItem IChange.Item
+            {
+                get { return this; }
+            }
+
+            IVersionControlServer IItem.VersionControlServer
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            int IItem.ChangesetId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            string IItem.ServerItem
+            {
+                get { return _serverItem; }
+            }
+
+            int IItem.DeletionId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            TfsItemType IItem.ItemType
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            int IItem.ItemId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            long IItem.ContentLength
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            TemporaryFile IItem.DownloadFile()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         #endregion
 
-        [Trait("focus", "true")]
-        public class WithNoChanges : Base<WithNoChanges.NoChangesFixture>
+        public class WithNoChanges : Base<WithNoChanges.Fixture>
         {
-            public class NoChangesFixture : BaseFixture
+            public class Fixture : BaseFixture
             {
-                public NoChangesFixture()
+                public Fixture()
                 {
                     Changeset.Changes = new IChange[0];
                 }
@@ -102,6 +180,55 @@ namespace Sep.Git.Tfs.Test.Core
             public void HasEmptyChangesToApply()
             {
                 Assert.Empty(Subject.ChangesToApply());
+            }
+        }
+
+        [Trait("focus", "true")]
+        public class WithAddsAndDeletes : Base<WithAddsAndDeletes.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    Changeset.Changes = new IChange[] {
+                        FakeChange.Add("$/Project/file1.txt"),
+                        FakeChange.Delete("$/Project/file2.txt"),
+                        FakeChange.Add("$/Project/file3.txt"),
+                        FakeChange.Delete("$/Project/file4.txt"),
+                        FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
+                    };
+                    Remote.Stub(r => r.GetPathInGitRepo(null))
+                        .Constraints(Is.Anything())
+                        .Do((Function<string, string>)delegate(string path) { return path.Replace("$/Project/", ""); });
+                    Remote.Stub(r => r.ShouldSkip(null)).
+                        Constraints(Is.Anything()).
+                        Return(false);
+                }
+            }
+
+            [Fact]
+            public void HasChanges()
+            {
+                Assert.True(Subject.HasChanges());
+            }
+
+            [Fact]
+            public void FetchesAllChanges()
+            {
+                Assert.Equal(5, Subject.ChangesToFetch().Count());
+            }
+
+            [Fact]
+            public void AppliesDeletesFirst()
+            {
+                var toApply = Subject.ChangesToApply();
+                Assert.Equal(new string [] {
+                    "$/Project/file2.txt",
+                    "$/Project/file4.txt",
+                    "$/Project/file5.txt",
+                    "$/Project/file1.txt",
+                    "$/Project/file3.txt",
+                }, toApply.Select(change => change.Item.ServerItem).ToArray());
             }
         }
     }

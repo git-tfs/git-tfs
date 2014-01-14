@@ -11,7 +11,6 @@ using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsFake;
 using Xunit;
 using Xunit.Sdk;
-using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
