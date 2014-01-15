@@ -61,33 +61,31 @@ namespace Sep.Git.Tfs.Util
         public IEnumerable<ApplicableChange> ChangesToApply2()
         {
             var compartments = new {
-                Deleted = new List<NamedChange>(),
-                Renamed = new List<NamedChange>(),
-                Updated = new List<NamedChange>(),
+                Deleted = new List<ApplicableChange>(),
+                Updated = new List<ApplicableChange>(),
             };
-            foreach (var change in FilteredChanges)
+            foreach (var change in NamedChanges)
             {
                 if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
-                    compartments.Deleted.Add(change);
+                {
+                    if(change.GitPath != null)
+                        compartments.Deleted.Add(ApplicableChange.Delete(change.GitPath));
+                }
                 else if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
-                    compartments.Renamed.Add(change);
+                {
+                    var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Change.Item));
+                    if (oldPath != null)
+                        compartments.Deleted.Add(ApplicableChange.Delete(oldPath));
+                    if (change.GitPath != null && !_remote.ShouldSkip(change.GitPath))
+                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath));
+                }
                 else
-                    compartments.Updated.Add(change);
+                {
+                    if (change.GitPath != null && !_remote.ShouldSkip(change.GitPath))
+                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath));
+                }
             }
-            foreach (var change in compartments.Deleted)
-                yield return ApplicableChange.Delete(change.GitPath);
-            foreach (var change in compartments.Renamed)
-            {
-                var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Change.Item));
-                if (oldPath != null)
-                    yield return ApplicableChange.Delete(oldPath);
-            }
-            foreach (var change in compartments.Updated)
-                if (change.Change.Item.DeletionId == 0)
-                    yield return ApplicableChange.Update(change.GitPath);
-            foreach (var change in compartments.Renamed)
-                if (change.Change.Item.DeletionId == 0)
-                    yield return ApplicableChange.Update(change.GitPath);
+            return compartments.Deleted.Concat(compartments.Updated);
         }
 
         private IEnumerable<IChange> Sort(IEnumerable<IChange> changes)
@@ -110,18 +108,19 @@ namespace Sep.Git.Tfs.Util
             public IChange Change { get; set; }
         }
 
-        IEnumerable<NamedChange> _filteredChanges;
-        private IEnumerable<NamedChange> FilteredChanges
+        IEnumerable<NamedChange> NamedChanges
         {
             get
             {
-                if (_filteredChanges == null)
-                {
-                    _filteredChanges = _changeset.Changes
-                        .Select(c => new NamedChange { GitPath = GetPathInGitRepo(c.Item.ServerItem), Change = c })
-                        .Where(c => c.GitPath != null && !_remote.ShouldSkip(c.GitPath));
-                }
-                return _filteredChanges;
+                return _changeset.Changes.Select(c => new NamedChange { GitPath = GetPathInGitRepo(c.Item.ServerItem), Change = c });
+            }
+        }
+
+        IEnumerable<NamedChange> FilteredChanges
+        {
+            get
+            {
+                return NamedChanges.Where(c => c.GitPath != null && !_remote.ShouldSkip(c.GitPath));
             }
         }
 

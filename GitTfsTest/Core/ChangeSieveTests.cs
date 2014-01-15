@@ -89,10 +89,14 @@ namespace Sep.Git.Tfs.Test.Core
                 Fixture.Mocks.VerifyAll();
             }
 
-            protected void AssertChange(ApplicableChange change, ChangeType type, string gitPath)
+            protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges)
             {
-                Assert.Equal(type, change.Type);
-                Assert.Equal(gitPath, change.GitPath);
+                Assert.Equal(Stringify(expectedChanges), Stringify(actualChanges));
+            }
+
+            string Stringify(IEnumerable<ApplicableChange> changes)
+            {
+                return string.Join("\n", changes.Select(c => "" + c.Type + ":" + c.GitPath));
             }
         }
 
@@ -341,18 +345,16 @@ namespace Sep.Git.Tfs.Test.Core
                     "$/Project/file3.txt",
                 }, toApply.Select(change => change.Item.ServerItem).ToArray());
             }
-
             [Fact]
             public void SplitsRenamesAndPutsDeletesFirst()
             {
-                var toApply = Subject.ChangesToApply2().ToArray();
-                Assert.Equal(6, toApply.Length);
-                AssertChange(toApply[0], ChangeType.Delete, "file2.txt");
-                AssertChange(toApply[1], ChangeType.Delete, "file4.txt");
-                AssertChange(toApply[2], ChangeType.Delete, "oldfile5.txt");
-                AssertChange(toApply[3], ChangeType.Update, "file1.txt");
-                AssertChange(toApply[4], ChangeType.Update, "file3.txt");
-                AssertChange(toApply[5], ChangeType.Update, "file5.txt");
+                AssertChanges(Subject.ChangesToApply2(),
+                    ApplicableChange.Delete("file2.txt"),
+                    ApplicableChange.Delete("file4.txt"),
+                    ApplicableChange.Delete("oldfile5.txt"),
+                    ApplicableChange.Update("file1.txt"),
+                    ApplicableChange.Update("file3.txt"),
+                    ApplicableChange.Update("file5.txt"));
             }
         }
 
@@ -391,7 +393,7 @@ namespace Sep.Git.Tfs.Test.Core
             }
 
             [Fact]
-            public void AppliesDeletesFirst()
+            public void AppliesDeletesFirstOld()
             {
                 var toApply = Subject.ChangesToApply();
                 Assert.Equal(new string [] {
@@ -399,6 +401,19 @@ namespace Sep.Git.Tfs.Test.Core
                     "$/Project/6-included.txt",
                     "$/Project/2-included.txt",
                 }, toApply.Select(change => change.Item.ServerItem).ToArray());
+            }
+
+            [Fact]
+            public void AppliesDeletesFirst()
+            {
+                AssertChanges(Subject.ChangesToApply2(),
+                    ApplicableChange.Delete("1-ignored.txt"),
+                    ApplicableChange.Delete("3-included.txt"),
+                    ApplicableChange.Delete("4-wasignored.txt"),
+                    ApplicableChange.Delete("5-wasincluded.txt"),
+                    ApplicableChange.Delete("6-wasignored.txt"),
+                    ApplicableChange.Update("2-included.txt"),
+                    ApplicableChange.Update("6-included.txt"));
             }
         }
 
@@ -418,9 +433,8 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void DoesNotApplyDeletedRenamedFile()
             {
-                var toApply = Subject.ChangesToApply2().ToArray();
-                Assert.Equal(1, toApply.Length);
-                AssertChange(toApply[0], ChangeType.Delete, "oldfile1.txt");
+                AssertChanges(Subject.ChangesToApply2(),
+                    ApplicableChange.Delete("oldfile1.txt"));
             }
         }
 
@@ -432,7 +446,7 @@ namespace Sep.Git.Tfs.Test.Core
                 {
                     Changeset.Changes = new IChange[] {
                         FakeChange.AddDir("$/Project/dir1"),
-                        FakeChange.AddDir("$/Project2/outsidefile.txt"),
+                        FakeChange.Add("$/Project2/outsidefile.txt"),
                         FakeChange.Rename("$/Project2/movedoutside.txt", from: "$/Project/startedinside.txt"),
                         FakeChange.Rename("$/Project/movedinside.txt", from: "$/Project2/startedoutside.txt"),
                     };
@@ -448,10 +462,9 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void OnlyAppliesChangesInsideTheProject()
             {
-                var toApply = Subject.ChangesToApply2().ToArray();
-                Assert.Equal(2, toApply.Length);
-                AssertChange(toApply[0], ChangeType.Delete, "startedinside.txt");
-                AssertChange(toApply[1], ChangeType.Update, "movedinside.txt");
+                AssertChanges(Subject.ChangesToApply2(),
+                    ApplicableChange.Delete("startedinside.txt"),
+                    ApplicableChange.Update("movedinside.txt"));
             }
         }
     }
