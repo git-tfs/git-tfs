@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Mode = LibGit2Sharp.Mode;
 
 namespace Sep.Git.Tfs.Util
 {
@@ -18,10 +19,12 @@ namespace Sep.Git.Tfs.Util
     {
         public ChangeType Type { get; set; }
         public string GitPath { get; set; }
+        public Mode Mode { get; set; }
 
-        public static ApplicableChange Update(string path)
+        public static ApplicableChange Update(string path, string modeString = null)
         {
-            return new ApplicableChange { Type = ChangeType.Update, GitPath = path };
+            var mode = modeString != null ? modeString.ToFileMode() : Mode.NonExecutableFile;
+            return new ApplicableChange { Type = ChangeType.Update, GitPath = path, Mode = mode };
         }
 
         public static ApplicableChange Delete(string path)
@@ -63,16 +66,16 @@ namespace Sep.Git.Tfs.Util
                     }
                     else if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
                     {
-                        var oldPath = _resolver.GetPathInGitRepo(GetPathBeforeRename(change.Change.Item));
-                        if (oldPath != null)
-                            compartments.Deleted.Add(ApplicableChange.Delete(oldPath));
+                        var oldInfo = _resolver.GetGitObject(GetPathBeforeRename(change.Change.Item));
+                        if (oldInfo != null)
+                            compartments.Deleted.Add(ApplicableChange.Delete(oldInfo.Path));
                         if (Include(change))
-                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath));
+                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath, oldInfo.Try(x => x.Mode)));
                     }
                     else
                     {
                         if (Include(change))
-                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath));
+                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath, change.Info.Mode));
                     }
                 }
             }
@@ -95,8 +98,9 @@ namespace Sep.Git.Tfs.Util
 
         class NamedChange
         {
-            public string GitPath { get; set; }
+            public GitObject Info { get; set; }
             public IChange Change { get; set; }
+            public string GitPath { get { return Info.Try(x => x.Path); } }
         }
 
         IEnumerable<NamedChange> NamedChanges
@@ -104,8 +108,8 @@ namespace Sep.Git.Tfs.Util
             get
             {
                 return _changeset.Changes.Select(c => new NamedChange {
-                    GitPath = _resolver.GetPathInGitRepo(c.Item.ServerItem),
-                    Change = c
+                    Info = _resolver.GetGitObject(c.Item.ServerItem),
+                    Change = c,
                 });
             }
         }

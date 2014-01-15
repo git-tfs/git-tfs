@@ -57,7 +57,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Update(ApplicableChange change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
-            index.Update(Mode.NewFile, change.GitPath, workspace.GetLocalPath(change.GitPath));
+            index.Update(change.Mode, change.GitPath, workspace.GetLocalPath(change.GitPath));
         }
 
         public IEnumerable<TfsTreeEntry> GetTree()

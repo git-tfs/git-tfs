@@ -38,7 +38,7 @@ namespace Sep.Git.Tfs.Test.Core
             private Dictionary<string, GitObject> _initialTree;
             public virtual Dictionary<string, GitObject> InitialTree
             {
-                get { return _initialTree ?? (_initialTree = new Dictionary<string, GitObject>()); }
+                get { return _initialTree ?? (_initialTree = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase)); }
             }
 
             private FakeChangeset _changeset;
@@ -106,6 +106,11 @@ namespace Sep.Git.Tfs.Test.Core
             public static IChange Add(string serverItem, int deletionId = 0)
             {
                 return new FakeChange(TfsChangeType.Add, TfsItemType.File, serverItem, deletionId);
+            }
+
+            public static IChange Edit(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Edit, TfsItemType.File, serverItem);
             }
 
             public static IChange Delete(string serverItem)
@@ -418,6 +423,46 @@ namespace Sep.Git.Tfs.Test.Core
                 AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("startedinside.txt"),
                     ApplicableChange.Update("movedinside.txt"));
+            }
+        }
+
+        public class WithExistingItems : Base<WithExistingItems.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    InitialTree.Add("dir1", new GitObject { Path = "dir1" });
+                    InitialTree.Add("dir1/file1.exe", new GitObject { Path = "dir1/file1.exe", Mode = "100755" });
+                    InitialTree.Add("dir1/file4.txt", new GitObject { Path = "dir1/file4.txt", Mode = "100644" });
+                    InitialTree.Add("dir2", new GitObject { Path = "dir2" });
+                    InitialTree.Add("dir2/file2.txt", new GitObject { Path = "dir2/file2.txt" });
+                    Changeset.Changes = new IChange[] {
+                        FakeChange.Add("$/Project/DIR2/file3.txt"),
+                        FakeChange.Delete("$/Project/DIR2/FILE2.txt"),
+                        FakeChange.Edit("$/Project/dir1/file1.exe"),
+                        FakeChange.Edit("$/Project/dir1/file4.txt"),
+                    };
+                }
+            }
+
+            [Fact]
+            public void UpdatesPathCasing()
+            {
+                AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Delete("dir2/file2.txt"),
+                    ApplicableChange.Update("dir2/file3.txt"),
+                    ApplicableChange.Update("dir1/file1.exe"),
+                    ApplicableChange.Update("dir1/file4.txt"));
+            }
+
+            [Fact]
+            public void PreservesFileMode()
+            {
+                var toApply = Subject.GetChangesToApply().ToArray();
+                Assert.Equal("100644", toApply[1].Mode.ToModeString()); // new file
+                Assert.Equal("100755", toApply[2].Mode.ToModeString()); // existing executable file
+                Assert.Equal("100644", toApply[3].Mode.ToModeString()); // existing normal file
             }
         }
     }
