@@ -433,8 +433,8 @@ namespace Sep.Git.Tfs.Test.Core
                 public Fixture()
                 {
                     InitialTree.Add("dir1", new GitObject { Path = "dir1" });
-                    InitialTree.Add("dir1/file1.exe", new GitObject { Path = "dir1/file1.exe", Mode = "100755" });
-                    InitialTree.Add("dir1/file4.txt", new GitObject { Path = "dir1/file4.txt", Mode = "100644" });
+                    InitialTree.Add("dir1/file1.exe", new GitObject { Path = "dir1/file1.exe", Mode = "100755".ToFileMode() });
+                    InitialTree.Add("dir1/file4.txt", new GitObject { Path = "dir1/file4.txt", Mode = "100644".ToFileMode() });
                     InitialTree.Add("dir2", new GitObject { Path = "dir2" });
                     InitialTree.Add("dir2/file2.txt", new GitObject { Path = "dir2/file2.txt" });
                     Changeset.Changes = new IChange[] {

@@ -21,9 +21,8 @@ namespace Sep.Git.Tfs.Util
         public string GitPath { get; set; }
         public Mode Mode { get; set; }
 
-        public static ApplicableChange Update(string path, string modeString = null)
+        public static ApplicableChange Update(string path, Mode mode = Mode.NonExecutableFile)
         {
-            var mode = modeString != null ? modeString.ToFileMode() : Mode.NonExecutableFile;
             return new ApplicableChange { Type = ChangeType.Update, GitPath = path, Mode = mode };
         }
 
@@ -70,7 +69,7 @@ namespace Sep.Git.Tfs.Util
                         if (oldInfo != null)
                             compartments.Deleted.Add(ApplicableChange.Delete(oldInfo.Path));
                         if (Include(change))
-                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath, oldInfo.Try(x => x.Mode)));
+                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath, oldInfo.Try(x => x.Mode, () => Mode.NonExecutableFile)));
                     }
                     else
                     {
