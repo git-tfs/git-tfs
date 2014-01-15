@@ -20,12 +20,7 @@ namespace Sep.Git.Tfs.Core
 
         public static string ToModeString(this LibGit2Sharp.Mode mode)
         {
-            var modeString = Convert.ToString((int)mode, 8);
-            while (modeString.Length < 6)
-            {
-                modeString = "0" + modeString;
-            }
-            return modeString;
+            return Convert.ToString((int)mode, 8).PadLeft(6, '0');
         }
     }
 }
