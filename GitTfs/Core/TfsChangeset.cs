@@ -38,11 +38,15 @@ namespace Sep.Git.Tfs.Core
                 {
                     Apply(change, index, workspace, initialTree);
                 }
+                //foreach (var change in sieve.ChangesToApply2())
+                //{
+                //    Apply(change, index, workspace, initialTree);
+                //}
             }
             return MakeNewLogEntry();
         }
 
-        private void Apply(IChangeApplicator change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        private void Apply(ApplicableChange change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             switch (change.Type)
             {
@@ -103,6 +107,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        [Obsolete]
         private string GetPathBeforeRename(IItem item)
         {
             var previousChangeset = item.ChangesetId - 1;
@@ -136,7 +141,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void Update(IChangeApplicator change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        private void Update(ApplicableChange change, GitIndexInfo index, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             index.Update(Mode.NewFile, change.GitPath, workspace.GetLocalPath(change.GitPath));
         }

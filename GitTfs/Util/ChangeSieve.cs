@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core;
@@ -13,10 +14,20 @@ namespace Sep.Git.Tfs.Util
         Delete,
     }
 
-    public interface IChangeApplicator
+    public class ApplicableChange
     {
-        ChangeType Type { get; }
-        string GitPath { get; }
+        public ChangeType Type { get; set; }
+        public string GitPath { get; set; }
+
+        public static ApplicableChange Update(string path)
+        {
+            return new ApplicableChange { Type = ChangeType.Update, GitPath = path };
+        }
+
+        public static ApplicableChange Delete(string path)
+        {
+            return new ApplicableChange { Type = ChangeType.Delete, GitPath = path };
+        }
     }
 
     public class ChangeSieve
@@ -39,17 +50,44 @@ namespace Sep.Git.Tfs.Util
 
         public IEnumerable<IChange> ChangesToFetch()
         {
-            return FilteredChanges;
+            return FilteredChanges.Select(c => c.Change);
         }
 
         public IEnumerable<IChange> ChangesToApply()
         {
-            return Sort(FilteredChanges);
+            return Sort(ChangesToFetch());
         }
 
-        public IEnumerable<IChangeApplicator> ChangesToApply2()
+        public IEnumerable<ApplicableChange> ChangesToApply2()
         {
-            return Enumerable.Empty<IChangeApplicator>();
+            var compartments = new {
+                Deleted = new List<NamedChange>(),
+                Renamed = new List<NamedChange>(),
+                Updated = new List<NamedChange>(),
+            };
+            foreach (var change in FilteredChanges)
+            {
+                if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
+                    compartments.Deleted.Add(change);
+                else if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
+                    compartments.Renamed.Add(change);
+                else
+                    compartments.Updated.Add(change);
+            }
+            foreach (var change in compartments.Deleted)
+                yield return ApplicableChange.Delete(change.GitPath);
+            foreach (var change in compartments.Renamed)
+            {
+                var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Change.Item));
+                if (oldPath != null)
+                    yield return ApplicableChange.Delete(oldPath);
+            }
+            foreach (var change in compartments.Updated)
+                if (change.Change.Item.DeletionId == 0)
+                    yield return ApplicableChange.Update(change.GitPath);
+            foreach (var change in compartments.Renamed)
+                if (change.Change.Item.DeletionId == 0)
+                    yield return ApplicableChange.Update(change.GitPath);
         }
 
         private IEnumerable<IChange> Sort(IEnumerable<IChange> changes)
@@ -66,18 +104,22 @@ namespace Sep.Git.Tfs.Util
             return 2;
         }
 
-        IEnumerable<IChange> _filteredChanges;
-        private IEnumerable<IChange> FilteredChanges
+        class NamedChange
+        {
+            public string GitPath { get; set; }
+            public IChange Change { get; set; }
+        }
+
+        IEnumerable<NamedChange> _filteredChanges;
+        private IEnumerable<NamedChange> FilteredChanges
         {
             get
             {
                 if (_filteredChanges == null)
                 {
-                    _filteredChanges = _changeset.Changes.Where(change =>
-                    {
-                        var pathInGitRepo = GetPathInGitRepo(change.Item.ServerItem);
-                        return (pathInGitRepo != null) && !_remote.ShouldSkip(pathInGitRepo);
-                    });
+                    _filteredChanges = _changeset.Changes
+                        .Select(c => new NamedChange { GitPath = GetPathInGitRepo(c.Item.ServerItem), Change = c })
+                        .Where(c => c.GitPath != null && !_remote.ShouldSkip(c.GitPath));
                 }
                 return _filteredChanges;
             }
@@ -109,6 +151,26 @@ namespace Sep.Git.Tfs.Util
             }
             _initialTree[fullPath] = new GitObject { Path = fullPath };
             return fullPath;
+        }
+
+        private string GetPathBeforeRename(IItem item)
+        {
+            var previousChangeset = item.ChangesetId - 1;
+            var oldItem = item.VersionControlServer.GetItem(item.ItemId, previousChangeset);
+            if (null == oldItem)
+            {
+                var history = item.VersionControlServer.QueryHistory(item.ServerItem, item.ChangesetId, 0,
+                                                                     TfsRecursionType.None, null, 1, previousChangeset,
+                                                                     1, true, false, false);
+                var previousChange = history.FirstOrDefault();
+                if (previousChange == null)
+                {
+                    Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
+                    return null;
+                }
+                oldItem = previousChange.Changes[0].Item;
+            }
+            return oldItem.ServerItem;
         }
     }
 }

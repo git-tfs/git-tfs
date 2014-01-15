@@ -14,13 +14,16 @@ namespace Sep.Git.Tfs.Test.Core
     {
         #region Base fixture
 
+        // Sets up a ChangeSieve for testing.
         public abstract class BaseFixture
         {
             public BaseFixture()
             {
+                // Make this remote act like it's mapped to $/Project
                 Remote.Stub(r => r.GetPathInGitRepo(null))
                     .Constraints(Is.Anything())
-                    .Do(new Function<string, string>(path => path.Replace("$/Project/", "")));
+                    .Do(new Function<string, string>(path => path.StartsWith("$/Project/") ? path.Replace("$/Project/", "") : null));
+                // Make this remote ignore any path that includes "ignored".
                 Remote.Stub(r => r.ShouldSkip(null))
                     .Constraints(Is.Anything())
                     .Do(new Function<string,bool>(s => s.Contains("ignored")));
@@ -67,6 +70,7 @@ namespace Sep.Git.Tfs.Test.Core
             public MockRepository Mocks { get { return _mocks; } }
         }
 
+        // A base class for ChangeSieve test classes.
         public class Base<FixtureClass> : IDisposable where FixtureClass : BaseFixture, new()
         {
             protected readonly FixtureClass Fixture;
@@ -85,18 +89,19 @@ namespace Sep.Git.Tfs.Test.Core
                 Fixture.Mocks.VerifyAll();
             }
 
-            protected void AssertChange(IChangeApplicator change, ChangeType type, string gitPath)
+            protected void AssertChange(ApplicableChange change, ChangeType type, string gitPath)
             {
                 Assert.Equal(type, change.Type);
                 Assert.Equal(gitPath, change.GitPath);
             }
         }
 
-        class FakeChange : IChange, IItem
+        // A stub IChange implementation.
+        class FakeChange : IChange, IItem, IVersionControlServer
         {
-            public static IChange Add(string serverItem)
+            public static IChange Add(string serverItem, int deletionId = 0)
             {
-                return new FakeChange(TfsChangeType.Add, TfsItemType.File, serverItem);
+                return new FakeChange(TfsChangeType.Add, TfsItemType.File, serverItem, deletionId);
             }
 
             public static IChange Delete(string serverItem)
@@ -106,7 +111,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             public static IChange Rename(string serverItem, string from, int deletionId = 0)
             {
-                return new FakeChange(TfsChangeType.Rename, TfsItemType.File, serverItem, deletionId);
+                return new FakeChange(TfsChangeType.Rename, TfsItemType.File, serverItem, deletionId, from);
             }
 
             public static IChange AddDir(string serverItem)
@@ -114,22 +119,24 @@ namespace Sep.Git.Tfs.Test.Core
                 return new FakeChange(TfsChangeType.Add, TfsItemType.Folder, serverItem);
             }
 
+            const int ChangesetId = 10;
+
             TfsChangeType _tfsChangeType;
             TfsItemType _tfsItemType;
             string _serverItem;
             int _deletionId;
+            string _renamedFrom;
+            int _itemId;
+            static int _maxItemId = 0;
 
-            public FakeChange(TfsChangeType tfsChangeType, TfsItemType itemType, string serverItem)
-                : this(tfsChangeType, itemType, serverItem, 0)
-            {
-            }
-
-            public FakeChange(TfsChangeType tfsChangeType, TfsItemType itemType, string serverItem, int deletionId)
+            private FakeChange(TfsChangeType tfsChangeType, TfsItemType itemType, string serverItem, int deletionId = 0, string renamedFrom = null)
             {
                 _tfsChangeType = tfsChangeType;
                 _tfsItemType = itemType;
                 _serverItem = serverItem;
                 _deletionId = deletionId;
+                _renamedFrom = renamedFrom;
+                _itemId = ++_maxItemId;
             }
 
             TfsChangeType IChange.ChangeType
@@ -144,12 +151,12 @@ namespace Sep.Git.Tfs.Test.Core
 
             IVersionControlServer IItem.VersionControlServer
             {
-                get { throw new NotImplementedException(); }
+                get { return this; }
             }
 
             int IItem.ChangesetId
             {
-                get { throw new NotImplementedException(); }
+                get { return FakeChange.ChangesetId; }
             }
 
             string IItem.ServerItem
@@ -169,7 +176,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             int IItem.ItemId
             {
-                get { throw new NotImplementedException(); }
+                get { return _itemId; }
             }
 
             long IItem.ContentLength
@@ -178,6 +185,80 @@ namespace Sep.Git.Tfs.Test.Core
             }
 
             TemporaryFile IItem.DownloadFile()
+            {
+                throw new NotImplementedException();
+            }
+
+            IItem IVersionControlServer.GetItem(int itemId, int changesetNumber)
+            {
+                if (itemId == _itemId && changesetNumber == ChangesetId - 1 && TfsChangeType.Rename == _tfsChangeType)
+                    return new PreviousItem(this, _renamedFrom);
+                throw new NotImplementedException();
+            }
+
+            class PreviousItem : IItem
+            {
+                IItem _theItem;
+                string _oldName;
+
+                public PreviousItem(IItem theItem, string oldName)
+                {
+                    _theItem = theItem;
+                    _oldName = oldName;
+                }
+
+                IVersionControlServer IItem.VersionControlServer
+                {
+                    get { throw new NotImplementedException(); }
+                }
+
+                int IItem.ChangesetId
+                {
+                    get { throw new NotImplementedException(); }
+                }
+
+                string IItem.ServerItem
+                {
+                    get { return _oldName; }
+                }
+
+                int IItem.DeletionId
+                {
+                    get { throw new NotImplementedException(); }
+                }
+
+                TfsItemType IItem.ItemType
+                {
+                    get { throw new NotImplementedException(); }
+                }
+
+                int IItem.ItemId
+                {
+                    get { throw new NotImplementedException(); }
+                }
+
+                long IItem.ContentLength
+                {
+                    get { throw new NotImplementedException(); }
+                }
+
+                TemporaryFile IItem.DownloadFile()
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            IItem IVersionControlServer.GetItem(string itemPath, int changesetNumber)
+            {
+                throw new NotImplementedException();
+            }
+
+            IItem[] IVersionControlServer.GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
+            {
+                throw new NotImplementedException();
+            }
+
+            IEnumerable<IChangeset> IVersionControlServer.QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo)
             {
                 throw new NotImplementedException();
             }
@@ -329,6 +410,7 @@ namespace Sep.Git.Tfs.Test.Core
                 {
                     Changeset.Changes = new IChange [] {
                         FakeChange.Rename("$/Project/file1.txt", from: "$/Project/oldfile1.txt", deletionId: 33),
+                        FakeChange.Add("$/Project/deletedfile1.txt", deletionId: 33), // this seems like nonsense.
                     };
                 }
             }
@@ -336,7 +418,9 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void DoesNotApplyDeletedRenamedFile()
             {
-                Assert.Empty(Subject.ChangesToApply2());
+                var toApply = Subject.ChangesToApply2().ToArray();
+                Assert.Equal(1, toApply.Length);
+                AssertChange(toApply[0], ChangeType.Delete, "oldfile1.txt");
             }
         }
 
@@ -355,10 +439,10 @@ namespace Sep.Git.Tfs.Test.Core
                 }
             }
 
-            [Fact]
+            [Fact, Trait("debug", "true")]
             public void DoesNotFetchFilesOutside()
             {
-                Assert.Equal(new string[] { "$/Project/movedinside.txt" }, Subject.ChangesToFetch().Select(c => c.Item.ServerItem));
+                Assert.Equal(new string[] { "$/Project/dir1", "$/Project/movedinside.txt" }, Subject.ChangesToFetch().Select(c => c.Item.ServerItem));
             }
 
             [Fact]
