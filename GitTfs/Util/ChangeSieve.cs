@@ -45,7 +45,7 @@ namespace Sep.Git.Tfs.Util
 
         public IEnumerable<IChange> ChangesToFetch()
         {
-            return FilteredChanges.Select(c => c.Change);
+            return NamedChanges.Where(c => Include(c.GitPath)).Select(c => c.Change);
         }
 
         public IEnumerable<ApplicableChange> ChangesToApply2()
@@ -106,15 +106,6 @@ namespace Sep.Git.Tfs.Util
             get
             {
                 return _changeset.Changes.Select(c => new NamedChange { GitPath = GetPathInGitRepo(c.Item.ServerItem), Change = c });
-            }
-        }
-
-        [Obsolete("Inline this into ChangesToFetch()")]
-        IEnumerable<NamedChange> FilteredChanges
-        {
-            get
-            {
-                return NamedChanges.Where(c => Include(c.GitPath));
             }
         }
 
