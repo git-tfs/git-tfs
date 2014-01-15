@@ -44,6 +44,11 @@ namespace Sep.Git.Tfs.Core
             return ++nr;
         }
 
+        public int Update(LibGit2Sharp.Mode mode, string path, string localFile)
+        {
+            return Update(mode.ToModeString(), path, localFile);
+        }
+
         public int Update(string mode, string path, string localFile)
         {
             var sha = repository.HashAndInsertObject(localFile);

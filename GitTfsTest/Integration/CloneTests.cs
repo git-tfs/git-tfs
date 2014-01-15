@@ -195,5 +195,64 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertRef("MyProject", "refs/remotes/tfs/Branch", expectedShaBranch);
             h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
         }
+
+        #region ignore regexes
+
+        [FactExceptOnUnix]
+        public void IgnoresAFile()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Add some files", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr\nanother line\n")
+                 .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/app.exe", "Do not include");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--ignore-regex=.exe$");
+            h.AssertNoFileInWorkspace("MyProject", "app.exe");
+        }
+
+        [FactExceptOnUnix]
+        public void WorksForACommitWithOnlyIgnoredFiles()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Add some files", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr\nanother line\n");
+                r.Changeset(3, "Add an ignored file", DateTime.Parse("2012-01-03 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/app.exe", "Do not include");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--ignore-regex=.exe$");
+            h.AssertFileInWorkspace("MyProject", "README", "tldr\nanother line\n");
+            h.AssertNoFileInWorkspace("MyProject", "app.exe");
+        }
+
+        [FactExceptOnUnix]
+        public void HandlesIgnoredFilesParticipatingInRenames()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Add some files", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", itemId: 100, contents: "tldr\nanother line\n")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/notignored.txt", itemId: 101, contents: "originalname: notignored.txt")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/ignoredatfirst.exe", itemId: 102, contents: "originalname: ignoredatfirst.exe")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/alwaysignored.exe", itemId: 103, contents: "originalname: alwaysignored.exe")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/neverignored.txt", itemId: 104, contents: "originalname: neverignored.txt");
+                r.Changeset(3, "Rename the ignored files", DateTime.Parse("2012-01-03 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Rename, TfsItemType.File, "$/MyProject/notignored.exe", itemId: 101, contents: "originalname: notignored.txt")
+                    .Change(TfsChangeType.Rename, TfsItemType.File, "$/MyProject/ignoredatfirst.txt", itemId: 102, contents: "originalname: ignoredatfirst.exe")
+                    .Change(TfsChangeType.Rename, TfsItemType.File, "$/MyProject/foreverignored.exe", itemId: 103, contents: "originalname: alwaysignored.exe")
+                    .Change(TfsChangeType.Rename, TfsItemType.File, "$/MyProject/included.txt", itemId: 104, contents: "originalname: neverignored.txt");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--ignore-regex=.exe$");
+            h.AssertTreeEntries("MyProject", "HEAD", "README", "ignoredatfirst.txt", "included.txt");
+        }
+
+        #endregion
     }
 }

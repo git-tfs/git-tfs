@@ -20,9 +20,14 @@ namespace Sep.Git.Tfs.Core
             return o;
         }
 
-        public static U AndAnd<T, U>(this T o, Func<T, U> expr)
+        public static U Try<T, U>(this T o, Func<T, U> expr)
         {
-            if (o == null) return default(U);
+            return Try(o, expr, () => default(U));
+        }
+
+        public static U Try<T, U>(this T o, Func<T, U> expr, Func<U> makeDefault)
+        {
+            if (o == null) return makeDefault();
             return expr(o);
         }
 

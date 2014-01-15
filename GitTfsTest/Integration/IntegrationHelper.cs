@@ -11,7 +11,6 @@ using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.VsFake;
 using Xunit;
 using Xunit.Sdk;
-using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
@@ -189,14 +188,15 @@ namespace Sep.Git.Tfs.Test.Integration
                 _changeset = changeset;
             }
 
-            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents = null)
+            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents = null, int? itemId = null)
             {
                 _changeset.Changes.Add(new ScriptedChange
                 {
                     ChangeType = changeType,
                     ItemType = itemType,
                     RepositoryPath = tfsPath,
-                    Content = contents
+                    Content = contents,
+                    ItemId = itemId
                 });
                 return this;
             }
@@ -271,8 +271,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public int GetCommitCount(string repodir)
         {
-            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
-            return repo.Commits.Count();
+            return Repository(repodir).Commits.Count();
         }
 
         public void AssertGitRepo(string repodir)
@@ -322,6 +321,20 @@ namespace Sep.Git.Tfs.Test.Integration
             var path = Path.Combine(Workdir, repodir, file);
             var actual = File.ReadAllText(path, Encoding.UTF8);
             AssertEqual(contents, actual, "Contents of " + path);
+        }
+
+        public void AssertNoFileInWorkspace(string repodir, string file)
+        {
+            var path = Path.Combine(Workdir, repodir, file);
+            Assert.False(File.Exists(path), "Expect " + file + " to be absent from " + repodir);
+        }
+
+        public void AssertTreeEntries(string repodir, string treeish, params string[] expectedPaths)
+        {
+            var obj = Repository(repodir).Lookup(treeish);
+            var tree = obj is Tree ? (Tree)obj : ((Commit)obj).Tree;
+            var entries = tree.Select(entry => entry.Path);
+            Assert.Equal(expectedPaths.OrderBy(s => s), entries.OrderBy(s => s));
         }
 
         public void AssertCommitMessage(string repodir, string commitish, string message)
