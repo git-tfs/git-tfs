@@ -41,12 +41,12 @@ namespace Sep.Git.Tfs.Util
             _resolver = resolver;
         }
 
-        public IEnumerable<IChange> ChangesToFetch()
+        public IEnumerable<IChange> GetChangesToFetch()
         {
             return NamedChanges.Where(c => Include(c.GitPath)).Select(c => c.Change);
         }
 
-        public IEnumerable<ApplicableChange> ChangesToApply2()
+        public IEnumerable<ApplicableChange> GetChangesToApply()
         {
             var compartments = new {
                 Deleted = new List<ApplicableChange>(),

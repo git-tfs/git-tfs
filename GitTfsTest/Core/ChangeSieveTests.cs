@@ -283,13 +283,13 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void HasEmptyChangesToFetch()
             {
-                Assert.Empty(Subject.ChangesToFetch());
+                Assert.Empty(Subject.GetChangesToFetch());
             }
 
             [Fact]
             public void HasEmptyChangesToApply()
             {
-                AssertChanges(Subject.ChangesToApply2() /* expect an empty list */);
+                AssertChanges(Subject.GetChangesToApply() /* expect an empty list */);
             }
         }
 
@@ -312,13 +312,13 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void FetchesAllChanges()
             {
-                Assert.Equal(5, Subject.ChangesToFetch().Count());
+                Assert.Equal(5, Subject.GetChangesToFetch().Count());
             }
 
             [Fact]
             public void SplitsRenamesAndPutsDeletesFirst()
             {
-                AssertChanges(Subject.ChangesToApply2(),
+                AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("file2.txt"),
                     ApplicableChange.Delete("file4.txt"),
                     ApplicableChange.Delete("oldfile5.txt"),
@@ -349,7 +349,7 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void FetchesAllExceptIgnored()
             {
-                var fetchChanges = Subject.ChangesToFetch().ToArray();
+                var fetchChanges = Subject.GetChangesToFetch().ToArray();
                 Assert.Equal(3, fetchChanges.Length);
                 Assert.Contains(Changes[2], fetchChanges);
                 Assert.Contains(Changes[3], fetchChanges);
@@ -359,7 +359,7 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void AppliesDeletesFirst()
             {
-                AssertChanges(Subject.ChangesToApply2(),
+                AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("1-ignored.txt"),
                     ApplicableChange.Delete("3-included.txt"),
                     ApplicableChange.Delete("4-wasignored.txt"),
@@ -386,7 +386,7 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void DoesNotApplyDeletedRenamedFile()
             {
-                AssertChanges(Subject.ChangesToApply2(),
+                AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("oldfile1.txt"));
             }
         }
@@ -409,13 +409,13 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void DoesNotFetchFilesOutside()
             {
-                Assert.Equal(new string[] { "$/Project/dir1", "$/Project/movedinside.txt" }, Subject.ChangesToFetch().Select(c => c.Item.ServerItem));
+                Assert.Equal(new string[] { "$/Project/dir1", "$/Project/movedinside.txt" }, Subject.GetChangesToFetch().Select(c => c.Item.ServerItem));
             }
 
             [Fact]
             public void OnlyAppliesChangesInsideTheProject()
             {
-                AssertChanges(Subject.ChangesToApply2(),
+                AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("startedinside.txt"),
                     ApplicableChange.Update("movedinside.txt"));
             }
