@@ -281,12 +281,6 @@ namespace Sep.Git.Tfs.Test.Core
             }
 
             [Fact]
-            public void HasNoChanges()
-            {
-                Assert.False(Subject.HasChanges());
-            }
-
-            [Fact]
             public void HasEmptyChangesToFetch()
             {
                 Assert.Empty(Subject.ChangesToFetch());
@@ -313,12 +307,6 @@ namespace Sep.Git.Tfs.Test.Core
                         FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
                     };
                 }
-            }
-
-            [Fact]
-            public void HasChanges()
-            {
-                Assert.True(Subject.HasChanges());
             }
 
             [Fact]
@@ -356,12 +344,6 @@ namespace Sep.Git.Tfs.Test.Core
                         FakeChange.Rename("$/Project/6-included.txt", from: "$/Project/6-wasignored.txt"),
                     };
                 }
-            }
-
-            [Fact]
-            public void HasChanges()
-            {
-                Assert.True(Subject.HasChanges());
             }
 
             [Fact]

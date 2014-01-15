@@ -43,11 +43,6 @@ namespace Sep.Git.Tfs.Util
             _remote = remote;
         }
 
-        public bool HasChanges()
-        {
-            return FilteredChanges.Any();
-        }
-
         public IEnumerable<IChange> ChangesToFetch()
         {
             return FilteredChanges.Select(c => c.Change);

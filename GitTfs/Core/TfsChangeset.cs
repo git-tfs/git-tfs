@@ -31,13 +31,10 @@ namespace Sep.Git.Tfs.Core
         {
             var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
             var sieve = new ChangeSieve(initialTree, _changeset, Summary.Remote);
-            if (sieve.HasChanges())
+            workspace.Get(_changeset.ChangesetId, sieve.ChangesToFetch());
+            foreach (var change in sieve.ChangesToApply2())
             {
-                workspace.Get(_changeset.ChangesetId, sieve.ChangesToFetch());
-                foreach (var change in sieve.ChangesToApply2())
-                {
-                    Apply(change, index, workspace, initialTree);
-                }
+                Apply(change, index, workspace, initialTree);
             }
             return MakeNewLogEntry();
         }
