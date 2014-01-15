@@ -48,7 +48,7 @@ namespace Sep.Git.Tfs.Test.Integration
                     Directory.Delete(_workdir);
                     _workdir = null;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
             }

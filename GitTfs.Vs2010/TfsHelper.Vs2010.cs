@@ -159,7 +159,7 @@ namespace Sep.Git.Tfs.Vs2010
                 _bridge.Unwrap<Item>(item).DownloadFile(temp);
                 return temp;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Trace.WriteLine(String.Format("Something went wrong downloading \"{0}\" in changeset {1}", item.ServerItem, item.ChangesetId));
                 temp.Dispose();
