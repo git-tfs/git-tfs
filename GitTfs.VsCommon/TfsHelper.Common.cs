@@ -393,7 +393,7 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 shelvesets = VersionControl.QueryShelvesets(null, shelvesetOwner);
             }
-            catch(IdentityNotFoundException e)
+            catch (IdentityNotFoundException)
             {
                 _stdout.WriteLine("User '{0}' not found", shelveList.Owner);
                 return GitTfsExitCodes.InvalidArguments;

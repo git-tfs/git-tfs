@@ -467,7 +467,7 @@ namespace Sep.Git.Tfs.Test.Commands
         {
             public InitBranch4Test(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors) : base(stdout, globals, helper, authors) { }
 
-            public string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
+            public new string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
             {
                 return base.ExtractGitBranchNameFromTfsRepositoryPath(tfsRepositoryPath);
             }
