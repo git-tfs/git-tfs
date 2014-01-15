@@ -406,7 +406,7 @@ namespace Sep.Git.Tfs.Test.Core
                 }
             }
 
-            [Fact, Trait("debug", "true")]
+            [Fact]
             public void DoesNotFetchFilesOutside()
             {
                 Assert.Equal(new string[] { "$/Project/dir1", "$/Project/movedinside.txt" }, Subject.ChangesToFetch().Select(c => c.Item.ServerItem));
