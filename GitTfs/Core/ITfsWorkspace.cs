@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
 
@@ -37,6 +38,10 @@ namespace Sep.Git.Tfs.Core
         /// Gets the files changed in a given changeset.
         /// </summary>
         void Get(IChangeset changeset);
+        /// <summary>
+        /// Gets the files changed in the given changes.
+        /// </summary>
+        void Get(int changesetId, IEnumerable<IChange> change);
 
         long CheckinTool(Func<string> generateCheckinComment);
         void Merge(string sourceTfsPath, string tfsRepositoryPath);

@@ -4,14 +4,31 @@ using System.Linq;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Util;
 using Xunit;
+using Rhino.Mocks;
+using StructureMap.AutoMocking;
+using Sep.Git.Tfs.Core;
 
 namespace Sep.Git.Tfs.Test.Util
 {
     public class CommitSpecificCheckinOptionsFactoryTests
     {
-        private CommitSpecificCheckinOptionsFactory GetCommitSpecificCheckinOptions()
+        private RhinoAutoMocker<CommitSpecificCheckinOptionsFactory> mocks;
+
+        public CommitSpecificCheckinOptionsFactoryTests()
         {
-            return new CommitSpecificCheckinOptionsFactory(new StringWriter(), new Globals(), new AuthorsFile());
+            mocks = new RhinoAutoMocker<CommitSpecificCheckinOptionsFactory>();
+            mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
+        }
+
+        private CommitSpecificCheckinOptionsFactory GetCommitSpecificCheckinOptions(string workItemRegex = null)
+        {
+            IGitRepository gitRepository = mocks.Get<IGitRepository>();
+            mocks.Get<Globals>().Repository = gitRepository;
+            mocks.Get<Globals>().GitDir = ".git";
+            gitRepository.Stub(r => r.GitDir).Return(".");
+            gitRepository.Stub(r => r.GetConfig(GitTfsConstants.WorkItemAssociateRegexConfigKey)).Return(workItemRegex);
+
+            return new CommitSpecificCheckinOptionsFactory(new StringWriter(), mocks.Get<Globals>(), new AuthorsFile());
         }
 
         [Fact]
@@ -71,6 +88,44 @@ namespace Sep.Git.Tfs.Test.Util
             string commitMessage = @"test workitem #5676";
 
             var specificCheckinOptions = GetCommitSpecificCheckinOptions().BuildCommitSpecificCheckinOptions(new CheckinOptions(), commitMessage);
+            Assert.Equal(1, specificCheckinOptions.WorkItemsToAssociate.Count);
+            Assert.Contains("5676", specificCheckinOptions.WorkItemsToAssociate);
+        }
+
+        [Fact]
+        public void Checkin_regex_with_user_defined_regex_non_matching()
+        {
+            string commitMessage = @"test workitem #5676";
+
+            var specificCheckinOptions = GetCommitSpecificCheckinOptions(@"workitem id:(?<item_id>\d+)").BuildCommitSpecificCheckinOptions(new CheckinOptions(), commitMessage);
+            Assert.Equal(0, specificCheckinOptions.WorkItemsToAssociate.Count);
+        }
+
+        [Fact]
+        public void Checkin_regex_with_user_defined_regex_matching()
+        {
+            string commitMessage = @"test workitem id:5676";
+
+            var specificCheckinOptions = GetCommitSpecificCheckinOptions(@"workitem id:(?<item_id>\d+)").BuildCommitSpecificCheckinOptions(new CheckinOptions(), commitMessage);
+            Assert.Equal(1, specificCheckinOptions.WorkItemsToAssociate.Count);
+            Assert.Contains("5676", specificCheckinOptions.WorkItemsToAssociate);
+        }
+
+        [Fact]
+        public void Checkin_regex_with_user_defined_invalid_regex()
+        {
+            string commitMessage = @"test workitem #5676";
+
+            var specificCheckinOptions = GetCommitSpecificCheckinOptions(@"workitem id:((?<item_id>\d+)").BuildCommitSpecificCheckinOptions(new CheckinOptions(), commitMessage);
+            Assert.Equal(0, specificCheckinOptions.WorkItemsToAssociate.Count);
+        }
+
+        [Fact]
+        public void Checkin_regex_with_user_defined_empty_regex()
+        {
+            string commitMessage = @"test workitem #5676";
+
+            var specificCheckinOptions = GetCommitSpecificCheckinOptions(@"").BuildCommitSpecificCheckinOptions(new CheckinOptions(), commitMessage);
             Assert.Equal(1, specificCheckinOptions.WorkItemsToAssociate.Count);
             Assert.Contains("5676", specificCheckinOptions.WorkItemsToAssociate);
         }

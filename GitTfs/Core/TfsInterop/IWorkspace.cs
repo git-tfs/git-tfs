@@ -15,6 +15,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         void ForceGetFile(string path, int changeset);
         void GetSpecificVersion(int changeset);
         void GetSpecificVersion(IChangeset changeset);
+        void GetSpecificVersion(int changeset, IEnumerable<IChange> changes);
         string GetLocalItemForServerItem(string serverItem);
         string GetServerItemForLocalItem(string localItem);
         string OwnerName { get; }

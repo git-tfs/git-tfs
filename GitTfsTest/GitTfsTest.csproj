@@ -110,6 +110,7 @@
     <Compile Include="Commands\ExtTest.cs" />
     <Compile Include="Commands\InitOptionsTest.cs" />
     <Compile Include="Commands\InitBranchTest.cs" />
+    <Compile Include="Core\ChangeSieveTests.cs" />
     <Compile Include="Core\DirectoryTidierTests.cs" />
     <Compile Include="Core\GitTfsRemoteTests.cs" />
     <Compile Include="Core\BranchVisitors\BranchContainsPathVisitorTest.cs" />

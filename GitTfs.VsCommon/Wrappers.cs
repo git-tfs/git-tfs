@@ -106,11 +106,6 @@ namespace Sep.Git.Tfs.VsCommon
         {
             get { return _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(_changeset.VersionControlServer); }
         }
-
-        public void Get(IWorkspace workspace)
-        {
-            workspace.GetSpecificVersion(this);
-        }
     }
 
     public class WrapperForChange : WrapperFor<Change>, IChange
@@ -465,8 +460,13 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void GetSpecificVersion(IChangeset changeset)
         {
-            var requests = from change in changeset.Changes
-                           select new GetRequest(new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId), changeset.ChangesetId);
+            GetSpecificVersion(changeset.ChangesetId, changeset.Changes);
+        }
+
+        public void GetSpecificVersion(int changesetId, IEnumerable<IChange> changes)
+        {
+            var requests = from change in changes
+                           select new GetRequest(new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId), changesetId);
             _workspace.Get(requests.ToArray(), GetOptions.Overwrite);
         }
 

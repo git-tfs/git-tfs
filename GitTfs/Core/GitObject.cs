@@ -7,5 +7,10 @@ namespace Sep.Git.Tfs.Core
         public string Sha { get; set; }
         public string Commit { get; set; }
         public string Path { get; set; }
+
+        public GitObject()
+        {
+            Mode = LibGit2Sharp.Mode.NonExecutableFile;
+        }
     }
 }
