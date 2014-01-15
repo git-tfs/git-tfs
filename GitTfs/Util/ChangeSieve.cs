@@ -53,11 +53,6 @@ namespace Sep.Git.Tfs.Util
             return FilteredChanges.Select(c => c.Change);
         }
 
-        public IEnumerable<IChange> ChangesToApply()
-        {
-            return Sort(ChangesToFetch());
-        }
-
         public IEnumerable<ApplicableChange> ChangesToApply2()
         {
             var compartments = new {

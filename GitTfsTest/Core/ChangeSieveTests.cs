@@ -293,15 +293,9 @@ namespace Sep.Git.Tfs.Test.Core
             }
 
             [Fact]
-            public void HasEmptyChangesToApplyOld()
-            {
-                Assert.Empty(Subject.ChangesToApply());
-            }
-
-            [Fact]
             public void HasEmptyChangesToApply()
             {
-                Assert.Empty(Subject.ChangesToApply2());
+                AssertChanges(Subject.ChangesToApply2() /* expect an empty list */);
             }
         }
 
@@ -333,18 +327,6 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal(5, Subject.ChangesToFetch().Count());
             }
 
-            [Fact]
-            public void AppliesDeletesFirst()
-            {
-                var toApply = Subject.ChangesToApply();
-                Assert.Equal(new string [] {
-                    "$/Project/file2.txt",
-                    "$/Project/file4.txt",
-                    "$/Project/file5.txt",
-                    "$/Project/file1.txt",
-                    "$/Project/file3.txt",
-                }, toApply.Select(change => change.Item.ServerItem).ToArray());
-            }
             [Fact]
             public void SplitsRenamesAndPutsDeletesFirst()
             {
@@ -390,17 +372,6 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Contains(Changes[2], fetchChanges);
                 Assert.Contains(Changes[3], fetchChanges);
                 Assert.Contains(Changes[6], fetchChanges);
-            }
-
-            [Fact]
-            public void AppliesDeletesFirstOld()
-            {
-                var toApply = Subject.ChangesToApply();
-                Assert.Equal(new string [] {
-                    "$/Project/3-included.txt",
-                    "$/Project/6-included.txt",
-                    "$/Project/2-included.txt",
-                }, toApply.Select(change => change.Item.ServerItem).ToArray());
             }
 
             [Fact]
