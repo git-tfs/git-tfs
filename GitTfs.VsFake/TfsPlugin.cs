@@ -19,7 +19,7 @@ namespace Sep.Git.Tfs.VsFake
 
         public override bool IsViable()
         {
-            return ScriptPath.AndAnd(File.Exists);
+            return ScriptPath.Try(File.Exists);
         }
 
         internal static string ScriptPath
