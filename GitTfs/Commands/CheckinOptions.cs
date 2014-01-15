@@ -33,6 +33,8 @@ namespace Sep.Git.Tfs.Commands
                         (reviewer) => { CheckinNotes["Security Reviewer"] = reviewer; } },
                     { "p|performance-reviewer=", "Set performance reviewer\ne.g. -p \"John Smith\"",
                         (reviewer) => { CheckinNotes["Performance Reviewer"] = reviewer; } },
+                    { "n|checkin-note=:", "Add checkin note\ne.g. -n \"Unit Test Reviewer\" \"John Smith\"",
+                        (key, value) => { CheckinNotes[key] = value; } },
                     { "no-gate", "Disables gated checkin.",
                         v => { OverrideGatedCheckIn = true; } },
                     { "author=", "TFS User ID to check in on behalf of", var => AuthorTfsUserId = var },
