@@ -34,14 +34,10 @@ namespace Sep.Git.Tfs.Core
             if (sieve.HasChanges())
             {
                 workspace.Get(_changeset.ChangesetId, sieve.ChangesToFetch());
-                foreach (var change in sieve.ChangesToApply())
+                foreach (var change in sieve.ChangesToApply2())
                 {
                     Apply(change, index, workspace, initialTree);
                 }
-                //foreach (var change in sieve.ChangesToApply2())
-                //{
-                //    Apply(change, index, workspace, initialTree);
-                //}
             }
             return MakeNewLogEntry();
         }
