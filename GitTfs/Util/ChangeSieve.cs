@@ -32,15 +32,13 @@ namespace Sep.Git.Tfs.Util
 
     public class ChangeSieve
     {
-        readonly IDictionary<string, GitObject> _initialTree;
         readonly IChangeset _changeset;
-        readonly IGitTfsRemote _remote;
+        readonly PathResolver _resolver;
 
-        public ChangeSieve(IDictionary<string, GitObject> initialTree, IChangeset changeset, IGitTfsRemote remote)
+        public ChangeSieve(IChangeset changeset, PathResolver resolver)
         {
-            _initialTree = initialTree;
             _changeset = changeset;
-            _remote = remote;
+            _resolver = resolver;
         }
 
         public IEnumerable<IChange> ChangesToFetch()
@@ -65,7 +63,7 @@ namespace Sep.Git.Tfs.Util
                     }
                     else if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
                     {
-                        var oldPath = GetPathInGitRepo(GetPathBeforeRename(change.Change.Item));
+                        var oldPath = _resolver.GetPathInGitRepo(GetPathBeforeRename(change.Change.Item));
                         if (oldPath != null)
                             compartments.Deleted.Add(ApplicableChange.Delete(oldPath));
                         if (Include(change))
@@ -105,7 +103,10 @@ namespace Sep.Git.Tfs.Util
         {
             get
             {
-                return _changeset.Changes.Select(c => new NamedChange { GitPath = GetPathInGitRepo(c.Item.ServerItem), Change = c });
+                return _changeset.Changes.Select(c => new NamedChange {
+                    GitPath = _resolver.GetPathInGitRepo(c.Item.ServerItem),
+                    Change = c
+                });
             }
         }
 
@@ -116,35 +117,7 @@ namespace Sep.Git.Tfs.Util
 
         private bool Include(string pathInGitRepo)
         {
-            return !String.IsNullOrEmpty(pathInGitRepo) && !_remote.ShouldSkip(pathInGitRepo);
-        }
-
-        private string GetPathInGitRepo(string tfsPath)
-        {
-            var pathInGitRepo = _remote.GetPathInGitRepo(tfsPath);
-            if (pathInGitRepo == null)
-                return null;
-            return UpdateToMatchExtantCasing(pathInGitRepo);
-        }
-
-        private static readonly Regex SplitDirnameFilename = new Regex(@"(?<dir>.*)[/\\](?<file>[^/\\]+)");
-
-        private string UpdateToMatchExtantCasing(string pathInGitRepo)
-        {
-            if (_initialTree.ContainsKey(pathInGitRepo))
-                return _initialTree[pathInGitRepo].Path;
-
-            var fullPath = pathInGitRepo;
-            var splitResult = SplitDirnameFilename.Match(pathInGitRepo);
-            if (splitResult.Success)
-            {
-
-                var dirName = splitResult.Groups["dir"].Value;
-                var fileName = splitResult.Groups["file"].Value;
-                fullPath = UpdateToMatchExtantCasing(dirName) + "/" + fileName;
-            }
-            _initialTree[fullPath] = new GitObject { Path = fullPath };
-            return fullPath;
+            return _resolver.ShouldIncludeGitItem(pathInGitRepo);
         }
 
         private string GetPathBeforeRename(IItem item)

@@ -30,7 +30,8 @@ namespace Sep.Git.Tfs.Core
         public LogEntry Apply(string lastCommit, GitIndexInfo index, ITfsWorkspace workspace)
         {
             var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
-            var sieve = new ChangeSieve(initialTree, _changeset, Summary.Remote);
+            var resolver = new PathResolver(Summary.Remote, initialTree);
+            var sieve = new ChangeSieve(_changeset, resolver);
             workspace.Get(_changeset.ChangesetId, sieve.ChangesToFetch());
             foreach (var change in sieve.ChangesToApply2())
             {
