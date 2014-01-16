@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -41,6 +42,8 @@ namespace Sep.Git.Tfs.Commands
                 .Merge(_fetch.OptionSet);
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public Subtree(TextWriter stdout, Fetch fetch, QuickFetch quickFetch, Globals globals, RemoteOptions remoteOptions)
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Util;
@@ -34,6 +35,8 @@ namespace Sep.Git.Tfs.Test.Util
             internal List<Invocation> Calls = new List<Invocation>();
 
             public OptionSet OptionSet { get; set; }
+
+            public CancellationToken Token { get; set; }
         }
         #endregion
 

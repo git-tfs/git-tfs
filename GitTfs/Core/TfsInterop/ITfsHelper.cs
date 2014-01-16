@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core.TfsInterop
@@ -10,7 +11,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         string Url { get; set; }
         string Username { get; set; }
         string Password { get; set; }
-        IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote);
+        IEnumerable<ITfsChangeset> GetChangesets(CancellationToken token, string path, long startVersion, IGitTfsRemote remote);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
         IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);
         IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
@@ -26,7 +27,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         bool CanShowCheckinDialog { get; }
         long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
         void CleanupWorkspaces(string workingDirectory);
-        int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null);
+        int GetRootChangesetForBranch(CancellationToken token, string tfsPathBranchToCreate, string tfsPathParentBranch = null);
         IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null);
         bool CanGetBranchInformation { get; }
         IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation();
@@ -35,7 +36,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
         void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder);
         bool IsExistingInTfs(string path);
-        int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote);
+        int FindMergeChangesetParent(CancellationToken token, string path, long firstChangeset, GitTfsRemote remote);
         /// <summary>
         /// Creates and maps a workspace for the given remote with the given local -> server directory mappings, at the given Tfs version,
         /// and then performs the action.

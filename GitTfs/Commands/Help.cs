@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
@@ -32,6 +33,8 @@ namespace Sep.Git.Tfs.Commands
         {
             get { return new OptionSet(); }
         }
+
+        public CancellationToken Token { get; set; }
 
         /// <summary>
         /// Figures out whether it should show help for git-tfs or for

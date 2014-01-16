@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Commands;
 
@@ -190,12 +191,12 @@ namespace Sep.Git.Tfs.Core
             throw new NotImplementedException();
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
+        public IFetchResult Fetch(CancellationToken token, bool stopOnFailMergeCommit = false)
         {
             throw new NotImplementedException();
         }
 
-        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        public IFetchResult FetchWithMerge(CancellationToken token, long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             throw new NotImplementedException();
         }

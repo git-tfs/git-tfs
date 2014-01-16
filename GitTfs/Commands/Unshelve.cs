@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using NDesk.Options;
 using StructureMap;
 using Sep.Git.Tfs.Core;
@@ -42,6 +43,8 @@ namespace Sep.Git.Tfs.Commands
                 };
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public int Run(string shelvesetName, string destinationBranch)
         {

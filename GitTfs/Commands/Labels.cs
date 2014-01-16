@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -49,6 +50,8 @@ namespace Sep.Git.Tfs.Commands
                 };
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public int Run(IGitTfsRemote remote)
         {

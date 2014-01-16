@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -63,6 +64,8 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
+        public CancellationToken Token { get; set; }
+
         public Branch(Globals globals, TextWriter stdout, Help helper, Cleanup cleanup, InitBranch initBranch, Rcheckin rcheckin)
         {
             this.globals = globals;
@@ -94,6 +97,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
+            cleanup.Token = Token;
+            initBranch.Token = Token;
+            rcheckin.Token = Token;
+
             if (!IsCommandWellUsed())
                 return helper.Run(this);
 
@@ -113,6 +120,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string param)
         {
+            cleanup.Token = Token;
+            initBranch.Token = Token;
+            rcheckin.Token = Token;
+
             if (!IsCommandWellUsed())
                 return helper.Run(this);
 

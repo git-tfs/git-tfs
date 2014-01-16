@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Test.TestHelpers;
@@ -60,6 +61,8 @@ namespace Sep.Git.Tfs.Test.Commands
             {
                 get { return TestOptions; }
             }
+
+            public CancellationToken Token { get; set; }
 
             public int Run(IList<string> args)
             {

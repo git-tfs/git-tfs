@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core;
@@ -32,10 +33,10 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public override int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
+        public override int FindMergeChangesetParent(CancellationToken token, string path, long firstChangeset, GitTfsRemote remote)
         {
             return VersionControl.QueryMerges(null, null, new ItemSpec(path, RecursionType.Full), LatestVersionSpec.Latest,
-              null, new ChangesetVersionSpec((int)firstChangeset)).Max(x => x.SourceVersion);
+              null, new ChangesetVersionSpec((int)firstChangeset)).WithCancellation(token).Max(x => x.SourceVersion);
         }
 
         public override IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
@@ -52,14 +53,14 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches);
         }
 
-        public override int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
+        public override int GetRootChangesetForBranch(CancellationToken token, string tfsPathBranchToCreate, string tfsPathParentBranch = null)
         {
             try
             {
                 if (!CanGetBranchInformation)
                 {
                     Trace.WriteLine("Try TFS2008 compatibility mode...");
-                    return base.GetRootChangesetForBranch(tfsPathBranchToCreate, tfsPathParentBranch);
+                    return base.GetRootChangesetForBranch(token, tfsPathBranchToCreate, tfsPathParentBranch);
                 }
 
                 if (!string.IsNullOrWhiteSpace(tfsPathParentBranch))
@@ -83,7 +84,7 @@ namespace Sep.Git.Tfs.VsCommon
                 Trace.WriteLine("Found parent branch : " + tfsPathParentBranch);
 
                 var firstChangesetInBranchToCreate = VersionControl.QueryHistory(tfsPathBranchToCreate, VersionSpec.Latest, 0, RecursionType.Full,
-                    null, null, null, int.MaxValue, true, false, false).Cast<Changeset>().LastOrDefault();
+                    null, null, null, int.MaxValue, true, false, false).WithCancellation(token).Cast<Changeset>().LastOrDefault();
 
                 if (firstChangesetInBranchToCreate == null)
                 {
@@ -95,6 +96,7 @@ namespace Sep.Git.Tfs.VsCommon
                                  new ItemIdentifier(tfsPathBranchToCreate),
                                  new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch),},
                                  null)
+                    .WithCancellation(token)
                     .OrderBy(x => x.SourceChangeset.ChangesetId);
 
                 var rootChangesetInParentBranch =
@@ -105,7 +107,7 @@ namespace Sep.Git.Tfs.VsCommon
             catch (FeatureNotSupportedException ex)
             {
                 Trace.WriteLine(ex.Message);
-                return base.GetRootChangesetForBranch(tfsPathBranchToCreate, tfsPathParentBranch);
+                return base.GetRootChangesetForBranch(token, tfsPathBranchToCreate, tfsPathParentBranch);
             }
         }
 

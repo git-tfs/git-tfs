@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using NDesk.Options;
 using StructureMap;
 using Sep.Git.Tfs.Commands;
@@ -73,6 +74,24 @@ namespace Sep.Git.Tfs.Core
         public static bool Empty<T>(this IEnumerable<T> e)
         {
             return !e.Any();
+        }
+
+        public static IEnumerable WithCancellation(this IEnumerable e, CancellationToken token)
+        {
+            foreach (var item in e)
+            {
+                token.ThrowIfCancellationRequested();
+                yield return item;
+            }
+        }
+
+        public static IEnumerable<T> WithCancellation<T>(this IEnumerable<T> e, CancellationToken token)
+        {
+            foreach (var item in e)
+            {
+                token.ThrowIfCancellationRequested();
+                yield return item;
+            }
         }
 
         public static void SetArguments(this ProcessStartInfo startInfo, params string [] args)

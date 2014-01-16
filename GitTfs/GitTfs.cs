@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using StructureMap;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
@@ -80,8 +81,19 @@ namespace Sep.Git.Tfs
             }
             else
             {
+                CancellationTokenSource cts = new CancellationTokenSource();
+                Console.CancelKeyPress += delegate(object sender,
+                                        ConsoleCancelEventArgs e)
+                {
+                    Trace.WriteLine("The operation has been interrupted.");
+                    if (e.SpecialKey == ConsoleSpecialKey.ControlC)
+                        e.Cancel = true; // tell the CLR to keep running
+                    cts.Cancel();
+                };
+
                 try
                 {
+                    command.Token = cts.Token;
                     return _runner.Run(command, unparsedArgs);
                 }
                 finally

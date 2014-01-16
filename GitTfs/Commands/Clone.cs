@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -35,6 +36,8 @@ namespace Sep.Git.Tfs.Commands
             this.stdout = stdout;
         }
 
+        public CancellationToken Token { get; set; }
+
         public OptionSet OptionSet
         {
             get
@@ -51,6 +54,9 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
         {
+            init.Token = Token;
+            fetch.Token = Token;
+
             var currentDir = Environment.CurrentDirectory;
             var repositoryDirCreated = InitGitDir(gitRepositoryPath);
 

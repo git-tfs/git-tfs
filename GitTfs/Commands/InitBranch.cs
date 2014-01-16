@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -62,6 +63,8 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
+        public CancellationToken Token { get; set; }
+
         public int Run(string tfsBranchPath)
         {
             return Run(tfsBranchPath, null);
@@ -89,14 +92,14 @@ namespace Sep.Git.Tfs.Commands
 
             int rootChangeSetId;
             if (ParentBranch == null)
-                rootChangeSetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath);
+                rootChangeSetId = defaultRemote.Tfs.GetRootChangesetForBranch(Token, tfsBranchPath);
             else
             {
                 var tfsRepositoryPathParentBranchFound = allRemotes.FirstOrDefault(r => r.TfsRepositoryPath.ToLower() == ParentBranch.ToLower());
                 if (tfsRepositoryPathParentBranchFound == null)
                     throw new GitTfsException("error: The Tfs parent branch '" + ParentBranch + "' can not be found in the Git repository\nPlease init it first and try again...\n");
 
-                rootChangeSetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
+                rootChangeSetId = defaultRemote.Tfs.GetRootChangesetForBranch(Token, tfsBranchPath, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
             }
 
             var sha1RootCommit = _globals.Repository.FindCommitHashByChangesetId(rootChangeSetId);
@@ -147,11 +150,12 @@ namespace Sep.Git.Tfs.Commands
 
             if (childBranchPaths.Any())
             {
-                _stdout.WriteLine("Tfs branches found:");
+                _stdout.WriteLine("Tfs {0} branches found:", childBranchPaths.Count);
                 foreach (var tfsBranchPath in childBranchPaths)
                 {
+                    Token.ThrowIfCancellationRequested();
                     _stdout.WriteLine("- " + tfsBranchPath.TfsRepositoryPath);
-                    tfsBranchPath.RootChangesetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath);
+                    tfsBranchPath.RootChangesetId = defaultRemote.Tfs.GetRootChangesetForBranch(Token, tfsBranchPath.TfsRepositoryPath);
                 }
                 childBranchPaths.Add(new BranchDatas {TfsRepositoryPath = defaultRemote.TfsRepositoryPath, TfsRemote = defaultRemote, RootChangesetId = -1});
 
@@ -267,7 +271,7 @@ namespace Sep.Git.Tfs.Commands
         private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true)
         {
             Trace.WriteLine("Try fetching changesets...");
-            var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+            var fetchResult = tfsRemote.Fetch(Token, stopOnFailMergeCommit);
             Trace.WriteLine("Changesets fetched!");
 
             if (createBranch && fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)

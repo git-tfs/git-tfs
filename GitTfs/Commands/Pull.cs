@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -26,6 +27,8 @@ namespace Sep.Git.Tfs.Commands
                             .Add("r|rebase", "rebase your modifications on tfs changes", v => _shouldRebase = v != null);
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public Pull(Globals globals, Fetch fetch, TextWriter stdout)
         {

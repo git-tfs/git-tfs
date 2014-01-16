@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NDesk.Options;
 using StructureMap;
 using Sep.Git.Tfs.Core;
@@ -36,6 +37,8 @@ namespace Sep.Git.Tfs.Commands
                 return remoteOptions.OptionSet;
             }
         }
+
+        public CancellationToken Token { get; set; }
 
         public int Run(string tfsUrl)
         {

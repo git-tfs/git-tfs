@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -25,6 +26,8 @@ namespace Sep.Git.Tfs.Commands
         {
             get { return _cleanupWorkspaces.OptionSet; }
         }
+        
+        public CancellationToken Token { get; set; }
 
         public int Run()
         {
