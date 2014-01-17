@@ -570,41 +570,17 @@ namespace Sep.Git.Tfs.Core
 
         private string Commit(LogEntry logEntry)
         {
-            string commitHash = null;
-            WithCommitHeaderEnv(logEntry, () => commitHash = WriteCommit(logEntry));
-            // TODO (maybe): StoreChangesetMetadata(commitInfo);
-            return commitHash;
+            logEntry.Log = BuildCommitMessage(logEntry.Log, logEntry.ChangesetId);
+            return Repository.Commit(logEntry).Sha;
         }
 
-        private string WriteCommit(LogEntry logEntry)
+        private string BuildCommitMessage(string tfsCheckinComment, long changesetId)
         {
-            // TODO (maybe): encode logEntry.Log according to 'git config --get i18n.commitencoding', if specified
-            //var commitEncoding = Repository.CommandOneline("config", "i18n.commitencoding");
-            //var encoding = LookupEncoding(commitEncoding) ?? Encoding.UTF8;
-            string commitHash = null;
-
-            //the remote to be associated with the commit might be a subtree, if it's null then it's not from a subtree.
-            var remote = logEntry.Remote ?? this;
-            Repository.CommandInputOutputPipe((procIn, procOut) =>
-                                                  {
-                                                      procIn.WriteLine(logEntry.Log);
-                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, remote.TfsUrl,
-                                                                       remote.TfsRepositoryPath, logEntry.ChangesetId);
-                                                      procIn.Close();
-                                                      commitHash = ParseCommitInfo(procOut.ReadToEnd());
-                                                  }, BuildCommitCommand(logEntry));
-            return commitHash;
-        }
-
-        private string[] BuildCommitCommand(LogEntry logEntry)
-        {
-            var commitCommand = new List<string> { "commit-tree", logEntry.Tree.Sha };
-            foreach (var parent in logEntry.CommitParents)
-            {
-                commitCommand.Add("-p");
-                commitCommand.Add(parent);
-            }
-            return commitCommand.ToArray();
+            var builder = new StringWriter();
+            builder.WriteLine(tfsCheckinComment);
+            builder.WriteLine(GitTfsConstants.TfsCommitInfoFormat,
+                TfsUrl, TfsRepositoryPath, changesetId);
+            return builder.ToString();
         }
 
         private string ParseCommitInfo(string commitTreeOutput)
