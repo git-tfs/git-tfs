@@ -27,7 +27,7 @@ namespace Sep.Git.Tfs.Core
             BaseChangesetId = _changeset.Changes.Max(c => c.Item.ChangesetId) - 1;
         }
 
-        public LogEntry Apply(string lastCommit, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace)
+        public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace)
         {
             var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
             var resolver = new PathResolver(Summary.Remote, initialTree);
@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.Core
             return MakeNewLogEntry();
         }
 
-        private void Apply(ApplicableChange change, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        private void Apply(ApplicableChange change, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             switch (change.Type)
             {
@@ -55,7 +55,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void Update(ApplicableChange change, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        private void Update(ApplicableChange change, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
             treeBuilder.Add(change.GitPath, workspace.GetLocalPath(change.GitPath), change.Mode);
         }
@@ -93,7 +93,7 @@ namespace Sep.Git.Tfs.Core
             return tfsItemsWithGitPaths.Where(x => x.gitPath != null).Select(x => new TfsTreeEntry(x.gitPath, x.item));
         }
 
-        public LogEntry CopyTree(IGitTreeBuilder treeBuilder, ITfsWorkspace workspace)
+        public LogEntry CopyTree(IGitTreeModifier treeBuilder, ITfsWorkspace workspace)
         {
             var startTime = DateTime.Now;
             var itemsCopied = 0;
@@ -122,7 +122,7 @@ namespace Sep.Git.Tfs.Core
             return MakeNewLogEntry(maxChangesetId == _changeset.ChangesetId ? _changeset : _tfs.GetChangeset(maxChangesetId));
         }
 
-        private void Add(IItem item, string pathInGitRepo, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace)
+        private void Add(IItem item, string pathInGitRepo, IGitTreeModifier treeBuilder, ITfsWorkspace workspace)
         {
             if (item.DeletionId == 0)
             {
@@ -130,7 +130,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void Delete(string pathInGitRepo, IGitTreeBuilder treeBuilder, IDictionary<string, GitObject> initialTree)
+        private void Delete(string pathInGitRepo, IGitTreeModifier treeBuilder, IDictionary<string, GitObject> initialTree)
         {
             if (initialTree.ContainsKey(pathInGitRepo))
             {
