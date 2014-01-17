@@ -178,14 +178,6 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private string IndexFile
-        {
-            get
-            {
-                return Path.Combine(Dir, "index");
-            }
-        }
-
         
 
         private string WorkingDirectory
@@ -325,7 +317,6 @@ namespace Sep.Git.Tfs.Core
             fetchResult.NewChangesetCount = fetchedChangesets.Count;
             foreach (var changeset in fetchedChangesets)
             {
-                AssertTemporaryIndexClean(MaxCommitHash);
                 var log = Apply(MaxCommitHash, changeset);
                 if (changeset.IsMergeChangeset)
                 {
@@ -466,7 +457,6 @@ namespace Sep.Git.Tfs.Core
 
         private void quickFetch(ITfsChangeset changeset)
         {
-            AssertTemporaryIndexEmpty();
             var log = CopyTree(MaxCommitHash, changeset);
             UpdateTfsHead(Commit(log), changeset.Summary.ChangesetId);
             DoGcIfNeeded();
@@ -548,42 +538,6 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void AssertTemporaryIndexClean(string treeish)
-        {
-            if (string.IsNullOrEmpty(treeish))
-            {
-                AssertTemporaryIndexEmpty();
-                return;
-            }
-            WithTemporaryIndex(() => AssertIndexClean(treeish));
-        }
-
-        private void AssertTemporaryIndexEmpty()
-        {
-            if (File.Exists(IndexFile))
-                File.Delete(IndexFile);
-        }
-
-        private void AssertIndexClean(string treeish)
-        {
-            if (!File.Exists(IndexFile)) Repository.CommandNoisy("read-tree", treeish);
-            var currentTree = Repository.CommandOneline("write-tree");
-            var expectedCommitInfo = Repository.Command("cat-file", "commit", treeish);
-            var expectedCommitTree = treeShaRegex.Match(expectedCommitInfo).Groups[1].Value;
-            if (expectedCommitTree != currentTree)
-            {
-                Trace.WriteLine("Index mismatch: " + expectedCommitTree + " != " + currentTree);
-                Trace.WriteLine("rereading " + treeish);
-                File.Delete(IndexFile);
-                Repository.CommandNoisy("read-tree", treeish);
-                currentTree = Repository.CommandOneline("write-tree");
-                if (expectedCommitTree != currentTree)
-                {
-                    throw new Exception("Unable to create a clean temporary index: trees (" + treeish + ") " + expectedCommitTree + " != " + currentTree);
-                }
-            }
-        }
-
         private LogEntry Apply(string parent, ITfsChangeset changeset)
         {
             LogEntry result = null;
@@ -639,22 +593,13 @@ namespace Sep.Git.Tfs.Core
 
         private string[] BuildCommitCommand(LogEntry logEntry)
         {
-            var tree = logEntry.Tree ?? GetTemporaryIndexTreeSha();
-            tree.AssertValidSha();
-            var commitCommand = new List<string> { "commit-tree", tree };
+            var commitCommand = new List<string> { "commit-tree", logEntry.Tree };
             foreach (var parent in logEntry.CommitParents)
             {
                 commitCommand.Add("-p");
                 commitCommand.Add(parent);
             }
             return commitCommand.ToArray();
-        }
-
-        private string GetTemporaryIndexTreeSha()
-        {
-            string tree = null;
-            WithTemporaryIndex(() => tree = Repository.CommandOneline("write-tree"));
-            return tree;
         }
 
         private string ParseCommitInfo(string commitTreeOutput)
@@ -680,15 +625,6 @@ namespace Sep.Git.Tfs.Core
                                                      {"GIT_COMMITTER_NAME", logEntry.CommitterName ?? logEntry.AuthorName},
                                                      {"GIT_COMMITTER_EMAIL", logEntry.CommitterEmail ?? logEntry.AuthorEmail}
                                                  });
-        }
-
-        private void WithTemporaryIndex(Action action)
-        {
-            WithTemporaryEnvironment(() =>
-                                         {
-                                             Directory.CreateDirectory(Path.GetDirectoryName(IndexFile));
-                                             action();
-                                         }, new Dictionary<string, string> { { "GIT_INDEX_FILE", IndexFile } });
         }
 
         private void WithTemporaryEnvironment(Action action, IDictionary<string, string> newEnvironment)
