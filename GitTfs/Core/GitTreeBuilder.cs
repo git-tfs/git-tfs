@@ -24,9 +24,9 @@ namespace Sep.Git.Tfs.Core
             _objectDatabase = objectDatabase;
         }
 
-        public void Add(string path, string file, string mode)
+        public void Add(string path, string file, LibGit2Sharp.Mode mode)
         {
-            _treeDefinition.Add(path, file, Mode.ToFileMode(mode));
+            _treeDefinition.Add(path, file, mode);
         }
 
         public void Remove(string path)

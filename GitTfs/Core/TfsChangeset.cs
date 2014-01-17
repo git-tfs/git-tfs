@@ -57,7 +57,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Update(ApplicableChange change, IGitTreeBuilder treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
-            treeBuilder.Add(change.GitPath, workspace.GetLocalPath(change.GitPath), change.Mode.ToModeString());
+            treeBuilder.Add(change.GitPath, workspace.GetLocalPath(change.GitPath), change.Mode);
         }
 
         public IEnumerable<TfsTreeEntry> GetTree()
@@ -126,7 +126,7 @@ namespace Sep.Git.Tfs.Core
         {
             if (item.DeletionId == 0)
             {
-                treeBuilder.Add(pathInGitRepo, workspace.GetLocalPath(pathInGitRepo), Mode.NewFile);
+                treeBuilder.Add(pathInGitRepo, workspace.GetLocalPath(pathInGitRepo), LibGit2Sharp.Mode.NonExecutableFile);
             }
         }
 
