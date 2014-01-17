@@ -1,0 +1,5 @@
+* Accept custom work item association regexes (#513)
+* Improve clone performance (#518)
+* Don't fetch files from TFS if we're going to ignore them (#519)
+* Support custom checkin notes (#520)
+* Other documentation and bug fixes (#487, #521, #523, #527)

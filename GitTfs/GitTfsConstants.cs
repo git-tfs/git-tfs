@@ -60,5 +60,7 @@ namespace Sep.Git.Tfs
 
         public const string ExportMetadatasConfigKey = GitTfsPrefix + ".export-metadatas";
         public const string WorkspaceConfigKey = GitTfsPrefix + ".workspace-dir";
+
+        public const string WorkItemAssociateRegexConfigKey = GitTfsPrefix + ".work-item-regex";
     }
 }

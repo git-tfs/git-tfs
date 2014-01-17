@@ -27,12 +27,14 @@ namespace Sep.Git.Tfs.VsFake
         IContainer _container;
         TextWriter _stdout;
         Script _script;
+        FakeVersionControlServer _versionControlServer;
 
         public TfsHelper(IContainer container, TextWriter stdout, Script script)
         {
             _container = container;
             _stdout = stdout;
             _script = script;
+            _versionControlServer = new FakeVersionControlServer(_script);
         }
 
         public string TfsClientLibraryVersion { get { return "(FAKE)"; } }
@@ -61,7 +63,7 @@ namespace Sep.Git.Tfs.VsFake
 
         public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
         {
-            return _script.Changesets.LastOrDefault().AndAnd(x => BuildTfsChangeset(x, remote));
+            return _script.Changesets.LastOrDefault().Try(x => BuildTfsChangeset(x, remote));
         }
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
@@ -84,23 +86,25 @@ namespace Sep.Git.Tfs.VsFake
 
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, IGitTfsRemote remote)
         {
-            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(changeset)).GetInstance<TfsChangeset>();
+            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(_versionControlServer, changeset)).GetInstance<TfsChangeset>();
             tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.Id, Remote = remote };
             return tfsChangeset;
         }
 
         class Changeset : IChangeset
         {
+            private IVersionControlServer _versionControlServer;
             private ScriptedChangeset _changeset;
 
-            public Changeset(ScriptedChangeset changeset)
+            public Changeset(IVersionControlServer versionControlServer, ScriptedChangeset changeset)
             {
+                _versionControlServer = versionControlServer;
                 _changeset = changeset;
             }
 
             public IChange[] Changes
             {
-                get { return _changeset.Changes.Select(x => new Change(_changeset, x)).ToArray(); }
+                get { return _changeset.Changes.Select(x => new Change(_versionControlServer, _changeset, x)).ToArray(); }
             }
 
             public string Committer
@@ -136,11 +140,13 @@ namespace Sep.Git.Tfs.VsFake
 
         class Change : IChange, IItem
         {
+            IVersionControlServer _versionControlServer;
             ScriptedChangeset _changeset;
             ScriptedChange _change;
 
-            public Change(ScriptedChangeset changeset, ScriptedChange change)
+            public Change(IVersionControlServer versionControlServer, ScriptedChangeset changeset, ScriptedChange change)
             {
+                _versionControlServer = versionControlServer;
                 _changeset = changeset;
                 _change = change;
             }
@@ -157,7 +163,7 @@ namespace Sep.Git.Tfs.VsFake
 
             IVersionControlServer IItem.VersionControlServer
             {
-                get { throw new NotImplementedException(); }
+                get { return _versionControlServer; }
             }
 
             int IItem.ChangesetId
@@ -182,7 +188,7 @@ namespace Sep.Git.Tfs.VsFake
 
             int IItem.ItemId
             {
-                get { throw new NotImplementedException(); }
+                get { return _change.ItemId.Value; }
             }
 
             long IItem.ContentLength
@@ -246,9 +252,14 @@ namespace Sep.Git.Tfs.VsFake
 
             public void GetSpecificVersion(IChangeset changeset)
             {
+                GetSpecificVersion(changeset.ChangesetId, changeset.Changes);
+            }
+
+            public void GetSpecificVersion(int changeset, IEnumerable<IChange> changes)
+            {
                 var repositoryRoot = _repositoryRoot.ToLower();
                 if(!repositoryRoot.EndsWith("/")) repositoryRoot += "/";
-                foreach (var change in changeset.Changes)
+                foreach (var change in changes)
                 {
                     if (change.Item.ItemType == TfsItemType.File)
                     {
@@ -365,7 +376,7 @@ namespace Sep.Git.Tfs.VsFake
 
         public IChangeset GetChangeset(int changesetId)
         {
-            return new Changeset(_script.Changesets.First(c => c.Id == changesetId));
+            return new Changeset(_versionControlServer, _script.Changesets.First(c => c.Id == changesetId));
         }
 
         public int GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
@@ -452,5 +463,39 @@ namespace Sep.Git.Tfs.VsFake
         }
 
         #endregion
+
+        private class FakeVersionControlServer : IVersionControlServer
+        {
+            Script _script;
+
+            public FakeVersionControlServer(Script script)
+            {
+                _script = script;
+            }
+
+            public IItem GetItem(int itemId, int changesetNumber)
+            {
+                var match = _script.Changesets.AsEnumerable().Reverse()
+                    .SkipWhile(cs => cs.Id > changesetNumber)
+                    .Select(cs => new { Changeset = cs, Change = cs.Changes.SingleOrDefault(change => change.ItemId == itemId) })
+                    .First(x => x.Change != null);
+                return new Change(this, match.Changeset, match.Change);
+            }
+
+            public IItem GetItem(string itemPath, int changesetNumber)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerable<IChangeset> QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo)
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

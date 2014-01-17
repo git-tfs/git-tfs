@@ -226,11 +226,14 @@ namespace Sep.Git.Tfs.Core
         {
             try
             {
-                var allFiles = Directory.EnumerateFiles(WorkingDirectory, "*", SearchOption.AllDirectories);
-                foreach (var file in allFiles)
-                    File.SetAttributes(file, File.GetAttributes(file) & ~FileAttributes.ReadOnly);
+                if (Directory.Exists(WorkingDirectory))
+                {
+                    var allFiles = Directory.EnumerateFiles(WorkingDirectory, "*", SearchOption.AllDirectories);
+                    foreach (var file in allFiles)
+                        File.SetAttributes(file, File.GetAttributes(file) & ~FileAttributes.ReadOnly);
 
-                Directory.Delete(WorkingDirectory, true);
+                    Directory.Delete(WorkingDirectory, true);
+                }
             }
             catch (Exception ex)
             {

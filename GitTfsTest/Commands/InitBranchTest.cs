@@ -444,7 +444,7 @@ namespace Sep.Git.Tfs.Test.Commands
            globals.Repository = mocks.Get<IGitRepository>();
            globals.Repository.Stub(t => t.AssertValidBranchName("")).IgnoreArguments().Do ( (Func<string, string>) delegate (string value) { return value; });
 
-           var initBranch4test = new InitBranch4Test(new StringWriter(), globals , null, null);
+           var initBranch4test = new InitBranchForTest(new StringWriter(), globals , null, null);
            Assert.Equal("test", initBranch4test.ExtractGitBranchNameFromTfsRepositoryPath("test"));
            Assert.Equal("test", initBranch4test.ExtractGitBranchNameFromTfsRepositoryPath("te^st"));
            Assert.Equal("test", initBranch4test.ExtractGitBranchNameFromTfsRepositoryPath("te~st"));
@@ -463,11 +463,12 @@ namespace Sep.Git.Tfs.Test.Commands
            Assert.Equal("test", initBranch4test.ExtractGitBranchNameFromTfsRepositoryPath("te@{st."));
         }
 
-        public class InitBranch4Test : InitBranch
+        public class InitBranchForTest : InitBranch
         {
-            public InitBranch4Test(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors) : base(stdout, globals, helper, authors) { }
+            public InitBranchForTest(TextWriter stdout, Globals globals, Help helper, AuthorsFile authors) : base(stdout, globals, helper, authors) { }
 
-            public string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
+            // The base class method is protected. Add a public version of it.
+            public new string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
             {
                 return base.ExtractGitBranchNameFromTfsRepositoryPath(tfsRepositoryPath);
             }
