@@ -471,15 +471,6 @@ namespace Sep.Git.Tfs.Core
                         stream.CopyTo(outstream);
         }
 
-        public string HashAndInsertObject(string filename)
-        {
-            if (_repository.Info.IsBare)
-            {
-                filename = Path.GetFullPath(filename);
-            }
-            return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
-        }
-
         public string AssertValidBranchName(string gitBranchName)
         {
             if (!_repository.Refs.IsValidName(ShortToLocalName(gitBranchName)))

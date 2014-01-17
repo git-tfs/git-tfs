@@ -27,7 +27,6 @@ namespace Sep.Git.Tfs.Core
         TfsChangesetInfo GetCurrentTfsCommit();
         IDictionary<string, GitObject> GetObjects(string commit);
         IGitTreeBuilder GetTreeBuilder(string commit);
-        string HashAndInsertObject(string filename);
         IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to);
         bool WorkingCopyHasUnstagedOrUncommitedChanges { get; }
         void CopyBlob(string sha, string outputFile);
