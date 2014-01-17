@@ -593,7 +593,7 @@ namespace Sep.Git.Tfs.Core
 
         private string[] BuildCommitCommand(LogEntry logEntry)
         {
-            var commitCommand = new List<string> { "commit-tree", logEntry.Tree };
+            var commitCommand = new List<string> { "commit-tree", logEntry.Tree.Sha };
             foreach (var parent in logEntry.CommitParents)
             {
                 commitCommand.Add("-p");
