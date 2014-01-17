@@ -38,6 +38,18 @@ namespace Sep.Git.Tfs.Core
                 _repository.Dispose();
         }
 
+        public GitCommit Commit(LogEntry logEntry)
+        {
+            var parents = logEntry.CommitParents.Select(sha => _repository.Lookup<Commit>(sha));
+            var commit = _repository.ObjectDatabase.CreateCommit(
+                logEntry.Log,
+                new Signature(logEntry.AuthorName, logEntry.AuthorEmail, logEntry.Date),
+                new Signature(logEntry.CommitterName, logEntry.CommitterEmail, logEntry.Date),
+                logEntry.Tree,
+                parents);
+            return new GitCommit(commit);
+        }
+
         public void UpdateRef(string gitRefName, string shaCommit, string message = null)
         {
             _repository.Refs.Add(gitRefName, shaCommit, allowOverwrite: true, logMessage: message);
