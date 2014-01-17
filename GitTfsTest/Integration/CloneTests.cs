@@ -57,6 +57,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
+            h.AssertCommitMessage("MyProject", "HEAD", "First commit\r\n\r\ngit-tfs-id: [" + h.TfsUrl + "]$/MyProject;C2\r\n");
             const string expectedSha = "d64d883266eca65bede947c79529318718a0d8eb";
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
