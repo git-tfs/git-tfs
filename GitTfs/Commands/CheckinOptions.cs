@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
+using System.Text.RegularExpressions;
 using NDesk.Options;
 using Sep.Git.Tfs.Util;
-using System;
-using System.Text.RegularExpressions;
 
 namespace Sep.Git.Tfs.Commands
 {

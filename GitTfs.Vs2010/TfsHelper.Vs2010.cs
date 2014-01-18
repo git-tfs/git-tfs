@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
-using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Microsoft.Win32;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -16,10 +15,6 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.Vs2010
 {
-    using System.Net;
-
-    using Microsoft.TeamFoundation.Framework.Client;
-
     public class TfsHelper : TfsHelperVs2010Base
     {
         private readonly TfsApiBridge _bridge;

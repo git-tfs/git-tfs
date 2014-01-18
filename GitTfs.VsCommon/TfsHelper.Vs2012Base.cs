@@ -6,12 +6,10 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
-using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Microsoft.Win32;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
-using Sep.Git.Tfs.VsCommon;
 using StructureMap;
 
 namespace Sep.Git.Tfs.VsCommon

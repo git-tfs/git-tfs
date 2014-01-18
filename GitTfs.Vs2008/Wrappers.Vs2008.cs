@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.VsCommon

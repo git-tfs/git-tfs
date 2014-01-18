@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using LibGit2Sharp;
-using Sep.Git.Tfs.Commands;
 using Branch = LibGit2Sharp.Branch;
 
 namespace Sep.Git.Tfs.Core

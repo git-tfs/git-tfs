@@ -1,16 +1,10 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using Microsoft.TeamFoundation.Client;
-using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using Sep.Git.Tfs.VsCommon;
 using StructureMap;
-using System.Diagnostics;
-using Sep.Git.Tfs.Core;
 
 namespace Sep.Git.Tfs.Vs2008
 {
