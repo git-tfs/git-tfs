@@ -364,6 +364,18 @@ namespace Sep.Git.Tfs.Core
             return entries;
         }
 
+        public IGitTreeBuilder GetTreeBuilder(string commit)
+        {
+            if (commit == null)
+            {
+                return new GitTreeBuilder(_repository.ObjectDatabase);
+            }
+            else
+            {
+                return new GitTreeBuilder(_repository.ObjectDatabase, _repository.Lookup<Commit>(commit).Tree);
+            }
+        }
+
         public Dictionary<string, GitObject> GetObjects()
         {
             return new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
@@ -457,15 +469,6 @@ namespace Sep.Git.Tfs.Core
                 using (Stream stream = blob.ContentStream)
                 using (var outstream = File.Create(destination.FullName))
                         stream.CopyTo(outstream);
-        }
-
-        public string HashAndInsertObject(string filename)
-        {
-            if (_repository.Info.IsBare)
-            {
-                filename = Path.GetFullPath(filename);
-            }
-            return _repository.ObjectDatabase.CreateBlob(filename).Id.Sha;
         }
 
         public string AssertValidBranchName(string gitBranchName)

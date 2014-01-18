@@ -81,20 +81,6 @@ namespace Sep.Git.Tfs.Util
             return compartments.Deleted.Concat(compartments.Updated);
         }
 
-        private IEnumerable<IChange> Sort(IEnumerable<IChange> changes)
-        {
-            return changes.OrderBy(change => Rank(change.ChangeType));
-        }
-
-        private int Rank(TfsChangeType type)
-        {
-            if (type.IncludesOneOf(TfsChangeType.Delete))
-                return 0;
-            if (type.IncludesOneOf(TfsChangeType.Rename))
-                return 1;
-            return 2;
-        }
-
         class NamedChange
         {
             public GitObject Info { get; set; }

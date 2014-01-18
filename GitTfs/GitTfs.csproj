@@ -122,6 +122,8 @@
     <Compile Include="Commands\ListRemoteBranches.cs" />
     <Compile Include="Commands\Subtree.cs" />
     <Compile Include="Core\DirectoryTidier.cs" />
+    <Compile Include="Core\GitTreeBuilder.cs" />
+    <Compile Include="Core\IGitTreeBuilder.cs" />
     <Compile Include="Core\ITfsWorkitem.cs" />
     <Compile Include="Commands\Branch.cs" />
     <Compile Include="Core\BranchVisitors\BranchTreeContainsPathVisitor.cs" />
@@ -222,7 +224,6 @@
     <Compile Include="Core\Ext.cs" />
     <Compile Include="Core\GitCommandException.cs" />
     <Compile Include="Core\GitHelpers.cs" />
-    <Compile Include="Core\GitIndexInfo.cs" />
     <Compile Include="Core\GitRepository.cs" />
     <Compile Include="Core\GitTfsRemote.cs" />
     <Compile Include="Core\IGitHelpers.cs" />
