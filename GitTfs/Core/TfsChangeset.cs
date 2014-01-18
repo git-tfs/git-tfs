@@ -56,7 +56,15 @@ namespace Sep.Git.Tfs.Core
 
         private void Update(ApplicableChange change, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
-            treeBuilder.Add(change.GitPath, workspace.GetLocalPath(change.GitPath), change.Mode);
+            var localPath = workspace.GetLocalPath(change.GitPath);
+            if (File.Exists(localPath))
+            {
+                treeBuilder.Add(change.GitPath, localPath, change.Mode);
+            }
+            else
+            {
+                _stdout.WriteLine("Cannot checkout file '{0}' from TFS. Skip it", change.GitPath);
+            }
         }
 
         public IEnumerable<TfsTreeEntry> GetTree()
