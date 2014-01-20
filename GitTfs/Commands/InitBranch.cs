@@ -112,6 +112,7 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.OK;
         }
 
+        [DebuggerDisplay("{TfsRepositoryPath} C{RootChangesetId}")]
         class BranchDatas
         {
             public string TfsRepositoryPath { get; set; }
@@ -248,6 +249,17 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException("error: The Git branch name '" + gitBranchName + "' is not valid...\n");
             Trace.WriteLine("Git local branch will be :" + gitBranchName);
 
+            if (_globals.Repository.HasRemote(gitBranchName))
+            {
+                Trace.WriteLine("Remote already exist");
+                var remote = _globals.Repository.ReadTfsRemote(gitBranchName);
+                if (remote.TfsUrl != defaultRemote.TfsUrl)
+                    Trace.WriteLine("warning: Url is different");
+                if (remote.TfsRepositoryPath != tfsRepositoryPath)
+                    Trace.WriteLine("warning: TFS repository path is different");
+                return remote;
+            }
+
             Trace.WriteLine("Try creating remote...");
             var tfsRemote = _globals.Repository.CreateTfsRemote(new RemoteInfo
                 {
@@ -255,7 +267,7 @@ namespace Sep.Git.Tfs.Commands
                     Url = defaultRemote.TfsUrl,
                     Repository = tfsRepositoryPath,
                     RemoteOptions = _remoteOptions
-                }, System.String.Empty);
+                }, String.Empty);
 
             if (!_globals.Repository.CreateBranch(tfsRemote.RemoteRef, sha1RootCommit))
                 throw new GitTfsException("error: Fail to create remote branch ref file!");

@@ -76,7 +76,7 @@ namespace Sep.Git.Tfs.VsCommon
                 Trace.WriteLine("Found parent branch : " + tfsPathParentBranch);
 
                 var firstChangesetInBranchToCreate = VersionControl.QueryHistory(tfsPathBranchToCreate, VersionSpec.Latest, 0, RecursionType.Full,
-                    null, null, null, int.MaxValue, true, false, false).Cast<Changeset>().LastOrDefault();
+                    null, null, null, 1, false, false, false, true).Cast<Changeset>().FirstOrDefault();
 
                 if (firstChangesetInBranchToCreate == null)
                 {
@@ -97,9 +97,9 @@ namespace Sep.Git.Tfs.VsCommon
 
                     return rootChangesetInParentBranch.ChangesetId;
                 }
-                catch(VersionControlException)
+                catch (VersionControlException)
                 {
-                    throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to get merge changesets for " + tfsPathBranchToCreate);
+                    throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to query history for " + tfsPathBranchToCreate);
                 }
             }
             catch (FeatureNotSupportedException ex)
