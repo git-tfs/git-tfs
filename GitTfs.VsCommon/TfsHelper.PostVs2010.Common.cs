@@ -31,6 +31,30 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
+        public override IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
+        {
+            const int batchCount = 100;
+            var start = (int)startVersion;
+            Changeset[] changesets;
+            do
+            {
+                var startChangeset = new ChangesetVersionSpec(start);
+                changesets = Retry.Do(() => VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+                    null, startChangeset, null, batchCount, true, true, true, true)
+                    .Cast<Changeset>().ToArray());
+                if (changesets.Length > 0)
+                    start = changesets[changesets.Length - 1].ChangesetId + 1;
+
+                // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 
+                // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
+                for (int i = 0; i < changesets.Length; i++)
+                {
+                    yield return BuildTfsChangeset(changesets[i], remote);
+                    changesets[i] = null;
+                }
+            } while (changesets.Length == batchCount);
+        }
+
         public override IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
             return VersionControl.QueryRootBranchObjects(RecursionType.Full)

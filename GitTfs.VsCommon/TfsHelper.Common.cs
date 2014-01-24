@@ -115,11 +115,11 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _linking ?? (_linking = GetService<ILinking>()); }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
+        public virtual IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
         {
-            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+            var changesets = Retry.Do(() => VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                 null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true, true, true)
-                .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
+                .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray());
 
             // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 
             // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
@@ -194,7 +194,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        private ITfsChangeset BuildTfsChangeset(Changeset changeset, IGitTfsRemote remote)
+        protected ITfsChangeset BuildTfsChangeset(Changeset changeset, IGitTfsRemote remote)
         {
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
             tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };

@@ -312,13 +312,15 @@ namespace Sep.Git.Tfs.Core
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             var fetchResult = new FetchResult{IsSuccess = true};
-            var fetchedChangesets = FetchChangesets().ToList();
-            fetchResult.NewChangesetCount = fetchedChangesets.Count;
+            var fetchedChangesets = FetchChangesets();
+            int count = 0;
             foreach (var changeset in fetchedChangesets)
             {
+                count++;
                 var log = Apply(MaxCommitHash, changeset);
                 if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, log))
                 {
+                    fetchResult.NewChangesetCount = count;
                     fetchResult.IsSuccess = false;
                     fetchResult.LastFetchedChangesetId = MaxChangesetId;
                     return fetchResult;
@@ -333,6 +335,7 @@ namespace Sep.Git.Tfs.Core
                 ProcessChangeset(changeset, log);
                 DoGcIfNeeded();
             }
+            fetchResult.NewChangesetCount = count;
             return fetchResult;
         }
 
