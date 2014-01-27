@@ -26,9 +26,10 @@ namespace Sep.Git.Tfs.Core
             BaseChangesetId = _changeset.Changes.Max(c => c.Item.ChangesetId) - 1;
         }
 
-        public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace)
+        public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
         {
-            var initialTree = Summary.Remote.Repository.GetObjects(lastCommit);
+            if (initialTree.Empty())
+                Summary.Remote.Repository.GetObjects(lastCommit, initialTree);
             var resolver = new PathResolver(Summary.Remote, initialTree);
             var sieve = new ChangeSieve(_changeset, resolver);
             workspace.Get(_changeset.ChangesetId, sieve.GetChangesToFetch());
@@ -84,7 +85,7 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<TfsTreeEntry> GetFullTree()
         {
-            var treeInfo = Summary.Remote.Repository.GetObjects();
+            var treeInfo = Summary.Remote.Repository.CreateObjectsDictionary();
             var resolver = new PathResolver(Summary.Remote, treeInfo);
             
             IItem[] tfsItems;

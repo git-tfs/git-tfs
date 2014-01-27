@@ -6,7 +6,7 @@ namespace Sep.Git.Tfs.Core
     {
         TfsChangesetInfo Summary { get; }
         int BaseChangesetId { get; }
-        LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace);
+        LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree);
         LogEntry CopyTree(IGitTreeModifier treeBuilder, ITfsWorkspace workspace);
 
         /// <summary>

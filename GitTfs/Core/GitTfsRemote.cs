@@ -314,10 +314,11 @@ namespace Sep.Git.Tfs.Core
             var fetchResult = new FetchResult{IsSuccess = true};
             var fetchedChangesets = FetchChangesets();
             int count = 0;
+            var objects = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
             foreach (var changeset in fetchedChangesets)
             {
                 count++;
-                var log = Apply(MaxCommitHash, changeset);
+                var log = Apply(MaxCommitHash, changeset, objects);
                 if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, log))
                 {
                     fetchResult.NewChangesetCount = count;
@@ -553,17 +554,23 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private LogEntry Apply(string parent, ITfsChangeset changeset)
+        private LogEntry Apply(string parent, ITfsChangeset changeset, IDictionary<string, GitObject> entries)
         {
             LogEntry result = null;
             WithWorkspace(changeset.Summary, workspace =>
             {
                 var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(parent);
-                result = changeset.Apply(parent, treeBuilder, workspace);
+                result = changeset.Apply(parent, treeBuilder, workspace, entries);
                 result.Tree = treeBuilder.GetTree();
             });
             if (!String.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);
             return result;
+        }
+
+        private LogEntry Apply(string parent, ITfsChangeset changeset)
+        {
+            IDictionary<string, GitObject> entries = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
+            return Apply(parent, changeset, entries);
         }
 
         private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)

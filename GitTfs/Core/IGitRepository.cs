@@ -23,14 +23,15 @@ namespace Sep.Git.Tfs.Core
         TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId);
         TfsChangesetInfo GetTfsCommit(string sha);
         TfsChangesetInfo GetCurrentTfsCommit();
+        IDictionary<string, GitObject> CreateObjectsDictionary();
         IDictionary<string, GitObject> GetObjects(string commit);
+        IDictionary<string, GitObject> GetObjects(string commit, IDictionary<string, GitObject> initialTree);
         IGitTreeBuilder GetTreeBuilder(string commit);
         IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to);
         bool WorkingCopyHasUnstagedOrUncommitedChanges { get; }
         void CopyBlob(string sha, string outputFile);
         GitCommit GetCommit(string commitish);
         string GetCurrentCommit();
-        Dictionary<string, GitObject> GetObjects();
         string GetCommitMessage(string head, string parentCommitish);
         string AssertValidBranchName(string gitBranchName);
         bool CreateBranch(string gitBranchName, string target);
