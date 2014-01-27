@@ -64,7 +64,20 @@ namespace Sep.Git.Tfs.Commands
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
 
-                if (retVal == 0) fetch.Run(withBranches);
+                if (retVal == 0)
+                {
+                    fetch.Run(withBranches);
+
+                    try
+                    {
+                        globals.Repository.CommandNoisy("gc");
+                    }
+                    catch (Exception e)
+                    {
+                        Trace.WriteLine(e);
+                        stdout.WriteLine("Warning: `git gc` failed!");
+                    }
+                }
             }
             catch
             {

@@ -185,6 +185,16 @@ namespace Sep.Git.Tfs.Commands
                     }
                 } while (childBranchPaths.Any(b => !b.IsEntirelyFetched) && isSomethingDone);
 
+                try
+                {
+                    _globals.Repository.CommandNoisy("gc");
+                }
+                catch (Exception e)
+                {
+                    Trace.WriteLine(e);
+                    _stdout.WriteLine("Warning: `git gc` failed!");
+                }
+
                 if (childBranchPaths.Any(b => !b.IsEntirelyFetched))
                 {
                     _stdout.WriteLine("warning: Some Tfs branches could not have been initialized:");
@@ -192,7 +202,7 @@ namespace Sep.Git.Tfs.Commands
                     {
                         _stdout.WriteLine("- " + branchNotInited.TfsRepositoryPath);
                     }
-                    _stdout.WriteLine("\nPlease report this case to the git-tfs developpers! (report here : https://github.com/git-tfs/git-tfs/issues/461 )");
+                    _stdout.WriteLine("\nPlease report this case to the git-tfs developers! (report here : https://github.com/git-tfs/git-tfs/issues/461 )");
                 }
             }
             else
