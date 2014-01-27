@@ -325,7 +325,7 @@ namespace Sep.Git.Tfs.Core
             foreach (var changeset in fetchedChangesets)
             {
                 count++;
-                var log = Apply(MaxCommitHash, changeset);
+                var log = Apply(MaxCommitHash, changeset, objects);
                 if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
                 {
                     fetchResult.NewChangesetCount = count;
