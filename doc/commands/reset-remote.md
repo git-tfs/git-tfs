@@ -15,14 +15,13 @@ Usage: git-tfs reset-remote commit-sha1-ref
 
 ## Example
 
-To init `$/Project1` from your TFS 2010 server `tfs`
-into a new directory `Project1`, do this:
+To reset the remote containing the commit '3dcce821d7a' to this commit, do this:
 
-    git tfs reset-remote 3dcce821d7a20e6b2499cdd6f2f52ffbe8507be7
+    git tfs reset-remote 3dcce821d7a
 
-Due to an optimisation of git-tfs, you then have to fetch the changesets with the `--force` option:
+Due to an optimisation of git-tfs, you then have to reset also the local git branch (the wrong commits should not be in your local branch) and then fetch the changesets :
 
-    git tfs fetch --force
+    git tfs fetch
 
 ## Use cases
 
