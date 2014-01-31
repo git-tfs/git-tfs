@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
@@ -109,6 +110,21 @@ For more information, see https://github.com/git-tfs/git-tfs/issues/448 ");
         public int GcPeriod
         {
             get { return 200; }
+        }
+
+        public int Indent { get; set; }
+
+        public string IndentString
+        {
+            get
+            {
+                var strBuilder = new StringBuilder();
+                for (int i = 0; i < Indent; i++)
+                {
+                    strBuilder.Append("  ");
+                }
+                return strBuilder.ToString();
+            }
         }
     }
 }

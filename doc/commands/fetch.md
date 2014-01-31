@@ -19,13 +19,13 @@ The fetch command fetch all the new changesets from a TFS remote
           --authors=VALUE        Path to an Authors file to map TFS users to Git
                                    users
           --ignore-regex=VALUE   a regex of files to ignore
-          --no-metadata          leave out the 'git-tfs-id:' tag in commit
+          --no-metadata          Leave out the 'git-tfs-id:' tag in commit
                                    messages
                                    Use this when you're exporting from TFS and
                                    don't need to put data back into TFS.
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
-      --max-changesets=VALUE     The maximum number of changesets to fetch
+          --max-changesets=VALUE The maximum number of changesets to fetch
 ## Examples
 
 ### Simple
