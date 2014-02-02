@@ -34,9 +34,9 @@ namespace Sep.Git.Tfs.Core
             _treeDefinition.Remove(path);
         }
 
-        public string GetTree()
+        public Tree GetTree()
         {
-            return _objectDatabase.CreateTree(_treeDefinition).Sha;
+            return _objectDatabase.CreateTree(_treeDefinition);
         }
     }
 }

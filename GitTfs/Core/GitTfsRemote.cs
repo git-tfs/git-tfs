@@ -305,18 +305,24 @@ namespace Sep.Git.Tfs.Core
             public string ParentBranchTfsPath { get; set; }
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, int maxCount = int.MaxValue)
         {
-            return FetchWithMerge(-1, stopOnFailMergeCommit);
+            return FetchWithMerge(-1, maxCount, stopOnFailMergeCommit);
         }
 
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
+            return FetchWithMerge(mergeChangesetId, int.MaxValue, stopOnFailMergeCommit, parentCommitsHashes);
+        }
+
+        public IFetchResult FetchWithMerge(long mergeChangesetId, int maxCount, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        {
+            int count = 0;
             var fetchResult = new FetchResult{IsSuccess = true};
-            var fetchedChangesets = FetchChangesets().ToList();
-            fetchResult.NewChangesetCount = fetchedChangesets.Count;
+            var fetchedChangesets = FetchChangesets(maxCount);
             foreach (var changeset in fetchedChangesets)
             {
+                count++;
                 var log = Apply(MaxCommitHash, changeset);
                 if (changeset.IsMergeChangeset)
                 {
@@ -332,12 +338,15 @@ namespace Sep.Git.Tfs.Core
                     {
                         if (stopOnFailMergeCommit)
                         {
+                            fetchResult.NewChangesetCount = count;
                             fetchResult.IsSuccess = false;
                             fetchResult.LastFetchedChangesetId = MaxChangesetId;
+                            if (globals.Indent == 0)
+                                stdout.WriteLine();
                             return fetchResult;
                         }
 //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
-                        stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
+                        stdout.WriteLine(globals.IndentString + "warning: this changeset " + changeset.Summary.ChangesetId +
                         " is a merge changeset. But it can't have been managed accordingly because one of the parent changeset "
                         + parentChangesetId + " is not present in the repository! If you want to do it, fetch the branch containing this changeset before retrying...");
                     }
@@ -417,15 +426,27 @@ namespace Sep.Git.Tfs.Core
                     Repository.CreateNote(commitSha, metadatas.ToString(), log.AuthorName, log.AuthorEmail, log.Date);
                 DoGcIfNeeded();
             }
+            if (globals.Indent == 0)
+                stdout.WriteLine();
+            fetchResult.NewChangesetCount = count;
             return fetchResult;
         }
 
         private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit)
         {
-            var tfsRemotes = FindTfsRemoteOfChangeset(Tfs.GetChangeset(parentChangesetId));
-            foreach (var tfsRemote in tfsRemotes.Where(r=>string.Compare(r.TfsRepositoryPath, this.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase) != 0))
+            try
             {
-                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+                globals.Indent++;
+                var tfsRemotes = FindTfsRemoteOfChangeset(Tfs.GetChangeset(parentChangesetId));
+                foreach (var tfsRemote in tfsRemotes.Where(r => string.Compare(r.TfsRepositoryPath, this.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase) != 0))
+                {
+                    stdout.WriteLine(globals.IndentString + "Fetching from dependent TFS branch {0}...", tfsRemote.Id);
+                    var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+                }
+            }
+            finally
+            {
+                globals.Indent--;
             }
             return Repository.FindCommitHashByChangesetId(parentChangesetId);
         }
@@ -462,18 +483,18 @@ namespace Sep.Git.Tfs.Core
             DoGcIfNeeded();
         }
 
-        private IEnumerable<ITfsChangeset> FetchChangesets()
+        private IEnumerable<ITfsChangeset> FetchChangesets(int maxCount)
         {
-            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
+            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current " + (maxCount == int.MaxValue ? string.Empty : "(max " + maxCount + ")") + "...", "info");
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId == GetLatestChangeset().Summary.ChangesetId)
                 return Enumerable.Empty<ITfsChangeset>();
             
             if(!IsSubtreeOwner)
-                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this);
+                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, maxCount, this);
 
             return globals.Repository.GetSubtrees(this)
-                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, x))
+                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, maxCount, x))
                 .OrderBy(x => x.Summary.ChangesetId);
         }
 
@@ -507,7 +528,7 @@ namespace Sep.Git.Tfs.Core
 
         private void LogCurrentMapping()
         {
-            stdout.WriteLine("C" + MaxChangesetId + " = " + MaxCommitHash);
+            stdout.WriteLine(globals.IndentString + "C" + MaxChangesetId + " = " + MaxCommitHash);
         }
 
         private string TagPrefix
@@ -565,41 +586,17 @@ namespace Sep.Git.Tfs.Core
 
         private string Commit(LogEntry logEntry)
         {
-            string commitHash = null;
-            WithCommitHeaderEnv(logEntry, () => commitHash = WriteCommit(logEntry));
-            // TODO (maybe): StoreChangesetMetadata(commitInfo);
-            return commitHash;
+            logEntry.Log = BuildCommitMessage(logEntry.Log, logEntry.ChangesetId);
+            return Repository.Commit(logEntry).Sha;
         }
 
-        private string WriteCommit(LogEntry logEntry)
+        private string BuildCommitMessage(string tfsCheckinComment, long changesetId)
         {
-            // TODO (maybe): encode logEntry.Log according to 'git config --get i18n.commitencoding', if specified
-            //var commitEncoding = Repository.CommandOneline("config", "i18n.commitencoding");
-            //var encoding = LookupEncoding(commitEncoding) ?? Encoding.UTF8;
-            string commitHash = null;
-
-            //the remote to be associated with the commit might be a subtree, if it's null then it's not from a subtree.
-            var remote = logEntry.Remote ?? this;
-            Repository.CommandInputOutputPipe((procIn, procOut) =>
-                                                  {
-                                                      procIn.WriteLine(logEntry.Log);
-                                                      procIn.WriteLine(GitTfsConstants.TfsCommitInfoFormat, remote.TfsUrl,
-                                                                       remote.TfsRepositoryPath, logEntry.ChangesetId);
-                                                      procIn.Close();
-                                                      commitHash = ParseCommitInfo(procOut.ReadToEnd());
-                                                  }, BuildCommitCommand(logEntry));
-            return commitHash;
-        }
-
-        private string[] BuildCommitCommand(LogEntry logEntry)
-        {
-            var commitCommand = new List<string> { "commit-tree", logEntry.Tree };
-            foreach (var parent in logEntry.CommitParents)
-            {
-                commitCommand.Add("-p");
-                commitCommand.Add(parent);
-            }
-            return commitCommand.ToArray();
+            var builder = new StringWriter();
+            builder.WriteLine(tfsCheckinComment);
+            builder.WriteLine(GitTfsConstants.TfsCommitInfoFormat,
+                TfsUrl, TfsRepositoryPath, changesetId);
+            return builder.ToString();
         }
 
         private string ParseCommitInfo(string commitTreeOutput)

@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly InitBranch initBranch;
         private bool withBranches;
+        private int maxChangesets;
         private TextWriter stdout;
 
         public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout)
@@ -29,6 +30,7 @@ namespace Sep.Git.Tfs.Commands
             this.init = init;
             this.globals = globals;
             this.initBranch = initBranch;
+            this.maxChangesets = int.MaxValue;
             //[Temporary] Remove in the next version!
             if (initBranch != null)
                 initBranch.DontDisplayObsoleteMessage = true;
@@ -39,8 +41,13 @@ namespace Sep.Git.Tfs.Commands
         {
             get
             {
-                return init.OptionSet.Merge(fetch.OptionSet)
-                           .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null);
+                return new OptionSet
+                {
+                    { "with-branches", "init all the TFS branches during the clone",
+                        v => withBranches = v != null },
+                    { "max-changesets=", "A maximum number of changesets to fetch",
+                        (int v) => maxChangesets = (v == -1 ? int.MaxValue : v) }
+                }.Merge(init.OptionSet);
             }
         }
 
@@ -64,7 +71,11 @@ namespace Sep.Git.Tfs.Commands
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
 
-                if (retVal == 0) fetch.Run(withBranches);
+                if (retVal == 0 && !withBranches)
+                {
+                    fetch.MaxChangesets = maxChangesets;
+                    fetch.Run(withBranches);
+                }
             }
             catch
             {
@@ -95,6 +106,7 @@ namespace Sep.Git.Tfs.Commands
             if (withBranches && initBranch != null)
             {
                 initBranch.CloneAllBranches = true;
+                initBranch.MaxChangesets = maxChangesets;
                 retVal = initBranch.Run();
             }
             if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);

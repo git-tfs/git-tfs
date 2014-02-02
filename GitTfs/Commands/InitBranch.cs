@@ -31,6 +31,7 @@ namespace Sep.Git.Tfs.Commands
         public bool CloneAllBranches { get; set; }
         public bool NoFetch { get; set; }
         public bool DontCreateGitBranch { get; set; }
+        public int MaxChangesets { get; set; }
 
         public IGitTfsRemote RemoteCreated { get; private set; }
 
@@ -43,6 +44,7 @@ namespace Sep.Git.Tfs.Commands
             _globals = globals;
             _helper = helper;
             _authors = authors;
+            MaxChangesets = int.MaxValue;
         }
 
         public OptionSet OptionSet
@@ -57,7 +59,7 @@ namespace Sep.Git.Tfs.Commands
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "ignore-regex=", "a regex of files to ignore", v => IgnoreRegex = v },
                     { "except-regex=", "a regex of exceptions to ignore-regex", v => ExceptRegex = v},
-                    { "nofetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
+                    { "nofetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) },
                 };
             }
         }
@@ -153,16 +155,18 @@ namespace Sep.Git.Tfs.Commands
                     _stdout.WriteLine("- " + tfsBranchPath.TfsRepositoryPath);
                     tfsBranchPath.RootChangesetId = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath);
                 }
+                _stdout.WriteLine();
                 childBranchPaths.Add(new BranchDatas {TfsRepositoryPath = defaultRemote.TfsRepositoryPath, TfsRemote = defaultRemote, RootChangesetId = -1});
 
                 bool isSomethingDone;
+                int count = 0;
+                var maxChangesets = MaxChangesets;
                 do
                 {
                     isSomethingDone = false;
                     var branchesToFetch = childBranchPaths.Where(b => !b.IsEntirelyFetched).ToList();
                     foreach (var tfsBranch in branchesToFetch)
                     {
-                        Trace.WriteLine("=> Working on TFS branch : " + tfsBranch.TfsRepositoryPath);
                         if (tfsBranch.TfsRemote == null)
                         {
                             var sha1RootCommit = _globals.Repository.FindCommitHashByChangesetId(tfsBranch.RootChangesetId);
@@ -174,15 +178,19 @@ namespace Sep.Git.Tfs.Commands
                         }
                         if (tfsBranch.TfsRemote != null)
                         {
+                            _stdout.WriteLine("Fetching TFS branch : " + tfsBranch.TfsRemote.Id);
                             var lastFetchedChangesetId = tfsBranch.TfsRemote.MaxChangesetId;
-                            Trace.WriteLine("Fetching remote :" + tfsBranch.TfsRemote.Id);
-                            var fetchResult = FetchRemote(tfsBranch.TfsRemote, true);
+                            var fetchResult = FetchRemote(tfsBranch.TfsRemote, true, true, maxChangesets);
+                            count += fetchResult.NewChangesetCount;
+                            if (maxChangesets != int.MaxValue)
+                                maxChangesets -= fetchResult.NewChangesetCount;
                             tfsBranch.IsEntirelyFetched = fetchResult.IsSuccess;
                             if (lastFetchedChangesetId != fetchResult.LastFetchedChangesetId)
                                 isSomethingDone = true;
                         }
                     }
                 } while (childBranchPaths.Any(b => !b.IsEntirelyFetched) && isSomethingDone);
+                _stdout.WriteLine("Fetched changesets: {0}", count);
 
                 if (childBranchPaths.Any(b => !b.IsEntirelyFetched))
                 {
@@ -239,11 +247,9 @@ namespace Sep.Git.Tfs.Commands
             // TFS string representations of repository paths do not end in trailing slashes
             tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
-            string gitBranchName;
-            if (!string.IsNullOrWhiteSpace(gitBranchNameExpected))
-                gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(gitBranchNameExpected);
-            else
-                gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(tfsRepositoryPath);
+            if (string.IsNullOrWhiteSpace(gitBranchNameExpected))
+                gitBranchNameExpected = tfsRepositoryPath;
+            string gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(gitBranchNameExpected);
             if (string.IsNullOrWhiteSpace(gitBranchName))
                 throw new GitTfsException("error: The Git branch name '" + gitBranchName + "' is not valid...\n");
             Trace.WriteLine("Git local branch will be :" + gitBranchName);
@@ -264,10 +270,10 @@ namespace Sep.Git.Tfs.Commands
             return tfsRemote;
         }
 
-        private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true)
+        private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true, int maxCount = int.MaxValue)
         {
             Trace.WriteLine("Try fetching changesets...");
-            var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+            var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit, maxCount);
             Trace.WriteLine("Changesets fetched!");
 
             if (createBranch && fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
@@ -298,7 +304,7 @@ namespace Sep.Git.Tfs.Commands
             }
             gitBranchNameExpected = gitBranchNameExpected.ToGitRefName();
             var gitBranchName = _globals.Repository.AssertValidBranchName(gitBranchNameExpected);
-            _stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
+            Trace.WriteLine("The name of the local branch will be : " + gitBranchName);
             return gitBranchName;
         }
     }

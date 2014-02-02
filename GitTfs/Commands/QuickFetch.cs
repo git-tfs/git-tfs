@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
@@ -15,7 +16,8 @@ namespace Sep.Git.Tfs.Commands
     //  2. Load the correct set of extant casing.
     public class QuickFetch : Fetch
     {
-        public QuickFetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors) : base(globals, remoteOptions, authors, null)
+        public QuickFetch(Globals globals, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors)
+            : base(globals, stdout, remoteOptions, authors, null)
         {
         }
 

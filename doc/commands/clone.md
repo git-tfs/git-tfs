@@ -31,7 +31,8 @@ a TFS source tree and fetch all the changesets
 	  -l, --with-labels, --fetch-labels
 								 Fetch the labels also when fetching TFS changesets
 	  -x, --export               Export metadatas
-		  --with-branches        init all the TFS branches during the clone
+		  --with-branches        Init all the TFS branches during the clone
+          --max-changesets=VALUE The maximum number of changesets to fetch
 
 ## Examples
 

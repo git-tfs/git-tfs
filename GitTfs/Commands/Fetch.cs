@@ -18,24 +18,28 @@ namespace Sep.Git.Tfs.Commands
     public class Fetch : GitTfsCommand
     {
         private readonly RemoteOptions remoteOptions;
+        private readonly TextWriter stdout;
         private readonly Globals globals;
         private readonly AuthorsFile authors;
         private readonly Labels labels;
 
-        public Fetch(Globals globals, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
+        public Fetch(Globals globals, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
         {
-            this.remoteOptions = remoteOptions;
             this.globals = globals;
+            this.stdout = stdout;
+            this.remoteOptions = remoteOptions;
             this.authors = authors;
             this.labels = labels;
+            MaxChangesets = int.MaxValue;
         }
 
-        bool FetchAll { get; set; }
-        bool FetchLabels { get; set; }
-        bool FetchParents { get; set; }
-        string BareBranch { get; set; }
-        bool ForceFetch { get; set; }
-        bool ExportMetadatas { get; set; }
+        private bool FetchAll { get; set; }
+        private bool FetchLabels { get; set; }
+        private bool FetchParents { get; set; }
+        private string BareBranch { get; set; }
+        private bool ForceFetch { get; set; }
+        private bool ExportMetadatas { get; set; }
+        public int MaxChangesets { get; set; }
         string ExportMetadatasFile { get; set; }
 
         public virtual OptionSet OptionSet
@@ -56,6 +60,8 @@ namespace Sep.Git.Tfs.Commands
                         v => ForceFetch = v != null },
                     { "x|export", "Export metadatas",
                         v => ExportMetadatas = v != null },
+                    { "max-changesets=", "A maximum number of changesets to fetch",
+                        (int v) => MaxChangesets = (v == -1 ? int.MaxValue : v) },
                     { "export-work-item-mapping=", "Path to Work-items mapping export file",
                         v => ExportMetadatasFile = v },
                 }.Merge(remoteOptions.OptionSet);
@@ -88,12 +94,13 @@ namespace Sep.Git.Tfs.Commands
 
         private void FetchRemote(bool stopOnFailMergeCommit, IGitTfsRemote remote)
         {
-            Trace.WriteLine("Fetching from TFS remote " + remote.Id);
+            stdout.WriteLine("Fetching from TFS remote '{0}'...", remote.Id);
             DoFetch(remote, stopOnFailMergeCommit);
             if (labels != null && FetchLabels)
             {
-                Trace.WriteLine("Fetching labels from TFS remote " + remote.Id);
+                stdout.WriteLine("Fetching labels from TFS remote '{0}'...", remote.Id);
                 labels.Run(remote);
+                stdout.WriteLine();
             }
         }
 
@@ -158,7 +165,8 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
 
-            remote.Fetch(stopOnFailMergeCommit);
+            var result = remote.Fetch(stopOnFailMergeCommit, MaxChangesets);
+            stdout.WriteLine("Fetched changesets: {0}", result.NewChangesetCount);
 
             Trace.WriteLine("Cleaning...");
             remote.CleanupWorkspaceDirectory();
