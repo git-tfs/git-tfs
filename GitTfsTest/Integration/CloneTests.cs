@@ -55,7 +55,7 @@ namespace Sep.Git.Tfs.Test.Integration
                     .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr");
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
-            h.AssertCommitMessage("MyProject", "HEAD", "First commit\r\n\r\ngit-tfs-id: [" + h.TfsUrl + "]$/MyProject;C2\r\n");
+            h.AssertCommitMessage("MyProject", "HEAD", "First commit", "", "git-tfs-id: [" + h.TfsUrl + "]$/MyProject;C2");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
             AssertNewClone("MyProject", RefsInNewClone,
@@ -112,12 +112,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
 
-            var expectedCommitMessage = new System.Text.StringBuilder();
-            expectedCommitMessage.AppendLine("Blåbærsyltetøy");
-            expectedCommitMessage.AppendLine("");
-            expectedCommitMessage.AppendLine("git-tfs-id: [http://does/not/matter]$/MyProject;C2");
-
-            h.AssertCommitMessage("MyProject", "HEAD", expectedCommitMessage.ToString());
+            h.AssertCommitMessage("MyProject", "HEAD", "Blåbærsyltetøy", "", "git-tfs-id: [http://does/not/matter]$/MyProject;C2");
             AssertNewClone("MyProject", RefsInNewClone,
                 commit: "cd14e6e28abffd625412dae36d9d9659bf6cb68c",
                 tree: "3f8b26f2594b7ca2370388c99739e56a64954f00");

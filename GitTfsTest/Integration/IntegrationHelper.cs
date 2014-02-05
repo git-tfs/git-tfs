@@ -349,10 +349,24 @@ namespace Sep.Git.Tfs.Test.Integration
             Assert.Equal(expectedPaths.OrderBy(s => s), entries.OrderBy(s => s));
         }
 
-        public void AssertCommitMessage(string repodir, string commitish, string message)
+        public void AssertCommitMessage(string repodir, string commitish, params string [] expectedMessageLines)
         {
             var commit = Repository(repodir).Lookup<Commit>(commitish);
-            AssertEqual(message, commit.Message, "Commit message of " + commitish);
+            AssertEqual(expectedMessageLines, Lines(commit.Message), "Commit message of " + commitish);
+        }
+
+        private static string[] Lines(string s)
+        {
+            var result = new List<string>();
+            var reader = new StringReader(s);
+            while (true)
+            {
+                var line = reader.ReadLine();
+                if (line == null)
+                    break;
+                result.Add(line);
+            }
+            return result.ToArray();
         }
 
         public void AssertConfig<T>(string repodir, string key, T expectedValue)
