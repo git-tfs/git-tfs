@@ -1,4 +1,6 @@
-﻿namespace Sep.Git.Tfs.Core
+﻿using LibGit2Sharp;
+
+namespace Sep.Git.Tfs.Core
 {
     public interface IGitTreeModifier
     {
@@ -8,6 +10,6 @@
 
     public interface IGitTreeBuilder : IGitTreeModifier
     {
-        string GetTree();
+        Tree GetTree();
     }
 }

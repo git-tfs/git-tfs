@@ -18,6 +18,7 @@ namespace Sep.Git.Tfs.Core
         void DeleteTfsRemote(IGitTfsRemote remoteId);
         bool HasRemote(string remoteId);
         bool HasRef(string gitRef);
+        GitCommit Commit(LogEntry logEntry);
         void UpdateRef(string gitRefName, string commitSha, string message = null);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head);

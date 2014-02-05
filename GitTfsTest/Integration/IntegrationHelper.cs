@@ -292,9 +292,21 @@ namespace Sep.Git.Tfs.Test.Integration
             AssertEqual(expectedSha, RevParse(repodir, gitref), "Expected " + gitref + " to be " + expectedSha);
         }
 
+        public void AssertTree(string repodir, string gitref, string expectedTreeSha)
+        {
+            var commit = Repository(repodir).Lookup<Commit>(gitref);
+            Assert.NotNull(commit);
+            AssertEqual(expectedTreeSha, commit.Tree.Sha, "Expected tree at " + gitref + " to be " + expectedTreeSha);
+        }
+
+        public Commit RevParseCommit(string repodir, string gitref)
+        {
+            return Repository(repodir).Lookup<Commit>(gitref);
+        }
+
         private string RevParse(string repodir, string gitref)
         {
-            var parsed = Repository(repodir).Lookup<Commit>(gitref);
+            var parsed = RevParseCommit(repodir, gitref);
             return parsed == null ? null : parsed.Sha;
         }
 
@@ -337,10 +349,24 @@ namespace Sep.Git.Tfs.Test.Integration
             Assert.Equal(expectedPaths.OrderBy(s => s), entries.OrderBy(s => s));
         }
 
-        public void AssertCommitMessage(string repodir, string commitish, string message)
+        public void AssertCommitMessage(string repodir, string commitish, params string [] expectedMessageLines)
         {
             var commit = Repository(repodir).Lookup<Commit>(commitish);
-            AssertEqual(message, commit.Message, "Commit message of " + commitish);
+            AssertEqual(expectedMessageLines, Lines(commit.Message), "Commit message of " + commitish);
+        }
+
+        private static string[] Lines(string s)
+        {
+            var result = new List<string>();
+            var reader = new StringReader(s);
+            while (true)
+            {
+                var line = reader.ReadLine();
+                if (line == null)
+                    break;
+                result.Add(line);
+            }
+            return result.ToArray();
         }
 
         public void AssertConfig<T>(string repodir, string key, T expectedValue)
