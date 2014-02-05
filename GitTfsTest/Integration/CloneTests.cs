@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Xunit;
 
@@ -35,13 +36,10 @@ namespace Sep.Git.Tfs.Test.Integration
                     .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
-            h.AssertGitRepo("MyProject");
-            h.AssertTree("MyProject", "HEAD", "4b825dc642cb6eb9a060e54bf8d69288fbee4904");
-            const string expectedSha = "4053764b2868a2be71ae7f5f113ad84dff8a052a";
-            h.AssertRef("MyProject", "HEAD", expectedSha);
-            h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
             h.AssertEmptyWorkspace("MyProject");
+            AssertNewClone("MyProject", RefsInNewClone,
+                commit: "4053764b2868a2be71ae7f5f113ad84dff8a052a",
+                tree: "4b825dc642cb6eb9a060e54bf8d69288fbee4904");
         }
 
         [FactExceptOnUnix]
@@ -57,15 +55,12 @@ namespace Sep.Git.Tfs.Test.Integration
                     .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr");
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
-            h.AssertGitRepo("MyProject");
             h.AssertCommitMessage("MyProject", "HEAD", "First commit\r\n\r\ngit-tfs-id: [" + h.TfsUrl + "]$/MyProject;C2\r\n");
-            h.AssertTree("MyProject", "HEAD", "41ab05d8f2a0f7f7f3a39c623e94fee68f64797e");
-            const string expectedSha = "d64d883266eca65bede947c79529318718a0d8eb";
-            h.AssertRef("MyProject", "HEAD", expectedSha);
-            h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
+            AssertNewClone("MyProject", RefsInNewClone,
+                commit: "d64d883266eca65bede947c79529318718a0d8eb",
+                tree: "41ab05d8f2a0f7f7f3a39c623e94fee68f64797e");
         }
 
         [FactExceptOnUnix]
@@ -80,10 +75,10 @@ namespace Sep.Git.Tfs.Test.Integration
                     .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/ÆØÅ/äöü.txt", "File contents");
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
-            h.AssertGitRepo("MyProject");
-            h.AssertTree("MyProject", "HEAD", "14f207f532105e6df76cf69d6481d84b9e5b17ad");
-            AssertRefs("4faa9a5f32e6af118b84071a537228d3f7da7d9d");
             h.AssertFileInWorkspace("MyProject", "ÆØÅ/äöü.txt", "File contents");
+            AssertNewClone("MyProject", RefsInNewClone,
+                commit: "4faa9a5f32e6af118b84071a537228d3f7da7d9d",
+                tree: "14f207f532105e6df76cf69d6481d84b9e5b17ad");
         }
 
         [FactExceptOnUnix]
@@ -98,10 +93,10 @@ namespace Sep.Git.Tfs.Test.Integration
                     .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "Blåbærsyltetøy er godt!"); // "Blueberry jam is tasty!"
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
-            h.AssertGitRepo("MyProject");
-            h.AssertTree("MyProject", "HEAD", "57336850a107184ca05911c9ac6cba8d1fd212fc");
-            AssertRefs("5bd7660fa145ce0c38b5c279502478ce205a0cfb");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "Blåbærsyltetøy er godt!");
+            AssertNewClone("MyProject", RefsInNewClone,
+                commit: "5bd7660fa145ce0c38b5c279502478ce205a0cfb",
+                tree: "57336850a107184ca05911c9ac6cba8d1fd212fc");
         }
 
         [FactExceptOnUnix]
@@ -116,10 +111,6 @@ namespace Sep.Git.Tfs.Test.Integration
                     .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "File contents");
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
-            h.AssertGitRepo("MyProject");
-            h.AssertTree("MyProject", "HEAD", "3f8b26f2594b7ca2370388c99739e56a64954f00");
-            AssertRefs("cd14e6e28abffd625412dae36d9d9659bf6cb68c");
-            h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
 
             var expectedCommitMessage = new System.Text.StringBuilder();
             expectedCommitMessage.AppendLine("Blåbærsyltetøy");
@@ -127,13 +118,9 @@ namespace Sep.Git.Tfs.Test.Integration
             expectedCommitMessage.AppendLine("git-tfs-id: [http://does/not/matter]$/MyProject;C2");
 
             h.AssertCommitMessage("MyProject", "HEAD", expectedCommitMessage.ToString());
-        }
-
-        private void AssertRefs(string expectedSha)
-        {
-            h.AssertRef("MyProject", "HEAD", expectedSha);
-            h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
+            AssertNewClone("MyProject", RefsInNewClone,
+                commit: "cd14e6e28abffd625412dae36d9d9659bf6cb68c",
+                tree: "3f8b26f2594b7ca2370388c99739e56a64954f00");
         }
 
         [FactExceptOnUnix]
@@ -152,10 +139,10 @@ namespace Sep.Git.Tfs.Test.Integration
                     .Change(TfsChangeType.Add, TfsItemType.File, "$/myproject/FOO/bar/file2.txt", "Another file in the same folder, but with different casing");
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
-            h.AssertGitRepo("MyProject");
             h.AssertCleanWorkspace("MyProject");
-            h.AssertTree("MyProject", "HEAD", "c962b51eb5397f1b98f662c9d43e6be13b7065f1");
-            AssertRefs("175420603e41cd0175e3c25581754726bd21cb96");
+            AssertNewClone("MyProject", RefsInNewClone,
+                commit: "175420603e41cd0175e3c25581754726bd21cb96",
+                tree: "c962b51eb5397f1b98f662c9d43e6be13b7065f1");
         }
 
         [FactExceptOnUnix]
@@ -192,16 +179,38 @@ namespace Sep.Git.Tfs.Test.Integration
 
             h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--with-branches");
 
-            h.AssertGitRepo("MyProject");
-            h.AssertTree("MyProject", "HEAD", "cf8a497b3a40028bee363a613fe156b9d37350bb");
-            const string expectedSha = "be59d37d08a0cc78916f04a256dc52f6722f800c";
-            h.AssertRef("MyProject", "HEAD", expectedSha);
-            h.AssertRef("MyProject", "master", expectedSha);
-            h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
-            const string expectedShaBranch = "0df2815a74403cfe96ccb96e3f995970f55df2b4";
-            h.AssertRef("MyProject", "Branch", expectedShaBranch);
-            h.AssertRef("MyProject", "refs/remotes/tfs/Branch", expectedShaBranch);
             h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
+            AssertNewClone("MyProject", RefsInNewClone,
+                commit: "be59d37d08a0cc78916f04a256dc52f6722f800c",
+                tree: "cf8a497b3a40028bee363a613fe156b9d37350bb");
+            AssertNewClone("MyProject", new[] { "refs/heads/Branch", "refs/remotes/tfs/Branch" },
+                commit: "0df2815a74403cfe96ccb96e3f995970f55df2b4",
+                tree: "c379179fee2ce45e44a5a2dd1d9bcf5ce8489608");
+        }
+
+        private readonly string[] RefsInNewClone = new[] { "HEAD", "refs/heads/master", "refs/remotes/tfs/default" };
+
+        /// <summary>
+        /// Verify repo layout.
+        /// The tree verifies the correctness of the filenames and contents.
+        /// The commit verifies the correctness of the commit message, author, and date, too.
+        /// </summary>
+        /// <param name="repodir">The repo dir.</param>
+        /// <param name="refs">Refs to inspect</param>
+        /// <param name="commit">(optional) The expected commit sha.</param>
+        /// <param name="tree">(optional) The expected tree sha.</param>
+        private void AssertNewClone(string repodir, string[] refs, string commit = null, string tree = null)
+        {
+            const string format = "{0}: {1} / {2}";
+            var expected = String.Join("\n", refs.Select(gitref => String.Format(format, gitref, commit, tree)));
+            var actual = String.Join("\n", refs.Select(gitref =>
+            {
+                var actualCommit = h.RevParseCommit(repodir, gitref);
+                return String.Format(format, gitref,
+                    commit == null || actualCommit == null ? null : actualCommit.Sha,
+                    tree == null || actualCommit == null ? null : actualCommit.Tree.Sha);
+            }));
+            Assert.Equal(expected, actual);
         }
 
         #region ignore regexes
