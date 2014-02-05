@@ -37,7 +37,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Run("init", "http://my-tfs.local/tfs", "$/MyProject", "MyProject");
             h.SetConfig("MyProject", "tfs-remote.default.autotag", "true");
             h.RunIn("MyProject", "fetch");
-            var expectedSha = "f8b247c3298f4189c6c9ff701f147af6e1428f97";
+            var expectedSha = "d2193af29826b7e755a17dffa0c2d7f9776fc2e2";
             h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
             h.AssertRef("MyProject", "refs/tags/tfs/default/C1", expectedSha);
         }

@@ -38,7 +38,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertEmptyWorkspace("MyProject");
             AssertNewClone("MyProject", RefsInNewClone,
-                commit: "4053764b2868a2be71ae7f5f113ad84dff8a052a",
+                commit: "db32a67aafa0a85ae2107e3210da9611f06c1c30",
                 tree: "4b825dc642cb6eb9a060e54bf8d69288fbee4904");
         }
 
@@ -59,7 +59,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
             h.AssertFileInWorkspace("MyProject", "README", "tldr");
             AssertNewClone("MyProject", RefsInNewClone,
-                commit: "d64d883266eca65bede947c79529318718a0d8eb",
+                commit: "26fe80d7ac739585ce69cdef04191ec7572fee7b",
                 tree: "41ab05d8f2a0f7f7f3a39c623e94fee68f64797e");
         }
 
@@ -77,7 +77,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertFileInWorkspace("MyProject", "ÆØÅ/äöü.txt", "File contents");
             AssertNewClone("MyProject", RefsInNewClone,
-                commit: "4faa9a5f32e6af118b84071a537228d3f7da7d9d",
+                commit: "337ee1fa394729ddf758c3832bc5f05f38ebc52a",
                 tree: "14f207f532105e6df76cf69d6481d84b9e5b17ad");
         }
 
@@ -95,7 +95,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "Blåbærsyltetøy er godt!");
             AssertNewClone("MyProject", RefsInNewClone,
-                commit: "5bd7660fa145ce0c38b5c279502478ce205a0cfb",
+                commit: "7ffa44247e0b3aa6272e3f15c8bdfd8c1ef94771",
                 tree: "57336850a107184ca05911c9ac6cba8d1fd212fc");
         }
 
@@ -114,7 +114,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             h.AssertCommitMessage("MyProject", "HEAD", "Blåbærsyltetøy", "", "git-tfs-id: [http://does/not/matter]$/MyProject;C2");
             AssertNewClone("MyProject", RefsInNewClone,
-                commit: "cd14e6e28abffd625412dae36d9d9659bf6cb68c",
+                commit: "a350378a2d054a81b641f0af8d2c294fa81ca82c",
                 tree: "3f8b26f2594b7ca2370388c99739e56a64954f00");
         }
 
@@ -136,7 +136,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertCleanWorkspace("MyProject");
             AssertNewClone("MyProject", RefsInNewClone,
-                commit: "175420603e41cd0175e3c25581754726bd21cb96",
+                commit: "10271dedb9729b1b0940113772526d149539dd8e",
                 tree: "c962b51eb5397f1b98f662c9d43e6be13b7065f1");
         }
 
@@ -176,10 +176,10 @@ namespace Sep.Git.Tfs.Test.Integration
 
             h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
             AssertNewClone("MyProject", RefsInNewClone,
-                commit: "be59d37d08a0cc78916f04a256dc52f6722f800c",
+                commit: "e04652ded438d48f5a6c24106caf798b478a26b4",
                 tree: "cf8a497b3a40028bee363a613fe156b9d37350bb");
             AssertNewClone("MyProject", new[] { "refs/heads/Branch", "refs/remotes/tfs/Branch" },
-                commit: "0df2815a74403cfe96ccb96e3f995970f55df2b4",
+                commit: "278756339885c299f7d9312bfcda6454b57f7db9",
                 tree: "c379179fee2ce45e44a5a2dd1d9bcf5ce8489608");
         }
 
