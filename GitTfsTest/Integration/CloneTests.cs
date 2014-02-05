@@ -36,6 +36,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
+            h.AssertTree("MyProject", "HEAD", "4b825dc642cb6eb9a060e54bf8d69288fbee4904");
             const string expectedSha = "4053764b2868a2be71ae7f5f113ad84dff8a052a";
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
@@ -58,6 +59,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
             h.AssertCommitMessage("MyProject", "HEAD", "First commit\r\n\r\ngit-tfs-id: [" + h.TfsUrl + "]$/MyProject;C2\r\n");
+            h.AssertTree("MyProject", "HEAD", "41ab05d8f2a0f7f7f3a39c623e94fee68f64797e");
             const string expectedSha = "d64d883266eca65bede947c79529318718a0d8eb";
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);
@@ -79,6 +81,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
+            h.AssertTree("MyProject", "HEAD", "14f207f532105e6df76cf69d6481d84b9e5b17ad");
             AssertRefs("4faa9a5f32e6af118b84071a537228d3f7da7d9d");
             h.AssertFileInWorkspace("MyProject", "ÆØÅ/äöü.txt", "File contents");
         }
@@ -96,6 +99,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
+            h.AssertTree("MyProject", "HEAD", "57336850a107184ca05911c9ac6cba8d1fd212fc");
             AssertRefs("5bd7660fa145ce0c38b5c279502478ce205a0cfb");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "Blåbærsyltetøy er godt!");
         }
@@ -113,6 +117,7 @@ namespace Sep.Git.Tfs.Test.Integration
             });
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
+            h.AssertTree("MyProject", "HEAD", "3f8b26f2594b7ca2370388c99739e56a64954f00");
             AssertRefs("cd14e6e28abffd625412dae36d9d9659bf6cb68c");
             h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
 
@@ -149,6 +154,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject");
             h.AssertGitRepo("MyProject");
             h.AssertCleanWorkspace("MyProject");
+            h.AssertTree("MyProject", "HEAD", "c962b51eb5397f1b98f662c9d43e6be13b7065f1");
             AssertRefs("175420603e41cd0175e3c25581754726bd21cb96");
         }
 
@@ -187,6 +193,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--with-branches");
 
             h.AssertGitRepo("MyProject");
+            h.AssertTree("MyProject", "HEAD", "cf8a497b3a40028bee363a613fe156b9d37350bb");
             const string expectedSha = "be59d37d08a0cc78916f04a256dc52f6722f800c";
             h.AssertRef("MyProject", "HEAD", expectedSha);
             h.AssertRef("MyProject", "master", expectedSha);

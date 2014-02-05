@@ -292,6 +292,13 @@ namespace Sep.Git.Tfs.Test.Integration
             AssertEqual(expectedSha, RevParse(repodir, gitref), "Expected " + gitref + " to be " + expectedSha);
         }
 
+        public void AssertTree(string repodir, string gitref, string expectedTreeSha)
+        {
+            var commit = Repository(repodir).Lookup<Commit>(gitref);
+            Assert.NotNull(commit);
+            AssertEqual(expectedTreeSha, commit.Tree.Sha, "Expected tree at " + gitref + " to be " + expectedTreeSha);
+        }
+
         private string RevParse(string repodir, string gitref)
         {
             var parsed = Repository(repodir).Lookup<Commit>(gitref);
