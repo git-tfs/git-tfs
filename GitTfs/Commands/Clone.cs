@@ -78,7 +78,7 @@ namespace Sep.Git.Tfs.Commands
                 }
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
-            }
+                }
             catch
             {
                 if (!resumable)
@@ -111,6 +111,9 @@ namespace Sep.Git.Tfs.Commands
             bool errorOccurs = false;
             try
             {
+                if (withBranches && initBranch != null)
+                    fetch.IgnoreBranches = false;
+
                 if (retVal == 0)
                 {
                     fetch.Run(withBranches);
@@ -120,7 +123,6 @@ namespace Sep.Git.Tfs.Commands
                 if (withBranches && initBranch != null)
                 {
                     initBranch.CloneAllBranches = true;
-                    globals.Repository.SetConfig(GitTfsConstants.AutoInitBranches, true.ToString());
 
                     retVal = initBranch.Run();
                 }
