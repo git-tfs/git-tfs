@@ -73,7 +73,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         protected override bool HasWorkItems(Changeset changeset)
         {
-            return changeset.AssociatedWorkItems.Length > 0;
+            return Retry.Do(() => changeset.AssociatedWorkItems.Length > 0);
         }
 
         public override bool CanShowCheckinDialog { get { return true; } }

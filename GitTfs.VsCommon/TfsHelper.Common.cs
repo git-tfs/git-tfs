@@ -238,7 +238,7 @@ namespace Sep.Git.Tfs.VsCommon
             WorkItem[] result = null;
             try
             {
-                result = changeset.WorkItems;
+                result = Retry.Do(() => changeset.WorkItems);
             }
             catch (ConnectionException exception)
             {
