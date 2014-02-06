@@ -4,3 +4,4 @@
 * Support custom checkin notes (#520)
 * Use LibGit2Sharp to create commits (#534)
 * Other documentation and bug fixes (#487, #521, #523, #527)
+* Problems between a git repo cloned with older versions of Git-Tfs and vNext (#534)
