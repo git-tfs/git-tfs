@@ -633,7 +633,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IIdentity GetIdentity(string username)
         {
-            return _bridge.Wrap<WrapperForIdentity, Identity>(GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None));
+            return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
         }
 
         public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
