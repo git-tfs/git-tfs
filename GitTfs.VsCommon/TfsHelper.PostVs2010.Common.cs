@@ -115,7 +115,7 @@ namespace Sep.Git.Tfs.VsCommon
         /// properties with different semantics, depending on what it needs to describe, so the strategy to determine
         /// whether we are interested in a given ExtendedMerge summary depends on the SourceItem's <see cref="ChangeType"/>.
         /// </remarks>
-        /// <returns><value>True</value> if the given <paramref name="merge"/> is relevant; <value>False</value> otherwise.
+        /// <returns>the <see cref="ChangesetSummary"/> of the changeset found.
         /// </returns>
         private static ChangesetSummary GetRelevantChangesetBasedOnChangeType(IEnumerable<ExtendedMerge> merges, string tfsPathParentBranch, string tfsPathBranchToCreate)
         {
