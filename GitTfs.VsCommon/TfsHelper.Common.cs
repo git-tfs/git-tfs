@@ -714,23 +714,42 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
         {
-            var labels = VersionControl.QueryLabels(nameFilter, tfsPathBranch, null, true, tfsPathBranch, VersionSpec.Latest);
-
-            return labels.Select(e => new TfsLabel {
-                Id = e.LabelId,
-                Name = e.Name,
-                Comment = e.Comment,
-                ChangesetId = e.Items.Where(i=>i.ServerItem.IndexOf(tfsPathBranch) == 0).OrderByDescending(i=>i.ChangesetId).First().ChangesetId,
-                Owner = e.OwnerName,
-                Date = e.LastModifiedDate,
-                IsTransBranch = (e.Items.FirstOrDefault(i => i.ServerItem.IndexOf(tfsPathBranch) != 0) != null)
-            });
+            foreach (var labelDefinition in VersionControl.QueryLabels(nameFilter, tfsPathBranch, null, false, tfsPathBranch, VersionSpec.Latest))
+            {
+                var label = VersionControl.QueryLabels(labelDefinition.Name, tfsPathBranch, null, true, tfsPathBranch, VersionSpec.Latest).FirstOrDefault();
+                if (label == null)
+                {
+                    throw new GitTfsException("error: data for the label '" + labelDefinition.Name + "' can't be loaded!");
+                }
+                var tfsLabel = new TfsLabel
+                    {
+                        Id = label.LabelId,
+                        Name = label.Name,
+                        Comment = label.Comment,
+                        Owner = label.OwnerName,
+                        Date = label.LastModifiedDate,
+                    };
+                foreach (var item in label.Items)
+                {
+                    if (item.ServerItem.StartsWith(tfsPathBranch))
+                    {
+                        if (item.ChangesetId > tfsLabel.ChangesetId)
+                        {
+                            tfsLabel.ChangesetId = item.ChangesetId;
+                        }
+                    }
+                    else
+                    {
+                        tfsLabel.IsTransBranch = true;
+                    }
+                }
+                yield return tfsLabel;
+            }
         }
 
         public virtual void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)
         {
             throw new NotImplementedException();
-            
         }
 
         public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder)
