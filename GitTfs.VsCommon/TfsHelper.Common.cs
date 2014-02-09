@@ -276,22 +276,24 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory));
-            try
+            Workspace workspace;
+            if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
-                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
-                    .With("remote").EqualTo(remote)
-                    .With("contextVersion").EqualTo(versionToFetch)
-                    .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
-                    .With("tfsHelper").EqualTo(this)
-                    .GetInstance<TfsWorkspace>();
-                action(tfsWorkspace);
+                Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
+                _workspaces.Add(remote.Id, workspace = GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
+                Janitor.CleanThisUpWhenWeClose(() =>
+                {
+                    Trace.WriteLine("Deleting workspace " + workspace.Name);
+                    workspace.Delete();
+                });
             }
-            finally
-            {
-                workspace.Delete();
-            }
+            var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
+                .With("remote").EqualTo(remote)
+                .With("contextVersion").EqualTo(versionToFetch)
+                .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                .With("tfsHelper").EqualTo(this)
+                .GetInstance<TfsWorkspace>();
+            action(tfsWorkspace);
         }
 
         private Workspace GetWorkspace(params WorkingFolder[] folders)
