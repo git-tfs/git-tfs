@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
-using Sep.Git.Tfs.Core.BranchVisitors;
+﻿using Sep.Git.Tfs.Core.BranchVisitors;
 using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Test.Commands;
 using Sep.Git.Tfs.VsFake;
 using Xunit;
 

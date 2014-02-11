@@ -6,7 +6,6 @@ using System.Linq;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.BranchVisitors;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 

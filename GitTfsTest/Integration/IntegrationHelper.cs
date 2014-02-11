@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using LibGit2Sharp;
 using Sep.Git.Tfs.Core;
@@ -250,15 +248,6 @@ namespace Sep.Git.Tfs.Test.Integration
             return arg;
         }
 
-        private string CurrentBuildPath
-        {
-            get
-            {
-                var path = new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath;
-                return Path.GetDirectoryName(path);
-            }
-        }
-
         public void ChangeConfigSetting(string repodir, string key, string value)
         {
             var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
@@ -308,11 +297,6 @@ namespace Sep.Git.Tfs.Test.Integration
         {
             var parsed = RevParseCommit(repodir, gitref);
             return parsed == null ? null : parsed.Sha;
-        }
-
-        private string ReadIfPresent(string path)
-        {
-            return File.Exists(path) ? File.ReadAllText(path).Trim() : null;
         }
 
         public void AssertEmptyWorkspace(string repodir)

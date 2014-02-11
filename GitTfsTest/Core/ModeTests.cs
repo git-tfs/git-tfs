@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Sep.Git.Tfs.Core;
-using LibGit2Sharp;
 using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core

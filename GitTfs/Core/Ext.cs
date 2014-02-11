@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,8 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using NDesk.Options;
-using StructureMap;
 using Sep.Git.Tfs.Commands;
+using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Sep.Git.Tfs.Core;
+
 namespace Sep.Git.Tfs.VsFake
 {
     class TfsPlugin : Sep.Git.Tfs.Core.TfsInterop.TfsPlugin

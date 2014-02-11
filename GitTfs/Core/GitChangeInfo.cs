@@ -120,16 +120,6 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private static string replaceUnicode(Match match)
-        {
-            return char.ConvertFromUtf32(Convert.ToInt32(match.Value.Substring(1), 8));
-        }
-
-        private static string getPathFromMatch(Match match, string quotName, string pathName)
-        {
-            return match.Groups[pathName].Value;
-        }
-
         private readonly Match _match;
 
         private GitChangeInfo(Match match)

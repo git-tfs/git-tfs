@@ -124,7 +124,7 @@ namespace Sep.Git.Tfs.Commands
         }
     }
 
-    public static partial class Ext
+    public static class Ext
     {
         static Regex ValidTfsPath = new Regex("^\\$/.+");
         public static void AssertValidTfsPath(this string tfsPath)

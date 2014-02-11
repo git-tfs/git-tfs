@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
