@@ -258,7 +258,7 @@ namespace Sep.Git.Tfs.VsCommon
             if (!_workspaces.TryGetValue(workspaceKey, out workspace))
             {
                 Trace.WriteLine("Setting up a TFS workspace (" + workspaceKey + ").");
-                _workspaces.Add(workspaceKey, workspace = GetWorkspace(folders));
+                _workspaces.Add(workspaceKey, workspace = CreateWorkspace(folders));
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
                     Trace.WriteLine("Deleting workspace " + workspace.Name);
@@ -291,12 +291,12 @@ namespace Sep.Git.Tfs.VsCommon
             return remote.Id + "::" + string.Join("//", folders.Select(folder => folder.ServerItem + ">>" + folder.LocalItem));
         }
 
-        private Workspace GetWorkspace(WorkingFolder folder)
+        private Workspace CreateWorkspace(WorkingFolder folder)
         {
-            return GetWorkspace(new[] { folder });
+            return CreateWorkspace(new[] { folder });
         }
 
-        private Workspace GetWorkspace(IEnumerable<WorkingFolder> folders)
+        private Workspace CreateWorkspace(IEnumerable<WorkingFolder> folders)
         {
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
             try
@@ -756,7 +756,7 @@ namespace Sep.Git.Tfs.VsCommon
                                 });
                 }
 
-                workspace = GetWorkspace(new WorkingFolder(projectPath, gitRepositoryPath));
+                workspace = CreateWorkspace(new WorkingFolder(projectPath, gitRepositoryPath));
                 if (!Directory.Exists(directoryForBranch))
                     Directory.CreateDirectory(directoryForBranch);
                 workspace.PendAdd(directoryForBranch);
