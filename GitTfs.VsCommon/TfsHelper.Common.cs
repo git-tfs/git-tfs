@@ -275,11 +275,6 @@ namespace Sep.Git.Tfs.VsCommon
             action(tfsWorkspace);
         }
 
-        private string WorkspaceKeyFor(IGitTfsRemote remote, IEnumerable<WorkingFolder> folders)
-        {
-            return remote.Id + "::" + string.Join("//", folders.Select(folder => folder.ServerItem + ">>" + folder.LocalItem));
-        }
-
         private Workspace FindOrCreateWorkspace(IGitTfsRemote remote, IEnumerable<WorkingFolder> folders)
         {
             Workspace workspace;
@@ -295,6 +290,11 @@ namespace Sep.Git.Tfs.VsCommon
                 });
             }
             return workspace;
+        }
+
+        private string WorkspaceKeyFor(IGitTfsRemote remote, IEnumerable<WorkingFolder> folders)
+        {
+            return remote.Id + "::" + string.Join("//", folders.Select(folder => folder.ServerItem + ">>" + folder.LocalItem));
         }
 
         private Workspace CreateWorkspace(WorkingFolder folder)
