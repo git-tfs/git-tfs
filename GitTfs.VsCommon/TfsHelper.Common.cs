@@ -254,11 +254,12 @@ namespace Sep.Git.Tfs.VsCommon
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Workspace workspace;
-            if (!_workspaces.TryGetValue(remote.Id, out workspace))
+            var workspaceKey = WorkspaceKeyFor(remote, mappings);
+            if (!_workspaces.TryGetValue(workspaceKey, out workspace))
             {
                 Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
                 var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
-                _workspaces.Add(remote.Id, workspace = GetWorkspace(folders));
+                _workspaces.Add(workspaceKey, workspace = GetWorkspace(folders));
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
                     Trace.WriteLine("Deleting workspace " + workspace.Name);
@@ -294,6 +295,11 @@ namespace Sep.Git.Tfs.VsCommon
                 .With("tfsHelper").EqualTo(this)
                 .GetInstance<TfsWorkspace>();
             action(tfsWorkspace);
+        }
+
+        private string WorkspaceKeyFor(IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings)
+        {
+            return remote.Id + "::" + string.Join("//", mappings.Select(mapping => mapping.Item1 + ">>" + mapping.Item2));
         }
 
         private Workspace GetWorkspace(params WorkingFolder[] folders)
