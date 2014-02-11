@@ -251,14 +251,13 @@ namespace Sep.Git.Tfs.VsCommon
 
         Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
-        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
+        private void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<WorkingFolder> folders, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Workspace workspace;
-            var workspaceKey = WorkspaceKeyFor(remote, mappings);
+            var workspaceKey = WorkspaceKeyFor(remote, folders);
             if (!_workspaces.TryGetValue(workspaceKey, out workspace))
             {
-                Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
-                var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
+                Trace.WriteLine("Setting up a TFS workspace (" + workspaceKey + ").");
                 _workspaces.Add(workspaceKey, workspace = GetWorkspace(folders));
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
@@ -275,34 +274,29 @@ namespace Sep.Git.Tfs.VsCommon
             action(tfsWorkspace);
         }
 
+        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
+        {
+            var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
+            WithWorkspace(localDirectory, remote, folders, versionToFetch, action);
+        }
+
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            Workspace workspace;
-            if (!_workspaces.TryGetValue(remote.Id, out workspace))
-            {
-                Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
-                _workspaces.Add(remote.Id, workspace = GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
-                Janitor.CleanThisUpWhenWeClose(() =>
-                {
-                    Trace.WriteLine("Deleting workspace " + workspace.Name);
-                    workspace.Delete();
-                });
-            }
-            var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
-                .With("remote").EqualTo(remote)
-                .With("contextVersion").EqualTo(versionToFetch)
-                .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
-                .With("tfsHelper").EqualTo(this)
-                .GetInstance<TfsWorkspace>();
-            action(tfsWorkspace);
+            var folders = new[] { new WorkingFolder(remote.TfsRepositoryPath, localDirectory) };
+            WithWorkspace(localDirectory, remote, folders, versionToFetch, action);
         }
 
-        private string WorkspaceKeyFor(IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings)
+        private string WorkspaceKeyFor(IGitTfsRemote remote, IEnumerable<WorkingFolder> folders)
         {
-            return remote.Id + "::" + string.Join("//", mappings.Select(mapping => mapping.Item1 + ">>" + mapping.Item2));
+            return remote.Id + "::" + string.Join("//", folders.Select(folder => folder.ServerItem + ">>" + folder.LocalItem));
         }
 
-        private Workspace GetWorkspace(params WorkingFolder[] folders)
+        private Workspace GetWorkspace(WorkingFolder folder)
+        {
+            return GetWorkspace(new[] { folder });
+        }
+
+        private Workspace GetWorkspace(IEnumerable<WorkingFolder> folders)
         {
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
             try
