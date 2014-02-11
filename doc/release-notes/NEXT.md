@@ -3,5 +3,6 @@
 * Don't fetch files from TFS if we're going to ignore them (#519)
 * Support custom checkin notes (#520)
 * Use LibGit2Sharp to create commits (#534)
+* Clean up TFS workspaces more of the time (#541, #545)
 * Other documentation and bug fixes (#487, #521, #523, #527)
 * Problems between a git repo cloned with older versions of Git-Tfs and vNext (#534)
