@@ -38,9 +38,10 @@ namespace Sep.Git.Tfs.Core
         {
             var parents = logEntry.CommitParents.Select(sha => _repository.Lookup<Commit>(sha));
             var commit = _repository.ObjectDatabase.CreateCommit(
+                new Signature(logEntry.AuthorName, logEntry.AuthorEmail, logEntry.Date.ToUniversalTime()),
+                new Signature(logEntry.CommitterName, logEntry.CommitterEmail, logEntry.Date.ToUniversalTime()),
                 logEntry.Log,
-                new Signature(logEntry.AuthorName, logEntry.AuthorEmail, logEntry.Date),
-                new Signature(logEntry.CommitterName, logEntry.CommitterEmail, logEntry.Date),
+                false,
                 logEntry.Tree,
                 parents);
             return new GitCommit(commit);
@@ -474,7 +475,7 @@ namespace Sep.Git.Tfs.Core
             if (!destination.Directory.Exists)
                 destination.Directory.Create();
             if ((blob = _repository.Lookup<Blob>(sha)) != null)
-                using (Stream stream = blob.ContentStream)
+                using (Stream stream = blob.GetContentStream())
                 using (var outstream = File.Create(destination.FullName))
                         stream.CopyTo(outstream);
         }
@@ -538,9 +539,9 @@ namespace Sep.Git.Tfs.Core
             _repository.Notes.Add(new ObjectId(sha), content, author, author, "commits");
         }
 
-        public void Reset(string sha, ResetOptions resetOptions)
+        public void ResetHard(string sha)
         {
-            _repository.Reset(resetOptions, sha);
+            _repository.Reset(ResetMode.Hard, sha);
         }
 
         public bool IsBare { get { return _repository.Info.IsBare; } }

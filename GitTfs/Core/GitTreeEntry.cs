@@ -24,7 +24,7 @@ namespace Sep.Git.Tfs.Core
         {
             if (_entry.TargetType == TreeEntryTargetType.Blob)
             {
-                return ((Blob)_entry.Target).ContentStream;
+                return ((Blob)_entry.Target).GetContentStream();
             }
             else
                 throw new InvalidOperationException("Invalid object type");
