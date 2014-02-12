@@ -58,12 +58,11 @@ namespace Sep.Git.Tfs.VsCommon
                 if (!string.IsNullOrWhiteSpace(tfsPathParentBranch))
                     Trace.WriteLine("Parameter about parent branch will be ignored because this version of TFS is able to find the parent!");
 
-                Trace.WriteLine("Looking for all branches...");
-                var allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full);
-                var tfsBranchToCreate = allTfsBranches.FirstOrDefault(b => b.Properties.RootItem.Item.ToLower() == tfsPathBranchToCreate.ToLower());
+                Trace.WriteLine("Looking to find branch '" + tfsPathBranchToCreate + "' in all TFS branches...");
+                var tfsBranchToCreate = AllTfsBranches.FirstOrDefault(b => b.Properties.RootItem.Item.ToLower() == tfsPathBranchToCreate.ToLower());
                 if (tfsBranchToCreate == null)
                 {
-                    throw new GitTfsException("error: TFS branches "+ tfsPathBranchToCreate +" not found!");
+                    throw new GitTfsException("error: TFS branches " + tfsPathBranchToCreate + " not found!");
                 }
 
                 if (tfsBranchToCreate.Properties.ParentBranch == null)
@@ -106,6 +105,18 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 Trace.WriteLine(ex.Message);
                 return base.GetRootChangesetForBranch(tfsPathBranchToCreate, tfsPathParentBranch);
+            }
+        }
+
+        private BranchObject[] _allTfsBranches;
+        private BranchObject[] AllTfsBranches
+        {
+            get
+            {
+                if (_allTfsBranches != null)
+                    return _allTfsBranches;
+                Trace.WriteLine("Looking for all branches...");
+                return _allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full);
             }
         }
 
