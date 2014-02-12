@@ -538,9 +538,9 @@ namespace Sep.Git.Tfs.Core
             _repository.Notes.Add(new ObjectId(sha), content, author, author, "commits");
         }
 
-        public void Reset(string sha, ResetMode mode)
+        public void ResetHard(string sha)
         {
-            _repository.Reset(mode, sha);
+            _repository.Reset(ResetMode.Hard, sha);
         }
 
         public bool IsBare { get { return _repository.Info.IsBare; } }

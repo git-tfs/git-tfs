@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.Core
         void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate);
         void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate);
         void MoveRemote(string oldRemoteName, string newRemoteName);
-        void Reset(string sha, ResetMode mode);
+        void ResetHard(string sha);
         bool IsBare { get; }
         /// Gets all configured "subtree" remotes which point to the same Tfs URL as the given remote.
         /// If the given remote is itself a subtree, an empty enumerable is returned.
