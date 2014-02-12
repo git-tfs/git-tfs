@@ -38,9 +38,10 @@ namespace Sep.Git.Tfs.Core
         {
             var parents = logEntry.CommitParents.Select(sha => _repository.Lookup<Commit>(sha));
             var commit = _repository.ObjectDatabase.CreateCommit(
-                logEntry.Log,
                 new Signature(logEntry.AuthorName, logEntry.AuthorEmail, logEntry.Date),
                 new Signature(logEntry.CommitterName, logEntry.CommitterEmail, logEntry.Date),
+                logEntry.Log,
+                false,
                 logEntry.Tree,
                 parents);
             return new GitCommit(commit);
