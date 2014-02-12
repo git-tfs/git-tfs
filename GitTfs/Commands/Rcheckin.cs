@@ -178,7 +178,7 @@ namespace Sep.Git.Tfs.Commands
             if (repo.IsBare)
                 repo.UpdateRef(refToCheckin, tfsRemote.MaxCommitHash);
             else
-                repo.Reset(tfsRemote.MaxCommitHash, ResetOptions.Hard);
+                repo.Reset(tfsRemote.MaxCommitHash, ResetMode.Hard);
             _stdout.WriteLine("No more to rcheckin.");
 
             Trace.WriteLine("Cleaning...");

@@ -474,7 +474,7 @@ namespace Sep.Git.Tfs.Core
             if (!destination.Directory.Exists)
                 destination.Directory.Create();
             if ((blob = _repository.Lookup<Blob>(sha)) != null)
-                using (Stream stream = blob.ContentStream)
+                using (Stream stream = blob.GetContentStream())
                 using (var outstream = File.Create(destination.FullName))
                         stream.CopyTo(outstream);
         }
@@ -538,9 +538,9 @@ namespace Sep.Git.Tfs.Core
             _repository.Notes.Add(new ObjectId(sha), content, author, author, "commits");
         }
 
-        public void Reset(string sha, ResetOptions resetOptions)
+        public void Reset(string sha, ResetMode mode)
         {
-            _repository.Reset(resetOptions, sha);
+            _repository.Reset(mode, sha);
         }
 
         public bool IsBare { get { return _repository.Info.IsBare; } }
