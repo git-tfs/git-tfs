@@ -83,17 +83,24 @@ namespace Sep.Git.Tfs.VsCommon
                     throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find first changeset for " + tfsPathBranchToCreate);
                 }
 
-                var mergedItemsToFirstChangesetInBranchToCreate = VersionControl
-                    .TrackMerges(new int[] {firstChangesetInBranchToCreate.ChangesetId},
-                                 new ItemIdentifier(tfsPathBranchToCreate),
-                                 new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch),},
-                                 null)
-                    .OrderBy(x => x.SourceChangeset.ChangesetId);
+                try
+                {
+                    var mergedItemsToFirstChangesetInBranchToCreate = VersionControl
+                        .TrackMerges(new int[] { firstChangesetInBranchToCreate.ChangesetId },
+                                     new ItemIdentifier(tfsPathBranchToCreate),
+                                     new ItemIdentifier[] { new ItemIdentifier(tfsPathParentBranch), },
+                                     null)
+                        .OrderBy(x => x.SourceChangeset.ChangesetId);
 
-                var rootChangesetInParentBranch =
-                    GetRelevantChangesetBasedOnChangeType(mergedItemsToFirstChangesetInBranchToCreate, tfsPathParentBranch, tfsPathBranchToCreate);
+                    var rootChangesetInParentBranch =
+                        GetRelevantChangesetBasedOnChangeType(mergedItemsToFirstChangesetInBranchToCreate, tfsPathParentBranch, tfsPathBranchToCreate);
 
-                return rootChangesetInParentBranch.ChangesetId;
+                    return rootChangesetInParentBranch.ChangesetId;
+                }
+                catch(VersionControlException)
+                {
+                    throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to get merge changesets for " + tfsPathBranchToCreate);
+                }
             }
             catch (FeatureNotSupportedException ex)
             {
