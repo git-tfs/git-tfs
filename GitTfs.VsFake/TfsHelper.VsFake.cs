@@ -374,7 +374,7 @@ namespace Sep.Git.Tfs.VsFake
             return exists;
         }
 
-        public bool CanGetBranchInformation { get { return false; } }
+        public bool CanGetBranchInformation { get { return true; } }
 
         public IChangeset GetChangeset(int changesetId)
         {
@@ -446,7 +446,7 @@ namespace Sep.Git.Tfs.VsFake
 
         public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
-            throw new NotImplementedException();
+            return new List<string>();
         }
 
         public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
