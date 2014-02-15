@@ -56,7 +56,7 @@ namespace Sep.Git.Tfs
                 {
                     throw new Exception("error: you can't use -i and -I option in the same time!");
                 }
-                var remotes = _globals.Repository.GetLastParentTfsCommits("HEAD");
+                var remotes = _globals.Repository.GetLastParentTfsCommits("HEAD", true);
                 if (!remotes.Any())
                 {
                     throw new Exception("No TFS parents found!");

@@ -246,7 +246,7 @@ namespace Sep.Git.Tfs.Core
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets = from cs in GetParentTfsCommits("refs/remotes/tfs/" + remote.Id + "..HEAD", false)
+            var untrackedTfsChangesets = from cs in GetParentTfsCommits("HEAD", false)
                                          where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
                                          orderby cs.ChangesetId
                                          select cs;
@@ -274,33 +274,51 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head, bool includeStubRemotes)
         {
-            List<TfsChangesetInfo> tfsCommits = GetParentTfsCommits(head, includeStubRemotes);
-            return from commit in tfsCommits
-                   group commit by commit.Remote
-                   into remotes
-                   select remotes.OrderBy(commit => -commit.ChangesetId).First();
-        }
-
-        public IEnumerable<TfsChangesetInfo> FilterParentTfsCommits(string head, bool includeStubRemotes,
-                                                                    Predicate<TfsChangesetInfo> pred)
-        {
-            return from commit in GetParentTfsCommits(head, includeStubRemotes)
-                   where pred(commit) select commit;
+            return GetParentTfsCommits(head, includeStubRemotes);
         }
 
         private List<TfsChangesetInfo> GetParentTfsCommits(string head, bool includeStubRemotes)
         {
-            var tfsCommits = new List<TfsChangesetInfo>();
-            try
+            var changesets = new List<TfsChangesetInfo>();
+            var commit = _repository.Lookup<Commit>(head);
+            if (commit == null)
+                return changesets;
+            FindTfsParentCommits(changesets, commit, includeStubRemotes);
+            return changesets;
+        }
+
+        private void FindTfsParentCommits(List<TfsChangesetInfo> changesets, Commit commit, bool includeStubRemotes)
+        {
+            while (true)
             {
-                CommandOutputPipe(stdout => FindTfsCommits(stdout, tfsCommits, includeStubRemotes),
-                                  "log", "--no-color", "--pretty=medium", head, "--");
+                var changesetInfo = TryParseChangesetInfo(commit.Message, commit.Sha, includeStubRemotes);
+                if (changesetInfo != null)
+                {
+                    changesets.Add(changesetInfo);
+                    return;
+                }
+                var parentsCount = commit.Parents.Count();
+                if (parentsCount > 1)
+                {
+                    foreach (var parent in commit.Parents)
+                    {
+                        FindTfsParentCommits(changesets, parent, includeStubRemotes);
+                    }
+                    return;
+                }
+                if (parentsCount == 0)
+                    return;
+
+                commit = commit.Parents.First();
             }
-            catch (GitCommandException e)
-            {
-                Trace.WriteLine("An error occurred while loading head " + head + " (maybe it doesn't exist?): " + e);
-            }
-            return tfsCommits;
+        }
+
+        public TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId)
+        {
+            var commit = FindCommitByChangesetId(changesetId, remoteRef);
+            if (commit == null)
+                return null;
+            return TryParseChangesetInfo(commit.Message, commit.Sha, true);
         }
 
         public TfsChangesetInfo GetCurrentTfsCommit()
@@ -312,41 +330,6 @@ namespace Sep.Git.Tfs.Core
         public TfsChangesetInfo GetTfsCommit(string sha)
         {
             return TryParseChangesetInfo(GetCommit(sha).Message, sha, false);
-        }
-
-        private void FindTfsCommits(TextReader stdout, ICollection<TfsChangesetInfo> tfsCommits, bool includeStubRemotes)
-        {
-            string currentCommit = null;
-            TfsChangesetInfo lastChangesetInfo = null;
-            string line;
-            while (null != (line = stdout.ReadLine()))
-            {
-                var match = GitTfsConstants.CommitRegex.Match(line);
-                if (match.Success)
-                {
-                    if (lastChangesetInfo != null)
-                    {
-                        tfsCommits.Add(lastChangesetInfo);
-                        lastChangesetInfo = null;
-                    }
-
-                    currentCommit = match.Groups[1].Value;
-                    continue;
-                }
-
-                var changesetInfo = TryParseChangesetInfo(line, currentCommit, includeStubRemotes);
-                if (changesetInfo != null)
-                {
-                    lastChangesetInfo = changesetInfo;
-                }
-            }
-
-            // Add the final changesetinfo object; it won't be handled in the loop
-            // if it was part of the last commit message.
-            if (lastChangesetInfo != null)
-                tfsCommits.Add(lastChangesetInfo);
-
-            //stdout.Close();
         }
 
         private TfsChangesetInfo TryParseChangesetInfo(string gitTfsMetaInfo, string commit, bool includeStubRemotes)
@@ -503,6 +486,15 @@ namespace Sep.Git.Tfs.Core
 
         public string FindCommitHashByChangesetId(long changesetId)
         {
+            var commit = FindCommitByChangesetId(changesetId);
+            if (commit == null)
+                return null;
+
+            return commit.Sha;
+        }
+
+        private Commit FindCommitByChangesetId(long changesetId, string remoteRef = null)
+        {
             Trace.WriteLine("Looking for changeset " + changesetId + " in git repository...");
 
             var patternToFind = "git-tfs-id: .*;C" + changesetId + "[^0-9]";
@@ -514,17 +506,13 @@ namespace Sep.Git.Tfs.Core
                 SortBy = CommitSortStrategies.None
             };
 
+            if (remoteRef != null)
+                reachableFromRemoteBranches.Since = _repository.Branches.Where(p => p.IsRemote && p.CanonicalName.EndsWith(remoteRef));
             var commitsFromRemoteBranches = _repository.Commits.QueryBy(reachableFromRemoteBranches);
 
             var commit = commitsFromRemoteBranches.FirstOrDefault(c => regex.IsMatch(c.Message));
-            if (commit != null)
-            {
-                Trace.WriteLine(" => Commit found! hash: " + commit.Sha);
-                return commit.Sha;
-            }
-
-            Trace.WriteLine(" => Commit not found!");
-            return null;
+            Trace.WriteLine((commit == null) ? " => Commit not found!" : " => Commit found! hash: " + commit.Sha);
+            return commit;
         }
 
         public void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate)

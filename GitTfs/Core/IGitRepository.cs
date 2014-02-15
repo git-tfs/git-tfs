@@ -21,7 +21,7 @@ namespace Sep.Git.Tfs.Core
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head, bool includeStubRemotes);
-        IEnumerable<TfsChangesetInfo> FilterParentTfsCommits(string head, bool includeStubRemotes, Predicate<TfsChangesetInfo> pred);
+        TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId);
         TfsChangesetInfo GetTfsCommit(string sha);
         TfsChangesetInfo GetCurrentTfsCommit();
         IDictionary<string, GitObject> GetObjects(string commit);
