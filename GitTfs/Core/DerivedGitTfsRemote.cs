@@ -16,6 +16,16 @@ namespace Sep.Git.Tfs.Core
             _tfsRepositoryPath = tfsRepositoryPath;
         }
 
+        GitTfsException DerivedRemoteException
+        {
+            get
+            {
+                return new GitTfsException("Unable to locate a remote for <" + _tfsUrl + ">" + _tfsRepositoryPath)
+                    .WithRecommendation("Try using `git tfs bootstrap` to auto-init TFS remotes.")
+                    .WithRecommendation("Try setting a legacy-url for an existing remote.");
+            }
+        }
+
         public bool IsDerived
         {
             get { return true; }
@@ -24,30 +34,30 @@ namespace Sep.Git.Tfs.Core
         public string Id
         {
             get { return "(derived)"; }
-            set { throw new NotImplementedException(); }
+            set { throw DerivedRemoteException; }
         }
 
         public string TfsUrl
         {
             get { return _tfsUrl; }
-            set { throw new NotImplementedException(); }
+            set { throw DerivedRemoteException; }
         }
 
         public bool Autotag
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { throw DerivedRemoteException; }
+            set { throw DerivedRemoteException; }
         }
 
         public string TfsUsername
         {
             get
             {
-                throw new NotImplementedException();
+                throw DerivedRemoteException;
             }
             set
             {
-                throw new NotImplementedException();
+                throw DerivedRemoteException;
             }
         }
 
@@ -55,25 +65,25 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                throw new NotImplementedException();
+                throw DerivedRemoteException;
             }
             set
             {
-                throw new NotImplementedException();
+                throw DerivedRemoteException;
             }
         }
 
         public string TfsRepositoryPath
         {
             get { return _tfsRepositoryPath; }
-            set { throw new NotImplementedException(); }
+            set { throw DerivedRemoteException; }
         }
 
         public string[] TfsSubtreePaths
         {
             get
             {
-                throw new NotImplementedException();
+                throw DerivedRemoteException;
             }
         }
 
@@ -118,43 +128,43 @@ namespace Sep.Git.Tfs.Core
 
         public string IgnoreRegexExpression
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { throw DerivedRemoteException; }
+            set { throw DerivedRemoteException; }
         }
 
         public string IgnoreExceptRegexExpression
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { throw DerivedRemoteException; }
+            set { throw DerivedRemoteException; }
         }
 
         public IGitRepository Repository
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { throw DerivedRemoteException; }
+            set { throw DerivedRemoteException; }
         }
 
         public ITfsHelper Tfs
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { throw DerivedRemoteException; }
+            set { throw DerivedRemoteException; }
         }
 
         public long MaxChangesetId
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { throw DerivedRemoteException; }
+            set { throw DerivedRemoteException; }
         }
 
         public string MaxCommitHash
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { throw DerivedRemoteException; }
+            set { throw DerivedRemoteException; }
         }
 
         public string RemoteRef
         {
-            get { throw new NotImplementedException(); }
+            get { throw DerivedRemoteException; }
         }
 
         public bool IsSubtree
@@ -182,103 +192,102 @@ namespace Sep.Git.Tfs.Core
 
         public bool ShouldSkip(string path)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public string GetPathInGitRepo(string tfsPath)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public void QuickFetch()
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public void QuickFetch(int changesetId)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public void Unshelve(string a, string b, string c)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public bool HasShelveset(string shelvesetName)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public void CleanupWorkspace()
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public void CleanupWorkspaceDirectory()
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public ITfsChangeset GetChangeset(long changesetId)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public void UpdateTfsHead(string commitHash, long changesetId)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public void EnsureTfsAuthenticated()
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
 
         public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
-
 
         public RemoteInfo RemoteInfo
         {
-            get { throw new NotImplementedException(); }
+            get { throw DerivedRemoteException; }
         }
 
         public void Merge(string sourceTfsPath, string targetTfsPath)
         {
-            throw new NotImplementedException();
+            throw DerivedRemoteException;
         }
         #endregion
     }

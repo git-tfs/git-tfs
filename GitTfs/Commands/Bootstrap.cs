@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string commitish)
         {
-            var tfsParents = _globals.Repository.GetLastParentTfsCommits(commitish, true);
+            var tfsParents = _globals.Repository.GetLastParentTfsCommits(commitish);
             foreach (var parent in tfsParents)
             {
                 GitCommit commit = _globals.Repository.GetCommit(parent.GitCommit);
