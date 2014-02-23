@@ -814,11 +814,8 @@ namespace Sep.Git.Tfs.Core
             // TFS string representations of repository paths do not end in trailing slashes
             tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
-            string gitBranchName;
-            if (!string.IsNullOrWhiteSpace(gitBranchNameExpected))
-                gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(gitBranchNameExpected);
-            else
-                gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(tfsRepositoryPath);
+            string gitBranchName = ExtractGitBranchNameFromTfsRepositoryPath(
+                string.IsNullOrWhiteSpace(gitBranchNameExpected) ? tfsRepositoryPath : gitBranchNameExpected);
             if (string.IsNullOrWhiteSpace(gitBranchName))
                 throw new GitTfsException("error: The Git branch name '" + gitBranchName + "' is not valid...\n");
             Trace.WriteLine("Git local branch will be :" + gitBranchName);
@@ -838,10 +835,10 @@ namespace Sep.Git.Tfs.Core
             var tfsRemote = Repository.CreateTfsRemote(new RemoteInfo
             {
                 Id = gitBranchName,
-                Url = this.TfsUrl,
+                Url = TfsUrl,
                 Repository = tfsRepositoryPath,
                 RemoteOptions = remoteOptions
-            }, String.Empty);
+            }, string.Empty);
             if (sha1RootCommit != null)
             {
                 if (!Repository.CreateBranch(tfsRemote.RemoteRef, sha1RootCommit))
@@ -850,6 +847,5 @@ namespace Sep.Git.Tfs.Core
             Trace.WriteLine("Remote created!");
             return tfsRemote;
         }
-
     }
 }
