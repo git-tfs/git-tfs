@@ -105,15 +105,16 @@ namespace Sep.Git.Tfs.Commands
             var remoteToDelete = new List<IGitTfsRemote>();
             foreach (var rootBranch in creationBranchData)
             {
-                Trace.WriteLine("Processing " + (rootBranch.IsRenamedBranch ? "renamed " : string.Empty) + "branch :" + rootBranch.TfsBranchPath + " (" + rootBranch.RootChangeset + ")");
+                Trace.WriteLine("Processing " + (rootBranch.IsRenamedBranch ? "renamed " : string.Empty) + "branch :"
+                    + rootBranch.TfsBranchPath + " (" + rootBranch.RootChangeset + ")");
                 var cbd = new BranchCreationDatas() {RootChangesetId = rootBranch.RootChangeset, TfsRepositoryPath = rootBranch.TfsBranchPath};
                 if (cbd.TfsRepositoryPath == tfsBranchPath)
                     cbd.GitBranchNameExpected = gitBranchNameExpected;
 
                 cbd.Sha1RootCommit = _globals.Repository.FindCommitHashByChangesetId(cbd.RootChangesetId);
                 if (string.IsNullOrWhiteSpace(cbd.Sha1RootCommit))
-                        throw new GitTfsException("error: The root changeset " + cbd.RootChangesetId +
-                                                  " have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n");
+                    throw new GitTfsException("error: The root changeset " + cbd.RootChangesetId +
+                                              " have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n");
 
                 Trace.WriteLine("Found commit " + cbd.Sha1RootCommit + " for changeset :" + cbd.RootChangesetId);
 
