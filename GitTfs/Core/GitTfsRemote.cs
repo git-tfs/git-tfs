@@ -539,7 +539,7 @@ namespace Sep.Git.Tfs.Core
             var sha1RootCommit = Repository.FindCommitHashByChangesetId(branchesDatas.First().RootChangeset);
             if (string.IsNullOrWhiteSpace(sha1RootCommit))
             {
-                return null;
+                return new List<IGitTfsRemote>();
             }
 
             remote = InitBranch(this.remoteOptions, tfsBranch.Path, sha1RootCommit);
