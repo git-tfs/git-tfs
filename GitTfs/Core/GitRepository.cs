@@ -261,7 +261,10 @@ namespace Sep.Git.Tfs.Core
 
         public MergeResult Merge(string commitish)
         {
-            return _repository.Merge(_repository.Lookup<Commit>(commitish), _repository.Config.BuildSignature(new DateTimeOffset(DateTime.Now)));
+            var commit = _repository.Lookup<Commit>(commitish);
+            if(commit == null)
+                throw new GitTfsException("error: commit '"+ commitish + "' can't be found and merged into!");
+            return _repository.Merge(commit, _repository.Config.BuildSignature(new DateTimeOffset(DateTime.Now)));
         }
 
         public String GetCurrentCommit()
