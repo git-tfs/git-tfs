@@ -535,10 +535,11 @@ namespace Sep.Git.Tfs.Core
             if(branchesDatas.Count > 1)
                 throw new NotImplementedException("TODO: Manage renamed branch by integrating IniTBranch.InitBranchSupportingRename() here");
 
-
-            var sha1RootCommit = Repository.FindCommitHashByChangesetId(branchesDatas.First().RootChangeset);
+            var rootChangesetId = branchesDatas.First().RootChangeset;
+            var sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
             if (string.IsNullOrWhiteSpace(sha1RootCommit))
             {
+                stdout.WriteLine("error: root commit not found corresponding to changeset " + rootChangesetId);
                 return new List<IGitTfsRemote>();
             }
 
