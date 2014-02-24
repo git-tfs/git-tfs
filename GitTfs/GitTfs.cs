@@ -61,7 +61,11 @@ namespace Sep.Git.Tfs
                 {
                     throw new Exception("No TFS parents found!");
                 }
-                _globals.UserSpecifiedRemoteId = remotes.First().Remote.Id;
+                var foundRemote = remotes.First().Remote;
+                if(foundRemote.IsDerived)
+                    _stdout.WriteLine("Need to bootstrap: " + foundRemote.RemoteRef);
+
+                _globals.UserSpecifiedRemoteId = foundRemote.Id;
                 _stdout.WriteLine("Working with tfs remote: " + _globals.RemoteId);
             }
         }

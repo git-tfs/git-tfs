@@ -147,9 +147,9 @@ namespace Sep.Git.Tfs.Core
             set { maxCommitHash = value; }
         }
 
-        private TfsChangesetInfo GetTfsChangesetById(int id)
+        private TfsChangesetInfo GetTfsChangesetById(long id)
         {
-            return Repository.FilterParentTfsCommits(RemoteRef, false, c => c.ChangesetId == id).FirstOrDefault();
+            return Repository.GetTfsChangesetById(RemoteRef, id);
         }
 
         private void InitHistory()
