@@ -259,6 +259,11 @@ namespace Sep.Git.Tfs.Core
             return new GitCommit(_repository.Lookup<Commit>(commitish));
         }
 
+        public MergeResult Merge(string commitish)
+        {
+            return _repository.Merge(_repository.Lookup<Commit>(commitish), _repository.Config.BuildSignature(new DateTimeOffset(DateTime.Now)));
+        }
+
         public String GetCurrentCommit()
         {
             return _repository.Head.Commits.First().Sha;

@@ -50,7 +50,7 @@ namespace Sep.Git.Tfs.Commands
                 parentChangeset.Remote.FetchWithMerge(newChangesetId, false, refToCheckin);
 
                 if (refToCheckin == "HEAD")
-                    parentChangeset.Remote.Repository.CommandNoisy("merge", parentChangeset.Remote.MaxCommitHash);
+                    parentChangeset.Remote.Repository.Merge(parentChangeset.Remote.MaxCommitHash);
             }
 
             Trace.WriteLine("Cleaning...");

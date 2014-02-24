@@ -133,7 +133,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 try
                 {
-                    if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+                    if (!init.IsBare) globals.Repository.Merge(globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
                 }
                 catch (Exception)
                 {

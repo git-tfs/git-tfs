@@ -31,6 +31,7 @@ namespace Sep.Git.Tfs.Core
         bool WorkingCopyHasUnstagedOrUncommitedChanges { get; }
         void CopyBlob(string sha, string outputFile);
         GitCommit GetCommit(string commitish);
+        MergeResult Merge(string commitish);
         string GetCurrentCommit();
         string GetCommitMessage(string head, string parentCommitish);
         string AssertValidBranchName(string gitBranchName);
