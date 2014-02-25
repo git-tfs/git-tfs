@@ -551,6 +551,13 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 Assert.Equal(0, Subject.GetChangesToApply().Count());
             }
+
+            [Fact]
+            public void DoNotFetch()
+            {
+                // Because we're not going to apply changes, don't waste time fetching any.
+                Assert.Equal(0, Subject.GetChangesToFetch().Count());
+            }
         }
 
         public class WithDeleteOtherFolder : Base<WithDeleteOtherFolder.Fixture>
@@ -574,6 +581,12 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Update("file1.txt"));
+            }
+
+            [Fact]
+            public void FetchesChangesInThisProject()
+            {
+                Assert.Equal(new string[] { "$/Project/file1.txt" }, Subject.GetChangesToFetch().Select(c => c.Item.ServerItem));
             }
         }
     }
