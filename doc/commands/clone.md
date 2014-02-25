@@ -58,6 +58,22 @@ Then, do this (the clone will be done in the `MyProject1Directory` directory):
 Note : It is highly recommanded to clone the root branch ( the branch that has no parents, here $/Project1/Trunk ) to be able to init the other branches after.
 If you clone the branch $/Project1/Branch, you will never able to init the root branch $/Project1/Trunk after.
 
+### Merge changesets and branches
+
+Since version 0.20, when cloning the trunk from TFS, if git-tfs encounter a merge changeset, it initialize and fetch automaticaly the other branch merged.
+
+Suppose you have on TFS:
+
+    A <- B <- C <- D <- E <- X <- Y <- Z $/Project1/Trunk
+               \           /                   
+                M <- N <- O <- P <- Q    $/Project1/Branch
+
+When cloning the tfs branch `$/Project1/Trunk`, after having fetch changesets A to E, git-tfs encounter merge changeset X. When it did, git-tfs initialize also the tfs branch `$/Project1/Branch` and fetch changeset M to O to be able to create the merge commit X and then continue to fetch changesets Y and Z.
+
+If you don't want to intialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--ignore-branches` to disable it!
+
+Note: To successfully process the merge changeset (and come from an older version than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right clic on a folder and choose `Branching and Merging` -> `Convert to Branch`.
+
 ### What repository path to clone?
 
 If you don't know exactly what repository path to clone, see [list-remote-branches](list-remote-branches.md) command to get a list of the existing repositories.
@@ -98,7 +114,7 @@ The clone command will be :
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --authors="c:\project_file\authors.txt"
 
-Once the clone is done, the file is store in the `.git` folder (with the name git-tfs_authors) and used with later `fetch`. You could overwrite it by specifting another file (or go delete it).
+Once the clone is done, the file is store in the `.git` folder (with the name `git-tfs_authors`) and used with later `fetch`. You could overwrite it by specifting another file (or go delete it).
 
 
 ### Set a custom Tfs Workspace directory
