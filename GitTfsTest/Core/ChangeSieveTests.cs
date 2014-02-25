@@ -529,7 +529,6 @@ namespace Sep.Git.Tfs.Test.Core
                     ApplicableChange.Update("file8.txt"));
             }
         }
-
         public class WithDeleteMainFolderBranchAndSubItems : Base<WithDeleteMainFolderBranchAndSubItems.Fixture>
         {
             public class Fixture : BaseFixture
@@ -551,6 +550,30 @@ namespace Sep.Git.Tfs.Test.Core
             public void WhenMainBranchFolderIsDeleted_ThenKeepFileInGitCommitByDoingNothing()
             {
                 Assert.Equal(0, Subject.GetChangesToApply().Count());
+            }
+        }
+
+        public class WithDeleteOtherFolder : Base<WithDeleteOtherFolder.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    Changeset.Changes = new IChange[] {
+                        FakeChange.Edit("$/Project/file1.txt"),
+                        FakeChange.DeleteDir("$/Projec"),
+                        FakeChange.Delete("$/Projec/file.txt"),
+                        FakeChange.DeleteDir("$/Project2"),
+                        FakeChange.Delete("$/Project2/file.txt"),
+                    };
+                }
+            }
+
+            [Fact]
+            public void IncludesChangesInThisProject()
+            {
+                AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Update("file1.txt"));
             }
         }
     }
