@@ -212,7 +212,11 @@ namespace Sep.Git.Tfs.Commands
             var di = new DirectoryInfo(gitRepositoryPath);
             if (di.Exists)
             {
-                if (!resumable)
+                bool isDebuggerAttached = false;
+#if DEBUG
+                isDebuggerAttached = Debugger.IsAttached;
+#endif
+                if (!isDebuggerAttached && !resumable)
                 {
                     if (di.EnumerateFileSystemInfos().Any())
                         throw new GitTfsException("error: Specified git repository directory is not empty");
