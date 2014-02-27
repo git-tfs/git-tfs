@@ -514,9 +514,10 @@ namespace Sep.Git.Tfs.Core
             //Don't know if there is a way to extract remote tfs repository path from changeset datas! Should be better!!!
             var remote = Repository.ReadAllTfsRemotes().FirstOrDefault(r => parentChangeset.Changes.Any(c => r.GetPathInGitRepo(c.Item.ServerItem) != null));
             if (remote != null)
-                return new List<IGitTfsRemote>(){remote};
-            var tfsBranch = Tfs.GetBranches(true).SingleOrDefault(b =>
-                parentChangeset.Changes.First().Item.ServerItem.StartsWith(b.Path.EndsWith("/") ? b.Path : b.Path + "/"));
+                return new List<IGitTfsRemote>() { remote };
+            var tfsPath = parentChangeset.Changes.First().Item.ServerItem;
+            tfsPath = tfsPath.EndsWith("/") ? tfsPath : tfsPath + "/";
+            var tfsBranch = Tfs.GetBranches(true).SingleOrDefault(b => tfsPath.StartsWith(b.Path.EndsWith("/") ? b.Path : b.Path + "/"));
 
             if (tfsBranch == null)
             {
