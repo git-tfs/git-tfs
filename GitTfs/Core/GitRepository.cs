@@ -493,7 +493,7 @@ namespace Sep.Git.Tfs.Core
             var reachableFromRemoteBranches = new CommitFilter
             {
                 Since = _repository.Branches.Where(p => p.IsRemote),
-                SortBy = CommitSortStrategies.None
+                SortBy = CommitSortStrategies.Time
             };
 
             if (remoteRef != null)
