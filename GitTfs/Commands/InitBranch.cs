@@ -86,7 +86,7 @@ namespace Sep.Git.Tfs.Commands
                 if (tfsRepositoryPathParentBranchFound == null)
                     throw new GitTfsException("error: The Tfs parent branch '" + ParentBranch + "' can not be found in the Git repository\nPlease init it first and try again...\n");
 
-                creationBranchData = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
+                creationBranchData = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath, -1, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
             }
 
             IFetchResult fetchResult;

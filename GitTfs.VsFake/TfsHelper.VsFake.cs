@@ -381,11 +381,11 @@ namespace Sep.Git.Tfs.VsFake
             return new Changeset(_versionControlServer, _script.Changesets.First(c => c.Id == changesetId));
         }
 
-        public IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, string tfsPathParentBranch = null)
+        public IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, int lastChangesetIdToCheck = -1, string tfsPathParentBranch = null)
         {
             var firstChangesetOfBranch = _script.Changesets.FirstOrDefault(c => c.IsBranchChangeset && c.BranchChangesetDatas.BranchPath == tfsPathBranchToCreate);
             if (firstChangesetOfBranch != null)
-                return new List<RootBranch>{new RootBranch(firstChangesetOfBranch.BranchChangesetDatas.RootChangesetId, tfsPathBranchToCreate)};
+                return new List<RootBranch> { new RootBranch(firstChangesetOfBranch.BranchChangesetDatas.RootChangesetId, tfsPathBranchToCreate) };
             return new List<RootBranch> { new RootBranch(-1, tfsPathBranchToCreate) };
         }
 
