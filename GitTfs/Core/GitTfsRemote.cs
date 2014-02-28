@@ -531,7 +531,7 @@ namespace Sep.Git.Tfs.Core
                 return new List<IGitTfsRemote>() {remote};
             }
 
-            var branchesDatas = Tfs.GetRootChangesetForBranch(tfsBranch.Path);
+            var branchesDatas = Tfs.GetRootChangesetForBranch(tfsBranch.Path, parentChangeset.ChangesetId);
 
             foreach (var branch in branchesDatas)
             {

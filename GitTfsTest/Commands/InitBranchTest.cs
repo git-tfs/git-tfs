@@ -189,7 +189,7 @@ namespace Sep.Git.Tfs.Test.Commands
             var mockRemote = MockRepository.GenerateStub<IGitTfsRemote>();
             mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true });
             remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<string>.Is.Anything)).Return(mockRemote);
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", remote.TfsRepositoryPath)).Return(new List<RootBranch>() { new RootBranch(2008, "$/MyProject/MyBranch") });
+            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, remote.TfsRepositoryPath)).Return(new List<RootBranch>() { new RootBranch(2008, "$/MyProject/MyBranch") });
 
             mocks.ClassUnderTest.ParentBranch = remote.TfsRepositoryPath;
 
