@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Mode = LibGit2Sharp.Mode;
@@ -56,26 +54,39 @@ namespace Sep.Git.Tfs.Util
             };
             foreach (var change in NamedChanges)
             {
-                if (change.Change.Item.ItemType == TfsItemType.File)
+                // We only need the file changes because git only cares about files and if you make
+                // changes to a folder in TFS, the changeset includes changes for all the descendant files anyway.
+                if (change.Change.Item.ItemType != TfsItemType.File)
+                    continue;
+
+                // If a change is only a branch operation and we already have a file at the target path,
+                // then there is nothing to do for that change.
+                if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Branch) &&
+                    _resolver.Contains(change.Change.Item.ServerItem))
                 {
-                    if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
+                    continue;
+                }
+
+                if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
+                {
+                    if (change.GitPath != null)
+                        compartments.Deleted.Add(ApplicableChange.Delete(change.GitPath));
+                }
+                else if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
+                {
+                    var oldInfo = _resolver.GetGitObject(GetPathBeforeRename(change.Change.Item));
+                    if (oldInfo != null)
+                        compartments.Deleted.Add(ApplicableChange.Delete(oldInfo.Path));
+                    if (Include(change))
                     {
-                        if (change.GitPath != null)
-                            compartments.Deleted.Add(ApplicableChange.Delete(change.GitPath));
+                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath,
+                            oldInfo.Try(x => x.Mode, () => Mode.NonExecutableFile)));
                     }
-                    else if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
-                    {
-                        var oldInfo = _resolver.GetGitObject(GetPathBeforeRename(change.Change.Item));
-                        if (oldInfo != null)
-                            compartments.Deleted.Add(ApplicableChange.Delete(oldInfo.Path));
-                        if (Include(change))
-                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath, oldInfo.Try(x => x.Mode, () => Mode.NonExecutableFile)));
-                    }
-                    else
-                    {
-                        if (Include(change))
-                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath, change.Info.Mode));
-                    }
+                }
+                else
+                {
+                    if (Include(change))
+                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath, change.Info.Mode));
                 }
             }
             return compartments.Deleted.Concat(compartments.Updated);

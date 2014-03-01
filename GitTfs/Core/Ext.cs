@@ -11,7 +11,7 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.Core
 {
-    public static partial class Ext
+    public static class Ext
     {
         public static T Tap<T>(this T o, Action<T> block)
         {

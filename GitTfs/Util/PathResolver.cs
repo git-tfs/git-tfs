@@ -7,8 +7,8 @@ namespace Sep.Git.Tfs.Util
 {
     public class PathResolver
     {
-        IGitTfsRemote _remote;
-        IDictionary<string, GitObject> _initialTree;
+        readonly IGitTfsRemote _remote;
+        readonly IDictionary<string, GitObject> _initialTree;
 
         public PathResolver(IGitTfsRemote remote, IDictionary<string, GitObject> initialTree)
         {
@@ -34,24 +34,32 @@ namespace Sep.Git.Tfs.Util
             return !String.IsNullOrEmpty(gitPath) && !_remote.ShouldSkip(gitPath);
         }
 
+        public bool Contains(string pathInGitRepo)
+        {
+            if (pathInGitRepo != null && _initialTree.ContainsKey(pathInGitRepo))
+                return true;
+            return false;
+        }
+
         private static readonly Regex SplitDirnameFilename = new Regex(@"(?<dir>.*)[/\\](?<file>[^/\\]+)");
 
         private GitObject Lookup(string pathInGitRepo)
         {
-            if (_initialTree.ContainsKey(pathInGitRepo))
-                return _initialTree[pathInGitRepo];
+            GitObject gitObject;
+            if (_initialTree.TryGetValue(pathInGitRepo, out gitObject))
+                return gitObject;
 
             var fullPath = pathInGitRepo;
             var splitResult = SplitDirnameFilename.Match(pathInGitRepo);
             if (splitResult.Success)
             {
-
                 var dirName = splitResult.Groups["dir"].Value;
                 var fileName = splitResult.Groups["file"].Value;
                 fullPath = Lookup(dirName).Path + "/" + fileName;
             }
-            _initialTree[fullPath] = new GitObject { Path = fullPath };
-            return _initialTree[fullPath];
+            gitObject = new GitObject { Path = fullPath };
+            _initialTree[fullPath] = gitObject;
+            return gitObject;
         }
     }
 }
