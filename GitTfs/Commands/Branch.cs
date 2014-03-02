@@ -54,7 +54,7 @@ namespace Sep.Git.Tfs.Commands
                     { "init", "Initialize an existing TFS branch", v => ShouldInitBranch = (v != null) },
                     { "ignore-regex=", "A regex of files to ignore", v => IgnoreRegex = v },
                     { "except-regex=", "A regex of exceptions to ignore-regex", v => ExceptRegex = v},
-                    { "no-fetch", "Don't fetch changeset for inited branch(es)", v => NoFetch = (v != null) },
+                    { "no-fetch", "Don't fetch changeset for newly initialized branch(es)", v => NoFetch = (v != null) },
                     { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
