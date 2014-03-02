@@ -68,8 +68,15 @@ namespace Sep.Git.Tfs.Commands
                 }
                 else
                 {
-                    Environment.CurrentDirectory = gitRepositoryPath;
-                    globals.Repository = init.GitHelper.MakeRepository(globals.GitDir);
+                    try
+                    {
+                        Environment.CurrentDirectory = gitRepositoryPath;
+                        globals.Repository = init.GitHelper.MakeRepository(globals.GitDir);
+                    }
+                    catch (Exception)
+                    {
+                        retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+                    }
                 }
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
