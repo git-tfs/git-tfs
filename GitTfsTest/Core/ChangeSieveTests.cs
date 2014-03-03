@@ -128,6 +128,16 @@ namespace Sep.Git.Tfs.Test.Core
                 return new FakeChange(TfsChangeType.Add, TfsItemType.Folder, serverItem);
             }
 
+            public static IChange Branch(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Branch, TfsItemType.File, serverItem);
+            }
+
+            public static IChange BranchAndEdit(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Branch | TfsChangeType.Edit, TfsItemType.File, serverItem);
+            }
+
             const int ChangesetId = 10;
 
             TfsChangeType _tfsChangeType;
@@ -201,18 +211,16 @@ namespace Sep.Git.Tfs.Test.Core
             IItem IVersionControlServer.GetItem(int itemId, int changesetNumber)
             {
                 if (itemId == _itemId && changesetNumber == ChangesetId - 1 && TfsChangeType.Rename == _tfsChangeType)
-                    return new PreviousItem(this, _renamedFrom);
+                    return new PreviousItem(_renamedFrom);
                 throw new NotImplementedException();
             }
 
             class PreviousItem : IItem
             {
-                IItem _theItem;
                 string _oldName;
 
-                public PreviousItem(IItem theItem, string oldName)
+                public PreviousItem(string oldName)
                 {
-                    _theItem = theItem;
                     _oldName = oldName;
                 }
 
@@ -463,6 +471,39 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal("100644", toApply[1].Mode.ToModeString()); // new file
                 Assert.Equal("100755", toApply[2].Mode.ToModeString()); // existing executable file
                 Assert.Equal("100644", toApply[3].Mode.ToModeString()); // existing normal file
+            }
+        }
+
+        public class SkipBranchedThings : Base<SkipBranchedThings.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    Changeset.Changes = new[] {
+                        FakeChange.Add("$/Project/file1.txt"),
+                        FakeChange.Delete("$/Project/file2.txt"),
+                        FakeChange.Add("$/Project/file3.txt"),
+                        FakeChange.Delete("$/Project/file4.txt"),
+                        FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
+                        FakeChange.Branch("$/Project/file6.txt"),
+                        FakeChange.Branch("$/Project/file7.txt"),
+                        FakeChange.BranchAndEdit("$/Project/file8.txt"),
+                    };
+                }
+            }
+
+            [Fact]
+            public void DoesNotApplyBranchedFile()
+            {
+                AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Delete("file2.txt"),
+                    ApplicableChange.Delete("file4.txt"),
+                    ApplicableChange.Delete("oldfile5.txt"),
+                    ApplicableChange.Update("file1.txt"),
+                    ApplicableChange.Update("file3.txt"),
+                    ApplicableChange.Update("file5.txt"),
+                    ApplicableChange.Update("file8.txt"));
             }
         }
     }

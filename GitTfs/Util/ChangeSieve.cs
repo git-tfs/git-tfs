@@ -62,7 +62,8 @@ namespace Sep.Git.Tfs.Util
                 // If a change is only a branch operation and we already have a file at the target path,
                 // then there is nothing to do for that change.
                 if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Branch) &&
-                    _resolver.Contains(change.Change.Item.ServerItem))
+                    !change.Change.ChangeType.IncludesOneOf(TfsChangeType.Edit) &&
+                    _resolver.Contains(change.GitPath))
                 {
                     continue;
                 }
