@@ -533,22 +533,24 @@ namespace Sep.Git.Tfs.Core
 
             var branchesDatas = Tfs.GetRootChangesetForBranch(tfsBranch.Path);
 
-            if(branchesDatas.Count > 1)
-                throw new NotImplementedException("TODO: Manage renamed branch by integrating IniTBranch.InitBranchSupportingRename() here");
-
-            var rootChangesetId = branchesDatas.First().RootChangeset;
-            var sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
-            if (string.IsNullOrWhiteSpace(sha1RootCommit))
+            foreach (var branch in branchesDatas)
             {
-                sha1RootCommit = FindMergedRemoteAndFetch(rootChangesetId, stopOnFailMergeCommit);
+                var rootChangesetId = branch.RootChangeset;
+                var sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
                 if (string.IsNullOrWhiteSpace(sha1RootCommit))
                 {
-                    stdout.WriteLine("error: root commit not found corresponding to changeset " + rootChangesetId);
-                    return new List<IGitTfsRemote>();
+                    sha1RootCommit = FindMergedRemoteAndFetch(rootChangesetId, stopOnFailMergeCommit);
+                    if (string.IsNullOrWhiteSpace(sha1RootCommit))
+                    {
+                        stdout.WriteLine("error: root commit not found corresponding to changeset " + rootChangesetId);
+                        return new List<IGitTfsRemote>();
+                    }
                 }
-            }
+                remote = InitBranch(this.remoteOptions, tfsBranch.Path, sha1RootCommit);
 
-            remote = InitBranch(this.remoteOptions, tfsBranch.Path, sha1RootCommit);
+                if (branch.IsRenamedBranch)
+                    remote.Fetch();
+            }
 
             return new List<IGitTfsRemote>(){remote};
         }
