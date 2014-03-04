@@ -480,15 +480,17 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 public Fixture()
                 {
+                    InitialTree.Add("file6.txt", new GitObject());
+
                     Changeset.Changes = new[] {
                         FakeChange.Add("$/Project/file1.txt"),
                         FakeChange.Delete("$/Project/file2.txt"),
                         FakeChange.Add("$/Project/file3.txt"),
                         FakeChange.Delete("$/Project/file4.txt"),
                         FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
-                        FakeChange.Branch("$/Project/file6.txt"),
-                        FakeChange.Branch("$/Project/file7.txt"),
-                        FakeChange.BranchAndEdit("$/Project/file8.txt"),
+                        FakeChange.Branch("$/Project/file6.txt"), // Do not include, because it was there before.
+                        FakeChange.Branch("$/Project/file7.txt"), // Include, because it was not there before.
+                        FakeChange.BranchAndEdit("$/Project/file8.txt"), // Include, because it's not just branched.
                     };
                 }
             }
@@ -503,6 +505,7 @@ namespace Sep.Git.Tfs.Test.Core
                     ApplicableChange.Update("file1.txt"),
                     ApplicableChange.Update("file3.txt"),
                     ApplicableChange.Update("file5.txt"),
+                    ApplicableChange.Update("file7.txt"),
                     ApplicableChange.Update("file8.txt"));
             }
         }
