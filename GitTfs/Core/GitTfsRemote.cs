@@ -325,20 +325,23 @@ namespace Sep.Git.Tfs.Core
             foreach (var changeset in fetchedChangesets)
             {
                 count++;
-                var log = Apply(MaxCommitHash, changeset, objects);
                 if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
                 {
                     fetchResult.NewChangesetCount = count;
                     fetchResult.LastFetchedChangesetId = MaxChangesetId;
                     return fetchResult;
                 }
-                if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, log))
+                string parentCommitSha = null;
+                if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                 {
                     fetchResult.IsSuccess = false;
                     fetchResult.NewChangesetCount = count;
                     fetchResult.LastFetchedChangesetId = MaxChangesetId;
                     return fetchResult;
                 }
+                var log = Apply(MaxCommitHash, changeset, objects);
+                if (parentCommitSha != null)
+                    log.CommitParents.Add(parentCommitSha);
                 if (changeset.Summary.ChangesetId == mergeChangesetId)
                 {
                     foreach (var parent in parentCommitsHashes)
@@ -358,13 +361,13 @@ namespace Sep.Git.Tfs.Core
             fetchResult.NewChangesetCount = count;
             return fetchResult;
         }
+
         private bool ProcessMergeChangeset(ITfsChangeset changeset, bool stopOnFailMergeCommit, ref string parentCommit)
         {
             if (!Tfs.CanGetBranchInformation)
             {
                 stdout.WriteLine("info: this changeset " + changeset.Summary.ChangesetId +
                                  " is a merge changeset. But was not treated as is because this version of TFS can't manage branches...");
-                return true;
             }
             else if (Repository.GetConfig(GitTfsConstants.IgnoreBranches) != true.ToString())
             {
@@ -374,40 +377,7 @@ namespace Sep.Git.Tfs.Core
                     shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit);
                 if (shaParent != null)
                 {
-                    log.CommitParents.Add(shaParent);
-                }
-                else
-                {
-                    if (stopOnFailMergeCommit)
-                    {
-                        fetchResult.IsSuccess = false;
-                        fetchResult.LastFetchedChangesetId = MaxChangesetId;
-                        return fetchResult;
-                    }
-                }
-                ProcessChangeset(changeset, log);
-                DoGcIfNeeded();
-            }
-            fetchResult.NewChangesetCount = count;
-            return fetchResult;
-        }
-
-        private bool ProcessMergeChangeset(ITfsChangeset changeset, bool stopOnFailMergeCommit, LogEntry log)
-        {
-            if (!Tfs.CanGetBranchInformation)
-            {
-                stdout.WriteLine("info: this changeset " + changeset.Summary.ChangesetId +
-                                 " is a merge changeset. But was not treated as is because this version of TFS can't manage branches...");
-            }
-            else if (Repository.GetConfig(GitTfsConstants.IgnoreBranches) != true.ToString())
-            {
-                var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
-                var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
-                if (shaParent == null)
-                    shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit);
-                if (shaParent != null)
-                {
-                    log.CommitParents.Add(shaParent);
+                    parentCommit = shaParent;
                 }
                 else
                 {
