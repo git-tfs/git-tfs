@@ -181,9 +181,9 @@ namespace Sep.Git.Tfs.VsCommon
                     new ItemIdentifier(tfsPathBranchToCreate),
                     new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch),},
                     null)
-                .OrderBy(x => x.SourceChangeset.ChangesetId);
+                .OrderByDescending(x => x.SourceChangeset.ChangesetId);
             MergeInfo lastMerge = null;
-            foreach (var extendedMerge in merges.Reverse())
+            foreach (var extendedMerge in merges)
             {
                 var sourceItem = extendedMerge.SourceItem.Item.ServerItem;
                 var targetItem = extendedMerge.TargetItem != null ? extendedMerge.TargetItem.Item : null;
