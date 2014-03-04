@@ -32,18 +32,23 @@ namespace Sep.Git.Tfs.Util
 
     public class ChangeSieve
     {
-        readonly IChangeset _changeset;
         readonly PathResolver _resolver;
+        readonly IEnumerable<NamedChange> _namedChanges;
 
         public ChangeSieve(IChangeset changeset, PathResolver resolver)
         {
-            _changeset = changeset;
             _resolver = resolver;
+
+            _namedChanges = changeset.Changes.Select(c => new NamedChange
+            {
+                    Info = _resolver.GetGitObject(c.Item.ServerItem),
+                    Change = c,
+            });
         }
 
         public IEnumerable<IChange> GetChangesToFetch()
         {
-            return NamedChanges.Where(c => Include(c.GitPath)).Select(c => c.Change);
+            return NamedChanges.Where(c => IncludeInFetch(c)).Select(c => c.Change);
         }
 
         public IEnumerable<ApplicableChange> GetChangesToApply()
@@ -59,15 +64,6 @@ namespace Sep.Git.Tfs.Util
                 if (change.Change.Item.ItemType != TfsItemType.File)
                     continue;
 
-                // If a change is only a branch operation and we already have a file at the target path,
-                // then there is nothing to do for that change.
-                if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Branch) &&
-                    !change.Change.ChangeType.IncludesOneOf(TfsChangeType.Edit) &&
-                    _resolver.Contains(change.GitPath))
-                {
-                    continue;
-                }
-
                 if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
                 {
                     if (change.GitPath != null)
@@ -78,7 +74,7 @@ namespace Sep.Git.Tfs.Util
                     var oldInfo = _resolver.GetGitObject(GetPathBeforeRename(change.Change.Item));
                     if (oldInfo != null)
                         compartments.Deleted.Add(ApplicableChange.Delete(oldInfo.Path));
-                    if (Include(change))
+                    if (IncludeInApply(change))
                     {
                         compartments.Updated.Add(ApplicableChange.Update(change.GitPath,
                             oldInfo.Try(x => x.Mode, () => Mode.NonExecutableFile)));
@@ -86,7 +82,7 @@ namespace Sep.Git.Tfs.Util
                 }
                 else
                 {
-                    if (Include(change))
+                    if (IncludeInApply(change))
                         compartments.Updated.Add(ApplicableChange.Update(change.GitPath, change.Info.Mode));
                 }
             }
@@ -104,21 +100,27 @@ namespace Sep.Git.Tfs.Util
         {
             get
             {
-                return _changeset.Changes.Select(c => new NamedChange {
-                    Info = _resolver.GetGitObject(c.Item.ServerItem),
-                    Change = c,
-                });
+                return _namedChanges;
             }
         }
 
-        private bool Include(NamedChange change)
+        private bool IncludeInFetch(NamedChange change)
         {
-            return Include(change.GitPath) && change.Change.Item.DeletionId == 0;
+            // If a change is only a branch operation and we already have a file at the target path,
+            // then there is nothing to do for that change.
+            if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Branch) &&
+                !change.Change.ChangeType.IncludesOneOf(TfsChangeType.Edit) &&
+                _resolver.Contains(change.GitPath))
+            {
+                return false;
+            }
+
+            return _resolver.ShouldIncludeGitItem(change.GitPath);
         }
 
-        private bool Include(string pathInGitRepo)
+        private bool IncludeInApply(NamedChange change)
         {
-            return _resolver.ShouldIncludeGitItem(pathInGitRepo);
+            return IncludeInFetch(change) && change.Change.Item.DeletionId == 0;
         }
 
         private string GetPathBeforeRename(IItem item)
