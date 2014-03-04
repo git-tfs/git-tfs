@@ -34,6 +34,7 @@ namespace Sep.Git.Tfs.Util
     {
         readonly PathResolver _resolver;
         readonly IEnumerable<NamedChange> _namedChanges;
+        bool? _renameBranchCommmit;
 
         public ChangeSieve(IChangeset changeset, PathResolver resolver)
         {
@@ -46,13 +47,38 @@ namespace Sep.Git.Tfs.Util
             });
         }
 
+        private bool RenameBranchCommmit
+        {
+            get
+            {
+                if (_renameBranchCommmit == null)
+                {
+                    _renameBranchCommmit = false;
+                    var change = NamedChanges.SingleOrDefault(c => c.Change.Item.ItemType == TfsItemType.Folder
+                       && c.GitPath == string.Empty
+                       && c.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete, TfsChangeType.Rename));
+                    if (change != null)
+                    {
+                        _renameBranchCommmit = true;
+                    }
+                }
+                return (bool)_renameBranchCommmit;
+            }
+        }
+
         public IEnumerable<IChange> GetChangesToFetch()
         {
+            if (RenameBranchCommmit)
+                return new List<IChange>();
+
             return NamedChanges.Where(c => IncludeInFetch(c)).Select(c => c.Change);
         }
 
         public IEnumerable<ApplicableChange> GetChangesToApply()
         {
+            if (RenameBranchCommmit)
+                return new List<ApplicableChange>();
+
             var compartments = new {
                 Deleted = new List<ApplicableChange>(),
                 Updated = new List<ApplicableChange>(),
