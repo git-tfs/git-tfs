@@ -521,7 +521,7 @@ namespace Sep.Git.Tfs.Core
 
             if (tfsBranch == null)
             {
-                stdout.WriteLine("error: branch not found. Verify that all the folders have been converted to branches (or something else :().");
+                stdout.WriteLine("error: branch `{0}` not found. Verify that all the folders have been converted to branches (or something else :().", tfsPath);
                 return new List<IGitTfsRemote>();
             }
 
