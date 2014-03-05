@@ -322,6 +322,7 @@ namespace Sep.Git.Tfs.Core
             var fetchedChangesets = FetchChangesets();
             int count = 0;
             var objects = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
+            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to " + (lastChangesetIdToFetch != -1 ? lastChangesetIdToFetch.ToString() : "current") + " ...", "info");
             foreach (var changeset in fetchedChangesets)
             {
                 count++;
@@ -552,7 +553,6 @@ namespace Sep.Git.Tfs.Core
 
         private IEnumerable<ITfsChangeset> FetchChangesets()
         {
-            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to current ...", "info");
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId == GetLatestChangeset().Summary.ChangesetId)
                 return Enumerable.Empty<ITfsChangeset>();
