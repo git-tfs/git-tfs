@@ -103,7 +103,9 @@ namespace Sep.Git.Tfs.Commands
 
         private void VerifyTfsPathToClone(string tfsRepositoryPath)
         {
-            if (initBranch != null)
+            if (initBranch == null)
+                return;
+            try
             {
                 var remote = globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
 
@@ -144,6 +146,15 @@ namespace Sep.Git.Tfs.Commands
                         stdout.WriteLine("warning: you are going to clone a subdirectory of a branch and won't be able to manage branches :(\n"
                             + "   => If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " with '--with-branches' option instead...)");
                 }
+            }
+            catch (GitTfsException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                stdout.WriteLine("warning: a server error occurs when trying to verify the tfs path cloned:\n   " + ex.Message
+                    + "\n   try to continue anyway...");
             }
         }
 
