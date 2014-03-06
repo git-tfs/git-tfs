@@ -71,7 +71,8 @@ namespace Sep.Git.Tfs.Commands
             var allRemotes = _globals.Repository.ReadAllTfsRemotes();
 
             tfsBranchPath.AssertValidTfsPath();
-            if (allRemotes.Any(r => r.TfsRepositoryPath.ToLower() == tfsBranchPath.ToLower()))
+            var remote = allRemotes.FirstOrDefault(r => r.TfsRepositoryPath.ToLower() == tfsBranchPath.ToLower());
+            if (remote != null && remote.MaxChangesetId != 0)
             {
                 _stdout.WriteLine("warning : There is already a remote for this tfs branch. Branch ignored!");
                 return GitTfsExitCodes.InvalidArguments;
@@ -111,14 +112,11 @@ namespace Sep.Git.Tfs.Commands
                 if (cbd.TfsRepositoryPath == tfsBranchPath)
                     cbd.GitBranchNameExpected = gitBranchNameExpected;
 
-                cbd.Sha1RootCommit = _globals.Repository.FindCommitHashByChangesetId(cbd.RootChangesetId);
-                if (string.IsNullOrWhiteSpace(cbd.Sha1RootCommit))
-                    throw new GitTfsException("error: The root changeset " + cbd.RootChangesetId +
-                                              " have not be found in the Git repository. The branch containing the changeset should not have been created. Please do it before retrying!!\n");
-
-                Trace.WriteLine("Found commit " + cbd.Sha1RootCommit + " for changeset :" + cbd.RootChangesetId);
-
-                tfsRemote = defaultRemote.InitBranch(_remoteOptions, cbd.TfsRepositoryPath, cbd.Sha1RootCommit, cbd.GitBranchNameExpected);
+                tfsRemote = defaultRemote.InitBranch(_remoteOptions, cbd.TfsRepositoryPath, cbd.RootChangesetId, !NoFetch, cbd.GitBranchNameExpected);
+                if (tfsRemote == null)
+                {
+                    throw new GitTfsException("error: Couldn't fetch parent branch\n");
+                }
                 if (rootBranch.IsRenamedBranch || !NoFetch)
                 {
                     fetchResult = FetchRemote(tfsRemote, false, !DontCreateGitBranch && !rootBranch.IsRenamedBranch);
@@ -140,7 +138,6 @@ namespace Sep.Git.Tfs.Commands
             public string TfsRepositoryPath { get; set; }
             public string GitBranchNameExpected { get; set; }
             public long RootChangesetId { get; set; }
-            public string Sha1RootCommit { get; set; }
         }
 
         [DebuggerDisplay("{TfsRepositoryPath} C{RootChangesetId}")]
