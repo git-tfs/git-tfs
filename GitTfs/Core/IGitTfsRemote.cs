@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Core
         bool ExportMetadatas { get; set; }
         Dictionary<string, string> ExportWorkitemsMapping { get; set; }
         bool ShouldSkip(string path);
-        IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, string sha1RootCommit, string gitBranchNameExpected = null);
+        IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null);
         string GetPathInGitRepo(string tfsPath);
         IFetchResult Fetch(bool stopOnFailMergeCommit = false);
         IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes);
