@@ -333,7 +333,13 @@ namespace Sep.Git.Tfs.Core
                         log.CommitParents.Add(parent);
                     }
                 }
-                ProcessChangeset(changeset, log);
+                var commitSha = ProcessChangeset(changeset, log);
+                // set commit sha for added git objects
+                foreach (var commit in objects)
+                {
+                    if (commit.Value.Commit == null)
+                        commit.Value.Commit = commitSha;
+                }
                 DoGcIfNeeded();
             }
             fetchResult.NewChangesetCount = count;
@@ -365,7 +371,7 @@ namespace Sep.Git.Tfs.Core
             return true;
         }
 
-        private void ProcessChangeset(ITfsChangeset changeset, LogEntry log)
+        private string ProcessChangeset(ITfsChangeset changeset, LogEntry log)
         {
 
             if (ExportMetadatas)
@@ -433,6 +439,7 @@ namespace Sep.Git.Tfs.Core
                 metadatas.Append("\nPerformance Reviewer:" + changeset.Summary.PerformanceReviewer);
             if (metadatas.Length != 0)
                 Repository.CreateNote(commitSha, metadatas.ToString(), log.AuthorName, log.AuthorEmail, log.Date);
+            return commitSha;
         }
 
         private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit)
