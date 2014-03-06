@@ -15,9 +15,9 @@ namespace Sep.Git.Tfs.Commands
             {
                 return new OptionSet
                 {
-                    { "ignore-regex=", "a regex of files to ignore",
+                    { "ignore-regex=", "A regex of files to ignore",
                         v => IgnoreRegex = v },
-                    { "except-regex=", "a regex of exceptions to ingore-regex",
+                    { "except-regex=", "A regex of exceptions to '--ignore-regex'",
                         v => ExceptRegex = v},
                     { "u|username=", "TFS username",
                         v => Username = v },
