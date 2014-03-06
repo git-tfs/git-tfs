@@ -36,8 +36,12 @@ namespace Sep.Git.Tfs.Util
 
         public bool Contains(string pathInGitRepo)
         {
-            if (pathInGitRepo != null && _initialTree.ContainsKey(pathInGitRepo))
-                return true;
+            if (pathInGitRepo != null)
+            {
+                GitObject result;
+                if (_initialTree.TryGetValue(pathInGitRepo, out result))
+                    return result.Commit != null;
+            }
             return false;
         }
 
@@ -45,9 +49,9 @@ namespace Sep.Git.Tfs.Util
 
         private GitObject Lookup(string pathInGitRepo)
         {
-            GitObject gitObject;
-            if (_initialTree.TryGetValue(pathInGitRepo, out gitObject))
-                return gitObject;
+            GitObject result;
+            if (_initialTree.TryGetValue(pathInGitRepo, out result))
+                return result;
 
             var fullPath = pathInGitRepo;
             var splitResult = SplitDirnameFilename.Match(pathInGitRepo);
@@ -57,9 +61,9 @@ namespace Sep.Git.Tfs.Util
                 var fileName = splitResult.Groups["file"].Value;
                 fullPath = Lookup(dirName).Path + "/" + fileName;
             }
-            gitObject = new GitObject { Path = fullPath };
-            _initialTree[fullPath] = gitObject;
-            return gitObject;
+            result = new GitObject { Path = fullPath };
+            _initialTree[fullPath] = result;
+            return result;
         }
     }
 }

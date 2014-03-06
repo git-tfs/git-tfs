@@ -480,7 +480,7 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 public Fixture()
                 {
-                    InitialTree.Add("file6.txt", new GitObject());
+                    InitialTree.Add("file6.txt", new GitObject() { Commit = "SHA" });
 
                     Changeset.Changes = new[] {
                         FakeChange.Add("$/Project/file1.txt"),
