@@ -43,7 +43,7 @@ The `branch` command permit to manage TFS branches. With this command, you can d
 		  --init                 Initialize an existing TFS branch
           --ignore-regex=VALUE   a regex of files to ignore
           --except-regex=VALUE   a regex of exceptions to ignore-regex
-		  --nofetch              Don't fetch changeset for inited branch(es)
+		  --no-fetch              Don't fetch changeset for inited branch(es)
 	  -b, --tfs-parent-branch=VALUE
 								 TFS Parent branch of the TFS branch to clone
 								   (TFS 2008 only! And required!!) ex:
@@ -130,7 +130,7 @@ You could use the parameter `--except-regex`, to add an exception to the paramet
 
 ### Init a branch without fetching changesets
 
-You could use the parameter `--nofetch`, to init the branch by creating its remote but without fetching the changesets of the branch.
+You could use the parameter `--no-fetch`, to init the branch by creating its remote but without fetching the changesets of the branch.
 
 ### Authentication
 

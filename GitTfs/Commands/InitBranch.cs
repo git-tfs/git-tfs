@@ -57,7 +57,7 @@ namespace Sep.Git.Tfs.Commands
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "ignore-regex=", "A regex of files to ignore", v => IgnoreRegex = v },
                     { "except-regex=", "A regex of exceptions to ignore-regex", v => ExceptRegex = v},
-                    { "nofetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
+                    { "no-fetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
                 };
             }
         }
@@ -108,7 +108,7 @@ namespace Sep.Git.Tfs.Commands
             if (!NoFetch)
                 FetchRemote(tfsRemote, false, !DontCreateGitBranch);
             else
-                Trace.WriteLine("Not fetching changesets, --nofetch option specified");
+                Trace.WriteLine("Not fetching changesets, --no-fetch option specified");
             return GitTfsExitCodes.OK;
         }
 
@@ -127,7 +127,7 @@ namespace Sep.Git.Tfs.Commands
                 _stdout.WriteLine("WARNING: This command is obsolete and will be removed in the next version. Use 'branch --init' instead!");
 
             if (CloneAllBranches && NoFetch)
-                throw new GitTfsException("error: --nofetch cannot be used with --all");
+                throw new GitTfsException("error: --no-fetch cannot be used with --all");
 
             if (!CloneAllBranches)
             {

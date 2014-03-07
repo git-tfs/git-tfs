@@ -360,7 +360,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.ClassUnderTest.NoFetch = true;
 
             var ex = Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run());
-            Assert.Equal("error: --nofetch cannot be used with --all", ex.Message);
+            Assert.Equal("error: --no-fetch cannot be used with --all", ex.Message);
         }
 
         [Fact]
