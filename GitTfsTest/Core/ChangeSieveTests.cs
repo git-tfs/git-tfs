@@ -496,6 +496,20 @@ namespace Sep.Git.Tfs.Test.Core
             }
 
             [Fact]
+            public void DoesNotFetchBranchedFile()
+            {
+                var fetchChanges = Subject.GetChangesToFetch().ToArray();
+                Assert.Equal(7, fetchChanges.Length);
+                Assert.Contains(Changes[0], fetchChanges);
+                Assert.Contains(Changes[1], fetchChanges);
+                Assert.Contains(Changes[2], fetchChanges);
+                Assert.Contains(Changes[3], fetchChanges);
+                Assert.Contains(Changes[4], fetchChanges);
+                Assert.Contains(Changes[6], fetchChanges);
+                Assert.Contains(Changes[7], fetchChanges);
+            }
+
+            [Fact]
             public void DoesNotApplyBranchedFile()
             {
                 AssertChanges(Subject.GetChangesToApply(),
