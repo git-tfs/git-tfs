@@ -119,12 +119,22 @@ namespace Sep.Git.Tfs.VsCommon
 
         protected abstract string GetVsInstallDir();
 
+        protected string TryGetUserRegString(string path, string name)
+        {
+            return TryGetRegString(Registry.CurrentUser, path, name);
+        }
+
         protected string TryGetRegString(string path, string name)
+        {
+            return TryGetRegString(Registry.LocalMachine, path, name);
+        }
+
+        protected string TryGetRegString(RegistryKey registryKey, string path, string name)
         {
             try
             {
-                Trace.WriteLine("Trying to get " + path + "|" + name);
-                var key = Registry.LocalMachine.OpenSubKey(path);
+                Trace.WriteLine("Trying to get " + registryKey.Name + "\\" + path + "|" + name);
+                var key = registryKey.OpenSubKey(path);
                 if(key != null)
                 {
                     return key.GetValue(name) as string;
@@ -132,7 +142,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
             catch(Exception e)
             {
-                Trace.WriteLine("Unable to get registry value " + path + "|" + name + ": " + e);
+                Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + "|" + name + ": " + e);
             }
             return null;
         }
