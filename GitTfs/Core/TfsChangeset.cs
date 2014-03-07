@@ -206,5 +206,7 @@ namespace Sep.Git.Tfs.Core
                            Remote = remote
                        };
         }
+
+        public string OmittedParentBranch { get; set; }
     }
 }
