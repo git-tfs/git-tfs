@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 return new OptionSet
                     {
-                        { "force", "force reset remote (when current commit do not belong to the remote to reset)", v => ForceResetRemote = v != null },
+                        { "force", "Force reset remote (when current commit do not belong to the remote to reset)", v => ForceResetRemote = v != null },
                     };
             }
         }

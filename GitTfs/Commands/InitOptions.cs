@@ -26,8 +26,8 @@ namespace Sep.Git.Tfs.Commands
                         v => GitInitAutoCrlf = ValidateCrlfValue(v) },
                     { "ignorecase=", "Ignore case in file paths (default: system default)",
                         v => GitInitIgnoreCase = ValidateIgnoreCaseValue(v) },
-                    {"bare", "clone the TFS repository in a bare git repository", v => IsBare = v != null},
-                    {"workspace=", "set tfs workspace to a specific folder (a shorter path is better!)", v => WorkspacePath = v},
+                    {"bare", "Clone the TFS repository in a bare git repository", v => IsBare = v != null},
+                    {"workspace=", "Set tfs workspace to a specific folder (a shorter path is better!)", v => WorkspacePath = v},
                 };
             }
         }

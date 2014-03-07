@@ -45,9 +45,9 @@ namespace Sep.Git.Tfs.Commands
             {
                 return new OptionSet
                 {
-                    { "all|fetch-all",
+                    { "all|fetch-all", "Fetch TFS changesets of all the initialized tfs remotes",
                         v => FetchAll = v != null },
-                    { "parents",
+                    { "parents", "Fetch TFS changesets of the parent(s) initialized tfs remotes",
                         v => FetchParents = v != null },
                     { "l|with-labels|fetch-labels", "Fetch the labels also when fetching TFS changesets",
                         v => FetchLabels = v != null },

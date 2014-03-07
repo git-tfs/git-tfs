@@ -14,8 +14,10 @@ The fetch command fetch all the new changesets from a TFS remote
       -I, --auto-tfs-remote, --auto-remote
                                  Autodetect (from git history) the remote ID of
                                    the TFS to interact with
-          --all, --fetch-all
-          --parents
+          --all, --fetch-all     Fetch TFS changesets of all the initialized tfs
+                                   remotes
+          --parents              Fetch TFS changesets of the parent(s)
+                                   initialized tfs remotes
           --authors=VALUE        Path to an Authors file to map TFS users to Git
                                    users
           --ignore-regex=VALUE   a regex of files to ignore
@@ -29,24 +31,33 @@ The fetch command fetch all the new changesets from a TFS remote
 
 ### Simple
 
-To fetch all the changeset of the `default` branch:
+To fetch all the changeset of the `default` remote:
 
     git tfs fetch
 
 ### Fetch from a branch
 
-To fetch all the changeset of the `tfs/myBranch` branch:
+To fetch all the changesets of the `tfs/myBranch` remote:
 
     git tfs fetch -i myBranch
 
 ### Fetch from the current branch
 
-To fetch all the changeset of the current branch:
+To fetch all the changesets of the current remote:
 
     git tfs fetch -I
 
-The current branch depend of the git commit that is currently checkouted. Git-tfs will look in the history
-to find the appropriate branch to fetch.
+The current remote depend of the git commit that is currently checkouted. Git-tfs will look in the history
+to find the appropriate remote to fetch.
+
+### Fetch from all the remotes
+
+To fetch all the changesets of all the initialized remotes
+
+    git tfs fetch --all
+
+Note: you could see all the tfs remotes already initialized using command `git tfs branch` and
+all that exists on the tfs server using command `git tfs branch -r`
 
 ### Authentication
 
@@ -66,3 +77,4 @@ If the tfs branch merged has not be inited, the merge changeset will be created 
 ## See also
 
 * [clone](clone.md)
+* [branch](branch.md)

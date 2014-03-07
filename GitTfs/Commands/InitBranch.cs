@@ -55,8 +55,8 @@ namespace Sep.Git.Tfs.Commands
                     { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
-                    { "ignore-regex=", "a regex of files to ignore", v => IgnoreRegex = v },
-                    { "except-regex=", "a regex of exceptions to ignore-regex", v => ExceptRegex = v},
+                    { "ignore-regex=", "A regex of files to ignore", v => IgnoreRegex = v },
+                    { "except-regex=", "A regex of exceptions to ignore-regex", v => ExceptRegex = v},
                     { "nofetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
                 };
             }

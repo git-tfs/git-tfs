@@ -35,7 +35,7 @@ ex : git tfs create http://myTfsServer:8080/tfs/TfsRepository myProjectName
                 return new OptionSet
                     {
                         {"c|create-project-folder", "Create also the team project folder if it doesn't exist!", v => _createTeamProjectFolder = v != null},
-                        {"t|trunk-name=", "name of the main branch that will be created on TFS (default: \"trunk\")", v => _trunkName = v},
+                        {"t|trunk-name=", "Name of the main branch that will be created on TFS (default: \"trunk\")", v => _trunkName = v},
                     }.Merge(_clone.OptionSet);
             }
         }

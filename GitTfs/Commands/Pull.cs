@@ -23,7 +23,7 @@ namespace Sep.Git.Tfs.Commands
             get
             {
                 return fetch.OptionSet
-                            .Add("r|rebase", "rebase your modifications on tfs changes", v => _shouldRebase = v != null);
+                            .Add("r|rebase", "Rebase your modifications on tfs changes", v => _shouldRebase = v != null);
             }
         }
 

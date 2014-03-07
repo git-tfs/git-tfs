@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to search all shelvesets.",
                         v => Owner = v },
-                    { "b|branch=", "GIT Branch to apply Shelveset to? (default: TFS default branch)", 
+                    { "b|branch=", "Git Branch to apply Shelveset to? (default: TFS default branch)", 
                         v => TfsBranch = v },                
                 };
             }

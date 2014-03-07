@@ -41,10 +41,10 @@ namespace Sep.Git.Tfs.Commands
             {
                 return new OptionSet
                     {
-                        { "q|no-rebase|quick", "omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
+                        { "q|no-rebase|quick", "Omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
                         v => Quick = v != null },
-                        {"a|autorebase", "continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
-                        {"ignore-merge", "force check in ignoring parent tfs branches in merge commits", v => ForceCheckin = v != null},
+                        {"a|autorebase", "Continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
+                        {"ignore-merge", "Force check in ignoring parent tfs branches in merge commits", v => ForceCheckin = v != null},
                     }.Merge(_checkinOptions.OptionSet);
             }
         }
