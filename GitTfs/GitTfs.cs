@@ -59,7 +59,18 @@ namespace Sep.Git.Tfs
                 var remotes = _globals.Repository.GetLastParentTfsCommits("HEAD");
                 if (!remotes.Any())
                 {
-                    throw new Exception("No TFS parents found!");
+                    var allRemotes = _globals.Repository.ReadAllTfsRemotes();
+                    if (!allRemotes.Any())
+                        throw new Exception("error: no tfs remotes defined in this repository!");
+
+                    if (allRemotes.Count() == 1)
+                    {
+                        _globals.UserSpecifiedRemoteId = allRemotes.First().Id;
+                        _stdout.WriteLine("Working with tfs remote: " + _globals.RemoteId);
+                        return;
+                    }
+                    throw new Exception("error: can't find a tfs remote to use\n   No TFS parents found and more than one tfs remote defined in the repository!"
+                        + "\n   Use '-i' option to define which one to use.");
                 }
                 var foundRemote = remotes.First().Remote;
                 if(foundRemote.IsDerived)
