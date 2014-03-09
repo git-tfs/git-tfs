@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -53,12 +53,11 @@ namespace Sep.Git.Tfs
 
         private void AutoDetectRemoteToUse()
         {
-            if (_globals.AutoFindRemote)
+            if (string.IsNullOrEmpty(_globals.UserSpecifiedRemoteId))
             {
-                if (!string.IsNullOrEmpty(_globals.UserSpecifiedRemoteId))
-                {
-                    throw new Exception("error: you can't use -i and -I option in the same time!");
-                }
+                if (_globals.AutoFindRemote)
+                    _stdout.WriteLine("info: Option '-I' is now the default behavior and is no more needed. It will be removed in the next version.");
+
                 var changesetsWithRemote = _globals.Repository.GetLastParentTfsCommits("HEAD");
                 if (!changesetsWithRemote.Any())
                 {
