@@ -44,47 +44,55 @@ namespace Sep.Git.Tfs.Commands
                     commit.AuthorAndEmail.Item1, commit.AuthorAndEmail.Item2,
                     commit.When.ToString("ddd MMM d HH:mm:ss zzz"),
                     commit.Message.Replace("\n","\n    ").TrimEnd(' '));
-                if (parent.Remote.IsDerived)
-                {
-                    var remoteId = GetRemoteId(parent);
-                    var remote = _globals.Repository.CreateTfsRemote(new RemoteInfo
-                    {
-                        Id = remoteId,
-                        Url = parent.Remote.TfsUrl,
-                        Repository = parent.Remote.TfsRepositoryPath,
-                        RemoteOptions = _remoteOptions,
-                    }, string.Empty);
-                    remote.UpdateTfsHead(parent.GitCommit, parent.ChangesetId);
-                    _stdout.WriteLine("-> new remote '" + remote.Id + "'");
-                }
-                else
-                {
-                    if (parent.Remote.MaxChangesetId < parent.ChangesetId)
-                    {
-                        long oldChangeset = parent.Remote.MaxChangesetId;
-                        _globals.Repository.MoveTfsRefForwardIfNeeded(parent.Remote);
-                        _stdout.WriteLine("-> existing remote {0} (updated from changeset {1})", parent.Remote.Id, oldChangeset);
-                    }
-                    else
-                    {
-                        _stdout.WriteLine("-> existing remote {0} (up to date)", parent.Remote.Id);
-                    }
-                }
+                CreateRemote(parent);
                 _stdout.WriteLine();
             }
             return GitTfsExitCodes.OK;
         }
 
-        private string GetRemoteId(TfsChangesetInfo parent)
+        public IGitTfsRemote CreateRemote(TfsChangesetInfo changeset)
+        {
+            IGitTfsRemote remote;
+            if (changeset.Remote.IsDerived)
+            {
+                var remoteId = GetRemoteId(changeset);
+                remote = _globals.Repository.CreateTfsRemote(new RemoteInfo
+                    {
+                        Id = remoteId,
+                        Url = changeset.Remote.TfsUrl,
+                        Repository = changeset.Remote.TfsRepositoryPath,
+                        RemoteOptions = _remoteOptions,
+                    }, string.Empty);
+                remote.UpdateTfsHead(changeset.GitCommit, changeset.ChangesetId);
+                _stdout.WriteLine("-> new remote '" + remote.Id + "'");
+            }
+            else
+            {
+                remote = changeset.Remote;
+                if (changeset.Remote.MaxChangesetId < changeset.ChangesetId)
+                {
+                    long oldChangeset = changeset.Remote.MaxChangesetId;
+                    _globals.Repository.MoveTfsRefForwardIfNeeded(changeset.Remote);
+                    _stdout.WriteLine("-> existing remote {0} (updated from changeset {1})", changeset.Remote.Id, oldChangeset);
+                }
+                else
+                {
+                    _stdout.WriteLine("-> existing remote {0} (up to date)", changeset.Remote.Id);
+                }
+            }
+            return remote;
+        }
+
+        private string GetRemoteId(TfsChangesetInfo changeset)
         {
             if (IsAvailable(GitTfsConstants.DefaultRepositoryId))
             {
-                _stdout.WriteLine("info: '" + parent.Remote.TfsRepositoryPath + "' will be bootstraped as your main remote...");
+                _stdout.WriteLine("info: '" + changeset.Remote.TfsRepositoryPath + "' will be bootstraped as your main remote...");
                 return GitTfsConstants.DefaultRepositoryId;
             }
 
             //Remove '$/'!
-            var expectedRemoteId = parent.Remote.TfsRepositoryPath.Substring(2).Trim('/');
+            var expectedRemoteId = changeset.Remote.TfsRepositoryPath.Substring(2).Trim('/');
             var indexOfSlash = expectedRemoteId.IndexOf('/');
             if (indexOfSlash != 0)
                 expectedRemoteId = expectedRemoteId.Substring(indexOfSlash + 1);
