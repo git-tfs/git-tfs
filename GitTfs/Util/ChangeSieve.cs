@@ -47,6 +47,9 @@ namespace Sep.Git.Tfs.Util
         }
 
         bool? _renameBranchCommmit;
+        /// <summary>
+        /// Is the top-level folder deleted or renamed?
+        /// </summary>
         private bool RenameBranchCommmit
         {
             get
@@ -99,7 +102,7 @@ namespace Sep.Git.Tfs.Util
                     if (IncludeInApply(change))
                     {
                         compartments.Updated.Add(ApplicableChange.Update(change.GitPath,
-                            oldInfo.Try(x => x.Mode, () => Mode.NonExecutableFile)));
+                            oldInfo != null ? oldInfo.Mode : Mode.NonExecutableFile));
                     }
                 }
                 else
