@@ -128,6 +128,16 @@ namespace Sep.Git.Tfs.Test.Core
                 return new FakeChange(TfsChangeType.Add, TfsItemType.Folder, serverItem);
             }
 
+            public static IChange Branch(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Branch, TfsItemType.File, serverItem);
+            }
+
+            public static IChange BranchAndEdit(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Branch | TfsChangeType.Edit, TfsItemType.File, serverItem);
+            }
+
             const int ChangesetId = 10;
 
             TfsChangeType _tfsChangeType;
@@ -201,18 +211,16 @@ namespace Sep.Git.Tfs.Test.Core
             IItem IVersionControlServer.GetItem(int itemId, int changesetNumber)
             {
                 if (itemId == _itemId && changesetNumber == ChangesetId - 1 && TfsChangeType.Rename == _tfsChangeType)
-                    return new PreviousItem(this, _renamedFrom);
+                    return new PreviousItem(_renamedFrom);
                 throw new NotImplementedException();
             }
 
             class PreviousItem : IItem
             {
-                IItem _theItem;
                 string _oldName;
 
-                public PreviousItem(IItem theItem, string oldName)
+                public PreviousItem(string oldName)
                 {
-                    _theItem = theItem;
                     _oldName = oldName;
                 }
 
@@ -463,6 +471,57 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal("100644", toApply[1].Mode.ToModeString()); // new file
                 Assert.Equal("100755", toApply[2].Mode.ToModeString()); // existing executable file
                 Assert.Equal("100644", toApply[3].Mode.ToModeString()); // existing normal file
+            }
+        }
+
+        public class SkipBranchedThings : Base<SkipBranchedThings.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    InitialTree.Add("file6.txt", new GitObject() { Commit = "SHA" });
+
+                    Changeset.Changes = new[] {
+                        /*0*/FakeChange.Add("$/Project/file1.txt"),
+                        /*1*/FakeChange.Delete("$/Project/file2.txt"),
+                        /*2*/FakeChange.Add("$/Project/file3.txt"),
+                        /*3*/FakeChange.Delete("$/Project/file4.txt"),
+                        /*4*/FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
+                        /*5*/FakeChange.Branch("$/Project/file6.txt"), // Do not include, because it was there before.
+                        /*6*/FakeChange.Branch("$/Project/file7.txt"), // Include, because it was not there before.
+                        /*7*/FakeChange.BranchAndEdit("$/Project/file8.txt"), // Include, because it's not just branched.
+                    };
+                }
+            }
+
+            [Fact]
+            public void DoesNotFetchBranchedFile()
+            {
+                var fetchChanges = Subject.GetChangesToFetch().ToArray();
+                Assert.Equal(7, fetchChanges.Length); // one is missing
+                Assert.Contains(Changes[0], fetchChanges);
+                Assert.Contains(Changes[1], fetchChanges);
+                Assert.Contains(Changes[2], fetchChanges);
+                Assert.Contains(Changes[3], fetchChanges);
+                Assert.Contains(Changes[4], fetchChanges);
+                // Changes[5] (branch of file6.txt) is missing
+                Assert.Contains(Changes[6], fetchChanges);
+                Assert.Contains(Changes[7], fetchChanges);
+            }
+
+            [Fact]
+            public void DoesNotApplyBranchedFile()
+            {
+                AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Delete("file2.txt"),
+                    ApplicableChange.Delete("file4.txt"),
+                    ApplicableChange.Delete("oldfile5.txt"),
+                    ApplicableChange.Update("file1.txt"),
+                    ApplicableChange.Update("file3.txt"),
+                    ApplicableChange.Update("file5.txt"),
+                    ApplicableChange.Update("file7.txt"),
+                    ApplicableChange.Update("file8.txt"));
             }
         }
     }
