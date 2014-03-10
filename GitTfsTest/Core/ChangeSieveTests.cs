@@ -483,14 +483,14 @@ namespace Sep.Git.Tfs.Test.Core
                     InitialTree.Add("file6.txt", new GitObject() { Commit = "SHA" });
 
                     Changeset.Changes = new[] {
-                        FakeChange.Add("$/Project/file1.txt"),
-                        FakeChange.Delete("$/Project/file2.txt"),
-                        FakeChange.Add("$/Project/file3.txt"),
-                        FakeChange.Delete("$/Project/file4.txt"),
-                        FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
-                        FakeChange.Branch("$/Project/file6.txt"), // Do not include, because it was there before.
-                        FakeChange.Branch("$/Project/file7.txt"), // Include, because it was not there before.
-                        FakeChange.BranchAndEdit("$/Project/file8.txt"), // Include, because it's not just branched.
+                        /*0*/FakeChange.Add("$/Project/file1.txt"),
+                        /*1*/FakeChange.Delete("$/Project/file2.txt"),
+                        /*2*/FakeChange.Add("$/Project/file3.txt"),
+                        /*3*/FakeChange.Delete("$/Project/file4.txt"),
+                        /*4*/FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
+                        /*5*/FakeChange.Branch("$/Project/file6.txt"), // Do not include, because it was there before.
+                        /*6*/FakeChange.Branch("$/Project/file7.txt"), // Include, because it was not there before.
+                        /*7*/FakeChange.BranchAndEdit("$/Project/file8.txt"), // Include, because it's not just branched.
                     };
                 }
             }
@@ -499,12 +499,13 @@ namespace Sep.Git.Tfs.Test.Core
             public void DoesNotFetchBranchedFile()
             {
                 var fetchChanges = Subject.GetChangesToFetch().ToArray();
-                Assert.Equal(7, fetchChanges.Length);
+                Assert.Equal(7, fetchChanges.Length); // one is missing
                 Assert.Contains(Changes[0], fetchChanges);
                 Assert.Contains(Changes[1], fetchChanges);
                 Assert.Contains(Changes[2], fetchChanges);
                 Assert.Contains(Changes[3], fetchChanges);
                 Assert.Contains(Changes[4], fetchChanges);
+                // Changes[5] (branch of file6.txt) is missing
                 Assert.Contains(Changes[6], fetchChanges);
                 Assert.Contains(Changes[7], fetchChanges);
             }
