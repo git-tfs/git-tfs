@@ -398,6 +398,7 @@ namespace Sep.Git.Tfs.Core
             {
                 stdout.WriteLine("info: this changeset " + changeset.Summary.ChangesetId +
                                  " is a merge changeset. But was not treated as is because of your git setting...");
+                changeset.OmittedParentBranch = ";C" + changeset.Summary.ChangesetId;
             }
             return true;
         }
