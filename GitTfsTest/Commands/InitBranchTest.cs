@@ -111,6 +111,9 @@ namespace Sep.Git.Tfs.Test.Commands
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out gitRepository, out remote, out newBranchRemote);
 
             remote.Tfs = mocks.Get<ITfsHelper>();
+            var mockRemote = MockRepository.GenerateStub<IGitTfsRemote>();
+            mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true });
+            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything)).Return(mockRemote);
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
 
             IGitTfsRemote existingBranchRemote = MockRepository.GenerateStub<IGitTfsRemote>();
@@ -125,7 +128,7 @@ namespace Sep.Git.Tfs.Test.Commands
 
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Return(GIT_BRANCH_TO_INIT).Repeat.Never();
 
-            Assert.Equal(GitTfsExitCodes.InvalidArguments, mocks.ClassUnderTest.Run("$/MyProject/MyBranch", GIT_BRANCH_TO_INIT));
+            Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("$/MyProject/MyBranch", GIT_BRANCH_TO_INIT));
 
             gitRepository.VerifyAllExpectations();
         }
