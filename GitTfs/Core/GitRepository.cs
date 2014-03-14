@@ -44,6 +44,7 @@ namespace Sep.Git.Tfs.Core
                 false,
                 logEntry.Tree,
                 parents);
+            changesetsCache[logEntry.ChangesetId] = commit.Sha;
             return new GitCommit(commit);
         }
 
@@ -475,6 +476,9 @@ namespace Sep.Git.Tfs.Core
             return reference != null;
         }
 
+        private readonly Dictionary<long, string> changesetsCache = new Dictionary<long, string>();
+        private bool cacheIsFull = false;
+
         public string FindCommitHashByChangesetId(long changesetId)
         {
             var commit = FindCommitByChangesetId(changesetId);
@@ -484,11 +488,20 @@ namespace Sep.Git.Tfs.Core
             return commit.Sha;
         }
 
+        private readonly Regex tfsIdRegex = new Regex("^git-tfs-id: .*;C([0-9]+)$", RegexOptions.Singleline | RegexOptions.Compiled);
+
         private Commit FindCommitByChangesetId(long changesetId, string remoteRef = null)
         {
             Trace.WriteLine("Looking for changeset " + changesetId + " in git repository...");
 
-            var regex = new Regex("git-tfs-id: .*;C" + changesetId + "[^0-9]", RegexOptions.Singleline | RegexOptions.Compiled);
+            if (remoteRef == null)
+            {
+                string sha;
+                if (changesetsCache.TryGetValue(changesetId, out sha))
+                    return _repository.Lookup<Commit>(sha);
+                if (cacheIsFull)
+                    return null;
+            }
 
             var reachableFromRemoteBranches = new CommitFilter
             {
@@ -500,7 +513,23 @@ namespace Sep.Git.Tfs.Core
                 reachableFromRemoteBranches.Since = _repository.Branches.Where(p => p.IsRemote && p.CanonicalName.EndsWith(remoteRef));
             var commitsFromRemoteBranches = _repository.Commits.QueryBy(reachableFromRemoteBranches);
 
-            var commit = commitsFromRemoteBranches.FirstOrDefault(c => regex.IsMatch(c.Message));
+            Commit commit = null;
+            foreach (var c in commitsFromRemoteBranches)
+            {
+                var match = tfsIdRegex.Match(commit.Message);
+                if (match.Success)
+                {
+                    int id = int.Parse(match.Groups[1].Value);
+                    changesetsCache[id] = c.Sha;
+                    if (id == changesetId)
+                    {
+                        commit = c;
+                        break;
+                    }
+                }
+            }
+            if (remoteRef == null && commit == null)
+                cacheIsFull = true; // repository fully scanned
             Trace.WriteLine((commit == null) ? " => Commit not found!" : " => Commit found! hash: " + commit.Sha);
             return commit;
         }
