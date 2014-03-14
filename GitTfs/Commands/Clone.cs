@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly InitBranch initBranch;
         private bool withBranches;
+        private bool resumable;
         private TextWriter stdout;
 
         public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout)
@@ -40,7 +41,8 @@ namespace Sep.Git.Tfs.Commands
             get
             {
                 return init.OptionSet.Merge(fetch.OptionSet)
-                           .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null);
+                           .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null)
+                           .Add("resumable", "do not clean the folder if an error occurred and try to continue when you restart clone with same parameters", v => resumable = v != null);
             }
         }
 
@@ -57,37 +59,68 @@ namespace Sep.Git.Tfs.Commands
             // TFS string representations of repository paths do not end in trailing slashes
             tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
-            int retVal;
+            int retVal = 0;
             try
             {
-                retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+                if (repositoryDirCreated)
+                {
+                    retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+                }
+                else
+                {
+                    try
+                    {
+                        Environment.CurrentDirectory = gitRepositoryPath;
+                        globals.Repository = init.GitHelper.MakeRepository(globals.GitDir);
+                    }
+                    catch (Exception)
+                    {
+                        retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+                    }
+                }
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
 
-                if (retVal == 0) fetch.Run(withBranches);
+                if (retVal == 0)
+                {
+                    fetch.Run(withBranches);
+
+                    try
+                    {
+                        globals.Repository.CommandNoisy("gc");
+                    }
+                    catch (Exception e)
+                    {
+                        Trace.WriteLine(e);
+                        stdout.WriteLine("Warning: `git gc` failed!");
+                    }
+                }
             }
             catch
             {
-                try
+                if (!resumable)
                 {
-                    // if we appeared to be inside repository dir when exception was thrown - we won't be able to delete it
-                    Environment.CurrentDirectory = currentDir;
-                    if (repositoryDirCreated)
-                        Directory.Delete(gitRepositoryPath, recursive: true);
-                    else
-                        CleanDirectory(gitRepositoryPath);
-                }
-                catch (IOException e)
-                {
-                    // swallow IOException. Smth went wrong before this and we're much more interested in that error
-                    string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of IOException:\n{0}\n", e.IndentExceptionMessage());
-                    Trace.WriteLine(msg);
-                }
-                catch (UnauthorizedAccessException e)
-                {
-                    // swallow it also
-                    string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
-                    Trace.WriteLine(msg);
+                    try
+                    {
+                        // if we appeared to be inside repository dir when exception was thrown - we won't be able to delete it
+                        Environment.CurrentDirectory = currentDir;
+                        if (repositoryDirCreated)
+                            Directory.Delete(gitRepositoryPath, recursive: true);
+                        else
+                            CleanDirectory(gitRepositoryPath);
+                    }
+                    catch (IOException e)
+                    {
+                        // swallow IOException. Smth went wrong before this and we're much more interested in that error
+                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of IOException:\n{0}\n", e.IndentExceptionMessage());
+                        Trace.WriteLine(msg);
+                    }
+                    catch (UnauthorizedAccessException e)
+                    {
+                        // swallow it also
+                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
+                        Trace.WriteLine(msg);
+                    }
                 }
 
                 throw;
@@ -158,14 +191,17 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        private static bool InitGitDir(string gitRepositoryPath)
+        private bool InitGitDir(string gitRepositoryPath)
         {
             bool repositoryDirCreated = false;
             var di = new DirectoryInfo(gitRepositoryPath);
             if (di.Exists)
             {
-                if (di.EnumerateFileSystemInfos().Any())
-                    throw new GitTfsException("error: Specified git repository directory is not empty");
+                if (!resumable)
+                {
+                    if (di.EnumerateFileSystemInfos().Any())
+                        throw new GitTfsException("error: Specified git repository directory is not empty");
+                }
             }
             else
             {

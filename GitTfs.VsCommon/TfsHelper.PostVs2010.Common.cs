@@ -31,6 +31,30 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
+        public override IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
+        {
+            const int batchCount = 100;
+            var start = (int)startVersion;
+            Changeset[] changesets;
+            do
+            {
+                var startChangeset = new ChangesetVersionSpec(start);
+                changesets = Retry.Do(() => VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+                    null, startChangeset, null, batchCount, true, true, true, true)
+                    .Cast<Changeset>().ToArray());
+                if (changesets.Length > 0)
+                    start = changesets[changesets.Length - 1].ChangesetId + 1;
+
+                // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 
+                // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
+                for (int i = 0; i < changesets.Length; i++)
+                {
+                    yield return BuildTfsChangeset(changesets[i], remote);
+                    changesets[i] = null;
+                }
+            } while (changesets.Length == batchCount);
+        }
+
         public override IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
             return VersionControl.QueryRootBranchObjects(RecursionType.Full)
@@ -58,47 +82,69 @@ namespace Sep.Git.Tfs.VsCommon
                 if (!string.IsNullOrWhiteSpace(tfsPathParentBranch))
                     Trace.WriteLine("Parameter about parent branch will be ignored because this version of TFS is able to find the parent!");
 
-                Trace.WriteLine("Looking for all branches...");
-                var allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full);
-                var tfsBranchToCreate = allTfsBranches.FirstOrDefault(b => b.Properties.RootItem.Item.ToLower() == tfsPathBranchToCreate.ToLower());
-                if (tfsBranchToCreate == null)
+                Trace.WriteLine("Looking to find branch '" + tfsPathBranchToCreate + "' in all TFS branches...");
+                string tfsParentBranch;
+                if (!AllTfsBranches.TryGetValue(tfsPathBranchToCreate, out tfsParentBranch))
                 {
-                    throw new GitTfsException("error: TFS branches "+ tfsPathBranchToCreate +" not found!");
+                    throw new GitTfsException("error: TFS branches " + tfsPathBranchToCreate + " not found!");
                 }
 
-                if (tfsBranchToCreate.Properties.ParentBranch == null)
+                if (tfsParentBranch == null)
                 {
                     throw new GitTfsException("error : the branch you try to init '" + tfsPathBranchToCreate + "' is a root branch (e.g. has no parents).",
                         new List<string> { "Clone this branch from Tfs instead of trying to init it!\n   Command: git tfs clone " + Url + " " + tfsPathBranchToCreate });
                 }
-                
-                tfsPathParentBranch = tfsBranchToCreate.Properties.ParentBranch.Item;
+
+                tfsPathParentBranch = tfsParentBranch;
                 Trace.WriteLine("Found parent branch : " + tfsPathParentBranch);
 
                 var firstChangesetInBranchToCreate = VersionControl.QueryHistory(tfsPathBranchToCreate, VersionSpec.Latest, 0, RecursionType.Full,
-                    null, null, null, int.MaxValue, true, false, false).Cast<Changeset>().LastOrDefault();
+                    null, null, null, 1, false, false, false, true).Cast<Changeset>().FirstOrDefault();
 
                 if (firstChangesetInBranchToCreate == null)
                 {
                     throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find first changeset for " + tfsPathBranchToCreate);
                 }
 
-                var mergedItemsToFirstChangesetInBranchToCreate = VersionControl
-                    .TrackMerges(new int[] {firstChangesetInBranchToCreate.ChangesetId},
-                                 new ItemIdentifier(tfsPathBranchToCreate),
-                                 new ItemIdentifier[] {new ItemIdentifier(tfsPathParentBranch),},
-                                 null)
-                    .OrderBy(x => x.SourceChangeset.ChangesetId);
+                try
+                {
+                    var mergedItemsToFirstChangesetInBranchToCreate = VersionControl
+                        .TrackMerges(new int[] { firstChangesetInBranchToCreate.ChangesetId },
+                                     new ItemIdentifier(tfsPathBranchToCreate),
+                                     new ItemIdentifier[] { new ItemIdentifier(tfsPathParentBranch), },
+                                     null)
+                        .OrderBy(x => x.SourceChangeset.ChangesetId);
 
-                var rootChangesetInParentBranch =
-                    GetRelevantChangesetBasedOnChangeType(mergedItemsToFirstChangesetInBranchToCreate, tfsPathParentBranch, tfsPathBranchToCreate);
+                    var rootChangesetInParentBranch =
+                        GetRelevantChangesetBasedOnChangeType(mergedItemsToFirstChangesetInBranchToCreate, tfsPathParentBranch, tfsPathBranchToCreate);
 
-                return rootChangesetInParentBranch.ChangesetId;
+                    return rootChangesetInParentBranch.ChangesetId;
+                }
+                catch (VersionControlException)
+                {
+                    throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to query history for " + tfsPathBranchToCreate);
+                }
             }
             catch (FeatureNotSupportedException ex)
             {
                 Trace.WriteLine(ex.Message);
                 return base.GetRootChangesetForBranch(tfsPathBranchToCreate, tfsPathParentBranch);
+            }
+        }
+
+        private IDictionary<string, string> _allTfsBranches;
+        private IDictionary<string, string> AllTfsBranches
+        {
+            get
+            {
+                if (_allTfsBranches != null)
+                    return _allTfsBranches;
+                Trace.WriteLine("Looking for all branches...");
+                _allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full)
+                    .ToDictionary(b => b.Properties.RootItem.Item,
+                        b => b.Properties.ParentBranch != null ? b.Properties.ParentBranch.Item : null,
+                        (StringComparer.InvariantCultureIgnoreCase));
+                return _allTfsBranches;
             }
         }
 

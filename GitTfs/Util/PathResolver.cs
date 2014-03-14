@@ -45,7 +45,7 @@ namespace Sep.Git.Tfs.Util
             return false;
         }
 
-        private static readonly Regex SplitDirnameFilename = new Regex(@"(?<dir>.*)[/\\](?<file>[^/\\]+)");
+        private static readonly Regex SplitDirnameFilename = new Regex(@"(?<dir>.*)[/\\](?<file>[^/\\]+)", RegexOptions.Compiled);
 
         private GitObject Lookup(string pathInGitRepo)
         {

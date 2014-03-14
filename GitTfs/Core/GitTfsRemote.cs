@@ -13,7 +13,7 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitTfsRemote : IGitTfsRemote
     {
-        private static readonly Regex isInDotGit = new Regex("(?:^|/)\\.git(?:/|$)");
+        private static readonly Regex isInDotGit = new Regex("(?:^|/)\\.git(?:/|$)", RegexOptions.Compiled);
 
         private readonly Globals globals;
         private readonly TextWriter stdout;
@@ -312,35 +312,23 @@ namespace Sep.Git.Tfs.Core
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             var fetchResult = new FetchResult{IsSuccess = true};
-            var fetchedChangesets = FetchChangesets().ToList();
-            fetchResult.NewChangesetCount = fetchedChangesets.Count;
+            var fetchedChangesets = FetchChangesets();
+            int count = 0;
+            var objects = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
             foreach (var changeset in fetchedChangesets)
             {
-                var log = Apply(MaxCommitHash, changeset);
-                if (changeset.IsMergeChangeset)
+                count++;
+                string parentCommitSha = null;
+                if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                 {
-                    var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
-                    var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
-                    if (shaParent == null)
-                        shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit);
-                    if (shaParent != null)
-                    {
-                        log.CommitParents.Add(shaParent);
-                    }
-                    else
-                    {
-                        if (stopOnFailMergeCommit)
-                        {
-                            fetchResult.IsSuccess = false;
-                            fetchResult.LastFetchedChangesetId = MaxChangesetId;
-                            return fetchResult;
-                        }
-//TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
-                        stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
-                        " is a merge changeset. But it can't have been managed accordingly because one of the parent changeset "
-                        + parentChangesetId + " is not present in the repository! If you want to do it, fetch the branch containing this changeset before retrying...");
-                    }
+                    fetchResult.NewChangesetCount = count;
+                    fetchResult.IsSuccess = false;
+                    fetchResult.LastFetchedChangesetId = MaxChangesetId;
+                    return fetchResult;
                 }
+                var log = Apply(MaxCommitHash, changeset, objects);
+                if (parentCommitSha != null)
+                    log.CommitParents.Add(parentCommitSha);
                 if (changeset.Summary.ChangesetId == mergeChangesetId)
                 {
                     foreach (var parent in parentCommitsHashes)
@@ -348,75 +336,113 @@ namespace Sep.Git.Tfs.Core
                         log.CommitParents.Add(parent);
                     }
                 }
-
-                if (ExportMetadatas)
+                var commitSha = ProcessChangeset(changeset, log);
+                // set commit sha for added git objects
+                foreach (var commit in objects)
                 {
-                    if (changeset.Summary.Workitems.Any())
-                    {
-                        log.Log += "\nwork-items: " + string.Join(", ", changeset.Summary.Workitems.Select(wi => "#" + wi.Id)); ;
-                    }
+                    if (commit.Value.Commit == null)
+                        commit.Value.Commit = commitSha;
+                }
+                DoGcIfNeeded();
+            }
+            fetchResult.NewChangesetCount = count;
+            return fetchResult;
+        }
 
-                    if (ExportWorkitemsMapping.Count != 0)
-                    {
-                        foreach (var mapping in ExportWorkitemsMapping)
-                        {
-                            log.Log = log.Log.Replace("#" + mapping.Key, "#" + mapping.Value);
-                        }
-                    }
+        private bool ProcessMergeChangeset(ITfsChangeset changeset, bool stopOnFailMergeCommit, ref string parentCommit)
+        {
+            var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
+            var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
+            if (shaParent == null)
+                shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit);
+            if (shaParent != null)
+            {
+                parentCommit = shaParent;
+            }
+            else
+            {
+                if (stopOnFailMergeCommit)
+                {
+                    return false;
+                }
+                //TODO : Manage case where there is not yet a git commit for the parent changset!!!!!
+                stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
+                                 " is a merge changeset. But it can't have been managed accordingly because one of the parent changeset "
+                                 + parentChangesetId +
+                                 " is not present in the repository! If you want to do it, fetch the branch containing this changeset before retrying...");
+            }
+            return true;
+        }
 
-                    if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
-                        log.Log += "\n" + GitTfsConstants.GitTfsPolicyOverrideCommentPrefix + changeset.Summary.PolicyOverrideComment;
+        private string ProcessChangeset(ITfsChangeset changeset, LogEntry log)
+        {
 
-                    if (!string.IsNullOrWhiteSpace(changeset.Summary.CodeReviewer))
-                        log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.CodeReviewer;
-
-                    if (!string.IsNullOrWhiteSpace(changeset.Summary.SecurityReviewer))
-                        log.Log += "\n" + GitTfsConstants.GitTfsSecurityReviewerPrefix + changeset.Summary.SecurityReviewer;
-
-                    if (!string.IsNullOrWhiteSpace(changeset.Summary.PerformanceReviewer))
-                        log.Log += "\n" + GitTfsConstants.GitTfsPerformanceReviewerPrefix + changeset.Summary.PerformanceReviewer;
+            if (ExportMetadatas)
+            {
+                if (changeset.Summary.Workitems.Any())
+                {
+                    log.Log += "\nwork-items: " + string.Join(", ", changeset.Summary.Workitems.Select(wi => "#" + wi.Id)); ;
                 }
 
-                var commitSha = Commit(log);
-                UpdateTfsHead(commitSha, changeset.Summary.ChangesetId);
-                StringBuilder metadatas = new StringBuilder();
-                if(changeset.Summary.Workitems.Any())
+                if (ExportWorkitemsMapping.Count != 0)
                 {
-                    string workitemNote = "Workitems:\n";
-                    foreach(var workitem in changeset.Summary.Workitems)
+                    foreach (var mapping in ExportWorkitemsMapping)
                     {
-                        var workitemId = workitem.Id.ToString();
-                        var workitemUrl = workitem.Url;
-                        if (ExportMetadatas && ExportWorkitemsMapping.Count != 0)
-                        {
-                            if (ExportWorkitemsMapping.ContainsKey(workitemId))
-                            {
-                                var oldWorkitemId = workitemId;
-                                workitemId = ExportWorkitemsMapping[workitemId];
-                                workitemUrl = workitemUrl.Replace(oldWorkitemId, workitemId);
-                            }
-                        }
-                        workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitemId, workitem.Title, workitemUrl);
+                        log.Log = log.Log.Replace("#" + mapping.Key, "#" + mapping.Value);
                     }
-                    metadatas.Append(workitemNote);
                 }
 
                 if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
-                    metadatas.Append("\nPolicy Override Comment:" + changeset.Summary.PolicyOverrideComment);
+                    log.Log += "\n" + GitTfsConstants.GitTfsPolicyOverrideCommentPrefix + changeset.Summary.PolicyOverrideComment;
 
                 if (!string.IsNullOrWhiteSpace(changeset.Summary.CodeReviewer))
-                    metadatas.Append("\nCode Reviewer:" + changeset.Summary.CodeReviewer);
+                    log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.CodeReviewer;
 
                 if (!string.IsNullOrWhiteSpace(changeset.Summary.SecurityReviewer))
-                    metadatas.Append("\nSecurity Reviewer:" + changeset.Summary.SecurityReviewer);
+                    log.Log += "\n" + GitTfsConstants.GitTfsSecurityReviewerPrefix + changeset.Summary.SecurityReviewer;
 
                 if (!string.IsNullOrWhiteSpace(changeset.Summary.PerformanceReviewer))
-                    metadatas.Append("\nPerformance Reviewer:" + changeset.Summary.PerformanceReviewer);
-                if (metadatas.Length != 0)
-                    Repository.CreateNote(commitSha, metadatas.ToString(), log.AuthorName, log.AuthorEmail, log.Date);
-                DoGcIfNeeded();
+                    log.Log += "\n" + GitTfsConstants.GitTfsPerformanceReviewerPrefix + changeset.Summary.PerformanceReviewer;
             }
-            return fetchResult;
+
+            var commitSha = Commit(log);
+            UpdateTfsHead(commitSha, changeset.Summary.ChangesetId);
+            StringBuilder metadatas = new StringBuilder();
+            if (changeset.Summary.Workitems.Any())
+            {
+                string workitemNote = "Workitems:\n";
+                foreach (var workitem in changeset.Summary.Workitems)
+                {
+                    var workitemId = workitem.Id.ToString();
+                    var workitemUrl = workitem.Url;
+                    if (ExportMetadatas && ExportWorkitemsMapping.Count != 0)
+                    {
+                        if (ExportWorkitemsMapping.ContainsKey(workitemId))
+                        {
+                            var oldWorkitemId = workitemId;
+                            workitemId = ExportWorkitemsMapping[workitemId];
+                            workitemUrl = workitemUrl.Replace(oldWorkitemId, workitemId);
+                        }
+                    }
+                    workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitemId, workitem.Title, workitemUrl);
+                }
+                metadatas.Append(workitemNote);
+            }
+
+            if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
+                metadatas.Append("\nPolicy Override Comment:" + changeset.Summary.PolicyOverrideComment);
+
+            if (!string.IsNullOrWhiteSpace(changeset.Summary.CodeReviewer))
+                metadatas.Append("\nCode Reviewer:" + changeset.Summary.CodeReviewer);
+
+            if (!string.IsNullOrWhiteSpace(changeset.Summary.SecurityReviewer))
+                metadatas.Append("\nSecurity Reviewer:" + changeset.Summary.SecurityReviewer);
+
+            if (!string.IsNullOrWhiteSpace(changeset.Summary.PerformanceReviewer))
+                metadatas.Append("\nPerformance Reviewer:" + changeset.Summary.PerformanceReviewer);
+            if (metadatas.Length != 0)
+                Repository.CreateNote(commitSha, metadatas.ToString(), log.AuthorName, log.AuthorEmail, log.Date);
+            return commitSha;
         }
 
         private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit)
@@ -538,17 +564,23 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private LogEntry Apply(string parent, ITfsChangeset changeset)
+        private LogEntry Apply(string parent, ITfsChangeset changeset, IDictionary<string, GitObject> entries)
         {
             LogEntry result = null;
             WithWorkspace(changeset.Summary, workspace =>
             {
                 var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(parent);
-                result = changeset.Apply(parent, treeBuilder, workspace);
+                result = changeset.Apply(parent, treeBuilder, workspace, entries);
                 result.Tree = treeBuilder.GetTree();
             });
             if (!String.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);
             return result;
+        }
+
+        private LogEntry Apply(string parent, ITfsChangeset changeset)
+        {
+            IDictionary<string, GitObject> entries = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
+            return Apply(parent, changeset, entries);
         }
 
         private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)

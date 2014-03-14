@@ -62,6 +62,9 @@
       <Link>ParentForm.cs</Link>
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="..\GitTfs.VsCommon\Retry.cs">
+      <Link>Retry.cs</Link>
+    </Compile>
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Vs2012Base.cs">
       <Link>TfsHelper.Vs2012Base.cs</Link>
     </Compile>

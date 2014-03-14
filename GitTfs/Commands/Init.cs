@@ -41,6 +41,11 @@ namespace Sep.Git.Tfs.Commands
             get { return initOptions.IsBare; }
         }
 
+        public IGitHelpers GitHelper
+        {
+            get { return gitHelper; }
+        }
+
         public int Run(string tfsUrl, string tfsRepositoryPath)
         {
             tfsRepositoryPath.AssertValidTfsPath();
