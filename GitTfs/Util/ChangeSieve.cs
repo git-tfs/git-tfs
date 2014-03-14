@@ -131,10 +131,10 @@ namespace Sep.Git.Tfs.Util
 
         private bool IncludeInFetch(NamedChange change)
         {
-            // If a change is only a branch operation and we already have a file at the target path,
+            // If a change is only a branch or merge operation and we already have a file at the target path,
             // then there is nothing to do for that change.
-            if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Branch) &&
-                !change.Change.ChangeType.IncludesOneOf(TfsChangeType.Edit) &&
+            if ((change.Change.ChangeType == TfsChangeType.Branch ||
+                change.Change.ChangeType == TfsChangeType.Merge) &&
                 _resolver.Contains(change.GitPath))
             {
                 return false;

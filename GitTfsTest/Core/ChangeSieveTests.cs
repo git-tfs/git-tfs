@@ -103,29 +103,29 @@ namespace Sep.Git.Tfs.Test.Core
         // A stub IChange implementation.
         class FakeChange : IChange, IItem, IVersionControlServer
         {
-            public static IChange Add(string serverItem, int deletionId = 0)
+            public static IChange Add(string serverItem, TfsChangeType additionalChange = 0, int deletionId = 0)
             {
-                return new FakeChange(TfsChangeType.Add, TfsItemType.File, serverItem, deletionId);
+                return new FakeChange(TfsChangeType.Add | additionalChange, TfsItemType.File, serverItem, deletionId);
             }
 
-            public static IChange Edit(string serverItem)
+            public static IChange Edit(string serverItem, TfsChangeType additionalChange = 0)
             {
-                return new FakeChange(TfsChangeType.Edit, TfsItemType.File, serverItem);
+                return new FakeChange(TfsChangeType.Edit | additionalChange, TfsItemType.File, serverItem);
             }
 
-            public static IChange Delete(string serverItem)
+            public static IChange Delete(string serverItem, TfsChangeType additionalChange = 0)
             {
-                return new FakeChange(TfsChangeType.Delete, TfsItemType.File, serverItem);
+                return new FakeChange(TfsChangeType.Delete | additionalChange, TfsItemType.File, serverItem);
             }
 
-            public static IChange Rename(string serverItem, string from, int deletionId = 0)
+            public static IChange Rename(string serverItem, string from, TfsChangeType additionalChange = 0, int deletionId = 0)
             {
-                return new FakeChange(TfsChangeType.Rename, TfsItemType.File, serverItem, deletionId, from);
+                return new FakeChange(TfsChangeType.Rename | additionalChange, TfsItemType.File, serverItem, deletionId, from);
             }
 
-            public static IChange AddDir(string serverItem)
+            public static IChange AddDir(string serverItem, TfsChangeType additionalChange = 0)
             {
-                return new FakeChange(TfsChangeType.Add, TfsItemType.Folder, serverItem);
+                return new FakeChange(TfsChangeType.Add | additionalChange, TfsItemType.Folder, serverItem);
             }
 
             public static IChange Branch(string serverItem)
@@ -133,9 +133,9 @@ namespace Sep.Git.Tfs.Test.Core
                 return new FakeChange(TfsChangeType.Branch, TfsItemType.File, serverItem);
             }
 
-            public static IChange BranchAndEdit(string serverItem)
+            public static IChange Merge(string serverItem)
             {
-                return new FakeChange(TfsChangeType.Branch | TfsChangeType.Edit, TfsItemType.File, serverItem);
+                return new FakeChange(TfsChangeType.Merge, TfsItemType.File, serverItem);
             }
 
             const int ChangesetId = 10;
@@ -210,7 +210,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             IItem IVersionControlServer.GetItem(int itemId, int changesetNumber)
             {
-                if (itemId == _itemId && changesetNumber == ChangesetId - 1 && TfsChangeType.Rename == _tfsChangeType)
+                if (itemId == _itemId && changesetNumber == ChangesetId - 1 && _tfsChangeType.HasFlag(TfsChangeType.Rename))
                     return new PreviousItem(_renamedFrom);
                 throw new NotImplementedException();
             }
@@ -313,11 +313,11 @@ namespace Sep.Git.Tfs.Test.Core
                 public Fixture()
                 {
                     Changeset.Changes = new IChange[] {
-                        FakeChange.Add("$/Project/file1.txt"),
-                        FakeChange.Delete("$/Project/file2.txt"),
-                        FakeChange.Add("$/Project/file3.txt"),
-                        FakeChange.Delete("$/Project/file4.txt"),
-                        FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
+                        /*0*/FakeChange.Add("$/Project/file1.txt"),
+                        /*1*/FakeChange.Delete("$/Project/file2.txt"),
+                        /*2*/FakeChange.Add("$/Project/file3.txt"),
+                        /*3*/FakeChange.Delete("$/Project/file4.txt"),
+                        /*4*/FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
                     };
                 }
             }
@@ -325,7 +325,13 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void FetchesAllChanges()
             {
-                Assert.Equal(5, Subject.GetChangesToFetch().Count());
+                var fetchChanges = Subject.GetChangesToFetch().ToArray();
+                Assert.Equal(5, fetchChanges.Length);
+                Assert.Contains(Changes[0], fetchChanges);
+                Assert.Contains(Changes[1], fetchChanges);
+                Assert.Contains(Changes[2], fetchChanges);
+                Assert.Contains(Changes[3], fetchChanges);
+                Assert.Contains(Changes[4], fetchChanges);
             }
 
             [Fact]
@@ -483,14 +489,10 @@ namespace Sep.Git.Tfs.Test.Core
                     InitialTree.Add("file6.txt", new GitObject() { Commit = "SHA" });
 
                     Changeset.Changes = new[] {
-                        /*0*/FakeChange.Add("$/Project/file1.txt"),
-                        /*1*/FakeChange.Delete("$/Project/file2.txt"),
-                        /*2*/FakeChange.Add("$/Project/file3.txt"),
-                        /*3*/FakeChange.Delete("$/Project/file4.txt"),
-                        /*4*/FakeChange.Rename("$/Project/file5.txt", from: "$/Project/oldfile5.txt"),
-                        /*5*/FakeChange.Branch("$/Project/file6.txt"), // Do not include, because it was there before.
-                        /*6*/FakeChange.Branch("$/Project/file7.txt"), // Include, because it was not there before.
-                        /*7*/FakeChange.BranchAndEdit("$/Project/file8.txt"), // Include, because it's not just branched.
+                        /*0*/FakeChange.Branch("$/Project/file6.txt"), // Do not include, because it was there before.
+                        /*1*/FakeChange.Branch("$/Project/file7.txt"), // Include, because it was not there before.
+                        /*2*/FakeChange.Edit("$/Project/file8.txt", TfsChangeType.Branch), // Include, because it's not just branched.
+                        /*3*/FakeChange.Rename("$/Project/file9.txt", from: "$/Project/oldfile9.txt", additionalChange: TfsChangeType.Branch), // Include, because it's not just branched.
                     };
                 }
             }
@@ -499,29 +501,60 @@ namespace Sep.Git.Tfs.Test.Core
             public void DoesNotFetchBranchedFile()
             {
                 var fetchChanges = Subject.GetChangesToFetch().ToArray();
-                Assert.Equal(7, fetchChanges.Length); // one is missing
-                Assert.Contains(Changes[0], fetchChanges);
+                Assert.Equal(3, fetchChanges.Length); // one is missing
+                // Changes[0] (branch of file6.txt) is missing
                 Assert.Contains(Changes[1], fetchChanges);
                 Assert.Contains(Changes[2], fetchChanges);
                 Assert.Contains(Changes[3], fetchChanges);
-                Assert.Contains(Changes[4], fetchChanges);
-                // Changes[5] (branch of file6.txt) is missing
-                Assert.Contains(Changes[6], fetchChanges);
-                Assert.Contains(Changes[7], fetchChanges);
             }
 
             [Fact]
             public void DoesNotApplyBranchedFile()
             {
                 AssertChanges(Subject.GetChangesToApply(),
-                    ApplicableChange.Delete("file2.txt"),
-                    ApplicableChange.Delete("file4.txt"),
-                    ApplicableChange.Delete("oldfile5.txt"),
-                    ApplicableChange.Update("file1.txt"),
-                    ApplicableChange.Update("file3.txt"),
-                    ApplicableChange.Update("file5.txt"),
+                    ApplicableChange.Delete("oldfile9.txt"),
                     ApplicableChange.Update("file7.txt"),
-                    ApplicableChange.Update("file8.txt"));
+                    ApplicableChange.Update("file8.txt"),
+                    ApplicableChange.Update("file9.txt"));
+            }
+        }
+
+        public class SkipMergedThings : Base<SkipMergedThings.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    InitialTree.Add("file6.txt", new GitObject() { Commit = "SHA" });
+
+                    Changeset.Changes = new[] {
+                        /*0*/FakeChange.Merge("$/Project/file6.txt"), // Do not include, because it was there before.
+                        /*1*/FakeChange.Merge("$/Project/file7.txt"), // Include, because it was not there before.
+                        /*2*/FakeChange.Edit("$/Project/file8.txt", TfsChangeType.Merge), // Include, because it's not just branched.
+                        /*3*/FakeChange.Rename("$/Project/file9.txt", from: "$/Project/oldfile9.txt", additionalChange: TfsChangeType.Merge), // Include, because it's not just branched.
+                    };
+                }
+            }
+
+            [Fact]
+            public void DoesNotFetchBranchedFile()
+            {
+                var fetchChanges = Subject.GetChangesToFetch().ToArray();
+                Assert.Equal(3, fetchChanges.Length); // one is missing
+                // Changes[0] (branch of file6.txt) is missing
+                Assert.Contains(Changes[1], fetchChanges);
+                Assert.Contains(Changes[2], fetchChanges);
+                Assert.Contains(Changes[3], fetchChanges);
+            }
+
+            [Fact]
+            public void DoesNotApplyBranchedFile()
+            {
+                AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Delete("oldfile9.txt"),
+                    ApplicableChange.Update("file7.txt"),
+                    ApplicableChange.Update("file8.txt"),
+                    ApplicableChange.Update("file9.txt"));
             }
         }
     }
