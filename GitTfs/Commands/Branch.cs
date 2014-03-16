@@ -71,8 +71,6 @@ namespace Sep.Git.Tfs.Commands
             this.cleanup = cleanup;
             this.initBranch = initBranch;
             this.rcheckin = rcheckin;
-            //[Temporary] Remove in the next version!
-            initBranch.DontDisplayObsoleteMessage = true;
         }
 
         public void SetInitBranchParameters()
