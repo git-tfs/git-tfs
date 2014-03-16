@@ -9,5 +9,6 @@
 * Don't fetch things we already have (#554, #303)
 * Add support for VisualStudioExpress (#558)
 * More robust fetching (#530)
+* Don't cleanup directory when fail during fetch in `clone` command (#572)
 * Other documentation and bug fixes (#487, #521, #523, #527, #557)
 
