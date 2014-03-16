@@ -48,5 +48,6 @@ namespace Sep.Git.Tfs.Core
         IEnumerable<IGitTfsRemote> GetSubtrees(IGitTfsRemote owner);
         void ResetRemote(IGitTfsRemote remoteToReset, string target);
         string GetCurrentBranch();
+        void GarbageCollect(bool auto = false, string additionalMessage = null);
     }
 }

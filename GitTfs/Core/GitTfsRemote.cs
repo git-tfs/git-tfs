@@ -552,15 +552,7 @@ namespace Sep.Git.Tfs.Core
             if (--globals.GcCountdown < 0)
             {
                 globals.GcCountdown = globals.GcPeriod;
-                try
-                {
-                    Repository.CommandNoisy("gc", "--auto");
-                }
-                catch (Exception e)
-                {
-                    Trace.WriteLine(e);
-                    stdout.WriteLine("Warning: `git gc` failed! Try running it after git-tfs is finished.");
-                }
+                Repository.GarbageCollect(true, "Try running it after git-tfs is finished.");
             }
         }
 
