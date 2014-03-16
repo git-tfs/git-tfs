@@ -80,12 +80,6 @@ namespace Sep.Git.Tfs.Commands
                 }
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
-
-                if (retVal == 0)
-                {
-                    fetch.Run(withBranches);
-                    globals.Repository.GarbageCollect();
-                }
             }
             catch
             {
@@ -116,12 +110,24 @@ namespace Sep.Git.Tfs.Commands
 
                 throw;
             }
-            if (withBranches && initBranch != null)
+            try
             {
-                initBranch.CloneAllBranches = true;
-                retVal = initBranch.Run();
+                if (retVal == 0)
+                {
+                    fetch.Run(withBranches);
+                    globals.Repository.GarbageCollect();
+                }
+
+                if (withBranches && initBranch != null)
+                {
+                    initBranch.CloneAllBranches = true;
+                    retVal = initBranch.Run();
+                }
             }
-            if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+            finally
+            {
+                if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+            }
             return retVal;
         }
 
