@@ -84,16 +84,7 @@ namespace Sep.Git.Tfs.Commands
                 if (retVal == 0)
                 {
                     fetch.Run(withBranches);
-
-                    try
-                    {
-                        globals.Repository.CommandNoisy("gc");
-                    }
-                    catch (Exception e)
-                    {
-                        Trace.WriteLine(e);
-                        stdout.WriteLine("Warning: `git gc` failed!");
-                    }
+                    globals.Repository.GarbageCollect();
                 }
             }
             catch

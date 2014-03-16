@@ -546,5 +546,21 @@ namespace Sep.Git.Tfs.Core
         {
             return _repository.Head.CanonicalName;
         }
+
+        public void GarbageCollect(bool auto, string additionalMessage)
+        {
+            try
+            {
+                if (auto)
+                    _globals.Repository.CommandNoisy("gc", "--auto");
+                else
+                    _globals.Repository.CommandNoisy("gc");
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e);
+                realStdout.WriteLine("Warning: `git gc` failed! " + additionalMessage);
+            }
+        }
     }
 }

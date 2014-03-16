@@ -9,7 +9,7 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitHelpers : IGitHelpers
     {
-        private readonly TextWriter realStdout;
+        protected readonly TextWriter realStdout;
         private readonly IContainer _container;
 
         /// <summary>

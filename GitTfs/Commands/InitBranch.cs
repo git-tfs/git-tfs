@@ -185,15 +185,7 @@ namespace Sep.Git.Tfs.Commands
                     }
                 } while (childBranchPaths.Any(b => !b.IsEntirelyFetched) && isSomethingDone);
 
-                try
-                {
-                    _globals.Repository.CommandNoisy("gc");
-                }
-                catch (Exception e)
-                {
-                    Trace.WriteLine(e);
-                    _stdout.WriteLine("Warning: `git gc` failed!");
-                }
+                _globals.Repository.GarbageCollect();
 
                 if (childBranchPaths.Any(b => !b.IsEntirelyFetched))
                 {
