@@ -15,7 +15,6 @@ using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using StructureMap;
 using StructureMap.Attributes;
-using ChangeType = Microsoft.TeamFoundation.Server.ChangeType;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -363,6 +362,8 @@ namespace Sep.Git.Tfs.VsCommon
         }
 
         protected abstract string GetAuthenticatedUser();
+
+        public abstract void SetPathResolver();
 
         public abstract bool CanShowCheckinDialog { get; }
 

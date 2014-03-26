@@ -45,6 +45,8 @@ namespace Sep.Git.Tfs.VsFake
 
         public void EnsureAuthenticated() {}
 
+        public void SetPathResolver() {}
+
         public bool CanShowCheckinDialog { get { return false; } }
 
         public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)

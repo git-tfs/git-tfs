@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Util;
 using StructureMap;
+using ChangeType = Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -213,6 +216,65 @@ namespace Sep.Git.Tfs.VsCommon
         protected override void ConvertFolderIntoBranch(string tfsRepositoryPath)
         {
             VersionControl.CreateBranchObject(new BranchProperties(new ItemIdentifier(tfsRepositoryPath)));
+        }
+
+        protected abstract string GetVsInstallDir();
+
+        public override void SetPathResolver()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(LoadFromVSFolder);
+
+        }
+
+        Assembly LoadFromVSFolder(object sender, ResolveEventArgs args)
+        {
+            string folderPath = Path.Combine(GetVsInstallDir(), "PrivateAssemblies");
+            string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
+            if (File.Exists(assemblyPath) == false)
+                return null;
+            Assembly assembly = Assembly.LoadFrom(assemblyPath);
+            return assembly;
+        }
+
+        public override bool CanShowCheckinDialog { get { return true; } }
+
+        public override long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
+        {
+            return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
+                                     pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray(),
+                                     checkedInfos.Select(c => _bridge.Unwrap<WorkItemCheckedInfo>(c)).ToArray(),
+                                     checkinComment);
+        }
+
+        private long ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges,
+            WorkItemCheckedInfo[] checkedInfos, string checkinComment)
+        {
+            using (var parentForm = new ParentForm())
+            {
+                parentForm.Show();
+
+                var dialog = Activator.CreateInstance(GetCheckinDialogType(), new object[] { workspace.VersionControlServer });
+
+                return dialog.Call<int>("Show", parentForm.Handle, workspace, pendingChanges, pendingChanges,
+                                        checkinComment, null, null, checkedInfos);
+            }
+        }
+
+        private const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
+
+        private Type GetCheckinDialogType()
+        {
+            return GetDialogAssembly().GetType(DialogAssemblyName + ".CheckinDialog");
+        }
+
+        private Assembly GetDialogAssembly()
+        {
+            return Assembly.LoadFrom(GetDialogAssemblyPath());
+        }
+
+        private string GetDialogAssemblyPath()
+        {
+            return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
     }
 

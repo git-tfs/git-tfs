@@ -71,51 +71,16 @@ namespace Sep.Git.Tfs.Vs2010
             return VersionControl.AuthorizedUser;
         }
 
-        public override bool CanShowCheckinDialog { get { return true; } }
+        private string vsInstallDir;
 
-        public override long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
+        protected override string GetVsInstallDir()
         {
-            return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
-                                     pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray(),
-                                     checkedInfos.Select(c => _bridge.Unwrap<WorkItemCheckedInfo>(c)).ToArray(),
-                                     checkinComment);
-        }
-
-        private long ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges, 
-            WorkItemCheckedInfo[] checkedInfos, string checkinComment)
-        {
-            using (var parentForm = new ParentForm())
+            if (vsInstallDir == null)
             {
-                parentForm.Show();
-
-                var dialog = Activator.CreateInstance(GetCheckinDialogType(), new object[] {workspace.VersionControlServer});
-
-                return dialog.Call<int>("Show", parentForm.Handle, workspace, pendingChanges, pendingChanges,
-                                        checkinComment, null, null, checkedInfos);
+                vsInstallDir = TryGetRegString(@"Software\Microsoft\VisualStudio\10.0", "InstallDir")
+                    ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\10.0", "InstallDir");
             }
-        }
-
-        private const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
-
-        private static Type GetCheckinDialogType()
-        {
-            return GetDialogAssembly().GetType(DialogAssemblyName + ".CheckinDialog");
-        }
-
-        private static Assembly GetDialogAssembly()
-        {
-            return Assembly.LoadFrom(GetDialogAssemblyPath());
-        }
-
-        private static string GetDialogAssemblyPath()
-        {
-            return Path.Combine(GetVs2010InstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
-        }
-
-        private static string GetVs2010InstallDir()
-        {
-            return TryGetRegString(@"Software\Microsoft\VisualStudio\10.0", "InstallDir")
-                ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\10.0", "InstallDir");
+            return vsInstallDir;
         }
 
         private static string TryGetRegString(string path, string name)

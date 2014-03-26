@@ -48,6 +48,8 @@ namespace Sep.Git.Tfs.Vs2008
             return VersionControl.AuthenticatedUser;
         }
 
+        public void SetPathResolver() { }
+
         public override bool CanShowCheckinDialog
         {
             get { return false; }

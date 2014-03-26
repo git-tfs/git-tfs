@@ -76,49 +76,6 @@ namespace Sep.Git.Tfs.VsCommon
             return Retry.Do(() => changeset.AssociatedWorkItems.Length > 0);
         }
 
-        public override bool CanShowCheckinDialog { get { return true; } }
-
-        public override long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
-        {
-            return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
-                                     pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray(),
-                                     checkedInfos.Select(c => _bridge.Unwrap<WorkItemCheckedInfo>(c)).ToArray(),
-                                     checkinComment);
-        }
-
-        private long ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges, 
-            WorkItemCheckedInfo[] checkedInfos, string checkinComment)
-        {
-            using (var parentForm = new ParentForm())
-            {
-                parentForm.Show();
-
-                var dialog = Activator.CreateInstance(GetCheckinDialogType(), new object[] {workspace.VersionControlServer});
-
-                return dialog.Call<int>("Show", parentForm.Handle, workspace, pendingChanges, pendingChanges,
-                                        checkinComment, null, null, checkedInfos);
-            }
-        }
-
-        private const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
-
-        private Type GetCheckinDialogType()
-        {
-            return GetDialogAssembly().GetType(DialogAssemblyName + ".CheckinDialog");
-        }
-
-        private Assembly GetDialogAssembly()
-        {
-            return Assembly.LoadFrom(GetDialogAssemblyPath());
-        }
-
-        private string GetDialogAssemblyPath()
-        {
-            return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
-        }
-
-        protected abstract string GetVsInstallDir();
-
         protected string TryGetUserRegString(string path, string name)
         {
             return TryGetRegString(Registry.CurrentUser, path, name);
