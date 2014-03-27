@@ -42,10 +42,11 @@ namespace Sep.Git.Tfs.Core
                         //this occurs when we have merged in a subtree, at the subtree merge commit there will be a tfsParent for the
                         //subtree owner in addition to the one for the subtree itself.  In this case, we will use the subtree owner, since
                         //we are in the main history line and not a subtree line.
-                        var cs = tfsParents.First();
+                        var lastChangeSet = tfsParents.OrderByDescending(x => x.ChangesetId).First();
+                        var cs = lastChangeSet;
                         if(cs.Remote.IsSubtree)
                             cs.Remote = _globals.Repository.ReadTfsRemote(cs.Remote.OwningRemoteId);
-                        _stdout.WriteLine(string.Format("Basing from parent '{0}', use -i to override", cs.Remote.Id));
+                        _stdout.WriteLine(string.Format("Basing from parent '{0}:{1}', use -i to override", cs.Remote.Id, cs.ChangesetId));
                         return write(cs, refToWrite);
                     }
 
