@@ -241,8 +241,12 @@ namespace Sep.Git.Tfs.Core
 
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
+            var currentMaxGitHash = remote.MaxCommitHash;
+//            var childCommits = GetLastChildTfsCommits(currentMaxGitHash);
+            //var currentCommit = _repository.Lookup<Commit>(currentMaxGitHash);
+
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets = from cs in GetLastParentTfsCommits("HEAD")
+            var untrackedTfsChangesets = from cs in GetLastChildTfsCommits(currentMaxGitHash, remote.Id)
                                          where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
                                          orderby cs.ChangesetId
                                          select cs;
@@ -251,6 +255,30 @@ namespace Sep.Git.Tfs.Core
                 // UpdateTfsHead sets tag with TFS changeset id on each commit so we can't just update to latest
                 remote.UpdateTfsHead(cs.GitCommit, cs.ChangesetId);
             }
+        }
+
+        private IEnumerable<TfsChangesetInfo> GetLastChildTfsCommits(string parentSha, string remoteId)
+        {
+            var changesets = new List<TfsChangesetInfo>();
+            var commit = _repository.Lookup<Commit>(parentSha);
+            if (commit == null) return changesets;
+
+            var filter = new CommitFilter
+                         {
+                             SortBy = CommitSortStrategies.Reverse,
+                             Since = commit,                             
+                         };
+            var childCommits = _repository.Commits.QueryBy(filter);
+            foreach (var childCommit in childCommits)
+            {
+                var changesetInfo = TryParseChangesetInfo(childCommit.Message, childCommit.Sha);
+                if (changesetInfo != null)
+                {
+                    changesets.Add(changesetInfo);
+                }                            
+            }
+            var maxChangeSetId = changesets.Where(x => x.Remote.Id == remoteId).Max(x => x.ChangesetId);
+            return changesets.Where(x => x.ChangesetId == maxChangeSetId);
         }
 
         public GitCommit GetCommit(string commitish)
