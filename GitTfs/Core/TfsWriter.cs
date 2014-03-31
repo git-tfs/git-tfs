@@ -43,11 +43,10 @@ namespace Sep.Git.Tfs.Core
                         //subtree owner in addition to the one for the subtree itself.  In this case, we will use the subtree owner, since
                         //we are in the main history line and not a subtree line.
                         var lastChangeSet = tfsParents.OrderByDescending(x => x.ChangesetId).First();
-                        var cs = lastChangeSet;
-                        if(cs.Remote.IsSubtree)
-                            cs.Remote = _globals.Repository.ReadTfsRemote(cs.Remote.OwningRemoteId);
-                        _stdout.WriteLine(string.Format("Basing from parent '{0}:{1}', use -i to override", cs.Remote.Id, cs.ChangesetId));
-                        return write(cs, refToWrite);
+                        if (lastChangeSet.Remote.IsSubtree)
+                            lastChangeSet.Remote = _globals.Repository.ReadTfsRemote(lastChangeSet.Remote.OwningRemoteId);
+                        _stdout.WriteLine(string.Format("Basing from parent '{0}:{1}', use -i to override", lastChangeSet.Remote.Id, lastChangeSet.ChangesetId));
+                        return write(lastChangeSet, refToWrite);
                     }
 
                     _stdout.WriteLine("More than one parent found! Use -i to choose the correct parent from: ");
