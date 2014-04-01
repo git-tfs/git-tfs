@@ -243,23 +243,14 @@ namespace Sep.Git.Tfs.Core
         {
             // Get last child in all refs
 
-            var allRefTargets = _repository.Refs.Select(x => x.TargetIdentifier);
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesetsList = new List<TfsChangesetInfo>();
-            foreach (var refTarget in allRefTargets)
-            {
-                Console.WriteLine("Tracking latest changesets for target {0}", refTarget);
-                var untrackedTfsChangesets = from cs in GetLastParentTfsCommits(refTarget)
-                                             where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
-                                             orderby cs.ChangesetId
-                                             select cs;
-                untrackedTfsChangesetsList.AddRange(untrackedTfsChangesets);
-                
-            }
-            Console.WriteLine("Found untracked TFS changesets {0}", string.Join(",", untrackedTfsChangesetsList.Select(x => x.ChangesetId)));
+            var untrackedTfsChangesets =    from gitRef in _repository.Refs
+                                            from cs in GetLastParentTfsCommits(gitRef.TargetIdentifier)
+                                            where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
+                                            orderby cs.ChangesetId
+                                            select cs;
 
-
-            foreach (var cs in untrackedTfsChangesetsList.OrderBy(x => x.ChangesetId))
+            foreach (var cs in untrackedTfsChangesets)
             {
                 // UpdateTfsHead sets tag with TFS changeset id on each commit so we can't just update to latest
                 remote.UpdateTfsHead(cs.GitCommit, cs.ChangesetId);
