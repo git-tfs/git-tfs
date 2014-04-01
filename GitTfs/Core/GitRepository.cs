@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 using LibGit2Sharp;
 using Branch = LibGit2Sharp.Branch;
@@ -241,16 +242,14 @@ namespace Sep.Git.Tfs.Core
 
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
-            // Get last child in all refs
-
+            // Get parent with last TFS commit in all refs
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets =    from gitRef in _repository.Refs
+            var untrackedTfsChangesets =    from gitRef in _repository.Refs.DistinctBy(x => x.TargetIdentifier)
                                             from cs in GetLastParentTfsCommits(gitRef.TargetIdentifier)
                                             where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
-                                            orderby cs.ChangesetId
                                             select cs;
 
-            foreach (var cs in untrackedTfsChangesets)
+            foreach (var cs in untrackedTfsChangesets.DistinctBy(x => x.GitCommit).OrderBy(x => x.ChangesetId))
             {
                 // UpdateTfsHead sets tag with TFS changeset id on each commit so we can't just update to latest
                 remote.UpdateTfsHead(cs.GitCommit, cs.ChangesetId);
