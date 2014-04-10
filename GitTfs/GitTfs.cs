@@ -22,10 +22,10 @@ namespace Sep.Git.Tfs
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
         private TextWriter _stdout;
-        private Bootstrap _bootstrap;
+        private Bootstrapper _bootstrapper;
 
         public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container,
-            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, TextWriter stdout, Bootstrap bootstrap)
+            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, TextWriter stdout, Bootstrapper bootstrapper)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
@@ -35,7 +35,7 @@ namespace Sep.Git.Tfs
             _runner = runner;
             _globals = globals;
             _stdout = stdout;
-            _bootstrap = bootstrap;
+            _bootstrapper = bootstrapper;
         }
 
         public int Run(IList<string> args)
@@ -79,7 +79,7 @@ namespace Sep.Git.Tfs
                 if (foundRemote.IsDerived)
                 {
                     _stdout.WriteLine("Bootstraping tfs remote...");
-                    foundRemote = _bootstrap.CreateRemote(changesetsWithRemote.First());
+                    foundRemote = _bootstrapper.CreateRemote(changesetsWithRemote.First());
                 }
 
                 _globals.UserSpecifiedRemoteId = foundRemote.Id;
