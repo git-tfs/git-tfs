@@ -80,18 +80,51 @@ namespace Sep.Git.Tfs.Test.Integration
         public class RepoBuilder
         {
             private Repository _repo;
+            private Commit _lastCommit;
 
             public RepoBuilder(Repository repo)
             {
                 _repo = repo;
             }
 
-            public string Commit(string message)
+            public Commit Commit(string message)
             {
-                File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
-                _repo.Index.Stage("README.txt");
+                _lastCommit = Commit(message, parentCommit: _lastCommit);
+                Ref("refs/heads/master", _lastCommit);
+                return _lastCommit;
+            }
+
+            public Commit Commit(string message, Commit parentCommit)
+            {
+                return Commit(message, new Commit[1]{parentCommit});
+            }
+
+            public Commit Commit(string message, IEnumerable<Commit> parentCommits)
+            {
+                var readme = CreateBlob(message);
+                var tree = CreateTreeWithReadme(readme);
                 var committer = new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
-                return _repo.Commit(message, committer, committer).Id.Sha;
+                return _repo.ObjectDatabase.CreateCommit(message, committer, committer, tree, parentCommits);
+            }
+
+            public void Ref(string name, LibGit2Sharp.GitObject target)
+            {
+                _repo.Refs.Add(name, target.Id, allowOverwrite: true);
+            }
+
+            private Blob CreateBlob(string content)
+            {
+                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+                {
+                    return _repo.ObjectDatabase.CreateBlob(stream);
+                }
+            }
+
+            private Tree CreateTreeWithReadme(Blob readme)
+            {
+                var definition = new TreeDefinition();
+                definition.Add("README.txt", readme, LibGit2Sharp.Mode.NonExecutableFile);
+                return _repo.ObjectDatabase.CreateTree(definition);
             }
         }
 
@@ -115,6 +148,11 @@ namespace Sep.Git.Tfs.Test.Integration
             public FakeHistoryBuilder(Script script)
             {
                 _script = script;
+            }
+
+            public FakeChangesetBuilder Changeset(int changesetId, string message)
+            {
+                return Changeset(changesetId, message, DateTime.Now);
             }
 
             public FakeChangesetBuilder Changeset(int changesetId, string message, DateTime checkinDate)

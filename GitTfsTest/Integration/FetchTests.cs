@@ -1,4 +1,5 @@
 ﻿using System;
+using LibGit2Sharp;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Xunit;
 
@@ -56,6 +57,36 @@ namespace Sep.Git.Tfs.Test.Integration
             integrationHelper.RunIn("MyProject", "pull");
 
             Assert.Equal(3, integrationHelper.GetCommitCount("MyProject"));
+        }
+
+        [FactExceptOnUnix]
+        public void AdvancesToTfsHead()
+        {
+            Commit startTfsHead = null;
+            Commit remoteTfsHead = null;
+            integrationHelper.SetupGitRepo("MyProject", g =>
+            {
+                startTfsHead = g.Commit("Changeset 1.\n\ngit-tfs-id: [http://server/tfs]$/MyProject;C1");
+                g.Ref("refs/remote/tfs/default", startTfsHead);
+
+                remoteTfsHead = g.Commit("Changeset 2.\n\ngit-tfs-id: [http://server/tfs]$/MyProject;C2", parentCommit: startTfsHead);
+                g.Ref("refs/remote/origin/master", remoteTfsHead);
+
+                var localHead = g.Commit("Local commit 1.", parentCommit: startTfsHead);
+                g.Ref("refs/heads/master", localHead);
+            });
+            integrationHelper.SetupFake(r =>
+            {
+                r.Changeset(1, "Changeset 1.")
+                 .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject")
+                 .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README.txt, Changeset 1.");
+                r.Changeset(2, "Changeset 2, but this one isn't used.")
+                 .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README.txt", "Changeset 2.");
+            });
+            integrationHelper.RunIn("MyProject", "init", "http://server/tfs");
+            integrationHelper.AssertRef("MyProject", "refs/remote/tfs/default", startTfsHead.Sha);
+            integrationHelper.RunIn("MyProject", "fetch");
+            integrationHelper.AssertRef("MyProject", "refs/remote/tfs/default", remoteTfsHead.Sha);
         }
 
         private void CloneRepoWithTwoCommits()
