@@ -96,7 +96,8 @@ namespace Sep.Git.Tfs.Test.Integration
 
             public Commit Commit(string message, Commit parentCommit)
             {
-                return Commit(message, new Commit[1]{parentCommit});
+                var parentCommits = parentCommit == null ? Enumerable.Empty<Commit>() : new[] {parentCommit};
+                return Commit(message, parentCommits);
             }
 
             public Commit Commit(string message, IEnumerable<Commit> parentCommits)
