@@ -516,7 +516,7 @@ namespace Sep.Git.Tfs.Core
             Commit commit = null;
             foreach (var c in commitsFromRemoteBranches)
             {
-                var match = tfsIdRegex.Match(commit.Message);
+                var match = tfsIdRegex.Match(c.Message);
                 if (match.Success)
                 {
                     int id = int.Parse(match.Groups[1].Value);
