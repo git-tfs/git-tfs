@@ -23,7 +23,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         bool HasShelveset(string shelvesetName);
         ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName);
         int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote);
-        void SetPathResolver();
         bool CanShowCheckinDialog { get; }
         long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment);
         void CleanupWorkspaces(string workingDirectory);

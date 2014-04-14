@@ -23,6 +23,7 @@ namespace Sep.Git.Tfs.VsCommon
             : base(stdout, bridge, container)
         {
             _bridge = bridge;
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(LoadFromVSFolder);
         }
 
         public override bool CanGetBranchInformation
@@ -220,18 +221,17 @@ namespace Sep.Git.Tfs.VsCommon
 
         protected abstract string GetVsInstallDir();
 
-        public override void SetPathResolver()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(LoadFromVSFolder);
-
-        }
-
+        /// <summary>
+        /// Help the TFS client find checkin policy assemblies.
+        /// </summary>
         Assembly LoadFromVSFolder(object sender, ResolveEventArgs args)
         {
+            Trace.WriteLine("Looking for assembly " + args.Name + " ...");
             string folderPath = Path.Combine(GetVsInstallDir(), "PrivateAssemblies");
             string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
             if (File.Exists(assemblyPath) == false)
                 return null;
+            Trace.WriteLine("... loading " + args.Name + " from " + assemblyPath);
             Assembly assembly = Assembly.LoadFrom(assemblyPath);
             return assembly;
         }

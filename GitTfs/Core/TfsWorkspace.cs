@@ -44,7 +44,6 @@ namespace Sep.Git.Tfs.Core
             shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
             if (evaluateCheckinPolicies)
             {
-                _tfsHelper.SetPathResolver();
                 foreach (var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, null, shelveset.WorkItemInfo).Messages)
                 {
                     _stdout.WriteLine("[Checkin Policy] " + message);
@@ -64,7 +63,6 @@ namespace Sep.Git.Tfs.Core
             if (string.IsNullOrWhiteSpace(checkinComment) && !_checkinOptions.NoGenerateCheckinComment)
                 checkinComment = generateCheckinComment();
 
-            _tfsHelper.SetPathResolver();
             var newChangesetId = _tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), checkinComment);
             if (newChangesetId <= 0)
                 throw new GitTfsException("Checkin canceled!");
@@ -88,7 +86,6 @@ namespace Sep.Git.Tfs.Core
             var workItemInfos = GetWorkItemInfos(options);
             var checkinNote = _tfsHelper.CreateCheckinNote(options.CheckinNotes);
 
-            _tfsHelper.SetPathResolver();
             var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, options.CheckinComment, checkinNote, workItemInfos);
             if (checkinProblems.HasErrors)
             {

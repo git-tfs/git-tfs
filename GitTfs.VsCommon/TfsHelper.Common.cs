@@ -363,8 +363,6 @@ namespace Sep.Git.Tfs.VsCommon
 
         protected abstract string GetAuthenticatedUser();
 
-        public abstract void SetPathResolver();
-
         public abstract bool CanShowCheckinDialog { get; }
 
         public ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName)
