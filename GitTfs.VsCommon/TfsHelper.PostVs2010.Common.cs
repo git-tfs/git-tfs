@@ -18,12 +18,17 @@ namespace Sep.Git.Tfs.VsCommon
     {
         TfsApiBridge _bridge;
         protected TfsTeamProjectCollection _server;
+        private static bool _resolverInstalled;
 
         public TfsHelperVs2010Base(TextWriter stdout, TfsApiBridge bridge, IContainer container)
             : base(stdout, bridge, container)
         {
             _bridge = bridge;
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(LoadFromVSFolder);
+            if (!_resolverInstalled)
+            {
+                AppDomain.CurrentDomain.AssemblyResolve += LoadFromVsFolder;
+                _resolverInstalled = true;
+            }
         }
 
         public override bool CanGetBranchInformation
@@ -224,7 +229,7 @@ namespace Sep.Git.Tfs.VsCommon
         /// <summary>
         /// Help the TFS client find checkin policy assemblies.
         /// </summary>
-        Assembly LoadFromVSFolder(object sender, ResolveEventArgs args)
+        Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
         {
             Trace.WriteLine("Looking for assembly " + args.Name + " ...");
             string folderPath = Path.Combine(GetVsInstallDir(), "PrivateAssemblies");
