@@ -29,6 +29,7 @@ namespace Sep.Git.Tfs.Core
         IGitTreeBuilder GetTreeBuilder(string commit);
         IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to);
         bool WorkingCopyHasUnstagedOrUncommitedChanges { get; }
+        bool ReplicateTfsMerges { get; set; }
         void CopyBlob(string sha, string outputFile);
         GitCommit GetCommit(string commitish);
         string GetCurrentCommit();

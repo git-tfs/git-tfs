@@ -319,7 +319,7 @@ namespace Sep.Git.Tfs.Core
             {
                 count++;
                 string parentCommitSha = null;
-                if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
+                if (Repository.ReplicateTfsMerges && changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                 {
                     fetchResult.NewChangesetCount = count;
                     fetchResult.IsSuccess = false;
