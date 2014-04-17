@@ -133,8 +133,14 @@ namespace Sep.Git.Tfs.Util
         {
             // If a change is only a branch or merge operation and we already have a file at the target path,
             // then there is nothing to do for that change.
-            if ((change.Change.ChangeType == TfsChangeType.Branch ||
-                change.Change.ChangeType == TfsChangeType.Merge) &&
+            TfsChangeType fileChanges = TfsChangeType.None | TfsChangeType.Add | TfsChangeType.Edit |
+                TfsChangeType.Encoding | TfsChangeType.Rename | TfsChangeType.Delete | TfsChangeType.Undelete;
+            TfsChangeType mergeChanges = TfsChangeType.Branch | TfsChangeType.Merge;
+            TfsChangeType type = change.Change.ChangeType & ~TfsChangeType.Lock; // ignore lock
+            // type == TfsChangeType.Merge - file merged without changes
+            // type == TfsChangeType.Branch - branch created with this file
+            // type == TfsChangeType.Merge | TfsChangeType.Branch - new file merged without changes
+            if (((type & fileChanges) == 0 && (type & mergeChanges) != 0) &&
                 _resolver.Contains(change.GitPath))
             {
                 return false;
