@@ -124,6 +124,11 @@ namespace Sep.Git.Tfs.Commands
                     retVal = initBranch.Run();
                 }
             }
+            catch (Exception ex)
+            {
+                throw new GitTfsException("error: an error occured when trying to clone the repository...\n",
+                                          new List<string> { "try to solve the problem that occurs", "or/and continue using command `git tfs " + ( withBranches ? "branch init --all`" : "fetch`") }, ex);
+            }
             finally
             {
                 if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
