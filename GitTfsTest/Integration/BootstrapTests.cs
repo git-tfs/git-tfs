@@ -1,6 +1,7 @@
 ﻿using System;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Xunit;
+using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
@@ -72,6 +73,39 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertNoRef("repo", "tfs/default");
             h.RunIn("repo", "fetch", "-I");
             h.AssertRef("repo", "tfs/default", c1);
+        }
+
+        [Fact]
+        public void WhenUsingIOption_ThenAutoBootstrapingOneBrancheInAdditionToMaster()
+        {
+            int ChangesetIdToTrickFetch = 1;
+            h.SetupFake(r =>
+            {
+                r.Changeset(ChangesetIdToTrickFetch, "UseLess! Just to have the same changeset Id that the commit already in repo (and fetch nothing)", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+            });
+
+            string c1 = null;
+            string c2 = null;
+            h.SetupGitRepo("repo", g =>
+            {
+                c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
+                g.CreateBranch("branch");
+                c2 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/branch;C" + ChangesetIdToTrickFetch);
+            });
+
+            using (var repo = h.GetRepository("repo"))
+            {
+                repo.Checkout("master");
+                h.AssertNoRef("repo", "tfs/default");
+                h.RunIn("repo", "fetch", "-I");
+                h.AssertRef("repo", "tfs/default", c1);
+
+                repo.Checkout("branch");
+                h.AssertNoRef("repo", "tfs/branch");
+                h.RunIn("repo", "fetch", "-I");
+                h.AssertRef("repo", "tfs/branch", c2);
+            }
         }
     }
 }
