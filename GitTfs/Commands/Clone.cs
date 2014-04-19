@@ -110,6 +110,7 @@ namespace Sep.Git.Tfs.Commands
 
                 throw;
             }
+            bool errorOccurs = false;
             try
             {
                 if (retVal == 0)
@@ -132,7 +133,16 @@ namespace Sep.Git.Tfs.Commands
             }
             finally
             {
-                if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+                try
+                {
+                    if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+                }
+                catch (Exception)
+                {
+                    //Swallow exception because the previously thrown exception is more important...
+                    if (!errorOccurs)
+                        throw;
+                }
             }
             return retVal;
         }
