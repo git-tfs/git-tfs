@@ -126,8 +126,9 @@ namespace Sep.Git.Tfs.Commands
             }
             catch (Exception ex)
             {
-                throw new GitTfsException("error: an error occured when trying to clone the repository...\n",
-                                          new List<string> { "try to solve the problem that occurs", "or/and continue using command `git tfs " + ( withBranches ? "branch init --all`" : "fetch`") }, ex);
+                errorOccurs = true;
+                throw new GitTfsException("error: a problem occured when trying to clone the repository. Try to solve the problem described below.\nIn any case, after, try to continue using command `git tfs "
+                    + (withBranches ? "branch init --all" : "fetch") + "`\n", ex);
             }
             finally
             {
