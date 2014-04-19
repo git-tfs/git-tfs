@@ -25,8 +25,8 @@ namespace Sep.Git.Tfs
             {
                 Trace.WriteLine(e);
                 Console.WriteLine(e.Message);
-                if (e.InnerException != null && e.InnerException is GitTfsException)
-                    ReportException(e.InnerException.InnerException);
+                if (e.InnerException != null)
+                    ReportException(e.InnerException);
                 if (!e.RecommendedSolutions.IsEmpty())
                 {
                     Console.WriteLine("You may be able to resolve this problem.");

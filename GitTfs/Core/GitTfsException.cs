@@ -27,11 +27,6 @@ namespace Sep.Git.Tfs.Core
             : base(message)
         {}
 
-        public Exception ToRethrowable()
-        {
-            return new GitTfsException(Message, RecommendedSolutions, this);
-        }
-
         public GitTfsException WithRecommendation(params string [] recommendations)
         {
             if (RecommendedSolutions == null)
