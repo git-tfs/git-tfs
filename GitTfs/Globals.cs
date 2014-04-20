@@ -86,7 +86,9 @@ namespace Sep.Git.Tfs
                 {
                     var allRemotes = Repository.ReadAllTfsRemotes();
                     if (!allRemotes.Any())
-                        throw new Exception("error: no tfs remotes defined in this repository!");
+                    {
+                        return _activeRemoteId = GitTfsConstants.DefaultRepositoryId;
+                    }
 
                     if (allRemotes.Count() == 1)
                     {
