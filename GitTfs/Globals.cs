@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
@@ -63,13 +64,55 @@ namespace Sep.Git.Tfs
         public string UserSpecifiedRemoteId
         {
             get { return _userSpecifiedRemoteId; }
-            set { RemoteId = _userSpecifiedRemoteId = value; }
+            set { _userSpecifiedRemoteId = value; }
         }
         private string _userSpecifiedRemoteId;
 
+        private string _activeRemoteId = null;
+        public string ActiveRemoteId
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_activeRemoteId))
+                    return _activeRemoteId;
+
+                if (!string.IsNullOrEmpty(UserSpecifiedRemoteId))
+                    return UserSpecifiedRemoteId;
+               //if (AutoFindRemote)
+               //    Stdout.WriteLine("info: Option '-I' is now the default behavior and is no more needed. It will be removed in the next version.");
+
+                var changesetsWithRemote = Repository.GetLastParentTfsCommits("HEAD");
+                if (!changesetsWithRemote.Any())
+                {
+                    var allRemotes = Repository.ReadAllTfsRemotes();
+                    if (!allRemotes.Any())
+                        throw new Exception("error: no tfs remotes defined in this repository!");
+
+                    if (allRemotes.Count() == 1)
+                    {
+                        _activeRemoteId = allRemotes.First().Id;
+                        Stdout.WriteLine("Working with tfs remote: " + _activeRemoteId);
+                        return _activeRemoteId;
+                    }
+                    throw new Exception("error: can't find a tfs remote to use\n   No TFS parents found and more than one tfs remote defined in the repository!"
+                        + "\n   Use '-i' option to define which one to use.");
+                }
+                var foundRemote = changesetsWithRemote.First().Remote;
+                if (foundRemote.IsDerived)
+                {
+                    Stdout.WriteLine("Bootstraping tfs remote...");
+                    foundRemote = Bootstrapper.CreateRemote(changesetsWithRemote.First());
+                }
+
+                _activeRemoteId = foundRemote.Id;
+                Stdout.WriteLine("Working with tfs remote: " + _activeRemoteId);
+                return _activeRemoteId;
+            }
+        }
+
         public bool AutoFindRemote { get; set; }
 
-        public string RemoteId { get; set; }
+        public string RemoteId { get{ return ActiveRemoteId; } }
 
         public string GitDir
         {
@@ -110,5 +153,9 @@ For more information, see https://github.com/git-tfs/git-tfs/issues/448 ");
         {
             get { return 200; }
         }
+
+        public TextWriter Stdout { get; set; }
+
+        public Bootstrapper Bootstrapper { get; set; }
     }
 }

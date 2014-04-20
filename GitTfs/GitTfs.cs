@@ -47,43 +47,7 @@ namespace Sep.Git.Tfs
             var unparsedArgs = ParseOptions(command, args);
             Trace.WriteLine("Command run:" + commandLineRun);
             ParseAuthors();
-            AutoDetectRemoteToUse();
             return Main(command, unparsedArgs);
-        }
-
-        private void AutoDetectRemoteToUse()
-        {
-            if (string.IsNullOrEmpty(_globals.UserSpecifiedRemoteId))
-            {
-                if (_globals.AutoFindRemote)
-                    _stdout.WriteLine("info: Option '-I' is now the default behavior and is no more needed. It will be removed in the next version.");
-
-                var changesetsWithRemote = _globals.Repository.GetLastParentTfsCommits("HEAD");
-                if (!changesetsWithRemote.Any())
-                {
-                    var allRemotes = _globals.Repository.ReadAllTfsRemotes();
-                    if (!allRemotes.Any())
-                        throw new Exception("error: no tfs remotes defined in this repository!");
-
-                    if (allRemotes.Count() == 1)
-                    {
-                        _globals.UserSpecifiedRemoteId = allRemotes.First().Id;
-                        _stdout.WriteLine("Working with tfs remote: " + _globals.RemoteId);
-                        return;
-                    }
-                    throw new Exception("error: can't find a tfs remote to use\n   No TFS parents found and more than one tfs remote defined in the repository!"
-                        + "\n   Use '-i' option to define which one to use.");
-                }
-                var foundRemote = changesetsWithRemote.First().Remote;
-                if (foundRemote.IsDerived)
-                {
-                    _stdout.WriteLine("Bootstraping tfs remote...");
-                    foundRemote = _bootstrapper.CreateRemote(changesetsWithRemote.First());
-                }
-
-                _globals.UserSpecifiedRemoteId = foundRemote.Id;
-                _stdout.WriteLine("Working with tfs remote: " + _globals.RemoteId);
-            }
         }
 
         public int Main(GitTfsCommand command, IList<string> unparsedArgs)
@@ -151,7 +115,8 @@ namespace Sep.Git.Tfs
             {
                 _globals.GitDir = ".git";
             }
-            _globals.RemoteId = GitTfsConstants.DefaultRepositoryId;
+            _globals.Stdout = _stdout;
+            _globals.Bootstrapper = _bootstrapper;
         }
 
         public void AssertValidGitRepository()
