@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -88,17 +89,20 @@ namespace Sep.Git.Tfs
                 }
 
                 var allRemotes = Repository.ReadAllTfsRemotes();
+                //Case where the repository is cloned
                 if (!allRemotes.Any())
                     return _remoteId = GitTfsConstants.DefaultRepositoryId;
 
                 if (allRemotes.Count() == 1)
                 {
+                    //Case where the repository is just initialised
                     _remoteId = allRemotes.First().Id;
                     Stdout.WriteLine("Working with tfs remote: " + _remoteId);
                     return _remoteId;
                 }
-                throw new Exception("error: can't find a tfs remote to use\n   No TFS parents found and more than one tfs remote defined in the repository!"
-                    + "\n   Use '-i' option to define which one to use.");
+                //We could no choose for the user which remote is the good one (if, eventualy we found one...)
+                throw new GitTfsException("error: no tfs remote to use found in parent commits.",
+                    new List<string>{"Checkout a current tfs branch", "Use '-i' option to define which one to use."});
             }
         }
 
