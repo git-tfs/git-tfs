@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to search all shelvesets.",
                         v => Owner = v },
-                    { "b|branch=", "Git Branch to apply Shelveset to? (default: TFS default branch)", 
+                    { "b|branch=", "Git Branch to apply Shelveset to? (default: TFS current remote)", 
                         v => TfsBranch = v },                
                 };
             }
@@ -42,15 +42,7 @@ namespace Sep.Git.Tfs.Commands
         public int Run(string shelvesetName, string destinationBranch)
         {
             if (string.IsNullOrEmpty(TfsBranch))//If destination not on command line, set up defaults.
-            {
-                TfsBranch = _globals.RemoteId;  //Default to main remote id.
-                //Get the current checkout
-                TfsChangesetInfo mostRecentUpdate = _globals.Repository.GetLastParentTfsCommits("HEAD").FirstOrDefault();
-                if (mostRecentUpdate != null)
-                {
-                    TfsBranch = mostRecentUpdate.Remote.Id;
-                }
-            }
+                TfsBranch = _globals.RemoteId;
 
             var remote = _globals.Repository.ReadTfsRemote(TfsBranch);
             remote.Unshelve(Owner, shelvesetName, destinationBranch);
