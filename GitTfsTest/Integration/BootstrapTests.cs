@@ -71,7 +71,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
             });
             h.AssertNoRef("repo", "tfs/default");
-            h.RunIn("repo", "fetch", "-I");
+            h.RunIn("repo", "fetch");
             h.AssertRef("repo", "tfs/default", c1);
         }
 
@@ -98,12 +98,12 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 repo.Checkout("master");
                 h.AssertNoRef("repo", "tfs/default");
-                h.RunIn("repo", "fetch", "-I");
+                h.RunIn("repo", "fetch");
                 h.AssertRef("repo", "tfs/default", c1);
 
                 repo.Checkout("branch");
                 h.AssertNoRef("repo", "tfs/branch");
-                h.RunIn("repo", "fetch", "-I");
+                h.RunIn("repo", "fetch");
                 h.AssertRef("repo", "tfs/branch", c2);
             }
         }
@@ -134,7 +134,7 @@ namespace Sep.Git.Tfs.Test.Integration
             using (var repo = h.GetRepository("repo"))
             {
                 h.AssertNoRef("repo", "tfs/default");
-                h.RunIn("repo", "fetch", "-I");
+                h.RunIn("repo", "fetch");
                 h.AssertRef("repo", "tfs/default", c3);
 
                 h.AssertNoRef("repo", "tfs/branch");
