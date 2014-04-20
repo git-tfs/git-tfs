@@ -26,8 +26,6 @@ namespace Sep.Git.Tfs
                         v => DebugOutput = v != null },
                     { "i|tfs-remote|remote|id=", "The remote ID of the TFS to interact with\ndefault: default",
                         v => UserSpecifiedRemoteId = v },
-                    { "I|auto-tfs-remote|auto-remote", "Autodetect (from git history) the remote ID of the TFS to interact with",
-                        v => AutoFindRemote = v != null },
                     { "A|authors=", "Path to an Authors file to map TFS users to Git users (will be kept in cache and used for all the following commands)",
                         v => AuthorsFilePath = v },
                 };
@@ -61,60 +59,48 @@ namespace Sep.Git.Tfs
         }
         private int? _debugTraceListener;
 
-        public string UserSpecifiedRemoteId
-        {
-            get { return _userSpecifiedRemoteId; }
-            set { _userSpecifiedRemoteId = value; }
-        }
-        private string _userSpecifiedRemoteId;
+        public string UserSpecifiedRemoteId { get; set; }
 
-        private string _activeRemoteId = null;
-        public string ActiveRemoteId
+        private string _remoteId = null;
+        public string RemoteId
         {
             get
             {
-                if (!string.IsNullOrEmpty(_activeRemoteId))
-                    return _activeRemoteId;
+                if (!string.IsNullOrEmpty(_remoteId))
+                    return _remoteId;
 
                 if (!string.IsNullOrEmpty(UserSpecifiedRemoteId))
                     return UserSpecifiedRemoteId;
-               //if (AutoFindRemote)
-               //    Stdout.WriteLine("info: Option '-I' is now the default behavior and is no more needed. It will be removed in the next version.");
 
                 var changesetsWithRemote = Repository.GetLastParentTfsCommits("HEAD");
-                if (!changesetsWithRemote.Any())
+                if (changesetsWithRemote.Any())
                 {
-                    var allRemotes = Repository.ReadAllTfsRemotes();
-                    if (!allRemotes.Any())
+                    var foundRemote = changesetsWithRemote.First().Remote;
+                    if (foundRemote.IsDerived)
                     {
-                        return _activeRemoteId = GitTfsConstants.DefaultRepositoryId;
+                        Stdout.WriteLine("Bootstraping tfs remote...");
+                        foundRemote = Bootstrapper.CreateRemote(changesetsWithRemote.First());
                     }
 
-                    if (allRemotes.Count() == 1)
-                    {
-                        _activeRemoteId = allRemotes.First().Id;
-                        Stdout.WriteLine("Working with tfs remote: " + _activeRemoteId);
-                        return _activeRemoteId;
-                    }
-                    throw new Exception("error: can't find a tfs remote to use\n   No TFS parents found and more than one tfs remote defined in the repository!"
-                        + "\n   Use '-i' option to define which one to use.");
-                }
-                var foundRemote = changesetsWithRemote.First().Remote;
-                if (foundRemote.IsDerived)
-                {
-                    Stdout.WriteLine("Bootstraping tfs remote...");
-                    foundRemote = Bootstrapper.CreateRemote(changesetsWithRemote.First());
+                    _remoteId = foundRemote.Id;
+                    Stdout.WriteLine("Working with tfs remote: " + _remoteId);
+                    return _remoteId;
                 }
 
-                _activeRemoteId = foundRemote.Id;
-                Stdout.WriteLine("Working with tfs remote: " + _activeRemoteId);
-                return _activeRemoteId;
+                var allRemotes = Repository.ReadAllTfsRemotes();
+                if (!allRemotes.Any())
+                    return _remoteId = GitTfsConstants.DefaultRepositoryId;
+
+                if (allRemotes.Count() == 1)
+                {
+                    _remoteId = allRemotes.First().Id;
+                    Stdout.WriteLine("Working with tfs remote: " + _remoteId);
+                    return _remoteId;
+                }
+                throw new Exception("error: can't find a tfs remote to use\n   No TFS parents found and more than one tfs remote defined in the repository!"
+                    + "\n   Use '-i' option to define which one to use.");
             }
         }
-
-        public bool AutoFindRemote { get; set; }
-
-        public string RemoteId { get{ return ActiveRemoteId; } }
 
         public string GitDir
         {
