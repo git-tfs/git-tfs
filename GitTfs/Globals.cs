@@ -97,8 +97,11 @@ namespace Sep.Git.Tfs
                 {
                     //Case where the repository is just initialised
                     _remoteId = allRemotes.First().Id;
-                    Stdout.WriteLine("Working with tfs remote: " + _remoteId);
-                    return _remoteId;
+                    if (_remoteId == GitTfsConstants.DefaultRepositoryId)
+                    {
+                        Stdout.WriteLine("Working with tfs remote: " + _remoteId);
+                        return _remoteId;
+                    }
                 }
                 //We could no choose for the user which remote is the good one (if, eventualy we found one...)
                 throw new GitTfsException("error: no tfs remote to use found in parent commits.",
