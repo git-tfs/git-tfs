@@ -54,6 +54,11 @@ namespace Sep.Git.Tfs.Test.Core
                 public DateTime CreationDate { get; set; }
                 public string Committer { get; set; }
                 public IChange[] Changes { get; set; }
+
+                public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes)
+                {
+                    throw new NotImplementedException();
+                }
             }
 
             private IGitTfsRemote _remote;

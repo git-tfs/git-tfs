@@ -107,6 +107,11 @@ namespace Sep.Git.Tfs.VsCommon
         {
             get { return _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(_changeset.VersionControlServer); }
         }
+
+        public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes)
+        {
+            workspace.Get(this.ChangesetId, changes);
+        }
     }
 
     public class WrapperForChange : WrapperFor<Change>, IChange

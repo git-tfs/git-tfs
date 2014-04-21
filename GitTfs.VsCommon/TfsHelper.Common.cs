@@ -506,9 +506,9 @@ namespace Sep.Git.Tfs.VsCommon
                 get { return _versionControlServer; }
             }
 
-            public void Get(IWorkspace workspace)
+            public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes)
             {
-                foreach (var change in _changes)
+                foreach (var change in changes)
                 {
                     var item = (UnshelveItem)change.Item;
                     item.Get(workspace);
@@ -616,7 +616,7 @@ namespace Sep.Git.Tfs.VsCommon
                 return temp;
             }
 
-            public void Get(IWorkspace workspace)
+            public void Get(ITfsWorkspace workspace)
             {
                 _pendingChange.DownloadShelvedFile(workspace.GetLocalItemForServerItem(_pendingChange.ServerItem));
             }

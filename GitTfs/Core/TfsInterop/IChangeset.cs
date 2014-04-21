@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
@@ -10,5 +11,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         string Comment { get; }
         int ChangesetId { get; }
         IVersionControlServer VersionControlServer { get; }
+        void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes);
     }
 }
