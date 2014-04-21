@@ -34,6 +34,7 @@ namespace Sep.Git.Tfs.Commands
             if (initBranch != null)
                 initBranch.DontDisplayObsoleteMessage = true;
             this.stdout = stdout;
+            globals.GcCountdown = globals.GcPeriod;
         }
 
         public OptionSet OptionSet
