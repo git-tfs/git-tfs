@@ -276,27 +276,34 @@ namespace Sep.Git.Tfs.Core
 
         private void FindTfsParentCommits(List<TfsChangesetInfo> changesets, Commit commit)
         {
+            var commitsToFollow = new Stack<Commit>();
+            commitsToFollow.Push(commit);
+            var alreadyVisitedCommits = new HashSet<string>();
             while (true)
             {
+                if (!commitsToFollow.Any())
+                {
+                    Trace.WriteLine("Commits visited count:" + alreadyVisitedCommits.Count);
+                    return;
+                }
+                commit = commitsToFollow.Pop();
+
+                if (alreadyVisitedCommits.Contains(commit.Sha))
+                    continue;
+
+                alreadyVisitedCommits.Add(commit.Sha);
                 var changesetInfo = TryParseChangesetInfo(commit.Message, commit.Sha);
                 if (changesetInfo != null)
                 {
                     changesets.Add(changesetInfo);
-                    return;
+                    continue;
                 }
                 var parentsCount = commit.Parents.Count();
-                if (parentsCount > 1)
-                {
-                    foreach (var parent in commit.Parents)
-                    {
-                        FindTfsParentCommits(changesets, parent);
-                    }
-                    return;
-                }
                 if (parentsCount == 0)
-                    return;
+                    continue;
 
-                commit = commit.Parents.First();
+                foreach (var parent in commit.Parents.Reverse())
+                    commitsToFollow.Push(parent);
             }
         }
 
