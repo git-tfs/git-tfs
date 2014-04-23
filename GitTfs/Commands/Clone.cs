@@ -81,12 +81,6 @@ namespace Sep.Git.Tfs.Commands
                 }
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
-
-                if (retVal == 0)
-                {
-                    fetch.Run(withBranches);
-                    globals.Repository.GarbageCollect();
-                }
             }
             catch
             {
@@ -117,12 +111,40 @@ namespace Sep.Git.Tfs.Commands
 
                 throw;
             }
-            if (withBranches && initBranch != null)
+            bool errorOccurs = false;
+            try
             {
-                initBranch.CloneAllBranches = true;
-                retVal = initBranch.Run();
+                if (retVal == 0)
+                {
+                    fetch.Run(withBranches);
+                    globals.Repository.GarbageCollect();
+                }
+
+                if (withBranches && initBranch != null)
+                {
+                    initBranch.CloneAllBranches = true;
+                    retVal = initBranch.Run();
+                }
             }
-            if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+            catch (Exception ex)
+            {
+                errorOccurs = true;
+                throw new GitTfsException("error: a problem occured when trying to clone the repository. Try to solve the problem described below.\nIn any case, after, try to continue using command `git tfs "
+                    + (withBranches ? "branch init --all" : "fetch") + "`\n", ex);
+            }
+            finally
+            {
+                try
+                {
+                    if (!init.IsBare) globals.Repository.CommandNoisy("merge", globals.Repository.ReadTfsRemote(globals.RemoteId).RemoteRef);
+                }
+                catch (Exception)
+                {
+                    //Swallow exception because the previously thrown exception is more important...
+                    if (!errorOccurs)
+                        throw;
+                }
+            }
             return retVal;
         }
 

@@ -280,23 +280,27 @@ namespace Sep.Git.Tfs.Commands
 
         private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true)
         {
-            Trace.WriteLine("Try fetching changesets...");
-            var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
-            Trace.WriteLine("Changesets fetched!");
-
-            if (createBranch && fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
+            try
             {
-                Trace.WriteLine("Try creating the local branch...");
-                if (!_globals.Repository.CreateBranch("refs/heads/" + tfsRemote.Id, tfsRemote.MaxCommitHash))
-                    _stdout.WriteLine("warning: Fail to create local branch ref file!");
-                else
-                    Trace.WriteLine("Local branch created!");
+                Trace.WriteLine("Try fetching changesets...");
+                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+                Trace.WriteLine("Changesets fetched!");
+
+                if (createBranch && fetchResult.IsSuccess && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
+                {
+                    Trace.WriteLine("Try creating the local branch...");
+                    if (!_globals.Repository.CreateBranch("refs/heads/" + tfsRemote.Id, tfsRemote.MaxCommitHash))
+                        _stdout.WriteLine("warning: Fail to create local branch ref file!");
+                    else
+                        Trace.WriteLine("Local branch created!");
+                }
+                return fetchResult;
             }
-
-            Trace.WriteLine("Cleaning...");
-            tfsRemote.CleanupWorkspaceDirectory();
-
-            return fetchResult;
+            finally
+            {
+                Trace.WriteLine("Cleaning...");
+                tfsRemote.CleanupWorkspaceDirectory();
+            }
         }
 
         protected string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)

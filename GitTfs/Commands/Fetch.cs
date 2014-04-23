@@ -159,13 +159,19 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
 
-            remote.Fetch(stopOnFailMergeCommit);
+            try
+            {
+                remote.Fetch(stopOnFailMergeCommit);
 
-            Trace.WriteLine("Cleaning...");
-            remote.CleanupWorkspaceDirectory();
+            }
+            finally
+            {
+                Trace.WriteLine("Cleaning...");
+                remote.CleanupWorkspaceDirectory();
 
-            if(remote.Repository.IsBare)
-                remote.Repository.UpdateRef(GitRepository.ShortToLocalName(BareBranch), remote.MaxCommitHash);
+                if (remote.Repository.IsBare)
+                    remote.Repository.UpdateRef(GitRepository.ShortToLocalName(BareBranch), remote.MaxCommitHash);
+            }
         }
 
         private IEnumerable<IGitTfsRemote> GetRemotesToFetch(IList<string> args)

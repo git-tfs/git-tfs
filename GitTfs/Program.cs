@@ -21,20 +21,6 @@ namespace Sep.Git.Tfs
             {
                 Environment.ExitCode = MainCore(args);
             }
-            catch(GitTfsException e)
-            {
-                Trace.WriteLine(e);
-                Console.WriteLine(e.Message);
-                if (!e.RecommendedSolutions.IsEmpty())
-                {
-                    Console.WriteLine("You may be able to resolve this problem.");
-                    foreach (var solution in e.RecommendedSolutions)
-                    {
-                        Console.WriteLine("- " + solution);
-                    }
-                }
-                Environment.ExitCode = GitTfsExitCodes.ExceptionThrown;
-            }
             catch (Exception e)
             {
                 ReportException(e);
@@ -49,6 +35,30 @@ namespace Sep.Git.Tfs
         }
 
         private static void ReportException(Exception e)
+        {
+            var gitTfsException = e as GitTfsException;
+            if(gitTfsException != null)
+            {
+                Trace.WriteLine(gitTfsException);
+                Console.WriteLine(gitTfsException.Message);
+                if (gitTfsException.InnerException != null)
+                    ReportException(gitTfsException.InnerException);
+                if (!gitTfsException.RecommendedSolutions.IsEmpty())
+                {
+                    Console.WriteLine("You may be able to resolve this problem.");
+                    foreach (var solution in gitTfsException.RecommendedSolutions)
+                    {
+                        Console.WriteLine("- " + solution);
+                    }
+                }
+            }
+            else
+            {
+                ReportInternalException(e);
+            }
+        }
+
+        private static void ReportInternalException(Exception e)
         {
             Trace.WriteLine(e);
             while(e is TargetInvocationException && e.InnerException != null)

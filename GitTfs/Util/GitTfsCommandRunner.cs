@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Util
             catch (TargetInvocationException e)
             {
                 if (e.InnerException is GitTfsException)
-                    throw ((GitTfsException) e.InnerException).ToRethrowable();
+                    throw e.InnerException;
                 throw;
             }
         }
