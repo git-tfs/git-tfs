@@ -42,6 +42,11 @@ namespace Sep.Git.Tfs.Core
         /// Gets the files changed in the given changes.
         /// </summary>
         void Get(int changesetId, IEnumerable<IChange> change);
+        /// <summary>
+        /// Find path where the server item is mapped to in the
+        /// local workspace.
+        /// </summary>
+        string GetLocalItemForServerItem(string serverItem);
 
         long CheckinTool(Func<string> generateCheckinComment);
         void Merge(string sourceTfsPath, string tfsRepositoryPath);

@@ -190,6 +190,11 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public string GetLocalItemForServerItem(string serverItem)
+        {
+            return _workspace.GetLocalItemForServerItem(serverItem);
+        }
+
         private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(CheckinOptions options = null)
         {
             return GetWorkItemInfosHelper<IWorkItemCheckinInfo>(_tfsHelper.GetWorkItemInfos, options);

@@ -132,9 +132,9 @@ namespace Sep.Git.Tfs.VsFake
                 get { throw new NotImplementedException(); }
             }
 
-            public void Get(IWorkspace workspace)
+            public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes)
             {
-                workspace.GetSpecificVersion(this);
+                workspace.Get(this.ChangesetId, changes);
             }
         }
 
