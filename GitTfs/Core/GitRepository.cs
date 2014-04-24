@@ -279,32 +279,25 @@ namespace Sep.Git.Tfs.Core
             var commitsToFollow = new Stack<Commit>();
             commitsToFollow.Push(commit);
             var alreadyVisitedCommits = new HashSet<string>();
-            while (true)
+            while (commitsToFollow.Any())
             {
-                if (!commitsToFollow.Any())
-                {
-                    Trace.WriteLine("Commits visited count:" + alreadyVisitedCommits.Count);
-                    return;
-                }
                 commit = commitsToFollow.Pop();
 
-                if (alreadyVisitedCommits.Contains(commit.Sha))
-                    continue;
-
                 alreadyVisitedCommits.Add(commit.Sha);
+
                 var changesetInfo = TryParseChangesetInfo(commit.Message, commit.Sha);
-                if (changesetInfo != null)
+                if (changesetInfo == null)
+                {
+                    // If commit was not a TFS commit, continue searching all new parents of the commit
+                    foreach (var parent in commit.Parents.Where(x => !alreadyVisitedCommits.Contains(x.Sha)))
+                        commitsToFollow.Push(parent);
+                }
+                else
                 {
                     changesets.Add(changesetInfo);
-                    continue;
                 }
-                var parentsCount = commit.Parents.Count();
-                if (parentsCount == 0)
-                    continue;
-
-                foreach (var parent in commit.Parents.Reverse())
-                    commitsToFollow.Push(parent);
             }
+            Trace.WriteLine("Commits visited count:" + alreadyVisitedCommits.Count);
         }
 
         public TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId)
