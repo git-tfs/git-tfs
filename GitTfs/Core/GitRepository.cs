@@ -289,7 +289,8 @@ namespace Sep.Git.Tfs.Core
                 if (changesetInfo == null)
                 {
                     // If commit was not a TFS commit, continue searching all new parents of the commit
-                    foreach (var parent in commit.Parents.Where(x => !alreadyVisitedCommits.Contains(x.Sha)))
+                    // Add parents in reverse order to keep topology (main parent should be treated first!)
+                    foreach (var parent in commit.Parents.Where(x => !alreadyVisitedCommits.Contains(x.Sha)).Reverse())
                         commitsToFollow.Push(parent);
                 }
                 else
