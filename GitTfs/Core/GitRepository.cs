@@ -253,21 +253,54 @@ namespace Sep.Git.Tfs.Core
         }
 
         /// <summary>
-        /// Scans the commit paths for all refs for newest TFS changeset.
+        /// Scans the commit paths of all refs for newest TFS changeset matching the specified remote.
         /// Only commits that are timestamped newer (with some slack) than current TFS remote will be scanned.
         /// </summary>
         private TfsChangesetInfo FindNewestChangesetForRemote(IGitTfsRemote remote)
         {
-            if (remote.MaxCommitHash == null) return null;
-            var lastKnownCommit =  _repository.Lookup<Commit>(remote.MaxCommitHash);
-            var searchDateTolerance = TimeSpan.FromDays(2); // Add some slack 
-            var commitDateLowerBoundary = lastKnownCommit.Committer.When - searchDateTolerance;
-            var commits =
-                _repository.Commits.QueryBy(new CommitFilter { SortBy = CommitSortStrategies.Time, Since = _repository.Refs.Where(r => !r.IsNote()) })
-                           .Where(c => c.Committer.When > commitDateLowerBoundary);
-            var newTfsChangesets = commits.Select(c => TryParseChangesetInfo(c.Message, c.Sha)).Where(changeset => changeset != null && changeset.Remote.Id == remote.Id);
-            return newTfsChangesets.OrderByDescending(c => c.ChangesetId).FirstOrDefault();
+            var remoteId = remote.Id;
+            var lastTfsCommitDate = remote.MaxCommitHash != null
+                ? _repository.Lookup<Commit>(remote.MaxCommitHash).Committer.When
+                : (DateTimeOffset?) null;
+            var searchDateTolerance = TimeSpan.FromDays(2); // Add some slack to compensate for system clocks out-of-sync in different remotes.
+            var commitDateLowerBoundary = lastTfsCommitDate != null ? lastTfsCommitDate - searchDateTolerance : null;
+
+            var allRefsCommits = _repository.Refs.Where(r => !r.IsNote() && !r.IsTag()).Select(x => _repository.Lookup<Commit>(x.TargetIdentifier)).Where(x => x != null);
+
+            TfsChangesetInfo newestChangeset = null;
+
+            var commitsToFollow = new Stack<Commit>();
+            foreach (var commit in allRefsCommits)
+            {
+                commitsToFollow.Push(commit);                
+            }
+            var alreadyVisitedCommits = new HashSet<string>();
+            while (commitsToFollow.Any())
+            {
+                var commit = commitsToFollow.Pop();
+
+                alreadyVisitedCommits.Add(commit.Sha);
+                // Skip too old commits, for performance.
+                if (commit.Committer.When < commitDateLowerBoundary) continue;
+
+                var changesetInfo = TryParseChangesetInfo(commit.Message, commit.Sha);
+                if (changesetInfo == null || changesetInfo.Remote.Id != remoteId)
+                {
+                    // If commit is not a TFS commit, or not the remote we were interest in, continue searching all new parents of the commit
+                    foreach (var parent in commit.Parents.Where(x => !alreadyVisitedCommits.Contains(x.Sha)))
+                        commitsToFollow.Push(parent);
+                }
+                else
+                {
+                    // We found a commit with a TFS for the remote we are looking for.
+                    if (newestChangeset == null || newestChangeset.ChangesetId < changesetInfo.ChangesetId) 
+                        newestChangeset = changesetInfo;
+                }
+            }
+            Trace.WriteLine("Commits visited count:" + alreadyVisitedCommits.Count);
+            return newestChangeset;
         }
+
 
 
         public GitCommit GetCommit(string commitish)
