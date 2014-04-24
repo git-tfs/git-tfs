@@ -243,7 +243,7 @@ namespace Sep.Git.Tfs.Core
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets = from cs in GetLastParentTfsCommits("HEAD")
+            var untrackedTfsChangesets = from cs in FindTfsParentCommits(_repository.Refs.Where(r => !r.IsNote() && !r.IsTag()).Select(r=>r.CanonicalName).ToArray())
                                          where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
                                          orderby cs.ChangesetId
                                          select cs;
@@ -266,22 +266,24 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head)
         {
-            var changesets = new List<TfsChangesetInfo>();
-            var commit = _repository.Lookup<Commit>(head);
-            if (commit == null)
-                return changesets;
-            FindTfsParentCommits(changesets, commit);
-            return changesets;
+            return FindTfsParentCommits(head);
         }
 
-        private void FindTfsParentCommits(List<TfsChangesetInfo> changesets, Commit commit)
+        private List<TfsChangesetInfo> FindTfsParentCommits(params string[] refs)
         {
+            var changesets = new List<TfsChangesetInfo>();
             var commitsToFollow = new Stack<Commit>();
-            commitsToFollow.Push(commit);
+            foreach (var @ref in refs)
+            {
+                var commit = _repository.Lookup<Commit>(@ref);
+                if (commit != null)
+                    commitsToFollow.Push(commit);
+            }
+
             var alreadyVisitedCommits = new HashSet<string>();
             while (commitsToFollow.Any())
             {
-                commit = commitsToFollow.Pop();
+                var commit = commitsToFollow.Pop();
 
                 alreadyVisitedCommits.Add(commit.Sha);
 
@@ -299,6 +301,7 @@ namespace Sep.Git.Tfs.Core
                 }
             }
             Trace.WriteLine("Commits visited count:" + alreadyVisitedCommits.Count);
+            return changesets;
         }
 
         public TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId)
