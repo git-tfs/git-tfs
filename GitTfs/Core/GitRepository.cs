@@ -244,17 +244,31 @@ namespace Sep.Git.Tfs.Core
         {
             // Get parent with last TFS commit in all refs
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets =    from gitRef in _repository.Refs.DistinctBy(x => x.TargetIdentifier)
-                                            from cs in GetLastParentTfsCommits(gitRef.TargetIdentifier)
-                                            where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
-                                            select cs;
+            var newestTfsChangeset = FindNewestChangesetForRemote(remote);
 
-            foreach (var cs in untrackedTfsChangesets.DistinctBy(x => x.GitCommit).OrderBy(x => x.ChangesetId))
+            if (newestTfsChangeset != null && newestTfsChangeset.ChangesetId > currentMaxChangesetId)
             {
-                // UpdateTfsHead sets tag with TFS changeset id on each commit so we can't just update to latest
-                remote.UpdateTfsHead(cs.GitCommit, cs.ChangesetId);
+                remote.UpdateTfsHead(newestTfsChangeset.GitCommit, newestTfsChangeset.ChangesetId);
             }
         }
+
+        /// <summary>
+        /// Scans the commit paths for all refs for newest TFS changeset.
+        /// Only commits that are timestamped newer (with some slack) than current TFS remote will be scanned.
+        /// </summary>
+        private TfsChangesetInfo FindNewestChangesetForRemote(IGitTfsRemote remote)
+        {
+            if (remote.MaxCommitHash == null) return null;
+            var lastKnownCommit =  _repository.Lookup<Commit>(remote.MaxCommitHash);
+            var searchDateTolerance = TimeSpan.FromDays(2); // Add some slack 
+            var commitDateLowerBoundary = lastKnownCommit.Committer.When - searchDateTolerance;
+            var commits =
+                _repository.Commits.QueryBy(new CommitFilter { SortBy = CommitSortStrategies.Time, Since = _repository.Refs.Where(r => !r.IsNote()) })
+                           .Where(c => c.Committer.When > commitDateLowerBoundary);
+            var newTfsChangesets = commits.Select(c => TryParseChangesetInfo(c.Message, c.Sha)).Where(changeset => changeset != null && changeset.Remote.Id == remote.Id);
+            return newTfsChangesets.OrderByDescending(c => c.ChangesetId).FirstOrDefault();
+        }
+
 
         public GitCommit GetCommit(string commitish)
         {
