@@ -243,8 +243,17 @@ namespace Sep.Git.Tfs.Core
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets = from cs in FindTfsParentCommits(_repository.Refs.Where(r => !r.IsNote() && !r.IsTag()).Select(r=>r.CanonicalName).ToArray())
-                                         where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
+            Func<Commit, bool> commitCondition = null;
+            Func<TfsChangesetInfo, bool> changesetCondition = c => c.Remote.Id == remote.Id && c.ChangesetId > currentMaxChangesetId;
+
+            if (remote.MaxCommitHash != null)
+            {
+                var lastTfsCommitDate = _repository.Lookup<Commit>(remote.MaxCommitHash).Committer.When - TimeSpan.FromDays(2);
+                commitCondition = c  => c.Committer.When > lastTfsCommitDate ;
+            }
+
+            var untrackedTfsChangesets = from cs in FindTfsParentCommits(commitCondition, changesetCondition,
+                                             _repository.Refs.Where(r => !r.IsNote() && !r.IsTag()).Select(r=>r.TargetIdentifier).ToArray())
                                          orderby cs.ChangesetId
                                          select cs;
             foreach (var cs in untrackedTfsChangesets)
@@ -266,10 +275,11 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head)
         {
-            return FindTfsParentCommits(head);
+            return FindTfsParentCommits(null, null, head);
         }
 
-        private List<TfsChangesetInfo> FindTfsParentCommits(params string[] refs)
+        private List<TfsChangesetInfo> FindTfsParentCommits(Func<Commit, bool> commitCondition,
+            Func<TfsChangesetInfo, bool> changesetCondition, params string[] refs)
         {
             var changesets = new List<TfsChangesetInfo>();
             var commitsToFollow = new Stack<Commit>();
@@ -287,6 +297,8 @@ namespace Sep.Git.Tfs.Core
 
                 alreadyVisitedCommits.Add(commit.Sha);
 
+                if(commitCondition != null && !commitCondition(commit))
+                    continue;
                 var changesetInfo = TryParseChangesetInfo(commit.Message, commit.Sha);
                 if (changesetInfo == null)
                 {
@@ -297,7 +309,8 @@ namespace Sep.Git.Tfs.Core
                 }
                 else
                 {
-                    changesets.Add(changesetInfo);
+                    if(changesetCondition == null || changesetCondition(changesetInfo))
+                        changesets.Add(changesetInfo);
                 }
             }
             Trace.WriteLine("Commits visited count:" + alreadyVisitedCommits.Count);
