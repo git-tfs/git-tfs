@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Test.Integration
             string c1 = null;
             h.SetupGitRepo("repo", g =>
             {
-                c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject;C1");
+                c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject;C1").Sha;
             });
             h.RunIn("repo", "bootstrap");
             h.AssertRef("repo", "tfs/default", c1);
@@ -46,7 +46,7 @@ namespace Sep.Git.Tfs.Test.Integration
             string c1 = null;
             h.SetupGitRepo("repo", g =>
             {
-                c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject;C1");
+                c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject;C1").Sha;
                 g.Commit("Another sample commit.");
             });
             h.RunIn("repo", "bootstrap");
