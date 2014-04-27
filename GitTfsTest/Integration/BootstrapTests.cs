@@ -94,7 +94,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 c2 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/branch;C" + ChangesetIdToTrickFetch);
             });
 
-            using (var repo = h.GetRepository("repo"))
+            using (var repo = h.Repository("repo"))
             {
                 repo.Checkout("master");
                 h.AssertNoRef("repo", "tfs/default");
@@ -131,7 +131,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 g.Merge("branch");
             });
 
-            using (var repo = h.GetRepository("repo"))
+            using (var repo = h.Repository("repo"))
             {
                 h.AssertNoRef("repo", "tfs/default");
                 h.RunIn("repo", "fetch", "-I");
