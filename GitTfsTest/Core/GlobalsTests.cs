@@ -77,7 +77,20 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         [Fact]
-        public void WhenNoRemotesFoundInParentCommits_AndThereIsOnlyOneRemoteInRepository_ThenReturnIt()
+        public void WhenNoRemotesFoundInParentCommits_ThereIsOnlyOneRemoteInRepository_AndThisIsTheDefaultOne_ThenReturnIt()
+        {
+            var mocker = new RhinoAutoMocker<IGitRepository>();
+            var gitRepoMock = mocker.Get<IGitRepository>();
+            var globals = new Globals() { Bootstrapper = null, Stdout = new StringWriter(), Repository = gitRepoMock };
+            globals.Repository.Stub(r => r.GetLastParentTfsCommits("HEAD"))
+                   .Return(new List<TfsChangesetInfo>());
+            globals.Repository.Stub(r => r.ReadAllTfsRemotes())
+                   .Return(new List<GitTfsRemote>() { new GitTfsRemote(new RemoteInfo() { Id = "default" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter()) });
+            Assert.Equal("default", globals.RemoteId);
+        }
+
+        [Fact]
+        public void WhenNoRemotesFoundInParentCommits_AndThereIsOnlyOneRemoteInRepository_ThenThrowAnException()
         {
             var mocker = new RhinoAutoMocker<IGitRepository>();
             var gitRepoMock = mocker.Get<IGitRepository>();
@@ -86,7 +99,7 @@ namespace Sep.Git.Tfs.Test.Core
                    .Return(new List<TfsChangesetInfo>());
             globals.Repository.Stub(r => r.ReadAllTfsRemotes())
                    .Return(new List<GitTfsRemote>() { new GitTfsRemote(new RemoteInfo() { Id = "myRemote" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter()) });
-            Assert.Equal("myRemote", globals.RemoteId);
+            Assert.Throws(typeof(GitTfsException), () => globals.RemoteId);
         }
 
         [Fact]
