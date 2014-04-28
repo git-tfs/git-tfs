@@ -11,5 +11,7 @@
 * More robust fetching (#530)
 * Don't cleanup directory when fail during fetch in `clone` command (#572)
 * If multiple changesets are found in parent tree, the latest changeset will be selected. (#591)
+* Autoselect remote (`-I`) by default (#562)
+* bootstrap automatically (#561)
 * Other documentation and bug fixes (#487, #521, #523, #527, #557)
 
