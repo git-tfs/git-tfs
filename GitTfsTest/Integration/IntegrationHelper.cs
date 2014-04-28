@@ -79,11 +79,6 @@ namespace Sep.Git.Tfs.Test.Integration
                 buildIt(new RepoBuilder(repo));
         }
 
-        public Repository GetRepository(string path)
-        {
-            return new Repository(Path.Combine(Workdir, path));
-        }
-
         public class RepoBuilder
         {
             private Repository _repo;
