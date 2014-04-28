@@ -131,22 +131,19 @@ namespace Sep.Git.Tfs.Util
 
         private bool IncludeInFetch(NamedChange change)
         {
-            // If a change is only a branch or merge operation and we already have a file at the target path,
-            // then there is nothing to do for that change.
-            TfsChangeType fileChanges = TfsChangeType.None | TfsChangeType.Add | TfsChangeType.Edit |
-                TfsChangeType.Encoding | TfsChangeType.Rename | TfsChangeType.Delete | TfsChangeType.Undelete;
-            TfsChangeType mergeChanges = TfsChangeType.Branch | TfsChangeType.Merge;
-            TfsChangeType type = change.Change.ChangeType & ~TfsChangeType.Lock; // ignore lock
-            // type == TfsChangeType.Merge - file merged without changes
-            // type == TfsChangeType.Branch - branch created with this file
-            // type == TfsChangeType.Merge | TfsChangeType.Branch - new file merged without changes
-            if (((type & fileChanges) == 0 && (type & mergeChanges) != 0) &&
-                _resolver.Contains(change.GitPath))
+            if (IgnorableChangeType(change.Change.ChangeType) && _resolver.Contains(change.GitPath))
             {
                 return false;
             }
 
             return _resolver.ShouldIncludeGitItem(change.GitPath);
+        }
+
+        private bool IgnorableChangeType(TfsChangeType changeType)
+        {
+            var isBranchOrMerge = (changeType & (TfsChangeType.Branch | TfsChangeType.Merge)) != 0;
+            var isContentChange = (changeType & TfsChangeType.Content) != 0;
+            return isBranchOrMerge && !isContentChange;
         }
 
         private bool IncludeInApply(NamedChange change)
