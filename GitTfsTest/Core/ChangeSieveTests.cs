@@ -143,6 +143,11 @@ namespace Sep.Git.Tfs.Test.Core
                 return new FakeChange(TfsChangeType.Merge, TfsItemType.File, serverItem);
             }
 
+            public static IChange MergeNewFile(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Merge | TfsChangeType.Branch, TfsItemType.File, serverItem);
+            }
+
             const int ChangesetId = 10;
 
             TfsChangeType _tfsChangeType;
@@ -531,12 +536,14 @@ namespace Sep.Git.Tfs.Test.Core
                 public Fixture()
                 {
                     InitialTree.Add("file6.txt", new GitObject() { Commit = "SHA" });
+                    InitialTree.Add("file7.txt", new GitObject() { Commit = "SHA" });
 
                     Changeset.Changes = new[] {
                         /*0*/FakeChange.Merge("$/Project/file6.txt"), // Do not include, because it was there before.
-                        /*1*/FakeChange.Merge("$/Project/file7.txt"), // Include, because it was not there before.
-                        /*2*/FakeChange.Edit("$/Project/file8.txt", TfsChangeType.Merge), // Include, because it's not just branched.
-                        /*3*/FakeChange.Rename("$/Project/file9.txt", from: "$/Project/oldfile9.txt", additionalChange: TfsChangeType.Merge), // Include, because it's not just branched.
+                        /*1*/FakeChange.MergeNewFile("$/Project/file7.txt"),  // Do not include, because it was in branch before.
+                        /*2*/FakeChange.Merge("$/Project/file8.txt"), // Include, because it was not there before.
+                        /*3*/FakeChange.Edit("$/Project/file9.txt", TfsChangeType.Merge), // Include, because it's not just branched.
+                        /*4*/FakeChange.Rename("$/Project/file10.txt", from: "$/Project/oldfile10.txt", additionalChange: TfsChangeType.Merge), // Include, because it's not just branched.
                     };
                 }
             }
@@ -547,19 +554,20 @@ namespace Sep.Git.Tfs.Test.Core
                 var fetchChanges = Subject.GetChangesToFetch().ToArray();
                 Assert.Equal(3, fetchChanges.Length); // one is missing
                 // Changes[0] (branch of file6.txt) is missing
-                Assert.Contains(Changes[1], fetchChanges);
+                // Changes[1] (branch of file7.txt) is missing
                 Assert.Contains(Changes[2], fetchChanges);
                 Assert.Contains(Changes[3], fetchChanges);
+                Assert.Contains(Changes[4], fetchChanges);
             }
 
             [Fact]
             public void DoesNotApplyBranchedFile()
             {
                 AssertChanges(Subject.GetChangesToApply(),
-                    ApplicableChange.Delete("oldfile9.txt"),
-                    ApplicableChange.Update("file7.txt"),
+                    ApplicableChange.Delete("oldfile10.txt"),
                     ApplicableChange.Update("file8.txt"),
-                    ApplicableChange.Update("file9.txt"));
+                    ApplicableChange.Update("file9.txt"),
+                    ApplicableChange.Update("file10.txt"));
             }
         }
     }
