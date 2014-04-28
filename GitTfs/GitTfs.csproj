@@ -158,6 +158,7 @@
     <Compile Include="Commands\Verify.cs" />
     <Compile Include="Commands\Unshelve.cs" />
     <Compile Include="Commands\Version.cs" />
+    <Compile Include="Core\Bootstrapper.cs" />
     <Compile Include="Core\Changes\Git\Add.cs" />
     <Compile Include="Core\Changes\Git\Delete.cs" />
     <Compile Include="Core\Changes\Git\Modify.cs" />

@@ -15,12 +15,14 @@ namespace Sep.Git.Tfs.Commands
         private readonly RemoteOptions _remoteOptions;
         private readonly Globals _globals;
         private readonly TextWriter _stdout;
+        private readonly Bootstrapper _bootstrapper;
 
-        public Bootstrap(RemoteOptions remoteOptions, Globals globals, TextWriter stdout)
+        public Bootstrap(RemoteOptions remoteOptions, Globals globals, TextWriter stdout, Bootstrapper bootstrapper)
         {
             _remoteOptions = remoteOptions;
             _globals = globals;
             _stdout = stdout;
+            _bootstrapper = bootstrapper;
         }
 
         public OptionSet OptionSet
@@ -44,60 +46,10 @@ namespace Sep.Git.Tfs.Commands
                     commit.AuthorAndEmail.Item1, commit.AuthorAndEmail.Item2,
                     commit.When.ToString("ddd MMM d HH:mm:ss zzz"),
                     commit.Message.Replace("\n","\n    ").TrimEnd(' '));
-                if (parent.Remote.IsDerived)
-                {
-                    var remoteId = GetRemoteId(parent);
-                    var remote = _globals.Repository.CreateTfsRemote(new RemoteInfo
-                    {
-                        Id = remoteId,
-                        Url = parent.Remote.TfsUrl,
-                        Repository = parent.Remote.TfsRepositoryPath,
-                        RemoteOptions = _remoteOptions,
-                    }, string.Empty);
-                    remote.UpdateTfsHead(parent.GitCommit, parent.ChangesetId);
-                    _stdout.WriteLine("-> new remote '" + remote.Id + "'");
-                }
-                else
-                {
-                    if (parent.Remote.MaxChangesetId < parent.ChangesetId)
-                    {
-                        long oldChangeset = parent.Remote.MaxChangesetId;
-                        _globals.Repository.MoveTfsRefForwardIfNeeded(parent.Remote);
-                        _stdout.WriteLine("-> existing remote {0} (updated from changeset {1})", parent.Remote.Id, oldChangeset);
-                    }
-                    else
-                    {
-                        _stdout.WriteLine("-> existing remote {0} (up to date)", parent.Remote.Id);
-                    }
-                }
+                _bootstrapper.CreateRemote(parent);
                 _stdout.WriteLine();
             }
             return GitTfsExitCodes.OK;
-        }
-
-        private string GetRemoteId(TfsChangesetInfo parent)
-        {
-            if (IsAvailable(GitTfsConstants.DefaultRepositoryId))
-            {
-                _stdout.WriteLine("info: '" + parent.Remote.TfsRepositoryPath + "' will be bootstraped as your main remote...");
-                return GitTfsConstants.DefaultRepositoryId;
-            }
-
-            //Remove '$/'!
-            var expectedRemoteId = parent.Remote.TfsRepositoryPath.Substring(2).Trim('/');
-            var indexOfSlash = expectedRemoteId.IndexOf('/');
-            if (indexOfSlash != 0)
-                expectedRemoteId = expectedRemoteId.Substring(indexOfSlash + 1);
-            var remoteId = expectedRemoteId.ToGitRefName();
-            var suffix = 0;
-            while (!IsAvailable(remoteId))
-                remoteId = expectedRemoteId + "-" + (suffix++);
-            return remoteId;
-        }
-
-        private bool IsAvailable(string remoteName)
-        {
-            return !_globals.Repository.HasRemote(remoteName);
         }
     }
 }

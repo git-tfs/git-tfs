@@ -20,8 +20,8 @@ namespace Sep.Git.Tfs.Core
         public int Write(string refToWrite, Func<TfsChangesetInfo, string, int> write)
         {
             var tfsParents = _globals.Repository.GetLastParentTfsCommits(refToWrite);
-            if (_globals.UserSpecifiedRemoteId != null)
-                tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == _globals.UserSpecifiedRemoteId);
+            if (_globals.RemoteId != null)
+                tfsParents = tfsParents.Where(changeset => changeset.Remote.Id == _globals.RemoteId);
 
             return WriteWith(tfsParents, refToWrite, write);
         }

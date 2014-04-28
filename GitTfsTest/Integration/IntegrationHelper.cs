@@ -72,9 +72,16 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public void SetupGitRepo(string path, Action<RepoBuilder> buildIt)
         {
-            var repoPath = LibGit2Sharp.Repository.Init(Path.Combine(Workdir, path));
+            var fullPath = Path.Combine(Workdir, path);
+            System.Diagnostics.Trace.WriteLine("Repository path:" + fullPath);
+            var repoPath = LibGit2Sharp.Repository.Init(fullPath);
             using (var repo = new Repository(repoPath))
                 buildIt(new RepoBuilder(repo));
+        }
+
+        public Repository GetRepository(string path)
+        {
+            return new Repository(Path.Combine(Workdir, path));
         }
 
         public class RepoBuilder
@@ -86,12 +93,32 @@ namespace Sep.Git.Tfs.Test.Integration
                 _repo = repo;
             }
 
+            private Signature GetCommitter()
+            {
+                return new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
+            }
+
             public string Commit(string message)
             {
                 File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
                 _repo.Index.Stage("README.txt");
-                var committer = new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
+                var committer = GetCommitter();
                 return _repo.Commit(message, committer, committer).Id.Sha;
+            }
+
+            public void CreateBranch(string branchName)
+            {
+                _repo.Checkout(_repo.CreateBranch(branchName));
+            }
+
+            public void Checkout(string commitishName)
+            {
+                _repo.Checkout(commitishName);
+            }
+
+            public void Merge(string branch)
+            {
+                _repo.Merge(_repo.Branches[branch].Commits.First(), GetCommitter());
             }
         }
 

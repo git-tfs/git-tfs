@@ -23,6 +23,7 @@ namespace Sep.Git.Tfs.Test.Commands
         public void ShouldFailWithLessThanOneParents()
         {
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
+            mocks.Get<Globals>().UserSpecifiedRemoteId = "default";
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("my-head")).Return(new TfsChangesetInfo[0]);
 
             Assert.NotEqual(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care", "my-head"));
@@ -32,6 +33,7 @@ namespace Sep.Git.Tfs.Test.Commands
         public void ShouldFailWithMoreThanOneNonSubtreeParents()
         {
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
+            mocks.Get<Globals>().UserSpecifiedRemoteId = "default";
 
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("my-head"))
                 .Return(new[] { ChangesetForRemote("good-choice"), ChangesetForRemote("another-good-choice") });
@@ -67,6 +69,7 @@ namespace Sep.Git.Tfs.Test.Commands
         public void ShouldSucceedWithParentsFromSubtreeAndOwner()
         {
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
+            mocks.Get<Globals>().UserSpecifiedRemoteId = "good-choice";
 
             var subtree = ChangesetForRemote("good-choice_subtree/good");
             subtree.Remote.Stub(x => x.IsSubtree).Return(true);
@@ -80,9 +83,12 @@ namespace Sep.Git.Tfs.Test.Commands
         [Fact]
         public void ShouldSucceedForOneArgument()
         {
-            mocks.Get<IGitRepository>().Stub(x => x.ReadTfsRemote(null)).IgnoreArguments().Return(mocks.Get<IGitTfsRemote>());
+            mocks.Get<Globals>().UserSpecifiedRemoteId = "default";
+            var tfsRemote = mocks.Get<IGitTfsRemote>();
+            tfsRemote.Stub(r => r.Id).Return("default");
+            mocks.Get<IGitRepository>().Stub(x => x.ReadTfsRemote(null)).IgnoreArguments().Return(tfsRemote);
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits(null)).IgnoreArguments()
-                .Return(new[] {new TfsChangesetInfo {Remote = mocks.Get<IGitTfsRemote>()}});
+                .Return(new[] { new TfsChangesetInfo { Remote = tfsRemote } });
 
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("don't care"));
         }
@@ -90,10 +96,12 @@ namespace Sep.Git.Tfs.Test.Commands
         [Fact]
         public void ShouldAskForCorrectParent()
         {
+            mocks.Get<Globals>().UserSpecifiedRemoteId = "default";
             var remote = mocks.Get<IGitTfsRemote>();
+            remote.Stub(r => r.Id).Return("default");
             //mocks.Get<IGitRepository>().Stub(x => x.ReadTfsRemote(null)).IgnoreArguments().Return(remote);
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits("commit_to_shelve"))
-                .Return(new[] { new TfsChangesetInfo { Remote = mocks.Get<IGitTfsRemote>() } });
+                .Return(new[] { new TfsChangesetInfo { Remote = remote } });
 
             mocks.ClassUnderTest.Run("shelveset name", "commit_to_shelve");
         }
@@ -101,10 +109,12 @@ namespace Sep.Git.Tfs.Test.Commands
         [Fact]
         public void ShouldTellRemoteToShelve()
         {
+            mocks.Get<Globals>().UserSpecifiedRemoteId = "default";
             var remote = mocks.Get<IGitTfsRemote>();
+            remote.Stub(r => r.Id).Return("default");
             //mocks.Get<IGitRepository>().Stub(x => x.ReadTfsRemote(null)).IgnoreArguments().Return(remote);
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits(null)).IgnoreArguments()
-                .Return(new[] { new TfsChangesetInfo { Remote = mocks.Get<IGitTfsRemote>() } });
+                .Return(new[] { new TfsChangesetInfo { Remote = remote } });
 
             mocks.ClassUnderTest.Run("shelveset name");
 
@@ -116,7 +126,9 @@ namespace Sep.Git.Tfs.Test.Commands
         public void ShouldTellRemoteToShelveTreeish()
         {
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
+            mocks.Get<Globals>().UserSpecifiedRemoteId = "default";
             var remote = mocks.Get<IGitTfsRemote>();
+            remote.Stub(r => r.Id).Return("default");
             //mocks.Get<IGitRepository>().Stub(x => x.ReadTfsRemote(null)).IgnoreArguments().Return(remote);
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits(null)).IgnoreArguments()
                 .Return(new[] {new TfsChangesetInfo {Remote = remote}});
@@ -172,7 +184,9 @@ namespace Sep.Git.Tfs.Test.Commands
         private void WireUpMockRemote()
         {
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
+            mocks.Get<Globals>().UserSpecifiedRemoteId = "default";
             var remote = mocks.Get<IGitTfsRemote>();
+            remote.Stub(x => x.Id).Return("default");
             mocks.Get<IGitRepository>().Stub(x => x.GetLastParentTfsCommits(null)).IgnoreArguments()
                 .Return(new[] { new TfsChangesetInfo { Remote = remote } });
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -22,8 +22,10 @@ namespace Sep.Git.Tfs
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
         private TextWriter _stdout;
+        private Bootstrapper _bootstrapper;
 
-        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container, IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals , TextWriter stdout)
+        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container,
+            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, TextWriter stdout, Bootstrapper bootstrapper)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
@@ -33,6 +35,7 @@ namespace Sep.Git.Tfs
             _runner = runner;
             _globals = globals;
             _stdout = stdout;
+            _bootstrapper = bootstrapper;
         }
 
         public int Run(IList<string> args)
@@ -44,41 +47,7 @@ namespace Sep.Git.Tfs
             var unparsedArgs = ParseOptions(command, args);
             Trace.WriteLine("Command run:" + commandLineRun);
             ParseAuthors();
-            AutoDetectRemoteToUse();
             return Main(command, unparsedArgs);
-        }
-
-        private void AutoDetectRemoteToUse()
-        {
-            if (_globals.AutoFindRemote)
-            {
-                if (!string.IsNullOrEmpty(_globals.UserSpecifiedRemoteId))
-                {
-                    throw new Exception("error: you can't use -i and -I option in the same time!");
-                }
-                var remotes = _globals.Repository.GetLastParentTfsCommits("HEAD");
-                if (!remotes.Any())
-                {
-                    var allRemotes = _globals.Repository.ReadAllTfsRemotes();
-                    if (!allRemotes.Any())
-                        throw new Exception("error: no tfs remotes defined in this repository!");
-
-                    if (allRemotes.Count() == 1)
-                    {
-                        _globals.UserSpecifiedRemoteId = allRemotes.First().Id;
-                        _stdout.WriteLine("Working with tfs remote: " + _globals.RemoteId);
-                        return;
-                    }
-                    throw new Exception("error: can't find a tfs remote to use\n   No TFS parents found and more than one tfs remote defined in the repository!"
-                        + "\n   Use '-i' option to define which one to use.");
-                }
-                var foundRemote = remotes.First().Remote;
-                if(foundRemote.IsDerived)
-                    _stdout.WriteLine("Need to bootstrap: " + foundRemote.RemoteRef);
-
-                _globals.UserSpecifiedRemoteId = foundRemote.Id;
-                _stdout.WriteLine("Working with tfs remote: " + _globals.RemoteId);
-            }
         }
 
         public int Main(GitTfsCommand command, IList<string> unparsedArgs)
@@ -146,7 +115,8 @@ namespace Sep.Git.Tfs
             {
                 _globals.GitDir = ".git";
             }
-            _globals.RemoteId = GitTfsConstants.DefaultRepositoryId;
+            _globals.Stdout = _stdout;
+            _globals.Bootstrapper = _bootstrapper;
         }
 
         public void AssertValidGitRepository()
