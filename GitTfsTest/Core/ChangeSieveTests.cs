@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sep.Git.Tfs.Core;
@@ -146,6 +146,11 @@ namespace Sep.Git.Tfs.Test.Core
             public static IChange MergeNewFile(string serverItem)
             {
                 return new FakeChange(TfsChangeType.Merge | TfsChangeType.Branch, TfsItemType.File, serverItem);
+            }
+
+            public static IChange DeleteDir(string serverItem)
+            {
+                return new FakeChange(TfsChangeType.Delete, TfsItemType.Folder, serverItem);
             }
 
             const int ChangesetId = 10;
@@ -568,6 +573,66 @@ namespace Sep.Git.Tfs.Test.Core
                     ApplicableChange.Update("file8.txt"),
                     ApplicableChange.Update("file9.txt"),
                     ApplicableChange.Update("file10.txt"));
+            }
+        }
+        public class WithDeleteMainFolderBranchAndSubItems : Base<WithDeleteMainFolderBranchAndSubItems.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    Changeset.Changes = new IChange[] {
+                        FakeChange.Delete("$/Project/file1.txt"),
+                        FakeChange.Delete("$/Project/file2.txt"),
+                        FakeChange.Delete("$/Project/file3.txt"),
+                        FakeChange.DeleteDir("$/Project/"),
+                        FakeChange.Delete("$/Project/file4.txt"),
+                        FakeChange.Delete("$/Project/file5.txt"),
+                    };
+                }
+            }
+
+            [Fact]
+            public void WhenMainBranchFolderIsDeleted_ThenKeepFileInGitCommitByDoingNothing()
+            {
+                Assert.Equal(0, Subject.GetChangesToApply().Count());
+            }
+
+            [Fact]
+            public void DoNotFetch()
+            {
+                // Because we're not going to apply changes, don't waste time fetching any.
+                Assert.Equal(0, Subject.GetChangesToFetch().Count());
+            }
+        }
+
+        public class WithDeleteOtherFolder : Base<WithDeleteOtherFolder.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    Changeset.Changes = new IChange[] {
+                        FakeChange.Edit("$/Project/file1.txt"),
+                        FakeChange.DeleteDir("$/Projec"),
+                        FakeChange.Delete("$/Projec/file.txt"),
+                        FakeChange.DeleteDir("$/Project2"),
+                        FakeChange.Delete("$/Project2/file.txt"),
+                    };
+                }
+            }
+
+            [Fact]
+            public void IncludesChangesInThisProject()
+            {
+                AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Update("file1.txt"));
+            }
+
+            [Fact]
+            public void FetchesChangesInThisProject()
+            {
+                Assert.Equal(new string[] { "$/Project/file1.txt" }, Subject.GetChangesToFetch().Select(c => c.Item.ServerItem));
             }
         }
     }

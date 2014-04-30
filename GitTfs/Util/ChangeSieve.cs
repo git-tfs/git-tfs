@@ -60,13 +60,16 @@ namespace Sep.Git.Tfs.Util
                         c.Change.Item.ItemType == TfsItemType.Folder
                             && c.GitPath == string.Empty
                             && c.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete, TfsChangeType.Rename));
-                }
+        }
                 return _renameBranchCommmit.Value;
             }
         }
 
         public IEnumerable<IChange> GetChangesToFetch()
         {
+            if (DeletesProject)
+                return Enumerable.Empty<IChange>();
+
             if (RenameBranchCommmit)
                 return new List<IChange>();
 
@@ -75,6 +78,9 @@ namespace Sep.Git.Tfs.Util
 
         public IEnumerable<ApplicableChange> GetChangesToApply()
         {
+            if (DeletesProject)
+                return Enumerable.Empty<ApplicableChange>();
+
             if (RenameBranchCommmit)
                 return new List<ApplicableChange>();
 
@@ -112,6 +118,23 @@ namespace Sep.Git.Tfs.Util
                 }
             }
             return compartments.Deleted.Concat(compartments.Updated);
+        }
+
+        bool? _deletesProject;
+        private bool DeletesProject
+        {
+            get
+            {
+                if (!_deletesProject.HasValue)
+                {
+                    _deletesProject =
+                        NamedChanges.Any(change =>
+                            change.Change.Item.ItemType == TfsItemType.Folder
+                               && change.GitPath == string.Empty
+                               && change.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete));
+                }
+                return _deletesProject.Value;
+            }
         }
 
         class NamedChange
