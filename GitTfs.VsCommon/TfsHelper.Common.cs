@@ -377,7 +377,8 @@ namespace Sep.Git.Tfs.VsCommon
             }
             var shelveset = shelvesets.First();
 
-            var change = VersionControl.QueryShelvedChanges(shelveset).Single();
+            var itemSpec = new ItemSpec(remote.TfsRepositoryPath, RecursionType.Full);
+            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] { itemSpec }).Single();
             var wrapperForVersionControlServer =
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
             // TODO - containerify this (no `new`)!
