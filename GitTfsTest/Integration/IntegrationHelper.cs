@@ -115,6 +115,12 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 _repo.Merge(_repo.Branches[branch].Commits.First(), GetCommitter());
             }
+
+            public string Amend(string message)
+            {
+                var committer = GetCommitter();
+                return _repo.Commit(message, committer, committer, true).Id.Sha;
+            }
         }
 
         #endregion
