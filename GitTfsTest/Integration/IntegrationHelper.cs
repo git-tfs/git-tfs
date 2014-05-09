@@ -76,16 +76,20 @@ namespace Sep.Git.Tfs.Test.Integration
             System.Diagnostics.Trace.WriteLine("Repository path:" + fullPath);
             var repoPath = LibGit2Sharp.Repository.Init(fullPath);
             using (var repo = new Repository(repoPath))
-                buildIt(new RepoBuilder(repo));
+                buildIt(new RepoBuilder(repo, this, path));
         }
 
         public class RepoBuilder
         {
             private Repository _repo;
+            private IntegrationHelper _integrationHelper;
+            private string _path;
 
-            public RepoBuilder(Repository repo)
+            public RepoBuilder(Repository repo, IntegrationHelper integrationHelper, string path)
             {
                 _repo = repo;
+                _integrationHelper = integrationHelper;
+                _path = path;
             }
 
             private Signature GetCommitter()
@@ -120,6 +124,11 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 var committer = GetCommitter();
                 return _repo.Commit(message, committer, committer, true).Id.Sha;
+            }
+
+            public int RunIn(params string[] args)
+            {
+                return _integrationHelper.RunIn(_path, args);
             }
         }
 

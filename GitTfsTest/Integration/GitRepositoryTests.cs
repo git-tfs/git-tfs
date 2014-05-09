@@ -143,5 +143,51 @@ namespace Sep.Git.Tfs.Test.Integration
                 Assert.Equal(0, changesets.Count());
             }
         }
+
+        [Fact]
+        public void MoveTfsRefForwardIfNeeded_WhenOneNewerChangesetAlreadyFetchedOnSameBranch_ThenMoveTheRemoteToThisCommit()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(2, "Changeset Id very low to test only MoveTfsRefForwardIfNeeded() method!", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+            });
+
+            string expectedRefCommit = null;
+            h.SetupGitRepo("repo", g =>
+            {
+                g.Commit("1. A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C1");
+                g.Commit("2. A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C2");
+                g.RunIn("bootstrap");
+                expectedRefCommit = g.Commit("3. A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C3");
+                g.RunIn("fetch");
+            });
+
+            h.AssertRef("repo", "tfs/default", expectedRefCommit);
+        }
+
+        [Fact]
+        public void MoveTfsRefForwardIfNeeded_WhenOneNewerChangesetAlreadyFetchedOnAnotherBranch_ThenMoveTheRemoteToThisCommit()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(2, "Changeset Id very low to test only MoveTfsRefForwardIfNeeded() method!", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+            });
+
+            string expectedRefCommit = null;
+            h.SetupGitRepo("repo", g =>
+            {
+                g.Commit("1. A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C1");
+                g.Commit("2. A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C2");
+                g.RunIn("bootstrap");
+                g.CreateBranch("other_branch");
+                expectedRefCommit = g.Commit("3. A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C3");
+                g.RunIn("fetch");
+            });
+
+
+            h.AssertRef("repo", "tfs/default", expectedRefCommit);
+        }
     }
 }
