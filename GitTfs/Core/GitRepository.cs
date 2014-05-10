@@ -276,28 +276,29 @@ namespace Sep.Git.Tfs.Core
 
         private void FindTfsParentCommits(List<TfsChangesetInfo> changesets, Commit commit)
         {
-            while (true)
+            var commitsToFollow = new Stack<Commit>();
+            commitsToFollow.Push(commit);
+            var alreadyVisitedCommits = new HashSet<string>();
+            while (commitsToFollow.Any())
             {
+                commit = commitsToFollow.Pop();
+
+                alreadyVisitedCommits.Add(commit.Sha);
+
                 var changesetInfo = TryParseChangesetInfo(commit.Message, commit.Sha);
-                if (changesetInfo != null)
+                if (changesetInfo == null)
+                {
+                    // If commit was not a TFS commit, continue searching all new parents of the commit
+                    // Add parents in reverse order to keep topology (main parent should be treated first!)
+                    foreach (var parent in commit.Parents.Where(x => !alreadyVisitedCommits.Contains(x.Sha)).Reverse())
+                        commitsToFollow.Push(parent);
+                }
+                else
                 {
                     changesets.Add(changesetInfo);
-                    return;
                 }
-                var parentsCount = commit.Parents.Count();
-                if (parentsCount > 1)
-                {
-                    foreach (var parent in commit.Parents)
-                    {
-                        FindTfsParentCommits(changesets, parent);
-                    }
-                    return;
-                }
-                if (parentsCount == 0)
-                    return;
-
-                commit = commit.Parents.First();
             }
+            Trace.WriteLine("Commits visited count:" + alreadyVisitedCommits.Count);
         }
 
         public TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId)

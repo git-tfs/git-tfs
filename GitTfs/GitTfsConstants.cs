@@ -26,7 +26,7 @@ namespace Sep.Git.Tfs
                           "\\[(?<url>.+)\\]" +
                           "(?<repository>.+)?;" +
                           "C(?<changeset>\\d+)" +
-                          "\\s*$", RegexOptions.Multiline);
+                          "\\s*$", RegexOptions.Multiline|RegexOptions.Compiled);
         // e.g. git-tfs-work-item: 24 associate
         public static readonly Regex TfsWorkItemRegex =
                 new Regex(GitTfsWorkItemPrefix + @"\s*(?<item_id>\d+)(\s*(?<action>associate|resolve))?");

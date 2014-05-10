@@ -130,6 +130,7 @@
     <Compile Include="GitTfsRegexTests.cs" />
     <Compile Include="Integration\BootstrapTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
+    <Compile Include="Integration\GitRepositoryTests.cs" />
     <Compile Include="Integration\FetchTests.cs" />
     <Compile Include="Integration\InitTests.cs" />
     <Compile Include="Integration\IntegrationHelper.cs" />
