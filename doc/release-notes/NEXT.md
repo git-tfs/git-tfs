@@ -12,6 +12,7 @@
 * Don't cleanup directory when fail during fetch in `clone` command (#572)
 * If multiple changesets are found in parent tree, the latest changeset will be selected. (#591)
 * Autoselect remote (`-I`) by default (#562)
-* bootstrap automatically (#561)
+* Bootstrap automatically (#561)
+* Do a better job at finding the most recent fetched TFS changeset (#592)
 * Other documentation and bug fixes (#487, #521, #523, #527, #557)
 
