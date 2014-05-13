@@ -114,7 +114,19 @@ namespace Sep.Git.Tfs.Commands
             if (!String.IsNullOrWhiteSpace(repo.CommandOneline("rev-list", tfsLatest, "^" + refToCheckin)))
                 throw new GitTfsException("error: latest TFS commit should be parent of commits being checked in");
 
-            return (Quick || repo.IsBare) ? _PerformRCheckinQuick(parentChangeset, refToCheckin) : _PerformRCheckin(parentChangeset, refToCheckin);
+            try
+            {
+                return (Quick || repo.IsBare) ? _PerformRCheckinQuick(parentChangeset, refToCheckin) : _PerformRCheckin(parentChangeset, refToCheckin);
+            }
+            catch (Exception)
+            {
+                tfsRemote.CleanupWorkspace();
+                throw;
+            }
+            finally
+            {
+                tfsRemote.CleanupWorkspaceDirectory();
+            }
         }
 
         private int _PerformRCheckinQuick(TfsChangesetInfo parentChangeset, string refToCheckin)
@@ -181,9 +193,6 @@ namespace Sep.Git.Tfs.Commands
                 repo.ResetHard(tfsRemote.MaxCommitHash);
             _stdout.WriteLine("No more to rcheckin.");
 
-            Trace.WriteLine("Cleaning...");
-            tfsRemote.CleanupWorkspaceDirectory();
-
             return GitTfsExitCodes.OK;
         }
 
@@ -202,9 +211,6 @@ namespace Sep.Git.Tfs.Commands
                 if (String.IsNullOrWhiteSpace(revList))
                 {
                     _stdout.WriteLine("No more to rcheckin.");
-
-                    Trace.WriteLine("Cleaning...");
-                    tfsRemote.CleanupWorkspaceDirectory();
 
                     return GitTfsExitCodes.OK;
                 }
