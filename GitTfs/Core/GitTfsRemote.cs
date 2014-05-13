@@ -177,8 +177,6 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        
-
         private string WorkingDirectory
         {
             get
