@@ -298,7 +298,6 @@ namespace Sep.Git.Tfs.Commands
             }
             finally
             {
-                Trace.WriteLine("Cleaning...");
                 tfsRemote.CleanupWorkspaceDirectory();
             }
         }

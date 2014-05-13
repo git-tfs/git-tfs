@@ -166,7 +166,6 @@ namespace Sep.Git.Tfs.Commands
             }
             finally
             {
-                Trace.WriteLine("Cleaning...");
                 remote.CleanupWorkspaceDirectory();
 
                 if (remote.Repository.IsBare)
