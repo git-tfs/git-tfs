@@ -98,7 +98,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
                 _repo.Index.Stage("README.txt");
                 var committer = GetCommitter();
-                return _repo.Commit(message, committer, committer).Id.Sha;
+                return _repo.Commit(message, committer, committer, new CommitOptions(){ AllowEmptyCommit = true}).Id.Sha;
             }
 
             public void CreateBranch(string branchName)
