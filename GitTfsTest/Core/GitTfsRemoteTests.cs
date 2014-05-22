@@ -62,5 +62,22 @@ namespace Sep.Git.Tfs.Test.Core
             mocks.Inject<ITfsHelper>(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
             return mocks.ClassUnderTest;
         }
+
+
+        [Fact]
+        public void GivenTheTfsPathsInTheBranchFolder_WhenGettingPathInGitRepo_ThenShouldGetRelativePaths()
+        {
+            var remote = BuildRemote(url: "test", repository: "$/Project/MyBranch_other");
+            Assert.Equal("", remote.GetPathInGitRepo("$/Project/MyBranch_other"));
+            Assert.Equal("file.txt", remote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
+        }
+
+        [Fact]
+        public void GivenTheTfsPathsInAnotherBranchFolder_WhenGettingPathInGitRepo_ThenShouldGetNothing()
+        {
+            var remote = BuildRemote(url: "test", repository: "$/Project/MyBranch");
+            Assert.Equal(null, remote.GetPathInGitRepo("$/Project/MyBranch_other"));
+            Assert.Equal(null, remote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
+        }
     }
 }
