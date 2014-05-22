@@ -296,9 +296,13 @@ namespace Sep.Git.Tfs.Commands
                 }
                 return fetchResult;
             }
+            catch (Exception)
+            {
+                tfsRemote.CleanupWorkspace();
+                throw;
+            }
             finally
             {
-                Trace.WriteLine("Cleaning...");
                 tfsRemote.CleanupWorkspaceDirectory();
             }
         }

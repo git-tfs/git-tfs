@@ -162,11 +162,14 @@ namespace Sep.Git.Tfs.Commands
             try
             {
                 remote.Fetch(stopOnFailMergeCommit);
-
+            }
+            catch (Exception)
+            {
+                remote.CleanupWorkspace();
+                throw;
             }
             finally
             {
-                Trace.WriteLine("Cleaning...");
                 remote.CleanupWorkspaceDirectory();
 
                 if (remote.Repository.IsBare)
