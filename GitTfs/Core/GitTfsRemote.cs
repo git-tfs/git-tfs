@@ -280,7 +280,8 @@ namespace Sep.Git.Tfs.Core
                 //look through the subtrees
                 var p = this.globals.Repository.GetSubtrees(this)
                             .Where(x => x.IsSubtree)
-                            .FirstOrDefault(x => tfsPath.StartsWith(x.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase));
+                            .FirstOrDefault(x => tfsPath.StartsWith(x.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)
+                                && (tfsPath.Length == x.TfsRepositoryPath.Length || tfsPath[x.TfsRepositoryPath.Length] == '/'));
                 if (p == null) return null;
 
                 tfsPath = p.GetPathInGitRepo(tfsPath);
