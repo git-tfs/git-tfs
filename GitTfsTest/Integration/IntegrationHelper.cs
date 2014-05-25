@@ -116,9 +116,10 @@ namespace Sep.Git.Tfs.Test.Integration
                 _repo.Checkout(commitishName);
             }
 
-            public void Merge(string branch)
+            public string Merge(string branch)
             {
-                _repo.Merge(_repo.Branches[branch].Commits.First(), GetCommitter());
+                var mergeResult = _repo.Merge(_repo.Branches[branch].Commits.First(), GetCommitter());
+                return mergeResult.Commit.Sha;
             }
 
             public string Amend(string message)
