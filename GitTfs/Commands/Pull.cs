@@ -58,7 +58,7 @@ namespace Sep.Git.Tfs.Commands
                     globals.Repository.CommandNoisy("rebase", "--preserve-merges", remote.RemoteRef);
                 }
                 else
-                    globals.Repository.CommandNoisy("merge", remote.RemoteRef);
+                    globals.Repository.Merge(remote.RemoteRef);
             }
 
             return retVal;
