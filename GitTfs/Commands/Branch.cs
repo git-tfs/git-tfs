@@ -199,7 +199,7 @@ namespace Sep.Git.Tfs.Commands
             if (returnCode != GitTfsExitCodes.OK || !checkInCurrentBranch)
                 return returnCode;
             
-            rcheckin.RebaseOnto(globals.Repository, initBranch.RemoteCreated.RemoteRef, commit.GitCommit);
+            rcheckin.RebaseOnto(initBranch.RemoteCreated.RemoteRef, commit.GitCommit);
             globals.UserSpecifiedRemoteId = initBranch.RemoteCreated.Id;
             return rcheckin.Run();
         }
