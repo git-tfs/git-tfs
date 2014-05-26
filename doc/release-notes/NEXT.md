@@ -14,5 +14,6 @@
 * Autoselect remote (`-I`) by default (#562)
 * Bootstrap automatically (#561)
 * Do a better job at finding the most recent fetched TFS changeset (#592)
+* Remove old `init-branch` command. Use `branch --init` instead (#393)
 * Other documentation and bug fixes (#487, #521, #523, #527, #557)
 
