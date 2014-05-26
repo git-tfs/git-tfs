@@ -70,6 +70,11 @@ namespace Sep.Git.Tfs.Core
                 return _commit.Message;
             }
         }
+
+        public IEnumerable<GitCommit> Parents
+        {
+            get { return _commit.Parents.Select(c => new GitCommit(c)); }
+        }
     }
 }
 
