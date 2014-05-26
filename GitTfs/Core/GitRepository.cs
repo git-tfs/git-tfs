@@ -663,9 +663,17 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<GitCommit> FindParentCommits(string @from, string to)
         {
-            return _repository.Commits.QueryBy(
+            var commits = _repository.Commits.QueryBy(
                 new CommitFilter() {Since = @from, Until = to, SortBy = CommitSortStrategies.Reverse, FirstParentOnly = true})
                 .Select(c=>new GitCommit(c));
+            var parent = to;
+            foreach (var gitCommit in commits)
+            {
+                if(!gitCommit.Parents.Any(c=>c.Sha == parent))
+                    return new List<GitCommit>();
+                parent = gitCommit.Sha;
+            }
+            return commits;
         }
     }
 }
