@@ -15,3 +15,6 @@ obj
 # 3rd-party stuff copied during build
 /packages
 GitTfs/git2.*
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
