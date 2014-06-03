@@ -22,7 +22,7 @@ namespace Sep.Git.Tfs.Commands
                         v => NoMerge = v != null },
                     { "f|force=", "The policy override reason.",
                         v => { Force = true; OverrideReason = v; } },
-                    { "w|work-item=:", "Associated work items\ne.g. -w12345 to associate with 12345\nor -w12345:resolve to resolve 12345",
+                    { "w|work-item:", "Associated work items\ne.g. -w12345 to associate with 12345\nor -w12345:resolve to resolve 12345",
                         (n, opt) => { if(n == null) throw new OptionException("Missing work item number for option -w.", "-w");
                             (opt == "resolve" ? WorkItemsToResolve : WorkItemsToAssociate).Add(n); } },
                     { "c|code-reviewer=", "Set code reviewer\ne.g. -c \"John Smith\"",

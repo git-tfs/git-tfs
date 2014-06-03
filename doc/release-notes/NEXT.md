@@ -16,5 +16,5 @@
 * Do a better job at finding the most recent fetched TFS changeset (#592)
 * Remove old `init-branch` command. Use `branch --init` instead (#393)
 * Use libgit2sharp to merge commits (#601)
-* Other documentation and bug fixes (#487, #521, #523, #527, #557)
+* Other documentation and bug fixes (#487, #521, #523, #527, #557, #613)
 
