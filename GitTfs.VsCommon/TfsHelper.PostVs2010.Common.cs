@@ -253,7 +253,7 @@ namespace Sep.Git.Tfs.VsCommon
         /// </remarks>
         /// <returns>the <see cref="ChangesetSummary"/> of the changeset found.
         /// </returns>
-        private static int GetRelevantChangesetBasedOnChangeType(IEnumerable<MergeInfo> merges, string tfsPathParentBranch, string tfsPathBranchToCreate, out string renameFromBranch)
+        private int GetRelevantChangesetBasedOnChangeType(IEnumerable<MergeInfo> merges, string tfsPathParentBranch, string tfsPathBranchToCreate, out string renameFromBranch)
         {
             renameFromBranch = null;
             var merge = merges.FirstOrDefault(m => m.SourceItem.Equals(tfsPathParentBranch, StringComparison.InvariantCultureIgnoreCase)
@@ -269,7 +269,14 @@ namespace Sep.Git.Tfs.VsCommon
                         || m.SourceChangeType.HasFlag(ChangeType.SourceRename));
                 }
                 if (merge == null)
-                    throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find root changeset for " + tfsPathBranchToCreate + " branch in " + tfsPathParentBranch + " branch");
+                {
+                    _stdout.WriteLine("warning: git-tfs was unable to find the root changeset (ie the last common commit) between the branch '"
+                                      + tfsPathBranchToCreate + "' and its parent branch '" + tfsPathParentBranch + "'.\n"
+                                      + "(Any help to add support of this special case is welcomed! Open an issue on https://github.com/git-tfs/git-tfs/issue )\n\n"
+                                      + "To be able to continue to fetch the changesets from Tfs,\nplease enter the root changeset id between the branch '"
+                                      + tfsPathBranchToCreate + "'\n and its parent branch '" + tfsPathParentBranch + "' by analysing the Tfs history...");
+                    return AskForRootChangesetId();
+                }
             }
 
             if (merge.SourceItem.Equals(tfsPathBranchToCreate, StringComparison.InvariantCultureIgnoreCase)
@@ -308,6 +315,21 @@ namespace Sep.Git.Tfs.VsCommon
                                 "Open an Issue on Github to notify the community that you need support for '" +
                                 merge.SourceChangeType + "': https://github.com/git-tfs/git-tfs/issues"
                             });
+        }
+
+        private int AskForRootChangesetId()
+        {
+            int changesetId;
+            while (true)
+            {
+                _stdout.Write("Please specify the root changeset id (or 'exit' to stop the process):");
+                var read = Console.ReadLine();
+                if (read == "exit")
+                    throw new GitTfsException("Exiting...(fetching stopped by user!)");
+                if (!int.TryParse(read, out changesetId) || changesetId <= 0)
+                    continue;
+                return changesetId;
+            }
         }
 
         public override void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)

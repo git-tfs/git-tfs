@@ -20,7 +20,7 @@ namespace Sep.Git.Tfs.VsCommon
 {
     public abstract class TfsHelperBase : ITfsHelper
     {
-        private readonly TextWriter _stdout;
+        protected readonly TextWriter _stdout;
         private readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
 
