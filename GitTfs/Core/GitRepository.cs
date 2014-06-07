@@ -497,7 +497,20 @@ namespace Sep.Git.Tfs.Core
             return commit.Sha;
         }
 
-        private readonly Regex tfsIdRegex = new Regex("^git-tfs-id: .*;C([0-9]+)$", RegexOptions.Singleline | RegexOptions.Compiled);
+        private static readonly Regex tfsIdRegex = new Regex("^git-tfs-id: .*;C([0-9]+)\r?$", RegexOptions.Multiline | RegexOptions.Compiled | RegexOptions.RightToLeft);
+
+        public static bool TryParseChangesetId(string commitMessage, out long changesetId)
+        {
+            var match = tfsIdRegex.Match(commitMessage);
+            if (match.Success)
+            {
+                changesetId = long.Parse(match.Groups[1].Value);
+                return true;
+            }
+
+            changesetId = 0;
+            return false;
+        }
 
         private Commit FindCommitByChangesetId(long changesetId, string remoteRef = null)
         {
@@ -525,10 +538,9 @@ namespace Sep.Git.Tfs.Core
             Commit commit = null;
             foreach (var c in commitsFromRemoteBranches)
             {
-                var match = tfsIdRegex.Match(c.Message);
-                if (match.Success)
+                long id;
+                if (TryParseChangesetId(c.Message, out id))
                 {
-                    int id = int.Parse(match.Groups[1].Value);
                     changesetsCache[id] = c.Sha;
                     if (id == changesetId)
                     {
