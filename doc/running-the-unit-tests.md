@@ -14,14 +14,14 @@ To run the tests, you can use the gui runner or the console runner. If you have 
 
 ### xUnit.net GUI runner
 
-The gui runner is `packages\xunit.runners.1.9.1\tools\xunit.gui.clr4.x86.exe`. Load the GitTfsTest assembly (i.e. GitTfsTest\bin\Debug\GitTfsTest.dll).
+The gui runner is `packages\xunit.runners.1.9.2\tools\xunit.gui.clr4.x86.exe`. Load the GitTfsTest assembly (i.e. GitTfsTest\bin\Debug\GitTfsTest.dll).
 
 ### xUnit.net console runner
 
 Here is an example running the tests with the console runner:
 
 ```
-C:\src\git-tfs>packages\xunit.runners.1.9.1\tools
+C:\src\git-tfs>packages\xunit.runners.1.9.2\tools
 \xunit.console.clr4.x86.exe GitTfsTest\bin\Debug\GitTfsTest.dll
 xUnit.net console test runner (32-bit .NET 4.0.30319.269)
 Copyright (C) 2007-11 Microsoft Corporation.
