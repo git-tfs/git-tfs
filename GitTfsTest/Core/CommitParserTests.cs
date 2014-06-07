@@ -20,6 +20,11 @@ namespace Sep.Git.Tfs.Test.Core
                     new object[] { "foo-tfs-id: bar;C123", false, 0 },
                     new object[] { "\ngit-tfs-id: foo;C234\n", true, 234 },
                     new object[] { "\r\ngit-tfs-id: foo;C345\r\n", true, 345 },
+                    new object[] { "commit message\n4567\ngit-tfs-id: foo;C1234\nee\n4567", true, 1234 },
+                    new object[] { "\r\ngit-tfs-id: foo;C888", true, 888 },
+                    new object[] { "commit message\r\n4567\r\ngit-tfs-id: foo;C12345\r\nee\r\n4567", true, 12345 },
+                    new object[] { "commit message\r\ngit-tfs-id: foo;C1\r\ngit-tfs-id: foo;C2\r\nee\r\n4567", true, 2 }, //if 2 are possible, choose last (but should never happen!)
+                    new object[] { "commit message\r\ngit-tfs-id: foo;\r\n foo;C2\r\nee\r\n4567", false, 0 }, //RegEx must not begin on one line and finish on a second one
                 };
             }
         }

@@ -497,7 +497,7 @@ namespace Sep.Git.Tfs.Core
             return commit.Sha;
         }
 
-        private static readonly Regex tfsIdRegex = new Regex("^git-tfs-id: .*;C([0-9]+)\r?$", RegexOptions.Singleline | RegexOptions.Multiline | RegexOptions.Compiled);
+        private static readonly Regex tfsIdRegex = new Regex("^git-tfs-id: .*;C([0-9]+)\r?$", RegexOptions.Multiline | RegexOptions.Compiled | RegexOptions.RightToLeft);
 
         public static bool TryParseChangesetId(string commitMessage, out long changesetId)
         {
