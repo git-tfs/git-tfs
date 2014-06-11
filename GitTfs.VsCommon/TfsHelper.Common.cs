@@ -15,7 +15,6 @@ using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using StructureMap;
 using StructureMap.Attributes;
-using ChangeType = Microsoft.TeamFoundation.Server.ChangeType;
 
 namespace Sep.Git.Tfs.VsCommon
 {

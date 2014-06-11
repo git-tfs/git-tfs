@@ -65,7 +65,7 @@ namespace Sep.Git.Tfs.Core
 
             var newChangesetId = _tfsHelper.ShowCheckinDialog(_workspace, pendingChanges, GetWorkItemCheckedInfos(), checkinComment);
             if (newChangesetId <= 0)
-                throw new GitTfsException("Checkin cancelled!");
+                throw new GitTfsException("Checkin canceled!");
             return newChangesetId;
         }
 

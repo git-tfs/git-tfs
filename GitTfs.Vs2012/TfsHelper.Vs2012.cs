@@ -10,12 +10,18 @@ namespace Sep.Git.Tfs.Vs2012
         {
         }
 
+        private string vsInstallDir;
+
         protected override string GetVsInstallDir()
         {
-            return TryGetRegString(@"Software\Microsoft\VisualStudio\11.0", "InstallDir")
-                ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\11.0", "InstallDir")
-                ?? TryGetUserRegString(@"Software\Microsoft\WDExpress\11.0_Config", "InstallDir")
-                ?? TryGetUserRegString(@"Software\WOW6432Node\Microsoft\WDExpress\11.0_Config", "InstallDir");
+            if (vsInstallDir == null)
+            {
+                vsInstallDir = TryGetRegString(@"Software\Microsoft\VisualStudio\11.0", "InstallDir")
+                    ?? TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\11.0", "InstallDir")
+                    ?? TryGetUserRegString(@"Software\Microsoft\WDExpress\11.0_Config", "InstallDir")
+                    ?? TryGetUserRegString(@"Software\WOW6432Node\Microsoft\WDExpress\11.0_Config", "InstallDir");
+            }
+            return vsInstallDir;
         }
     }
 }

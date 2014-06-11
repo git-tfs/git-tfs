@@ -88,6 +88,9 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="NDesk.Options, Version=0.2.1.0, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
@@ -255,6 +258,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="App.config" />
+    <None Include="app.manifest" />
     <None Include="Core\TfsInterop\README.txt" />
   </ItemGroup>
   <ItemGroup>
