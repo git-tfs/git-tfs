@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -45,13 +46,13 @@ namespace Sep.Git.Tfs.Test.Core
             Assert.False(remote.MatchesUrlAndRepositoryPath("test", "$/shouldnotmatch"));
         }
 
-        private GitTfsRemote BuildRemote(string repository, string url = "", string[] legacyUrls = null)
+        private GitTfsRemote BuildRemote(string repository, string url = "", string[] legacyUrls = null, string id = "test")
         {
             if (legacyUrls == null)
                 legacyUrls = new string[0];
             var info = new RemoteInfo
             {
-                Id = "test",
+                Id = id,
                 Url = url,
                 Repository = repository,
                 Aliases = legacyUrls,
@@ -60,6 +61,65 @@ namespace Sep.Git.Tfs.Test.Core
             mocks.Inject<TextWriter>(new StringWriter());
             mocks.Inject<RemoteInfo>(info);
             mocks.Inject<ITfsHelper>(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
+            return mocks.ClassUnderTest;
+        }
+
+        [Fact]
+        public void GivenTheTfsPathsInTheBranchFolder_WhenGettingPathInGitRepo_ThenShouldGetRelativePaths()
+        {
+            var remote = BuildRemote(url: "test", repository: "$/Project/MyBranch_other");
+            Assert.Equal("", remote.GetPathInGitRepo("$/Project/MyBranch_other"));
+            Assert.Equal("file.txt", remote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
+        }
+
+        [Fact]
+        public void GivenTheTfsPathsInAnotherBranchFolder_WhenGettingPathInGitRepo_ThenShouldGetNothing()
+        {
+            var remote = BuildRemote(url: "test", repository: "$/Project/MyBranch");
+            Assert.Equal(null, remote.GetPathInGitRepo("$/Project/MyBranch_other"));
+            Assert.Equal(null, remote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
+        }
+
+        [Fact]
+        public void GivenTheTfsPathsAreInOneOfTheSubRemotes_WhenGettingPathInGitRepoInSubtree_ThenShouldGetRelativePathes()
+        {
+            var subtreeRemote = BuildSubTreeOwnerRemote(new List<IGitTfsRemote>
+                {
+                    BuildRemote(url: "MyBranch", repository: "$/Project/MyBranch", id:"test_subtree/MyBranch"),
+                    BuildRemote(url: "MyBranch_other", repository: "$/Project/MyBranch_other", id:"test_subtree/MyBranch_other"),
+                });
+            Assert.Equal("MyBranch_other/", subtreeRemote.GetPathInGitRepo("$/Project/MyBranch_other"));
+            Assert.Equal("MyBranch_other/file.txt", subtreeRemote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
+        }
+
+        [Fact]
+        public void GivenTheTfsPathsAreNotInOneOfTheSubRemotes_WhenGettingPathInGitRepoInSubtree_ThenShouldGetNothing()
+        {
+            var subtreeRemote = BuildSubTreeOwnerRemote(new List<IGitTfsRemote>
+                {
+                    BuildRemote(url: "MyBranch", repository: "$/Project/MyBranch", id:"test_subtree/MyBranch"),
+                });
+            Assert.Equal(null, subtreeRemote.GetPathInGitRepo("$/Project/MyBranch_other"));
+            Assert.Equal(null, subtreeRemote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
+        }
+
+        private GitTfsRemote BuildSubTreeOwnerRemote(IEnumerable<IGitTfsRemote> remotes)
+        {
+            var info = new RemoteInfo
+            {
+                Id = "test",
+                Url = null,
+                Repository = null,
+            };
+            var mocks = new RhinoAutoMocker<GitTfsRemote>();
+            mocks.Inject<TextWriter>(new StringWriter());
+            mocks.Inject<RemoteInfo>(info);
+            mocks.Inject<ITfsHelper>(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
+
+            var mockGitRepository = mocks.Get<IGitRepository>();
+            mockGitRepository.Stub(t => t.GetSubtrees(Arg<IGitTfsRemote>.Is.Anything)).Return(remotes);
+
+            mocks.Inject<Globals>(new Globals() { Repository = mockGitRepository });
             return mocks.ClassUnderTest;
         }
     }
