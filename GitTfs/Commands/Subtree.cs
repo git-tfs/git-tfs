@@ -140,7 +140,9 @@ namespace Sep.Git.Tfs.Commands
                  });
             
             _stdout.WriteLine("-> new remote " + remote.Id);
-            
+
+            fetch.IgnoreBranches = true;
+
             int result = fetch.Run(remote.Id);
             
             if (result == GitTfsExitCodes.OK)

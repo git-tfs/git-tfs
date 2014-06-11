@@ -1,3 +1,4 @@
+* Support renamed tfs branches, baseless merge and automatic branch initialisation when encounter merge changeset(#480)
 * Accept custom work item association regexes (#513)
 * Improve clone performance (#518)
 * Don't fetch files from TFS if we're going to ignore them (#519)

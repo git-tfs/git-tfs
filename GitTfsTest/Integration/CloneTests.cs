@@ -140,8 +140,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 tree: "c962b51eb5397f1b98f662c9d43e6be13b7065f1");
         }
 
-        [FactExceptOnUnix]
-        public void CloneProjectWithMergeChangeset()
+        private void CreateFakeRepositoryWithMergeChangeset()
         {
             //History of changesets:
             //6
@@ -171,6 +170,12 @@ namespace Sep.Git.Tfs.Test.Integration
                 r.MergeChangeset(6, "merge in main", DateTime.Parse("2012-01-02 12:12:16 -05:00"), fromBranch: "$/MyProject/Branch", intoBranch: "$/MyProject/Main", lastChangesetId: 5)
                     .Change(TfsChangeType.Edit | TfsChangeType.Merge, TfsItemType.File, "$/MyProject/Main/File.txt", "File contents_main_branch=>_merge");
             });
+        }
+
+        [FactExceptOnUnix]
+        public void WhenCloningTrunkWithMergeChangesetWithAllBranches_ThenThe2BranchesAreAutomaticallyInitialized()
+        {
+            CreateFakeRepositoryWithMergeChangeset();
 
             h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--with-branches");
 
@@ -183,6 +188,34 @@ namespace Sep.Git.Tfs.Test.Integration
                 tree: "c379179fee2ce45e44a5a2dd1d9bcf5ce8489608");
         }
 
+        [FactExceptOnUnix]
+        public void WhenCloningTrunkWithMergeChangeset_ThenTheMergedBranchIsAutomaticallyInitialized()
+        {
+            CreateFakeRepositoryWithMergeChangeset();
+
+            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject");
+
+            h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
+            AssertNewClone("MyProject", RefsInNewClone,
+                commit: "be59d37d08a0cc78916f04a256dc52f6722f800c",
+                tree: "cf8a497b3a40028bee363a613fe156b9d37350bb");
+            AssertNewClone("MyProject", new[] { "refs/remotes/tfs/Branch" },
+                commit: "0df2815a74403cfe96ccb96e3f995970f55df2b4",
+                tree: "c379179fee2ce45e44a5a2dd1d9bcf5ce8489608");
+        }
+
+        [FactExceptOnUnix]
+        public void WhenCloningTrunkWithIgnoringBranches_ThenTheMergedBranchIsAutomaticallyInitialized()
+        {
+            CreateFakeRepositoryWithMergeChangeset();
+
+            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--ignore-branches");
+
+            h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
+            AssertNewClone("MyProject", RefsInNewClone,
+                commit: "843a915aea98894fef51379d68a0f309e8537dd5",
+                tree: "cf8a497b3a40028bee363a613fe156b9d37350bb");
+        }
         private readonly string[] RefsInNewClone = new[] { "HEAD", "refs/heads/master", "refs/remotes/tfs/default" };
 
         /// <summary>
