@@ -119,7 +119,7 @@ namespace Sep.Git.Tfs.Test.Integration
             public string Amend(string message)
             {
                 var committer = GetCommitter();
-                return _repo.Commit(message, committer, committer, true).Id.Sha;
+                return _repo.Commit(message, committer, committer, new CommitOptions(){ AmendPreviousCommit = true}).Id.Sha;
             }
         }
 
