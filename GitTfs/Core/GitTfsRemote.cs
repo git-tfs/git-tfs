@@ -169,16 +169,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private string Dir
-        {
-            get
-            {
-                return Ext.CombinePaths(globals.GitDir, "tfs", Id);
-            }
-        }
-
-        
-
+        private const string WorkspaceDirectory = "~w";
         private string WorkingDirectory
         {
             get
@@ -193,7 +184,7 @@ namespace Sep.Git.Tfs.Core
                     }
 
                     //find the relative path to the owning remote
-                    return Ext.CombinePaths(globals.GitDir, "tfs", this.OwningRemoteId, "workspace", this.Prefix);
+                    return Ext.CombinePaths(globals.GitDir, WorkspaceDirectory, OwningRemoteId, Prefix);
                 }
 
                 return dir ?? DefaultWorkingDirectory;
@@ -204,7 +195,7 @@ namespace Sep.Git.Tfs.Core
         {
             get
             {
-                return Path.Combine(Dir, "workspace");
+                return Path.Combine(globals.GitDir, WorkspaceDirectory);
             }
         }
 
