@@ -24,7 +24,7 @@ Add the git-tfs folder path to your PATH. You could also set it temporary (the t
 
 ## Use git-tfs
 
-You need .NET 4 and either the 2008, 2010 or 2012 version of Team Explorer installed.
+You need .NET 4 and either the 2010, 2012 or 2013 version of Team Explorer installed (or Visual Studio).
 
 ### Help
 
@@ -96,7 +96,6 @@ This is the complete list of commands in the master branch on github.
 * [quick-clone](doc/commands/quick-clone.md) - since 0.9
 * [unshelve](doc/commands/unshelve.md) - since [0.11][v0.12]
 * [shelve-list](doc/commands/shelve-list.md) - since [0.12][v0.12]
-* [init-branch](doc/commands/init-branch.md) - since v0.16 (prefer the [branch](doc/commands/branch.md) command)
 * [labels](doc/commands/labels.md) - since v0.17
 
 ### Push to TFS
@@ -110,7 +109,6 @@ This is the complete list of commands in the master branch on github.
 
 * [list-remote-branches](doc/commands/list-remote-branches.md) - since 0.17
 * [branch](doc/commands/branch.md) - since 0.17
-* [init-branch](doc/commands/init-branch.md) - since v0.16 (prefer the [branch](doc/commands/branch.md) command)
 
 ### Other
 
@@ -132,9 +130,9 @@ This is the complete list of commands in the master branch on github.
 
 And depending of the version of TFS you use :
 
+* [Visual Studio 2013 SDK](http://www.microsoft.com/en-us/download/details.aspx?id=40758)
 * [Visual Studio 2012 SDK](http://www.microsoft.com/en-us/download/details.aspx?id=30668)
 * [Visual Studio 2010 SDK](http://www.microsoft.com/downloads/en/details.aspx?FamilyID=21307C23-F0FF-4EF2-A0A4-DCA54DDB1E21&displaylang=en)
-* [Visual Studio 2008 SDK](http://www.microsoft.com/download/en/details.aspx?id=21827)
 
 ### Get the source code and build
 
