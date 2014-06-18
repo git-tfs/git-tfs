@@ -22,7 +22,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             return x.Try("GitTfs.Vs2013", "Sep.Git.Tfs.Vs2013.TfsPlugin") ??
                    x.Try("GitTfs.Vs2012", "Sep.Git.Tfs.Vs2012.TfsPlugin") ??
                    x.Try("GitTfs.Vs2010", "Sep.Git.Tfs.Vs2010.TfsPlugin") ??
-                   x.Try("GitTfs.Vs2008", "Sep.Git.Tfs.Vs2008.TfsPlugin") ??
                    x.Fail();
         }
 

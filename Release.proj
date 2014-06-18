@@ -8,9 +8,8 @@
     <!-- The file that includes the AssemblyVersionAttribute. -->
     <VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
 
-    <!-- If we support VS2008, we need to build as x86. Otherwise, build for any platform. -->
-    <TargetPlatform>AnyCPU</TargetPlatform>
-    <TargetPlatform Condition="Exists('$(SolutionDir)/GitTfs.Vs2008/GitTfs.Vs2008.csproj')">x86</TargetPlatform>
+    <!-- git-tfs can run as 32-bit or 64-bit. -->
+    <TargetPlatform>Any CPU</TargetPlatform>
 
     <!-- Where git-tfs.exe and its dependencies are built. -->
     <BuildDir>$(SolutionDir)/GitTfs/bin/Release</BuildDir>

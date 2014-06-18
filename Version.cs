@@ -1,4 +1,4 @@
 partial class GitTfsProperties
 {
-public const string Version = "0.19.2";
+public const string Version = "0.20.0";
 }
