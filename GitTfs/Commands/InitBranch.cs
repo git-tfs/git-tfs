@@ -380,7 +380,7 @@ namespace Sep.Git.Tfs.Commands
                 if (fetchResult.IsSuccess && createBranch && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
                 {
                     Trace.WriteLine("Try creating the local branch...");
-                    var branchRef = "refs/heads/" + tfsRemote.Id;
+                    var branchRef = tfsRemote.Id.ToLocalGitRef();
                     if (!_globals.Repository.HasRef(branchRef))
                     {
                         if (!_globals.Repository.CreateBranch(branchRef, tfsRemote.MaxCommitHash))

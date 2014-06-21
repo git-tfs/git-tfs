@@ -51,5 +51,6 @@ namespace Sep.Git.Tfs.Core
         void ResetRemote(IGitTfsRemote remoteToReset, string target);
         string GetCurrentBranch();
         void GarbageCollect(bool auto = false, string additionalMessage = null);
+        bool Checkout(string commitish);
     }
 }
