@@ -612,15 +612,10 @@ namespace Sep.Git.Tfs.Core
 
         private ITfsChangeset GetLatestChangeset()
         {
-            if (!string.IsNullOrEmpty(this.TfsRepositoryPath))
-            {
+            if (!string.IsNullOrEmpty(TfsRepositoryPath))
                 return Tfs.GetLatestChangeset(this);
-            }
-            else
-            {
-                var changesetId = globals.Repository.GetSubtrees(this).Select(x => Tfs.GetLatestChangeset(x)).Max(x => x.Summary.ChangesetId);
-                return GetChangeset(changesetId);
-            }
+            var changesetId = globals.Repository.GetSubtrees(this).Select(x => Tfs.GetLatestChangeset(x)).Max(x => x.Summary.ChangesetId);
+            return GetChangeset(changesetId);
         }
 
         private int GetLatestChangesetId()
