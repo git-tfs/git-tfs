@@ -18,6 +18,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes);
         IIdentity GetIdentity(string username);
         ITfsChangeset GetLatestChangeset(IGitTfsRemote remote);
+        int GetLatestChangesetId(IGitTfsRemote remote);
         ITfsChangeset GetChangeset(int changesetId, IGitTfsRemote remote);
         IChangeset GetChangeset(int changesetId);
         bool HasShelveset(string shelvesetName);

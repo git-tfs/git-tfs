@@ -640,16 +640,26 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
         }
 
-        public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
+        public Changeset GetLatestChangeset(IGitTfsRemote remote, bool includeChanges)
         {
             var history = VersionControl.QueryHistory(remote.TfsRepositoryPath, VersionSpec.Latest, 0,
-                                                      RecursionType.Full, null, null, VersionSpec.Latest, 1, true, false,
+                                                      RecursionType.Full, null, null, VersionSpec.Latest, 1, includeChanges, false,
                                                       false).Cast<Changeset>().ToList();
 
             if (history.Empty())
                 throw new GitTfsException("error: remote TFS repository path was not found");
 
-            return BuildTfsChangeset(history.Single(), remote);
+            return history.Single();
+        }
+
+        public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
+        {
+            return BuildTfsChangeset(GetLatestChangeset(remote, true), remote);
+        }
+
+        public int GetLatestChangesetId(IGitTfsRemote remote)
+        {
+            return GetLatestChangeset(remote, false).ChangesetId;
         }
 
         public IChangeset GetChangeset(int changesetId)
