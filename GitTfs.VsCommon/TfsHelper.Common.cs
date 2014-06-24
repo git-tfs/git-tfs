@@ -114,10 +114,11 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _linking ?? (_linking = GetService<ILinking>()); }
         }
 
-        public virtual IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
+        public virtual IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1)
         {
-            var changesets = Retry.Do(() => VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue, true, true, true)
+            var lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec((int)lastVersion);
+            var changesets = Retry.Do(() => VersionControl.QueryHistory(path, lastChangeset, 0, RecursionType.Full,
+                null, new ChangesetVersionSpec((int)startVersion), lastChangeset, int.MaxValue, true, true, true)
                 .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray());
 
             // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 

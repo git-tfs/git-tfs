@@ -10,7 +10,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         string Url { get; set; }
         string Username { get; set; }
         string Password { get; set; }
-        IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote);
+        IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
         IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);
         IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction);
