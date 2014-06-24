@@ -40,15 +40,16 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public override IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote)
+        public override IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1)
         {
+            VersionSpec lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec((int)lastVersion);
             const int batchCount = 100;
             var start = (int)startVersion;
             Changeset[] changesets;
             do
             {
                 var startChangeset = new ChangesetVersionSpec(start);
-                changesets = Retry.Do(() => VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+                changesets = Retry.Do(() => VersionControl.QueryHistory(path, lastChangeset, 0, RecursionType.Full,
                     null, startChangeset, null, batchCount, true, true, true, true)
                     .Cast<Changeset>().ToArray());
                 if (changesets.Length > 0)
