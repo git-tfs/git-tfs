@@ -381,6 +381,16 @@ namespace Sep.Git.Tfs.Core
             else if (Repository.GetConfig(GitTfsConstants.IgnoreBranches) != true.ToString())
             {
                 var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
+                if (parentChangesetId < 1)  // Handle missing merge parent info
+                {
+                    if (stopOnFailMergeCommit)
+                    {
+                        return false;
+                    }
+                    stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
+                                     " is a merge changeset. But git-tfs is unable to determine the parent changeset.");
+                    return true;
+                }
                 var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
                 if (shaParent == null)
                 {
