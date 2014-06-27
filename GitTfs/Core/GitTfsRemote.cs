@@ -354,7 +354,7 @@ namespace Sep.Git.Tfs.Core
         private bool ProcessMergeChangeset(ITfsChangeset changeset, bool stopOnFailMergeCommit, ref string parentCommit)
         {
             var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
-            if (parentChangesetId == 0)
+            if (parentChangesetId < 1)  // Handle missing merge parent info
             {
                 if (stopOnFailMergeCommit)
                 {
