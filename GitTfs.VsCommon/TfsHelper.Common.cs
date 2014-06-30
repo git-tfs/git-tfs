@@ -133,6 +133,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var targetVersion = new ChangesetVersionSpec((int)targetChangeset);
             var mergeInfo = VersionControl.QueryMerges(null, null, path, targetVersion, targetVersion, targetVersion, RecursionType.Full);
+            if (mergeInfo.Length == 0) return -1;
             return mergeInfo.Max(x => x.SourceVersion);
         }
 
