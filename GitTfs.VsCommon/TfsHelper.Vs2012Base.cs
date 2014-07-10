@@ -14,7 +14,7 @@ using StructureMap;
 
 namespace Sep.Git.Tfs.VsCommon
 {
-    public abstract class TfsHelperVs2012Base : TfsHelperVs2010Base
+    public abstract class TfsHelperVs2012Base : TfsHelperBase
     {
         private readonly TfsApiBridge _bridge;
 

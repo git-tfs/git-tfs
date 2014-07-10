@@ -97,9 +97,6 @@
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Common.cs">
       <Link>TfsHelper.Common.cs</Link>
     </Compile>
-    <Compile Include="..\GitTfs.VsCommon\TfsHelper.PostVs2010.Common.cs">
-      <Link>TfsHelper.PostVs2010.Common.cs</Link>
-    </Compile>
     <Compile Include="..\GitTfs.VsCommon\Wrappers.cs">
       <Link>Wrappers.cs</Link>
     </Compile>
