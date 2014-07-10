@@ -11,7 +11,6 @@ namespace Sep.Git.Tfs.Vs2012
         }
 
         private string vsInstallDir;
-
         protected override string GetVsInstallDir()
         {
             if (vsInstallDir == null)

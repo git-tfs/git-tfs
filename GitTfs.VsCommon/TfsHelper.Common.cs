@@ -10,6 +10,7 @@ using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
+using Microsoft.Win32;
 using SEP.Extensions;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
@@ -34,7 +35,6 @@ namespace Sep.Git.Tfs.VsCommon
             _stdout = stdout;
             _bridge = bridge;
             _container = container;
-            _bridge = bridge;
             if (!_resolverInstalled)
             {
                 AppDomain.CurrentDomain.AssemblyResolve += LoadFromVsFolder;
@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.VsCommon
         [SetterProperty]
         public Janitor Janitor { get; set; }
 
-        public abstract string TfsClientLibraryVersion { get; }
+        public string TfsClientLibraryVersion { get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version + " (MS)"; } }
 
         public string Url { get; set; }
 
@@ -57,7 +57,38 @@ namespace Sep.Git.Tfs.VsCommon
             get { return !String.IsNullOrEmpty(Username); }
         }
 
-        public abstract void EnsureAuthenticated();
+        public void EnsureAuthenticated()
+        {
+            if (string.IsNullOrEmpty(Url))
+            {
+                _server = null;
+            }
+            else
+            {
+                Uri uri;
+                if (!Uri.IsWellFormedUriString(Url, UriKind.Absolute))
+                {
+                    // maybe it is not an Uri but instance name
+                    var servers = RegisteredTfsConnections.GetConfigurationServers();
+                    var registered = servers.FirstOrDefault(s => String.Compare(s.Name, Url, StringComparison.OrdinalIgnoreCase) == 0);
+                    if (registered == null)
+                        throw new GitTfsException("Given tfs name is not correct URI and not found as a registered TFS instance");
+                    uri = registered.Uri;
+                }
+                else
+                {
+                    uri = new Uri(Url);
+                }
+
+                // TODO: Use TfsTeamProjectCollection constructor that takes a TfsClientCredentials object
+                _server = HasCredentials ?
+                    new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
+                    new TfsTeamProjectCollection(uri, new UICredentialsProvider());
+
+                _server.EnsureAuthenticated();
+            }
+        }
+
 
         private string[] _legacyUrls;
 
@@ -73,7 +104,11 @@ namespace Sep.Git.Tfs.VsCommon
             return new NetworkCredential(Username, Password);
         }
 
-        protected abstract T GetService<T>();
+        protected T GetService<T>()
+        {
+            if (_server == null) EnsureAuthenticated();
+            return (T)_server.GetService(typeof(T));
+        }
 
         private VersionControlServer _versionControl;
         protected VersionControlServer VersionControl
@@ -687,7 +722,10 @@ namespace Sep.Git.Tfs.VsCommon
             return matchingShelvesets != null && matchingShelvesets.Length > 0;
         }
 
-        protected abstract string GetAuthenticatedUser();
+        protected string GetAuthenticatedUser()
+        {
+            return VersionControl.AuthorizedUser;
+        }
 
         public bool CanShowCheckinDialog { get { return true; } }
 
@@ -1169,6 +1207,60 @@ namespace Sep.Git.Tfs.VsCommon
             Trace.WriteLine("... loading " + args.Name + " from " + assemblyPath);
             Assembly assembly = Assembly.LoadFrom(assemblyPath);
             return assembly;
+        }
+
+        protected string TryGetUserRegString(string path, string name)
+        {
+            return TryGetRegString(Registry.CurrentUser, path, name);
+        }
+
+        protected string TryGetRegString(string path, string name)
+        {
+            return TryGetRegString(Registry.LocalMachine, path, name);
+        }
+
+        protected string TryGetRegString(RegistryKey registryKey, string path, string name)
+        {
+            try
+            {
+                Trace.WriteLine("Trying to get " + registryKey.Name + "\\" + path + "|" + name);
+                var key = registryKey.OpenSubKey(path);
+                if (key != null)
+                {
+                    return key.GetValue(name) as string;
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + "|" + name + ": " + e);
+            }
+            return null;
+        }
+    }
+
+    public class ItemDownloadStrategy : IItemDownloadStrategy
+    {
+        private readonly TfsApiBridge _bridge;
+
+        public ItemDownloadStrategy(TfsApiBridge bridge)
+        {
+            _bridge = bridge;
+        }
+
+        public TemporaryFile DownloadFile(IItem item)
+        {
+            var temp = new TemporaryFile();
+            try
+            {
+                _bridge.Unwrap<Item>(item).DownloadFile(temp);
+                return temp;
+            }
+            catch (Exception)
+            {
+                Trace.WriteLine(String.Format("Something went wrong downloading \"{0}\" in changeset {1}", item.ServerItem, item.ChangesetId));
+                temp.Dispose();
+                throw;
+            }
         }
     }
 }
