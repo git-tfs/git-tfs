@@ -585,7 +585,7 @@ namespace Sep.Git.Tfs.Core
         private IEnumerable<ITfsChangeset> FetchChangesets()
         {
             // TFS 2010 doesn't like when we ask for history past its last changeset.
-            if (MaxChangesetId == GetLatestChangeset().Summary.ChangesetId)
+            if (MaxChangesetId == GetLatestChangesetId())
                 return Enumerable.Empty<ITfsChangeset>();
             
             if(!IsSubtreeOwner)
@@ -603,15 +603,17 @@ namespace Sep.Git.Tfs.Core
 
         private ITfsChangeset GetLatestChangeset()
         {
-            if (!string.IsNullOrEmpty(this.TfsRepositoryPath))
-            {
+            if (!string.IsNullOrEmpty(TfsRepositoryPath))
                 return Tfs.GetLatestChangeset(this);
-            }
-            else
-            {
-                var changesetId = globals.Repository.GetSubtrees(this).Select(x => Tfs.GetLatestChangeset(x)).Max(x => x.Summary.ChangesetId);
-                return GetChangeset(changesetId);
-            }
+            var changesetId = globals.Repository.GetSubtrees(this).Select(x => Tfs.GetLatestChangeset(x)).Max(x => x.Summary.ChangesetId);
+            return GetChangeset(changesetId);
+        }
+
+        private int GetLatestChangesetId()
+        {
+            if (!string.IsNullOrEmpty(TfsRepositoryPath))
+                return Tfs.GetLatestChangesetId(this);
+            return globals.Repository.GetSubtrees(this).Select(x => Tfs.GetLatestChangesetId(x)).Max();
         }
 
         public void UpdateTfsHead(string commitHash, long changesetId)
