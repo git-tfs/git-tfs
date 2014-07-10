@@ -93,8 +93,8 @@ You should have done (to clone only the trunk) :
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Repository/ProjectTrunk
 
-Note : It is highly recommanded to clone the root branch ( the branch that has no parents, here $/Repository/ProjectTrunk ) to be able to init the other branches after.
-If you clone the branch $/Repository/ProjectBranch, you will never able to init the root branch $/Repository/ProjectTrunk after.
+Note : It is highly recommanded once having clone the root branch ( the branch that has no parents, here $/Repository/ProjectTrunk ) to init the other branches after.
+If you have cloned the branch $/Repository/ProjectBranch, you will never be able to init the root branch $/Repository/ProjectTrunk after.
 
 Then use `branch` like this :
 
@@ -105,6 +105,14 @@ Then use `branch` like this :
 ### Init a TFS branch with customised git branch name
 
     git tfs branch --init $/Repository/ProjectBranch myNewBranch
+
+### Merge changesets and branches
+
+Since version 0.20, when initializing and fetching a TFS branch, if git-tfs encounter a merge changeset, it initialize and fetch automaticaly the other branch merged.
+
+If you don't want to intialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--ignore-branches` to disable it!
+
+Note: To successfully process the merge changeset (and come from an older version than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right clic on a folder and choose `Branching and Merging` -> `Convert to Branch`.
 
 ### Init all the TFS branches
 

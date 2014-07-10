@@ -195,6 +195,11 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
+        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long shaRootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null)
+        {
+            throw new NotImplementedException();
+        }
+
         public string GetPathInGitRepo(string tfsPath)
         {
             throw DerivedRemoteException;

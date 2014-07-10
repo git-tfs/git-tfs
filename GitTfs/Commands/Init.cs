@@ -132,6 +132,11 @@ namespace Sep.Git.Tfs.Commands
     public static class Ext
     {
         static Regex ValidTfsPath = new Regex("^\\$/.+");
+        public static bool IsValidTfsPath(this string tfsPath)
+        {
+            return ValidTfsPath.IsMatch(tfsPath);
+        }
+
         public static void AssertValidTfsPath(this string tfsPath)
         {
             if (!ValidTfsPath.IsMatch(tfsPath))
@@ -159,5 +164,12 @@ namespace Sep.Git.Tfs.Commands
             return expectedRefName.Trim('/');
         }
 
+        public static string ToGitBranchNameFromTfsRepositoryPath(this string tfsRepositoryPath)
+        {
+            string gitBranchNameExpected = tfsRepositoryPath.IndexOf("$/") == 0
+                ? tfsRepositoryPath.Remove(0, tfsRepositoryPath.IndexOf('/', 2) + 1)
+                : tfsRepositoryPath;
+            return gitBranchNameExpected.ToGitRefName();
+        }
     }
 }

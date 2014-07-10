@@ -23,5 +23,10 @@ namespace Sep.Git.Tfs.Core
         /// Get if this changeset is a merge changeset
         /// </summary>
         bool IsMergeChangeset { get; }
+
+        /// <summary>
+        /// Get parent that not was fetched
+        /// </summary>
+        string OmittedParentBranch { get; set; }
     }
 }

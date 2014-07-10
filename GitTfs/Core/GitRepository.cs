@@ -127,6 +127,13 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public IEnumerable<string> GetGitRemoteBranches(string gitRemote)
+        {
+            gitRemote = gitRemote + "/";
+            var references = _repository.Branches.Where(b => b.IsRemote && b.Name.StartsWith(gitRemote) && !b.Name.EndsWith("/HEAD"));
+            return references.Select(r => r.Name);
+        }
+
         private IDictionary<string, IGitTfsRemote> GetTfsRemotes()
         {
             return _cachedRemotes ?? (_cachedRemotes = ReadTfsRemotes());
