@@ -20,7 +20,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals _globals;
         private readonly AuthorsFile _authors;
 
-        private bool Quick { get; set; }
+        private bool Old { get; set; }
         private bool AutoRebase { get; set; }
         private bool ForceCheckin { get; set; }
 
@@ -40,8 +40,10 @@ namespace Sep.Git.Tfs.Commands
             {
                 return new OptionSet
                     {
-                        { "q|no-rebase|quick", "Omit rebases (faster)\nNote: this can lead to problems if someone checks something in while the command is running.",
-                        v => Quick = v != null },
+                        { "q|no-rebase|quick", "'--quick' option is now deprecated because is became default one.",
+                            v => { if( v != null ) _stdout.WriteLine("[deprecated] '--quick' option is now the default and no more needed. It will be removed in the next version..."); }
+                        },
+                        {"old", "Use the old process to rcheckin (slower)", v => Old = v != null},
                         {"a|autorebase", "Continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
                         {"ignore-merge", "Force check in ignoring parent tfs branches in merge commits", v => ForceCheckin = v != null},
                     }.Merge(_checkinOptions.OptionSet);
@@ -88,7 +90,7 @@ namespace Sep.Git.Tfs.Commands
             parentChangeset.Remote.Fetch();
             if (parentChangeset.ChangesetId != parentChangeset.Remote.MaxChangesetId)
             {
-                if (Quick && AutoRebase)
+                if (!Old && AutoRebase)
                 {
                     _globals.Repository.CommandNoisy("rebase", "--preserve-merges", parentChangeset.Remote.RemoteRef);
                     parentChangeset = _globals.Repository.GetTfsCommit(parentChangeset.Remote.MaxCommitHash);
@@ -110,7 +112,7 @@ namespace Sep.Git.Tfs.Commands
             if (!String.IsNullOrWhiteSpace(_globals.Repository.CommandOneline("rev-list", tfsLatest, "^" + refToCheckin)))
                 throw new GitTfsException("error: latest TFS commit should be parent of commits being checked in");
 
-            return (Quick || _globals.Repository.IsBare) ? _PerformRCheckinQuick(parentChangeset, refToCheckin) : _PerformRCheckin(parentChangeset, refToCheckin);
+            return (!Old || _globals.Repository.IsBare) ? _PerformRCheckinQuick(parentChangeset, refToCheckin) : _PerformRCheckin(parentChangeset, refToCheckin);
         }
 
         private int _PerformRCheckinQuick(TfsChangesetInfo parentChangeset, string refToCheckin)
