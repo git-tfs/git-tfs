@@ -388,7 +388,7 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
-    public partial class WrapperForWorkspace : WrapperFor<Workspace>, IWorkspace
+    public class WrapperForWorkspace : WrapperFor<Workspace>, IWorkspace
     {
         private readonly TfsApiBridge _bridge;
         private readonly Workspace _workspace;
@@ -506,6 +506,49 @@ namespace Sep.Git.Tfs.VsCommon
                 conflict.Resolution = Resolution.AcceptYours;
                 _workspace.ResolveConflict(conflict);
             }
+        }
+
+        public int Checkin(IPendingChange[] changes, string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges,
+           TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
+        {
+            var checkinParameters = new WorkspaceCheckInParameters(_bridge.Unwrap<PendingChange>(changes), comment)
+            {
+                CheckinNotes = _bridge.Unwrap<CheckinNote>(checkinNote),
+                AssociatedWorkItems = _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges),
+                PolicyOverride = ToTfs(policyOverrideInfo),
+                OverrideGatedCheckIn = overrideGatedCheckIn
+            };
+
+            if (author != null)
+                checkinParameters.Author = author;
+
+            return _workspace.CheckIn(checkinParameters);
+        }
+    }
+
+    public class WrapperForBranchObject : WrapperFor<BranchObject>, IBranchObject
+    {
+        BranchObject _branch;
+
+        public WrapperForBranchObject(BranchObject branch)
+            : base(branch)
+        {
+            _branch = branch;
+        }
+
+        public string Path
+        {
+            get { return _branch.Properties.RootItem.Item; }
+        }
+
+        public bool IsRoot
+        {
+            get { return _branch.Properties.ParentBranch == null; }
+        }
+
+        public string ParentPath
+        {
+            get { return _branch.Properties.ParentBranch.Item; }
         }
     }
 }

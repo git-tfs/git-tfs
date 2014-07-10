@@ -60,9 +60,6 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\GitTfs.Vs2012\Wrappers.Vs2012.cs">
-      <Link>Wrappers.Vs2012.cs</Link>
-    </Compile>
     <Compile Include="..\GitTfs.VsCommon\ParentForm.cs">
       <Link>ParentForm.cs</Link>
       <SubType>Form</SubType>
@@ -75,9 +72,6 @@
     </Compile>
     <Compile Include="..\GitTfs.VsCommon\TfsPlugin.cs">
       <Link>TfsPlugin.cs</Link>
-    </Compile>
-    <Compile Include="..\GitTfs.VsCommon\Wrappers.PostVs2010.cs">
-      <Link>Wrappers.PostVs2010.cs</Link>
     </Compile>
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
