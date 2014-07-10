@@ -82,7 +82,7 @@ This is the complete list of commands in the master branch on github.
 
 ### Repository setup
 
-* [list-remote-branches](doc/commands/list-remote-branches.md) - since 0.17
+* [list-remote-branches](doc/commands/list-remote-branches.md) - since [0.17](/releases/tag/v0.17.0)
 * [clone](doc/commands/clone.md) - since 0.9
 * [quick-clone](doc/commands/quick-clone.md) - since 0.9
 * [bootstrap](doc/commands/bootstrap.md) - since [0.11][v0.11]
@@ -96,7 +96,7 @@ This is the complete list of commands in the master branch on github.
 * [quick-clone](doc/commands/quick-clone.md) - since 0.9
 * [unshelve](doc/commands/unshelve.md) - since [0.11][v0.12]
 * [shelve-list](doc/commands/shelve-list.md) - since [0.12][v0.12]
-* [labels](doc/commands/labels.md) - since v0.17
+* [labels](doc/commands/labels.md) - since [0.17](/releases/tag/v0.17.0)
 
 ### Push to TFS
 
@@ -107,8 +107,8 @@ This is the complete list of commands in the master branch on github.
 
 ### Manage TFS branches
 
-* [list-remote-branches](doc/commands/list-remote-branches.md) - since 0.17
-* [branch](doc/commands/branch.md) - since 0.17
+* [list-remote-branches](doc/commands/list-remote-branches.md) - since [0.17](/releases/tag/v0.17.0)
+* [branch](doc/commands/branch.md) - since [0.17](/releases/tag/v0.17.0)
 
 ### Other
 
@@ -119,8 +119,9 @@ This is the complete list of commands in the master branch on github.
 * [help](doc/commands/help.md) - since 0.9
 * [verify](doc/commands/verify.md) - since [0.11][v0.11]
 * [autotag](doc/commands/autotag.md) option - since [0.12][v0.12]
-* [subtree](doc/commands/subtree.md) - since 0.19
-* [reset-remote](doc/commands/reset-remote.md) - since 0.19
+* [subtree](doc/commands/subtree.md) - since [0.19](/releases/tag/v0.19.0)
+* [reset-remote](doc/commands/reset-remote.md) - since [0.19](/releases/tag/v0.19.0)
+* [checkout](doc/commands/checkout.md) - since [0.21](/releases/tag/v0.21.0)
 
 ## Building
 
