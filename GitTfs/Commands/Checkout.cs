@@ -29,11 +29,14 @@ namespace Sep.Git.Tfs.Commands
                 return new OptionSet
                 {
                     { "b|branch=", "Name of the branch to create", v => BranchName = v },
+                    { "n|dry-run", "Don't checkout the commit, just return commit sha", v => ReturnShaOnly = v != null },
                 };
             }
         }
 
+
         protected string BranchName { get; set; }
+        protected bool ReturnShaOnly { get; set; }
 
         public int Run(string id)
         {
@@ -43,6 +46,11 @@ namespace Sep.Git.Tfs.Commands
             var sha = _globals.Repository.FindCommitHashByChangesetId(changesetId);
             if (string.IsNullOrEmpty(sha))
                 throw new GitTfsException("error: commit not found for this changeset id...");
+            if (ReturnShaOnly)
+            {
+                _stdout.Write(sha);
+                return GitTfsExitCodes.OK;
+            }
             string commitishToCheckout = sha;
             if (!string.IsNullOrEmpty(BranchName))
             {
