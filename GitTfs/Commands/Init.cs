@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -171,5 +171,11 @@ namespace Sep.Git.Tfs.Commands
                 : tfsRepositoryPath;
             return gitBranchNameExpected.ToGitRefName();
         }
+
+        public static string ToLocalGitRef(this string refName)
+        {
+            return "refs/heads/" + refName;
+        }
+
     }
 }

@@ -619,5 +619,18 @@ namespace Sep.Git.Tfs.Core
                 realStdout.WriteLine("Warning: `git gc` failed! " + additionalMessage);
             }
         }
+
+        public bool Checkout(string commitish)
+        {
+            try
+            {
+                _repository.Checkout(commitish);
+                return true;
+            }
+            catch (MergeConflictException ex)
+            {
+                return false;
+            }
+        }
     }
 }
