@@ -297,7 +297,7 @@ namespace Sep.Git.Tfs.VsCommon
                     //if that succeeds, break out of the retry loop
                     break;
                 }
-                catch (MappingConflictException ex)
+                catch (Exception ex)
                 {
                     Trace.WriteLine(string.Format("GetWorkspace threw {0} exception: {1}", ex.GetType().ToString(), ex.Message));
                     try
