@@ -309,48 +309,53 @@ namespace Sep.Git.Tfs.Core
 
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, params string[] parentCommitsHashes)
         {
-            var fetchResult = new FetchResult { IsSuccess = true };
-            var fetchedChangesets = FetchChangesets(lastChangesetIdToFetch);
-            int count = 0;
-            var objects = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
-            Trace.WriteLine(RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to " + (lastChangesetIdToFetch != -1 ? lastChangesetIdToFetch.ToString() : "current") + " ...", "info");
-            foreach (var changeset in fetchedChangesets)
+            var fetchResult = new FetchResult { IsSuccess = true, NewChangesetCount = 0 };
+            var latestChangesetId = GetLatestChangesetId();
+            if (lastChangesetIdToFetch != -1)
+                latestChangesetId = Math.Min(latestChangesetId, lastChangesetIdToFetch);
+            // TFS 2010 doesn't like when we ask for history past its last changeset.
+            if (MaxChangesetId >= latestChangesetId)
+                return fetchResult;
+            List<ITfsChangeset> fetchedChangesets;
+            do
             {
-                count++;
-                if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
-                {
-                    fetchResult.NewChangesetCount = count;
-                    fetchResult.LastFetchedChangesetId = MaxChangesetId;
+                fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch).ToList();
+                if(!fetchedChangesets.Any())
                     return fetchResult;
-                }
-                string parentCommitSha = null;
-                if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
+
+                var objects = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
+                Trace.WriteLine(
+                    RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to " + latestChangesetId + " ...", "info");
+                foreach (var changeset in fetchedChangesets)
                 {
-                    fetchResult.IsSuccess = false;
-                    fetchResult.NewChangesetCount = count;
-                    fetchResult.LastFetchedChangesetId = MaxChangesetId;
-                    return fetchResult;
-                }
-                var log = Apply(MaxCommitHash, changeset, objects);
-                if (parentCommitSha != null)
-                    log.CommitParents.Add(parentCommitSha);
-                if (changeset.Summary.ChangesetId == mergeChangesetId)
-                {
-                    foreach (var parent in parentCommitsHashes)
+                    fetchResult.NewChangesetCount++;
+                    if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
+                        return fetchResult;
+                    string parentCommitSha = null;
+                    if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                     {
-                        log.CommitParents.Add(parent);
+                        fetchResult.IsSuccess = false;
+                        return fetchResult;
                     }
+                    var log = Apply(MaxCommitHash, changeset, objects);
+                    if (parentCommitSha != null)
+                        log.CommitParents.Add(parentCommitSha);
+                    if (changeset.Summary.ChangesetId == mergeChangesetId)
+                    {
+                        foreach (var parent in parentCommitsHashes)
+                            log.CommitParents.Add(parent);
+                    }
+                    var commitSha = ProcessChangeset(changeset, log);
+                    fetchResult.LastFetchedChangesetId = changeset.Summary.ChangesetId;
+                    // set commit sha for added git objects
+                    foreach (var commit in objects)
+                    {
+                        if (commit.Value.Commit == null)
+                            commit.Value.Commit = commitSha;
+                    }
+                    DoGcIfNeeded();
                 }
-                var commitSha = ProcessChangeset(changeset, log);
-                // set commit sha for added git objects
-                foreach (var commit in objects)
-                {
-                    if (commit.Value.Commit == null)
-                        commit.Value.Commit = commitSha;
-                }
-                DoGcIfNeeded();
-            }
-            fetchResult.NewChangesetCount = count;
+            } while (fetchedChangesets.Any() && latestChangesetId > fetchResult.LastFetchedChangesetId);
             return fetchResult;
         }
 
@@ -582,20 +587,13 @@ namespace Sep.Git.Tfs.Core
             DoGcIfNeeded();
         }
 
-        private IEnumerable<ITfsChangeset> FetchChangesets(long lastVersion = -1)
+        private IEnumerable<ITfsChangeset> FetchChangesets(bool byLots, long lastVersion = -1)
         {
-            long latestChangesetId = GetLatestChangesetId();
-            if (lastVersion != -1)
-                latestChangesetId = Math.Min(latestChangesetId, lastVersion);
-            // TFS 2010 doesn't like when we ask for history past its last changeset.
-            if (MaxChangesetId >= latestChangesetId)
-                return Enumerable.Empty<ITfsChangeset>();
-            
             if(!IsSubtreeOwner)
-                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this, lastVersion);
+                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this, lastVersion, byLots);
 
             return globals.Repository.GetSubtrees(this)
-                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, x, lastVersion))
+                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, x, lastVersion, byLots))
                 .OrderBy(x => x.Summary.ChangesetId);
         }
 
