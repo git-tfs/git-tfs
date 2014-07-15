@@ -86,6 +86,19 @@ namespace Sep.Git.Tfs.Core
             return entry == null ? null : entry.Value;
         }
 
+        public T GetConfig<T>(string key)
+        {
+            try
+            {
+                var entry = _repository.Config.Get<T>(key);
+                return entry.Value;
+            }
+            catch (Exception)
+            {
+                return default(T);
+            }
+        }
+
         public void SetConfig(string key, string value)
         {
             _repository.Config.Set<string>(key, value, ConfigurationLevel.Local);

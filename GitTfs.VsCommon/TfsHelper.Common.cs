@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -159,6 +159,22 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _linking ?? (_linking = GetService<ILinking>()); }
         }
 
+        public const int DefaultBatchSize = 100;
+        private int _batchCount = DefaultBatchSize;
+        public int BatchCount
+        {
+            get { return _batchCount; }
+            set
+            {
+                if (value < 0)
+                    _batchCount = Int32.MaxValue;
+                else if (value > 0)
+                    _batchCount = value;
+                else
+                    _batchCount = DefaultBatchSize;
+            }
+        }
+
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
         {
             if (Is2008OrOlder)
@@ -168,7 +184,6 @@ namespace Sep.Git.Tfs.VsCommon
                 yield break;
             }
 
-            const int batchCount = 100;
             var start = (int)startVersion;
             Changeset[] changesets;
             var lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec((int)lastVersion);
@@ -176,7 +191,7 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 var startChangeset = new ChangesetVersionSpec(start);
                 changesets = Retry.Do(() => VersionControl.QueryHistory(path, lastChangeset, 0, RecursionType.Full,
-                    null, startChangeset, lastChangeset, batchCount, true, true, true, true)
+                    null, startChangeset, lastChangeset, BatchCount, true, true, true, true)
                     .Cast<Changeset>().ToArray());
                 if (changesets.Length > 0)
                     start = changesets[changesets.Length - 1].ChangesetId + 1;
@@ -188,7 +203,7 @@ namespace Sep.Git.Tfs.VsCommon
                     yield return BuildTfsChangeset(changesets[i], remote);
                     changesets[i] = null;
                 }
-            } while (!byLots && changesets.Length == batchCount);
+            } while (!byLots && changesets.Length == BatchCount);
         }
 
         public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, long startVersion, IGitTfsRemote remote)

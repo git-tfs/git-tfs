@@ -39,6 +39,15 @@ namespace Sep.Git.Tfs.Commands
         bool ExportMetadatas { get; set; }
         string ExportMetadatasFile { get; set; }
         public bool IgnoreBranches { get; set; }
+        private int _batchSize;
+        public string BatchSize
+        {
+            set
+            {
+                if (!int.TryParse(value, out _batchSize))
+                    throw new GitTfsException("error: batch size parameter should be an integer.");
+            }
+        }
 
         public virtual OptionSet OptionSet
         {
@@ -62,6 +71,8 @@ namespace Sep.Git.Tfs.Commands
                         v => ExportMetadatasFile = v },
                     { "ignore-branches", "Ignore fetching merged branches when encounter merge changesets",
                         v => IgnoreBranches = v != null },
+                    { "batch-size=", "Size of a the batch of tfs changesets fetched (-1 for all in one batch)",
+                        v => BatchSize = v },
                 }.Merge(remoteOptions.OptionSet);
             }
         }
@@ -85,6 +96,9 @@ namespace Sep.Git.Tfs.Commands
         {
             if (!FetchAll && IgnoreBranches)
                 globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true.ToString());
+
+            if (_batchSize != 0)
+                globals.Repository.SetConfig(GitTfsConstants.BatchSize, _batchSize.ToString());
 
             foreach (var remote in GetRemotesToFetch(args))
             {

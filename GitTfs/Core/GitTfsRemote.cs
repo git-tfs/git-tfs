@@ -317,6 +317,9 @@ namespace Sep.Git.Tfs.Core
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
             List<ITfsChangeset> fetchedChangesets;
+            var batchCount = Repository.GetConfig<int>(GitTfsConstants.BatchSize);
+            if(batchCount != 0)
+                Tfs.BatchCount = batchCount;
             do
             {
                 fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch).ToList();

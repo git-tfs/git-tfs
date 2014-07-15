@@ -42,6 +42,7 @@ namespace Sep.Git.Tfs.VsFake
         public string Url { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public int BatchCount { get { return int.MaxValue; } set{ } }
 
         public void EnsureAuthenticated() {}
 
