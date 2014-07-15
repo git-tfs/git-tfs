@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public override IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1)
+        public override IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
         {
             VersionSpec lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec((int)lastVersion);
             const int batchCount = 100;
@@ -62,7 +62,7 @@ namespace Sep.Git.Tfs.VsCommon
                     yield return BuildTfsChangeset(changesets[i], remote);
                     changesets[i] = null;
                 }
-            } while (changesets.Length == batchCount);
+            } while (!byLots && changesets.Length == batchCount);
         }
 
         public override IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
