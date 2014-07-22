@@ -41,9 +41,9 @@ namespace Sep.Git.Tfs.Core
                 new Signature(logEntry.AuthorName, logEntry.AuthorEmail, logEntry.Date.ToUniversalTime()),
                 new Signature(logEntry.CommitterName, logEntry.CommitterEmail, logEntry.Date.ToUniversalTime()),
                 logEntry.Log,
-                false,
                 logEntry.Tree,
-                parents);
+                parents,
+                false);
             changesetsCache[logEntry.ChangesetId] = commit.Sha;
             return new GitCommit(commit);
         }
