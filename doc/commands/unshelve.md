@@ -1,19 +1,22 @@
 ## Summary
 Unshelves a TFS shelveset into a new Git branch.
 
-    Usage: git-tfs unshelve -u <shelve-owner-name> <shelve-name> <git-branch-name>
+    Usage: git-tfs unshelve [options] shelve-name destination-branch
       -h, -H, --help
       -V, --version
       -d, --debug                Show debug output about everything git-tfs does
       -i, --tfs-remote, --remote, --id=VALUE
                                  The remote ID of the TFS to interact with
                                    default: default
+      -A, --authors=VALUE        Path to an Authors file to map TFS users to Git
+                                   users (will be kept in cache and used for all
+                                   the following commands)
       -u, --user=VALUE           Shelveset owner (default: current user)
                                    Use 'all' to search all shelvesets.
-      -b, --branch=VALUE         Git branch to branch from (default: TFS default branch)
-                                   Used to work with TFS Branches in the Git
-                                   repository.  Shelfset becomes a branch of
-                                   the virtual TFS branch in GIT.
+      -b, --branch=VALUE         Git Branch to apply Shelveset to? (default: TFS
+                                   current remote)
+          --force                Get as much of the Shelveset as possible, and
+                                   log any other errors
 
 ## Examples
 
