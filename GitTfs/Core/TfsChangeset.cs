@@ -26,7 +26,7 @@ namespace Sep.Git.Tfs.Core
             BaseChangesetId = _changeset.Changes.Max(c => c.Item.ChangesetId) - 1;
         }
 
-        public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree, Action<Exception> ignorableErrorHandler)
         {
             if (initialTree.Empty())
                 Summary.Remote.Repository.GetObjects(lastCommit, initialTree);
@@ -35,7 +35,9 @@ namespace Sep.Git.Tfs.Core
             _changeset.Get(workspace, sieve.GetChangesToFetch());
             foreach (var change in sieve.GetChangesToApply())
             {
-                Apply(change, treeBuilder, workspace, initialTree);
+                ignorableErrorHandler.Catch(() => {
+                    Apply(change, treeBuilder, workspace, initialTree);
+                });
             }
             return MakeNewLogEntry();
         }

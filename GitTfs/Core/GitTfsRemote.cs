@@ -337,7 +337,7 @@ namespace Sep.Git.Tfs.Core
                         fetchResult.IsSuccess = false;
                         return fetchResult;
                     }
-                    var log = Apply(MaxCommitHash, changeset, objects);
+                    var log = Apply(MaxCommitHash, changeset, objects, null);
                     if (parentCommitSha != null)
                         log.CommitParents.Add(parentCommitSha);
                     if (changeset.Summary.ChangesetId == mergeChangesetId)
@@ -562,9 +562,9 @@ namespace Sep.Git.Tfs.Core
             return remote;
         }
 
-        private string CommitChangeset(ITfsChangeset changeset, string parent)
+        private string CommitChangeset(ITfsChangeset changeset, string parent, Action<Exception> ignorableErrorHandler)
         {
-            var log = Apply(parent, changeset);
+            var log = Apply(parent, changeset, ignorableErrorHandler);
             return Commit(log);
         }
 
@@ -652,23 +652,23 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private LogEntry Apply(string parent, ITfsChangeset changeset, IDictionary<string, GitObject> entries)
+        private LogEntry Apply(string parent, ITfsChangeset changeset, IDictionary<string, GitObject> entries, Action<Exception> ignorableErrorHandler)
         {
             LogEntry result = null;
             WithWorkspace(changeset.Summary, workspace =>
             {
                 var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(parent);
-                result = changeset.Apply(parent, treeBuilder, workspace, entries);
+                result = changeset.Apply(parent, treeBuilder, workspace, entries, ignorableErrorHandler);
                 result.Tree = treeBuilder.GetTree();
             });
             if (!String.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);
             return result;
         }
 
-        private LogEntry Apply(string parent, ITfsChangeset changeset)
+        private LogEntry Apply(string parent, ITfsChangeset changeset, Action<Exception> ignorableErrorHandler)
         {
             IDictionary<string, GitObject> entries = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
-            return Apply(parent, changeset, entries);
+            return Apply(parent, changeset, entries, ignorableErrorHandler);
         }
 
         private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)
@@ -698,7 +698,7 @@ namespace Sep.Git.Tfs.Core
             return builder.ToString();
         }
 
-        public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch)
+        public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler)
         {
             var destinationRef = GitRepository.ShortToLocalName(destinationBranch);
             if(Repository.HasRef(destinationRef))
@@ -712,7 +712,7 @@ namespace Sep.Git.Tfs.Core
                 throw new GitTfsException("ERROR: Parent changeset C" + parentId  + " not found."
                                          +" Try fetching the latest changes from TFS");
 
-            var commit = CommitChangeset(shelvesetChangeset, ch.GitCommit);
+            var commit = CommitChangeset(shelvesetChangeset, ch.GitCommit, ignorableErrorHandler);
             Repository.UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
         }
 

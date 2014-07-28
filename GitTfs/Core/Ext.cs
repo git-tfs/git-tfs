@@ -146,5 +146,27 @@ namespace Sep.Git.Tfs.Core
         {
             return list.Any(listMember => listMember.IndexOf(toCheck, comp) >= 0);
         }
+
+        /// <summary>
+        /// Optionally handle exceptions with "this" action. If there isn't a handler, don't catch exceptions.
+        /// </summary>
+        public static void Catch<TException>(this Action<TException> handler, Action work) where TException : Exception
+        {
+            if (handler == null)
+            {
+                work();
+            }
+            else
+            {
+                try
+                {
+                    work();
+                }
+                catch (TException e)
+                {
+                    handler(e);
+                }
+            }
+        }
     }
 }

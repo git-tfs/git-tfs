@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -6,7 +7,7 @@ namespace Sep.Git.Tfs.Core
     {
         TfsChangesetInfo Summary { get; }
         int BaseChangesetId { get; }
-        LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree);
+        LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree, Action<Exception> ignorableErrorHandler);
         LogEntry CopyTree(IGitTreeModifier treeBuilder, ITfsWorkspace workspace);
 
         /// <summary>
