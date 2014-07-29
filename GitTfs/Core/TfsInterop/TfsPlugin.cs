@@ -16,12 +16,12 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             if (explicitVersion == "11") explicitVersion = "2012"; // GitTfs.Vs2012 was formerly called GitTfs.Vs11
             if(!String.IsNullOrEmpty(explicitVersion))
             {
-                return x.Try("GitTfs.Vs" + explicitVersion, "Sep.Git.Tfs.VsCommon.TfsPlugin") ??
+                return x.Try("GitTfs.Vs" + explicitVersion, "Sep.Git.Tfs.TfsPlugin") ??
                        x.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");
             }
-            return x.Try("GitTfs.Vs2013", "Sep.Git.Tfs.VsCommon.TfsPlugin") ??
-                   x.Try("GitTfs.Vs2012", "Sep.Git.Tfs.VsCommon.TfsPlugin") ??
-                   x.Try("GitTfs.Vs2010", "Sep.Git.Tfs.VsCommon.TfsPlugin") ??
+            return x.Try("GitTfs.Vs2013", "Sep.Git.Tfs.TfsPlugin") ??
+                   x.Try("GitTfs.Vs2012", "Sep.Git.Tfs.TfsPlugin") ??
+                   x.Try("GitTfs.Vs2010", "Sep.Git.Tfs.TfsPlugin") ??
                    x.Fail();
         }
 

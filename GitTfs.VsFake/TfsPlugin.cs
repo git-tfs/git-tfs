@@ -3,7 +3,7 @@ using System.IO;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.VsFake;
 
-namespace Sep.Git.Tfs.VsCommon
+namespace Sep.Git.Tfs
 {
     class TfsPlugin : Sep.Git.Tfs.Core.TfsInterop.TfsPlugin
     {

@@ -1,4 +1,4 @@
-﻿namespace Sep.Git.Tfs.VsCommon
+﻿namespace Sep.Git.Tfs
 {
     class TfsPlugin : Sep.Git.Tfs.Core.TfsInterop.TfsPlugin
     {
