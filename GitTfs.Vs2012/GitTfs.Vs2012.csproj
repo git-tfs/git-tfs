@@ -68,8 +68,8 @@
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Vs2012Base.cs">
       <Link>TfsHelper.Vs2012Base.cs</Link>
     </Compile>
-    <Compile Include="..\GitTfs.VsCommon\Wrappers.PostVs2010.cs">
-      <Link>Wrappers.PostVs2010.cs</Link>
+    <Compile Include="..\GitTfs.VsCommon\TfsPlugin.cs">
+      <Link>TfsPlugin.cs</Link>
     </Compile>
     <Compile Include="..\Version.cs">
       <Link>Properties\Version.cs</Link>
@@ -77,16 +77,11 @@
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Common.cs">
       <Link>TfsHelper.Common.cs</Link>
     </Compile>
-    <Compile Include="..\GitTfs.VsCommon\TfsHelper.PostVs2010.Common.cs">
-      <Link>TfsHelper.PostVs2010.Common.cs</Link>
-    </Compile>
     <Compile Include="..\GitTfs.VsCommon\Wrappers.cs">
       <Link>Wrappers.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TfsHelper.Vs2012.cs" />
-    <Compile Include="TfsPlugin.cs" />
-    <Compile Include="Wrappers.Vs2012.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GitTfs\GitTfs.csproj">
