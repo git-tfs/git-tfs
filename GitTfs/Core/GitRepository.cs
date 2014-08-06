@@ -53,7 +53,7 @@ namespace Sep.Git.Tfs.Core
             if (message == null)
                 _repository.Refs.Add(gitRefName, shaCommit, allowOverwrite: true);
             else
-                _repository.Refs.Add(gitRefName, shaCommit, new Signature("git-tfs", "git-tfs@git-tfs.com", DateTime.Now), message, true);
+                _repository.Refs.Add(gitRefName, shaCommit, _repository.Config.BuildSignature(DateTime.Now), message, true);
         }
 
         public static string ShortToLocalName(string branchName)
