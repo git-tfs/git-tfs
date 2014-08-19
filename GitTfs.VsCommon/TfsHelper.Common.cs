@@ -427,11 +427,13 @@ namespace Sep.Git.Tfs.VsCommon
             if (merge.SourceChangeType.HasFlag(ChangeType.Branch)
                 || merge.SourceChangeType.HasFlag(ChangeType.Merge)
                 || merge.SourceChangeType.HasFlag(ChangeType.Add)
-                || merge.SourceChangeType.HasFlag(ChangeType.Rollback))
+                || merge.SourceChangeType.HasFlag(ChangeType.Rollback)
+                || merge.SourceChangeType.HasFlag(ChangeType.Delete))
             {
                 Trace.WriteLine("Found C" + merge.SourceChangeset + " on branch " + merge.SourceItem);
                 return merge.SourceChangeset;
             }
+
             throw new GitTfsException(
                 "Don't know (yet) how to find the root changeset for an ExtendedMerge of type " +
                 merge.SourceChangeType,
