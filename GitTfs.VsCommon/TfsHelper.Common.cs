@@ -7,6 +7,8 @@ using System.Net;
 using System.Reflection;
 using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Client;
+using Microsoft.TeamFoundation.Framework.Client;
+using Microsoft.TeamFoundation.Framework.Common;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -19,6 +21,7 @@ using Sep.Git.Tfs.Util;
 using StructureMap;
 using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
+using IdentityNotFoundException = Microsoft.TeamFoundation.VersionControl.Client.IdentityNotFoundException;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -85,18 +88,29 @@ namespace Sep.Git.Tfs.VsCommon
                     uri = new Uri(Url);
                 }
 
-                // TODO: Use TfsTeamProjectCollection constructor that takes a TfsClientCredentials object
+#if VS2010
                 _server = HasCredentials ?
                     new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
                     new TfsTeamProjectCollection(uri, new UICredentialsProvider());
+#else
+                _server = new TfsTeamProjectCollection(uri, GetTfsCredential());
+#endif
 
                 _server.EnsureAuthenticated();
             }
         }
 
-
+#if !VS2010
+        protected TfsClientCredentials GetTfsCredential()
+        {
+            var basicAuthCredential = new BasicAuthCredential(GetCredential());
+            return new TfsClientCredentials(basicAuthCredential) {AllowInteractive = !HasCredentials};
+        }
+#endif
         protected NetworkCredential GetCredential()
         {
+            if (!HasCredentials)
+                return new NetworkCredential();
             var idx = Username.IndexOf('\\');
             if (idx >= 0)
             {
@@ -151,10 +165,17 @@ namespace Sep.Git.Tfs.VsCommon
             Trace.WriteLine("get [C" + e.Version + "]" + e.ServerItem);
         }
 
+#if VS2010
         private IGroupSecurityService GroupSecurityService
         {
             get { return GetService<IGroupSecurityService>(); }
         }
+#else
+        private IIdentityManagementService GroupSecurityService
+        {
+            get { return GetService<IIdentityManagementService>(); }
+        }
+#endif
 
         private ILinking _linking;
         private ILinking Linking
@@ -1059,7 +1080,11 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IIdentity GetIdentity(string username)
         {
+#if VS2010
             return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
+#else
+            return _bridge.Wrap<WrapperForIdentity, TeamFoundationIdentity>(Retry.Do(() => GroupSecurityService.ReadIdentity(IdentitySearchFactor.AccountName, username, MembershipQuery.None, ReadIdentityOptions.None)));
+#endif
         }
 
         public Changeset GetLatestChangeset(IGitTfsRemote remote, bool includeChanges)
