@@ -161,6 +161,12 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
         {
+            if (!CanGetBranchInformation)
+            {
+                foreach (var changeset in GetChangesetsForTfs2008(path, startVersion, remote))
+                    yield return changeset;
+            }
+
             const int batchCount = 100;
             var start = (int)startVersion;
             Changeset[] changesets;
@@ -182,6 +188,21 @@ namespace Sep.Git.Tfs.VsCommon
                     changesets[i] = null;
                 }
             } while (!byLots && changesets.Length == batchCount);
+        }
+
+        public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, long startVersion, IGitTfsRemote remote)
+        {
+            var changesets = Retry.Do(() => VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+                                                                        null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue,
+                                                                        true, true, true)
+                                                          .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray());
+            // don't take the enumerator produced by a foreach statement or a yield statement, as there are references
+            // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
+            for (int i = 0; i < changesets.Length; i++)
+            {
+                yield return BuildTfsChangeset(changesets[i], remote);
+                changesets[i] = null;
+            }
         }
 
         public virtual int FindMergeChangesetParent(string path, long targetChangeset, GitTfsRemote remote)
