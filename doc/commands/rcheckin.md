@@ -99,8 +99,6 @@ to find the appropriate branch to rcheckin.
 
 ### Rcheckin commits of other users
 
-_(feature in the source tree, not yet released)_
-
 You could check in commits of other users in TFS. To be able to do that, you must specify the path toward an author file with the option `--authors` which permit to match TFS users to git users. See [clone](clone.md) command for more informations about the format.
 
     git tfs rcheckin --authors="c:\path\to\authors.txt"
