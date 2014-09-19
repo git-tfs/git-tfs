@@ -24,15 +24,18 @@ namespace Sep.Git.Tfs.VsCommon
 {
     public abstract class TfsHelperBase : ITfsHelper
     {
-        protected readonly TextWriter _stdout;
+        private readonly Object _thisLock = new Object();
+        protected readonly TextWriter Stdout;
         private readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
-        protected TfsTeamProjectCollection _server;
+        protected TfsTeamProjectCollection Server;
         private static bool _resolverInstalled;
+
+        readonly Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
         public TfsHelperBase(TextWriter stdout, TfsApiBridge bridge, IContainer container)
         {
-            _stdout = stdout;
+            Stdout = stdout;
             _bridge = bridge;
             _container = container;
             if (!_resolverInstalled)
@@ -61,7 +64,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             if (string.IsNullOrEmpty(Url))
             {
-                _server = null;
+                Server = null;
             }
             else
             {
@@ -81,16 +84,13 @@ namespace Sep.Git.Tfs.VsCommon
                 }
 
                 // TODO: Use TfsTeamProjectCollection constructor that takes a TfsClientCredentials object
-                _server = HasCredentials ?
+                Server = HasCredentials ?
                     new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
                     new TfsTeamProjectCollection(uri, new UICredentialsProvider());
 
-                _server.EnsureAuthenticated();
+                Server.EnsureAuthenticated();
             }
         }
-
-
-        private string[] _legacyUrls;
 
         protected NetworkCredential GetCredential()
         {
@@ -106,8 +106,9 @@ namespace Sep.Git.Tfs.VsCommon
 
         protected T GetService<T>()
         {
-            if (_server == null) EnsureAuthenticated();
-            return (T)_server.GetService(typeof(T));
+            if (Server == null) EnsureAuthenticated();
+            if (Server != null) return (T)Server.GetService(typeof(T));
+            return default(T);
         }
 
         private VersionControlServer _versionControl;
@@ -131,16 +132,16 @@ namespace Sep.Git.Tfs.VsCommon
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
-           if (e.Failure != null)
-           {
-              _stdout.WriteLine(e.Failure.Message);
-              Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
-           }
-           if (e.Exception != null)
-           {
-              _stdout.WriteLine(e.Exception.Message);
-              Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
-           }
+            if (e.Failure != null)
+            {
+                Stdout.WriteLine(e.Failure.Message);
+                Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
+            }
+            if (e.Exception != null)
+            {
+                Stdout.WriteLine(e.Exception.Message);
+                Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+            }
         }
 
         private void Getting(object sender, GettingEventArgs e)
@@ -195,7 +196,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             get
             {
-                var is2008OrOlder = (_server.ConfigurationServer == null);
+                var is2008OrOlder = (Server.ConfigurationServer == null);
                 return !is2008OrOlder;
             }
         }
@@ -301,7 +302,7 @@ namespace Sep.Git.Tfs.VsCommon
         public IList<RootBranch> GetRootChangesetForBranchForTfs2008(string tfsPathBranchToCreate, int lastChangesetIdToCheck = -1, string tfsPathParentBranch = null)
         {
             Trace.WriteLine("TFS 2008 Compatible mode!");
-            int firstChangesetIdOfParentBranch = 1;
+            const int firstChangesetIdOfParentBranch = 1;
 
             if (string.IsNullOrWhiteSpace(tfsPathParentBranch))
                 throw new GitTfsException("This version of TFS Server doesn't permit to use this command :(\nTry using option '--parent-branch'...");
@@ -323,7 +324,7 @@ namespace Sep.Git.Tfs.VsCommon
             Trace.WriteLine("First changeset in the main branch after branching : " + changesetIdsFirstChangesetInMainBranch);
 
             Trace.WriteLine("Try to find the previous changeset...");
-            int step = 100;
+            const int step = 100;
             int upperBound = changesetIdsFirstChangesetInMainBranch - 1;
             int lowerBound = Math.Max(upperBound - step, 1);
             //for optimization, retrieve the lesser possible changesets... so 100 by 100
@@ -334,16 +335,15 @@ namespace Sep.Git.Tfs.VsCommon
                                 null, new ChangesetVersionSpec(lowerBound), new ChangesetVersionSpec(upperBound), int.MaxValue, false,
                                 false, false).Cast<Changeset>().Select(c => c.ChangesetId).ToList();
                 if (firstBranchChangesetIds.Count != 0)
-                    return new List<RootBranch> { new RootBranch(firstBranchChangesetIds.First(cId => cId < changesetIdsFirstChangesetInMainBranch), tfsPathBranchToCreate) };
-                else
                 {
-                    if (upperBound == 1)
-                    {
-                        throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find a previous changeset to changeset n�" + changesetIdsFirstChangesetInMainBranch + " in the branch!!!");
-                    }
-                    upperBound = Math.Max(upperBound - step, 1);
-                    lowerBound = Math.Max(upperBound - step, 1);
+                    return new List<RootBranch> { new RootBranch(firstBranchChangesetIds.First(cId => cId < changesetIdsFirstChangesetInMainBranch), tfsPathBranchToCreate) };
                 }
+                if (upperBound == 1)
+                {
+                    throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find a previous changeset to changeset n�" + changesetIdsFirstChangesetInMainBranch + " in the branch!!!");
+                }
+                upperBound = Math.Max(upperBound - step, 1);
+                lowerBound = Math.Max(upperBound - step, 1);
             }
         }
 
@@ -395,7 +395,7 @@ namespace Sep.Git.Tfs.VsCommon
                 }
                 if (merge == null)
                 {
-                    _stdout.WriteLine("warning: git-tfs was unable to find the root changeset (ie the last common commit) between the branch '"
+                    Stdout.WriteLine("warning: git-tfs was unable to find the root changeset (ie the last common commit) between the branch '"
                                       + tfsPathBranchToCreate + "' and its parent branch '" + tfsPathParentBranch + "'.\n"
                                       + "(Any help to add support of this special case is welcomed! Open an issue on https://github.com/git-tfs/git-tfs/issue )\n\n"
                                       + "To be able to continue to fetch the changesets from Tfs,\nplease enter the root changeset id between the branch '"
@@ -453,13 +453,13 @@ namespace Sep.Git.Tfs.VsCommon
 
         private int AskForRootChangesetId()
         {
-            int changesetId;
             while (true)
             {
-                _stdout.Write("Please specify the root changeset id (or 'exit' to stop the process):");
+                Stdout.Write("Please specify the root changeset id (or 'exit' to stop the process):");
                 var read = Console.ReadLine();
                 if (read == "exit")
                     throw new GitTfsException("Exiting...(fetching stopped by user!)");
+                int changesetId;
                 if (!int.TryParse(read, out changesetId) || changesetId <= 0)
                     continue;
                 return changesetId;
@@ -487,9 +487,9 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var mergedItemsToFirstChangesetInBranchToCreate = new List<MergeInfo>();
             var merges = VersionControl
-                .TrackMerges(new int[] { firstChangesetInBranchToCreate },
+                .TrackMerges(new[] { firstChangesetInBranchToCreate },
                     new ItemIdentifier(tfsPathBranchToCreate),
-                    new ItemIdentifier[] { new ItemIdentifier(tfsPathParentBranch), },
+                    new[] { new ItemIdentifier(tfsPathParentBranch)},
                     null)
                 .OrderByDescending(x => x.SourceChangeset.ChangesetId);
             MergeInfo lastMerge = null;
@@ -550,7 +550,7 @@ namespace Sep.Git.Tfs.VsCommon
                 }
             }
             tfsChangeset.Summary.PolicyOverrideComment = changeset.PolicyOverride.Comment;
-            
+
             return tfsChangeset;
         }
 
@@ -572,9 +572,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
 
             return result != null && result.Length > 0;
-        }
-
-        Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
+        }        
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
@@ -583,11 +581,11 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
                 var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
-                _workspaces.Add(remote.Id, workspace = Retry.Do(() =>GetWorkspace(folders)));
+                _workspaces.Add(remote.Id, workspace = Retry.Do(() => GetWorkspace(folders)));
                 Janitor.CleanThisUpWhenWeClose(() =>
                 {
-                    Trace.WriteLine("Deleting workspace " + workspace.Name);
-                    Retry.Do(() => workspace.Delete());
+                    var deleteWsCompleted = Retry.Do(() => workspace.Delete(), TimeSpan.FromSeconds(5), 25);
+                    Trace.WriteLine(string.Format("TFS Workspace delete '{0}': result - '{1}'", localDirectory, deleteWsCompleted.ToYesNoString()));
                 });
             }
             var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
@@ -601,48 +599,105 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
+
+            // Make the attempt to configure a workspace more resilient to poor TFS environments.
+            var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)), retryInterval: TimeSpan.FromSeconds(5));
+            Trace.WriteLine(string.Format("Created TFS workspace named '{1}' setup at '{0}'", localDirectory, workspace.Name));
+
             try
             {
-                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
+                TfsWorkspace tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
                     .With("remote").EqualTo(remote)
                     .With("contextVersion").EqualTo(versionToFetch)
                     .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
                     .With("tfsHelper").EqualTo(this)
                     .GetInstance<TfsWorkspace>();
+
+                //  Apply the action to the TFS workspace.
                 action(tfsWorkspace);
             }
-            finally
+            catch (Exception ex)
             {
-                Retry.Do(() => workspace.Delete());
+                Trace.WriteLine("Unable to execute Workspace action.");
+                throw new GitTfsException(ex.Message, ex);
+            }
+
+            //  Cleanup the temp workspace once the action was finished 
+            try
+            {
+                // Add more Tracing around failures to delete workstpaces.                
+                var deleteWsCompleted = Retry.Do(() => workspace.Delete(), TimeSpan.FromSeconds(5), 25);
+                Trace.WriteLine(string.Format("TFS Workspace delete '{0}': result - '{1}'", localDirectory, deleteWsCompleted.ToYesNoString()));
+            }
+            catch (AggregateException aex)
+            {
+                Trace.WriteLine(string.Format("FAILED to cleanup up TFS workspace named '{1}' setup at '{0}'", localDirectory, workspace.Name));
+                throw new GitTfsException(aex.Message, aex);
             }
         }
 
         private Workspace GetWorkspace(params WorkingFolder[] folders)
         {
-            var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
-            try
+            Workspace workspace;
+
+            //  Ensure the extraction of the Workspace name is thread safe.
+            lock (_thisLock)
             {
-                foreach(WorkingFolder folder in folders)
-                    workspace.CreateMapping(folder);
-            }
-            catch (MappingConflictException e)
-            {
-                workspace.Delete();
-                throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
-            }
-            catch
-            {
-                workspace.Delete();
-                throw;
+                string randomWorkspaceName = this.GenerateWorkspaceName();
+               
+                //  Make the workspace creatation process more resilient. Especially to duplicated workspace and to any potential timing/sync issues between workstation and TFS.                
+                workspace = Retry.Do(() =>
+                    {
+                        Workspace result = null;
+                        foreach (WorkingFolder folder in folders)
+                        {
+                            result = VersionControl.TryGetWorkspace(folder.LocalItem);
+                            if (result != null)
+                            {
+                                Trace.WriteLine(string.Format("GetWorkspace - Found an existing workspace - '{0}'.", randomWorkspaceName));
+                                result.Refresh();
+                                break;
+                            }                            
+                        }
+
+                        if (result == null)
+                        {
+                            Trace.WriteLine(string.Format("GetWorkspace - Creating workspace - '{0}'.", randomWorkspaceName));                            
+                            result = VersionControl.CreateWorkspace(randomWorkspaceName);
+                            Trace.WriteLine(string.Format("GetWorkspace - Created workspace - '{0}'.", randomWorkspaceName));
+                        }                        
+                        return result;                        
+                    }, TimeSpan.FromSeconds(5), 5);
+
+                bool deleteWsCompleted;
+                try
+                {
+                    foreach (WorkingFolder folder in folders)
+                        workspace.CreateMapping(folder);
+                }
+                catch (MappingConflictException e)
+                {
+                    //workspace.Refresh
+                    deleteWsCompleted = Retry.Do(() => workspace.Delete(), TimeSpan.FromSeconds(5), 25);                    
+                    Trace.WriteLine(string.Format("GetWorkspace - MappingConflict triggered a TFS Workspace delete result - '{0}'", deleteWsCompleted.ToYesNoString()));
+                    throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
+                }
+                catch
+                {
+                    deleteWsCompleted = Retry.Do(() => workspace.Delete(), TimeSpan.FromSeconds(5), 25);
+                    Trace.WriteLine(string.Format("GetWorkspace - UnknowException triggered a TFS Workspace delete result - '{0}'", deleteWsCompleted.ToYesNoString()));
+                    throw;
+                }
             }
             return workspace;
         }
 
         private string GenerateWorkspaceName()
         {
-            return "git-tfs-" + Guid.NewGuid();
+            //  This is not guaranteed to be unique.
+            // return "git-tfs-" + Guid.NewGuid();
+            var rand = new ThreadSafeRandom();
+            return string.Format("git-tfs-{0}", rand.Next());
         }
 
         public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
@@ -683,7 +738,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
-        
+
         public void CleanupWorkspaces(string workingDirectory)
         {
             // workingDirectory is the path to a TFS workspace managed by git-tfs.
@@ -699,8 +754,9 @@ namespace Sep.Git.Tfs.VsCommon
                 {
                     // Normally, the workspace will have one mapping, mapped to the git-tfs
                     // workspace folder. In that case, we just delete the workspace.
-                    _stdout.WriteLine("Removing workspace \"" + workspace.DisplayName + "\".");
-                    workspace.Delete();
+                    Stdout.WriteLine("Removing workspace \"" + workspace.DisplayName + "\".");
+                    var deleteWsCompleted = Retry.Do(() => workspace.Delete(), TimeSpan.FromSeconds(5), 25);
+                    Trace.WriteLine(string.Format("TFS Workspace delete '{0}': result - '{1}'", workingDirectory, deleteWsCompleted.ToYesNoString()));
                 }
                 else
                 {
@@ -711,7 +767,7 @@ namespace Sep.Git.Tfs.VsCommon
                     var fullWorkingDirectoryPath = Path.GetFullPath(workingDirectory);
                     foreach (var mapping in workspace.Folders.Where(f => fullWorkingDirectoryPath.StartsWith(Path.GetFullPath(f.LocalItem), StringComparison.CurrentCultureIgnoreCase)))
                     {
-                        _stdout.WriteLine("Removing @\"" + mapping.LocalItem + "\" from workspace \"" + workspace.DisplayName + "\".");
+                        Stdout.WriteLine("Removing @\"" + mapping.LocalItem + "\" from workspace \"" + workspace.DisplayName + "\".");
                         workspace.DeleteMapping(mapping);
                     }
                 }
@@ -743,13 +799,17 @@ namespace Sep.Git.Tfs.VsCommon
             var shelveset = shelvesets.First();
 
             var itemSpec = new ItemSpec(remote.TfsRepositoryPath, RecursionType.Full);
-            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] { itemSpec }).Single();
+            var change = VersionControl.QueryShelvedChanges(shelveset,  new[] { itemSpec }).Single();
             var wrapperForVersionControlServer =
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
             // TODO - containerify this (no `new`)!
             var fakeChangeset = new Unshelveable(shelveset, change, wrapperForVersionControlServer, _bridge);
-            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout, null) { Summary = new TfsChangesetInfo { Remote = remote } };
-            return tfsChangeset;
+            if (remote.Tfs != null)
+            {
+                var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, Stdout, null) { Summary = new TfsChangesetInfo { Remote = remote } };
+                return tfsChangeset;
+            }
+            return null;
         }
 
         public int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote)
@@ -762,12 +822,12 @@ namespace Sep.Git.Tfs.VsCommon
             }
             catch (IdentityNotFoundException)
             {
-                _stdout.WriteLine("User '{0}' not found", shelveList.Owner);
+                Stdout.WriteLine("User '{0}' not found", shelveList.Owner);
                 return GitTfsExitCodes.InvalidArguments;
             }
             if (shelvesets.Empty())
             {
-                _stdout.WriteLine("No changesets found.");
+                Stdout.WriteLine("No changesets found.");
                 return GitTfsExitCodes.OK;
             }
 
@@ -789,7 +849,7 @@ namespace Sep.Git.Tfs.VsCommon
                         shelvesets = shelvesets.OrderBy(s => s.Comment);
                         break;
                     default:
-                        _stdout.WriteLine("ERROR: sorting criteria '{0}' is invalid. Possible values are: date, owner, name, comment", sortBy);
+                        Stdout.WriteLine("ERROR: sorting criteria '{0}' is invalid. Possible values are: date, owner, name, comment", sortBy);
                         return GitTfsExitCodes.InvalidArguments;
                 }
             }
@@ -807,7 +867,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             foreach (var shelveset in shelvesets)
             {
-                _stdout.WriteLine("{0,-22} {1,-20}", shelveset.OwnerName, shelveset.Name);
+                Stdout.WriteLine("{0,-22} {1,-20}", shelveset.OwnerName, shelveset.Name);
             }
         }
 
@@ -815,11 +875,11 @@ namespace Sep.Git.Tfs.VsCommon
         {
             foreach (var shelveset in shelvesets)
             {
-                _stdout.WriteLine("Name   : {0}", shelveset.Name);
-                _stdout.WriteLine("Owner  : {0}", shelveset.OwnerName);
-                _stdout.WriteLine("Date   : {0:g}", shelveset.CreationDate);
-                _stdout.WriteLine("Comment: {0}", shelveset.Comment);
-                _stdout.WriteLine();
+                Stdout.WriteLine("Name   : {0}", shelveset.Name);
+                Stdout.WriteLine("Owner  : {0}", shelveset.OwnerName);
+                Stdout.WriteLine("Date   : {0:g}", shelveset.CreationDate);
+                Stdout.WriteLine("Comment: {0}", shelveset.Comment);
+                Stdout.WriteLine();
             }
         }
 
@@ -1149,8 +1209,8 @@ namespace Sep.Git.Tfs.VsCommon
                         VersionControl.CreateTeamProjectFolder(new TeamProjectFolderOptions(projectName));
                     else
                         throw new GitTfsException("error: the team project folder '" + projectPath + "' doesn't exist!",
-                            new List<string>()
-                                {
+                            new List<string>
+                            {
                                     "Verify that the name of the project '" + projectName +"' is well spelled",
                                     "Create the team project folder in TFS before (recommanded)",
                                     "Use the flag '--create-project-folder' to create the team project folder during the process"
