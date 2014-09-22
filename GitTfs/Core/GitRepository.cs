@@ -41,16 +41,19 @@ namespace Sep.Git.Tfs.Core
                 new Signature(logEntry.AuthorName, logEntry.AuthorEmail, logEntry.Date.ToUniversalTime()),
                 new Signature(logEntry.CommitterName, logEntry.CommitterEmail, logEntry.Date.ToUniversalTime()),
                 logEntry.Log,
-                false,
                 logEntry.Tree,
-                parents);
+                parents,
+                false);
             changesetsCache[logEntry.ChangesetId] = commit.Sha;
             return new GitCommit(commit);
         }
 
         public void UpdateRef(string gitRefName, string shaCommit, string message = null)
         {
-            _repository.Refs.Add(gitRefName, shaCommit, allowOverwrite: true, logMessage: message);
+            if (message == null)
+                _repository.Refs.Add(gitRefName, shaCommit, allowOverwrite: true);
+            else
+                _repository.Refs.Add(gitRefName, shaCommit, _repository.Config.BuildSignature(DateTime.Now), message, true);
         }
 
         public static string ShortToLocalName(string branchName)
@@ -192,10 +195,10 @@ namespace Sep.Git.Tfs.Core
 
         public void MoveRemote(string oldRemoteName, string newRemoteName)
         {
-            if (!_repository.Refs.IsValidName(ShortToLocalName(oldRemoteName)))
+            if (!Reference.IsValidName(ShortToLocalName(oldRemoteName)))
                 throw new GitTfsException("error: the name of the remote to move is invalid!");
 
-            if (!_repository.Refs.IsValidName(ShortToLocalName(newRemoteName)))
+            if (!Reference.IsValidName(ShortToLocalName(newRemoteName)))
                 throw new GitTfsException("error: the new name of the remote is invalid!");
 
             if (HasRemote(newRemoteName))
@@ -222,7 +225,7 @@ namespace Sep.Git.Tfs.Core
             if (branch == null)
                 return null;
 
-            return _repository.Branches.Move(branch, newName);
+            return _repository.Branches.Rename(branch, newName);
         }
 
         private IDictionary<string, IGitTfsRemote> ReadTfsRemotes()
@@ -473,7 +476,7 @@ namespace Sep.Git.Tfs.Core
 
         public string AssertValidBranchName(string gitBranchName)
         {
-            if (!_repository.Refs.IsValidName(ShortToLocalName(gitBranchName)))
+            if (!Reference.IsValidName(ShortToLocalName(gitBranchName)))
                 throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
             return gitBranchName;
         }
