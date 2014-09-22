@@ -190,6 +190,7 @@
     <Compile Include="Core\GitTfsException.cs" />
     <Compile Include="Core\Janitor.cs" />
     <Compile Include="Util\AuthorsFile.cs" />
+    <Compile Include="Util\BooleanExtensions.cs" />
     <Compile Include="Util\Bouncer.cs" />
     <Compile Include="Util\ChangeSieve.cs" />
     <Compile Include="Util\PathResolver.cs" />
@@ -199,7 +200,9 @@
     <Compile Include="Util\GitTfsCommandFactory.cs" />
     <Compile Include="Util\GitTfsCommandRunner.cs" />
     <Compile Include="Core\IGitTfsVersionProvider.cs" />
+    <Compile Include="Util\Retry.cs" />
     <Compile Include="Util\TemporaryFile.cs" />
+    <Compile Include="Util\ThreadSafeRandom.cs" />
     <Compile Include="Util\WhenDynamicDoesntWork.cs" />
     <Compile Include="Util\PluggableWithAliases.cs" />
     <Compile Include="Util\ConfiguresStructureMap.cs" />
