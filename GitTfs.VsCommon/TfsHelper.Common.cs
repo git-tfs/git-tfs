@@ -192,10 +192,10 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, long startVersion, IGitTfsRemote remote)
         {
-            var changesets = Retry.Do(() => VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
+            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
                                                                         null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue,
                                                                         true, true, true)
-                                                          .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray());
+                                                          .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
             // don't take the enumerator produced by a foreach statement or a yield statement, as there are references
             // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
             for (int i = 0; i < changesets.Length; i++)
