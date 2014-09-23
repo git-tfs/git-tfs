@@ -29,6 +29,8 @@ namespace Sep.Git.Tfs.VsCommon
         private readonly IContainer _container;
         protected TfsTeamProjectCollection _server;
         private static bool _resolverInstalled;
+        //  Thread saftey.
+        private readonly Object _thisLock = new Object();
 
         public TfsHelperBase(TextWriter stdout, TfsApiBridge bridge, IContainer container)
         {
@@ -131,16 +133,16 @@ namespace Sep.Git.Tfs.VsCommon
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
-           if (e.Failure != null)
-           {
-              _stdout.WriteLine(e.Failure.Message);
-              Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
-           }
-           if (e.Exception != null)
-           {
-              _stdout.WriteLine(e.Exception.Message);
-              Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
-           }
+            if (e.Failure != null)
+            {
+                _stdout.WriteLine(e.Failure.Message);
+                Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
+            }
+            if (e.Exception != null)
+            {
+                _stdout.WriteLine(e.Exception.Message);
+                Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+            }
         }
 
         private void Getting(object sender, GettingEventArgs e)
@@ -550,7 +552,7 @@ namespace Sep.Git.Tfs.VsCommon
                 }
             }
             tfsChangeset.Summary.PolicyOverrideComment = changeset.PolicyOverride.Comment;
-            
+
             return tfsChangeset;
         }
 
@@ -583,12 +585,8 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
                 var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
-                _workspaces.Add(remote.Id, workspace = Retry.Do(() =>GetWorkspace(folders)));
-                Janitor.CleanThisUpWhenWeClose(() =>
-                {
-                    Trace.WriteLine("Deleting workspace " + workspace.Name);
-                    Retry.Do(() => workspace.Delete());
-                });
+                _workspaces.Add(remote.Id, workspace = Retry.Do(() => GetWorkspace(folders)));
+                Janitor.CleanThisUpWhenWeClose(() => TryToDeleteWorkspace(workspace));
             }
             var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
                 .With("remote").EqualTo(remote)
@@ -601,8 +599,9 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
+
             var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
+            Trace.WriteLine(string.Format("Created TFS workspace named '{0}' setup at '{1}'", workspace.Name, localDirectory));
             try
             {
                 var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
@@ -613,29 +612,59 @@ namespace Sep.Git.Tfs.VsCommon
                     .GetInstance<TfsWorkspace>();
                 action(tfsWorkspace);
             }
-            finally
+            catch (Exception ex)
             {
-                Retry.Do(() => workspace.Delete());
+                // Add more Tracing around failures to delete workstpaces.
+                TryToDeleteWorkspace(workspace);
+                throw new GitTfsException(ex.Message, ex);
             }
         }
 
         private Workspace GetWorkspace(params WorkingFolder[] folders)
         {
-            var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
-            try
+            Workspace workspace;
+            // Ensure the extraction of the Workspace name is thread safe.
+            lock (_thisLock)
             {
-                foreach(WorkingFolder folder in folders)
-                    workspace.CreateMapping(folder);
-            }
-            catch (MappingConflictException e)
-            {
-                workspace.Delete();
-                throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
-            }
-            catch
-            {
-                workspace.Delete();
-                throw;
+                string randomWorkspaceName = this.GenerateWorkspaceName();
+                // Make the workspace creatation process more resilient. Especially to duplicated workspace and to any potential timing/sync issues between workstation and TFS.
+                workspace = Retry.Do(() =>
+                {
+                    Workspace result = null;
+                    foreach (WorkingFolder folder in folders)
+                    {
+                        result = VersionControl.TryGetWorkspace(folder.LocalItem);
+                        if (result != null)
+                        {
+                            Trace.WriteLine(string.Format("GetWorkspace - Found an existing workspace - '{0}'.", randomWorkspaceName));
+                            result.Refresh();
+                            break;
+                        }
+                    }
+                    if (result == null)
+                    {
+                        Trace.WriteLine(string.Format("GetWorkspace - Creating workspace - '{0}'.", randomWorkspaceName));
+                        result = VersionControl.CreateWorkspace(randomWorkspaceName);
+                        Trace.WriteLine(string.Format("GetWorkspace - Created workspace - '{0}'.", randomWorkspaceName));
+                    }
+                    return result;
+                }, TimeSpan.FromSeconds(5), 5);
+                bool deleteWsCompleted;
+                try
+                {
+                    foreach (WorkingFolder folder in folders)
+                        workspace.CreateMapping(folder);
+                }
+                catch (MappingConflictException e)
+                {
+                    TryToDeleteWorkspace(workspace);
+                    throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
+                }
+                catch
+                {
+                    TryToDeleteWorkspace(workspace);
+                    throw new GitTfsException("GetWorkspace - UnknowException triggered");
+                }
             }
             return workspace;
         }
@@ -683,7 +712,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
-        
+
         public void CleanupWorkspaces(string workingDirectory)
         {
             // workingDirectory is the path to a TFS workspace managed by git-tfs.
@@ -700,7 +729,8 @@ namespace Sep.Git.Tfs.VsCommon
                     // Normally, the workspace will have one mapping, mapped to the git-tfs
                     // workspace folder. In that case, we just delete the workspace.
                     _stdout.WriteLine("Removing workspace \"" + workspace.DisplayName + "\".");
-                    workspace.Delete();
+
+                    TryToDeleteWorkspace(workspace);
                 }
                 else
                 {
@@ -716,6 +746,27 @@ namespace Sep.Git.Tfs.VsCommon
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Method to help improve the process that deletes workspaces used by Git-TFS.
+        /// The the delete fails, the process pauses for 5 seconds and retry 25 times before reporting failures.        
+        /// </summary>
+        /// <param name="workspace"></param>
+        /// <remarks>
+        /// TFS randomly seems to report a workspace removed/deleted BUT subsequent calls by Git-TFS suggest that the delete hasn't actually been completed. 
+        /// This suggest that deletes may be queued and take a lower priority than other actions, especially if the TFS server is under load.
+        /// </remarks>
+        private static void TryToDeleteWorkspace(Workspace workspace)
+        {
+            //  Try and ensure the client and TFS Server are synchronized.
+            workspace.Refresh();
+
+            //  When deleting a workspace we may need to allow the TFS server some time to complete existing processing or re-try the workspace delete.            
+            var deleteWsCompleted = Retry.Do(() => workspace.Delete(), TimeSpan.FromSeconds(5), 25);
+
+            // Include trace information about the success of the TFS API that deletes the workspace.
+            Trace.WriteLine(string.Format("TFS Workspace delete '{0}': result - '{1}'", workspace.DisplayName, deleteWsCompleted.ToYesNoString()));
         }
 
         public bool HasShelveset(string shelvesetName)
