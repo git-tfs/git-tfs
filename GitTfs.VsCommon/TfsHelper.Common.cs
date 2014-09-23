@@ -620,14 +620,21 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
+        /// <summary>
+        /// Core Workspace to physical folder configuration.
+        /// </summary>
+        /// <param name="folders"></param>
+        /// <returns></returns>
         private Workspace GetWorkspace(params WorkingFolder[] folders)
         {
             Workspace workspace;
+
             // Ensure the extraction of the Workspace name is thread safe.
             lock (_thisLock)
             {
                 string randomWorkspaceName = this.GenerateWorkspaceName();
-                // Make the workspace creatation process more resilient. Especially to duplicated workspace and to any potential timing/sync issues between workstation and TFS.
+                
+                // Retrieve the workspace via the TFS API
                 workspace = Retry.Do(() =>
                 {
                     Workspace result = null;
@@ -649,7 +656,8 @@ namespace Sep.Git.Tfs.VsCommon
                     }
                     return result;
                 }, TimeSpan.FromSeconds(5), 5);
-                bool deleteWsCompleted;
+
+                // With the new workspace, create all the folder mapping to suit.
                 try
                 {
                     foreach (WorkingFolder folder in folders)
@@ -665,10 +673,18 @@ namespace Sep.Git.Tfs.VsCommon
                     TryToDeleteWorkspace(workspace);
                     throw new GitTfsException("GetWorkspace - UnknowException triggered");
                 }
-            }
+            } // Thread safe completed.
             return workspace;
         }
 
+        /// <summary>
+        /// Retrieve a unique workspace name, based on a GUID.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// The Guid.NewGuid method doesn't guarantee that a unique value will get generated, but the probability is very low. 
+        /// See http://msdn.microsoft.com/en-us/library/system.guid.newguid%28v=vs.110%29.aspx
+        /// </remarks>
         private string GenerateWorkspaceName()
         {
             return "git-tfs-" + Guid.NewGuid();
