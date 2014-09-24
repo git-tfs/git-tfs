@@ -161,7 +161,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
         {
-            if (!CanGetBranchInformation)
+            if (Is2008OrOlder)
             {
                 foreach (var changeset in GetChangesetsForTfs2008(path, startVersion, remote))
                     yield return changeset;
@@ -213,13 +213,14 @@ namespace Sep.Git.Tfs.VsCommon
             return mergeInfo.Max(x => x.SourceVersion);
         }
 
+        public bool Is2008OrOlder
+        {
+            get { return _server.ConfigurationServer == null; }
+        }
+
         public bool CanGetBranchInformation
         {
-            get
-            {
-                var is2008OrOlder = (_server.ConfigurationServer == null);
-                return !is2008OrOlder;
-            }
+            get { return !Is2008OrOlder; }
         }
 
         public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
