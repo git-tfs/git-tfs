@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
@@ -58,7 +59,11 @@ namespace Sep.Git.Tfs.Commands
         {
             if (Force)
             {
-                return (e) => _stdout.WriteLine("ERROR: unshelve: " + e);
+                return (e) =>
+                {
+                    _stdout.WriteLine("WARNING: unshelve: " + e.Message);
+                    Trace.WriteLine(e);
+                };
             }
             return null;
         }
