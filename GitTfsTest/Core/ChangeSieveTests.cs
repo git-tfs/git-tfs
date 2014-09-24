@@ -55,7 +55,7 @@ namespace Sep.Git.Tfs.Test.Core
                 public string Committer { get; set; }
                 public IChange[] Changes { get; set; }
 
-                public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes)
+                public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
                 {
                     throw new NotImplementedException();
                 }

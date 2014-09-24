@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Core
                 Summary.Remote.Repository.GetObjects(lastCommit, initialTree);
             var resolver = new PathResolver(Summary.Remote, initialTree);
             var sieve = new ChangeSieve(_changeset, resolver);
-            _changeset.Get(workspace, sieve.GetChangesToFetch());
+            _changeset.Get(workspace, sieve.GetChangesToFetch(), ignorableErrorHandler);
             foreach (var change in sieve.GetChangesToApply())
             {
                 ignorableErrorHandler.Catch(() => {

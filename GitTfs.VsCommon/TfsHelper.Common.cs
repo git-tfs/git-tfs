@@ -511,12 +511,15 @@ namespace Sep.Git.Tfs.VsCommon
                 get { return _versionControlServer; }
             }
 
-            public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes)
+            public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
             {
                 foreach (var change in changes)
                 {
-                    var item = (UnshelveItem)change.Item;
-                    item.Get(workspace);
+                    ignorableErrorHandler.Catch(() =>
+                    {
+                        var item = (UnshelveItem)change.Item;
+                        item.Get(workspace);
+                    });
                 }
             }
         }
