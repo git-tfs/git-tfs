@@ -21,22 +21,25 @@ a TFS source tree and fetch all the changesets
 		  --bare                 clone the TFS repository in a bare git repository
 		  --workspace=VALUE      set tfs workspace to a specific folder (a shorter path is better!)
 		  --ignore-regex=VALUE   a regex of files to ignore
-		  --except-regex=VALUE   a regex of exceptions to ingore-regex
+		  --except-regex=VALUE   a regex of exceptions to ignore-regex
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
 		  --all, --fetch-all
 		  --parents
-		  --authors=VALUE        Path to an Authors file to map TFS users to Git
-								   users
+		  --authors=VALUE        Path to an Authors file to map TFS users to Git users
 	  -l, --with-labels, --fetch-labels
 								 Fetch the labels also when fetching TFS changesets
 	  -x, --export               Export metadatas
+		  --export-work-item-mapping=VALUE
+								 Path to Work-items mapping export file
+		  --ignore-branches      Ignore fetching merged branches when encounter merge changesets
+		  --batch-size=VALUE          Size of a the batch of tfs changesets fetched (-1 for all in one batch)
 		  --with-branches        init all the TFS branches during the clone
+		  --resumable            if an error occurred, try to continue when you restart clone
+								 with same parameters
 
 ## Examples
-
 ### Simple
-
 To clone all of `$/Project1` from your TFS 2010 server `tfs`
 into a new directory `Project1`, do this:
 
@@ -125,7 +128,20 @@ You could do it with the _--workspace_ parameter:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --workspace="c:\ws"
 
+### Export metadatas
 
+The option `--export` permit, when fetching changesets and creating commits, to add all the tfs metadatas to the commit message (work items ids, reviewers, ...).
+
+This option could be used with other option `--export-work-item-mapping` that specify a mapping file to convert old work items ids to new work items ids.
+
+It could be used to migrate sources away from TFSVC. See [Migrate from tfs to git](../usecases/migrate_tfs_to_git.md#migrate-toward-tfs2013-git-repository-keeping-workitems) for more details.
+
+### Batch size of fetched changesets
+
+The option `--batch-size` permit to specify the number of changesets fetched from tfs at the same time (default:100).
+You could use this option to specify smaller batch size if git-tfs use too much memory because changesest are huge.
+This option is saved in the git config file (key `git-tfs.batch-size`). See [config file doc](../config.md). 
+Note: this option could also be specified during the `fetch`.
 
 ## After cloning a repository
 

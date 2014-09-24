@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 return init.OptionSet.Merge(fetch.OptionSet)
                            .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null)
-                           .Add("resumable", "do not clean the folder if an error occurred and try to continue when you restart clone with same parameters", v => resumable = v != null);
+                           .Add("resumable", "if an error occurred, try to continue when you restart clone with same parameters", v => resumable = v != null);
             }
         }
 
