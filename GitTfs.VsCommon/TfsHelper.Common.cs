@@ -165,6 +165,7 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 foreach (var changeset in GetChangesetsForTfs2008(path, startVersion, remote))
                     yield return changeset;
+                yield break;
             }
 
             const int batchCount = 100;
