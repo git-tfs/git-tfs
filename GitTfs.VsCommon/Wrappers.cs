@@ -108,7 +108,7 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(_changeset.VersionControlServer); }
         }
 
-        public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes)
+        public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
         {
             workspace.Get(this.ChangesetId, changes);
         }

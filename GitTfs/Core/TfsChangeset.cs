@@ -26,16 +26,18 @@ namespace Sep.Git.Tfs.Core
             BaseChangesetId = _changeset.Changes.Max(c => c.Item.ChangesetId) - 1;
         }
 
-        public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree)
+        public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree, Action<Exception> ignorableErrorHandler)
         {
             if (initialTree.Empty())
                 Summary.Remote.Repository.GetObjects(lastCommit, initialTree);
             var resolver = new PathResolver(Summary.Remote, initialTree);
             var sieve = new ChangeSieve(_changeset, resolver);
-            _changeset.Get(workspace, sieve.GetChangesToFetch());
+            _changeset.Get(workspace, sieve.GetChangesToFetch(), ignorableErrorHandler);
             foreach (var change in sieve.GetChangesToApply())
             {
-                Apply(change, treeBuilder, workspace, initialTree);
+                ignorableErrorHandler.Catch(() => {
+                    Apply(change, treeBuilder, workspace, initialTree);
+                });
             }
             return MakeNewLogEntry();
         }

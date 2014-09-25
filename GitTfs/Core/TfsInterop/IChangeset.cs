@@ -11,6 +11,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         string Comment { get; }
         int ChangesetId { get; }
         IVersionControlServer VersionControlServer { get; }
-        void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes);
+        void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler);
     }
 }

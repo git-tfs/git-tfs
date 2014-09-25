@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
@@ -24,6 +26,7 @@ namespace Sep.Git.Tfs.Commands
 
         public string Owner { get; set; }
         public string TfsBranch { get; set; }
+        public bool Force { get; set; }
 
         public OptionSet OptionSet
         {
@@ -34,7 +37,9 @@ namespace Sep.Git.Tfs.Commands
                     { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to search all shelvesets.",
                         v => Owner = v },
                     { "b|branch=", "Git Branch to apply Shelveset to? (default: TFS current remote)", 
-                        v => TfsBranch = v },                
+                        v => TfsBranch = v },
+                    { "force", "Get as much of the Shelveset as possible, and log any other errors",
+                        v => Force = v != null },
                 };
             }
         }
@@ -45,9 +50,22 @@ namespace Sep.Git.Tfs.Commands
                 TfsBranch = _globals.RemoteId;
 
             var remote = _globals.Repository.ReadTfsRemote(TfsBranch);
-            remote.Unshelve(Owner, shelvesetName, destinationBranch);
+            remote.Unshelve(Owner, shelvesetName, destinationBranch, BuildErrorHandler());
             _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
             return GitTfsExitCodes.OK;
+        }
+
+        private Action<Exception> BuildErrorHandler()
+        {
+            if (Force)
+            {
+                return (e) =>
+                {
+                    _stdout.WriteLine("WARNING: unshelve: " + e.Message);
+                    Trace.WriteLine(e);
+                };
+            }
+            return null;
         }
     }
 }

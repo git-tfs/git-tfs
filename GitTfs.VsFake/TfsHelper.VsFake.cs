@@ -139,7 +139,7 @@ namespace Sep.Git.Tfs.VsFake
                 get { throw new NotImplementedException(); }
             }
 
-            public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes)
+            public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
             {
                 workspace.Get(this.ChangesetId, changes);
             }
