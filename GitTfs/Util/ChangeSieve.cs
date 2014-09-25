@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Sep.Git.Tfs.Core;
@@ -180,16 +181,19 @@ namespace Sep.Git.Tfs.Util
             var oldItem = item.VersionControlServer.GetItem(item.ItemId, previousChangeset);
             if (null == oldItem)
             {
-                var history = item.VersionControlServer.QueryHistory(item.ServerItem, item.ChangesetId, 0,
+                try
+                {
+                    var history = item.VersionControlServer.QueryHistory(item.ServerItem, item.ChangesetId, 0,
                                                                      TfsRecursionType.None, null, 1, previousChangeset,
                                                                      1, true, false, false);
-                var previousChange = history.FirstOrDefault();
-                if (previousChange == null)
+                    var previousChange = history.First();
+                    oldItem = previousChange.Changes[0].Item;
+                }
+                catch
                 {
                     Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
                     return null;
                 }
-                oldItem = previousChange.Changes[0].Item;
             }
             return oldItem.ServerItem;
         }
