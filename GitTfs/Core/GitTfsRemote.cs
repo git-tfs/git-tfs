@@ -332,6 +332,8 @@ namespace Sep.Git.Tfs.Core
                     if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
                         return fetchResult;
                     string parentCommitSha = null;
+                    if (changeset.IsMergeChangeset)
+                        Trace.Write(string.Format("Reviewing merged changset '{0}' ", changeset.BaseChangesetId));
                     if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                     {
                         fetchResult.IsSuccess = false;
