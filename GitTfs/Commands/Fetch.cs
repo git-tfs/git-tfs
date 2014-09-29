@@ -19,12 +19,14 @@ namespace Sep.Git.Tfs.Commands
         private readonly RemoteOptions remoteOptions;
         private readonly TextWriter stdout;
         private readonly Globals globals;
+        private readonly ConfigProperties properties;
         private readonly AuthorsFile authors;
         private readonly Labels labels;
 
-        public Fetch(Globals globals, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
+        public Fetch(Globals globals, ConfigProperties properties, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
         {
             this.globals = globals;
+            this.properties = properties;
             this.stdout = stdout;
             this.remoteOptions = remoteOptions;
             this.authors = authors;
@@ -39,14 +41,14 @@ namespace Sep.Git.Tfs.Commands
         bool ExportMetadatas { get; set; }
         string ExportMetadatasFile { get; set; }
         public bool IgnoreBranches { get; set; }
-        private int _batchSize;
-        public int BatchSize { get { return _batchSize; } }
         public string BatchSizeOption
         {
             set
             {
-                if (!int.TryParse(value, out _batchSize))
+                int batchSize;
+                if (!int.TryParse(value, out batchSize))
                     throw new GitTfsException("error: batch size parameter should be an integer.");
+                properties.BatchSize = batchSize;
             }
         }
 

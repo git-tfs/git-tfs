@@ -116,8 +116,6 @@ namespace Sep.Git.Tfs.Commands
 
                 if (retVal == 0)
                 {
-                    if (fetch.BatchSize != 0)
-                        globals.Repository.SetConfig(GitTfsConstants.BatchSize, BatchSize.ToString());
                     fetch.Run(withBranches);
                     globals.Repository.GarbageCollect();
                 }

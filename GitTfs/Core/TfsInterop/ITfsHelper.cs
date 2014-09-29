@@ -10,7 +10,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         string Url { get; set; }
         string Username { get; set; }
         string Password { get; set; }
-        int BatchCount { get; set; }
         IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
         IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);

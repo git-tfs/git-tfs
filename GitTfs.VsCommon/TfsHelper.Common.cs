@@ -44,6 +44,9 @@ namespace Sep.Git.Tfs.VsCommon
         [SetterProperty]
         public Janitor Janitor { get; set; }
 
+        [SetterProperty]
+        public ConfigProperties properties { get; set; }
+
         public string TfsClientLibraryVersion { get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version + " (MS)"; } }
 
         public string Url { get; set; }
@@ -159,19 +162,11 @@ namespace Sep.Git.Tfs.VsCommon
             get { return _linking ?? (_linking = GetService<ILinking>()); }
         }
 
-        public const int DefaultBatchSize = 100;
-        private int _batchCount = DefaultBatchSize;
         public int BatchCount
         {
-            get { return _batchCount; }
-            set
+            get
             {
-                if (value < 0)
-                    _batchCount = Int32.MaxValue;
-                else if (value > 0)
-                    _batchCount = value;
-                else
-                    _batchCount = DefaultBatchSize;
+                return properties.BatchSize;
             }
         }
 
