@@ -60,7 +60,7 @@ namespace Sep.Git.Tfs.Util
                         c.Change.Item.ItemType == TfsItemType.Folder
                             && c.GitPath == string.Empty
                             && c.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete, TfsChangeType.Rename));
-        }
+                }
                 return _renameBranchCommmit.Value;
             }
         }

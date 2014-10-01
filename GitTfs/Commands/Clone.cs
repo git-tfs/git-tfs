@@ -78,7 +78,7 @@ namespace Sep.Git.Tfs.Commands
                 }
 
                 VerifyTfsPathToClone(tfsRepositoryPath);
-                }
+            }
             catch
             {
                 if (!resumable)
