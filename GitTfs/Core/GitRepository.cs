@@ -88,6 +88,11 @@ namespace Sep.Git.Tfs.Core
 
         public T GetConfig<T>(string key)
         {
+            return GetConfig(key, default(T));
+        }
+
+        public T GetConfig<T>(string key, T defaultValue)
+        {
             try
             {
                 var entry = _repository.Config.Get<T>(key);
@@ -95,10 +100,9 @@ namespace Sep.Git.Tfs.Core
             }
             catch (Exception)
             {
-                return default(T);
+                return defaultValue;
             }
         }
-
         public void SetConfig(string key, string value)
         {
             _repository.Config.Set<string>(key, value, ConfigurationLevel.Local);

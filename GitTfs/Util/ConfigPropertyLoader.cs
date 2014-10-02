@@ -31,11 +31,7 @@ namespace Sep.Git.Tfs.Util
             if (_overrides.ContainsKey(key))
                 return (T) _overrides[key];
 
-            var configEntry = _globals.Repository.GetConfig<T>(key);
-            if (configEntry != null)
-                return configEntry;
-
-            return defaultValue;
+            return _globals.Repository.GetConfig<T>(key, defaultValue);
         }
     }
 }
