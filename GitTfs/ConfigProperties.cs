@@ -14,6 +14,11 @@ namespace Sep.Git.Tfs
             _loader = loader;
         }
 
+        public void PersistAllOverrides()
+        {
+            _loader.PersistAllOverrides();
+        }
+        
         public int BatchSize
         {
             set { _loader.Override(GitTfsConstants.BatchSize, value); }

@@ -33,5 +33,13 @@ namespace Sep.Git.Tfs.Util
 
             return _globals.Repository.GetConfig<T>(key, defaultValue);
         }
+
+        public void PersistAllOverrides()
+        {
+            foreach (var key in _overrides.Keys)
+            {
+                _globals.Repository.SetConfig(key, _overrides[key].ToString());
+            }
+        }
     }
 }
