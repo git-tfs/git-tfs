@@ -70,6 +70,11 @@ namespace Sep.Git.Tfs.Test.Integration
             Repository(repodir).Config.Set(key, value);
         }
 
+        public T GetConfig<T>(string repodir, string key)
+        {
+            return Repository(repodir).Config.Get<T>(key, ConfigurationLevel.Local).Value;
+        }
+
         public void SetupGitRepo(string path, Action<RepoBuilder> buildIt)
         {
             var fullPath = Path.Combine(Workdir, path);
