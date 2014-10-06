@@ -625,21 +625,53 @@ namespace Sep.Git.Tfs.VsCommon
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
+            //Code below is a Work In Progress - it seems to work for me, but... Dave Hanna 7/11/2014
+            // We'll put this in a retry loop here with our own Exception handling in stead of relying on Retry.Do
+            //var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
+            const int NUMB_RETRIES = 1;
+            // If an exception occurrs, we'll clean up , then go back and try again.
+            // There's probably no point in retrying more than once
+            WorkingFolder workingFolder = null;
+            Workspace workspace = null;
+            for (int ix = 0; ix < NUMB_RETRIES + 1; ix ++)
+            {
+                try
+                {
+                    workingFolder = new WorkingFolder(remote.TfsRepositoryPath, localDirectory);
+                    workspace = GetWorkspace(workingFolder);
+                    //if that succeeds, break out of the retry loop
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(string.Format("GetWorkspace threw {0} exception: {1}", ex.GetType().ToString(), ex.Message));
+                    try
+                    {
+                        CleanupWorkspaces(localDirectory); // Try to cleanup the offending workspace, then go try again.
+
+                    }
+                    catch (Exception ex1)
+                    {
+                        // Most likely, CleanupWorkspaces will throw  a Non-existent workspace exception.  We'll ignore it,
+                        // because it's for the workspace we were trying to cleanup, so it's already gone.  And we go try again.
+                        Trace.WriteLine(string.Format("CleanupWorkspace threw a {0} exception: {1}", ex1.GetType().ToString(), ex1.Message ));
+                    }
+                }
+            }
             try
-            {
-                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
-                    .With("remote").EqualTo(remote)
-                    .With("contextVersion").EqualTo(versionToFetch)
-                    .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
-                    .With("tfsHelper").EqualTo(this)
-                    .GetInstance<TfsWorkspace>();
-                action(tfsWorkspace);
-            }
-            finally
-            {
-                Retry.Do(() => workspace.Delete());
-            }
+                {
+                    var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
+                        .With("remote").EqualTo(remote)
+                        .With("contextVersion").EqualTo(versionToFetch)
+                        .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                        .With("tfsHelper").EqualTo(this)
+                        .GetInstance<TfsWorkspace>();
+                    action(tfsWorkspace);
+                }
+                finally
+                {
+                    Retry.Do(() => workspace.Delete());
+                }
         }
 
         private Workspace GetWorkspace(params WorkingFolder[] folders)
@@ -718,6 +750,7 @@ namespace Sep.Git.Tfs.VsCommon
             if (workspace != null)
             {
                 Trace.WriteLine("Found mapping in workspace \"" + workspace.DisplayName + "\".", "cleanup-workspaces");
+           
                 if (workspace.Folders.Length == 1)
                 {
                     // Normally, the workspace will have one mapping, mapped to the git-tfs
@@ -732,12 +765,19 @@ namespace Sep.Git.Tfs.VsCommon
                     // in the workspace, we only need to remove the one that includes the working
                     // directory that we want to set.
                     var fullWorkingDirectoryPath = Path.GetFullPath(workingDirectory);
-                    foreach (var mapping in workspace.Folders.Where(f => fullWorkingDirectoryPath.StartsWith(Path.GetFullPath(f.LocalItem), StringComparison.CurrentCultureIgnoreCase)))
+                    foreach (
+                        var mapping in
+                            workspace.Folders.Where(
+                                f =>
+                                    fullWorkingDirectoryPath.StartsWith(Path.GetFullPath(f.LocalItem),
+                                        StringComparison.CurrentCultureIgnoreCase)))
                     {
-                        _stdout.WriteLine("Removing @\"" + mapping.LocalItem + "\" from workspace \"" + workspace.DisplayName + "\".");
+                        _stdout.WriteLine("Removing @\"" + mapping.LocalItem + "\" from workspace \"" +
+                                          workspace.DisplayName + "\".");
                         workspace.DeleteMapping(mapping);
                     }
                 }
+
             }
         }
 
