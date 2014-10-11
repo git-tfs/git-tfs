@@ -48,7 +48,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsUrl, string tfsRepositoryPath)
         {
-            tfsRepositoryPath.AssertValidTfsPath();
+            tfsRepositoryPath.AssertValidTfsPathOrRoot();
             DoGitInitDb();
             GitTfsInit(tfsUrl, tfsRepositoryPath);
             return 0;
@@ -56,7 +56,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
         {
-            tfsRepositoryPath.AssertValidTfsPath();
+            tfsRepositoryPath.AssertValidTfsPathOrRoot();
             if (!initOptions.IsBare)
             {
                 InitSubdir(gitRepositoryPath);
@@ -131,10 +131,17 @@ namespace Sep.Git.Tfs.Commands
 
     public static class Ext
     {
-        static Regex ValidTfsPath = new Regex("^\\$/.+");
+        private static Regex ValidTfsPath = new Regex("^\\$/.+");
         public static bool IsValidTfsPath(this string tfsPath)
         {
             return ValidTfsPath.IsMatch(tfsPath);
+        }
+
+        public static void AssertValidTfsPathOrRoot(this string tfsPath)
+        {
+            if (tfsPath == GitTfsConstants.TfsRoot)
+                return;
+            AssertValidTfsPath(tfsPath);
         }
 
         public static void AssertValidTfsPath(this string tfsPath)
