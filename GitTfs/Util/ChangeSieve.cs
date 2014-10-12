@@ -51,7 +51,7 @@ namespace Sep.Git.Tfs.Util
         /// <summary>
         /// Is the top-level folder deleted or renamed?
         /// </summary>
-        private bool RenameBranchCommmit
+        public bool RenameBranchCommmit
         {
             get
             {
