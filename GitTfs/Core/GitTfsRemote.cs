@@ -346,7 +346,7 @@ namespace Sep.Git.Tfs.Core
                     }
                     var parentSha = LastParentCommitBeforeRename ?? MaxCommitHash;
                     var log = Apply(parentSha, changeset, objects);
-                    if (changeset.IsRenameChangeset)
+                    if (changeset.IsRenameChangeset && parentSha != null)
                     {
                         if (LastParentCommitBeforeRename == null)
                         {
