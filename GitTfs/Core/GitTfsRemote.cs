@@ -344,7 +344,17 @@ namespace Sep.Git.Tfs.Core
                         fetchResult.IsSuccess = false;
                         return fetchResult;
                     }
-                    var log = Apply(MaxCommitHash, changeset, objects);
+                    var parentSha = LastParentCommitBeforeRename ?? MaxCommitHash;
+                    var log = Apply(parentSha, changeset, objects);
+                    if (changeset.IsRenameChangeset)
+                    {
+                        if (LastParentCommitBeforeRename == null)
+                        {
+                            LastParentCommitBeforeRename = MaxCommitHash;
+                            return fetchResult;
+                        }
+                        LastParentCommitBeforeRename = null;
+                    }
                     if (parentCommitSha != null)
                         log.CommitParents.Add(parentCommitSha);
                     if (changeset.Summary.ChangesetId == mergeChangesetId)
@@ -365,6 +375,8 @@ namespace Sep.Git.Tfs.Core
             } while (fetchedChangesets.Any() && latestChangesetId > fetchResult.LastFetchedChangesetId);
             return fetchResult;
         }
+
+        public static string LastParentCommitBeforeRename { get; set; }
 
         private Dictionary<string, GitObject> BuildEntryDictionary()
         {
