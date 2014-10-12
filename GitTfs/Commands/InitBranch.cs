@@ -130,6 +130,9 @@ namespace Sep.Git.Tfs.Commands
         private IGitTfsRemote InitBranchSupportingRename(string tfsBranchPath, string gitBranchNameExpected, IList<RootBranch> creationBranchData, IGitTfsRemote defaultRemote, out IFetchResult fetchResult)
         {
             fetchResult = null;
+
+            RemoveAlreadyFetchedBranches(creationBranchData, defaultRemote);
+
             _stdout.WriteLine("Branches to Initialize successively :");
             foreach (var branch in creationBranchData)
                 _stdout.WriteLine("-" + branch.TfsBranchPath + " (" + branch.RootChangeset + ")");
@@ -163,6 +166,22 @@ namespace Sep.Git.Tfs.Commands
                 _globals.Repository.DeleteTfsRemote(gitTfsRemote);
             }
             return RemoteCreated = tfsRemote;
+        }
+
+        private static void RemoveAlreadyFetchedBranches(IList<RootBranch> creationBranchData, IGitTfsRemote defaultRemote)
+        {
+            for (int i = creationBranchData.Count - 1; i > 0; i--)
+            {
+                var branch = creationBranchData[i];
+                if (defaultRemote.Repository.FindCommitHashByChangesetId(branch.RootChangeset) != null)
+                {
+                    for (int j = 0; j < i; j++)
+                    {
+                        creationBranchData.RemoveAt(0);
+                    }
+                    break;
+                }
+            }
         }
 
         class BranchCreationDatas
