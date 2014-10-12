@@ -71,9 +71,6 @@ namespace Sep.Git.Tfs.Util
             if (DeletesProject)
                 return Enumerable.Empty<IChange>();
 
-            if (RenameBranchCommmit)
-                return new List<IChange>();
-
             return NamedChanges.Where(c => IncludeInFetch(c)).Select(c => c.Change);
         }
 
@@ -81,9 +78,6 @@ namespace Sep.Git.Tfs.Util
         {
             if (DeletesProject)
                 return Enumerable.Empty<ApplicableChange>();
-
-            if (RenameBranchCommmit)
-                return new List<ApplicableChange>();
 
             var compartments = new {
                 Deleted = new List<ApplicableChange>(),
