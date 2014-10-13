@@ -16,8 +16,8 @@ namespace Sep.Git.Tfs.Commands
     //  2. Load the correct set of extant casing.
     public class QuickFetch : Fetch
     {
-        public QuickFetch(Globals globals, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors)
-            : base(globals, stdout, remoteOptions, authors, null)
+        public QuickFetch(Globals globals, ConfigProperties properties, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors)
+            : base(globals, properties, stdout, remoteOptions, authors, null)
         {
         }
 

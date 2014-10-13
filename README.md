@@ -123,6 +123,8 @@ This is the complete list of commands in the master branch on github.
 * [reset-remote](doc/commands/reset-remote.md) - since [0.19](../../releases/tag/v0.19.0)
 * [checkout](doc/commands/checkout.md) - since [0.21](../../releases/tag/v0.21.0)
 
+* [config file](doc/config.md)
+
 ## Building
 
 ### Prerequisites 

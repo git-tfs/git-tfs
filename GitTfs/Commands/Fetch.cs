@@ -19,12 +19,14 @@ namespace Sep.Git.Tfs.Commands
         private readonly RemoteOptions remoteOptions;
         private readonly TextWriter stdout;
         private readonly Globals globals;
+        private readonly ConfigProperties properties;
         private readonly AuthorsFile authors;
         private readonly Labels labels;
 
-        public Fetch(Globals globals, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
+        public Fetch(Globals globals, ConfigProperties properties, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
         {
             this.globals = globals;
+            this.properties = properties;
             this.stdout = stdout;
             this.remoteOptions = remoteOptions;
             this.authors = authors;
@@ -39,6 +41,16 @@ namespace Sep.Git.Tfs.Commands
         bool ExportMetadatas { get; set; }
         string ExportMetadatasFile { get; set; }
         public bool IgnoreBranches { get; set; }
+        public string BatchSizeOption
+        {
+            set
+            {
+                int batchSize;
+                if (!int.TryParse(value, out batchSize))
+                    throw new GitTfsException("error: batch size parameter should be an integer.");
+                properties.BatchSize = batchSize;
+            }
+        }
 
         public virtual OptionSet OptionSet
         {
@@ -62,6 +74,8 @@ namespace Sep.Git.Tfs.Commands
                         v => ExportMetadatasFile = v },
                     { "ignore-branches", "Ignore fetching merged branches when encounter merge changesets",
                         v => IgnoreBranches = v != null },
+                    { "batch-size=", "Size of a the batch of tfs changesets fetched (-1 for all in one batch)",
+                        v => BatchSizeOption = v },
                 }.Merge(remoteOptions.OptionSet);
             }
         }

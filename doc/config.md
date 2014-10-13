@@ -15,6 +15,18 @@ during `git tfs init`.
   this is to make the result of `git tfs clone` as nearly identical,
   byte-wise, as possible, to the version in TFS.
 
+There is other git-tfs configuration values for the repository:
+
+* `git-tfs.batch-size` define the number of changesets fetched in the same time
+  from TFS (Could also be set with the `clone` command). 
+* `git-tfs.work-item-regex` could be used to define the regular expression to 
+  extract workitems reference from commit message.
+* `git-tfs.workspace-dir` is used to define a new directory as the workspace
+  used by TFS to circumvent problem with long paths.
+  The path should be the shortest possible (i.e. "c:\w")
+* `git-tfs.export-metadatas` is set to `true` to export all metadata in the
+  commit messages.
+
 ## Per-TFS remote
 
 Git-tfs can map multiple TFS branches to git branches. Each TFS

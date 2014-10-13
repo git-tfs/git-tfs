@@ -74,6 +74,13 @@ If the tfs branch merged has not be inited, the merge changeset will be created 
 
     warning: this changeset 34 is a merge changeset. But it can't have been managed accordingly because one of the parent changeset 33 is not present in the repository! If you want to do it, fetch the branch containing this changeset before retrying...
 
+### Batch size of fetched changesets
+
+The option `--batch-size` permit to specify the number of changesets fetched from tfs at the same time (default:100).
+You could use this option to specify smaller batch size if git-tfs use too much memory because changesets are huge.
+This option is not saved but you could add it to the git config file (key `git-tfs.batch-size`). See [config file doc](../config.md). 
+Note: this option could also be specified during the `clone`.
+
 ## See also
 
 * [clone](clone.md)
