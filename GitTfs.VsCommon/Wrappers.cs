@@ -455,12 +455,12 @@ namespace Sep.Git.Tfs.VsCommon
         public void ForceGetFile(string path, int changeset)
         {
             var item = new ItemSpec(path, RecursionType.None);
-            _workspace.Get(new GetRequest(item, changeset), GetOptions.Overwrite | GetOptions.GetAll);
+            Retry.DoWhile(() => _workspace.Get(new GetRequest(item, changeset), GetOptions.Overwrite | GetOptions.GetAll).NumFailures != 0);
         }
 
         public void GetSpecificVersion(int changeset)
         {
-            Retry.Do(() => _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll));
+            Retry.Do(() => Retry.DoWhile(() => _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll).NumFailures != 0));
         }
 
         public void GetSpecificVersion(IChangeset changeset)
@@ -477,7 +477,7 @@ namespace Sep.Git.Tfs.VsCommon
                                    new GetRequest(
                                        new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId),
                                        changesetId);
-                _workspace.Get(requests.ToArray(), GetOptions.Overwrite);
+                Retry.DoWhile(() => _workspace.Get(requests.ToArray(), GetOptions.Overwrite).NumFailures != 0);
             });
         }
 
