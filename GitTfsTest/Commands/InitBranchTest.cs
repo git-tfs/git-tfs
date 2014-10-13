@@ -326,7 +326,7 @@ namespace Sep.Git.Tfs.Test.Commands
 
             var ex = Assert.Throws(typeof(GitTfsException), ()=>mocks.ClassUnderTest.Run());
 
-            Assert.Equal("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '$/MyProject/TheCloneWasNotMadeFromTheTrunk!'...", ex.Message);
+            Assert.Equal("error: The use of the option '--with-branches' to init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '$/MyProject/TheCloneWasNotMadeFromTheTrunk!'...", ex.Message);
 
             gitRepository.VerifyAllExpectations();
 
@@ -386,7 +386,7 @@ namespace Sep.Git.Tfs.Test.Commands
 
             var ex = Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run());
 
-            Assert.Equal("error: Init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '$/MyProject/Trunk' is not a TFS branch!", ex.Message);
+            Assert.Equal("error: The use of the option '--with-branches' to init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '$/MyProject/Trunk' is not a TFS branch!", ex.Message);
 
             gitRepository.VerifyAllExpectations();
 

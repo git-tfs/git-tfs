@@ -127,6 +127,11 @@ namespace Sep.Git.Tfs.Commands
                     retVal = initBranch.Run();
                 }
             }
+            catch (GitTfsException)
+            {
+                errorOccurs = true;
+                throw;
+            }
             catch (Exception ex)
             {
                 errorOccurs = true;
