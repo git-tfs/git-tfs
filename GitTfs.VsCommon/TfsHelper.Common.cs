@@ -616,12 +616,8 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
                 var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
-                _workspaces.Add(remote.Id, workspace = Retry.Do(() =>GetWorkspace(folders)));
-                Janitor.CleanThisUpWhenWeClose(() =>
-                {
-                    Trace.WriteLine("Deleting workspace " + workspace.Name);
-                    Retry.Do(() => workspace.Delete());
-                });
+                _workspaces.Add(remote.Id, workspace = Retry.Do(() => GetWorkspace(folders)));
+                Janitor.CleanThisUpWhenWeClose(() => TryToDeleteWorkspace(workspace));
             }
             var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
                 .With("remote").EqualTo(remote)
@@ -648,7 +644,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
             finally
             {
-                Retry.Do(() => workspace.Delete());
+                TryToDeleteWorkspace(workspace);
             }
         }
 
@@ -657,17 +653,17 @@ namespace Sep.Git.Tfs.VsCommon
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
             try
             {
-                foreach(WorkingFolder folder in folders)
+                foreach (WorkingFolder folder in folders)
                     workspace.CreateMapping(folder);
             }
             catch (MappingConflictException e)
             {
-                workspace.Delete();
+                TryToDeleteWorkspace(workspace);
                 throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
             }
             catch
             {
-                workspace.Delete();
+                TryToDeleteWorkspace(workspace);
                 throw;
             }
             return workspace;
@@ -749,6 +745,27 @@ namespace Sep.Git.Tfs.VsCommon
                     }
                 }
             }
+        }
+        /// <summary>
+        /// Method to help improve the process that deletes workspaces used by Git-TFS.
+        /// The the delete fails, the process pauses for 5 seconds and retry 25 times before reporting failures.        
+        /// </summary>
+        /// <param name="workspace"></param>
+        /// <remarks>
+        /// TFS randomly seems to report a workspace removed/deleted BUT subsequent calls by Git-TFS suggest that the delete hasn't actually been completed. 
+        /// This suggest that deletes may be queued and take a lower priority than other actions, especially if the TFS server is under load.
+        /// </remarks>
+        private static void TryToDeleteWorkspace(Workspace workspace)
+        {
+            //  Try and ensure the client and TFS Server are synchronized.
+            workspace.Refresh();
+
+            //  When deleting a workspace we may need to allow the TFS server some time to complete existing processing or re-try the workspace delete.            
+            var deleteWsCompleted = Retry.Do(() => workspace.Delete(), TimeSpan.FromSeconds(5), 25);
+
+            // Include trace information about the success of the TFS API that deletes the workspace.
+            Trace.WriteLine(string.Format(deleteWsCompleted ? "TFS Workspace '{0}' was removed." : "TFS Workspace '{0}' could not be removed", workspace.DisplayName));
+
         }
 
         public bool HasShelveset(string shelvesetName)
