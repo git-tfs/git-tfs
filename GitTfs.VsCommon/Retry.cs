@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Sep.Git.Tfs.Core;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -53,6 +54,23 @@ namespace Sep.Git.Tfs.VsCommon
             }
 
             throw new AggregateException(exceptions);
+        }
+
+        public static void DoWhile(Func<bool> action, int retryCount = 10)
+        {
+            DoWhile(action, TimeSpan.FromSeconds(0), retryCount);
+        }
+
+        public static void DoWhile(Func<bool> action, TimeSpan retryInterval, int retryCount = 10)
+        {
+            int count = 0;
+            while (action())
+            {
+                count++;
+                if (count > retryCount)
+                    throw new GitTfsException("error: Action failed after " + retryCount + " retries!");
+                Thread.Sleep(retryInterval);
+            }
         }
     }
 }
