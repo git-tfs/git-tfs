@@ -452,15 +452,20 @@ namespace Sep.Git.Tfs.VsCommon
             return _workspace.PendRename(pathFrom, pathTo);
         }
 
+        void DoUntilNoFailures(Func<GetStatus> get)
+        {
+            Retry.DoWhile(() => get().NumFailures != 0);
+        }
+
         public void ForceGetFile(string path, int changeset)
         {
             var item = new ItemSpec(path, RecursionType.None);
-            Retry.DoWhile(() => _workspace.Get(new GetRequest(item, changeset), GetOptions.Overwrite | GetOptions.GetAll).NumFailures != 0);
+            DoUntilNoFailures(() => _workspace.Get(new GetRequest(item, changeset), GetOptions.Overwrite | GetOptions.GetAll));
         }
 
         public void GetSpecificVersion(int changeset)
         {
-            Retry.Do(() => Retry.DoWhile(() => _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll).NumFailures != 0));
+            Retry.Do(() => DoUntilNoFailures(() => _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll)));
         }
 
         public void GetSpecificVersion(IChangeset changeset)
@@ -477,7 +482,7 @@ namespace Sep.Git.Tfs.VsCommon
                                    new GetRequest(
                                        new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId),
                                        changesetId);
-                Retry.DoWhile(() => _workspace.Get(requests.ToArray(), GetOptions.Overwrite).NumFailures != 0);
+                DoUntilNoFailures(() => _workspace.Get(requests.ToArray(), GetOptions.Overwrite));
             });
         }
 
