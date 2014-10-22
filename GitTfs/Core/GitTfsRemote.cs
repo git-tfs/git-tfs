@@ -319,15 +319,18 @@ namespace Sep.Git.Tfs.Core
             List<ITfsChangeset> fetchedChangesets;
             do
             {
-                fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch).ToList();
-                if(!fetchedChangesets.Any())
+                var fetchedChangesetsEn = FetchChangesets(true, lastChangesetIdToFetch).GetEnumerator();
+
+                if (!fetchedChangesetsEn.MoveNext())
                     return fetchResult;
 
                 var objects = BuildEntryDictionary();
                 Trace.WriteLine(
                     RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to " + latestChangesetId + " ...", "info");
-                foreach (var changeset in fetchedChangesets)
+
+                do
                 {
+                    var changeset = fetchedChangesetsEn.Current;
                     fetchResult.NewChangesetCount++;
                     if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
                         return fetchResult;
@@ -347,15 +350,19 @@ namespace Sep.Git.Tfs.Core
                     }
                     var commitSha = ProcessChangeset(changeset, log);
                     fetchResult.LastFetchedChangesetId = changeset.Summary.ChangesetId;
+                    
                     // set commit sha for added git objects
-                    foreach (var commit in objects)
+                    foreach (var commit in objects.Where(commit => commit.Value.Commit == null))
                     {
-                        if (commit.Value.Commit == null)
-                            commit.Value.Commit = commitSha;
+                        commit.Value.Commit = commitSha;
                     }
+
                     DoGcIfNeeded();
                 }
-            } while (fetchedChangesets.Any() && latestChangesetId > fetchResult.LastFetchedChangesetId);
+                while (fetchedChangesetsEn.MoveNext());
+            }
+            while (latestChangesetId > fetchResult.LastFetchedChangesetId);
+
             return fetchResult;
         }
 
