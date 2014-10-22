@@ -65,24 +65,19 @@ namespace Sep.Git.Tfs.Util
             }
         }
 
-        public IEnumerable<IChange> GetChangesToFetch()
+        public IEnumerable<IChange> GetChangesToFetch(bool isInitialChangeset = false)
         {
-            if (DeletesProject)
+            if (DeletesProject || (!isInitialChangeset && RenameBranchCommmit))
                 return Enumerable.Empty<IChange>();
 
-            if (RenameBranchCommmit)
-                return new List<IChange>();
-
-            return NamedChanges.Where(c => IncludeInFetch(c)).Select(c => c.Change);
+            return NamedChanges.Where(IncludeInFetch).Select(c => c.Change);
         }
 
-        public IEnumerable<ApplicableChange> GetChangesToApply()
+        public IEnumerable<ApplicableChange> GetChangesToApply(bool isInitialChangeset = false)
         {
-            if (DeletesProject)
+            if (DeletesProject || (!isInitialChangeset && RenameBranchCommmit))
                 return Enumerable.Empty<ApplicableChange>();
 
-            if (RenameBranchCommmit)
-                return new List<ApplicableChange>();
 
             var compartments = new {
                 Deleted = new List<ApplicableChange>(),
