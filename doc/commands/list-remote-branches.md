@@ -1,6 +1,6 @@
 ## Summary
 
-The `list-remote-branches` command help you find the branches to clone of a TFS server.
+The `list-remote-branches` command helps you find the branches to clone of a TFS server.
 
 ## Synopsis
 
@@ -18,7 +18,7 @@ The `list-remote-branches` command help you find the branches to clone of a TFS 
 To be able to return the list of the existing branches, all your source code folders corresponding to branches
 should be converted into branches (a notion introduced by TFS2010).
 
-If none of your branches is converted into branch in your TFS server, the command will return the message :
+If none of your branches are converted into branch in your TFS server, the command will return the message :
 
     No TFS branches were found!
 
@@ -53,7 +53,7 @@ However, it is recommended to clone the root branch and then use the [`branch`](
 
 ### Authentication
 
-If the TFS server need an authentication, you could use the _--username_ and _--password_ parameters. If you don't specify theses informations, you will be prompted to enter them. This informations are not store by git-tfs.
+If the TFS server needs an authentication, you could use the _--username_ and _--password_ parameters. If you don't specify this information, you will be prompted to enter them. This information is not stored by git-tfs.
 
     git tfs list-remote-branches http://tfs:8080/tfs/DefaultCollection -u=DISSRVTFS03\peter.pan -p=wendy
 
