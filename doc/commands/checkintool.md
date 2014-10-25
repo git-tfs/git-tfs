@@ -1,8 +1,8 @@
 ## Summary
 
-This function launches the standard TFS checkin window to commit your changes into TFS. It squashes differences between the last TFS commit and HEAD into one TFS-checkin and mark it as descendant of both previous TFS-checkin and HEAD.
+This function launches the standard TFS checkin window to commit your changes into TFS. It squashes differences between the last TFS commit and HEAD into one TFS-checkin and marks it as descendant of both previous TFS-checkin and HEAD.
 
-It works similarly to [checkin](checkin.md), except checkin doesn't launches the standard TFS checkin window.
+It works similarly to [checkin](checkin.md), except checkin doesn't launch the standard TFS checkin window.
 
 ## Synopsis
 
