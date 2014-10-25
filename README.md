@@ -115,13 +115,13 @@ This is the complete list of commands in the master branch on github.
 * [info](doc/commands/info.md)
 * [cleanup](doc/commands/cleanup.md) - since 0.10
 * [cleanup-workspaces](doc/commands/cleanup-workspaces.md) - since 0.10
-* [diagnostics](doc/commands/diagnostics.md) - since 0.9
 * [help](doc/commands/help.md) - since 0.9
 * [verify](doc/commands/verify.md) - since [0.11][v0.11]
-* [autotag](doc/commands/autotag.md) option - since [0.12][v0.12]
+* [autotag](doc/autotag_option.md) option - since [0.12][v0.12]
 * [subtree](doc/commands/subtree.md) - since [0.19](../../releases/tag/v0.19.0)
 * [reset-remote](doc/commands/reset-remote.md) - since [0.19](../../releases/tag/v0.19.0)
 * [checkout](doc/commands/checkout.md) - since [0.21](../../releases/tag/v0.21.0)
+* diagnostics (for git-tfs developpers only) - since 0.9
 
 * [config file](doc/config.md)
 
@@ -139,7 +139,7 @@ And depending of the version of TFS you use :
 
 ### Get the source code and build
 
-    #get the source code
+    #get the source code (with submodules source code!)
     git clone --recursive git://github.com/git-tfs/git-tfs.git
     cd git-tfs
 

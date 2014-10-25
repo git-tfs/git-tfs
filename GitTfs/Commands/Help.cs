@@ -73,7 +73,7 @@ namespace Sep.Git.Tfs.Commands
                     output.WriteLine();
                 }
             }
-            output.WriteLine(" (use 'git-tfs help [command]' for more information)");
+            output.WriteLine(" (use 'git-tfs help [command]' or 'git-tfs [command] --help' for more information)");
             output.WriteLine("\nFind more help in our online help : https://github.com/git-tfs/git-tfs");
             return GitTfsExitCodes.Help;
         }

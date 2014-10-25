@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Test.Commands
             var output = outputWriter.GetStringBuilder().ToString();
             output.AssertStartsWith("Usage: git-tfs [command] [options]");
             output.TrimEnd()
-                  .AssertEndsWith(" (use 'git-tfs help [command]' for more information)" + Environment.NewLine +
+                  .AssertEndsWith(" (use 'git-tfs help [command]' or 'git-tfs [command] --help' for more information)" + Environment.NewLine +
                                   "\nFind more help in our online help : https://github.com/git-tfs/git-tfs");
         }
 
