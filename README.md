@@ -10,7 +10,7 @@ And read [how to report an issue](doc/reporting-issues.md), before doing so ;)
 
 ## Get git-tfs
 
-Three differents ways to get git-tfs:
+Three different ways to get git-tfs:
 
 * Download a binary. Find it on the [release page](https://github.com/git-tfs/git-tfs/releases),
 * Using Chocolatey. If [Chocolatey](http://chocolatey.org/) is already installed on your computer, run `cinst gittfs` to install the [Chocolatey package](http://chocolatey.org/packages/gittfs)
@@ -72,8 +72,13 @@ You need .NET 4 and either the 2010, 2012 or 2013 version of Team Explorer insta
     # or shelve your changes :
     git tfs shelve MY_AWESOME_CHANGES
 
-You could find more interesting [use cases](doc/usecases/usecases.md) on how to use git-tfs.
-	
+Have a look to more detailed git-tfs use cases:
+
+* [Working with no branches](doc/usecases/working_with_no_branches.md)
+* [Manage TFS branches with git-tfs](doc/usecases/manage_tfs_branches.md)
+* [Migrate your history from TFSVC to a git repository](doc/usecases/migrate_tfs_to_git.md)
+* [Working with shelvesets](doc/usecases/working_with_shelvesets.md).
+
 git-tfs is designed to work outside of any existing TFS workspaces.
 
 ## Available commands / options
@@ -117,7 +122,7 @@ This is the complete list of commands in the master branch on github.
 * [cleanup-workspaces](doc/commands/cleanup-workspaces.md) - since 0.10
 * [help](doc/commands/help.md) - since 0.9
 * [verify](doc/commands/verify.md) - since [0.11][v0.11]
-* [autotag](doc/autotag_option.md) option - since [0.12][v0.12]
+* [autotag](doc/config.md#per-tfs-remote) option - since [0.12][v0.12]
 * [subtree](doc/commands/subtree.md) - since [0.19](../../releases/tag/v0.19.0)
 * [reset-remote](doc/commands/reset-remote.md) - since [0.19](../../releases/tag/v0.19.0)
 * [checkout](doc/commands/checkout.md) - since [0.21](../../releases/tag/v0.21.0)

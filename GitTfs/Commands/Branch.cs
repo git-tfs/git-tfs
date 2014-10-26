@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Commands
         "       * Display remote TFS branches:\n       git tfs branch -r\n       git tfs branch -r -all\n\n" +
         "       * Create a TFS branch from current commit:\n       git tfs branch $/Repository/ProjectBranchToCreate <myWishedRemoteName> --comment=\"Creation of my branch\"\n\n" +
         "       * Rename a remote branch:\n       git tfs branch --move oldTfsRemoteName newTfsRemoteName\n\n" +
-        "       * Delete a remote branche:\n       git tfs branch --delete tfsRemoteName\n\n" +
+        "       * Delete a remote branch:\n       git tfs branch --delete tfsRemoteName\n\n" +
         "       * Initialise an existing remote TFS branch:\n       git tfs branch --init $/Repository/ProjectBranch\n       git tfs branch --init $/Repository/ProjectBranch myNewBranch\n       git tfs branch --init --all\n       git tfs branch --init --tfs-parent-branch=$/Repository/ProjectParentBranch $/Repository/ProjectBranch\n")]
     [RequiresValidGitRepository]
     public class Branch : GitTfsCommand

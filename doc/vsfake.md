@@ -25,6 +25,6 @@ $ GIT_TFS_CLIENT=Fake git-tfs --version
 
 ## Status
 
-The plan for VsFake is to implement a mock TFS endpoint whose behavior is defined by configuration files. In development (not just on Mono), this plugin should make it easier to reproduce and investigate bugs.
+The plan for VsFake is to implement a mock TFS endpoint whose behaviour is defined by configuration files. In development (not just on Mono), this plugin should make it easier to reproduce and investigate bugs.
 
 As of 30 Jan 2011, VsFake is only implemented enough for git-tfs to start and show help.

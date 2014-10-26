@@ -12,7 +12,7 @@ The fetch command fetch all the new changesets from a TFS remote
                                  The remote ID of the TFS to interact with
                                    default: default
       -I, --auto-tfs-remote, --auto-remote
-                                 Autodetect (from git history) the remote ID of
+                                 Auto-detect (from git history) the remote ID of
                                    the TFS to interact with
           --all, --fetch-all     Fetch TFS changesets of all the initialized tfs
                                    remotes
@@ -25,7 +25,7 @@ The fetch command fetch all the new changesets from a TFS remote
                                    messages
                                    Use this when you're exporting from TFS and
                                    don't need to put data back into TFS.
-      -u, --username=VALUE       TFS username
+      -u, --username=VALUE       TFS user name
       -p, --password=VALUE       TFS password
 ## Examples
 
@@ -69,8 +69,8 @@ For the use of parameter `--authors`, see the [clone](clone.md) command.
 
 ### Fetching merge changesets
 
-Merge changesets will be automatically fetched and created as a merge commit if the tfs branch merged has already inited in the git repository.
-If the tfs branch merged has not be inited, the merge changeset will be created as a normal commit (not a merged one) and this warning message will be created :
+Merge changesets will be automatically fetched and created as a merge commit if the tfs branch merged has already been initialized in the git repository.
+If the tfs branch merged has not be initialized, the merge changeset will be created as a normal commit (not a merged one) and this warning message will be created :
 
     warning: this changeset 34 is a merge changeset. But it can't have been managed accordingly because one of the parent changeset 33 is not present in the repository! If you want to do it, fetch the branch containing this changeset before retrying...
 

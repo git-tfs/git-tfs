@@ -33,7 +33,7 @@ If you want to include in the list the shelvesets of all the users, just do:
 	
 # Unshelve a shelveset
 
-Once you've found the name of the shelveset, you could use the `unshelve` command to fetch the shleveset in your repository.
+Once you've found the name of the shelveset, you could use the `unshelve` command to fetch the shelveset in your repository.
  
 ## Unshelve one of your shelveset
 

@@ -2,7 +2,7 @@
 
 The `init` command creates a new git repository, initialized from a TFS source tree (without fetching the changesets). Fetching changeset should be done with [fetch](fetch.md) command.
 
-Prefer the [clone](clone.md) command to init and fetch changesets from a TFS repository!
+Prefer the [clone](clone.md) command to initialize and fetch changesets from a TFS repository!
 
 ## Synopsis
 
@@ -33,7 +33,7 @@ Prefer the [clone](clone.md) command to init and fetch changesets from a TFS rep
 
 ### Simple
 
-To init `$/Project1` from your TFS 2010 server `tfs`
+To initialize `$/Project1` from your TFS 2010 server `tfs`
 into a new directory `Project1`, do this:
 
     git tfs init http://tfs:8080/tfs/DefaultCollection $/Project1
@@ -42,7 +42,7 @@ then, to retrieve tfs changesets do this :
 
     git tfs pull
 
-Note: [pull] is here prefered to [fetch], otherwise the git branch `master` won't be created :(	
+Note: [pull] is here preferred to [fetch], otherwise the git branch `master` won't be created :(	
 
 ## See also
 

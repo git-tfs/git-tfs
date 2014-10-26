@@ -1,6 +1,6 @@
 ## Summary
 
-The verify command helps identify inaccuracies of a fetch, clone, or quick-clone from TFS.
+The verify command helps identify inaccuracies of a fetch, clone or quick-clone from TFS.
 
 ## Synopsis
 

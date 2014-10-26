@@ -9,7 +9,7 @@ First fetch all the source history (with all branches) in a local git repository
     git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --with-branches
 
 See [clone](../commands/clone.md) command if you should use a password or an author file
- (recommended if you want an mail adresse instead of a windows login in commit messages), ...
+ (recommended if you want an email address instead of a windows login in commit messages), ...
 
 Wait quite some time, fetching changesets from TFS is a slow process :(
  
@@ -21,7 +21,7 @@ Clean all the git-tfs metadatas from the commit messages:
 	
 Then verify that all is ok and delete the folder `.git/refs/original` ( to delete old branches)
 
-Note: if you do that, you won't be able to fetch tfs changesets anymore.
+Note: if you do that, you won't be able to fetch tfs changesets any more.
 You should do that if you want to migrate definitively away of TFS!
 
 ### Add a remote toward git central repository
@@ -40,26 +40,26 @@ Migration is done!
 
 ## Migrate toward TFS2013 git repository (keeping workitems)
 
-### Migrate your workitems
-Use [Total Tfs Migration](https://totaltfsmigration.codeplex.com/) to migrate your workitems from your old TFS(VC) project to your new TFS(Git) project.
+### Migrate your work-items
+Use [Total Tfs Migration](https://totaltfsmigration.codeplex.com/) to migrate your work-items from your old TFS(VC) project to your new TFS(Git) project.
 
 When process is done, you should have in the subdirectory `map` of the application,
  a file named `ID_map_[Project1]_to_[Project2].txt` containing the mapping between 
- old work items and new workitems ids.
+ old work items and new work-items ids.
 
 Note :
 - For the moment, 'Tfs Integration Platform' doesn't support TFS2013 and consequently doesn't permit to migrate work items to a TFS(Git) project.
-- If one day, it is possible, mapping between old work items and new workitems ids is store in the table 'RUNTIME_MIGRATION_ITEMS' of the database 'Tfs_IntegrationPlatform'.
-Extract the datas to create a file with each line formated following: OldWorkItemId|NewWorkItemId
+- If one day, it is possible, mapping between old work items and new work-items ids is store in the table 'RUNTIME_MIGRATION_ITEMS' of the database 'Tfs_IntegrationPlatform'.
+Extract the data to create a file with each line formatted following: OldWorkItemId|NewWorkItemId
 
 ### Fetch All History
 
-First fetch all the source history (with all branches) in a local git repository exporting workitems metadatas (using the mapping file obtained in the previous step):
+First fetch all the source history (with all branches) in a local git repository exporting work-items metadatas (using the mapping file obtained in the previous step):
 
     git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --with-branches --export --export-work-item-mapping="c:\workitems\mapping\file.txt"
 
 See [clone](../commands/clone.md) command if you should use a password or an author file
- (recommended if you want an mail adresse instead of a windows login in commit messages), ...
+ (recommended if you want an mail address instead of a windows login in commit messages), ...
 
 Wait quite some time, fetching changesets from TFS is a slow process :(
  
@@ -71,7 +71,7 @@ Clean all the git-tfs metadatas from the commit messages:
 	
 Then verify that all is ok and delete the folder `.git/refs/original` ( to delete old branches)
 
-Note: if you do that, you won't be able to fetch tfs changesets anymore.
+Note: if you do that, you won't be able to fetch tfs changesets any more.
 You should do that if you want to migrate definitively away of TFS(VC)!
 
 ### Add a remote toward TFS(Git) repository
