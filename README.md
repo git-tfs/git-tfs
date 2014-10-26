@@ -72,14 +72,16 @@ You need .NET 4 and either the 2010, 2012 or 2013 version of Team Explorer insta
     # or shelve your changes :
     git tfs shelve MY_AWESOME_CHANGES
 
+git-tfs is designed to work outside of any existing TFS workspaces.
+
 Have a look to more detailed git-tfs use cases:
 
 * [Working with no branches](doc/usecases/working_with_no_branches.md)
 * [Manage TFS branches with git-tfs](doc/usecases/manage_tfs_branches.md)
 * [Migrate your history from TFSVC to a git repository](doc/usecases/migrate_tfs_to_git.md)
-* [Working with shelvesets](doc/usecases/working_with_shelvesets.md).
-
-git-tfs is designed to work outside of any existing TFS workspaces.
+* [Working with shelvesets](doc/usecases/working_with_shelvesets.md)
+* [Git and Tfs (ProGit v2 Book)](http://git-scm.com/book/en/v2/Git-and-Other-Systems-Git-as-a-Client#Git-and-TFS)
+* [Migrate from Tfs to Git (ProGit v2 Book)](http://git-scm.com/book/en/v2/Git-and-Other-Systems-Migrating-to-Git#TFS)
 
 ## Available commands / options
 
