@@ -41,7 +41,7 @@ At this point, `user2` will be able to use all the normal git-tfs commands.
 
 ## Using bootstrap in a repository with TFS branches
 
-If you cloned a git tfs repository where TFS branches has already been initialized, and that you planned to use `bootstrap`, you _MUST_ `bootstrap` FIRST the trunk also named 'master' (that will be bootstraped as `tfs/default`):
+If you cloned a git tfs repository where TFS branches has already been initialized, and that you planned to use `bootstrap`, you _MUST_ `bootstrap` FIRST the trunk also named 'master' (that will be bootstrapped as `tfs/default`):
 
     git clone git@someplace:shared/repo.git
     cd repo
@@ -52,9 +52,9 @@ If you cloned a git tfs repository where TFS branches has already been initializ
 
 Then, you could `bootstrap`, when you want or when you need, all the missing tfs remotes:
 
-    //bootstap a tfs branch 'myBranch' for example
+    //bootstrap a tfs branch 'myBranch' for example
     git checkout myBranch
     //bootstrap the tfs branch
     git tfs bootstrap
 
-Note: When you `bootstrap` one branch, the `boostrap` command will automatically bootstrap also all the TFS remotes that will be found when following the commit history of the branch you are bootstrapping. So, perhaps, you won't have to `boostrap` all the TFS remotes one by one ;)
+Note: When you `bootstrap` one branch, the `bootstrap` command will automatically bootstrap also all the TFS remotes that will be found when following the commit history of the branch you are bootstrapping. So, perhaps, you won't have to `bootstrap` all the TFS remotes one by one ;)

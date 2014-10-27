@@ -46,7 +46,7 @@ into a new directory `Project1`, do this:
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1
 
 ### Clone only the trunk (or a branch)
-Sometimes, it could be interesting to clone only a branch of a TFS repository (for exemple to extract only the trunk of your project and manage branches with `[branch](branch.md)`. 
+Sometimes, it could be interesting to clone only a branch of a TFS repository (for example to extract only the trunk of your project and manage branches with `[branch](branch.md)`. 
 
 Suppose you have on TFS:
 
@@ -58,12 +58,12 @@ Then, do this (the clone will be done in the `MyProject1Directory` directory):
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory
 
-Note : It is highly recommanded to clone the root branch ( the branch that has no parents, here $/Project1/Trunk ) to be able to init the other branches after.
+Note : It is highly recommended to clone the root branch ( the branch that has no parents, here $/Project1/Trunk ) to be able to init the other branches after.
 If you clone the branch $/Project1/Branch, you will never able to init the root branch $/Project1/Trunk after.
 
 ### Merge changesets and branches
 
-Since version 0.20, when cloning the trunk from TFS, if git-tfs encounter a merge changeset, it initialize and fetch automaticaly the other branch merged.
+Since version 0.20, when cloning the trunk from TFS, if git-tfs encounter a merge changeset, it initialize and fetch automatically the other branch merged.
 
 Suppose you have on TFS:
 
@@ -73,9 +73,9 @@ Suppose you have on TFS:
 
 When cloning the tfs branch `$/Project1/Trunk`, after having fetch changesets A to E, git-tfs encounter merge changeset X. When it did, git-tfs initialize also the tfs branch `$/Project1/Branch` and fetch changeset M to O to be able to create the merge commit X and then continue to fetch changesets Y and Z.
 
-If you don't want to intialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--ignore-branches` to disable it!
+If you don't want to initialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--ignore-branches` to disable it!
 
-Note: To successfully process the merge changeset (and come from an older version than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right clic on a folder and choose `Branching and Merging` -> `Convert to Branch`.
+Note: To successfully process the merge changeset (and come from an older version than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right click on a folder and choose `Branching and Merging` -> `Convert to Branch`.
 
 ### What repository path to clone?
 
@@ -87,7 +87,7 @@ Prerequisite: To use this feature, all your source code folders corresponding to
 should be converted into branches (a notion introduced by TFS2010).
 To change that, you should open 'Source Control Explorer' and then, for each folder corresponding to a branch, right click on your source folder and select 'Branching and Merging' > 'Convert to branch'.
 
-If you want to clone your entire repository with all the branches or that the tfs branches are merged througth merge changeset, perhaps you should use the option `--with-branches`:
+If you want to clone your entire repository with all the branches or that the tfs branches are merged through merge changeset, perhaps you should use the option `--with-branches`:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk --with-branches
 
@@ -115,15 +115,24 @@ With the parameter _--authors_, you could specify a file containing all the mapp
 
 The clone command will be :
 
-    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --authors="c:\project_file\authors.txt"
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk --authors="c:\project_file\authors.txt"
 
-Once the clone is done, the file is store in the `.git` folder (with the name `git-tfs_authors`) and used with later `fetch`. You could overwrite it by specifting another file (or go delete it).
+Once the clone is done, the file is store in the `.git` folder (with the name `git-tfs_authors`) and used with later `fetch`. You could overwrite it by specifying another file (or go delete it).
 
+Note: You could use the `tf history` command to help you find all the Tfs users logins that should be found in the `authors.txt` file.
+
+    tf history $/Project1/Trunk -recursive | cut -b 11-28 | tail -n+3 | uniq | sort | uniq > authors.txt
+
+Be aware that the parameters of the `cut` command (column of beginning and column of end) depends of multiple parameters and that you surely will have to find them experimentally.
+The best way is perhaps to run the command in 2 times and look inside the first file generated `authors_tmp.txt` where the users column began and end.
+
+    tf history $/Project1/Trunk  -recursive > authors_tmp.txt
+    cat authors_tmp.txt | cut -b 11-28 | tail -n+3 | uniq | sort | uniq > authors.txt
 
 ### Set a custom Tfs Workspace directory
 
 By default, git-tfs use as a Tfs workspace an internal directory and you shouldn't care about ;)
-But, due to [file system limitations](../Set-custom-workspace.md), it could be usefull to set a custom directory (with a path as short as possible) as a tfs wordspace.
+But, due to [file system limitations](../Set-custom-workspace.md), it could be useful to set a custom directory (with a path as short as possible) as a tfs workspace.
 You could do it with the _--workspace_ parameter:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --workspace="c:\ws"

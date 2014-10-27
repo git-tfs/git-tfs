@@ -33,7 +33,7 @@ When you use [checkintool], you will end with an history looking like that :
      \      /  \     /  \     /  \     /
       --M--     --N--    --O--    --P--
 
-Perhaps, you would like to have a better historic, whithout all these merges, and, especially, following the TFS history.
+Perhaps, you would like to have a better historic, without all these merges, and, especially, following the TFS history.
 You have to reset the `tfs/default` remote to the `A` commit and then fetch to have an history like that:
 
     A[C1] <- B[C2] <- C[C3] <- D[C4] <- E[C5,tfs/default, master, HEAD]

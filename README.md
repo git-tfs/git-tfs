@@ -10,7 +10,7 @@ And read [how to report an issue](doc/reporting-issues.md), before doing so ;)
 
 ## Get git-tfs
 
-Three differents ways to get git-tfs:
+Three different ways to get git-tfs:
 
 * Download a binary. Find it on the [release page](https://github.com/git-tfs/git-tfs/releases),
 * Using Chocolatey. If [Chocolatey](http://chocolatey.org/) is already installed on your computer, run `cinst gittfs` to install the [Chocolatey package](http://chocolatey.org/packages/gittfs)
@@ -72,9 +72,16 @@ You need .NET 4 and either the 2010, 2012 or 2013 version of Team Explorer insta
     # or shelve your changes :
     git tfs shelve MY_AWESOME_CHANGES
 
-You could find more interesting [use cases](doc/usecases/usecases.md) on how to use git-tfs.
-	
 git-tfs is designed to work outside of any existing TFS workspaces.
+
+Have a look to more detailed git-tfs use cases:
+
+* [Working with no branches](doc/usecases/working_with_no_branches.md)
+* [Manage TFS branches with git-tfs](doc/usecases/manage_tfs_branches.md)
+* [Migrate your history from TFSVC to a git repository](doc/usecases/migrate_tfs_to_git.md)
+* [Working with shelvesets](doc/usecases/working_with_shelvesets.md)
+* [Git and Tfs (ProGit v2 Book)](http://git-scm.com/book/en/v2/Git-and-Other-Systems-Git-as-a-Client#Git-and-TFS)
+* [Migrate from Tfs to Git (ProGit v2 Book)](http://git-scm.com/book/en/v2/Git-and-Other-Systems-Migrating-to-Git#TFS)
 
 ## Available commands / options
 
@@ -115,13 +122,13 @@ This is the complete list of commands in the master branch on github.
 * [info](doc/commands/info.md)
 * [cleanup](doc/commands/cleanup.md) - since 0.10
 * [cleanup-workspaces](doc/commands/cleanup-workspaces.md) - since 0.10
-* [diagnostics](doc/commands/diagnostics.md) - since 0.9
 * [help](doc/commands/help.md) - since 0.9
 * [verify](doc/commands/verify.md) - since [0.11][v0.11]
-* [autotag](doc/commands/autotag.md) option - since [0.12][v0.12]
+* [autotag](doc/config.md#per-tfs-remote) option - since [0.12][v0.12]
 * [subtree](doc/commands/subtree.md) - since [0.19](../../releases/tag/v0.19.0)
 * [reset-remote](doc/commands/reset-remote.md) - since [0.19](../../releases/tag/v0.19.0)
 * [checkout](doc/commands/checkout.md) - since [0.21](../../releases/tag/v0.21.0)
+* diagnostics (for git-tfs developpers only) - since 0.9
 
 * [config file](doc/config.md)
 
@@ -139,7 +146,7 @@ And depending of the version of TFS you use :
 
 ### Get the source code and build
 
-    #get the source code
+    #get the source code (with submodules source code!)
     git clone --recursive git://github.com/git-tfs/git-tfs.git
     cd git-tfs
 

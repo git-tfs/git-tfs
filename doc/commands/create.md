@@ -1,6 +1,6 @@
 ## Summary
 
-The `create` command creates the project folder on a TFS server and init the git repository with this new TFS folder.
+The `create` command creates the project folder on a TFS server and initialize the git repository with this new TFS folder.
 You could also in the same time create the Tfs repository...
 
 Prefer the [clone](clone.md) or [init](init.md) command if the project folder already exists in TFS!
@@ -41,7 +41,7 @@ Prefer the [clone](clone.md) or [init](init.md) command if the project folder al
 								   be done for a bare repository
 		  --force                Force fetch of tfs changesets when there is
 								   ahead commits (ahead commits will be lost!)
-		  --with-branches        init all the TFS branches during the clone
+		  --with-branches        initialize all the TFS branches during the clone
 
 ## Examples
 
@@ -63,7 +63,7 @@ To create `$/myProjectName/trunk` in your TFS 2010/2012 server and the project f
 
     git tfs create --create-project-folder http://myTfsServer:8080/tfs/TfsRepository myProjectName
 
-PS: it is prefered to create the project folder from TFS GUI because this command create only the source controller part of the project.
+PS: it is preferred to create the project folder from TFS GUI because this command create only the source controller part of the project.
 TFS will create in the same the other components for the project (ALM, issue management,...) 
 
 ## See also

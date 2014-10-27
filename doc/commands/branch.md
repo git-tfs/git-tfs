@@ -15,7 +15,7 @@ The `branch` command permit to manage TFS branches. With this command, you can d
 		   * Rename a remote branch:
 		   git tfs branch --move oldTfsRemoteName newTfsRemoteName
 
-		   * Delete a remote branche:
+		   * Delete a remote branch:
 		   git tfs branch --delete tfsRemoteName
 
 		   * Initialise an existing remote TFS branch:
@@ -53,7 +53,7 @@ The `branch` command permit to manage TFS branches. With this command, you can d
 	  -a, --authors=VALUE        Path to an Authors file to map TFS users to Git
 								   users## Examples
 
-## Display already inited branches
+## Display already initialized branches
 
     git tfs branch
 
@@ -93,34 +93,34 @@ You should have done (to clone only the trunk) :
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Repository/ProjectTrunk
 
-Note : It is highly recommanded once having clone the root branch ( the branch that has no parents, here $/Repository/ProjectTrunk ) to init the other branches after.
+Note : It is highly recommended once having clone the root branch ( the branch that has no parents, here $/Repository/ProjectTrunk ) to initialize the other branches after.
 If you have cloned the branch $/Repository/ProjectBranch, you will never be able to init the root branch $/Repository/ProjectTrunk after.
 
 Then use `branch` like this :
 
-### Init a TFS branch using auto-naming of your git branch
+### Initialize a TFS branch using auto-naming of your git branch
 
     git tfs branch --init $/Repository/ProjectBranch
 
-### Init a TFS branch with customised git branch name
+### Initialize a TFS branch with customised git branch name
 
     git tfs branch --init $/Repository/ProjectBranch myNewBranch
 
 ### Merge changesets and branches
 
-Since version 0.20, when initializing and fetching a TFS branch, if git-tfs encounter a merge changeset, it initialize and fetch automaticaly the other branch merged.
+Since version 0.20, when initializing and fetching a TFS branch, if git-tfs encounter a merge changeset, it initialize and fetch automatically the other branch merged.
 
-If you don't want to intialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--ignore-branches` to disable it!
+If you don't want to initialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--ignore-branches` to disable it!
 
-Note: To successfully process the merge changeset (and come from an older version than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right clic on a folder and choose `Branching and Merging` -> `Convert to Branch`.
+Note: To successfully process the merge changeset (and come from an older version than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right click on a folder and choose `Branching and Merging` -> `Convert to Branch`.
 
-### Init all the TFS branches
+### Initialize all the TFS branches
 
     git tfs branch --init --all
 	
 This command init all the branches not already done and ignore existing ones.
 
-### Init a branch with TFS2008
+### Initialize a branch with TFS2008
 
 TFS2008 doesn't permit to know the parent of a branch. You should find it yourself with TFS and use the parameter `--tfs-parent-branch` to give it to the `init-branch` command:
 
@@ -136,9 +136,9 @@ You could use the parameter `--except-regex`, to add an exception to the paramet
 
     git tfs init-branch $/Repository/ProjectBranch --ignore-regex=*.bin --except-regex=important.bin
 
-### Init a branch without fetching changesets
+### Initialize a branch without fetching changesets
 
-You could use the parameter `--no-fetch`, to init the branch by creating its remote but without fetching the changesets of the branch.
+You could use the parameter `--no-fetch`, to initialize the branch by creating its remote but without fetching the changesets of the branch.
 
 ### Authentication
 
@@ -155,7 +155,7 @@ Note : It will not rename the TFS branch, just the local git remote.
     git tfs branch --move oldTfsRemoteName newTfsRemoteName
 
 
-## Delete a remote branche
+## Delete a remote branch
 
 Note : It will not delete the TFS branch, just the local git remote.
 

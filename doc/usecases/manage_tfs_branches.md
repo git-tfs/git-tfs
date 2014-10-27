@@ -98,7 +98,7 @@ Working with branches, for the main commands (`fetch`, `pull` and `rcheckin`), i
 
 Note : you could also use the option `-I` (instead of `-i` followed by the remote name) and let git-tfs find the good tfs remote to use
 
-All the others actions are done throught the `branch` command
+All the others actions are done through the `branch` command
 
 ## List branches
 
@@ -183,8 +183,8 @@ Git-tfs can handle merges (ie merge changesets) but there is some restrictions a
 
 If git-tfs encounter a merge changeset when fetching changesets, there is 2 possibilities:
 
-* Either, the 2 parent changesets have already been fetched and a merge commit will be created localy (the merge changeset has been well managed).
-* Either, the parent of the merged branch has not already been fetch. Then the merge changeset will be ignored and a nomal commit will be created
+* Either, the 2 parent changesets have already been fetched and a merge commit will be created locally (the merge changeset has been well managed).
+* Either, the parent of the merged branch has not already been fetch. Then the merge changeset will be ignored and a normal commit will be created
  (the merge changeset has not been well managed). In this case, a warning will be displayed.
 
 You should know that if you don't manage well merge changesets and that, in the future, you want to merge again the 2 branches, you will issue a lot of merge conflicts!
@@ -194,12 +194,12 @@ You could prevent that by doing 2 things:
 * cloning using the `--with-branches` option which will manage well all the merge changesets
 * always fetch the merge branch before fetching a merge changeset
 
-Note: if you see a warning, you could correct that by reseting the tfs remote to a previous commit. Then fetch the merged branch and retry to fetch the branch. 
+Note: if you see a warning, you could correct that by resetting the tfs remote to a previous commit. Then fetch the merged branch and retry to fetch the branch. 
 
 ### Merge 2 branches and checkin this merge in Tfs
 
 Because merging 2 branches with git is a lot more easy than with Tfs, you could use git-tfs to do it.
 
-If you want, for exemple, to merge the branch `b1` in the trunk `trunk`, you need that `b1` and `trunk` to be entirely checked in Tfs.
+If you want, for example, to merge the branch `b1` in the trunk `trunk`, you need that `b1` and `trunk` to be entirely checked in Tfs.
 Once done, you could do the merge with git as a normal merge with 2 local git branches.
 Then you have to check this commit into Tfs with the command `rcheckin` and a merge changeset will be created into Tfs.

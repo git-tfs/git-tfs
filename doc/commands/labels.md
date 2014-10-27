@@ -2,7 +2,7 @@
 
 The `labels` command fetch all the tfs labels.
 
-Note : Due to how TFS manage labels, this command fetch a lot of datas and could be quite long :(
+Note : Due to how TFS manage labels, this command fetch a lot of data and could be quite long :(
 
 ## Synopsis
 

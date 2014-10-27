@@ -1,4 +1,4 @@
-Sometimes, depending on where is located your repository folder on your drive and what is the file arborescence of your project,
+Sometimes, depending on where is located your repository folder on your drive and what is the file tree of your project,
 you could face errors because you exceed the 259 characters limit of NTFS file system.
 
 These errors could be :
@@ -14,7 +14,7 @@ This is due to the fact that git-tfs use a temp folder located in the folder `.g
 Note: If you look for this folder, you surely couldn't find it because it is created and deleted when a git-tfs command is run!
 
 A first simple solution could be to move your folder from a very long path to a shorter one.
-For exemple, move your repository folder from :
+For example, move your repository folder from :
 `C:\A\Very\Very\Long\Path\To\My\GitTfs\Repository` to `C:\repo`.
 
 Another better solution if you faced this problem is to use a custom workspace directory!

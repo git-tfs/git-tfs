@@ -8,11 +8,11 @@ Installation instructions: To install this policy, follow the instructions in Ch
 
 The first thing to check is that you can perform normal TFS checkins (in Visual Studio). If you can't, first solve that problem, and then check git-tfs again.
 
-If you can perform checkins in Visual Studio, then the problem is that git-tfs can't find the checkin policy (in this example above, `ChangesetComments`) that the Team Foundation Server told it to run. Depending on how this happened, there are a couple of possible solutions.
+If you can perform checkins in Visual Studio, then the problem is that git-tfs can't find the check-in policy (in this example above, `ChangesetComments`) that the Team Foundation Server told it to run. Depending on how this happened, there are a couple of possible solutions.
 
 ## Git-tfs should be using the same version of Visual Studio that you are.
 
-Sometimes git-tfs uses a different version of Visual Studio than you are. This most commonly happens when you are developing with the previous version of Visual Studio (e.g. VS2010), and install the latest version (e.g. VS2012) to try it out, but the checkin policies are not yet registered with the new version of Visual Studio. Git-tfs by default prefers the newest version of Visual Studio. To see which version of the TFS client libraries git-tfs is using, do this:
+Sometimes git-tfs uses a different version of Visual Studio than you are. This most commonly happens when you are developing with the previous version of Visual Studio (e.g. VS2010), and install the latest version (e.g. VS2012) to try it out, but the check-in policies are not yet registered with the new version of Visual Studio. Git-tfs by default prefers the newest version of Visual Studio. To see which version of the TFS client libraries git-tfs is using, do this:
 
 ```
 C:\> git tfs info
@@ -25,11 +25,11 @@ git-tfs version 0.16.1.0 (TFS client library 11.0.0.0 (MS)) (32-bit)
 
 TFS client library 11 is VS 2012, 10 is VS 2010, and 9 is VS 2008.
 
-You can tell git-tfs to use a specific client library by setting the `GIT_TFS_CLIENT` environment variable to the version of Visual Studio you are using (e.g. `2010`). If you set this in the Environment Variables control panel, then git-tfs will use the specified client library in all future cmd windows that you open. Don't forget to relaunch your console after setting the Environment Variable otherwise the old ones will be used.
+You can tell git-tfs to use a specific client library by setting the `GIT_TFS_CLIENT` environment variable to the version of Visual Studio you are using (e.g. `2010`). If you set this in the Environment Variables control panel, then git-tfs will use the specified client library in all future command windows that you open. Don't forget to relaunch your console after setting the Environment Variable otherwise the old ones will be used.
 
-## The checkin policies need to be registered.
+## The check-in policies need to be registered.
 
-There are some cases where Visual Studio can find the checkin policy implementation, but git-tfs still can't (especially VS2012 because a bug in the install of the TFS component). This can be solved by adding information about the checkin policy to the Windows registry.
+There are some cases where Visual Studio can find the check-in policy implementation, but git-tfs still can't (especially VS2012 because a bug in the install of the TFS component). This can be solved by adding information about the checkin policy to the Windows registry.
 
 Depending of the version of Visual Studio (here VS2012), look for the registry key :
 
