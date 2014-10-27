@@ -11,6 +11,7 @@ namespace Sep.Git.Tfs
 
         public const string DefaultRepositoryId = "default";
 
+        public const string TfsRoot = "$/";
         public const string GitTfsPrefix = "git-tfs";
         public const string GitTfsWorkItemPrefix = GitTfsPrefix + "-work-item:";
         public const string GitTfsCodeReviewerPrefix = GitTfsPrefix + "-code-reviewer:";

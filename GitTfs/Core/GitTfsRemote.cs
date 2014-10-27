@@ -262,9 +262,16 @@ namespace Sep.Git.Tfs.Core
             if (!IsSubtreeOwner)
             {
                 if (!tfsPath.StartsWith(TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)) return null;
-                if (tfsPath.Length > TfsRepositoryPath.Length && tfsPath[TfsRepositoryPath.Length] != '/')
-                    return null;
-                tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
+                if (TfsRepositoryPath == GitTfsConstants.TfsRoot)
+                {
+                    tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
+                }
+                else
+                {
+                    if (tfsPath.Length > TfsRepositoryPath.Length && tfsPath[TfsRepositoryPath.Length] != '/')
+                        return null;
+                    tfsPath = tfsPath.Substring(TfsRepositoryPath.Length);
+                }
             }
             else
             {

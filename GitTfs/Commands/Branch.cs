@@ -97,6 +97,8 @@ namespace Sep.Git.Tfs.Commands
 
             globals.WarnOnGitVersion(stdout);
 
+            VerifyCloneAllRepository();
+
             if (ShouldRenameRemote || ShouldDeleteRemote)
                 return helper.Run(this);
 
@@ -113,6 +115,8 @@ namespace Sep.Git.Tfs.Commands
         {
             if (!IsCommandWellUsed())
                 return helper.Run(this);
+
+            VerifyCloneAllRepository();
 
             globals.WarnOnGitVersion(stdout);
 
@@ -136,6 +140,8 @@ namespace Sep.Git.Tfs.Commands
             if (!IsCommandWellUsed())
                 return helper.Run(this);
 
+            VerifyCloneAllRepository();
+
             globals.WarnOnGitVersion(stdout);
 
             if (ShouldDeleteRemote)
@@ -151,6 +157,12 @@ namespace Sep.Git.Tfs.Commands
                 return RenameRemote(param1, param2);
 
             return CreateRemote(param1, param2);
+        }
+
+        private void VerifyCloneAllRepository()
+        {
+            if (globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId).TfsRepositoryPath == GitTfsConstants.TfsRoot)
+                throw new GitTfsException("error: you can't use the 'branch' command when you have cloned the whole repository '$/' !");
         }
 
         private int RenameRemote(string oldRemoteName, string newRemoteName)

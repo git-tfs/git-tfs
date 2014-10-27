@@ -55,7 +55,8 @@ namespace Sep.Git.Tfs.Commands
             var repositoryDirCreated = InitGitDir(gitRepositoryPath);
 
             // TFS string representations of repository paths do not end in trailing slashes
-            tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
+            if (tfsRepositoryPath != GitTfsConstants.TfsRoot)
+                tfsRepositoryPath = (tfsRepositoryPath ?? string.Empty).TrimEnd('/');
 
             int retVal = 0;
             try
@@ -113,6 +114,9 @@ namespace Sep.Git.Tfs.Commands
             {
                 if (withBranches && initBranch != null)
                     fetch.IgnoreBranches = false;
+
+                if (tfsRepositoryPath == GitTfsConstants.TfsRoot)
+                    fetch.IgnoreBranches = true;
 
                 if (retVal == 0)
                 {
