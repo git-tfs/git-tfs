@@ -304,6 +304,12 @@ namespace Sep.Git.Tfs.Core
             public string ParentBranchTfsPath { get; set; }
         }
 
+        public struct RenamingData
+        {
+            public static bool IsProcessingRenameChangeset = false;
+            public static string LastParentCommitBeforeRename = null;
+        }
+
         public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
         {
             return FetchWithMerge(-1, stopOnFailMergeCommit);
@@ -344,16 +350,19 @@ namespace Sep.Git.Tfs.Core
                         fetchResult.IsSuccess = false;
                         return fetchResult;
                     }
-                    var parentSha = LastParentCommitBeforeRename ?? MaxCommitHash;
+                    var parentSha = RenamingData.IsProcessingRenameChangeset ? RenamingData.LastParentCommitBeforeRename : MaxCommitHash;
+                    var isFirstCommitInRepository = (parentSha == null);
                     var log = Apply(parentSha, changeset, objects);
-                    if (changeset.IsRenameChangeset && parentSha != null)
+                    if (changeset.IsRenameChangeset && !isFirstCommitInRepository)
                     {
-                        if (LastParentCommitBeforeRename == null)
+                        if (!RenamingData.IsProcessingRenameChangeset)
                         {
-                            LastParentCommitBeforeRename = MaxCommitHash;
+                            RenamingData.IsProcessingRenameChangeset = true;
+                            RenamingData.LastParentCommitBeforeRename = MaxCommitHash;
                             return fetchResult;
                         }
-                        LastParentCommitBeforeRename = null;
+                        RenamingData.IsProcessingRenameChangeset = false;
+                        RenamingData.LastParentCommitBeforeRename = null;
                     }
                     if (parentCommitSha != null)
                         log.CommitParents.Add(parentCommitSha);
@@ -376,7 +385,6 @@ namespace Sep.Git.Tfs.Core
             return fetchResult;
         }
 
-        public static string LastParentCommitBeforeRename { get; set; }
 
         private Dictionary<string, GitObject> BuildEntryDictionary()
         {
