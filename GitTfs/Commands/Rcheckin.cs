@@ -270,7 +270,7 @@ namespace Sep.Git.Tfs.Commands
                     var tfsCommit = _globals.Repository.GetTfsCommit(gitParent);
                     if (tfsCommit != null)
                         return tfsCommit.Remote.TfsRepositoryPath;
-                    var lastCheckinCommit = _globals.Repository.GetLastParentTfsCommits(gitParent).First();
+                    var lastCheckinCommit = _globals.Repository.GetLastParentTfsCommits(gitParent).FirstOrDefault();
                     if (lastCheckinCommit != null)
                     {
                         if(!ForceCheckin && lastCheckinCommit.Remote.Id != remoteToCheckin.Id)
@@ -280,8 +280,10 @@ namespace Sep.Git.Tfs.Commands
                                 .WithRecommendation("check in all the commits of the tfs merged branch in TFS before trying to check in a merge commit",
                                 "use --ignore-merge option to ignore merged TFS branch and check in commit as a normal changeset (not a merge).");
                     }
-
-                    _stdout.WriteLine("warning: the parent " + gitParent + " does not belong to a TFS tracked branch (not checked in TFS) and will be ignored!");
+                    else
+                    {
+                        _stdout.WriteLine("warning: the parent " + gitParent + " does not belong to a TFS tracked branch (not checked in TFS) and will be ignored!");
+                    }
                 }
             }
             return null;
