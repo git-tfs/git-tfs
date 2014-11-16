@@ -118,6 +118,8 @@ namespace Sep.Git.Tfs.Commands
                 if (tfsRepositoryPath == GitTfsConstants.TfsRoot)
                     fetch.IgnoreBranches = true;
 
+                globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, fetch.IgnoreBranches.ToString());
+
                 if (retVal == 0)
                 {
                     fetch.Run(withBranches);
