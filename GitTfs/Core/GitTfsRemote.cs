@@ -302,25 +302,21 @@ namespace Sep.Git.Tfs.Core
             public long LastFetchedChangesetId { get; set; }
             public int NewChangesetCount { get; set; }
             public string ParentBranchTfsPath { get; set; }
+            public bool IsProcessingRenameChangeset { get; set; }
+            public string LastParentCommitBeforeRename { get; set; }
         }
 
-        public struct RenamingData
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, IRenameResult renameResult = null)
         {
-            public static bool IsProcessingRenameChangeset = false;
-            public static string LastParentCommitBeforeRename = null;
+            return FetchWithMerge(-1, stopOnFailMergeCommit, renameResult);
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
+        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes)
         {
-            return FetchWithMerge(-1, stopOnFailMergeCommit);
+            return FetchWithMerge(mergeChangesetId, stopOnFailMergeCommit, -1, renameResult, parentCommitsHashes);
         }
 
-        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
-        {
-            return FetchWithMerge(mergeChangesetId, stopOnFailMergeCommit, -1, parentCommitsHashes);
-        }
-
-        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, params string[] parentCommitsHashes)
+        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null, params string[] parentCommitsHashes)
         {
             var fetchResult = new FetchResult { IsSuccess = true, NewChangesetCount = 0 };
             var latestChangesetId = GetLatestChangesetId();
@@ -350,19 +346,19 @@ namespace Sep.Git.Tfs.Core
                         fetchResult.IsSuccess = false;
                         return fetchResult;
                     }
-                    var parentSha = RenamingData.IsProcessingRenameChangeset ? RenamingData.LastParentCommitBeforeRename : MaxCommitHash;
+                    var parentSha = (renameResult != null && renameResult.IsProcessingRenameChangeset) ? renameResult.LastParentCommitBeforeRename : MaxCommitHash;
                     var isFirstCommitInRepository = (parentSha == null);
                     var log = Apply(parentSha, changeset, objects);
                     if (changeset.IsRenameChangeset && !isFirstCommitInRepository)
                     {
-                        if (!RenamingData.IsProcessingRenameChangeset)
+                        if (renameResult == null || !renameResult.IsProcessingRenameChangeset)
                         {
-                            RenamingData.IsProcessingRenameChangeset = true;
-                            RenamingData.LastParentCommitBeforeRename = MaxCommitHash;
+                            fetchResult.IsProcessingRenameChangeset = true;
+                            fetchResult.LastParentCommitBeforeRename = MaxCommitHash;
                             return fetchResult;
                         }
-                        RenamingData.IsProcessingRenameChangeset = false;
-                        RenamingData.LastParentCommitBeforeRename = null;
+                        renameResult.IsProcessingRenameChangeset = false;
+                        renameResult.LastParentCommitBeforeRename = null;
                     }
                     if (parentCommitSha != null)
                         log.CommitParents.Add(parentCommitSha);
@@ -415,7 +411,7 @@ namespace Sep.Git.Tfs.Core
                 if (shaParent == null)
                 {
                     string omittedParentBranch;
-                    shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, out omittedParentBranch);
+                    shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, null, out omittedParentBranch);
                     changeset.OmittedParentBranch = omittedParentBranch;
                 }
                 if (shaParent != null)
@@ -515,31 +511,31 @@ namespace Sep.Git.Tfs.Core
             return commitSha;
         }
 
-        private string FindRootRemoteAndFetch(int parentChangesetId)
+        private string FindRootRemoteAndFetch(int parentChangesetId, IRenameResult renameResult = null)
         {
             string omittedParentBranch;
-            return FindRemoteAndFetch(parentChangesetId, false, false, out omittedParentBranch);
+            return FindRemoteAndFetch(parentChangesetId, false, false, renameResult, out omittedParentBranch);
         }
 
-        private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, out string omittedParentBranch)
+        private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, IRenameResult renameResult, out string omittedParentBranch)
         {
-            return FindRemoteAndFetch(parentChangesetId, false, true, out omittedParentBranch);
+            return FindRemoteAndFetch(parentChangesetId, false, true, renameResult, out omittedParentBranch);
         }
 
-        private string FindRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, bool mergeChangeset, out string omittedParentBranch)
+        private string FindRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, bool mergeChangeset, IRenameResult renameResult, out string omittedParentBranch)
         {
-            var tfsRemote = FindOrInitTfsRemoteOfChangeset(parentChangesetId, mergeChangeset, out omittedParentBranch);
+            var tfsRemote = FindOrInitTfsRemoteOfChangeset(parentChangesetId, mergeChangeset, renameResult, out omittedParentBranch);
 
             if (tfsRemote != null && string.Compare(tfsRemote.TfsRepositoryPath, TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase) != 0)
             {
                 stdout.WriteLine("\tFetching from dependent TFS remote '{0}'...", tfsRemote.Id);
-                var fetchResult = ((GitTfsRemote)tfsRemote).FetchWithMerge(-1, stopOnFailMergeCommit, parentChangesetId);
+                var fetchResult = ((GitTfsRemote)tfsRemote).FetchWithMerge(-1, stopOnFailMergeCommit, parentChangesetId, renameResult);
                 return Repository.FindCommitHashByChangesetId(parentChangesetId);
             }
             return null;
         }
 
-        private IGitTfsRemote FindOrInitTfsRemoteOfChangeset(int parentChangesetId, bool mergeChangeset, out string omittedParentBranch)
+        private IGitTfsRemote FindOrInitTfsRemoteOfChangeset(int parentChangesetId, bool mergeChangeset, IRenameResult renameResult, out string omittedParentBranch)
         {
             omittedParentBranch = null;
             IGitTfsRemote tfsRemote;
@@ -569,7 +565,7 @@ namespace Sep.Git.Tfs.Core
                 }
                 else
                 {
-                    tfsRemote = InitTfsRemoteOfChangeset(tfsBranch, parentChangeset.ChangesetId);
+                    tfsRemote = InitTfsRemoteOfChangeset(tfsBranch, parentChangeset.ChangesetId, renameResult);
                     if (tfsRemote == null)
                         omittedParentBranch = tfsBranch.Path + ";C" + parentChangesetId;
                 }
@@ -577,7 +573,7 @@ namespace Sep.Git.Tfs.Core
             return tfsRemote;
         }
 
-        private IGitTfsRemote InitTfsRemoteOfChangeset(IBranchObject tfsBranch, int parentChangesetId)
+        private IGitTfsRemote InitTfsRemoteOfChangeset(IBranchObject tfsBranch, int parentChangesetId, IRenameResult renameResult = null)
         {
             if (tfsBranch.IsRoot)
             {
@@ -598,7 +594,7 @@ namespace Sep.Git.Tfs.Core
                 }
 
                 if (branch.IsRenamedBranch)
-                    remote.Fetch();
+                    remote.Fetch(renameResult:renameResult);
             }
 
             return remote;
@@ -856,12 +852,12 @@ namespace Sep.Git.Tfs.Core
             return gitBranchName;
         }
 
-        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null)
+        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null, IRenameResult renameResult = null)
         {
-            return InitTfsBranch(remoteOptions, tfsRepositoryPath, rootChangesetId, fetchParentBranch, gitBranchNameExpected);
+            return InitTfsBranch(remoteOptions, tfsRepositoryPath, rootChangesetId, fetchParentBranch, gitBranchNameExpected, renameResult);
         }
 
-        private IGitTfsRemote InitTfsBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null)
+        private IGitTfsRemote InitTfsBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null)
         {
             Trace.WriteLine("Begin process of creating branch for remote :" + tfsRepositoryPath);
             // TFS string representations of repository paths do not end in trailing slashes
@@ -878,7 +874,7 @@ namespace Sep.Git.Tfs.Core
             {
                 sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
                 if (fetchParentBranch && string.IsNullOrWhiteSpace(sha1RootCommit))
-                    sha1RootCommit = FindRootRemoteAndFetch((int)rootChangesetId);
+                    sha1RootCommit = FindRootRemoteAndFetch((int)rootChangesetId, renameResult);
                 if (string.IsNullOrWhiteSpace(sha1RootCommit))
                     return null;
 

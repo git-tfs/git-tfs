@@ -147,14 +147,14 @@ namespace Sep.Git.Tfs.Commands
                 if (cbd.TfsRepositoryPath == tfsBranchPath)
                     cbd.GitBranchNameExpected = gitBranchNameExpected;
 
-                tfsRemote = defaultRemote.InitBranch(_remoteOptions, cbd.TfsRepositoryPath, cbd.RootChangesetId, !NoFetch, cbd.GitBranchNameExpected);
+                tfsRemote = defaultRemote.InitBranch(_remoteOptions, cbd.TfsRepositoryPath, cbd.RootChangesetId, !NoFetch, cbd.GitBranchNameExpected, fetchResult);
                 if (tfsRemote == null)
                 {
                     throw new GitTfsException("error: Couldn't fetch parent branch\n");
                 }
                 if (rootBranch.IsRenamedBranch || !NoFetch)
                 {
-                    fetchResult = FetchRemote(tfsRemote, false, !DontCreateGitBranch && !rootBranch.IsRenamedBranch);
+                    fetchResult = FetchRemote(tfsRemote, false, !DontCreateGitBranch && !rootBranch.IsRenamedBranch, fetchResult);
                     if(fetchResult.IsSuccess && rootBranch.IsRenamedBranch)
                         remoteToDelete.Add(tfsRemote);
                 }
@@ -392,12 +392,12 @@ namespace Sep.Git.Tfs.Commands
         }
 
 
-        private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true)
+        private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true, IRenameResult renameResult = null)
         {
             try
             {
                 Trace.WriteLine("Try fetching changesets...");
-                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit, renameResult);
                 Trace.WriteLine("Changesets fetched!");
 
                 if (fetchResult.IsSuccess && createBranch && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
