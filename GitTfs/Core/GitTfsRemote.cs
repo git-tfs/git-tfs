@@ -112,15 +112,15 @@ namespace Sep.Git.Tfs.Core
         /// Gets the TFS server-side paths of all subtrees of this remote.
         /// Valid if the remote has subtrees, which occurs when <see cref="TfsRepositoryPath"/> is null.
         /// </summary>
-        public string[] TfsSubtreePaths 
-        { 
+        public string[] TfsSubtreePaths
+        {
             get
             {
                 if (tfsSubtreePaths == null)
                     tfsSubtreePaths = Repository.GetSubtrees(this).Select(x => x.TfsRepositoryPath).ToArray();
 
                 return tfsSubtreePaths;
-            } 
+            }
         }
         private string[] tfsSubtreePaths = null;
 
@@ -178,7 +178,7 @@ namespace Sep.Git.Tfs.Core
 
                 if (this.IsSubtree)
                 {
-                    if(dir != null)
+                    if (dir != null)
                     {
                         return Path.Combine(dir, this.Prefix);
                     }
@@ -290,7 +290,7 @@ namespace Sep.Git.Tfs.Core
                 else
                     tfsPath = p.Prefix + "/" + tfsPath;
             }
-            
+
             while (tfsPath.StartsWith("/"))
                 tfsPath = tfsPath.Substring(1);
             return tfsPath;
@@ -327,7 +327,7 @@ namespace Sep.Git.Tfs.Core
             do
             {
                 fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch).ToList();
-                if(!fetchedChangesets.Any())
+                if (!fetchedChangesets.Any())
                     return fetchResult;
 
                 var objects = BuildEntryDictionary();
@@ -382,7 +382,7 @@ namespace Sep.Git.Tfs.Core
             {
                 var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
                 var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
-                if (shaParent == null)
+                if (shaParent == null && parentChangesetId != 0)
                 {
                     string omittedParentBranch;
                     shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, out omittedParentBranch);
@@ -391,6 +391,15 @@ namespace Sep.Git.Tfs.Core
                 if (shaParent != null)
                 {
                     parentCommit = shaParent;
+                }
+                else if (parentChangesetId == 0)
+                {
+                    if (stopOnFailMergeCommit)
+                        return false;
+
+                    stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
+                                     " is a merge changeset. But git-tfs failed to find any parent changeset. " +
+                                     "Parent changeset will be ignored...");
                 }
                 else
                 {
@@ -595,7 +604,7 @@ namespace Sep.Git.Tfs.Core
 
         private IEnumerable<ITfsChangeset> FetchChangesets(bool byLots, long lastVersion = -1)
         {
-            if(!IsSubtreeOwner)
+            if (!IsSubtreeOwner)
                 return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this, lastVersion, byLots);
 
             return globals.Repository.GetSubtrees(this)
@@ -684,7 +693,8 @@ namespace Sep.Git.Tfs.Core
         private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithWorkspace(changeset.Summary, workspace => {
+            WithWorkspace(changeset.Summary, workspace =>
+            {
                 var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(null);
                 result = changeset.CopyTree(treeBuilder, workspace);
                 result.Tree = treeBuilder.GetTree();
@@ -711,7 +721,7 @@ namespace Sep.Git.Tfs.Core
         public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler)
         {
             var destinationRef = GitRepository.ShortToLocalName(destinationBranch);
-            if(Repository.HasRef(destinationRef))
+            if (Repository.HasRef(destinationRef))
                 throw new GitTfsException("ERROR: Destination branch (" + destinationBranch + ") already exists!");
 
             var shelvesetChangeset = Tfs.GetShelvesetData(this, shelvesetOwner, shelvesetName);
@@ -719,8 +729,8 @@ namespace Sep.Git.Tfs.Core
             var parentId = shelvesetChangeset.BaseChangesetId;
             var ch = GetTfsChangesetById(parentId);
             if (ch == null)
-                throw new GitTfsException("ERROR: Parent changeset C" + parentId  + " not found."
-                                         +" Try fetching the latest changes from TFS");
+                throw new GitTfsException("ERROR: Parent changeset C" + parentId + " not found."
+                                         + " Try fetching the latest changes from TFS");
 
             var log = Apply(ch.GitCommit, shelvesetChangeset, ignorableErrorHandler);
             var commit = Commit(log);
@@ -805,12 +815,12 @@ namespace Sep.Git.Tfs.Core
 
         public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
         {
-            if(!MatchesTfsUrl(tfsUrl))
+            if (!MatchesTfsUrl(tfsUrl))
                 return false;
 
-            if(TfsRepositoryPath == null)
+            if (TfsRepositoryPath == null)
                 return tfsRepositoryPath == null;
-            
+
             return TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
         }
 
