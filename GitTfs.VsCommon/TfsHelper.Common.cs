@@ -134,16 +134,16 @@ namespace Sep.Git.Tfs.VsCommon
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
-           if (e.Failure != null)
-           {
-              _stdout.WriteLine(e.Failure.Message);
-              Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
-           }
-           if (e.Exception != null)
-           {
-              _stdout.WriteLine(e.Exception.Message);
-              Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
-           }
+            if (e.Failure != null)
+            {
+                _stdout.WriteLine(e.Failure.Message);
+                Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
+            }
+            if (e.Exception != null)
+            {
+                _stdout.WriteLine(e.Exception.Message);
+                Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+            }
         }
 
         private void Getting(object sender, GettingEventArgs e)
@@ -204,7 +204,7 @@ namespace Sep.Git.Tfs.VsCommon
         public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, long startVersion, IGitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                                        null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue,
+                                                                        null, new ChangesetVersionSpec((int)startVersion), VersionSpec.Latest, int.MaxValue,
                                                                         true, true, true)
                                                           .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
             // don't take the enumerator produced by a foreach statement or a yield statement, as there are references
@@ -220,7 +220,14 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var targetVersion = new ChangesetVersionSpec((int)targetChangeset);
             var mergeInfo = VersionControl.QueryMerges(null, null, path, targetVersion, targetVersion, targetVersion, RecursionType.Full);
-            return mergeInfo.Max(x => x.SourceVersion);
+            int result = 0;
+
+            if (mergeInfo.Any())
+            {
+                result = mergeInfo.Max(x => x.SourceVersion);
+            }
+
+            return result;
         }
 
         public bool Is2008OrOlder
@@ -583,7 +590,7 @@ namespace Sep.Git.Tfs.VsCommon
                 }
             }
             tfsChangeset.Summary.PolicyOverrideComment = changeset.PolicyOverride.Comment;
-            
+
             return tfsChangeset;
         }
 
@@ -712,7 +719,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
-        
+
         public void CleanupWorkspaces(string workingDirectory)
         {
             // workingDirectory is the path to a TFS workspace managed by git-tfs.
