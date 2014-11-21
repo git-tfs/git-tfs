@@ -462,7 +462,8 @@ namespace Sep.Git.Tfs.VsCommon
                 || merge.SourceChangeType.HasFlag(ChangeType.Merge)
                 || merge.SourceChangeType.HasFlag(ChangeType.Add)
                 || merge.SourceChangeType.HasFlag(ChangeType.Rollback)
-                || merge.SourceChangeType.HasFlag(ChangeType.Delete))
+                || merge.SourceChangeType.HasFlag(ChangeType.Delete)
+                || merge.SourceChangeType.HasFlag(ChangeType.Undelete))
             {
                 Trace.WriteLine("Found C" + merge.SourceChangeset + " on branch " + merge.SourceItem);
                 return merge.SourceChangeset;
