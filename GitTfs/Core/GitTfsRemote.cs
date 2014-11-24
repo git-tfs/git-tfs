@@ -428,7 +428,13 @@ namespace Sep.Git.Tfs.Core
             if (value != null && bool.TryParse(value, out isIgnoringBranches))
                 return isIgnoringBranches;
 
+            stdout.WriteLine("warning: no value found for branch management setting '" + GitTfsConstants.IgnoreBranches +
+                             "'...");
             var isIgnoringBranchesDetected = Repository.ReadAllTfsRemotes().Count() < 2;
+            stdout.WriteLine("=> Branch support " + (isIgnoringBranchesDetected ? "disabled!" : "enabled!"));
+            if(isIgnoringBranchesDetected)
+                stdout.WriteLine("   if you want to enable branch support, use the command:" + Environment.NewLine
+                    + "    git config --local " + GitTfsConstants.IgnoreBranches + " false");
             globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, isIgnoringBranchesDetected.ToString());
             return isIgnoringBranchesDetected;
         }
