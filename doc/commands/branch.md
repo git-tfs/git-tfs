@@ -1,6 +1,6 @@
 ## Summary
 
-The `branch` command permit to manage TFS branches. With this command, you can display, create, init, rename and delete branches.
+The `branch` command allows you to manage TFS branches. With this command, you can display, create, init, rename and delete local git branches that correspond to remote branches in TFS.
 
 ## Synopsis
 	Usage: git-tfs branch
@@ -68,19 +68,19 @@ The `branch` command permit to manage TFS branches. With this command, you can d
 
 ## Create a TFS branch
 
-First, checkout with git the revision from where you want to create the TFS branch. Then use the command :
+First, use git to checkout the revision (branch or hash) from where you want to create the TFS branch. Then use the command :
 
     git tfs branch $/Repository/ProjectBranchToCreate --comment="Creation of my branch"
 
-You will now have a TFS branch (called $/Repository/ProjectBranchToCreate ) with a first commit with a the comment specified. The local git remote with the same name 'ProjectBranchToCreate' is created.
+You will now have a TFS branch (called $/Repository/ProjectBranchToCreate ) whose first checkin will have the comment specified. A local git remote with the same name ('ProjectBranchToCreate') is created.
 
-If you want to specify another name (but not recommended), use the command :
+While not recommended, if you want to specify another name for the local branch, use the command :
 
     git tfs branch $/Repository/ProjectBranchToCreate myWishedRemoteName --comment="Creation of my branch"
 
  The local git remote with the name 'myWishedRemoteName ' is created.
 
-## Init an existing TFS branches
+## Init an existing TFS branch
 
 To use this command, you should have cloned only the trunk folder in TFS (and not the whole repository). See [clone](clone.md) command.
 Suppose you have on TFS:
@@ -93,8 +93,8 @@ You should have done (to clone only the trunk) :
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Repository/ProjectTrunk
 
-Note : It is highly recommended once having clone the root branch ( the branch that has no parents, here $/Repository/ProjectTrunk ) to initialize the other branches after.
-If you have cloned the branch $/Repository/ProjectBranch, you will never be able to init the root branch $/Repository/ProjectTrunk after.
+Note : It is highly recommended once having cloned the root branch (the branch that has no parents, here $/Repository/ProjectTrunk) to initialize the other branches after.
+If you have cloned the branch $/Repository/ProjectBranch, you will not be able to init the root branch $/Repository/ProjectTrunk later (git can't create new commits that are parents to your existing local branch).
 
 Then use `branch` like this :
 
@@ -108,37 +108,37 @@ Then use `branch` like this :
 
 ### Merge changesets and branches
 
-Since version 0.20, when initializing and fetching a TFS branch, if git-tfs encounter a merge changeset, it initialize and fetch automatically the other branch merged.
+Since version 0.20, if git-tfs encounters a merge changeset while initializing and fetching a TFS branch, it will automatically initialize and fetch the merged branch as well.
 
-If you don't want to initialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--ignore-branches` to disable it!
+If you don't want to initialize the merged branches automatically (or you can't because your version of TFS does not support this feature), you can use the option `--ignore-branches` to disable it!
 
-Note: To successfully process the merge changeset (and come from an older version than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right click on a folder and choose `Branching and Merging` -> `Convert to Branch`.
+Note: To successfully process the merge changeset (and come from an older version than TFS2010), you must first convert all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right click on a folder and choose `Branching and Merging` -> `Convert to Branch`.
 
 ### Initialize all the TFS branches
 
     git tfs branch --init --all
 	
-This command init all the branches not already done and ignore existing ones.
+This command will init all the branches that haven't yet been inited.
 
 ### Initialize a branch with TFS2008
 
-TFS2008 doesn't permit to know the parent of a branch. You should find it yourself with TFS and use the parameter `--tfs-parent-branch` to give it to the `init-branch` command:
+TFS2008 doesn't provide the ability for git-tfs to programmatically determine the parent of a branch. You must find it yourself within the TFS UI. You can check the checkin message or ask whomever originally made the branch. Once you determine the parent branch, provide it using the parameter `--tfs-parent-branch`. 
 
     git tfs branch --init --tfs-parent-branch=$/Repository/ProjectParentBranch $/Repository/ProjectBranch
 
 ### Ignore files when fetching changesets
 
-You could use the parameter `--ignore-regex`, to ignore some file when fetching the changesets of the branch.
+You can use the parameter `--ignore-regex`, to ignore some files when fetching the changesets of the branch.
 
     git tfs init-branch $/Repository/ProjectBranch --ignore-regex=*.bin
 
-You could use the parameter `--except-regex`, to add an exception to the parameter  `--ignore-regex`.
+You can use the parameter `--except-regex`, to add an exception to the parameter `--ignore-regex`.
 
     git tfs init-branch $/Repository/ProjectBranch --ignore-regex=*.bin --except-regex=important.bin
 
 ### Initialize a branch without fetching changesets
 
-You could use the parameter `--no-fetch`, to initialize the branch by creating its remote but without fetching the changesets of the branch.
+You can use the parameter `--no-fetch`, to initialize the branch by creating its remote but without fetching the changesets of the branch.
 
 ### Authentication
 
@@ -150,14 +150,14 @@ For the use of parameter `--authors`, see the [clone](clone.md) command.
 
 ## Rename a remote branch
 
-Note : It will not rename the TFS branch, just the local git remote.
+Note : This will not rename the TFS branch, just the local git remote.
 
     git tfs branch --move oldTfsRemoteName newTfsRemoteName
 
 
 ## Delete a remote branch
 
-Note : It will not delete the TFS branch, just the local git remote.
+Note : This will not delete the TFS branch, just the local git remote.
 
     git tfs branch --delete tfsRemoteName
 
