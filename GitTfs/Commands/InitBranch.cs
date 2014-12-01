@@ -295,7 +295,7 @@ namespace Sep.Git.Tfs.Commands
                 foreach (var tfsBranch in branchesToFetch)
                 {
                     _stdout.WriteLine("=> Working on TFS branch : " + tfsBranch.TfsRepositoryPath);
-                    if (tfsBranch.TfsRemote == null)
+                    if (tfsBranch.TfsRemote == null || tfsBranch.TfsRemote.MaxChangesetId == 0)
                     {
                         try
                         {
