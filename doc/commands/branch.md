@@ -1,6 +1,6 @@
 ## Summary
 
-The `branch` command allows you to manage TFS branches. With this command, you can display, create, init, rename and delete local git branches that correspond to remote branches in TFS.
+The `branch` command allows you to manage TFS branches. With this command, you can display, create, initialize, rename and delete Tfs branches/remotes.
 
 ## Synopsis
 	Usage: git-tfs branch
@@ -80,7 +80,7 @@ While not recommended, if you want to specify another name for the local branch,
 
  The local git remote with the name 'myWishedRemoteName ' is created.
 
-## Init an existing TFS branch
+## Initialize an existing TFS branch
 
 To use this command, you should have cloned only the trunk folder in TFS (and not the whole repository). See [clone](clone.md) command.
 Suppose you have on TFS:
@@ -117,8 +117,8 @@ Note: To successfully process the merge changeset (and come from an older versio
 ### Initialize all the TFS branches
 
     git tfs branch --init --all
-	
-This command will init all the branches that haven't yet been inited.
+
+This command will initialize all the branches that haven't yet been initialized.
 
 ### Initialize a branch with TFS2008
 
