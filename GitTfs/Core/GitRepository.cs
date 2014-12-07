@@ -96,6 +96,8 @@ namespace Sep.Git.Tfs.Core
             try
             {
                 var entry = _repository.Config.Get<T>(key);
+                if (entry == null)
+                    return defaultValue;
                 return entry.Value;
             }
             catch (Exception)
