@@ -22,7 +22,7 @@ namespace Sep.Git.Tfs.Test.Core
                 // Make this remote act like it's mapped to $/Project
                 Remote.Stub(r => r.GetPathInGitRepo(null))
                     .Constraints(Is.Anything())
-                    .Do(new Function<string, string>(path => path.StartsWith("$/Project/") ? path.Replace("$/Project/", "") : null));
+                    .Do(new Function<string, string>(path => path != null && path.StartsWith("$/Project/") ? path.Replace("$/Project/", "") : null));
                 // Make this remote ignore any path that includes "ignored".
                 Remote.Stub(r => r.ShouldSkip(null))
                     .Constraints(Is.Anything())
@@ -575,6 +575,7 @@ namespace Sep.Git.Tfs.Test.Core
                     ApplicableChange.Update("file10.txt"));
             }
         }
+       
         public class WithDeleteMainFolderBranchAndSubItems : Base<WithDeleteMainFolderBranchAndSubItems.Fixture>
         {
             public class Fixture : BaseFixture
@@ -709,7 +710,7 @@ namespace Sep.Git.Tfs.Test.Core
 
                 int IItem.DeletionId
                 {
-                    get { throw new NotImplementedException(); }
+                    get { return 0; }
                 }
 
                 TfsItemType IItem.ItemType
