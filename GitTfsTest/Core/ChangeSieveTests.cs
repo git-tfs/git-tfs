@@ -635,5 +635,118 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal(new string[] { "$/Project/file1.txt" }, Subject.GetChangesToFetch().Select(c => c.Item.ServerItem));
             }
         }
+
+        public class RenamedFromDeleted : Base<RenamedFromDeleted.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                public Fixture()
+                {
+                    Changeset.Changes = new IChange[] {
+                        new RenamedFromDeletedChange("$/Project/file1.txt"),
+                    };
+                }
+            }
+
+            [Fact]
+            public void FetchesItemRenamedAfterDelete()
+            {
+                AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Update("file1.txt"));
+            }
+
+            // A Change/Item that only throws an exception when you try to query its history.
+            public class RenamedFromDeletedChange : IChange, IItem, IVersionControlServer
+            {
+                // This is the interesting part of this implementation.
+                // The TFS client throws an exception of type Microsoft.TeamFoundation.VersionControl.Client.ItemNotFoundException.
+                // ChangeSieve doesn't have a reference to the TFS client libs, so it can't catch that exact exception.
+                // This class, therefore, throws an exception that is of a type that ChangeSieve can't specifically catch.
+                IEnumerable<IChangeset> IVersionControlServer.QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo)
+                {
+                    throw new AnExceptionTypeThatYouCannotCatch();
+                }
+
+                class AnExceptionTypeThatYouCannotCatch : Exception
+                {
+                }
+
+                // The rest of the implementation is pretty straight-forward.
+
+                readonly string _serverItem;
+
+                // Accept a name so that the name is more obviously matched between the Fixture
+                // and the assertion.
+                public RenamedFromDeletedChange(string serverItem)
+                {
+                    _serverItem = serverItem;
+                }
+
+                TfsChangeType IChange.ChangeType
+                {
+                    get { return TfsChangeType.Rename; }
+                }
+
+                IItem IChange.Item
+                {
+                    get { return this; }
+                }
+
+                IVersionControlServer IItem.VersionControlServer
+                {
+                    get { return this; }
+                }
+
+                int IItem.ChangesetId
+                {
+                    get { return 100; }
+                }
+
+                string IItem.ServerItem
+                {
+                    get { return _serverItem; }
+                }
+
+                int IItem.DeletionId
+                {
+                    get { throw new NotImplementedException(); }
+                }
+
+                TfsItemType IItem.ItemType
+                {
+                    get { return TfsItemType.File; }
+                }
+
+                int IItem.ItemId
+                {
+                    get { return 200; }
+                }
+
+                long IItem.ContentLength
+                {
+                    get { return 0; }
+                }
+
+                TemporaryFile IItem.DownloadFile()
+                {
+                    return null;
+                }
+
+                IItem IVersionControlServer.GetItem(int itemId, int changesetNumber)
+                {
+                    return null;
+                }
+
+                IItem IVersionControlServer.GetItem(string itemPath, int changesetNumber)
+                {
+                    return null;
+                }
+
+                IItem[] IVersionControlServer.GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
+                {
+                    return null;
+                }
+            }
+        }
     }
 }

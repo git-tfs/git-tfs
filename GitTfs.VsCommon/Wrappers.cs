@@ -49,11 +49,18 @@ namespace Sep.Git.Tfs.VsCommon
                                                     TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount,
                                                     bool includeChanges, bool slotMode, bool includeDownloadInfo)
         {
-            var history = _versionControlServer.QueryHistory(path, new ChangesetVersionSpec(version), deletionId,
-                                                             _bridge.Convert<RecursionType>(recursion), user, new ChangesetVersionSpec(versionFrom),
-                                                             new ChangesetVersionSpec(versionTo), maxCount, includeChanges, slotMode,
-                                                             includeDownloadInfo);
-            return _bridge.Wrap<WrapperForChangeset, Changeset>(history);
+            try
+            {
+                var history = _versionControlServer.QueryHistory(path, new ChangesetVersionSpec(version), deletionId,
+                                                                 _bridge.Convert<RecursionType>(recursion), user, new ChangesetVersionSpec(versionFrom),
+                                                                 new ChangesetVersionSpec(versionTo), maxCount, includeChanges, slotMode,
+                                                                 includeDownloadInfo);
+                return _bridge.Wrap<WrapperForChangeset, Changeset>(history);
+            }
+            catch (ItemNotFoundException)
+            {
+                return Enumerable.Empty<WrapperForChangeset>();
+            }
         }
     }
 
