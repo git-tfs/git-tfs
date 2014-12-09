@@ -12,7 +12,6 @@ namespace Sep.Git.Tfs.Util
     /// </summary>
     public class ExportMetadatasInitializer
     {
-        private readonly Globals globals;
         private readonly string exportMetadatasFilePath;
 
         public ExportMetadatasInitializer(Globals globals)
