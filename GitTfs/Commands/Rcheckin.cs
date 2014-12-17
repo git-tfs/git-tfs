@@ -55,7 +55,7 @@ namespace Sep.Git.Tfs.Commands
         // uses rebase and works only with HEAD
         public int Run()
         {
-            _globals.WarnOnGitVersion(_stdout);
+            Configure();
 
             if (_globals.Repository.IsBare)
                 throw new GitTfsException("error: you should specify the local branch to checkin for a bare repository.");
@@ -63,10 +63,12 @@ namespace Sep.Git.Tfs.Commands
             return _writer.Write("HEAD", PerformRCheckin);
         }
 
+
         // uses rebase and works only with HEAD in a none bare repository
         public int Run(string localBranch)
         {
-            _globals.WarnOnGitVersion(_stdout);
+            Configure();
+
 
             if (!_globals.Repository.IsBare)
                 throw new GitTfsException("error: This syntax with one parameter is only allowed in bare repository.");
@@ -74,6 +76,14 @@ namespace Sep.Git.Tfs.Commands
             _authors.Parse(null, _globals.GitDir);
 
             return _writer.Write(GitRepository.ShortToLocalName(localBranch), PerformRCheckin);
+        }
+
+        private void Configure()
+        {
+            if (_globals.Repository.GetConfig(GitTfsConstants.RCheckinAutoStashConfigKey) == "true")
+                AutoStash = true;
+
+            _globals.WarnOnGitVersion(_stdout);
         }
 
         private int PerformRCheckin(TfsChangesetInfo parentChangeset, string refToCheckin)
@@ -91,17 +101,17 @@ namespace Sep.Git.Tfs.Commands
             {
                 using (new TemporaryStash(_globals.Repository))
                 {
-                    return doRChecking(parentChangeset, refToCheckin);
+                    return SetupAndBeginRCheckin(parentChangeset, refToCheckin);
                 }
             }
             else
             {
-                return doRChecking(parentChangeset, refToCheckin);
+                return SetupAndBeginRCheckin(parentChangeset, refToCheckin);
             }
 
         }
 
-        private int doRChecking(TfsChangesetInfo parentChangeset, string refToCheckin)
+        private int SetupAndBeginRCheckin(TfsChangesetInfo parentChangeset, string refToCheckin)
         {
             // get latest changes from TFS to minimize possibility of late conflict
             _stdout.WriteLine("Fetching changes from TFS to minimize possibility of late conflict...");
