@@ -124,6 +124,7 @@
     <Compile Include="Util\CommitSpecificCheckinOptionsFactoryTests.cs" />
     <Compile Include="Util\GitTfsCommandRunnerTests.cs" />
     <Compile Include="Util\BouncerTest.cs" />
+    <Compile Include="Util\TemporaryStashTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GitTfs.VsFake\GitTfs.VsFake.csproj">
