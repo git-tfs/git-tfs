@@ -23,6 +23,7 @@ namespace Sep.Git.Tfs.Commands
         private bool Old { get; set; }
         private bool AutoRebase { get; set; }
         private bool ForceCheckin { get; set; }
+        private bool AutoStash { get; set; }
 
         public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Globals globals, AuthorsFile authors)
         {
@@ -46,6 +47,7 @@ namespace Sep.Git.Tfs.Commands
                         {"old", "Use the old process to rcheckin (slower)", v => Old = v != null},
                         {"a|autorebase", "Continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
                         {"ignore-merge", "Force check in ignoring parent tfs branches in merge commits", v => ForceCheckin = v != null},
+                        {"auto-stash", "AUtomatically perform git stash and git stash pop if working directory is dirty", v => AutoStash = v != null },
                     }.Merge(_checkinOptions.OptionSet);
             }
         }
@@ -79,12 +81,28 @@ namespace Sep.Git.Tfs.Commands
             if (_globals.Repository.IsBare)
                 AutoRebase = false;
 
-            if (_globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
+            if (!AutoStash && _globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
             {
                 throw new GitTfsException("error: You have local changes; rebase-workflow checkin only possible with clean working directory.")
-                    .WithRecommendation("Try 'git stash' to stash your local changes and checkin again.");
+                    .WithRecommendation("Try 'git stash' to stash your local changes and checkin again. or use --auto-stash");
             }
 
+            if (AutoStash)
+            {
+                using (new TemporaryStash(_globals.Repository))
+                {
+                    return doRChecking(parentChangeset, refToCheckin);
+                }
+            }
+            else
+            {
+                return doRChecking(parentChangeset, refToCheckin);
+            }
+
+        }
+
+        private int doRChecking(TfsChangesetInfo parentChangeset, string refToCheckin)
+        {
             // get latest changes from TFS to minimize possibility of late conflict
             _stdout.WriteLine("Fetching changes from TFS to minimize possibility of late conflict...");
             parentChangeset.Remote.Fetch();
