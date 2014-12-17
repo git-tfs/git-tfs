@@ -162,7 +162,7 @@ And depending of the version of TFS you use :
     #or with Rake (Ruby)
     rake build:debug
 
-Note : if the build fails because it can't find libgit2sharp dependency, update submodules with `git submodule update`
+Note : if the build fails because it can't find libgit2sharp dependency, update submodules with `git submodule init` followed by `git submodule update`
 
 ## Contributing
 Contributions are always welcome.
