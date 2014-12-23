@@ -45,8 +45,9 @@ into a new directory `Project1`, do this:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1
 
-### Clone only the trunk (or a branch)
-Sometimes, it could be interesting to clone only a branch of a TFS repository (for example to extract only the trunk of your project and manage branches with `[branch](branch.md)`. 
+### Clone only the trunk (with dependency branches)
+
+Sometimes, it could be interesting to clone only a branch of a TFS repository (for example to extract only the trunk of your project and manage branches using the [branch](branch.md) command. 
 
 Suppose you have on TFS:
 
@@ -58,12 +59,27 @@ Then, do this (the clone will be done in the `MyProject1Directory` directory):
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory
 
-Note : It is highly recommended to clone the root branch ( the branch that has no parents, here $/Project1/Trunk ) to be able to init the other branches after.
+
+
+Note : 
+
+* Since v0.21, git-tfs will also initialize all the branches that have been merged in the trunk during its changeset history
+and will try to manage all the merge changesets accordingly (See [Merge changesets and branches](#merge-changesets-and-branches) for more details).
+* It is highly recommended to clone the root branch ( the branch that has no parents, here $/Project1/Trunk ) to be able to init the other branches after.
 If you clone the branch $/Project1/Branch, you will never able to init the root branch $/Project1/Trunk after.
+
+### Clone only the trunk (without dependency branches or a branch)
+
+If you want to clone the trunk without cloning dependency branches (because for example it fails at managing these branches) or you want to clone a children branch instead,
+you could use the `--ignore-branches`.
+
+Then, do this (the clone will be done in the `MyProject1Directory` directory):
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory --ignore-branches
 
 ### Merge changesets and branches
 
-Since version 0.20, when cloning the trunk from TFS, if git-tfs encounter a merge changeset, it initialize and fetch automatically the other branch merged.
+Since version v0.21, when cloning the trunk from TFS, if git-tfs encounter a merge changeset, it initialize and fetch automatically the other branch merged.
 
 Suppose you have on TFS:
 

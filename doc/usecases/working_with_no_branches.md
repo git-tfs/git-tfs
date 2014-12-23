@@ -11,8 +11,8 @@ If you don't know (or remember) the path of the project you want to clone on a T
 
     git tfs list-remote-branches http://tfs:8080/tfs/DefaultCollection
 
-You will have an output like that (showing branch linked to its parent branch) :
- 	
+You will have an output like that (showing children branches linked to there parent branch) :
+
      $/project/trunk [*]
      |
      +- $/project/branch1
@@ -41,7 +41,7 @@ If you want to work with tfs branches, you should clone one of the root branches
 	
 ## Clone just the trunk
 
-You could clone only the trunk of your project (and init the other branches later).
+You could clone only the trunk of your project (and initialize the other branches later).
 For that, use the command:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/project/trunk .
