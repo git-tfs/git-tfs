@@ -213,13 +213,7 @@ namespace Sep.Git.Tfs.Commands
 
             if (gitRemote == null)
             {
-                var rootBranch = defaultRemote.Tfs.GetRootTfsBranchForRemotePath(defaultRemote.TfsRepositoryPath);
-                if (rootBranch == null)
-                    throw new GitTfsException(string.Format("error: The use of the option '--with-branches' to init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '{0}' is not a TFS branch!", defaultRemote.TfsRepositoryPath));
-                if (defaultRemote.TfsRepositoryPath.ToLower() != rootBranch.Path.ToLower())
-                    throw new GitTfsException(string.Format("error: The use of the option '--with-branches' to init all the branches is only possible when 'git tfs clone' was done from the trunk!!! Please clone again from '{0}'...", rootBranch.Path));
-
-                var childBranchPaths = rootBranch.GetAllChildren().Select(b => new BranchDatas { TfsRepositoryPath = b.Path }).ToList();
+                var childBranchPaths = GetChildBranchesToInit(defaultRemote);
 
                 if (childBranchPaths.Any())
                 {
@@ -256,6 +250,16 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
             return GitTfsExitCodes.OK;
+        }
+
+        private static List<BranchDatas> GetChildBranchesToInit(IGitTfsRemote defaultRemote)
+        {
+            var rootBranch = defaultRemote.Tfs.GetRootTfsBranchForRemotePath(defaultRemote.TfsRepositoryPath);
+            if (rootBranch == null)
+                throw new GitTfsException("error: The use of the option '--with-branches' to init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '"
+                    + defaultRemote.TfsRepositoryPath + "' is not a TFS branch!");
+
+            return rootBranch.GetAllChildrenOfBranch(defaultRemote.TfsRepositoryPath).Select(b => new BranchDatas { TfsRepositoryPath = b.Path }).ToList();
         }
 
         private void InitializeBranches(IGitTfsRemote defaultRemote, List<BranchDatas> childBranchPaths)

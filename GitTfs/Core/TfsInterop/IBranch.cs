@@ -91,5 +91,20 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             }
             return childrenBranches;
         }
+
+        public static IEnumerable<BranchTree> GetAllChildrenOfBranch(this BranchTree branch, string tfsPath)
+        {
+            if (branch == null) return Enumerable.Empty<BranchTree>();
+
+            if (string.Compare(branch.Path, tfsPath, StringComparison.InvariantCultureIgnoreCase) == 0)
+                return branch.GetAllChildren();
+
+            var childrenBranches = new List<BranchTree>();
+            foreach (var childBranch in branch.ChildBranches)
+            {
+                childrenBranches.AddRange(GetAllChildrenOfBranch(childBranch, tfsPath));
+            }
+            return childrenBranches;
+        }
     }
 }
