@@ -378,7 +378,7 @@ namespace Sep.Git.Tfs.Core
                 stdout.WriteLine("info: this changeset " + changeset.Summary.ChangesetId +
                                  " is a merge changeset. But was not treated as is because this version of TFS can't manage branches...");
             }
-            else if (Repository.GetConfig(GitTfsConstants.IgnoreBranches) != true.ToString())
+            else if (!IsIgnoringBranches())
             {
                 var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
                 if (parentChangesetId < 1)  // Handle missing merge parent info
@@ -419,6 +419,24 @@ namespace Sep.Git.Tfs.Core
                 changeset.OmittedParentBranch = ";C" + changeset.Summary.ChangesetId;
             }
             return true;
+        }
+
+        public bool IsIgnoringBranches()
+        {
+            var value = Repository.GetConfig<string>(GitTfsConstants.IgnoreBranches, null);
+            bool isIgnoringBranches;
+            if (value != null && bool.TryParse(value, out isIgnoringBranches))
+                return isIgnoringBranches;
+
+            stdout.WriteLine("warning: no value found for branch management setting '" + GitTfsConstants.IgnoreBranches +
+                             "'...");
+            var isIgnoringBranchesDetected = Repository.ReadAllTfsRemotes().Count() < 2;
+            stdout.WriteLine("=> Branch support " + (isIgnoringBranchesDetected ? "disabled!" : "enabled!"));
+            if(isIgnoringBranchesDetected)
+                stdout.WriteLine("   if you want to enable branch support, use the command:" + Environment.NewLine
+                    + "    git config --local " + GitTfsConstants.IgnoreBranches + " false");
+            globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, isIgnoringBranchesDetected.ToString());
+            return isIgnoringBranchesDetected;
         }
 
         private string ProcessChangeset(ITfsChangeset changeset, LogEntry log)

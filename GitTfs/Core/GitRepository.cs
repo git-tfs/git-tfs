@@ -105,6 +105,7 @@ namespace Sep.Git.Tfs.Core
                 return defaultValue;
             }
         }
+
         public void SetConfig(string key, string value)
         {
             _repository.Config.Set<string>(key, value, ConfigurationLevel.Local);

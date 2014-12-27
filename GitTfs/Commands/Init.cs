@@ -101,6 +101,8 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
 
+            globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, false.ToString());
+
         }
 
         private string[] BuildInitCommand()
