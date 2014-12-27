@@ -64,14 +64,14 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs = mocks.Get<ITfsHelper>();
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
             var mockRemote = MockRepository.GenerateStub<IGitTfsRemote>();
-            mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() {IsSuccess = true});
-            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(mockRemote);
+            mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult() {IsSuccess = true});
+            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(mockRemote);
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
 
             newBranchRemote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT).Repeat.Once();
-            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
+            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
             newBranchRemote.MaxCommitHash = "sha1AfterFetch";
 
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("$/MyProject/MyBranch", expectedGitBranchName));
@@ -112,8 +112,8 @@ namespace Sep.Git.Tfs.Test.Commands
 
             remote.Tfs = mocks.Get<ITfsHelper>();
             var mockRemote = MockRepository.GenerateStub<IGitTfsRemote>();
-            mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true });
-            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(mockRemote);
+            mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true });
+            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(mockRemote);
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
 
             IGitTfsRemote existingBranchRemote = MockRepository.GenerateStub<IGitTfsRemote>();
@@ -188,8 +188,8 @@ namespace Sep.Git.Tfs.Test.Commands
 
             remote.Tfs = mocks.Get<ITfsHelper>();
             var mockRemote = MockRepository.GenerateStub<IGitTfsRemote>();
-            mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true });
-            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(mockRemote);
+            mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true });
+            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(mockRemote);
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, remote.TfsRepositoryPath)).Return(new List<RootBranch>() { new RootBranch(2008, "$/MyProject/MyBranch") });
 
             mocks.ClassUnderTest.ParentBranch = remote.TfsRepositoryPath;
@@ -198,7 +198,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
 
             newBranchRemote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT).Repeat.Once();
-            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
+            newBranchRemote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             newBranchRemote.MaxCommitHash = "sha1AfterFetch";
 
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
@@ -260,7 +260,7 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch1)).Return(new List<RootBranch>() { new RootBranch(rootChangeSetB1, tfsPathBranch1) });
 
             newBranch1Remote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT1).Repeat.Once();
-            newBranch1Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
+            newBranch1Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult(){IsSuccess = true}).Repeat.Once();
             newBranch1Remote.MaxCommitHash = "ShaAfterFetch_Branch1";
             #endregion
 
@@ -272,11 +272,11 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch2)).Return(new List<RootBranch>() { new RootBranch(rootChangeSetB2, tfsPathBranch2) });
 
             newBranch2Remote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT2).Repeat.Once();
-            newBranch2Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
+            newBranch2Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             newBranch2Remote.MaxCommitHash = "ShaAfterFetch_Branch2";
             #endregion
 
-            remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
+            remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run());
 
             gitRepository.VerifyAllExpectations();
@@ -315,7 +315,7 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch1)).Return(new List<RootBranch>() { new RootBranch(rootChangeSetB1, tfsPathBranch1) });
 
             newBranch1Remote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT1).Repeat.Once();
-            newBranch1Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
+            newBranch1Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             newBranch1Remote.MaxCommitHash = "ShaAfterFetch_Branch1";
             #endregion
 
@@ -327,13 +327,13 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch(tfsPathBranch2)).Return(new List<RootBranch>() { new RootBranch(rootChangeSetB2, tfsPathBranch2) });
 
             newBranch2Remote.Expect(r => r.RemoteRef).Return("refs/remote/tfs/" + GIT_BRANCH_TO_INIT2).Repeat.Once();
-            newBranch2Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
+            newBranch2Remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             newBranch2Remote.MaxCommitHash = "ShaAfterFetch_Branch2";
             #endregion
             
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT3)).Return(GIT_BRANCH_TO_INIT3).Repeat.Never();
 
-            remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
+            remote.Expect(r => r.Fetch(Arg<bool>.Is.Anything, Arg<RenameContext>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true }).Repeat.Once();
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run());
 
             gitRepository.VerifyAllExpectations();

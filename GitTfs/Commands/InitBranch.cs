@@ -139,6 +139,7 @@ namespace Sep.Git.Tfs.Commands
 
             IGitTfsRemote tfsRemote = null;
             var remoteToDelete = new List<IGitTfsRemote>();
+            var renameContext = new RenameContext();
             foreach (var rootBranch in creationBranchData)
             {
                 Trace.WriteLine("Processing " + (rootBranch.IsRenamedBranch ? "renamed " : string.Empty) + "branch :"
@@ -147,14 +148,14 @@ namespace Sep.Git.Tfs.Commands
                 if (cbd.TfsRepositoryPath == tfsBranchPath)
                     cbd.GitBranchNameExpected = gitBranchNameExpected;
 
-                tfsRemote = defaultRemote.InitBranch(_remoteOptions, cbd.TfsRepositoryPath, cbd.RootChangesetId, !NoFetch, cbd.GitBranchNameExpected, fetchResult);
+                tfsRemote = defaultRemote.InitBranch(_remoteOptions, cbd.TfsRepositoryPath, cbd.RootChangesetId, !NoFetch, cbd.GitBranchNameExpected, renameContext);
                 if (tfsRemote == null)
                 {
                     throw new GitTfsException("error: Couldn't fetch parent branch\n");
                 }
                 if (rootBranch.IsRenamedBranch || !NoFetch)
                 {
-                    fetchResult = FetchRemote(tfsRemote, false, !DontCreateGitBranch && !rootBranch.IsRenamedBranch, fetchResult);
+                    fetchResult = FetchRemote(tfsRemote, false, !DontCreateGitBranch && !rootBranch.IsRenamedBranch, renameContext);
                     if(fetchResult.IsSuccess && rootBranch.IsRenamedBranch)
                         remoteToDelete.Add(tfsRemote);
                 }
@@ -392,12 +393,12 @@ namespace Sep.Git.Tfs.Commands
         }
 
 
-        private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true, IRenameResult renameResult = null)
+        private IFetchResult FetchRemote(IGitTfsRemote tfsRemote, bool stopOnFailMergeCommit, bool createBranch = true, RenameContext renameContext = null)
         {
             try
             {
                 Trace.WriteLine("Try fetching changesets...");
-                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit, renameResult);
+                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit, renameContext);
                 Trace.WriteLine("Changesets fetched!");
 
                 if (fetchResult.IsSuccess && createBranch && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)

@@ -195,7 +195,7 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long shaRootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null, IRenameResult renameResult = null)
+        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long shaRootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null, RenameContext renameContext = null)
         {
             throw new NotImplementedException();
         }
@@ -205,12 +205,12 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, IRenameResult renameResult = null)
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, RenameContext renameContext = null)
         {
             throw DerivedRemoteException;
         }
 
-        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes)
+        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, RenameContext renameContext = null, params string[] parentCommitsHashes)
         {
             throw DerivedRemoteException;
         }
