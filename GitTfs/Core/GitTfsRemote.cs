@@ -411,7 +411,7 @@ namespace Sep.Git.Tfs.Core
                 if (shaParent == null)
                 {
                     string omittedParentBranch;
-                    shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, null, out omittedParentBranch);
+                    shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, out omittedParentBranch);
                     changeset.OmittedParentBranch = omittedParentBranch;
                 }
                 if (shaParent != null)
@@ -517,9 +517,9 @@ namespace Sep.Git.Tfs.Core
             return FindRemoteAndFetch(parentChangesetId, false, false, renameResult, out omittedParentBranch);
         }
 
-        private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, IRenameResult renameResult, out string omittedParentBranch)
+        private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, out string omittedParentBranch)
         {
-            return FindRemoteAndFetch(parentChangesetId, false, true, renameResult, out omittedParentBranch);
+            return FindRemoteAndFetch(parentChangesetId, false, true, null, out omittedParentBranch);
         }
 
         private string FindRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, bool mergeChangeset, IRenameResult renameResult, out string omittedParentBranch)
