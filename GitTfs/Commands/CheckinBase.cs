@@ -47,7 +47,7 @@ namespace Sep.Git.Tfs.Commands
             else
             {
                 _stdout.WriteLine("TFS Changeset #" + newChangesetId + " was created. Marking it as a merge commit...");
-                parentChangeset.Remote.FetchWithMerge(newChangesetId, false, null, refToCheckin);
+                parentChangeset.Remote.FetchWithMerge(newChangesetId, false, refToCheckin);
 
                 if (refToCheckin == "HEAD")
                     parentChangeset.Remote.Repository.Merge(parentChangeset.Remote.MaxCommitHash);

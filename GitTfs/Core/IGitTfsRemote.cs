@@ -73,4 +73,12 @@ namespace Sep.Git.Tfs.Core
         void EnsureTfsAuthenticated();
         bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath);
     }
+
+    public static class IGitTfsRemoteExt
+    {
+        public static IFetchResult FetchWithMerge(this IGitTfsRemote remote, long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        {
+            return remote.FetchWithMerge(mergeChangesetId, stopOnFailMergeCommit, null, parentCommitsHashes);
+        }
+    }
 }

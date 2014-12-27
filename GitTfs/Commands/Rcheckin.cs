@@ -142,7 +142,7 @@ namespace Sep.Git.Tfs.Commands
                 try
                 {
                     newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                    var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, null, rc.Parents);
+                    var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
                     if (fetchResult.NewChangesetCount != 1)
                     {
                         var lastCommit = _globals.Repository.FindCommitHashByChangesetId(newChangesetId);
@@ -210,7 +210,7 @@ namespace Sep.Git.Tfs.Commands
 
                 _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
                 long newChangesetId = tfsRemote.Checkin(rc.Sha, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                tfsRemote.FetchWithMerge(newChangesetId, false, null, rc.Parents);
+                tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
                 if (tfsRemote.MaxChangesetId != newChangesetId)
                     throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
 
