@@ -304,9 +304,9 @@ namespace Sep.Git.Tfs.Core
             public string ParentBranchTfsPath { get; set; }
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
+        public IFetchResult Fetch(int lastChangesetIdToFetch = -1, bool stopOnFailMergeCommit = false)
         {
-            return FetchWithMerge(-1, stopOnFailMergeCommit);
+            return FetchWithMerge(-1, stopOnFailMergeCommit, lastChangesetIdToFetch);
         }
 
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
@@ -323,6 +323,9 @@ namespace Sep.Git.Tfs.Core
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
+
+            var changeSetsToIgnore = Tfs.ChangeSetNumbersToIgnore();
+
             List<ITfsChangeset> fetchedChangesets;
             do
             {
@@ -335,9 +338,19 @@ namespace Sep.Git.Tfs.Core
                     RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to " + latestChangesetId + " ...", "info");
                 foreach (var changeset in fetchedChangesets)
                 {
-                    fetchResult.NewChangesetCount++;
                     if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
                         return fetchResult;
+
+                    if (changeSetsToIgnore.Contains(changeset.Summary.ChangesetId))
+                    {
+                        stdout.WriteLine(
+                            "info: changeset " + changeset.Summary.ChangesetId + " is in the ignore list (config:"
+                            + GitTfsConstants.SkipChangeSets + ") and will be skipped");
+                        continue;
+                    }
+
+                    fetchResult.NewChangesetCount++;
+
                     string parentCommitSha = null;
                     if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                     {

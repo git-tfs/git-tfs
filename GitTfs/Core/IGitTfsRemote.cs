@@ -46,7 +46,7 @@ namespace Sep.Git.Tfs.Core
         bool ShouldSkip(string path);
         IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null);
         string GetPathInGitRepo(string tfsPath);
-        IFetchResult Fetch(bool stopOnFailMergeCommit = false);
+        IFetchResult Fetch(int lastChangesetIdToFetch = -1, bool stopOnFailMergeCommit = false);
         IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes);
         void QuickFetch();
         void QuickFetch(int changesetId);

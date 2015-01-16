@@ -66,7 +66,8 @@ namespace Sep.Git.Tfs.Core
             }
             else
             {
-                _stdout.WriteLine("Cannot checkout file '{0}' from TFS. Skip it", change.GitPath);
+                _stdout.WriteLine("Cannot checkout file '{0}' from TFS.", change.GitPath);
+                throw new GitTfsException("error: failed to checkout file '{0}' from TFS !");
             }
         }
 

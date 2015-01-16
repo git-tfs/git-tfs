@@ -205,7 +205,7 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
+        public IFetchResult Fetch(int lastChangesetIdToFetch = -1, bool stopOnFailMergeCommit = false)
         {
             throw DerivedRemoteException;
         }

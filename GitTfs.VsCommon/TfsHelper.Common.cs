@@ -170,6 +170,27 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
+        public SortedSet<long> ChangeSetNumbersToIgnore()
+        {
+            SortedSet<long> result = new SortedSet<long>();
+
+            var toIgnore = properties.SkipChangeSets;
+            if (toIgnore != null && toIgnore.Length > 0)
+            {
+                var parts = toIgnore.Split(',');
+                foreach (var part in parts)
+                {
+                    int changeSetNum;
+                    if (int.TryParse(part, out changeSetNum))
+                    {
+                        result.Add(changeSetNum);
+                    }
+                }
+            }
+
+            return result;
+        }
+
         public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
         {
             if (Is2008OrOlder)

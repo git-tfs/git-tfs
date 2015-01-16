@@ -69,5 +69,7 @@ namespace Sep.Git.Tfs
         public const string IgnoreNotInitBranches = GitTfsPrefix + ".ignore-not-init-branches";
 
         public const string BatchSize = GitTfsPrefix + ".batch-size";
+
+        public const string SkipChangeSets = GitTfsPrefix + ".skip-changesets";
     }
 }

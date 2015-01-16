@@ -397,7 +397,7 @@ namespace Sep.Git.Tfs.Commands
             try
             {
                 Trace.WriteLine("Try fetching changesets...");
-                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit);
+                var fetchResult = tfsRemote.Fetch(-1, stopOnFailMergeCommit);
                 Trace.WriteLine("Changesets fetched!");
 
                 if (fetchResult.IsSuccess && createBranch && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)

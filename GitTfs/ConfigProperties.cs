@@ -24,5 +24,10 @@ namespace Sep.Git.Tfs
             set { _loader.Override(GitTfsConstants.BatchSize, value); }
             get { return _loader.Get(GitTfsConstants.BatchSize, 100); }
         }
+
+        public string SkipChangeSets
+        {
+            get { return _loader.Get(GitTfsConstants.SkipChangeSets, ""); }
+        }
     }
 }

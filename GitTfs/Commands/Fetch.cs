@@ -31,6 +31,7 @@ namespace Sep.Git.Tfs.Commands
             this.remoteOptions = remoteOptions;
             this.authors = authors;
             this.labels = labels;
+            this.upToChangeSet = -1;
         }
 
         bool FetchAll { get; set; }
@@ -51,6 +52,17 @@ namespace Sep.Git.Tfs.Commands
                 properties.BatchSize = batchSize;
             }
         }
+        public string UpToChangeSetOption
+        {
+            set
+            {
+                int tmp;
+                if (!int.TryParse(value, out tmp))
+                    throw new GitTfsException("error: up-to parameter should be an integer.");
+                upToChangeSet = tmp;
+            }
+        }
+        int upToChangeSet { get; set; }
 
         public virtual OptionSet OptionSet
         {
@@ -76,6 +88,8 @@ namespace Sep.Git.Tfs.Commands
                         v => IgnoreBranches = v != null },
                     { "batch-size=", "Size of a the batch of tfs changesets fetched (-1 for all in one batch)",
                         v => BatchSizeOption = v },
+                    { "t|up-to=", "up-to changeset # (optional, -1 for up to maximum, must be a number, not prefixed with C)", 
+                        v => UpToChangeSetOption = v }
                 }.Merge(remoteOptions.OptionSet);
             }
         }
@@ -181,8 +195,7 @@ namespace Sep.Git.Tfs.Commands
 
             try
             {
-                remote.Fetch(stopOnFailMergeCommit);
-
+                remote.Fetch(upToChangeSet, stopOnFailMergeCommit);
             }
             finally
             {
