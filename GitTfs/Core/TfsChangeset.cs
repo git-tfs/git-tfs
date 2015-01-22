@@ -28,17 +28,19 @@ namespace Sep.Git.Tfs.Core
 
         public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree, Action<Exception> ignorableErrorHandler)
         {
-            if (initialTree.Empty())
+            var isInitial = initialTree.Empty();
+            if (isInitial)
                 Summary.Remote.Repository.GetObjects(lastCommit, initialTree);
+
             var resolver = new PathResolver(Summary.Remote, initialTree);
             var sieve = new ChangeSieve(_changeset, resolver);
-            _changeset.Get(workspace, sieve.GetChangesToFetch(), ignorableErrorHandler);
-            foreach (var change in sieve.GetChangesToApply())
+            _changeset.Get(workspace, sieve.GetChangesToFetch(isInitial), ignorableErrorHandler);
+            foreach (var change in sieve.GetChangesToApply(isInitial))
             {
-                ignorableErrorHandler.Catch(() => {
-                    Apply(change, treeBuilder, workspace, initialTree);
-                });
+                var chg = change;
+                ignorableErrorHandler.Catch(() => Apply(chg, treeBuilder, workspace, initialTree));
             }
+
             return MakeNewLogEntry();
         }
 
