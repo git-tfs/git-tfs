@@ -73,7 +73,8 @@ namespace Sep.Git.Tfs.VsCommon
                 {
                     // maybe it is not an Uri but instance name
                     var servers = RegisteredTfsConnections.GetConfigurationServers();
-                    var registered = servers.FirstOrDefault(s => String.Compare(s.Name, Url, StringComparison.OrdinalIgnoreCase) == 0);
+                    var registered = servers.FirstOrDefault(s => ((String.Compare(s.Name, Url, StringComparison.OrdinalIgnoreCase) == 0) ||
+                                                                  (String.Compare(s.Name, Uri.EscapeDataString(Url), StringComparison.OrdinalIgnoreCase) == 0)));
                     if (registered == null)
                         throw new GitTfsException("Given tfs name is not correct URI and not found as a registered TFS instance");
                     uri = registered.Uri;
