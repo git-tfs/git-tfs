@@ -111,6 +111,7 @@
     <Compile Include="Core\TfsApiBridgeTest.cs" />
     <Compile Include="Core\StubbedCheckinEvaluationResult.cs" />
     <Compile Include="Core\TfsWorkspaceTests.cs" />
+    <Compile Include="Fixtures\vtccds.cs" />
     <Compile Include="GitTfsRegexTests.cs" />
     <Compile Include="Integration\BootstrapTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
@@ -165,6 +166,26 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Fixtures\vtccds\0445de4a590c27552a06ecda1b5ff2af" />
+    <EmbeddedResource Include="Fixtures\vtccds\1b9bf73806f680f3f6a79ca80e635dcf" />
+    <EmbeddedResource Include="Fixtures\vtccds\2ea0b9d555f39b93aa67d834aec81dec" />
+    <EmbeddedResource Include="Fixtures\vtccds\36eae6b6a4717375a4ff16287744cd1d" />
+    <EmbeddedResource Include="Fixtures\vtccds\4cd460612edcbab617997836871d7291" />
+    <EmbeddedResource Include="Fixtures\vtccds\4f4cd8afcb1708c003540aea8d64239d" />
+    <EmbeddedResource Include="Fixtures\vtccds\52c0fc9d4cfbf1ae07f36b8e711a5d6b" />
+    <EmbeddedResource Include="Fixtures\vtccds\5a18c163f1804fe83dfeae04f1d1d34e" />
+    <EmbeddedResource Include="Fixtures\vtccds\6553cc439299c73677e0c43dd0fd786e" />
+    <EmbeddedResource Include="Fixtures\vtccds\6c6060d9696edc7000396cc499ab8277" />
+    <EmbeddedResource Include="Fixtures\vtccds\70e6b3871859cf52ef78fba876bc37a4" />
+    <EmbeddedResource Include="Fixtures\vtccds\74687eb86f9a0c7a2ca65efbbae6a5ad" />
+    <EmbeddedResource Include="Fixtures\vtccds\86882c0ae4717b4969d54f676c0261e3" />
+    <EmbeddedResource Include="Fixtures\vtccds\96b58369f5bd2b081005ba208ac649b8" />
+    <EmbeddedResource Include="Fixtures\vtccds\9a975dd2be9a190424fc226a5a25d84f" />
+    <EmbeddedResource Include="Fixtures\vtccds\c02331d395d07dc7efaaa295ac474971" />
+    <EmbeddedResource Include="Fixtures\vtccds\d67034311a9ccd1a5a62cc0ecdaa1a6f" />
+    <EmbeddedResource Include="Fixtures\vtccds\fb5dcd187b5ab3729973b310f3c55596" />
+    <EmbeddedResource Include="Fixtures\vtccds\fba9507f41916830d82be84924dded7b" />
+    <EmbeddedResource Include="Fixtures\vtccds\fd30d6210bb40fd2c9b689f0bf8b2833" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
