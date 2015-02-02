@@ -219,7 +219,12 @@ namespace Sep.Git.Tfs.Test.Integration
                 _changeset = changeset;
             }
 
-            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents = null, int? itemId = null)
+            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents, int? itemId = null)
+            {
+                return Change(changeType, itemType, tfsPath, Encoding.UTF8.GetBytes(contents), itemId);
+            }
+
+            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, byte[] contents = null, int? itemId = null)
             {
                 _changeset.Changes.Add(new ScriptedChange
                 {

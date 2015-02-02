@@ -210,7 +210,8 @@ namespace Sep.Git.Tfs.VsFake
             TemporaryFile IItem.DownloadFile()
             {
                 var temp = new TemporaryFile();
-                using(var writer = new StreamWriter(temp))
+                using(var stream = File.Create(temp))
+                using(var writer = new BinaryWriter(stream))
                     writer.Write(_change.Content);
                 return temp;
             }
