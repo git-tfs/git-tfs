@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Test.Fixtures;
 using Xunit;
 
 namespace Sep.Git.Tfs.Test.Integration
@@ -202,6 +203,22 @@ namespace Sep.Git.Tfs.Test.Integration
             AssertNewClone("MyProject", new[] { "refs/remotes/tfs/Branch" },
                 commit: "0df2815a74403cfe96ccb96e3f995970f55df2b4",
                 tree: "c379179fee2ce45e44a5a2dd1d9bcf5ce8489608");
+        }
+
+        [FactExceptOnUnix]
+        public void WhenCloningVtccds()
+        {
+            h.SetupFake(r =>
+            {
+                r.SetRootBranch("$/vtccds/trunk");
+                vtccds.Prepare(r);
+            });
+
+            h.Run("clone", h.TfsUrl, "$/vtccds/trunk", "Vtccds", "--with-branches");
+
+            //AssertNewClone("MyProject", new[] { "refs/heads/renamed3" },
+            //    commit: "0df2815a74403cfe96ccb96e3f995970f55df2b4",
+            //    tree: "c379179fee2ce45e44a5a2dd1d9bcf5ce8489608");
         }
 
         [FactExceptOnUnix]
