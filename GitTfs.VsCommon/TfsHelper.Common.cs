@@ -618,7 +618,12 @@ namespace Sep.Git.Tfs.VsCommon
             if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
                 Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
-                _workspaces.Add(remote.Id, workspace = Retry.Do(() => GetWorkspace(mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray())));
+                var mappingsAsList = mappings as ICollection<Tuple<string, string>> ?? mappings.ToList();
+                _workspaces.Add(remote.Id, workspace = Retry.Do(() =>
+                {
+                    var workingFolders = mappingsAsList.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2)));
+                    return GetWorkspace(workingFolders.ToArray());
+                }));
                 Janitor.CleanThisUpWhenWeClose(() => TryToDeleteWorkspace(workspace));
             }
             var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
