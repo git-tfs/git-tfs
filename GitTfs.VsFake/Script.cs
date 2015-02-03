@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Sep.Git.Tfs.Core;
@@ -44,6 +45,7 @@ namespace Sep.Git.Tfs.VsFake
     }
 
     [Serializable]
+    [DebuggerDisplay("{Id}")]
     public class ScriptedChangeset
     {
         public int Id { get; set; }
@@ -62,6 +64,7 @@ namespace Sep.Git.Tfs.VsFake
     }
 
     [Serializable]
+    [DebuggerDisplay("{ChangeType}/{ItemType}/{RepositoryPath}/{ItemId}")]
     public class ScriptedChange
     {
         public TfsChangeType ChangeType { get; set; }
