@@ -6,7 +6,7 @@ using Sep.Git.Tfs.Commands;
 namespace Sep.Git.Tfs.Core
 {
 
-    public interface IFetchResult
+    public interface IFetchResult : IRenameResult
     {
         bool IsSuccess { get; set; }
         long LastFetchedChangesetId { get; set; }
@@ -14,12 +14,11 @@ namespace Sep.Git.Tfs.Core
         string ParentBranchTfsPath { get; set; }
     }
 
-    public class RenameContext
+    public interface IRenameResult
     {
-        public bool IsProcessingRenameChangeset { get; set; }
-        public string LastParentCommitBeforeRename { get; set; }
+        bool IsProcessingRenameChangeset { get; set; }
+        string LastParentCommitBeforeRename { get; set; }
     }
-
 
     public interface IGitTfsRemote
     {
@@ -51,10 +50,10 @@ namespace Sep.Git.Tfs.Core
         bool ExportMetadatas { get; set; }
         Dictionary<string, string> ExportWorkitemsMapping { get; set; }
         bool ShouldSkip(string path);
-        IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, RenameContext renameContext = null);
+        IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null);
         string GetPathInGitRepo(string tfsPath);
-        IFetchResult Fetch(bool stopOnFailMergeCommit = false, RenameContext renameContext = null);
-        IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, RenameContext renameContext = null, params string[] parentCommitsHashes);
+        IFetchResult Fetch(bool stopOnFailMergeCommit = false, IRenameResult renameResult = null);
+        IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes);
         void QuickFetch();
         void QuickFetch(int changesetId);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler);
