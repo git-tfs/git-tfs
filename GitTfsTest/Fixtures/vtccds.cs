@@ -49,11 +49,11 @@ namespace Sep.Git.Tfs.Test.Fixtures
             r.BranchChangeset(25200, "testRename renamed in afterRename", DateTime.Parse("2013-09-09T22:13:05.513Z"), "$/vtccds/testRename", "$/vtccds/afterRename", 25199)
                 .Change(TfsChangeType.Rename, TfsItemType.Folder, "$/vtccds/afterRename", Read(null), 426365)
                 .Change(TfsChangeType.Delete, TfsItemType.Folder, "$/vtccds/testRename", Read(null), 426363)
-                .Change(TfsChangeType.Rename, TfsItemType.File, "$/vtccds/afterRename/file.txt", Read("2ea0b9d555f39b93aa67d834aec81dec"), 426366)
+                .Change(TfsChangeType.Rename, TfsItemType.File, "$/vtccds/afterRename/file.txt", Read("2ea0b9d555f39b93aa67d834aec81dec"), 426364)
                 .Change(TfsChangeType.Delete, TfsItemType.File, "$/vtccds/testRename/file.txt", Read("2ea0b9d555f39b93aa67d834aec81dec"), 426364)
 ;
             r.Changeset(25202, "1st commit after rename", DateTime.Parse("2013-09-10T12:19:16.28Z"))
-                .Change(TfsChangeType.Edit, TfsItemType.File, "$/vtccds/afterRename/file.txt", Read("6553cc439299c73677e0c43dd0fd786e"), 426366)
+                .Change(TfsChangeType.Edit, TfsItemType.File, "$/vtccds/afterRename/file.txt", Read("6553cc439299c73677e0c43dd0fd786e"), 426364)
 ;
             r.BranchChangeset(25957, "branch to test rename of a file", DateTime.Parse("2013-10-25T08:33:22.15Z"), "$/vtccds/trunk", "$/vtccds/renameFile", 25197)
                 .Change(TfsChangeType.Branch, TfsItemType.Folder, "$/vtccds/renameFile", Read(null), 439692)
@@ -61,10 +61,10 @@ namespace Sep.Git.Tfs.Test.Fixtures
 ;
             r.Changeset(25958, "file.txt renamed to renamed_file.txt", DateTime.Parse("2013-10-25T08:37:09.53Z"))
                 .Change(TfsChangeType.Delete, TfsItemType.File, "$/vtccds/renameFile/file.txt", Read("fba9507f41916830d82be84924dded7b"), 439693)
-                .Change(TfsChangeType.Rename, TfsItemType.File, "$/vtccds/renameFile/renamed_file.txt", Read("fba9507f41916830d82be84924dded7b"), 439694)
+                .Change(TfsChangeType.Rename, TfsItemType.File, "$/vtccds/renameFile/renamed_file.txt", Read("fba9507f41916830d82be84924dded7b"), 439693)
 ;
             r.Changeset(25959, "other useless commit", DateTime.Parse("2013-10-25T08:37:33.233Z"))
-                .Change(TfsChangeType.Edit, TfsItemType.File, "$/vtccds/renameFile/renamed_file.txt", Read("9a975dd2be9a190424fc226a5a25d84f"), 439694)
+                .Change(TfsChangeType.Edit, TfsItemType.File, "$/vtccds/renameFile/renamed_file.txt", Read("9a975dd2be9a190424fc226a5a25d84f"), 439693)
 ;
             r.Changeset(26394, "fix #1669 and  #1670", DateTime.Parse("2013-11-18T10:15:38.977Z"))
                 .Change(TfsChangeType.Edit, TfsItemType.File, "$/vtccds/trunk/file.txt", Read("4f4cd8afcb1708c003540aea8d64239d"), 390991)
@@ -91,11 +91,11 @@ namespace Sep.Git.Tfs.Test.Fixtures
             r.BranchChangeset(27508, "rename the branch a second time...", DateTime.Parse("2014-01-05T23:08:43.21Z"), "$/vtccds/afterRename", "$/vtccds/renamedTwice", 25202)
                 .Change(TfsChangeType.Delete, TfsItemType.Folder, "$/vtccds/afterRename", Read(null), 426365)
                 .Change(TfsChangeType.Rename, TfsItemType.Folder, "$/vtccds/renamedTwice", Read(null), 479201)
-                .Change(TfsChangeType.Delete, TfsItemType.File, "$/vtccds/afterRename/file.txt", Read("6553cc439299c73677e0c43dd0fd786e"), 426366)
-                .Change(TfsChangeType.Rename, TfsItemType.File, "$/vtccds/renamedTwice/file.txt", Read("6553cc439299c73677e0c43dd0fd786e"), 479202)
+                .Change(TfsChangeType.Delete, TfsItemType.File, "$/vtccds/afterRename/file.txt", Read("6553cc439299c73677e0c43dd0fd786e"), 426364)
+                .Change(TfsChangeType.Rename, TfsItemType.File, "$/vtccds/renamedTwice/file.txt", Read("6553cc439299c73677e0c43dd0fd786e"), 426364)
 ;
             r.Changeset(27509, "first commit after 2nd branch renaming...", DateTime.Parse("2014-01-05T23:12:55.78Z"))
-                .Change(TfsChangeType.Edit, TfsItemType.File, "$/vtccds/renamedTwice/file.txt", Read("d67034311a9ccd1a5a62cc0ecdaa1a6f"), 479202)
+                .Change(TfsChangeType.Edit, TfsItemType.File, "$/vtccds/renamedTwice/file.txt", Read("d67034311a9ccd1a5a62cc0ecdaa1a6f"), 426364)
 ;
             r.BranchChangeset(30333, "Creation branch $/vtccds/b1.1", DateTime.Parse("2014-06-05T11:06:52.633Z"), "$/vtccds/trunk", "$/vtccds/b1.1", 26394)
                 .Change(TfsChangeType.Branch, TfsItemType.Folder, "$/vtccds/b1.1", Read(null), 513921)
@@ -111,11 +111,11 @@ namespace Sep.Git.Tfs.Test.Fixtures
                 .Change(TfsChangeType.Edit, TfsItemType.File, "$/vtccds/b1/file.txt", Read("52c0fc9d4cfbf1ae07f36b8e711a5d6b"), 391049)
 ;
             r.BranchChangeset(33407, "Rename branch and other changes...\n\n-Modify file.txt\n-Add file2.txt", DateTime.Parse("2014-10-11T15:19:56.077Z"), "$/vtccds/renamedTwice", "$/vtccds/renamed3", 27509)
-                .Change(TfsChangeType.Rename, TfsItemType.Folder, "$/vtccds/renamed3", Read(null), 587694)
+                .Change(TfsChangeType.Rename, TfsItemType.Folder, "$/vtccds/renamed3", Read(null), 479201)
                 .Change(TfsChangeType.Delete, TfsItemType.Folder, "$/vtccds/renamedTwice", Read(null), 479201)
-                .Change(TfsChangeType.Edit | TfsChangeType.Rename, TfsItemType.File, "$/vtccds/renamed3/file.txt", Read("fb5dcd187b5ab3729973b310f3c55596"), 587695)
+                .Change(TfsChangeType.Edit | TfsChangeType.Rename, TfsItemType.File, "$/vtccds/renamed3/file.txt", Read("fb5dcd187b5ab3729973b310f3c55596"), 426364)
                 .Change(TfsChangeType.Add | TfsChangeType.Edit | TfsChangeType.Encoding, TfsItemType.File, "$/vtccds/renamed3/file2.txt", Read("0445de4a590c27552a06ecda1b5ff2af"), 587696)
-                .Change(TfsChangeType.Delete, TfsItemType.File, "$/vtccds/renamedTwice/file.txt", Read("d67034311a9ccd1a5a62cc0ecdaa1a6f"), 479202)
+                .Change(TfsChangeType.Delete, TfsItemType.File, "$/vtccds/renamedTwice/file.txt", Read("d67034311a9ccd1a5a62cc0ecdaa1a6f"), 426364)
 ;
             IntegrationHelper.FakeHistoryBuilder.FakeCommiter = null;
         }
