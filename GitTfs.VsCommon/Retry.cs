@@ -36,17 +36,17 @@ namespace Sep.Git.Tfs.VsCommon
                 {
                     return action();
                 }
-                catch (Microsoft.TeamFoundation.TeamFoundationServiceUnavailableException ex)
-                {
-                    exceptions.Add(ex);
-                    Thread.Sleep(retryInterval);
-                }
-                catch (Microsoft.TeamFoundation.Framework.Client.DatabaseOperationTimeoutException ex)
+                catch (Microsoft.TeamFoundation.TeamFoundationServerException ex)
                 {
                     exceptions.Add(ex);
                     Thread.Sleep(retryInterval);
                 }
                 catch (System.Net.WebException ex)
+                {
+                    exceptions.Add(ex);
+                    Thread.Sleep(retryInterval);
+                }
+                catch (GitTfsException ex) // allows continue of catch (MappingConflictException e) throw as innerexception
                 {
                     exceptions.Add(ex);
                     Thread.Sleep(retryInterval);
