@@ -56,6 +56,7 @@ namespace Sep.Git.Tfs.VsFake
 
         public bool IsMergeChangeset { get; set; }
         public MergeChangesetDatas MergeChangesetDatas { get; set; }
+        public string Committer { get; set; }
 
         List<ScriptedChange> _changes = new List<ScriptedChange>();
     }

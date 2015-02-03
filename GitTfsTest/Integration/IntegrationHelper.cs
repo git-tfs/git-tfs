@@ -150,6 +150,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 _script = script;
             }
 
+            public static string FakeCommiter;
             public FakeChangesetBuilder Changeset(int changesetId, string message, DateTime checkinDate)
             {
                 var changeset = new ScriptedChangeset
@@ -159,6 +160,7 @@ namespace Sep.Git.Tfs.Test.Integration
                     CheckinDate = checkinDate,
                     IsBranchChangeset = false,
                     IsMergeChangeset = false,
+                    Committer = FakeCommiter,
                 };
                 _script.Changesets.Add(changeset);
                 return new FakeChangesetBuilder(changeset);
@@ -173,6 +175,7 @@ namespace Sep.Git.Tfs.Test.Integration
                     CheckinDate = checkinDate,
                     IsBranchChangeset = true,
                     IsMergeChangeset = false,
+                    Committer = FakeCommiter,
                     BranchChangesetDatas = new BranchChangesetDatas
                     {
                         RootChangesetId = rootChangesetId,
@@ -193,6 +196,7 @@ namespace Sep.Git.Tfs.Test.Integration
                     CheckinDate = checkinDate,
                     IsBranchChangeset = false,
                     IsMergeChangeset = true,
+                    Committer = FakeCommiter,
                     MergeChangesetDatas = new MergeChangesetDatas
                     {
                         BeforeMergeChangesetId = lastChangesetId,
@@ -242,7 +246,8 @@ namespace Sep.Git.Tfs.Test.Integration
 
         #region run git-tfs
 
-        public string TfsUrl { get { return "http://does/not/matter"; } }
+        private string _tfsUrl = "http://does/not/matter";
+        public string TfsUrl { get { return _tfsUrl; } set { _tfsUrl = value; } }
 
         public int Run(params string[] args)
         {

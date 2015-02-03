@@ -12,9 +12,10 @@ namespace Sep.Git.Tfs.Test.Fixtures
     {
         public static void Prepare(IntegrationHelper.FakeHistoryBuilder r)
         {
-            r.Changeset(22484, "Created team project folder $/vtccds via the Team Project Creation Wizard", DateTime.Parse("2013-05-24T15:44:32.373Z"))
-                .Change(TfsChangeType.Add | TfsChangeType.Encoding, TfsItemType.Folder, "$/vtccds", Read(null), 390990)
-;
+            IntegrationHelper.FakeHistoryBuilder.FakeCommiter = "vtccds_cp";
+//            r.Changeset(22484, "Created team project folder $/vtccds via the Team Project Creation Wizard", DateTime.Parse("2013-05-24T15:44:32.373Z"))
+//                .Change(TfsChangeType.Add | TfsChangeType.Encoding, TfsItemType.Folder, "$/vtccds", Read(null), 390990)
+//;
             r.Changeset(22487, "1er commit dans le tronc!!!", DateTime.Parse("2013-05-24T16:27:37.15Z"))
                 .Change(TfsChangeType.Add | TfsChangeType.Encoding, TfsItemType.Folder, "$/vtccds/trunk", Read(null), 390992)
                 .Change(TfsChangeType.Add | TfsChangeType.Edit | TfsChangeType.Encoding, TfsItemType.File, "$/vtccds/trunk/file.txt", Read("36eae6b6a4717375a4ff16287744cd1d"), 390991)
@@ -116,6 +117,7 @@ namespace Sep.Git.Tfs.Test.Fixtures
                 .Change(TfsChangeType.Add | TfsChangeType.Edit | TfsChangeType.Encoding, TfsItemType.File, "$/vtccds/renamed3/file2.txt", Read("0445de4a590c27552a06ecda1b5ff2af"), 587696)
                 .Change(TfsChangeType.Delete, TfsItemType.File, "$/vtccds/renamedTwice/file.txt", Read("d67034311a9ccd1a5a62cc0ecdaa1a6f"), 479202)
 ;
+            IntegrationHelper.FakeHistoryBuilder.FakeCommiter = null;
         }
 
         private static byte[] Read(string itemContentHash)

@@ -56,6 +56,8 @@ namespace Sep.Git.Tfs.VsFake
 
         public IIdentity GetIdentity(string username)
         {
+            if (username == "vtccds_cp")
+                return new FakeIdentity { DisplayName = username, MailAddress = "b8d46dada4dd62d2ab98a2bda7310285c42e46f6qvabajY2" };
             return new NullIdentity();
         }
 
@@ -117,7 +119,7 @@ namespace Sep.Git.Tfs.VsFake
 
             public string Committer
             {
-                get { return "todo"; }
+                get { return _changeset.Committer ?? "todo"; }
             }
 
             public DateTime CreationDate
@@ -127,7 +129,7 @@ namespace Sep.Git.Tfs.VsFake
 
             public string Comment
             {
-                get { return _changeset.Comment; }
+                get { return _changeset.Comment.Replace("\n", "\r\n"); }
             }
 
             public int ChangesetId

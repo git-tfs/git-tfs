@@ -206,26 +206,31 @@ namespace Sep.Git.Tfs.Test.Integration
         }
 
         [FactExceptOnUnix]
-        public void WhenCloningVtccds()
+        public void WhenCloningFunctionalTestVtccdsWithBranchesRenaming_ThenAllRenamesShouldBeWellHandled()
         {
             h.SetupFake(r =>
             {
                 r.SetRootBranch("$/vtccds/trunk");
                 vtccds.Prepare(r);
             });
-
+            h.TfsUrl = "https://tfs.codeplex.com:443/tfs/TFS16";
             h.Run("clone", h.TfsUrl, "$/vtccds/trunk", "Vtccds", "--with-branches");
 
-            AssertNewClone("Vtccds", new[] {"refs/heads/b1"}, commit: "f5cc57be452ef53ca3ec13dbc3ae3b78dcf12a8e");
-            AssertNewClone("Vtccds", new[] {"refs/heads/b1.1"}, commit: "7c271d31b82bd858d604e3710aa02a99f224e4e0");
-            AssertNewClone("Vtccds", new[] {"refs/heads/master"}, commit: "148c73d95143a3e40844e638df9783f7d812930c");
-            AssertNewClone("Vtccds", new[] {"refs/heads/testRename"}, commit: "c829dd14d41e70cba323f1e2464fbd149267fc11");
-            AssertNewClone("Vtccds", new[] {"refs/remotes/tfs/afterRename"}, commit: "c829dd14d41e70cba323f1e2464fbd149267fc11");
-            AssertNewClone("Vtccds", new[] {"refs/remotes/tfs/b1"}, commit: "f5cc57be452ef53ca3ec13dbc3ae3b78dcf12a8e");
-            AssertNewClone("Vtccds", new[] {"refs/remotes/tfs/b1.1"}, commit: "7c271d31b82bd858d604e3710aa02a99f224e4e0");
-            AssertNewClone("Vtccds", new[] {"refs/remotes/tfs/default"}, commit: "148c73d95143a3e40844e638df9783f7d812930c");
-            AssertNewClone("Vtccds", new[] {"refs/remotes/tfs/renameFile"}, commit: "e9c180fdd2d97051292e55ae873a0b5c358df4c7");
-            AssertNewClone("Vtccds", new[] {"refs/remotes/tfs/testRename"}, commit: "c829dd14d41e70cba323f1e2464fbd149267fc11");
+            AssertNewClone("Vtccds", new[] { "refs/heads/b1" }, commit: "3cdb2a311ac7cbda1e892a9b3371a76c871a696a");
+            AssertNewClone("Vtccds", new[] { "refs/heads/b1.1" }, commit: "e6e79221fd35b2002367a41535de9c43b626150a");
+            AssertNewClone("Vtccds", new[] { "refs/heads/master" }, commit: "e7d54b14fbdcbbc184d58e82931b7c1ac4a2be70");
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/afterRename" }, commit: "33c183f3f7b26d22a6e3a2688d407a211917b4b4");
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/b1" }, commit: "3cdb2a311ac7cbda1e892a9b3371a76c871a696a");
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/b1.1" }, commit: "e6e79221fd35b2002367a41535de9c43b626150a");
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/default" }, commit: "e7d54b14fbdcbbc184d58e82931b7c1ac4a2be70");
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/renameFile" }, commit: "fd7e8f228962fd2bf48e233c36c800d4a99e4a37");
+
+            //References to fix to correspond exactly to https://github.com/pmiossec/vtccds
+            AssertNewClone("Vtccds", new[] { "refs/heads/renameFile" }, commit: "003ca02adfd9561418f05a61c7a999386957a146");
+            AssertNewClone("Vtccds", new[] { "refs/heads/renamed3" }, commit: "615ac5588d3cb6282c2c7d514f2828ad3aeaf5c7");
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/renamed3" }, commit: "615ac5588d3cb6282c2c7d514f2828ad3aeaf5c7");
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/renameFile" }, commit: "003ca02adfd9561418f05a61c7a999386957a146");
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/branch_from_nowhere" }, commit: "9cb91c60d76d00af182ae9f16da6e6aa77b88a5e");
         }
 
         [FactExceptOnUnix]
