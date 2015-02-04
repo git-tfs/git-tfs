@@ -393,9 +393,21 @@ namespace Sep.Git.Tfs.VsFake
         public IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, int lastChangesetIdToCheck = -1, string tfsPathParentBranch = null)
         {
             var firstChangesetOfBranch = _script.Changesets.FirstOrDefault(c => c.IsBranchChangeset && c.BranchChangesetDatas.BranchPath == tfsPathBranchToCreate);
+            var rootBranches = new List<RootBranch>();
+            var branchChangeset = _script.Changesets.Where(c => c.IsBranchChangeset).ToList();
             if (firstChangesetOfBranch != null)
-                return new List<RootBranch> { new RootBranch(firstChangesetOfBranch.BranchChangesetDatas.RootChangesetId, tfsPathBranchToCreate) };
-            return new List<RootBranch> { new RootBranch(-1, tfsPathBranchToCreate) };
+            {
+                do
+                {
+                    rootBranches.Add(new RootBranch(firstChangesetOfBranch.BranchChangesetDatas.RootChangesetId, firstChangesetOfBranch.BranchChangesetDatas.BranchPath));
+                    firstChangesetOfBranch = branchChangeset.FirstOrDefault(
+                            c => c.BranchChangesetDatas.BranchPath == firstChangesetOfBranch.BranchChangesetDatas.ParentBranch);
+                } while (firstChangesetOfBranch != null);
+                rootBranches.Reverse();
+                return rootBranches;
+            }
+            rootBranches.Add(new RootBranch(-1, tfsPathBranchToCreate));
+            return rootBranches;
         }
 
         public IEnumerable<IBranchObject> GetBranches(bool getDeletedBranches = false)
