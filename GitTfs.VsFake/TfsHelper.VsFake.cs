@@ -412,15 +412,38 @@ namespace Sep.Git.Tfs.VsFake
 
         public IEnumerable<IBranchObject> GetBranches(bool getDeletedBranches = false)
         {
+            var deletedBranchesPathes = _script.Changesets.Where( c => c.IsBranchChangeset &&
+                        c.Changes.Any(ch => ch.ChangeType == TfsChangeType.Delete && ch.RepositoryPath == c.BranchChangesetDatas.ParentBranch))
+                        .Select(b => b.BranchChangesetDatas.ParentBranch).ToList();
+
+            var renamings = _script.Changesets.Where(
+                c => c.IsBranchChangeset &&
+                deletedBranchesPathes.Any(b => b == c.BranchChangesetDatas.BranchPath)).ToList();
+            
             var branches = new List<IBranchObject>();
             branches.AddRange(_script.RootBranches.Select(b => new MockBranchObject { IsRoot = true, Path = b.BranchPath, ParentPath = null }));
             branches.AddRange(_script.Changesets.Where(c=>c.IsBranchChangeset).Select(c => new MockBranchObject
                     {
                         IsRoot = false,
                         Path = c.BranchChangesetDatas.BranchPath,
-                        ParentPath = c.BranchChangesetDatas.ParentBranch
+                        ParentPath = GetRealRootBranch(renamings, c.BranchChangesetDatas.ParentBranch)
                     }));
+            if (!getDeletedBranches)
+                branches.RemoveAll(b => deletedBranchesPathes.Contains(b.Path));
+
             return branches;
+        }
+
+        private string GetRealRootBranch(List<ScriptedChangeset> deletedBranches, string branchPath)
+        {
+            var realRoot = branchPath;
+            while (true)
+            {
+                var parent = deletedBranches.FirstOrDefault(b => b.BranchChangesetDatas.BranchPath == realRoot);
+                if (parent == null)
+                    return realRoot;
+                realRoot = parent.BranchChangesetDatas.ParentBranch;
+            }
         }
         #endregion
 
