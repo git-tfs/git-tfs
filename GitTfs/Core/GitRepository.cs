@@ -234,7 +234,7 @@ namespace Sep.Git.Tfs.Core
             CreateTfsRemote(remoteInfo);
             var newRemote = ReadTfsRemote(newRemoteName);
 
-            _repository.Refs.Move(oldRemote.RemoteRef, newRemote.RemoteRef);
+            _repository.Refs.Rename(oldRemote.RemoteRef, newRemote.RemoteRef);
             UnsetTfsRemoteConfig(oldRemoteName);
         }
 
@@ -474,7 +474,7 @@ namespace Sep.Git.Tfs.Core
                 if (IsBare)
                     return false;
                 return (from 
-                            entry in _repository.Index.RetrieveStatus()
+                            entry in _repository.RetrieveStatus()
                         where 
                             entry.State != FileStatus.Ignored &&
                             entry.State != FileStatus.Untracked
