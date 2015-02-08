@@ -231,6 +231,11 @@ namespace Sep.Git.Tfs.Test.Integration
 
             AssertNewClone("Vtccds", new[] { "refs/heads/renamed3" }, commit: "615ac5588d3cb6282c2c7d514f2828ad3aeaf5c7");
             AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/renamed3" }, commit: "615ac5588d3cb6282c2c7d514f2828ad3aeaf5c7");
+
+            //No refs for renamed branches
+            h.AssertNoRef("Vtccds", "refs/remotes/tfs/renamedTwice");
+            h.AssertNoRef("Vtccds", "refs/remotes/tfs/afterRename");
+            h.AssertNoRef("Vtccds", "refs/remotes/tfs/testRename");
         }
 
         [FactExceptOnUnix]
