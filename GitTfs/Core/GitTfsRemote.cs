@@ -523,23 +523,22 @@ namespace Sep.Git.Tfs.Core
             return commitSha;
         }
 
-        private IEnumerable<string> TranslateWorkItems(IEnumerable<string> workItemsOriginal) {
-            if (ExportWorkitemsMapping.Count != 0) {
-                List<string> workItemsTranslated = new List<string>();
-                if (workItemsOriginal != null) {
-                    foreach (var oldWorkItemId in workItemsOriginal) {
-                        string translatedWorkItemId = null;
-                        if (oldWorkItemId != null && !ExportWorkitemsMapping.TryGetValue(oldWorkItemId, out translatedWorkItemId)) {
-                            translatedWorkItemId = oldWorkItemId;
-                        }
-                        if (translatedWorkItemId != null) {
-                            workItemsTranslated.Add(translatedWorkItemId);
-                        }
-                    }
-                }
-                workItemsOriginal = workItemsTranslated;
+        private IEnumerable<string> TranslateWorkItems(IEnumerable<string> workItemsOriginal)
+        {
+            if (ExportWorkitemsMapping.Count == 0)
+                return workItemsOriginal;
+            List<string> workItemsTranslated = new List<string>();
+            if (workItemsOriginal == null)
+                return workItemsTranslated;
+            foreach (var oldWorkItemId in workItemsOriginal)
+            {
+                string translatedWorkItemId = null;
+                if (oldWorkItemId != null && !ExportWorkitemsMapping.TryGetValue(oldWorkItemId, out translatedWorkItemId))
+                    translatedWorkItemId = oldWorkItemId;
+                if (translatedWorkItemId != null)
+                    workItemsTranslated.Add(translatedWorkItemId);
             }
-            return workItemsOriginal;
+            return workItemsTranslated;
         }
 
         private string FindRootRemoteAndFetch(int parentChangesetId, IRenameResult renameResult = null)
