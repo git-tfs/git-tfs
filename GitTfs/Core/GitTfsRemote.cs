@@ -736,7 +736,7 @@ namespace Sep.Git.Tfs.Core
             return builder.ToString();
         }
 
-        public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler)
+        public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force)
         {
             var destinationRef = GitRepository.ShortToLocalName(destinationBranch);
             if(Repository.HasRef(destinationRef))
@@ -746,11 +746,22 @@ namespace Sep.Git.Tfs.Core
 
             var parentId = shelvesetChangeset.BaseChangesetId;
             var ch = GetTfsChangesetById(parentId);
+            string rootCommit;
             if (ch == null)
-                throw new GitTfsException("ERROR: Parent changeset C" + parentId  + " not found."
-                                         +" Try fetching the latest changes from TFS");
+            {
+                if (!force)
+                    throw new GitTfsException("ERROR: Parent changeset C" + parentId + " not found."
+                                              + " Try fetching the latest changes from TFS");
+                stdout.WriteLine("warning: Parent changeset C" + parentId + " not found."
+                                 + " Trying to apply the shelveset on the current commit...");
+                rootCommit = Repository.GetCurrentCommit();
+            }
+            else
+            {
+                rootCommit = ch.GitCommit;
+            }
 
-            var log = Apply(ch.GitCommit, shelvesetChangeset, ignorableErrorHandler);
+            var log = Apply(rootCommit, shelvesetChangeset, ignorableErrorHandler);
             var commit = Commit(log);
             Repository.UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
         }
