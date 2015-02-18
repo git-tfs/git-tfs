@@ -225,7 +225,7 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public void Unshelve(string a, string b, string c, Action<Exception> h)
+        public void Unshelve(string a, string b, string c, Action<Exception> h, bool force)
         {
             throw DerivedRemoteException;
         }
