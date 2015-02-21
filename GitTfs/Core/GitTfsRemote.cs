@@ -750,8 +750,12 @@ namespace Sep.Git.Tfs.Core
             if (ch == null)
             {
                 if (!force)
-                    throw new GitTfsException("ERROR: Parent changeset C" + parentId + " not found."
-                                              + " Try fetching the latest changes from TFS");
+                    throw new GitTfsException("ERROR: Parent changeset C" + parentId + " not found.", new[]
+                            {
+                                "Try fetching the latest changes from TFS",
+                                "Try applying the shelveset on the currently checkouted commit using the '--force' option"
+                            }
+                        );
                 stdout.WriteLine("warning: Parent changeset C" + parentId + " not found."
                                  + " Trying to apply the shelveset on the current commit...");
                 rootCommit = Repository.GetCurrentCommit();
