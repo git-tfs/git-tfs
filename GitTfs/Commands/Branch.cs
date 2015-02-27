@@ -161,7 +161,9 @@ namespace Sep.Git.Tfs.Commands
 
         private void VerifyCloneAllRepository()
         {
-            if (globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId).TfsRepositoryPath == GitTfsConstants.TfsRoot)
+            var remoteID = DefaultRepositoryID;
+
+            if (globals.Repository.ReadTfsRemote(remoteID).TfsRepositoryPath == GitTfsConstants.TfsRoot)
                 throw new GitTfsException("error: you can't use the 'branch' command when you have cloned the whole repository '$/' !");
         }
 
@@ -231,10 +233,20 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.OK;
         }
 
+        public string DefaultRepositoryID
+        {
+            get
+            {
+                return globals.Repository.HasRemote(GitTfsConstants.DefaultRepositoryId)
+                    ? GitTfsConstants.DefaultRepositoryId
+                    : globals.Repository.ReadAllTfsRemotes().Select(z => z.Id).First();
+            }
+        }
+
         public int DisplayBranchData()
         {
             // should probably pull this from options so that it is settable from the command-line
-            const string remoteId = GitTfsConstants.DefaultRepositoryId;
+            var remoteId = DefaultRepositoryID;
 
             var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
             if (DisplayRemotes)
