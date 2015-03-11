@@ -23,7 +23,7 @@ namespace Sep.Git.Tfs.Core
         void UpdateRef(string gitRefName, string commitSha, string message = null);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head);
-        TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId);
+        TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId, string tfsPath);
         TfsChangesetInfo GetTfsCommit(GitCommit commit);
         TfsChangesetInfo GetTfsCommit(string sha);
         TfsChangesetInfo GetCurrentTfsCommit();
@@ -41,7 +41,7 @@ namespace Sep.Git.Tfs.Core
         string AssertValidBranchName(string gitBranchName);
         bool CreateBranch(string gitBranchName, string target);
         Branch RenameBranch(string oldName, string newName);
-        string FindCommitHashByChangesetId(long changesetId);
+        string FindCommitHashByChangesetId(long changesetId, string tfsPath);
         void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate);
         void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate);
         void MoveRemote(string oldRemoteName, string newRemoteName);

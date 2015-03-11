@@ -149,7 +149,7 @@ namespace Sep.Git.Tfs.Core
 
         private TfsChangesetInfo GetTfsChangesetById(long id)
         {
-            return Repository.GetTfsChangesetById(RemoteRef, id);
+            return Repository.GetTfsChangesetById(RemoteRef, id, TfsRepositoryPath);
         }
 
         private void InitHistory()
@@ -407,7 +407,7 @@ namespace Sep.Git.Tfs.Core
                                      " is a merge changeset. But git-tfs is unable to determine the parent changeset.");
                     return true;
                 }
-                var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
+                var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId, TfsRepositoryPath);
                 if (shaParent == null)
                 {
                     string omittedParentBranch;
@@ -560,7 +560,7 @@ namespace Sep.Git.Tfs.Core
             {
                 stdout.WriteLine("\tFetching from dependent TFS remote '{0}'...", tfsRemote.Id);
                 var fetchResult = ((GitTfsRemote)tfsRemote).FetchWithMerge(-1, stopOnFailMergeCommit, parentChangesetId, renameResult);
-                return Repository.FindCommitHashByChangesetId(parentChangesetId);
+                return Repository.FindCommitHashByChangesetId(parentChangesetId, TfsRepositoryPath);
             }
             return null;
         }
@@ -917,7 +917,7 @@ namespace Sep.Git.Tfs.Core
             string sha1RootCommit = null;
             if (rootChangesetId != -1)
             {
-                sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
+                sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId, TfsRepositoryPath);
                 if (fetchParentBranch && string.IsNullOrWhiteSpace(sha1RootCommit))
                     sha1RootCommit = FindRootRemoteAndFetch((int)rootChangesetId, renameResult);
                 if (string.IsNullOrWhiteSpace(sha1RootCommit))

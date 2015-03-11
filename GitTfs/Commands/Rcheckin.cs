@@ -136,7 +136,7 @@ namespace Sep.Git.Tfs.Commands
                     var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, parents.Select(c=>c.Sha).ToArray());
                     if (fetchResult.NewChangesetCount != 1)
                     {
-                        var lastCommit = _globals.Repository.FindCommitHashByChangesetId(newChangesetId);
+                        var lastCommit = _globals.Repository.FindCommitHashByChangesetId(newChangesetId, tfsRemote.TfsRepositoryPath);
                         RebaseOnto(lastCommit, target);
                         if (AutoRebase)
                             tfsRemote.Repository.CommandNoisy("rebase", "--preserve-merges", tfsRemote.RemoteRef);
@@ -152,7 +152,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     if (newChangesetId != 0)
                     {
-                        var lastCommit = _globals.Repository.FindCommitHashByChangesetId(newChangesetId);
+                        var lastCommit = _globals.Repository.FindCommitHashByChangesetId(newChangesetId, tfsRemote.TfsRepositoryPath);
                         RebaseOnto(lastCommit, currentParent);
                     }
                     throw;

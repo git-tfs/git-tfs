@@ -339,9 +339,9 @@ namespace Sep.Git.Tfs.Core
             Trace.WriteLine("Commits visited count:" + alreadyVisitedCommits.Count);
         }
 
-        public TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId)
+        public TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId, string tfsPath)
         {
-            var commit = FindCommitByChangesetId(changesetId, remoteRef);
+            var commit = FindCommitByChangesetId(changesetId, tfsPath, remoteRef);
             if (commit == null)
                 return null;
             return TryParseChangesetInfo(commit.Message, commit.Sha);
@@ -523,9 +523,9 @@ namespace Sep.Git.Tfs.Core
         private readonly Dictionary<long, string> changesetsCache = new Dictionary<long, string>();
         private bool cacheIsFull = false;
 
-        public string FindCommitHashByChangesetId(long changesetId)
+        public string FindCommitHashByChangesetId(long changesetId, string tfsPath)
         {
-            var commit = FindCommitByChangesetId(changesetId);
+            var commit = FindCommitByChangesetId(changesetId, tfsPath);
             if (commit == null)
                 return null;
 
@@ -547,7 +547,7 @@ namespace Sep.Git.Tfs.Core
             return false;
         }
 
-        private Commit FindCommitByChangesetId(long changesetId, string remoteRef = null)
+        private Commit FindCommitByChangesetId(long changesetId, string tfsPath, string remoteRef = null)
         {
             Trace.WriteLine("Looking for changeset " + changesetId + " in git repository...");
 
@@ -576,8 +576,8 @@ namespace Sep.Git.Tfs.Core
                 long id;
                 if (TryParseChangesetId(c.Message, out id))
                 {
-                    changesetsCache[id] = c.Sha;
-                    if (id == changesetId)
+                    changesetsCache[changesetId] = c.Sha;
+                    if (id == changesetId && c.Message.Contains(tfsPath))
                     {
                         commit = c;
                         break;

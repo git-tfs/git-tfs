@@ -96,7 +96,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
 
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Throw(new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!"));
-            gitRepository.Expect(x => x.FindCommitHashByChangesetId(Arg<int>.Is.Anything)).Return("9ee6a5ab4abd0a96a5e90a6a99988ce59af7964a").Repeat.Never();
+            gitRepository.Expect(x => x.FindCommitHashByChangesetId(Arg<int>.Is.Anything, Arg<string>.Is.Anything)).Return("9ee6a5ab4abd0a96a5e90a6a99988ce59af7964a").Repeat.Never();
 
             Assert.Throws(typeof(GitTfsException), ()=>mocks.ClassUnderTest.Run("$/MyProject/MyBranch", GIT_BRANCH_TO_INIT));
 
