@@ -23,6 +23,7 @@ namespace Sep.Git.Tfs.Commands
         private bool Old { get; set; }
         private bool AutoRebase { get; set; }
         private bool ForceCheckin { get; set; }
+        private bool AutoStash { get; set; }
 
         public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Globals globals, AuthorsFile authors)
         {
@@ -46,6 +47,7 @@ namespace Sep.Git.Tfs.Commands
                         {"old", "Use the old process to rcheckin (slower)", v => Old = v != null},
                         {"a|autorebase", "Continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
                         {"ignore-merge", "Force check in ignoring parent tfs branches in merge commits", v => ForceCheckin = v != null},
+                        {"auto-stash", "AUtomatically perform git stash and git stash pop if working directory is dirty", v => AutoStash = v != null },
                     }.Merge(_checkinOptions.OptionSet);
             }
         }
@@ -53,7 +55,7 @@ namespace Sep.Git.Tfs.Commands
         // uses rebase and works only with HEAD
         public int Run()
         {
-            _globals.WarnOnGitVersion(_stdout);
+            Configure();
 
             if (_globals.Repository.IsBare)
                 throw new GitTfsException("error: you should specify the local branch to checkin for a bare repository.");
@@ -61,10 +63,12 @@ namespace Sep.Git.Tfs.Commands
             return _writer.Write("HEAD", PerformRCheckin);
         }
 
+
         // uses rebase and works only with HEAD in a none bare repository
         public int Run(string localBranch)
         {
-            _globals.WarnOnGitVersion(_stdout);
+            Configure();
+
 
             if (!_globals.Repository.IsBare)
                 throw new GitTfsException("error: This syntax with one parameter is only allowed in bare repository.");
@@ -74,17 +78,41 @@ namespace Sep.Git.Tfs.Commands
             return _writer.Write(GitRepository.ShortToLocalName(localBranch), PerformRCheckin);
         }
 
+        private void Configure()
+        {
+            if (_globals.Repository.GetConfig(GitTfsConstants.RCheckinAutoStashConfigKey) == "true")
+                AutoStash = true;
+
+            _globals.WarnOnGitVersion(_stdout);
+        }
+
         private int PerformRCheckin(TfsChangesetInfo parentChangeset, string refToCheckin)
         {
             if (_globals.Repository.IsBare)
                 AutoRebase = false;
 
-            if (_globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
+            if (!AutoStash && _globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
             {
                 throw new GitTfsException("error: You have local changes; rebase-workflow checkin only possible with clean working directory.")
-                    .WithRecommendation("Try 'git stash' to stash your local changes and checkin again.");
+                    .WithRecommendation("Try 'git stash' to stash your local changes and checkin again. or use --auto-stash");
             }
 
+            if (AutoStash)
+            {
+                using (new TemporaryStash(_globals.Repository))
+                {
+                    return SetupAndBeginRCheckin(parentChangeset, refToCheckin);
+                }
+            }
+            else
+            {
+                return SetupAndBeginRCheckin(parentChangeset, refToCheckin);
+            }
+
+        }
+
+        private int SetupAndBeginRCheckin(TfsChangesetInfo parentChangeset, string refToCheckin)
+        {
             // get latest changes from TFS to minimize possibility of late conflict
             _stdout.WriteLine("Fetching changes from TFS to minimize possibility of late conflict...");
             parentChangeset.Remote.Fetch();

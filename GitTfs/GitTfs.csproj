@@ -202,6 +202,7 @@
     <Compile Include="Util\GitTfsCommandRunner.cs" />
     <Compile Include="Core\IGitTfsVersionProvider.cs" />
     <Compile Include="Util\TemporaryFile.cs" />
+    <Compile Include="Util\TemporaryStash.cs" />
     <Compile Include="Util\WhenDynamicDoesntWork.cs" />
     <Compile Include="Util\PluggableWithAliases.cs" />
     <Compile Include="Util\ConfiguresStructureMap.cs" />
