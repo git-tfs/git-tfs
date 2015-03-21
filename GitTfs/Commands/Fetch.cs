@@ -124,15 +124,14 @@ namespace Sep.Git.Tfs.Commands
 
         protected virtual void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
+            var bareBranch = string.IsNullOrEmpty(BareBranch) ? remote.Id : BareBranch;
             if (remote.Repository.IsBare)
             {
-                if(string.IsNullOrEmpty(BareBranch))
-                    throw new GitTfsException("error : specify a git branch to fetch on...");
-                if (!remote.Repository.HasRef(GitRepository.ShortToLocalName(BareBranch)))
+                if (!remote.Repository.HasRef(GitRepository.ShortToLocalName(bareBranch)))
                     throw new GitTfsException("error : the specified git branch doesn't exist...");
-                if (!ForceFetch && remote.MaxCommitHash != remote.Repository.GetCommit(BareBranch).Sha)
+                if (!ForceFetch && remote.MaxCommitHash != remote.Repository.GetCommit(bareBranch).Sha)
                     throw new GitTfsException("error : fetch is not allowed when there is ahead commits!",
-                        new List<string>() {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
+                        new [] {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
             }
 
             // It is possible that we have outdated refs/remotes/tfs/<id>.
@@ -202,7 +201,7 @@ namespace Sep.Git.Tfs.Commands
                 remote.CleanupWorkspaceDirectory();
 
                 if (remote.Repository.IsBare)
-                    remote.Repository.UpdateRef(GitRepository.ShortToLocalName(BareBranch), remote.MaxCommitHash);
+                    remote.Repository.UpdateRef(GitRepository.ShortToLocalName(bareBranch), remote.MaxCommitHash);
             }
         }
 
