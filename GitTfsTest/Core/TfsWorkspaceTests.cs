@@ -19,6 +19,7 @@ namespace Sep.Git.Tfs.Test.Core
             TextWriter writer = new StringWriter();
             TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
             IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
+            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
             CheckinOptions checkinOptions = new CheckinOptions();
             ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
             CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
@@ -43,6 +44,7 @@ namespace Sep.Git.Tfs.Test.Core
             TextWriter writer = new StringWriter();
             TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
             IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
+            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
             CheckinOptions checkinOptions = new CheckinOptions();
             ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
             CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
@@ -92,6 +94,7 @@ namespace Sep.Git.Tfs.Test.Core
             TextWriter writer = new StringWriter();
             TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
             IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
+            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
             CheckinOptions checkinOptions = new CheckinOptions();
             ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
             CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
@@ -143,6 +146,7 @@ namespace Sep.Git.Tfs.Test.Core
             TextWriter writer = new StringWriter();
             TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
             IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
+            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
             CheckinOptions checkinOptions = new CheckinOptions();
             ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
             CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
@@ -196,6 +200,7 @@ namespace Sep.Git.Tfs.Test.Core
             TextWriter writer = new StringWriter();
             TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
             IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
+            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
             CheckinOptions checkinOptions = new CheckinOptions();
             ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
             CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();

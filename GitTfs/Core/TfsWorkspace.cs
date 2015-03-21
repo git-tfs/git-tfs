@@ -26,7 +26,7 @@ namespace Sep.Git.Tfs.Core
             _contextVersion = contextVersion;
             _checkinOptions = checkinOptions;
             _tfsHelper = tfsHelper;
-            _localDirectory = localDirectory;
+            _localDirectory = remote.Repository.IsBare ? Path.GetFullPath(localDirectory) : localDirectory;
             _stdout = stdout;
 
             this.Remote = remote;
