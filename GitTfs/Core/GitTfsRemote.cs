@@ -560,7 +560,18 @@ namespace Sep.Git.Tfs.Core
             if (tfsRemote != null && string.Compare(tfsRemote.TfsRepositoryPath, TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase) != 0)
             {
                 stdout.WriteLine("\tFetching from dependent TFS remote '{0}'...", tfsRemote.Id);
-                var fetchResult = ((GitTfsRemote)tfsRemote).FetchWithMerge(-1, stopOnFailMergeCommit, parentChangesetId, renameResult);
+                try
+                {
+                    var fetchResult = ((GitTfsRemote) tfsRemote).FetchWithMerge(-1, stopOnFailMergeCommit, parentChangesetId, renameResult);
+                }
+                finally
+                {
+                    Trace.WriteLine("Cleaning...");
+                    tfsRemote.CleanupWorkspaceDirectory();
+
+                    if (tfsRemote.Repository.IsBare)
+                        tfsRemote.Repository.UpdateRef(GitRepository.ShortToLocalName(tfsRemote.Id), tfsRemote.MaxCommitHash);
+                }
                 return Repository.FindCommitHashByChangesetId(parentChangesetId);
             }
             return null;
@@ -626,7 +637,20 @@ namespace Sep.Git.Tfs.Core
                 }
 
                 if (branch.IsRenamedBranch)
-                    remote.Fetch(renameResult:renameResult);
+                {
+                    try
+                    {
+                        remote.Fetch(renameResult:renameResult);
+                    }
+                    finally
+                    {
+                        Trace.WriteLine("Cleaning...");
+                        remote.CleanupWorkspaceDirectory();
+
+                        if (remote.Repository.IsBare)
+                            remote.Repository.UpdateRef(GitRepository.ShortToLocalName(remote.Id), remote.MaxCommitHash);
+                    }
+                }
             }
 
             return remote;
