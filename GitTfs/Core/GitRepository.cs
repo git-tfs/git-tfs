@@ -272,8 +272,13 @@ namespace Sep.Git.Tfs.Core
 
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
+            MoveTfsRefForwardIfNeeded(remote, "HEAD");
+        }
+
+        public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote, string @ref)
+        {
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets = from cs in GetLastParentTfsCommits("HEAD")
+            var untrackedTfsChangesets = from cs in GetLastParentTfsCommits(@ref)
                                          where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
                                          orderby cs.ChangesetId
                                          select cs;

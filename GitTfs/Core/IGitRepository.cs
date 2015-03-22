@@ -22,6 +22,7 @@ namespace Sep.Git.Tfs.Core
         GitCommit Commit(LogEntry logEntry);
         void UpdateRef(string gitRefName, string commitSha, string message = null);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
+        void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote, string @ref);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head);
         TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId);
         TfsChangesetInfo GetTfsCommit(GitCommit commit);
