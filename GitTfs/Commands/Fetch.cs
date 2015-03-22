@@ -125,6 +125,20 @@ namespace Sep.Git.Tfs.Commands
         protected virtual void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
             var bareBranch = string.IsNullOrEmpty(BareBranch) ? remote.Id : BareBranch;
+
+            // It is possible that we have outdated refs/remotes/tfs/<id>.
+            // E.g. someone already fetched changesets from TFS into another git repository and we've pulled it since
+            // in that case tfs fetch will retrieve same changes again unnecessarily. To prevent it we will scan tree from HEAD and see if newer changesets from
+            // TFS exists (by checking git-tfs-id mark in commit's comments).
+            // The process is similar to bootstrapping.
+            if (!ForceFetch)
+            {
+                if (!remote.Repository.IsBare)
+                    remote.Repository.MoveTfsRefForwardIfNeeded(remote);
+                else
+                    remote.Repository.MoveTfsRefForwardIfNeeded(remote, bareBranch);
+            }
+
             if (!ForceFetch &&
                 remote.Repository.IsBare &&
                 remote.Repository.HasRef(GitRepository.ShortToLocalName(bareBranch)) &&
@@ -134,13 +148,6 @@ namespace Sep.Git.Tfs.Commands
                     new[] {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
             }
 
-            // It is possible that we have outdated refs/remotes/tfs/<id>.
-            // E.g. someone already fetched changesets from TFS into another git repository and we've pulled it since
-            // in that case tfs fetch will retrieve same changes again unnecessarily. To prevent it we will scan tree from HEAD and see if newer changesets from
-            // TFS exists (by checking git-tfs-id mark in commit's comments).
-            // The process is similar to bootstrapping.
-            if (!ForceFetch)
-                globals.Repository.MoveTfsRefForwardIfNeeded(remote);
             var exportMetadatasFilePath = Path.Combine(globals.GitDir, "git-tfs_workitem_mapping.txt");
             if (ExportMetadatas)
             {
