@@ -362,11 +362,12 @@ namespace Sep.Git.Tfs.Commands
 
         private IGitTfsRemote InitFromDefaultRemote()
         {
-            IGitTfsRemote defaultRemote = null;
+            IGitTfsRemote defaultRemote;
             if (_globals.Repository.HasRemote(GitTfsConstants.DefaultRepositoryId))
                 defaultRemote = _globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
             else
                 defaultRemote = _globals.Repository.ReadAllTfsRemotes()
+                    .Where(x => x != null && x.RemoteInfo != null && !string.IsNullOrEmpty(x.RemoteInfo.Url))
                     .OrderBy(x => x.RemoteInfo.Url.Length).FirstOrDefault();
             if (defaultRemote == null)
                 throw new GitTfsException("error: No git-tfs repository found. Please try to clone first...\n");
