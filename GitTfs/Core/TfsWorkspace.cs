@@ -153,8 +153,7 @@ namespace Sep.Git.Tfs.Core
                 {
                     _stdout.WriteLine("Warning: One item should have been edited, but actually edited " + edited + ". Ignoring item.");
                 }
-                else
-                if (edited == 0 && _checkinOptions.AddMissingItems)
+                else if (edited == 0 && _checkinOptions.AddMissingItems)
                 {
                     _stdout.WriteLine("Warning: One item should have been edited, but was not found. Adding the file instead.");
                     Add(path);
