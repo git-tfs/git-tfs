@@ -362,9 +362,12 @@ namespace Sep.Git.Tfs.Commands
 
         private IGitTfsRemote InitFromDefaultRemote()
         {
-            var defaultRemote = _globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
-            if (defaultRemote == null)
-                throw new GitTfsException("error: No git-tfs repository found. Please try to clone first...\n");
+            IGitTfsRemote defaultRemote = null;
+            if (_globals.Repository.HasRemote(GitTfsConstants.DefaultRepositoryId))
+                defaultRemote = _globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId);
+            else
+                defaultRemote = _globals.Repository.ReadAllTfsRemotes()
+                    .OrderBy(x => x.RemoteInfo.Url.Length).FirstOrDefault();
 
             _remoteOptions = new RemoteOptions();
             if (!string.IsNullOrWhiteSpace(TfsUsername))
@@ -372,7 +375,7 @@ namespace Sep.Git.Tfs.Commands
                 _remoteOptions.Username = TfsUsername;
                 _remoteOptions.Password = TfsPassword;
             }
-            else
+            else if (defaultRemote != null)
             {
                 _remoteOptions.Username = defaultRemote.TfsUsername;
                 _remoteOptions.Password = defaultRemote.TfsPassword;
@@ -380,12 +383,12 @@ namespace Sep.Git.Tfs.Commands
 
             if (IgnoreRegex != null)
                 _remoteOptions.IgnoreRegex = IgnoreRegex;
-            else
+            else if (defaultRemote != null)
                 _remoteOptions.IgnoreRegex = defaultRemote.IgnoreRegexExpression;
 
             if (ExceptRegex != null)
                 _remoteOptions.ExceptRegex = ExceptRegex;
-            else
+            else if (defaultRemote != null)
                 _remoteOptions.ExceptRegex = defaultRemote.IgnoreExceptRegexExpression;
 
             return defaultRemote;
