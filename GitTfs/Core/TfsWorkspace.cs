@@ -143,11 +143,26 @@ namespace Sep.Git.Tfs.Core
 
         public void Edit(string path)
         {
-            path = GetLocalPath(path);
-            _stdout.WriteLine(" edit " + path);
-            GetFromTfs(path);
-            var edited = _workspace.PendEdit(path);
-            if (edited != 1) throw new Exception("One item should have been edited, but actually edited " + edited + " items.");
+            var localPath = GetLocalPath(path);
+            _stdout.WriteLine(" edit " + localPath);
+            GetFromTfs(localPath);
+            var edited = _workspace.PendEdit(localPath);
+            if (edited != 1)
+            {
+                if (_checkinOptions.IgnoreMissingItems)
+                {
+                    _stdout.WriteLine("Warning: One item should have been edited, but actually edited " + edited + ". Ignoring item.");
+                }
+                else if (edited == 0 && _checkinOptions.AddMissingItems)
+                {
+                    _stdout.WriteLine("Warning: One item should have been edited, but was not found. Adding the file instead.");
+                    Add(path);
+                }
+                else
+                {
+                    throw new Exception("One item should have been edited, but actually edited " + edited + " items.");
+                }
+            }
         }
 
         public void Delete(string path)
