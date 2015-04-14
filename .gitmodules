@@ -1,3 +1,0 @@
-[submodule "lib/libgit2sharp"]
-	path = lib/libgit2sharp
-	url = https://github.com/libgit2/libgit2sharp.git

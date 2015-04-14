@@ -3,18 +3,5 @@
 # Exit on error
 set -e
 
-git submodule update --init --recursive
-git submodule foreach --recursive git clean -f -x -d
-
-LIBGIT2SHA=`cat lib/libgit2sharp/LibGit2Sharp/libgit2_hash.txt`
-SHORTSHA=`echo $LIBGIT2SHA | cut -c 1-7`
-
-mkdir lib/libgit2sharp/cmake-build
-cd lib/libgit2sharp/cmake-build
-cmake -DTHREADSAFE=ON -DCMAKE_BUILD_TYPE=Release -DBUILD_CLAR=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=./libgit2-bin -DLIBGIT2_FILENAME=git2-$SHORTSHA ../libgit2
-cmake --build . --target install
-
-export LD_LIBRARY_PATH=$PWD/libgit2-bin/lib
-
-cd ../../..
+export LD_LIBRARY_PATH=$PWD/GitTfsTest/bin/Debug/NativeBinaries/amd64
 xbuild CI.proj
