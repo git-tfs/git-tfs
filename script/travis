@@ -3,4 +3,5 @@
 # Exit on error
 set -e
 
+export LD_LIBRARY_PATH=$PWD/GitTfsTest/bin/Debug/NativeBinaries/amd64
 xbuild CI.proj
