@@ -9,6 +9,9 @@ notifications:
     on_success: change
     on_failure: always
 	
+before_install:
+  - sudo apt-get update
+	
 install:
   - sudo apt-get install mono-devel mono-gmcs
 
