@@ -3,5 +3,4 @@
 # Exit on error
 set -e
 
-cd ../../..
 xbuild CI.proj
