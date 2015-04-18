@@ -161,6 +161,9 @@ namespace Sep.Git.Tfs.Commands
 
         private void VerifyCloneAllRepository()
         {
+	    if (!globals.Repository.HasRemote(GitTfsConstants.DefaultRepositoryId))
+	        return;
+
             if (globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId).TfsRepositoryPath == GitTfsConstants.TfsRoot)
                 throw new GitTfsException("error: you can't use the 'branch' command when you have cloned the whole repository '$/' !");
         }
