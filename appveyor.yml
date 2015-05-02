@@ -1,0 +1,16 @@
+version: 1.0.{build}
+os: Windows Server 2012 R2
+configuration: Debug
+platform: Any CPU
+clone_folder: c:\gittfs
+init: []
+install:
+- git submodule init
+- git submodule update
+- cinst vs2010sdk -y
+- cinst tfs2010objectmodel -y
+build:
+  project: gittfs.sln
+  verbosity: minimal
+test:
+  assemblies: '**\*Test*.dll'
