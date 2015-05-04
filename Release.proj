@@ -145,11 +145,12 @@
 
   <!-- Internal: Update the "download" button on git-tfs.com -->
   <Target Name="UpdateWebSite" DependsOnTargets="VersionRequired; ClonePagesRepository">
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git checkout master" />
+    <Exec WorkingDirectory="$(WebSiteDir)" Command="git fetch" />
+    <Exec WorkingDirectory="$(WebSiteDir)" Command="git checkout -B v$(Version) origin/master" />
     <WriteLinesToFile File="$(WebSiteDir)/$(DownloadButton)" Lines="&lt;a href=%22$(DownloadUrl)%22 class=%22download-button%22&gt;Download v$(Version)&lt;/a&gt;" Overwrite="true" Encoding="ASCII"/>
     <!-- If the previous attempt was aborted, we might have already updated the button and this commit will be empty. -->
     <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -m %22v$(Version)%22 $(DownloadButton)" IgnoreExitCode="true" />
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) master" />
+    <Exec WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) HEAD:refs/heads/master" />
   </Target>
 
   <!-- Internal. -->
