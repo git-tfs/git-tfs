@@ -123,10 +123,7 @@
 
   <!-- Internal: Called by Release to tag the git-tfs repository. -->
   <Target Name="TagSource" DependsOnTargets="VersionRequired">
-    <!-- This is OK to fail because the tag may have been created in an aborted release build. -->
-    <Exec Command="git tag v$(Version)" IgnoreExitCode="true" />
-    <!-- Double-check that the tag exists. -->
-    <Exec Command="git show --stat v$(Version)" />
+    <Exec Command="git tag -f v$(Version)" />
   </Target>
 
   <!-- Internal: Called by Release to push the release tag to github.com -->
