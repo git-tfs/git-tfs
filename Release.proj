@@ -129,7 +129,7 @@
   <!-- Internal: Called by Release to push the release tag to github.com -->
   <Target Name="PushSource" DependsOnTargets="VersionRequired">
     <!-- Do these separately so that the push to master blocks the push of the tag. -->
-    <Exec Command="git push $(OriginUrl) master" />
+    <Exec Command="git push $(OriginUrl) HEAD:refs/heads/master" />
     <Exec Command="git push $(OriginUrl) v$(Version)" />
   </Target>
 
