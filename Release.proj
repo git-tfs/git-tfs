@@ -19,6 +19,9 @@
     <PackageFile>GitTfs-$(Version).zip</PackageFile>
     <Archive>$(PackagedDir)/$(PackageFile)</Archive>
 
+    <!-- The default location of the release notes -->
+    <ReleaseNotes Condition="'$(ReleaseNotes)' == ''">$(SolutionDir)/doc/release-notes/v$(VERSION).md</ReleaseNotes>
+
     <!-- Where to push the release tag. -->
     <GitHubOwner>git-tfs</GitHubOwner>
     <GitHubRepository>git-tfs</GitHubRepository>

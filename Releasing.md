@@ -16,5 +16,5 @@ Normally, you should do this:
 3. Build the release and include the version (e.g. X.Y.Z) and the name of a changelog file (optional).
 
 ```
-> msbuild Release.proj /t:Release /p:Version=X.Y.Z /p:ReleaseNotes="ReleaseNoteFile.md"
+> msbuild Release.proj /t:Release /p:Version=X.Y.Z
 ```
