@@ -109,6 +109,10 @@ If you want to clone your entire repository with all the branches or that the tf
 
 All the tfs history (and all the branches) and the merge changesets will consequently be fetched from TFS and created in the git repository!
 
+### Clone from a specific changeset
+
+See [quick-clone](quick-clone.md#clone-a-specific-changeset).
+
 ### Excludes
 
 Let's say you want to clone `$/Project`, but you don't want to

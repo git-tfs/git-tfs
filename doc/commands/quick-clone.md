@@ -71,10 +71,23 @@ Useful for making code changes or additions where past history isn't relevant.
 
 ### Simple
 
-To clone the latest changeset in `$/Project1` from your TFS 2010 server `tfs`
+To clone the latest changeset in `$/Project1` from your TFS server `tfs`
 into a new directory `Project1`, do this:
 
     git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/Project1
+
+### Clone a specific changeset
+
+To clone a specific changeset in the history of `$/Project1` from your TFS server `tfs`
+into a new directory `Project1`, do this:
+
+    git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/Project1 -c=126
+
+where `126` is the id of the changeset to clone.
+
+If you want to get all the history from this specific changeset, then just do:
+
+    git tfs fetch
 
 ### Excludes
 

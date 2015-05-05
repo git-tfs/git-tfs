@@ -160,7 +160,14 @@ namespace Sep.Git.Tfs.Core
 
         private LogEntry MakeNewLogEntry(IChangeset changesetToLog, IGitTfsRemote remote = null)
         {
-            var identity = _tfs.GetIdentity(changesetToLog.Committer);
+            IIdentity identity = null;
+            try
+            {
+                identity = _tfs.GetIdentity(changesetToLog.Committer);
+            }
+            catch
+            {
+            } 
             var name = changesetToLog.Committer;
             var email = changesetToLog.Committer;
             if (_authors != null && _authors.Authors.ContainsKey(changesetToLog.Committer))

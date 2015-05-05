@@ -36,6 +36,7 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.TfsUrl = "http://myTfsServer:8080/tfs";
             remote.Tfs = new VsFake.TfsHelper(mocks.Container, null, null);
             gitRepository.Stub(r => r.GitDir).Return(".");
+            gitRepository.Stub(r => r.HasRemote(Arg<string>.Is.Anything)).Return(true);
 
             newBranchRemote = MockRepository.GenerateStub<IGitTfsRemote>();
             newBranchRemote.Id = gitBranchToInit;

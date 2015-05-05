@@ -325,10 +325,10 @@ namespace Sep.Git.Tfs.Core
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
-            List<ITfsChangeset> fetchedChangesets;
+            IEnumerable<ITfsChangeset> fetchedChangesets;
             do
             {
-                fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch).ToList();
+                fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch);
                 if(!fetchedChangesets.Any())
                     return fetchResult;
 
@@ -394,7 +394,7 @@ namespace Sep.Git.Tfs.Core
                 stdout.WriteLine("info: this changeset " + changeset.Summary.ChangesetId +
                                  " is a merge changeset. But was not treated as is because this version of TFS can't manage branches...");
             }
-            else if (Repository.GetConfig(GitTfsConstants.IgnoreBranches) != true.ToString())
+            else if (!IsIgnoringBranches())
             {
                 var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
                 if (parentChangesetId < 1)  // Handle missing merge parent info
@@ -435,6 +435,24 @@ namespace Sep.Git.Tfs.Core
                 changeset.OmittedParentBranch = ";C" + changeset.Summary.ChangesetId;
             }
             return true;
+        }
+
+        public bool IsIgnoringBranches()
+        {
+            var value = Repository.GetConfig<string>(GitTfsConstants.IgnoreBranches, null);
+            bool isIgnoringBranches;
+            if (value != null && bool.TryParse(value, out isIgnoringBranches))
+                return isIgnoringBranches;
+
+            stdout.WriteLine("warning: no value found for branch management setting '" + GitTfsConstants.IgnoreBranches +
+                             "'...");
+            var isIgnoringBranchesDetected = Repository.ReadAllTfsRemotes().Count() < 2;
+            stdout.WriteLine("=> Branch support " + (isIgnoringBranchesDetected ? "disabled!" : "enabled!"));
+            if(isIgnoringBranchesDetected)
+                stdout.WriteLine("   if you want to enable branch support, use the command:" + Environment.NewLine
+                    + "    git config --local " + GitTfsConstants.IgnoreBranches + " false");
+            globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, isIgnoringBranchesDetected.ToString());
+            return isIgnoringBranchesDetected;
         }
 
         private string ProcessChangeset(ITfsChangeset changeset, LogEntry log)
@@ -734,7 +752,7 @@ namespace Sep.Git.Tfs.Core
             return builder.ToString();
         }
 
-        public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler)
+        public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force)
         {
             var destinationRef = GitRepository.ShortToLocalName(destinationBranch);
             if(Repository.HasRef(destinationRef))
@@ -744,11 +762,26 @@ namespace Sep.Git.Tfs.Core
 
             var parentId = shelvesetChangeset.BaseChangesetId;
             var ch = GetTfsChangesetById(parentId);
+            string rootCommit;
             if (ch == null)
-                throw new GitTfsException("ERROR: Parent changeset C" + parentId  + " not found."
-                                         +" Try fetching the latest changes from TFS");
+            {
+                if (!force)
+                    throw new GitTfsException("ERROR: Parent changeset C" + parentId + " not found.", new[]
+                            {
+                                "Try fetching the latest changes from TFS",
+                                "Try applying the shelveset on the currently checkouted commit using the '--force' option"
+                            }
+                        );
+                stdout.WriteLine("warning: Parent changeset C" + parentId + " not found."
+                                 + " Trying to apply the shelveset on the current commit...");
+                rootCommit = Repository.GetCurrentCommit();
+            }
+            else
+            {
+                rootCommit = ch.GitCommit;
+            }
 
-            var log = Apply(ch.GitCommit, shelvesetChangeset, ignorableErrorHandler);
+            var log = Apply(rootCommit, shelvesetChangeset, ignorableErrorHandler);
             var commit = Commit(log);
             Repository.UpdateRef(destinationRef, commit, "Shelveset " + shelvesetName + " from " + shelvesetOwner);
         }

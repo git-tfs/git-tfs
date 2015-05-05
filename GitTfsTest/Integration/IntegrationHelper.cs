@@ -101,7 +101,7 @@ namespace Sep.Git.Tfs.Test.Integration
             public string Commit(string message)
             {
                 File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
-                _repo.Index.Stage("README.txt");
+                _repo.Stage("README.txt");
                 var committer = GetCommitter();
                 return _repo.Commit(message, committer, committer, new CommitOptions(){ AllowEmptyCommit = true}).Id.Sha;
             }
@@ -351,7 +351,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public void AssertCleanWorkspace(string repodir)
         {
-            var status = Repository(repodir).Index.RetrieveStatus();
+            var status = Repository(repodir).RetrieveStatus();
             AssertEqual(new List<string>(), status.Select(statusEntry => "" + statusEntry.State + ": " + statusEntry.FilePath).ToList(), "repo status");
         }
 

@@ -19,6 +19,9 @@
     <PackageFile>GitTfs-$(Version).zip</PackageFile>
     <Archive>$(PackagedDir)/$(PackageFile)</Archive>
 
+    <!-- The default location of the release notes -->
+    <ReleaseNotes Condition="'$(ReleaseNotes)' == ''">$(SolutionDir)/doc/release-notes/v$(VERSION).md</ReleaseNotes>
+
     <!-- Where to push the release tag. -->
     <GitHubOwner>git-tfs</GitHubOwner>
     <GitHubRepository>git-tfs</GitHubRepository>
@@ -99,7 +102,8 @@
 
   <!-- Internal: Called by Release to set the new version. -->
   <Target Name="UpdateVersion" DependsOnTargets="UpdateAssemblyVersionAttribute; UpdateVersionInReadme">
-    <Exec Command="git commit -m v$(Version) $(VersionFilePath) README.md" />
+    <!-- This is OK to fail. If a previous release attempt failed, the commit will now be empty. -->
+    <Exec Command="git commit -m v$(Version) $(VersionFilePath) README.md" IgnoreExitCode="true" />
   </Target>
 
   <!-- Internal. -->
@@ -119,12 +123,14 @@
 
   <!-- Internal: Called by Release to tag the git-tfs repository. -->
   <Target Name="TagSource" DependsOnTargets="VersionRequired">
-    <Exec Command="git tag v$(Version)" />
+    <Exec Command="git tag -f v$(Version)" />
   </Target>
 
   <!-- Internal: Called by Release to push the release tag to github.com -->
   <Target Name="PushSource" DependsOnTargets="VersionRequired">
-    <Exec Command="git push $(OriginUrl) master v$(Version)" />
+    <!-- Do these separately so that the push to master blocks the push of the tag. -->
+    <Exec Command="git push $(OriginUrl) HEAD:refs/heads/master" />
+    <Exec Command="git push $(OriginUrl) v$(Version)" />
   </Target>
 
   <!-- Internal: Called by Release to create the zip. -->
@@ -139,10 +145,12 @@
 
   <!-- Internal: Update the "download" button on git-tfs.com -->
   <Target Name="UpdateWebSite" DependsOnTargets="VersionRequired; ClonePagesRepository">
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git checkout master" />
+    <Exec WorkingDirectory="$(WebSiteDir)" Command="git fetch" />
+    <Exec WorkingDirectory="$(WebSiteDir)" Command="git checkout -B v$(Version) origin/master" />
     <WriteLinesToFile File="$(WebSiteDir)/$(DownloadButton)" Lines="&lt;a href=%22$(DownloadUrl)%22 class=%22download-button%22&gt;Download v$(Version)&lt;/a&gt;" Overwrite="true" Encoding="ASCII"/>
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -m %22v$(Version)%22 $(DownloadButton)" />
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) master" />
+    <!-- If the previous attempt was aborted, we might have already updated the button and this commit will be empty. -->
+    <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -m %22v$(Version)%22 $(DownloadButton)" IgnoreExitCode="true" />
+    <Exec WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) HEAD:refs/heads/master" />
   </Target>
 
   <!-- Internal. -->
