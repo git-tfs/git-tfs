@@ -1,6 +1,6 @@
 ## Summary
 
-The `labels` command fetch all the tfs labels.
+The `labels` command creates a tag in git for each label found in tfs.
 
 Note : Due to how TFS manage labels, this command fetch a lot of data and could be quite long :(
 
@@ -28,4 +28,8 @@ Note : Due to how TFS manage labels, this command fetch a lot of data and could 
 								   users
 ## Examples
 
-TODO...
+	tim@WIN7-VM2:/c/repo/MySolution(master) $ git tfs labels
+	Working with tfs remote: default
+	Looking for label on $/MySolution...
+	1 labels found!
+	Writing label 'Releasebuild1.2.3.4567(default)'...
