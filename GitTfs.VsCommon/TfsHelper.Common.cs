@@ -220,7 +220,8 @@ namespace Sep.Git.Tfs.VsCommon
         public virtual int FindMergeChangesetParent(string path, long targetChangeset, GitTfsRemote remote)
         {
             var targetVersion = new ChangesetVersionSpec((int)targetChangeset);
-            var mergeInfo = VersionControl.QueryMerges(null, null, path, targetVersion, targetVersion, targetVersion, RecursionType.Full);
+            var searchTo = targetVersion;
+            var mergeInfo = VersionControl.QueryMerges(null, null, path, targetVersion, null, searchTo, RecursionType.Full);
             if (mergeInfo.Length == 0) return -1;
             return mergeInfo.Max(x => x.SourceVersion);
         }
