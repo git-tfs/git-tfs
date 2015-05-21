@@ -41,6 +41,7 @@ namespace Sep.Git.Tfs.VsCommon
                 _resolverInstalled = true;
             }
         }
+        
         [SetterProperty]
         public Janitor Janitor { get; set; }
 
