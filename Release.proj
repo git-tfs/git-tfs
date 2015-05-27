@@ -114,7 +114,7 @@
   </Target>
 
   <!-- Internal. -->
-  <Target Name="UpdateVersionInReadme" DependsOnTargets="VersionRequired">
+  <Target Name="UpdateVersionInReadme" DependsOnTargets="VersionRequired; MSBuildCommunityTasks">
     <FileUpdate Files="README.md" Regex="The most recent version is __.*__\." ReplacementText="The most recent version is __$(Version)__." />
   </Target>
 
