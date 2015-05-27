@@ -133,6 +133,7 @@
     <!-- Do these separately so that the push to master blocks the push of the tag. -->
     <Exec Condition="'$(DryRun)' == 'False'" Command="git push $(OriginUrl) HEAD:refs/heads/master" />
     <Exec Condition="'$(DryRun)' == 'False'" Command="git push $(OriginUrl) v$(Version)" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would push to github.com)" />
   </Target>
 
   <!-- Internal: Called by Release to create the zip. -->
@@ -143,6 +144,7 @@
   <!-- Internal: Create a release on github.com -->
   <Target Name="ReleaseOnGitHub" DependsOnTargets="VersionRequired; AuthTokenRequired; MSBuildCommunityTasks">
     <CreateRelease Condition="'$(DryRun)' == 'False'" Repository="$(GitHubOwner)/$(GitHubRepository)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would create release on github.com)" />
   </Target>
 
   <!-- Internal: Update the "download" button on git-tfs.com -->
@@ -153,6 +155,7 @@
     <!-- If the previous attempt was aborted, we might have already updated the button and this commit will be empty. -->
     <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -m %22v$(Version)%22 $(DownloadButton)" IgnoreExitCode="true" />
     <Exec Condition="'$(DryRun)' == 'False'" WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) HEAD:refs/heads/master" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would push pages site to github.com)" />
   </Target>
 
   <!-- Internal. -->
@@ -233,5 +236,6 @@
   <!-- Internal. -->
   <Target Name="PushChocolateyPackage" DependsOnTargets="BuildChocolateyPackage">
     <Exec Condition="'$(DryRun)' == 'False'" Command="cpush $(ChocolateyNupkg)" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would push chocolatey package)" />
   </Target>
 </Project>
