@@ -52,15 +52,17 @@
   </Target>
 
   <!-- The contents of the zip. -->
-  <ItemGroup>
-    <ReleaseFiles Include="$(SolutionDir)\README.md" />
-    <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
-    <ReleaseFiles Include="$(SolutionDir)\NOTICE" />
-    <ReleaseFiles Include="$(BuildDir)\git-tfs.exe" />
-    <ReleaseFiles Include="$(BuildDir)\*.config" />
-    <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
-    <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
-  </ItemGroup>
+  <Target Name="DefineReleaseFiles">
+    <ItemGroup>
+      <ReleaseFiles Include="$(SolutionDir)\README.md" />
+      <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
+      <ReleaseFiles Include="$(SolutionDir)\NOTICE" />
+      <ReleaseFiles Include="$(BuildDir)\git-tfs.exe" />
+      <ReleaseFiles Include="$(BuildDir)\*.config" />
+      <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
+      <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
+    </ItemGroup>
+  </Target>
 
   <!-- The zip. -->
   <ItemGroup>
@@ -137,7 +139,8 @@
   </Target>
 
   <!-- Internal: Called by Release to create the zip. -->
-  <Target Name="Package" DependsOnTargets="VersionRequired; MSBuildCommunityTasks">
+  <Target Name="Package" DependsOnTargets="VersionRequired; MSBuildCommunityTasks; DefineReleaseFiles">
+    <Message Text="@(ReleaseFiles)" />
     <Zip Files="@(ReleaseFiles)" ZipFileName="$(Archive)" WorkingDirectory="$(BuildDir)" />
   </Target>
 
