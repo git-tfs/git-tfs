@@ -140,7 +140,6 @@
 
   <!-- Internal: Called by Release to create the zip. -->
   <Target Name="Package" DependsOnTargets="VersionRequired; MSBuildCommunityTasks; DefineReleaseFiles">
-    <Message Text="@(ReleaseFiles)" />
     <Zip Files="@(ReleaseFiles)" ZipFileName="$(Archive)" WorkingDirectory="$(BuildDir)" />
   </Target>
 
