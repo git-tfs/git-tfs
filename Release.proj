@@ -34,6 +34,8 @@
     <WebSiteDir>$(PackagedDir)/git-tfs.github.com</WebSiteDir>
     <DownloadButton>_includes/download_button.html</DownloadButton>
     <WebSiteRepository>https://github.com/$(GitHubOwner)/git-tfs.github.com.git</WebSiteRepository>
+
+    <DryRun Condition="'$(DryRun)' == ''">True</DryRun>
   </PropertyGroup>
 
   <!-- Internal. -->
@@ -129,8 +131,8 @@
   <!-- Internal: Called by Release to push the release tag to github.com -->
   <Target Name="PushSource" DependsOnTargets="VersionRequired">
     <!-- Do these separately so that the push to master blocks the push of the tag. -->
-    <Exec Command="git push $(OriginUrl) HEAD:refs/heads/master" />
-    <Exec Command="git push $(OriginUrl) v$(Version)" />
+    <Exec Condition="'$(DryRun)' == 'False'" Command="git push $(OriginUrl) HEAD:refs/heads/master" />
+    <Exec Condition="'$(DryRun)' == 'False'" Command="git push $(OriginUrl) v$(Version)" />
   </Target>
 
   <!-- Internal: Called by Release to create the zip. -->
@@ -140,7 +142,7 @@
 
   <!-- Internal: Create a release on github.com -->
   <Target Name="ReleaseOnGitHub" DependsOnTargets="VersionRequired; AuthTokenRequired; MSBuildCommunityTasks">
-    <CreateRelease Repository="$(GitHubOwner)/$(GitHubRepository)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" />
+    <CreateRelease Condition="'$(DryRun)' == 'False'" Repository="$(GitHubOwner)/$(GitHubRepository)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" />
   </Target>
 
   <!-- Internal: Update the "download" button on git-tfs.com -->
@@ -150,7 +152,7 @@
     <WriteLinesToFile File="$(WebSiteDir)/$(DownloadButton)" Lines="&lt;a href=%22$(DownloadUrl)%22 class=%22download-button%22&gt;Download v$(Version)&lt;/a&gt;" Overwrite="true" Encoding="ASCII"/>
     <!-- If the previous attempt was aborted, we might have already updated the button and this commit will be empty. -->
     <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -m %22v$(Version)%22 $(DownloadButton)" IgnoreExitCode="true" />
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) HEAD:refs/heads/master" />
+    <Exec Condition="'$(DryRun)' == 'False'" WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) HEAD:refs/heads/master" />
   </Target>
 
   <!-- Internal. -->
@@ -230,6 +232,6 @@
 
   <!-- Internal. -->
   <Target Name="PushChocolateyPackage" DependsOnTargets="BuildChocolateyPackage">
-    <Exec Command="cpush $(ChocolateyNupkg)" />
+    <Exec Condition="'$(DryRun)' == 'False'" Command="cpush $(ChocolateyNupkg)" />
   </Target>
 </Project>
