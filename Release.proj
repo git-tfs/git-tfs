@@ -48,7 +48,7 @@
 
   <!-- Internal. -->
   <Target Name="AuthTokenRequired">
-    <Error Text="You must set a github.com auth token in auth.targets (see auth.targets.example)" Condition="'$(GitHubAuthToken)' == ''" />
+    <Error Text="You must set a github.com auth token in auth.targets (see auth.targets.example)" Condition="'$(DryRun)' == 'False' And '$(GitHubAuthToken)' == ''" />
   </Target>
 
   <!-- The contents of the zip. -->
