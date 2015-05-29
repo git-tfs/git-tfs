@@ -14,6 +14,9 @@
     <!-- Where git-tfs.exe and its dependencies are built. -->
     <BuildDir>$(SolutionDir)/GitTfs/bin/Release</BuildDir>
 
+    <!-- Where libgit2sharp's native DLLs are. -->
+    <LibGit2SharpDir>$(SolutionDir)/packages/LibGit2Sharp.0.21.0.176/lib/net40</LibGit2SharpDir>
+
     <!-- The name of the output zip file. -->
     <PackagedDir>$(SolutionDir)/Releases</PackagedDir>
     <PackageFile>GitTfs-$(Version).zip</PackageFile>
@@ -60,7 +63,7 @@
       <ReleaseFiles Include="$(BuildDir)\git-tfs.exe" />
       <ReleaseFiles Include="$(BuildDir)\*.config" />
       <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
-      <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
+      <ReleaseFiles Include="$(LibGit2SharpDir)\NativeBinaries\**\*.dll" />
     </ItemGroup>
   </Target>
 
