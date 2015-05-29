@@ -89,45 +89,45 @@ This is the complete list of commands in the master branch on github.
 
 ### Repository setup
 
-* [list-remote-branches](doc/commands/list-remote-branches.md) - since [0.17](../../releases/tag/v0.17.0)
-* [clone](doc/commands/clone.md) - since 0.9
-* [quick-clone](doc/commands/quick-clone.md) - since 0.9
-* [bootstrap](doc/commands/bootstrap.md) - since [0.11][v0.11]
-* [init](doc/commands/init.md) - since 0.9
+* [list-remote-branches](doc/commands/list-remote-branches.md): *list tfs branches that can be cloned or initialized* - since [0.17](../../releases/tag/v0.17.0)
+* [clone](doc/commands/clone.md): *clone a tfs path/branch and its history in a git repository* - since 0.9
+* [quick-clone](doc/commands/quick-clone.md): *clone a specific changeset of a tfs path/branch in a git repository* - since 0.9
+* [bootstrap](doc/commands/bootstrap.md): *bootstrap an existing git-tfs repository cloned from an existing repository* - since [0.11][v0.11]
+* [init](doc/commands/init.md): *initialize a git-tfs repository (without getting changesets)* - since 0.9
 
 ### Pull from TFS
 
-* [clone](doc/commands/clone.md) - since 0.9
-* [fetch](doc/commands/fetch.md) - since 0.9
-* [pull](doc/commands/pull.md) - since 0.9
-* [quick-clone](doc/commands/quick-clone.md) - since 0.9
-* [unshelve](doc/commands/unshelve.md) - since [0.11][v0.12]
-* [shelve-list](doc/commands/shelve-list.md) - since [0.12][v0.12]
-* [labels](doc/commands/labels.md) - since [0.17](../../releases/tag/v0.17.0)
+* [clone](doc/commands/clone.md): *clone a tfs path/branch and its history in a git repository* - since 0.9
+* [fetch](doc/commands/fetch.md): *get changesets from tfs and update the tfs remote* - since 0.9
+* [pull](doc/commands/pull.md): *get changesets from tfs, update the tfs remote and update your work* - since 0.9
+* [quick-clone](doc/commands/quick-clone.md): *clone a specific changeset (without history) of a tfs path/branch in a git repository* - since 0.9
+* [unshelve](doc/commands/unshelve.md): *fetch a tfs shelvesets in your repository* - since [0.11][v0.12]
+* [shelve-list](doc/commands/shelve-list.md): *list tfs shelvesets* - since [0.12][v0.12]
+* [labels](doc/commands/labels.md): *fetch tfs labels* - since [0.17](../../releases/tag/v0.17.0)
 
 ### Push to TFS
 
-* [rcheckin](doc/commands/rcheckin.md) - since [0.12][v0.12]
-* [checkin](doc/commands/checkin.md) - since 0.10
-* [checkintool](doc/commands/checkintool.md) - since 0.10
-* [shelve](doc/commands/shelve.md) - since 0.9
+* [rcheckin](doc/commands/rcheckin.md): *replicate your git commits as tfs changesets* - since [0.12][v0.12]
+* [checkin](doc/commands/checkin.md): *checkin your git commits as one tfs changeset* - since 0.10
+* [checkintool](doc/commands/checkintool.md): *checkin in tfs using the tfs checkin dialog* - since 0.10
+* [shelve](doc/commands/shelve.md): *create a shelveset from git commits* - since 0.9
 
 ### Manage TFS branches
 
-* [list-remote-branches](doc/commands/list-remote-branches.md) - since [0.17](../../releases/tag/v0.17.0)
-* [branch](doc/commands/branch.md) - since [0.17](../../releases/tag/v0.17.0)
+* [list-remote-branches](doc/commands/list-remote-branches.md): *list tfs branches that can be cloned or initialized* - since [0.17](../../releases/tag/v0.17.0)
+* [branch](doc/commands/branch.md): *manage (initialize, create, remove) tfs branches* - since [0.17](../../releases/tag/v0.17.0)
 
 ### Other
 
-* [info](doc/commands/info.md)
-* [cleanup](doc/commands/cleanup.md) - since 0.10
-* [cleanup-workspaces](doc/commands/cleanup-workspaces.md) - since 0.10
-* [help](doc/commands/help.md) - since 0.9
-* [verify](doc/commands/verify.md) - since [0.11][v0.11]
+* [info](doc/commands/info.md): *get some informations about git-tfs and tfs*
+* [cleanup](doc/commands/cleanup.md): *clean some git-tfs internal objects* - since 0.10
+* [cleanup-workspaces](doc/commands/cleanup-workspaces.md): *clean tfs workspaces created by git-tfs* - since 0.10
+* [help](doc/commands/help.md): *get help on git-tfs commands* - since 0.9
+* [verify](doc/commands/verify.md): *verify the changesets fetched* - since [0.11][v0.11]
 * [autotag](doc/config.md#per-tfs-remote) option - since [0.12][v0.12]
-* [subtree](doc/commands/subtree.md) - since [0.19](../../releases/tag/v0.19.0)
-* [reset-remote](doc/commands/reset-remote.md) - since [0.19](../../releases/tag/v0.19.0)
-* [checkout](doc/commands/checkout.md) - since [0.21](../../releases/tag/v0.21.0)
+* [subtree](doc/commands/subtree.md): *manage sparse tfs pathes with git-tfs* - since [0.19](../../releases/tag/v0.19.0)
+* [reset-remote](doc/commands/reset-remote.md): *reset a tfs remote to a previous changeset to fecth again its history* - since [0.19](../../releases/tag/v0.19.0)
+* [checkout](doc/commands/checkout.md): *checkout a commit by a changeset id* - since [0.21](../../releases/tag/v0.21.0)
 * diagnostics (for git-tfs developpers only) - since 0.9
 
 * [config file](doc/config.md)
