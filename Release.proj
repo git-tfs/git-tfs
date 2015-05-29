@@ -124,6 +124,8 @@
   <!-- Internal: Called by release to compile git-tfs.exe -->
   <Target Name="Build">
     <MSBuild Projects="GitTfs.sln" Targets="Rebuild" Properties="Configuration=Release;Platform=$(TargetPlatform);WarningLevel=0" />
+    <!-- Build a second time to ensure that the libgit2 NativeBinaries get copied. -->
+    <MSBuild Projects="GitTfs.sln" Targets="Rebuild" Properties="Configuration=Release;Platform=$(TargetPlatform);WarningLevel=0" />
   </Target>
 
   <!-- Internal: Called by Release to tag the git-tfs repository. -->
