@@ -34,6 +34,8 @@
     <WebSiteDir>$(PackagedDir)/git-tfs.github.com</WebSiteDir>
     <DownloadButton>_includes/download_button.html</DownloadButton>
     <WebSiteRepository>https://github.com/$(GitHubOwner)/git-tfs.github.com.git</WebSiteRepository>
+
+    <DryRun Condition="'$(DryRun)' == ''">True</DryRun>
   </PropertyGroup>
 
   <!-- Internal. -->
@@ -50,15 +52,17 @@
   </Target>
 
   <!-- The contents of the zip. -->
-  <ItemGroup>
-    <ReleaseFiles Include="$(SolutionDir)\README.md" />
-    <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
-    <ReleaseFiles Include="$(SolutionDir)\NOTICE" />
-    <ReleaseFiles Include="$(BuildDir)\git-tfs.exe" />
-    <ReleaseFiles Include="$(BuildDir)\*.config" />
-    <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
-    <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
-  </ItemGroup>
+  <Target Name="DefineReleaseFiles">
+    <ItemGroup>
+      <ReleaseFiles Include="$(SolutionDir)\README.md" />
+      <ReleaseFiles Include="$(SolutionDir)\LICENSE" />
+      <ReleaseFiles Include="$(SolutionDir)\NOTICE" />
+      <ReleaseFiles Include="$(BuildDir)\git-tfs.exe" />
+      <ReleaseFiles Include="$(BuildDir)\*.config" />
+      <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
+      <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
+    </ItemGroup>
+  </Target>
 
   <!-- The zip. -->
   <ItemGroup>
@@ -112,7 +116,7 @@
   </Target>
 
   <!-- Internal. -->
-  <Target Name="UpdateVersionInReadme" DependsOnTargets="VersionRequired">
+  <Target Name="UpdateVersionInReadme" DependsOnTargets="VersionRequired; MSBuildCommunityTasks">
     <FileUpdate Files="README.md" Regex="The most recent version is __.*__\." ReplacementText="The most recent version is __$(Version)__." />
   </Target>
 
@@ -129,18 +133,20 @@
   <!-- Internal: Called by Release to push the release tag to github.com -->
   <Target Name="PushSource" DependsOnTargets="VersionRequired">
     <!-- Do these separately so that the push to master blocks the push of the tag. -->
-    <Exec Command="git push $(OriginUrl) HEAD:refs/heads/master" />
-    <Exec Command="git push $(OriginUrl) v$(Version)" />
+    <Exec Condition="'$(DryRun)' == 'False'" Command="git push $(OriginUrl) HEAD:refs/heads/master" />
+    <Exec Condition="'$(DryRun)' == 'False'" Command="git push $(OriginUrl) v$(Version)" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would push to github.com)" />
   </Target>
 
   <!-- Internal: Called by Release to create the zip. -->
-  <Target Name="Package" DependsOnTargets="VersionRequired; MSBuildCommunityTasks">
+  <Target Name="Package" DependsOnTargets="VersionRequired; MSBuildCommunityTasks; DefineReleaseFiles">
     <Zip Files="@(ReleaseFiles)" ZipFileName="$(Archive)" WorkingDirectory="$(BuildDir)" />
   </Target>
 
   <!-- Internal: Create a release on github.com -->
   <Target Name="ReleaseOnGitHub" DependsOnTargets="VersionRequired; AuthTokenRequired; MSBuildCommunityTasks">
-    <CreateRelease Repository="$(GitHubOwner)/$(GitHubRepository)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" />
+    <CreateRelease Condition="'$(DryRun)' == 'False'" Repository="$(GitHubOwner)/$(GitHubRepository)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would create release on github.com)" />
   </Target>
 
   <!-- Internal: Update the "download" button on git-tfs.com -->
@@ -150,7 +156,8 @@
     <WriteLinesToFile File="$(WebSiteDir)/$(DownloadButton)" Lines="&lt;a href=%22$(DownloadUrl)%22 class=%22download-button%22&gt;Download v$(Version)&lt;/a&gt;" Overwrite="true" Encoding="ASCII"/>
     <!-- If the previous attempt was aborted, we might have already updated the button and this commit will be empty. -->
     <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -m %22v$(Version)%22 $(DownloadButton)" IgnoreExitCode="true" />
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) HEAD:refs/heads/master" />
+    <Exec Condition="'$(DryRun)' == 'False'" WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) HEAD:refs/heads/master" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would push pages site to github.com)" />
   </Target>
 
   <!-- Internal. -->
@@ -230,6 +237,7 @@
 
   <!-- Internal. -->
   <Target Name="PushChocolateyPackage" DependsOnTargets="BuildChocolateyPackage">
-    <Exec Command="cpush $(ChocolateyNupkg)" />
+    <Exec Condition="'$(DryRun)' == 'False'" Command="cpush $(ChocolateyNupkg)" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would push chocolatey package)" />
   </Target>
 </Project>
