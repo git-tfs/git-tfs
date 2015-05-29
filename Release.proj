@@ -71,15 +71,18 @@
     </ArchiveFile>
   </ItemGroup>
 
-  <!-- Load nuget, so we can get dependencies. (Dependencies are not checked in to git.) -->
+  <!-- Use nuget get dependencies. (Dependencies are not checked in to git.) -->
   <PropertyGroup>
-    <PackagesConfig>$(SolutionDir)/.nuget/packages.config</PackagesConfig>
-    <RequireRestoreConsent>false</RequireRestoreConsent>
-    <MSBuildCommunityTasksPath>$(SolutionDir)/packages/MSBuildTasks.1.4.0.45/tools</MSBuildCommunityTasksPath>
+    <NugetExe>$(SolutionDir)\.nuget\nuget.exe</NugetExe>
+    <NugetPackagesDir>$(SolutionDir)/packages</NugetPackagesDir>
+    <MSBuildCommunityTasksPath>$(NugetPackagesDir)/MSBuildTasks.1.4.0.45/tools</MSBuildCommunityTasksPath>
     <MSBuildCommunityTasksLib>$(MSBuildCommunityTasksPath)/MSBuild.Community.Tasks.dll</MSBuildCommunityTasksLib>
     <MSBuildGitTfsTasksLib>$(SolutionDir)/packages/MSBuildGitTfsTasks/GitTfsTasks.dll</MSBuildGitTfsTasksLib>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)/.nuget/nuget.targets" />
+  <Target Name="RestorePackages">
+    <Exec Command="$(NugetExe) restore -PackagesDirectory $(NugetPackagesDir) $(SolutionDir)/.nuget/packages.config" />
+    <Exec Command="$(NugetExe) restore -PackagesDirectory $(NugetPackagesDir) $(SolutionDir)/GitTfs/packages.config" />
+  </Target>
 
   <!-- Load some extra tasks. -->
   <Target Name="MSBuildCommunityTasks" DependsOnTargets="RestorePackages" />
