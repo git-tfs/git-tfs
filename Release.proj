@@ -48,7 +48,7 @@
 
   <!-- Internal. -->
   <Target Name="AuthTokenRequired">
-    <Error Text="You must set a github.com auth token in auth.targets (see auth.targets.example)" Condition="'$(GitHubAuthToken)' == ''" />
+    <Error Text="You must set a github.com auth token in auth.targets (see auth.targets.example)" Condition="'$(DryRun)' == 'False' And '$(GitHubAuthToken)' == ''" />
   </Target>
 
   <!-- The contents of the zip. -->
@@ -71,15 +71,18 @@
     </ArchiveFile>
   </ItemGroup>
 
-  <!-- Load nuget, so we can get dependencies. (Dependencies are not checked in to git.) -->
+  <!-- Use nuget get dependencies. (Dependencies are not checked in to git.) -->
   <PropertyGroup>
-    <PackagesConfig>$(SolutionDir)/.nuget/packages.config</PackagesConfig>
-    <RequireRestoreConsent>false</RequireRestoreConsent>
-    <MSBuildCommunityTasksPath>$(SolutionDir)/packages/MSBuildTasks.1.4.0.45/tools</MSBuildCommunityTasksPath>
+    <NugetExe>$(SolutionDir)\.nuget\nuget.exe</NugetExe>
+    <NugetPackagesDir>$(SolutionDir)/packages</NugetPackagesDir>
+    <MSBuildCommunityTasksPath>$(NugetPackagesDir)/MSBuildTasks.1.4.0.45/tools</MSBuildCommunityTasksPath>
     <MSBuildCommunityTasksLib>$(MSBuildCommunityTasksPath)/MSBuild.Community.Tasks.dll</MSBuildCommunityTasksLib>
     <MSBuildGitTfsTasksLib>$(SolutionDir)/packages/MSBuildGitTfsTasks/GitTfsTasks.dll</MSBuildGitTfsTasksLib>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)/.nuget/nuget.targets" />
+  <Target Name="RestorePackages">
+    <Exec Command="$(NugetExe) restore -PackagesDirectory $(NugetPackagesDir) $(SolutionDir)/.nuget/packages.config" />
+    <Exec Command="$(NugetExe) restore -PackagesDirectory $(NugetPackagesDir) $(SolutionDir)/GitTfs/packages.config" />
+  </Target>
 
   <!-- Load some extra tasks. -->
   <Target Name="MSBuildCommunityTasks" DependsOnTargets="RestorePackages" />
@@ -107,7 +110,8 @@
   <!-- Internal: Called by Release to set the new version. -->
   <Target Name="UpdateVersion" DependsOnTargets="UpdateAssemblyVersionAttribute; UpdateVersionInReadme">
     <!-- This is OK to fail. If a previous release attempt failed, the commit will now be empty. -->
-    <Exec Command="git commit -m v$(Version) $(VersionFilePath) README.md" IgnoreExitCode="true" />
+    <Exec Condition="'$(DryRun)' == 'False'" Command="git commit -m v$(Version) $(VersionFilePath) README.md" IgnoreExitCode="true" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would git commit -m v$(Version) $(VersionFilePath) README.md)" />
   </Target>
 
   <!-- Internal. -->

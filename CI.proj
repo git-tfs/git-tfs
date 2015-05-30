@@ -3,11 +3,8 @@
 
   <PropertyGroup>
     <SolutionDir>./</SolutionDir>
-    <PackagesConfig>.nuget/packages.config</PackagesConfig>
     <RequireRestoreConsent>false</RequireRestoreConsent>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
-
   <Target Name="CI" DependsOnTargets="Build; RunTests" />
 
   <Target Name="Build">
@@ -15,7 +12,7 @@
   </Target>
 
   <UsingTask AssemblyFile="packages/xunit.runners.1.9.2/tools/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
-  <Target Name="RunTests" DependsOnTargets="RestorePackages">
+  <Target Name="RunTests">
     <xunit Assembly="GitTfsTest/bin/Debug/GitTfsTest.dll" />
   </Target>
 

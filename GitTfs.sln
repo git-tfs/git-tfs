@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.VsFake", "GitTfs.VsF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2012", "GitTfs.Vs2012\GitTfs.Vs2012.csproj", "{699CE23D-8BBD-4C15-82E9-7A628ACCA4C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGit2Sharp", "lib\libgit2sharp\LibGit2Sharp\LibGit2Sharp.csproj", "{EE6ED99F-CB12-4683-B055-D28FC7357A34}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F52EAF74-50FA-495E-8A4A-29F91F4C00C9}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.exe = .nuget\NuGet.exe
@@ -40,9 +38,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2013", "GitTfs.Vs2013\GitTfs.Vs2013.csproj", "{101D3C78-27CC-446A-98EC-E2DE88BF0641}"
 EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = GitTfs1.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -67,10 +62,6 @@ Global
 		{699CE23D-8BBD-4C15-82E9-7A628ACCA4C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{699CE23D-8BBD-4C15-82E9-7A628ACCA4C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{699CE23D-8BBD-4C15-82E9-7A628ACCA4C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EE6ED99F-CB12-4683-B055-D28FC7357A34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE6ED99F-CB12-4683-B055-D28FC7357A34}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE6ED99F-CB12-4683-B055-D28FC7357A34}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE6ED99F-CB12-4683-B055-D28FC7357A34}.Release|Any CPU.Build.0 = Release|Any CPU
 		{101D3C78-27CC-446A-98EC-E2DE88BF0641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{101D3C78-27CC-446A-98EC-E2DE88BF0641}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{101D3C78-27CC-446A-98EC-E2DE88BF0641}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -78,5 +69,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = GitTfs1.vsmdi
 	EndGlobalSection
 EndGlobal
