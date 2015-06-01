@@ -32,6 +32,10 @@ namespace Sep.Git.Tfs.Core
                 Summary.Remote.Repository.GetObjects(lastCommit, initialTree);
             var resolver = new PathResolver(Summary.Remote, initialTree);
             var sieve = new ChangeSieve(_changeset, resolver);
+            if (sieve.RenameBranchCommmit)
+            {
+                IsRenameChangeset = true;
+            }
             _changeset.Get(workspace, sieve.GetChangesToFetch(), ignorableErrorHandler);
             foreach (var change in sieve.GetChangesToApply())
             {
@@ -217,5 +221,6 @@ namespace Sep.Git.Tfs.Core
         }
 
         public string OmittedParentBranch { get; set; }
+        public bool IsRenameChangeset { get; set; }
     }
 }

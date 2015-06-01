@@ -304,6 +304,12 @@ namespace Sep.Git.Tfs.Core
             public string ParentBranchTfsPath { get; set; }
         }
 
+        public struct RenamingData
+        {
+            public static bool IsProcessingRenameChangeset = false;
+            public static string LastParentCommitBeforeRename = null;
+        }
+
         public IFetchResult Fetch(bool stopOnFailMergeCommit = false)
         {
             return FetchWithMerge(-1, stopOnFailMergeCommit);
@@ -344,7 +350,20 @@ namespace Sep.Git.Tfs.Core
                         fetchResult.IsSuccess = false;
                         return fetchResult;
                     }
-                    var log = Apply(MaxCommitHash, changeset, objects);
+                    var parentSha = RenamingData.IsProcessingRenameChangeset ? RenamingData.LastParentCommitBeforeRename : MaxCommitHash;
+                    var isFirstCommitInRepository = (parentSha == null);
+                    var log = Apply(parentSha, changeset, objects);
+                    if (changeset.IsRenameChangeset && !isFirstCommitInRepository)
+                    {
+                        if (!RenamingData.IsProcessingRenameChangeset)
+                        {
+                            RenamingData.IsProcessingRenameChangeset = true;
+                            RenamingData.LastParentCommitBeforeRename = MaxCommitHash;
+                            return fetchResult;
+                        }
+                        RenamingData.IsProcessingRenameChangeset = false;
+                        RenamingData.LastParentCommitBeforeRename = null;
+                    }
                     if (parentCommitSha != null)
                         log.CommitParents.Add(parentCommitSha);
                     if (changeset.Summary.ChangesetId == mergeChangesetId)
@@ -365,6 +384,7 @@ namespace Sep.Git.Tfs.Core
             } while (fetchedChangesets.Any() && latestChangesetId > fetchResult.LastFetchedChangesetId);
             return fetchResult;
         }
+
 
         private Dictionary<string, GitObject> BuildEntryDictionary()
         {
