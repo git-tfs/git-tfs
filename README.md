@@ -183,7 +183,8 @@ If you have questions or suggestions about how we could improve git-tfs you coul
 
 ## Community
 
-`#git-tfs` on FreeNode, and the [mailing list](https://groups.google.com/group/git-tfs-dev)
+Drop in and chat in [slack](https://gittfs.slack.com/). (For an invite, email `spraints at gmail.com`.)
+We also have a [mailing list](https://groups.google.com/group/git-tfs-dev).
 
 Thanks to [jetbrains](http://www.jetbrains.com/teamcity)
 ([teamcity](http://teamcity.codebetter.com/project.html?projectId=project256))
