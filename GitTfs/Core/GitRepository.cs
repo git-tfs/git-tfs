@@ -450,9 +450,14 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to)
+        public IEnumerable<IGitChangedFile> GetChangedFiles(string from, string to, string renameThreshold)
         {
-            using (var diffOutput = CommandOutputPipe("diff-tree", "-r", "-M", "-z", from, to))
+            var command = new List<string> {"diff-tree", "-r", "-z", from, to};
+
+            if (!string.IsNullOrEmpty(renameThreshold))
+                command.Insert(1, "-M" + renameThreshold);
+
+            using (var diffOutput = CommandOutputPipe(command.ToArray()))
             {
                 var changes = GitChangeInfo.GetChangedFiles(diffOutput);
                 foreach (var change in changes)

@@ -59,7 +59,7 @@ namespace Sep.Git.Tfs.Core
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force);
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies);
         bool HasShelveset(string shelvesetName);
-        long CheckinTool(string head, TfsChangesetInfo parentChangeset);
+        long CheckinTool(string head, TfsChangesetInfo parentChangeset, CheckinOptions options);
         long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null);
 
         /// <summary>

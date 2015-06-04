@@ -798,28 +798,30 @@ namespace Sep.Git.Tfs.Core
 
         private void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies, ITfsWorkspace workspace)
         {
-            PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace);
+            PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace, null);
             workspace.Shelve(shelvesetName, evaluateCheckinPolicies, () => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
         }
 
-        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        public long CheckinTool(string head, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             var changeset = 0L;
-            WithWorkspace(parentChangeset, workspace => changeset = CheckinTool(head, parentChangeset, workspace));
+            WithWorkspace(parentChangeset, workspace => changeset = CheckinTool(head, parentChangeset, workspace, options));
             return changeset;
         }
 
-        private long CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        private long CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace, CheckinOptions options)
         {
-            PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace);
+            PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace, options);
             return workspace.CheckinTool(() => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
         }
 
-        private void PendChangesToWorkspace(string head, string parent, ITfsWorkspaceModifier workspace)
+        private void PendChangesToWorkspace(string head, string parent, ITfsWorkspaceModifier workspace, CheckinOptions options)
         {
+            var renameThreshold = options == null ? null : options.RenameThreshold;
+
             using (var tidyWorkspace = new DirectoryTidier(workspace, GetLatestChangeset().GetFullTree()))
             {
-                foreach (var change in Repository.GetChangedFiles(parent, head))
+                foreach (var change in Repository.GetChangedFiles(parent, head, renameThreshold))
                 {
                     change.Apply(tidyWorkspace);
                 }
@@ -856,7 +858,7 @@ namespace Sep.Git.Tfs.Core
 
         private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options, string sourceTfsPath)
         {
-            PendChangesToWorkspace(head, parent, workspace);
+            PendChangesToWorkspace(head, parent, workspace, options);
             if (!string.IsNullOrWhiteSpace(sourceTfsPath))
                 workspace.Merge(sourceTfsPath, TfsRepositoryPath);
             return workspace.Checkin(options);
