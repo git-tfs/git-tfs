@@ -52,6 +52,8 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
+        protected int? InitialChangeset { get; set; }
+
         public virtual OptionSet OptionSet
         {
             get
@@ -76,6 +78,8 @@ namespace Sep.Git.Tfs.Commands
                         v => IgnoreBranches = v != null },
                     { "batch-size=", "Size of a the batch of tfs changesets fetched (-1 for all in one batch)",
                         v => BatchSizeOption = v },
+                    { "c|changeset=", "The changeset to clone from (must be a number)",
+                        v => InitialChangeset = Convert.ToInt32(v) },
                 }.Merge(remoteOptions.OptionSet);
             }
         }
@@ -181,7 +185,15 @@ namespace Sep.Git.Tfs.Commands
 
             try
             {
-                remote.Fetch(stopOnFailMergeCommit);
+                if (InitialChangeset.HasValue)
+                {
+                    remote.QuickFetch(InitialChangeset.Value);
+                    remote.Fetch(stopOnFailMergeCommit);
+                }
+                else
+                {
+                    remote.Fetch(stopOnFailMergeCommit);
+                }
 
             }
             finally

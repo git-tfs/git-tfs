@@ -21,20 +21,6 @@ namespace Sep.Git.Tfs.Commands
         {
         }
 
-        public override OptionSet OptionSet
-        {
-            get
-            {
-                return base.OptionSet.Merge(new OptionSet
-                {
-                    { "c|changeset=", "The changeset to clone from (must be a number)",
-                        v => InitialChangeset = Convert.ToInt32(v) },
-                });
-            }
-        }
-
-        private int? InitialChangeset { get; set; }
-
         protected override void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
             if (InitialChangeset.HasValue)
