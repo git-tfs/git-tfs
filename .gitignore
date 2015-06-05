@@ -1,5 +1,6 @@
 # Local-only VS/Re#/etc files
 *.suo
+*.vs/
 *.user
 *.gpState
 _ReSharper.*
