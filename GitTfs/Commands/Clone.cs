@@ -75,6 +75,7 @@ namespace Sep.Git.Tfs.Commands
                     catch (Exception)
                     {
                         retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
+                        File.WriteAllText(@".git\description", tfsRepositoryPath + "\n" + globals.CommandLineRun);
                     }
                 }
 
