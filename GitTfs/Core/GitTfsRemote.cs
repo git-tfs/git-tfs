@@ -577,7 +577,7 @@ namespace Sep.Git.Tfs.Core
                 }
                 else if (tfsBranch == null)
                 {
-                    stdout.WriteLine("error: branch  not found. Verify that all the folders have been converted to branches (or something else :().\n\tpath {0}", tfsPath);
+                    stdout.WriteLine("error: branch {0} not found. Verify that all the folders have been converted to branches (or something else :().\n\tpath {0}", tfsPath);
                     tfsRemote = null;
                     omittedParentBranch = ";C" + parentChangesetId;
                 }
