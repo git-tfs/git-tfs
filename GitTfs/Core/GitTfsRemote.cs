@@ -619,8 +619,9 @@ namespace Sep.Git.Tfs.Core
                 remote = InitBranch(this.remoteOptions, tfsBranch.Path, rootChangesetId, true);
                 if (remote == null)
                 {
-                    stdout.WriteLine("error: root commit not found corresponding to changeset " + rootChangesetId);
-                    return null;
+                    stdout.WriteLine("warning: root commit not found corresponding to changeset " + rootChangesetId);
+                    stdout.WriteLine("=> continuing anyway by creating a branch without parent...");
+                    return InitTfsBranch(this.remoteOptions, tfsBranch.Path);
                 }
 
                 if (branch.IsRenamedBranch)
