@@ -16,9 +16,11 @@ namespace Sep.Git.Tfs.Commands
     //  2. Load the correct set of extant casing.
     public class QuickFetch : Fetch
     {
+        private ConfigProperties _properties;
         public QuickFetch(Globals globals, ConfigProperties properties, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors)
             : base(globals, properties, stdout, remoteOptions, authors, null)
         {
+            _properties = properties;
         }
 
         protected override void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
@@ -27,6 +29,8 @@ namespace Sep.Git.Tfs.Commands
                 remote.QuickFetch(InitialChangeset.Value);
             else
                 remote.QuickFetch();
+            _properties.InitialChangeset = remote.MaxChangesetId;
+            _properties.PersistAllOverrides();
         }
     }
 }
