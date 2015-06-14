@@ -27,8 +27,15 @@ namespace Sep.Git.Tfs
 
         public long? InitialChangeset
         {
-            set { _loader.Override(GitTfsConstants.InitialChangeset, value); }
-            get { return _loader.Get<long?>(GitTfsConstants.InitialChangeset, null); }
+            set
+            {
+                _loader.Override(GitTfsConstants.InitialChangeset, value ?? -1);
+            }
+            get
+            {
+                long? initialChangeset = _loader.Get<long>(GitTfsConstants.InitialChangeset, -1);
+                return initialChangeset == -1 ? null : initialChangeset;
+            }
         }
 
     }

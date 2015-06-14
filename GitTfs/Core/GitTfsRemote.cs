@@ -18,16 +18,19 @@ namespace Sep.Git.Tfs.Core
         private readonly Globals globals;
         private readonly TextWriter stdout;
         private readonly RemoteOptions remoteOptions;
+        private readonly ConfigProperties properties;
         private long? maxChangesetId;
         private string maxCommitHash;
         private bool isTfsAuthenticated;
         public RemoteInfo RemoteInfo { get; private set; }
 
-        public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals, ITfsHelper tfsHelper, TextWriter stdout)
+        public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals,
+            ITfsHelper tfsHelper, TextWriter stdout, ConfigProperties properties)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
             this.stdout = stdout;
+            this.properties = properties;
             Tfs = tfsHelper;
             Repository = repository;
 
@@ -333,8 +336,6 @@ namespace Sep.Git.Tfs.Core
                     return fetchResult;
 
                 var objects = BuildEntryDictionary();
-                Trace.WriteLine(
-                    RemoteRef + ": Getting changesets from " + (MaxChangesetId + 1) + " to " + latestChangesetId + " ...", "info");
                 foreach (var changeset in fetchedChangesets)
                 {
                     fetchResult.NewChangesetCount++;
@@ -652,11 +653,18 @@ namespace Sep.Git.Tfs.Core
 
         private IEnumerable<ITfsChangeset> FetchChangesets(bool byLots, long lastVersion = -1)
         {
-            if(!IsSubtreeOwner)
-                return Tfs.GetChangesets(TfsRepositoryPath, MaxChangesetId + 1, this, lastVersion, byLots);
+            long lowerBoundChangesetId;
+            if(properties.InitialChangeset.HasValue)
+                lowerBoundChangesetId = Math.Max(MaxChangesetId + 1, properties.InitialChangeset.Value);
+            else
+                lowerBoundChangesetId = MaxChangesetId + 1;
+            Trace.WriteLine(RemoteRef + ": Getting changesets from " + lowerBoundChangesetId +
+                " to " + lastVersion + " ...", "info");
+            if (!IsSubtreeOwner)
+                return Tfs.GetChangesets(TfsRepositoryPath, lowerBoundChangesetId, this, lastVersion, byLots);
 
             return globals.Repository.GetSubtrees(this)
-                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, this.MaxChangesetId + 1, x, lastVersion, byLots))
+                .SelectMany(x => Tfs.GetChangesets(x.TfsRepositoryPath, lowerBoundChangesetId, x, lastVersion, byLots))
                 .OrderBy(x => x.Summary.ChangesetId);
         }
 
