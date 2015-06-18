@@ -112,7 +112,16 @@ namespace Sep.Git.Tfs.Commands
             if (!String.IsNullOrWhiteSpace(_globals.Repository.CommandOneline("rev-list", tfsLatest, "^" + refToCheckin)))
                 throw new GitTfsException("error: latest TFS commit should be parent of commits being checked in");
 
+            SetupMetadataExport(parentChangeset.Remote);
+
             return (!Old || _globals.Repository.IsBare) ? _PerformRCheckinQuick(parentChangeset, refToCheckin) : _PerformRCheckin(parentChangeset, refToCheckin);
+        }
+
+        private void SetupMetadataExport(IGitTfsRemote remote)
+        {
+            var exportInitializer = new ExportMetadatasInitializer(_globals);
+            var shouldExport = _globals.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true";
+            exportInitializer.InitializeRemote(remote, shouldExport);
         }
 
         private int _PerformRCheckinQuick(TfsChangesetInfo parentChangeset, string refToCheckin)
