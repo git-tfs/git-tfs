@@ -459,16 +459,10 @@ namespace Sep.Git.Tfs.Core
         {
             if (ExportMetadatas)
             {
-                if (changeset.Summary.Workitems.Any())
-                {
-                    log.Log += "\nwork-items: " + string.Join(", ", changeset.Summary.Workitems.Select(wi => "#" + wi.Id)); ;
-                }
-
-                if (ExportWorkitemsMapping.Count != 0)
-                {
-                    foreach (var mapping in ExportWorkitemsMapping)
-                    {
-                        log.Log = log.Log.Replace("#" + mapping.Key, "#" + mapping.Value);
+                if (changeset.Summary.Workitems.Any()) {
+                    var workItemIds = TranslateWorkItems(changeset.Summary.Workitems.Select(wi => wi.Id.ToString()));
+                    if (workItemIds != null) {
+                        log.Log += "\nwork-items: " + string.Join(", ", workItemIds.Select(s => "#" + s));
                     }
                 }
 
@@ -527,6 +521,24 @@ namespace Sep.Git.Tfs.Core
             if (metadatas.Length != 0)
                 Repository.CreateNote(commitSha, metadatas.ToString(), log.AuthorName, log.AuthorEmail, log.Date);
             return commitSha;
+        }
+
+        private IEnumerable<string> TranslateWorkItems(IEnumerable<string> workItemsOriginal)
+        {
+            if (ExportWorkitemsMapping.Count == 0)
+                return workItemsOriginal;
+            List<string> workItemsTranslated = new List<string>();
+            if (workItemsOriginal == null)
+                return workItemsTranslated;
+            foreach (var oldWorkItemId in workItemsOriginal)
+            {
+                string translatedWorkItemId = null;
+                if (oldWorkItemId != null && !ExportWorkitemsMapping.TryGetValue(oldWorkItemId, out translatedWorkItemId))
+                    translatedWorkItemId = oldWorkItemId;
+                if (translatedWorkItemId != null)
+                    workItemsTranslated.Add(translatedWorkItemId);
+            }
+            return workItemsTranslated;
         }
 
         private string FindRootRemoteAndFetch(int parentChangesetId, IRenameResult renameResult = null)
