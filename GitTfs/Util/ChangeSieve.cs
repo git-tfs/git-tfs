@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -75,8 +74,10 @@ namespace Sep.Git.Tfs.Util
             return NamedChanges.Where(c => IncludeInFetch(c)).Select(c => c.Change);
         }
 
-        /// <summary/>
-        /// <param name="forceGetChanges">true - force get changes ignoring check what should be apply. </param>
+        /// <summary>
+        /// Get all the changes of a changeset to apply
+        /// </summary>
+        /// <param name="forceGetChanges">true - force get changes ignoring check what should be applied. </param>
         public IEnumerable<ApplicableChange> GetChangesToApply(bool forceGetChanges = false)
         {
             if (DeletesProject)
