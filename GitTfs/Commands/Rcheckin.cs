@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -105,44 +106,34 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
 
-            string tfsLatest = parentChangeset.Remote.MaxCommitHash;
-
-            // we could rcheckin only if tfsLatest changeset is a parent of HEAD
-            // so that we could rebase after each single checkin without conflicts
-            if (!String.IsNullOrWhiteSpace(_globals.Repository.CommandOneline("rev-list", tfsLatest, "^" + refToCheckin)))
+            IEnumerable<GitCommit> commitsToCheckin = _globals.Repository.FindParentCommits(refToCheckin, parentChangeset.Remote.MaxCommitHash);
+            Trace.WriteLine("Commit to checkin count:" + commitsToCheckin.Count());
+            if (!commitsToCheckin.Any())
                 throw new GitTfsException("error: latest TFS commit should be parent of commits being checked in");
 
-            return (!Old || _globals.Repository.IsBare) ? _PerformRCheckinQuick(parentChangeset, refToCheckin) : _PerformRCheckin(parentChangeset, refToCheckin);
+            return (!Old || _globals.Repository.IsBare) ? _PerformRCheckinQuick(parentChangeset, refToCheckin, commitsToCheckin) : _PerformRCheckin(parentChangeset, refToCheckin, commitsToCheckin);
         }
 
-        private int _PerformRCheckinQuick(TfsChangesetInfo parentChangeset, string refToCheckin)
+        private int _PerformRCheckinQuick(TfsChangesetInfo parentChangeset, string refToCheckin, IEnumerable<GitCommit> commitsToCheckin)
         {
             var tfsRemote = parentChangeset.Remote;
-            string tfsLatest = parentChangeset.Remote.MaxCommitHash;
-
-            string[] revList = null;
-            _globals.Repository.CommandOutputPipe(tr => revList = tr.ReadToEnd().Split('\n').Where(s => !String.IsNullOrWhiteSpace(s)).ToArray(),
-                                   "rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + ".." + refToCheckin);
-
-            string currentParent = tfsLatest;
+            string currentParent = parentChangeset.Remote.MaxCommitHash;
             long newChangesetId = 0;
 
-            var rc = new RCheckinCommit(_globals.Repository);
-
-            foreach (string commitWithParents in revList)
+            foreach (var commit in commitsToCheckin)
             {
-                rc.ExtractCommit(commitWithParents, currentParent);
-                rc.BuildCommitMessage(!_checkinOptions.NoGenerateCheckinComment, currentParent);
-                string target = rc.Sha;
-                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(tfsRemote, rc.Parents, target);
+                var message = BuildCommitMessage(commit, !_checkinOptions.NoGenerateCheckinComment, currentParent);
+                string target = commit.Sha;
+                var parents = commit.Parents.Where(c => c.Sha != currentParent).ToArray();
+                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(tfsRemote, parents, target);
 
-                var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, rc.Message, rc.Commit);
+                var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, message, commit);
 
                 _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
                 try
                 {
                     newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                    var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
+                    var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, parents.Select(c=>c.Sha).ToArray());
                     if (fetchResult.NewChangesetCount != 1)
                     {
                         var lastCommit = _globals.Repository.FindCommitHashByChangesetId(newChangesetId);
@@ -180,18 +171,16 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.OK;
         }
 
-        private int _PerformRCheckin(TfsChangesetInfo parentChangeset, string refToCheckin)
+        private int _PerformRCheckin(TfsChangesetInfo parentChangeset, string refToCheckin, IEnumerable<GitCommit> commitsToCheckin)
         {
             var tfsRemote = parentChangeset.Remote;
             string tfsLatest = parentChangeset.Remote.MaxCommitHash;
 
-            var rc = new RCheckinCommit(_globals.Repository);
-
             while (true)
             {
                 // determine first descendant of tfsLatest
-                string revList = _globals.Repository.CommandOneline("rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", tfsLatest + ".." + refToCheckin);
-                if (String.IsNullOrWhiteSpace(revList))
+                var commit = commitsToCheckin.FirstOrDefault();
+                if (commit == null)
                 {
                     _stdout.WriteLine("No more to rcheckin.");
 
@@ -201,16 +190,16 @@ namespace Sep.Git.Tfs.Commands
                     return GitTfsExitCodes.OK;
                 }
 
-                rc.ExtractCommit(revList, tfsLatest);
-                rc.BuildCommitMessage(!_checkinOptions.NoGenerateCheckinComment, tfsLatest);
-                string target = rc.Sha;
-                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(tfsRemote, rc.Parents, target);
+                var message = BuildCommitMessage(commit, !_checkinOptions.NoGenerateCheckinComment, tfsLatest);
+                string target = commit.Sha;
+                var parents = commit.Parents.Where(c => c.Sha != tfsLatest).ToArray();
+                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(tfsRemote, parents, target);
 
-                var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, rc.Message, rc.Commit);
+                var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, message, commit);
 
                 _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
-                long newChangesetId = tfsRemote.Checkin(rc.Sha, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                tfsRemote.FetchWithMerge(newChangesetId, false, rc.Parents);
+                long newChangesetId = tfsRemote.Checkin(commit.Sha, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
+                tfsRemote.FetchWithMerge(newChangesetId, false, parents.Select(c => c.Sha).ToArray());
                 if (tfsRemote.MaxChangesetId != newChangesetId)
                     throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
 
@@ -220,45 +209,18 @@ namespace Sep.Git.Tfs.Commands
 
                 RebaseOnto(tfsLatest, target);
                 _stdout.WriteLine("Rebase done successfully.");
+                commitsToCheckin = _globals.Repository.FindParentCommits(refToCheckin, tfsLatest);
             }
         }
 
-        private struct RCheckinCommit
+        public string BuildCommitMessage(GitCommit commit, bool generateCheckinComment, string latest)
         {
-            public GitCommit Commit { get; private set; }
-            public string Sha { get; private set; }
-            public string Message { get; private set; }
-            public string[] Parents { get; private set; }
-
-            private readonly IGitRepository _repo;
-
-            public RCheckinCommit(IGitRepository repo)
-                : this()
-            {
-                _repo = repo;
-                Commit = null;
-                Sha = null;
-                Message = null;
-                Parents = null;
-            }
-
-            public void ExtractCommit(string revList, string latest)
-            {
-                string[] commitShas = revList.Split(' ');
-                Sha = commitShas[0];
-                Parents = commitShas.AsEnumerable().Skip(1).Where(hash => hash != latest).ToArray();
-                Commit = _repo.GetCommit(Sha);
-            }
-
-            public void BuildCommitMessage(bool generateCheckinComment, string latest)
-            {
-                Message = generateCheckinComment
-                                   ? _repo.GetCommitMessage(Sha, latest)
-                                   : _repo.GetCommit(Sha).Message;
-            }
+            return generateCheckinComment
+                               ? _globals.Repository.GetCommitMessage(commit.Sha, latest)
+                               : _globals.Repository.GetCommit(commit.Sha).Message;
         }
 
-        private string FindTfsRepositoryPathOfMergedBranch(IGitTfsRemote remoteToCheckin, string[] gitParents, string target)
+        private string FindTfsRepositoryPathOfMergedBranch(IGitTfsRemote remoteToCheckin, GitCommit[] gitParents, string target)
         {
             if (gitParents.Length != 0)
             {
@@ -270,7 +232,7 @@ namespace Sep.Git.Tfs.Commands
                     var tfsCommit = _globals.Repository.GetTfsCommit(gitParent);
                     if (tfsCommit != null)
                         return tfsCommit.Remote.TfsRepositoryPath;
-                    var lastCheckinCommit = _globals.Repository.GetLastParentTfsCommits(gitParent).FirstOrDefault();
+                    var lastCheckinCommit = _globals.Repository.GetLastParentTfsCommits(gitParent.Sha).FirstOrDefault();
                     if (lastCheckinCommit != null)
                     {
                         if(!ForceCheckin && lastCheckinCommit.Remote.Id != remoteToCheckin.Id)

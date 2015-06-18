@@ -353,9 +353,14 @@ namespace Sep.Git.Tfs.Core
             return TryParseChangesetInfo(currentCommit.Message, currentCommit.Sha);
         }
 
+        public TfsChangesetInfo GetTfsCommit(GitCommit commit)
+        {
+            return TryParseChangesetInfo(commit.Message, commit.Sha);
+        }
+
         public TfsChangesetInfo GetTfsCommit(string sha)
         {
-            return TryParseChangesetInfo(GetCommit(sha).Message, sha);
+            return GetTfsCommit(GetCommit(sha));
         }
 
         private TfsChangesetInfo TryParseChangesetInfo(string gitTfsMetaInfo, string commit)
@@ -654,6 +659,21 @@ namespace Sep.Git.Tfs.Core
             {
                 return false;
             }
+        }
+
+        public IEnumerable<GitCommit> FindParentCommits(string @from, string to)
+        {
+            var commits = _repository.Commits.QueryBy(
+                new CommitFilter() {Since = @from, Until = to, SortBy = CommitSortStrategies.Reverse, FirstParentOnly = true})
+                .Select(c=>new GitCommit(c));
+            var parent = to;
+            foreach (var gitCommit in commits)
+            {
+                if(!gitCommit.Parents.Any(c=>c.Sha == parent))
+                    return new List<GitCommit>();
+                parent = gitCommit.Sha;
+            }
+            return commits;
         }
     }
 }
