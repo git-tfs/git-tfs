@@ -6,3 +6,4 @@
 * Add a repository description when cloning (#790, @pmiossec)
 * Fix workitems export (#712 & #723, @tomimon & @pmiossec)
 * Fix an issue when first change set is branch (#772 & #792, @vzabavnov & @pmiossec)
+*  Remove old (slow) rcheckin algorithm (#791, @pmiossec)
