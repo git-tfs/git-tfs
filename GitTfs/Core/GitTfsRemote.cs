@@ -328,7 +328,7 @@ namespace Sep.Git.Tfs.Core
             IEnumerable<ITfsChangeset> fetchedChangesets;
             do
             {
-                fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch);
+                fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch).ToList(); //avoid enumerating the changesets more than once
                 if(!fetchedChangesets.Any())
                     return fetchResult;
 

@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Test.Core
             private ChangeSieve _changeSieve;
             public ChangeSieve Subject
             {
-                get { return _changeSieve ?? (_changeSieve = new ChangeSieve(Changeset, new PathResolver(Remote, InitialTree))); }
+                get { return _changeSieve ?? (_changeSieve = new ChangeSieve(Changeset, new PathResolver(Remote, "", InitialTree))); }
             }
 
             private Dictionary<string, GitObject> _initialTree;

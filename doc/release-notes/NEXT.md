@@ -2,3 +2,4 @@
 * Manage the case where files are added when renaming a tfs branch (#718, @pmiossec)
 * Being able to clone from a specific changeset (#784, @pmiossec)
 * Rcheckin with libgit2sharp (#605, @pmiossec)
+* Fixed bug in git tfs pull with subtrees (#775, @pmiossec)
