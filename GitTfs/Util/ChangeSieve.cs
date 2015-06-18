@@ -74,7 +74,11 @@ namespace Sep.Git.Tfs.Util
             return NamedChanges.Where(c => IncludeInFetch(c)).Select(c => c.Change);
         }
 
-        public IEnumerable<ApplicableChange> GetChangesToApply()
+        /// <summary>
+        /// Get all the changes of a changeset to apply
+        /// </summary>
+        /// <param name="forceGetChanges">true - force get changes ignoring check what should be applied. </param>
+        public IEnumerable<ApplicableChange> GetChangesToApply(bool forceGetChanges = false)
         {
             if (DeletesProject)
                 return Enumerable.Empty<ApplicableChange>();
@@ -108,8 +112,13 @@ namespace Sep.Git.Tfs.Util
                 }
                 else
                 {
-                    if (IncludeInApply(change))
+                    if (forceGetChanges || IncludeInApply(change))
+                    {
+                        // for get changes only on first change set
+                        forceGetChanges = false;
+
                         compartments.Updated.Add(ApplicableChange.Update(change.GitPath, change.Info.Mode));
+                    }
                 }
             }
             return compartments.Deleted.Concat(compartments.Updated);

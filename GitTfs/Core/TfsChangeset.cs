@@ -37,7 +37,8 @@ namespace Sep.Git.Tfs.Core
                 IsRenameChangeset = true;
             }
             _changeset.Get(workspace, sieve.GetChangesToFetch(), ignorableErrorHandler);
-            foreach (var change in sieve.GetChangesToApply())
+            var forceGetChanges = lastCommit == null;
+            foreach (var change in sieve.GetChangesToApply(forceGetChanges))
             {
                 ignorableErrorHandler.Catch(() => {
                     Apply(change, treeBuilder, workspace, initialTree);
