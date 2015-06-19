@@ -577,9 +577,24 @@ namespace Sep.Git.Tfs.Core
                 tfsRemote = remote;
             else
             {
-                var tfsPath = parentChangeset.Changes.First().Item.ServerItem;
-                tfsPath = tfsPath.EndsWith("/") ? tfsPath : tfsPath + "/";
-                var tfsBranch = Tfs.GetBranches(true).SingleOrDefault(b => tfsPath.StartsWith(b.Path.EndsWith("/") ? b.Path : b.Path + "/"));
+                // If the changeset has created multiple folders, the expected branch folder will not always be the first
+                // so we scan all the changes of type folder to try to detect the first one which is a branch.
+                // In most cases it will change nothing: the first folder is the good one
+                IBranchObject tfsBranch = null;
+                string tfsPath = null;
+                var allBranches = Tfs.GetBranches(true);
+                foreach (var change in parentChangeset.Changes)
+                {
+                    tfsPath = change.Item.ServerItem;
+                    tfsPath = tfsPath.EndsWith("/") ? tfsPath : tfsPath + "/";
+
+                    tfsBranch = allBranches.SingleOrDefault(b => tfsPath.StartsWith(b.Path.EndsWith("/") ? b.Path : b.Path + "/"));
+                    if(tfsBranch != null)
+                    {
+                        // we found a branch, we stop here
+                        break;
+                    }
+                }
 
                 if (mergeChangeset && tfsBranch != null && Repository.GetConfig(GitTfsConstants.IgnoreNotInitBranches) == true.ToString())
                 {
