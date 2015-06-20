@@ -1,0 +1,22 @@
+#appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
+version: 0.21.2.{build}
+os: Visual Studio 2015 RC
+#configuration: Release
+#platform: Any CPU
+clone_folder: c:\gittfs
+clone_depth: 1
+# build cache to preserve files/folders between builds
+cache:
+  - packages -> **\repositories.config  # preserve "packages" directory in the root of build folder but will reset it if repositories.config is modified
+init: []
+install:
+#- choco install tfs2010objectmodel -y
+#- choco install tfs2012objectmodel -y
+#- choco install tfs2013objectmodel -y
+#build:
+#  project: GitTfs.sln
+#  verbosity: minimal
+build_script:
+  msbuild CI.proj /t:Build /nologo /verbosity:minimal /p:BuildInParallel=true /m:4
+test:
+  assemblies: '**\GitTfsTest.dll'
