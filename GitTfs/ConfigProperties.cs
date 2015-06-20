@@ -24,5 +24,19 @@ namespace Sep.Git.Tfs
             set { _loader.Override(GitTfsConstants.BatchSize, value); }
             get { return _loader.Get(GitTfsConstants.BatchSize, 100); }
         }
+
+        public long? InitialChangeset
+        {
+            set
+            {
+                _loader.Override(GitTfsConstants.InitialChangeset, value ?? -1);
+            }
+            get
+            {
+                long? initialChangeset = _loader.Get<long>(GitTfsConstants.InitialChangeset, -1);
+                return initialChangeset == -1 ? null : initialChangeset;
+            }
+        }
+
     }
 }

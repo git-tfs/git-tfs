@@ -1,6 +1,6 @@
 ## Summary
 
-The quick-clone command creates a new git repository, initialized from the last change-set in a TFS source tree, ignoring the full history. 
+The quick-clone command creates a new git repository, initialized from the last changeset (or a specific changeset in history) in a TFS source tree, ignoring the full history. 
 Useful for making code changes or additions where past history isn't relevant.
 
 ## Synopsis

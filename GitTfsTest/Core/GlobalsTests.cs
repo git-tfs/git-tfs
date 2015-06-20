@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Test.Core
                            new TfsChangesetInfo()
                                {
                                    ChangesetId = 34,
-                                   Remote = new GitTfsRemote(new RemoteInfo() {Id = "myRemote"}, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter())
+                                   Remote = new GitTfsRemote(new RemoteInfo() {Id = "myRemote"}, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter(), new ConfigProperties(null))
                                }
                        });
             Assert.Equal("myRemote", globals.RemoteId);
@@ -52,12 +52,12 @@ namespace Sep.Git.Tfs.Test.Core
                            new TfsChangesetInfo()
                                {
                                    ChangesetId = 34,
-                                   Remote = new GitTfsRemote(new RemoteInfo() {Id = "mainRemote"}, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter())
+                                   Remote = new GitTfsRemote(new RemoteInfo() {Id = "mainRemote"}, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter(), new ConfigProperties(null))
                                },
                                new TfsChangesetInfo()
                                {
                                    ChangesetId = 34,
-                                   Remote = new GitTfsRemote(new RemoteInfo() {Id = "myRemote"}, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter())
+                                   Remote = new GitTfsRemote(new RemoteInfo() {Id = "myRemote"}, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter(), new ConfigProperties(null))
                                },
                        });
             Assert.Equal("mainRemote", globals.RemoteId);
@@ -85,7 +85,7 @@ namespace Sep.Git.Tfs.Test.Core
             globals.Repository.Stub(r => r.GetLastParentTfsCommits("HEAD"))
                    .Return(new List<TfsChangesetInfo>());
             globals.Repository.Stub(r => r.ReadAllTfsRemotes())
-                   .Return(new List<GitTfsRemote>() { new GitTfsRemote(new RemoteInfo() { Id = "default" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter()) });
+                   .Return(new List<GitTfsRemote>() { new GitTfsRemote(new RemoteInfo() { Id = "default" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter(), new ConfigProperties(null)) });
             Assert.Equal("default", globals.RemoteId);
         }
 
@@ -98,7 +98,7 @@ namespace Sep.Git.Tfs.Test.Core
             globals.Repository.Stub(r => r.GetLastParentTfsCommits("HEAD"))
                    .Return(new List<TfsChangesetInfo>());
             globals.Repository.Stub(r => r.ReadAllTfsRemotes())
-                   .Return(new List<GitTfsRemote>() { new GitTfsRemote(new RemoteInfo() { Id = "myRemote" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter()) });
+                   .Return(new List<GitTfsRemote>() { new GitTfsRemote(new RemoteInfo() { Id = "myRemote" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter(), new ConfigProperties(null)) });
             Assert.Throws(typeof(GitTfsException), () => globals.RemoteId);
         }
 
@@ -113,8 +113,8 @@ namespace Sep.Git.Tfs.Test.Core
             globals.Repository.Stub(r => r.ReadAllTfsRemotes())
                    .Return(new List<GitTfsRemote>()
                        {
-                           new GitTfsRemote(new RemoteInfo() { Id = "myRemote" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter()),
-                           new GitTfsRemote(new RemoteInfo() { Id = "myRemote2" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter())
+                           new GitTfsRemote(new RemoteInfo() { Id = "myRemote" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter(), new ConfigProperties(null)),
+                           new GitTfsRemote(new RemoteInfo() { Id = "myRemote2" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new StringWriter(), new ConfigProperties(null))
                        });
             Assert.Throws(typeof(GitTfsException), () => globals.RemoteId);
         }
