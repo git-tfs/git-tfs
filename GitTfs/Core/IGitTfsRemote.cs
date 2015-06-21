@@ -38,7 +38,6 @@ namespace Sep.Git.Tfs.Core
         string TfsUsername { get; set; }
         string TfsPassword { get; set; }
         IGitRepository Repository { get; set; }
-        [Obsolete("Make this go away")]
         ITfsHelper Tfs { get; set; }
         long MaxChangesetId { get; set; }
         string MaxCommitHash { get; set; }
