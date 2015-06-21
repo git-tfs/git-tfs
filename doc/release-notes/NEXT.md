@@ -4,3 +4,5 @@
 * Being able to clone from a specific changeset (#784, @pmiossec)
 * Rcheckin with libgit2sharp (#605, @pmiossec)
 * Add a repository description when cloning (#790, @pmiossec)
+* Fix workitems export (#712 & #723, @tomimon & @pmiossec)
+* Fix an issue when first change set is branch (#772 & #792, @vzabavnov & @pmiossec)
