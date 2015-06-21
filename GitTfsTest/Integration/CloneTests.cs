@@ -23,11 +23,6 @@ namespace Sep.Git.Tfs.Test.Integration
             h.Dispose();
         }
 
-        [FactExceptOnUnix(Skip="eventually")]
-        public void FailOnNoProject()
-        {
-        }
-
         [FactExceptOnUnix]
         public void ClonesEmptyProject()
         {
