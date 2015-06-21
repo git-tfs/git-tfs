@@ -81,28 +81,6 @@ namespace Sep.Git.Tfs.Test.Commands
             newBranchRemote.VerifyAllExpectations();
         }
 
-        [Fact(Skip = "Forbidden characters are handled, now!")]
-        public void ShouldFailIfGitBranchNameIsInvalid()
-        {
-            const string GIT_BRANCH_TO_INIT = "my~Branch";
-
-            IGitRepository gitRepository; IGitTfsRemote remote; IGitTfsRemote newBranchRemote;
-            InitMocks4Tests(GIT_BRANCH_TO_INIT, out gitRepository, out remote, out newBranchRemote);
-
-            remote.Tfs = mocks.Get<ITfsHelper>();
-            remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
-
-            gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
-            gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
-
-            gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Throw(new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!"));
-            gitRepository.Expect(x => x.FindCommitHashByChangesetId(Arg<int>.Is.Anything)).Return("9ee6a5ab4abd0a96a5e90a6a99988ce59af7964a").Repeat.Never();
-
-            Assert.Throws(typeof(GitTfsException), ()=>mocks.ClassUnderTest.Run("$/MyProject/MyBranch", GIT_BRANCH_TO_INIT));
-
-            gitRepository.VerifyAllExpectations();
-        }
-
         [Fact]
         public void ShouldDoNothingBecauseRemoteAlreadyExisting()
         {
