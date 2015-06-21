@@ -20,7 +20,6 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals _globals;
         private readonly AuthorsFile _authors;
 
-        private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
         public string ParentBranch { get; set; }

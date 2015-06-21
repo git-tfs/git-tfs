@@ -655,7 +655,7 @@ namespace Sep.Git.Tfs.Core
                 _repository.Checkout(commitish);
                 return true;
             }
-            catch (MergeConflictException ex)
+            catch (MergeConflictException)
             {
                 return false;
             }

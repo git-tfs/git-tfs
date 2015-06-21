@@ -78,20 +78,20 @@ namespace Sep.Git.Tfs.Test.Core
         // A base class for ChangeSieve test classes.
         public class Base<FixtureClass> : IDisposable where FixtureClass : BaseFixture, new()
         {
-            protected readonly FixtureClass Fixture;
-            protected ChangeSieve Subject { get { return Fixture.Subject; } }
-            protected IChange[] Changes { get { return Fixture.Changeset.Changes; } }
+            protected readonly FixtureClass BaseFixture;
+            protected ChangeSieve Subject { get { return BaseFixture.Subject; } }
+            protected IChange[] Changes { get { return BaseFixture.Changeset.Changes; } }
 
             public Base()
             {
-                Fixture = new FixtureClass();
-                var subject = Fixture.Subject;
-                Fixture.Mocks.ReplayAll();
+                BaseFixture = new FixtureClass();
+                var subject = BaseFixture.Subject;
+                BaseFixture.Mocks.ReplayAll();
             }
 
             public void Dispose()
             {
-                Fixture.Mocks.VerifyAll();
+                BaseFixture.Mocks.VerifyAll();
             }
 
             protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges)
