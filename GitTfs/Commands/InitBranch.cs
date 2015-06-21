@@ -173,7 +173,7 @@ namespace Sep.Git.Tfs.Commands
             for (int i = creationBranchData.Count - 1; i > 0; i--)
             {
                 var branch = creationBranchData[i];
-                if (defaultRemote.Repository.FindCommitHashByChangesetId(branch.RootChangeset) != null)
+                if (defaultRemote.Repository.FindCommitHashByChangesetId(branch.RootChangeset, branch.TfsBranchPath) != null)
                 {
                     for (int j = 0; j < i; j++)
                     {
