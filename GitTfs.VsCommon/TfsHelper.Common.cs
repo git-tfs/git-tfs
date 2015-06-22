@@ -7,9 +7,6 @@ using System.Net;
 using System.Reflection;
 using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Client;
-using Microsoft.TeamFoundation.Framework.Client;
-using Microsoft.TeamFoundation.Framework.Common;
-using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Microsoft.Win32;
@@ -28,7 +25,7 @@ namespace Sep.Git.Tfs.VsCommon
     public abstract class TfsHelperBase : ITfsHelper
     {
         protected readonly TextWriter _stdout;
-        private readonly TfsApiBridge _bridge;
+        protected readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
         protected TfsTeamProjectCollection _server;
         private static bool _resolverInstalled;
@@ -88,25 +85,16 @@ namespace Sep.Git.Tfs.VsCommon
                     uri = new Uri(Url);
                 }
 
-#if VS2010
-                _server = HasCredentials ?
-                    new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
-                    new TfsTeamProjectCollection(uri, new UICredentialsProvider());
-#else
-                _server = new TfsTeamProjectCollection(uri, GetTfsCredential());
-#endif
+                _server = GetTfsCredential(uri);
 
                 _server.EnsureAuthenticated();
             }
         }
 
-#if !VS2010
-        protected TfsClientCredentials GetTfsCredential()
-        {
-            var basicAuthCredential = new BasicAuthCredential(GetCredential());
-            return new TfsClientCredentials(basicAuthCredential) {AllowInteractive = !HasCredentials};
-        }
-#endif
+        protected abstract TfsTeamProjectCollection GetTfsCredential(Uri uri);
+
+        public abstract IIdentity GetIdentity(string username);
+
         protected NetworkCredential GetCredential()
         {
             if (!HasCredentials)
@@ -164,18 +152,6 @@ namespace Sep.Git.Tfs.VsCommon
         {
             Trace.WriteLine("get [C" + e.Version + "]" + e.ServerItem);
         }
-
-#if VS2010
-        private IGroupSecurityService GroupSecurityService
-        {
-            get { return GetService<IGroupSecurityService>(); }
-        }
-#else
-        private IIdentityManagementService GroupSecurityService
-        {
-            get { return GetService<IIdentityManagementService>(); }
-        }
-#endif
 
         private ILinking _linking;
         private ILinking Linking
@@ -1076,15 +1052,6 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var shelveset = new Shelveset(_bridge.Unwrap<Workspace>(workspace).VersionControlServer, shelvesetName, workspace.OwnerName);
             return _bridge.Wrap<WrapperForShelveset, Shelveset>(shelveset);
-        }
-
-        public IIdentity GetIdentity(string username)
-        {
-#if VS2010
-            return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
-#else
-            return _bridge.Wrap<WrapperForIdentity, TeamFoundationIdentity>(Retry.Do(() => GroupSecurityService.ReadIdentity(IdentitySearchFactor.AccountName, username, MembershipQuery.None, ReadIdentityOptions.None)));
-#endif
         }
 
         public Changeset GetLatestChangeset(IGitTfsRemote remote, bool includeChanges)
