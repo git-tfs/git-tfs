@@ -95,8 +95,6 @@ namespace Sep.Git.Tfs.VsCommon
         }
 
 
-        private string[] _legacyUrls;
-
         protected NetworkCredential GetCredential()
         {
             var idx = Username.IndexOf('\\');
