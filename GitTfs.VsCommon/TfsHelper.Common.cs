@@ -7,7 +7,6 @@ using System.Net;
 using System.Reflection;
 using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Client;
-using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Microsoft.Win32;
@@ -19,13 +18,14 @@ using Sep.Git.Tfs.Util;
 using StructureMap;
 using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
+using IdentityNotFoundException = Microsoft.TeamFoundation.VersionControl.Client.IdentityNotFoundException;
 
 namespace Sep.Git.Tfs.VsCommon
 {
     public abstract class TfsHelperBase : ITfsHelper
     {
         protected readonly TextWriter _stdout;
-        private readonly TfsApiBridge _bridge;
+        protected readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
         protected TfsTeamProjectCollection _server;
         private static bool _resolverInstalled;
@@ -85,18 +85,20 @@ namespace Sep.Git.Tfs.VsCommon
                     uri = new Uri(Url);
                 }
 
-                // TODO: Use TfsTeamProjectCollection constructor that takes a TfsClientCredentials object
-                _server = HasCredentials ?
-                    new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
-                    new TfsTeamProjectCollection(uri, new UICredentialsProvider());
+                _server = GetTfsCredential(uri);
 
                 _server.EnsureAuthenticated();
             }
         }
 
+        protected abstract TfsTeamProjectCollection GetTfsCredential(Uri uri);
+
+        public abstract IIdentity GetIdentity(string username);
 
         protected NetworkCredential GetCredential()
         {
+            if (!HasCredentials)
+                return new NetworkCredential();
             var idx = Username.IndexOf('\\');
             if (idx >= 0)
             {
@@ -149,11 +151,6 @@ namespace Sep.Git.Tfs.VsCommon
         private void Getting(object sender, GettingEventArgs e)
         {
             Trace.WriteLine("get [C" + e.Version + "]" + e.ServerItem);
-        }
-
-        private IGroupSecurityService GroupSecurityService
-        {
-            get { return GetService<IGroupSecurityService>(); }
         }
 
         private ILinking _linking;
@@ -1055,11 +1052,6 @@ namespace Sep.Git.Tfs.VsCommon
         {
             var shelveset = new Shelveset(_bridge.Unwrap<Workspace>(workspace).VersionControlServer, shelvesetName, workspace.OwnerName);
             return _bridge.Wrap<WrapperForShelveset, Shelveset>(shelveset);
-        }
-
-        public IIdentity GetIdentity(string username)
-        {
-            return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
         }
 
         public Changeset GetLatestChangeset(IGitTfsRemote remote, bool includeChanges)
