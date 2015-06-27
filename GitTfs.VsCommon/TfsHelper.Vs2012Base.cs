@@ -45,8 +45,11 @@ namespace Sep.Git.Tfs.VsCommon
 
         protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
         {
-            var basicAuthCredential = new BasicAuthCredential(GetCredential());
-            return new TfsTeamProjectCollection(uri, new TfsClientCredentials(basicAuthCredential) { AllowInteractive = !HasCredentials });
+#pragma warning disable 618
+            return HasCredentials ?
+                new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
+                new TfsTeamProjectCollection(uri, new UICredentialsProvider());
+#pragma warning restore 618
         }
     }
 }
