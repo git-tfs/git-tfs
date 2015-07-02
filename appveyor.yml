@@ -14,13 +14,9 @@ install:
 #- choco install tfs2013objectmodel -y
 build_script:
   - msbuild GitTfs.sln /t:GitTfs_Vs2015 /t:GitTfsTest /verbosity:minimal /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
-after_build:
-  - ps: |
-      $libgit2Binaries=Get-ChildItem ".\packages\" -Filter "NativeBinaries" -Recurse | Select-Object -First 1 | % { $_.FullName }
-      Copy-Item $libgit2Binaries ".\GitTfs.Vs2015\bin\Debug\NativeBinaries" -Recurse
 
 test:
   assemblies: '**\GitTfsTest.dll'
 after_test:
   - ps: |
-      & ".\FunctionalTesting\smoke_tests.ps1" "$Env:APPVEYOR_BUILD_FOLDER\GitTfs.Vs2015\bin\Debug"
+      & ".\FunctionalTesting\smoke_tests.ps1" "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug"
