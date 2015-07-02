@@ -1,8 +1,7 @@
 #appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
 version: 0.21.2.{build}
 os: Visual Studio 2015 RC
-#configuration: Release
-#platform: Any CPU
+platform: Any CPU
 clone_folder: c:\gittfs
 clone_depth: 1
 # build cache to preserve files/folders between builds
@@ -13,10 +12,11 @@ install:
 #- choco install tfs2010objectmodel -y
 #- choco install tfs2012objectmodel -y
 #- choco install tfs2013objectmodel -y
-#build:
-#  project: GitTfs.sln
-#  verbosity: minimal
 build_script:
-  msbuild CI.proj /t:Build /nologo /verbosity:minimal /p:BuildInParallel=true /m:4
+  - msbuild GitTfs.sln /t:GitTfs_Vs2015 /t:GitTfsTest /verbosity:minimal /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
+
 test:
   assemblies: '**\GitTfsTest.dll'
+after_test:
+  - ps: |
+      & ".\FunctionalTesting\smoke_tests.ps1" "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug"
