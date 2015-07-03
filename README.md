@@ -134,6 +134,12 @@ This is the complete list of commands in the master branch on github.
 
 ## Building
 
+### Continuous Integration Status
+
+[![Teamcity build status](http://teamcity.codebetter.com/app/rest/builds/buildType:bt787/statusIcon)](http://teamcity.codebetter.com/project.html?projectId=project256&guest=1) & 
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/git-tfs/git-tfs)](https://ci.appveyor.com/project/pmiossec/git-tfs-v2qcm)
+( Great thanks to [![Teamcity Icon](http://teamcity.codebetter.com/img/icons/TeamCity16.png?v8) Jetbrains Teamcity](http://www.jetbrains.com/teamcity) and [![AppVeyor Icon](http://www.appveyor.com/site/favicon.ico) AppVeyor](http://www.appveyor.com/)! )
+
 ### Prerequisites 
 
 * MSBuild (included in .NET 4) 
@@ -185,7 +191,3 @@ If you have questions or suggestions about how we could improve git-tfs you coul
 
 Drop in and chat in [slack](https://gittfs.slack.com/). (For an invite, email `spraints at gmail.com`.)
 We also have a [mailing list](https://groups.google.com/group/git-tfs-dev).
-
-Thanks to [jetbrains](http://www.jetbrains.com/teamcity)
-([teamcity](http://teamcity.codebetter.com/project.html?projectId=project256))
-for providing CI!
