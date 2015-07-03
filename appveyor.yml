@@ -14,7 +14,11 @@ install:
 #- choco install tfs2013objectmodel -y
 build_script:
   - msbuild GitTfs.sln /t:GitTfs_Vs2015 /t:GitTfsTest /verbosity:minimal /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
-
+after_build:
+  - ps: |
+      $zipFile= "git-tfs_$Env:APPVEYOR_REPO_COMMIT.zip"
+      7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug\*" -xr!"*.pdb"
+      Push-AppveyorArtifact $zipFile
 test:
   assemblies: '**\GitTfsTest.dll'
 after_test:
