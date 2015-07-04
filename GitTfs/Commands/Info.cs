@@ -12,18 +12,18 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Info : GitTfsCommand
     {
-        Globals globals;
-        TextWriter stdout;
-        IGitTfsVersionProvider versionProvider;
+        readonly Globals _globals;
+        readonly TextWriter _stdout;
+        readonly IGitTfsVersionProvider _versionProvider;
 
         public Info(Globals globals, TextWriter stdout, IGitTfsVersionProvider versionProvider)
         {
-            this.globals = globals;
-            this.stdout = stdout;
-            this.versionProvider = versionProvider;
+            _globals = globals;
+            _stdout = stdout;
+            _versionProvider = versionProvider;
         }
 
-        public OptionSet OptionSet { get { return globals.OptionSet; } }
+        public OptionSet OptionSet { get { return _globals.OptionSet; } }
 
         public int Run()
         {
@@ -31,7 +31,7 @@ namespace Sep.Git.Tfs.Commands
 
             DescribeGitTfs();
 
-            var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
+            var tfsRemotes = _globals.Repository.ReadAllTfsRemotes();
             foreach (var remote in tfsRemotes)
             {
                 DescribeTfsRemotes(remote);
@@ -42,19 +42,16 @@ namespace Sep.Git.Tfs.Commands
 
         private void DescribeGit()
         {
-            // add a line of whitespace to improve readability
-            stdout.WriteLine();
+            DisplayReadabilityLineJump();
 
-            // show git version
-            stdout.WriteLine(globals.GitVersion);
+            _stdout.WriteLine(_globals.GitVersion);
         }
 
         private void DescribeGitTfs()
         {
-            // add a line of whitespace to improve readability
-            stdout.WriteLine();
-            stdout.WriteLine(versionProvider.GetVersionString());
-            stdout.WriteLine(" " + versionProvider.GetPathToGitTfsExecutable());
+            DisplayReadabilityLineJump();
+            _stdout.WriteLine(_versionProvider.GetVersionString());
+            _stdout.WriteLine(" " + _versionProvider.GetPathToGitTfsExecutable());
 
             DescribeGitRepository();
         }
@@ -64,18 +61,22 @@ namespace Sep.Git.Tfs.Commands
             var repoDescription = File.ReadAllLines(@".git\description");
             if (repoDescription.Length == 0 || !repoDescription[0].StartsWith("$/"))
                 return;
-            // add a line of whitespace to improve readability
-            stdout.WriteLine();
 
-            stdout.WriteLine("cloned from tfs path:" + string.Join(Environment.NewLine, repoDescription));
+            DisplayReadabilityLineJump();
+
+            _stdout.WriteLine("cloned from tfs path:" + string.Join(Environment.NewLine, repoDescription));
         }
 
         private void DescribeTfsRemotes(IGitTfsRemote remote)
         {
-            // add a line of whitespace to improve readability
-            stdout.WriteLine();
-            stdout.WriteLine("remote tfs id: '{0}' {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
-            stdout.WriteLine("               {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
+            DisplayReadabilityLineJump();
+            _stdout.WriteLine("remote tfs id: '{0}' {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
+            _stdout.WriteLine("               {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
+        }
+
+        private void DisplayReadabilityLineJump()
+        {
+            _stdout.WriteLine();
         }
     }
 }
