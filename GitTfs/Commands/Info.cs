@@ -55,6 +55,19 @@ namespace Sep.Git.Tfs.Commands
             stdout.WriteLine();
             stdout.WriteLine(versionProvider.GetVersionString());
             stdout.WriteLine(" " + versionProvider.GetPathToGitTfsExecutable());
+
+            DescribeGitRepository();
+        }
+
+        private void DescribeGitRepository()
+        {
+            var repoDescription = File.ReadAllLines(@".git\description");
+            if (repoDescription.Length == 0 || !repoDescription[0].StartsWith("$/"))
+                return;
+            // add a line of whitespace to improve readability
+            stdout.WriteLine();
+
+            stdout.WriteLine("cloned from tfs path:" + string.Join(Environment.NewLine, repoDescription));
         }
 
         private void DescribeTfsRemotes(IGitTfsRemote remote)
