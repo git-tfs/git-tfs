@@ -30,7 +30,7 @@ namespace Sep.Git.Tfs.Test.Commands
             "git tfs clone --username=xxx --password=xxx https://topsecret.com/tfs $/reallysupersecret")]
         public void ShouldEncodeUserCredentialsInTheCommandLine(string cmd, string output)
         {
-            Assert.Equal(output, Clone.HideUserCredentials(cmd));
+            Assert.Equal(output, Init.HideUserCredentials(cmd));
         }
     }
 }

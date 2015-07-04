@@ -76,7 +76,6 @@ namespace Sep.Git.Tfs.Commands
                     catch (Exception)
                     {
                         retVal = init.Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
-                        File.WriteAllText(@".git\description", tfsRepositoryPath + "\n" + HideUserCredentials(globals.CommandLineRun));
                     }
                 }
 
@@ -160,14 +159,6 @@ namespace Sep.Git.Tfs.Commands
                 }
             }
             return retVal;
-        }
-
-        public static string HideUserCredentials(string commandLineRun)
-        {
-            Regex rgx = new Regex("(--username|-u)[= ][^ ]+");
-            commandLineRun = rgx.Replace(commandLineRun, "--username=xxx");
-            rgx = new Regex("(--password|-p)[= ][^ ]+");
-            return rgx.Replace(commandLineRun, "--password=xxx");
         }
 
         private void VerifyTfsPathToClone(string tfsRepositoryPath)
