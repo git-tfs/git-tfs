@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using NDesk.Options;
 using StructureMap;
@@ -58,13 +59,20 @@ namespace Sep.Git.Tfs.Commands
 
         private void DescribeGitRepository()
         {
-            var repoDescription = File.ReadAllLines(@".git\description");
-            if (repoDescription.Length == 0 || !repoDescription[0].StartsWith("$/"))
-                return;
+            try
+            {
+                var repoDescription = File.ReadAllLines(@".git\description");
+                if (repoDescription.Length == 0 || !repoDescription[0].StartsWith("$/"))
+                    return;
 
-            DisplayReadabilityLineJump();
+                DisplayReadabilityLineJump();
 
-            _stdout.WriteLine("cloned from tfs path:" + string.Join(Environment.NewLine, repoDescription));
+                _stdout.WriteLine("cloned from tfs path:" + string.Join(Environment.NewLine, repoDescription));
+            }
+            catch (Exception)
+            {
+                Trace.WriteLine("warning: unable to read the repository description!");
+            }
         }
 
         private void DescribeTfsRemotes(IGitTfsRemote remote)
