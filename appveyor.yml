@@ -20,9 +20,9 @@ after_build:
       Copy-Item $libgit2Binaries "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug\NativeBinaries" -Recurse
       $zipFile= "git-tfs_$Env:APPVEYOR_REPO_COMMIT.zip"
       7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug\*" -xr!"*.pdb"
-      Push-AppveyorArtifact $zipFile
 test:
   assemblies: '**\GitTfsTest.dll'
 after_test:
   - ps: |
       & ".\FunctionalTesting\smoke_tests.ps1" "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug"
+      Push-AppveyorArtifact $zipFile
