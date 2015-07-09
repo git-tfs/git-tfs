@@ -13,7 +13,7 @@ install:
 #- choco install tfs2012objectmodel -y
 #- choco install tfs2013objectmodel -y
 build_script:
-  - msbuild GitTfs.sln /t:GitTfs_Vs2015 /t:GitTfsTest /verbosity:minimal /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
+  - msbuild GitTfs.sln /t:GitTfs_Vs2012 /t:GitTfs_Vs2013 /t:GitTfsTest /verbosity:minimal /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
 after_build:
   - ps: |
       $libgit2Binaries=Get-ChildItem ".\packages\" -Filter "NativeBinaries" -Recurse | Select-Object -First 1 | % { $_.FullName }
