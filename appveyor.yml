@@ -1,6 +1,6 @@
 #appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
 version: 0.21.2.{build}
-os: Visual Studio 2015 RC
+#os: Visual Studio 2015 RC
 platform: Any CPU
 clone_folder: c:\gittfs
 clone_depth: 1
