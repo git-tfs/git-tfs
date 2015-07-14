@@ -102,6 +102,7 @@
     <Compile Include="Core\ChangeSieveTests.cs" />
     <Compile Include="Core\CommitParserTests.cs" />
     <Compile Include="Core\ConfigPropertyLoaderTests.cs" />
+    <Compile Include="Core\GitTfsConstantsTest.cs" />
     <Compile Include="Core\GlobalsTests.cs" />
     <Compile Include="Core\DirectoryTidierTests.cs" />
     <Compile Include="Core\GitTfsRemoteTests.cs" />
