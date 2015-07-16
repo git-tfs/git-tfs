@@ -30,7 +30,8 @@ namespace Sep.Git.Tfs.Core
         {
             if (initialTree.Empty())
                 Summary.Remote.Repository.GetObjects(lastCommit, initialTree);
-            var resolver = new PathResolver(Summary.Remote, initialTree);
+            var remoteRelativeLocalPath = GetPathRelativeToWorkspaceLocalPath(workspace);
+            var resolver = new PathResolver(Summary.Remote, remoteRelativeLocalPath, initialTree);
             var sieve = new ChangeSieve(_changeset, resolver);
             if (sieve.RenameBranchCommmit)
             {
@@ -40,7 +41,8 @@ namespace Sep.Git.Tfs.Core
             var forceGetChanges = lastCommit == null;
             foreach (var change in sieve.GetChangesToApply(forceGetChanges))
             {
-                ignorableErrorHandler.Catch(() => {
+                ignorableErrorHandler.Catch(() =>
+                {
                     Apply(change, treeBuilder, workspace, initialTree);
                 });
             }
@@ -93,7 +95,7 @@ namespace Sep.Git.Tfs.Core
         public IEnumerable<TfsTreeEntry> GetFullTree()
         {
             var treeInfo = Summary.Remote.Repository.CreateObjectsDictionary();
-            var resolver = new PathResolver(Summary.Remote, treeInfo);
+            var resolver = new PathResolver(Summary.Remote, "", treeInfo);
             
             IItem[] tfsItems;
             if(Summary.Remote.TfsRepositoryPath != null)
@@ -152,6 +154,14 @@ namespace Sep.Git.Tfs.Core
                 treeBuilder.Remove(initialTree[pathInGitRepo].Path);
                 Trace.WriteLine("\tD\t" + pathInGitRepo);
             }
+        }
+
+        private string GetPathRelativeToWorkspaceLocalPath(ITfsWorkspace workspace)
+        {
+            if (workspace.Remote.MatchesUrlAndRepositoryPath(Summary.Remote.TfsUrl, Summary.Remote.TfsRepositoryPath))
+                return "";
+
+            return string.IsNullOrEmpty(Summary.Remote.TfsRepositoryPath) ? "" : Summary.Remote.Prefix;
         }
 
         private LogEntry MakeNewLogEntry()
