@@ -124,16 +124,7 @@ namespace Sep.Git.Tfs.Commands
 
         protected virtual void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
-            if (remote.Repository.IsBare)
-            {
-                if(string.IsNullOrEmpty(BareBranch))
-                    throw new GitTfsException("error : specify a git branch to fetch on...");
-                if (!remote.Repository.HasRef(GitRepository.ShortToLocalName(BareBranch)))
-                    throw new GitTfsException("error : the specified git branch doesn't exist...");
-                if (!ForceFetch && remote.MaxCommitHash != remote.Repository.GetCommit(BareBranch).Sha)
-                    throw new GitTfsException("error : fetch is not allowed when there is ahead commits!",
-                        new List<string>() {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
-            }
+            var bareBranch = string.IsNullOrEmpty(BareBranch) ? remote.Id : BareBranch;
 
             // It is possible that we have outdated refs/remotes/tfs/<id>.
             // E.g. someone already fetched changesets from TFS into another git repository and we've pulled it since
@@ -141,7 +132,22 @@ namespace Sep.Git.Tfs.Commands
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
             if (!ForceFetch)
-                globals.Repository.MoveTfsRefForwardIfNeeded(remote);
+            {
+                if (!remote.Repository.IsBare)
+                    remote.Repository.MoveTfsRefForwardIfNeeded(remote);
+                else
+                    remote.Repository.MoveTfsRefForwardIfNeeded(remote, bareBranch);
+            }
+
+            if (!ForceFetch &&
+                remote.Repository.IsBare &&
+                remote.Repository.HasRef(GitRepository.ShortToLocalName(bareBranch)) &&
+                remote.MaxCommitHash != remote.Repository.GetCommit(bareBranch).Sha)
+            {
+                throw new GitTfsException("error : fetch is not allowed when there is ahead commits!",
+                    new[] {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
+            }
+
             var exportMetadatasFilePath = Path.Combine(globals.GitDir, "git-tfs_workitem_mapping.txt");
             if (ExportMetadatas)
             {
@@ -204,7 +210,7 @@ namespace Sep.Git.Tfs.Commands
                 remote.CleanupWorkspaceDirectory();
 
                 if (remote.Repository.IsBare)
-                    remote.Repository.UpdateRef(GitRepository.ShortToLocalName(BareBranch), remote.MaxCommitHash);
+                    remote.Repository.UpdateRef(GitRepository.ShortToLocalName(bareBranch), remote.MaxCommitHash);
             }
         }
 
