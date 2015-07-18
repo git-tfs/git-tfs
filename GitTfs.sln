@@ -19,7 +19,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F52EAF
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{4A46FEEE-B8A2-4445-B9D1-8160520C7301}"
 	ProjectSection(SolutionItems) = preProject
+		doc\develop-on-mono.md = doc\develop-on-mono.md
+		doc\release-notes\NEXT.md = doc\release-notes\NEXT.md
 		README.md = README.md
+		doc\running-the-unit-tests.md = doc\running-the-unit-tests.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CDE05FFA-9DDB-4694-8CA6-6DB7B235CD7F}"
