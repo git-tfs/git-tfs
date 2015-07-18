@@ -13,7 +13,7 @@ And read [how to report an issue](doc/reporting-issues.md), before doing so ;)
 Three different ways to get git-tfs:
 
 * Download a binary. Find it on the [release page](https://github.com/git-tfs/git-tfs/releases),
-* Using Chocolatey. If [Chocolatey](http://chocolatey.org/) is already installed on your computer, run `cinst gittfs` to install the [Chocolatey package](http://chocolatey.org/packages/gittfs)
+* Using Chocolatey. If [Chocolatey](http://chocolatey.org/) is already installed on your computer, run `choco install gittfs` to install the [Chocolatey package](http://chocolatey.org/packages/gittfs)
 * Build from source code. See §[Building](#building) for more informations...
 
 __Whatever the way you get git-tfs, you should have git-tfs.exe in your path (and git, too)__.
