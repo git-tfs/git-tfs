@@ -657,13 +657,21 @@ namespace Sep.Git.Tfs.VsCommon
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
             try
             {
-                foreach (WorkingFolder folder in folders)
-                    workspace.CreateMapping(folder);
+                SetWorkspaceMappingFolders(workspace, folders);
             }
             catch (MappingConflictException e)
             {
-                TryToDeleteWorkspace(workspace);
-                throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
+                try
+                {
+                    foreach (WorkingFolder folder in folders)
+                        CleanupWorkspaces(folder.LocalItem);
+                    SetWorkspaceMappingFolders(workspace, folders);
+                }
+                catch
+                {
+                    TryToDeleteWorkspace(workspace);
+                    throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
+                }
             }
             catch
             {
@@ -671,6 +679,12 @@ namespace Sep.Git.Tfs.VsCommon
                 throw;
             }
             return workspace;
+        }
+
+        private static void SetWorkspaceMappingFolders(Workspace workspace, WorkingFolder[] folders)
+        {
+            foreach (WorkingFolder folder in folders)
+                workspace.CreateMapping(folder);
         }
 
         private string GenerateWorkspaceName()
