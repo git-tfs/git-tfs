@@ -171,7 +171,7 @@ And depending of the version of TFS you use :
 Note : if the build fails because it can't find libgit2sharp dependency, update submodules with `git submodule init` followed by `git submodule update`
 
 ## Contributing
-Contributions are always welcome.
+Contributions are always welcome. Thanks to all our [contributors](https://github.com/git-tfs/git-tfs/graphs/contributors)!
 
 There are some simple [guidelines](CONTRIBUTING.md).
 
