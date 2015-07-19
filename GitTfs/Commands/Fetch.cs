@@ -148,46 +148,15 @@ namespace Sep.Git.Tfs.Commands
                     new[] {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
             }
 
-            var exportMetadatasFilePath = Path.Combine(globals.GitDir, "git-tfs_workitem_mapping.txt");
+            var metadataExportInitializer = new ExportMetadatasInitializer(globals);
+            bool shouldExport = ExportMetadatas || remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true";
+
             if (ExportMetadatas)
             {
-                remote.ExportMetadatas = true;
-                remote.Repository.SetConfig(GitTfsConstants.ExportMetadatasConfigKey, "true");
-                if (!string.IsNullOrEmpty(ExportMetadatasFile))
-                {
-                    if (File.Exists(ExportMetadatasFile))
-                    {
-                        File.Copy(ExportMetadatasFile, exportMetadatasFilePath);
-                    }
-                    else
-                        throw new GitTfsException("error: the work items mapping file doesn't exist!");
-                }
+                metadataExportInitializer.InitializeConfig(remote.Repository, ExportMetadatasFile);
             }
-            else
-            {
-                if(remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true")
-                    remote.ExportMetadatas = true;
-            }
-            remote.ExportWorkitemsMapping = new Dictionary<string, string>();
-            if (remote.ExportMetadatas && File.Exists(exportMetadatasFilePath))
-            {
-                try
-                {
-                    foreach (var lineRead in File.ReadAllLines(exportMetadatasFilePath))
-                    {
-                        if (string.IsNullOrWhiteSpace(lineRead))
-                            continue;
-                        var values = lineRead.Split('|');
-                        var oldWorkitem = values[0].Trim();
-                        if(!remote.ExportWorkitemsMapping.ContainsKey(oldWorkitem))
-                            remote.ExportWorkitemsMapping.Add(oldWorkitem, values[1].Trim());
-                    }
-                }
-                catch (Exception)
-                {
-                    throw new GitTfsException("error: bad format of workitems mapping file! One line format should be: OldWorkItemId|NewWorkItemId");
-                }
-            }
+
+            metadataExportInitializer.InitializeRemote(remote, shouldExport);
 
             try
             {

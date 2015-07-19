@@ -8,3 +8,4 @@
 * Fix an issue when first change set is branch (#772 & #792, @vzabavnov & @pmiossec)
 * Remove old (slow) rcheckin algorithm (#791, @pmiossec)
 * Fixed bug in git tfs pull with subtrees (#775, @sbarne3)
+* Metadatas exported when using the rcheckin command (#691 & #819, @akatakritos)
