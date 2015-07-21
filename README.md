@@ -1,7 +1,5 @@
 ﻿## Introduction
 
-[![Join the chat at https://gitter.im/git-tfs/git-tfs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/git-tfs/git-tfs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 [git-tfs](http://git-tfs.com/) is a two-way bridge between TFS (Team Foundation Server) and git, similar to git-svn.
 It fetches TFS commits into a git repository, and lets you push your updates back to TFS.
 
@@ -191,5 +189,5 @@ If you have questions or suggestions about how we could improve git-tfs you coul
 
 ## Community
 
-Drop in and chat in [slack](https://gittfs.slack.com/). (For an invite, email `spraints at gmail.com`.)
+Drop in and chat in [![gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/git-tfs/git-tfs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 We also have a [mailing list](https://groups.google.com/group/git-tfs-dev).
