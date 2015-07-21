@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Sep.Git.Tfs.Core;
@@ -44,6 +45,7 @@ namespace Sep.Git.Tfs.VsFake
     }
 
     [Serializable]
+    [DebuggerDisplay("{Id}")]
     public class ScriptedChangeset
     {
         public int Id { get; set; }
@@ -56,17 +58,19 @@ namespace Sep.Git.Tfs.VsFake
 
         public bool IsMergeChangeset { get; set; }
         public MergeChangesetDatas MergeChangesetDatas { get; set; }
+        public string Committer { get; set; }
 
         List<ScriptedChange> _changes = new List<ScriptedChange>();
     }
 
     [Serializable]
+    [DebuggerDisplay("{ChangeType}/{ItemType}/{RepositoryPath}/{ItemId}")]
     public class ScriptedChange
     {
         public TfsChangeType ChangeType { get; set; }
         public TfsItemType ItemType { get; set; }
         public string RepositoryPath { get; set; }
-        public string Content { get; set; }
+        public byte[] Content { get; set; }
         public int? ItemId { get; set; }
     }
 

@@ -22,8 +22,10 @@ namespace Sep.Git.Tfs.Core
         GitCommit Commit(LogEntry logEntry);
         void UpdateRef(string gitRefName, string commitSha, string message = null);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
+        void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote, string @ref);
         IEnumerable<TfsChangesetInfo> GetLastParentTfsCommits(string head);
         TfsChangesetInfo GetTfsChangesetById(string remoteRef, long changesetId);
+        TfsChangesetInfo GetTfsCommit(GitCommit commit);
         TfsChangesetInfo GetTfsCommit(string sha);
         TfsChangesetInfo GetCurrentTfsCommit();
         IDictionary<string, GitObject> CreateObjectsDictionary();
@@ -54,5 +56,6 @@ namespace Sep.Git.Tfs.Core
         string GetCurrentBranch();
         void GarbageCollect(bool auto = false, string additionalMessage = null);
         bool Checkout(string commitish);
+        IEnumerable<GitCommit> FindParentCommits(string fromCommit, string toCommit);
     }
 }

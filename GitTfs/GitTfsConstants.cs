@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs
                           GitTfsPrefix +
                           "-id:\\s+" +
                           "\\[(?<url>.+)\\]" +
-                          "(?<repository>.+)?;" +
+                          "(?<repository>\\$.+)?;" +
                           "C(?<changeset>\\d+)" +
                           "\\s*$", RegexOptions.Multiline|RegexOptions.Compiled);
         // e.g. git-tfs-work-item: 24 associate
@@ -69,5 +69,6 @@ namespace Sep.Git.Tfs
         public const string IgnoreNotInitBranches = GitTfsPrefix + ".ignore-not-init-branches";
 
         public const string BatchSize = GitTfsPrefix + ".batch-size";
+        public static string InitialChangeset = GitTfsPrefix + ".initial-changeset";
     }
 }

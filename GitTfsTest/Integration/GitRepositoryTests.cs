@@ -143,5 +143,62 @@ namespace Sep.Git.Tfs.Test.Integration
                 Assert.Equal(0, changesets.Count());
             }
         }
+
+        [Fact]
+        public void FindParentCommits()
+        {
+            //History of changesets:
+            //6
+            //|\
+            //| 5
+            //| |
+            //3 4
+            //| /
+            //2
+            //|
+            //1
+
+            string c1 = null;
+            string c2 = null;
+            string c3 = null;
+            string c4 = null;
+            string c5 = null;
+            string c6 = null;
+            h.SetupGitRepo("repo", g =>
+            {
+                c1 = g.Commit("C1-Common");
+                c2 = g.Commit("C2-Common");
+                g.CreateBranch("branch");
+                c4 = g.Commit("C4-branch");
+                c5 = g.Commit("C5-branch");
+                g.Checkout("master");
+                c3 = g.Commit("C3-master");
+                g.Merge("branch");
+                //Trick to create a merge commit similar to one fetched from TFS
+                c6 = g.Amend("C6-master (merge branch into)");
+            });
+
+
+            using (var repo = h.Repository("repo"))
+            {
+                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                //string revList = gitRepository.CommandOneline("rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", c1 + ".." + c4);
+
+                var changesets = gitRepository.FindParentCommits(c5, c1);
+                Assert.Equal(3, changesets.Count());
+                Assert.Equal(c2, changesets.ElementAt(0).Sha);
+                Assert.Equal(c4, changesets.ElementAt(1).Sha);
+                Assert.Equal(c5, changesets.ElementAt(2).Sha);
+
+                changesets = gitRepository.FindParentCommits(c6, c1);
+                Assert.Equal(3, changesets.Count());
+                Assert.Equal(c2, changesets.ElementAt(0).Sha);
+                Assert.Equal(c3, changesets.ElementAt(1).Sha);
+                Assert.Equal(c6, changesets.ElementAt(2).Sha);
+
+                changesets = gitRepository.FindParentCommits(c5, c3);
+                Assert.Equal(0, changesets.Count());
+            }
+        }
     }
 }

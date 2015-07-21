@@ -1,7 +1,12 @@
+using System;
 using System.IO;
+using Microsoft.TeamFoundation.Client;
+using Microsoft.TeamFoundation.Framework.Client;
+using Microsoft.TeamFoundation.Framework.Common;
+using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
-using Sep.Git.Tfs.Core;
 using StructureMap;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -27,6 +32,25 @@ namespace Sep.Git.Tfs.VsCommon
                     ?? TryGetUserRegString(@"Software\Microsoft\WDExpress\" + TfsVersionString + "_Config", "InstallDir");
             }
             return vsInstallDir;
+        }
+
+#pragma warning disable 618
+        private IGroupSecurityService GroupSecurityService
+        {
+            get { return GetService<IGroupSecurityService>(); }
+        }
+
+        public override IIdentity GetIdentity(string username)
+        {
+            return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
+        }
+
+        protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
+        {
+            return HasCredentials ?
+                new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
+                new TfsTeamProjectCollection(uri, new UICredentialsProvider());
+#pragma warning restore 618
         }
     }
 }

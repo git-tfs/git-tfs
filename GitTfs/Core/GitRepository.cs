@@ -234,7 +234,7 @@ namespace Sep.Git.Tfs.Core
             CreateTfsRemote(remoteInfo);
             var newRemote = ReadTfsRemote(newRemoteName);
 
-            _repository.Refs.Move(oldRemote.RemoteRef, newRemote.RemoteRef);
+            _repository.Refs.Rename(oldRemote.RemoteRef, newRemote.RemoteRef);
             UnsetTfsRemoteConfig(oldRemoteName);
         }
 
@@ -272,8 +272,13 @@ namespace Sep.Git.Tfs.Core
 
         public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote)
         {
+            MoveTfsRefForwardIfNeeded(remote, "HEAD");
+        }
+
+        public void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote, string @ref)
+        {
             long currentMaxChangesetId = remote.MaxChangesetId;
-            var untrackedTfsChangesets = from cs in GetLastParentTfsCommits("HEAD")
+            var untrackedTfsChangesets = from cs in GetLastParentTfsCommits(@ref)
                                          where cs.Remote.Id == remote.Id && cs.ChangesetId > currentMaxChangesetId
                                          orderby cs.ChangesetId
                                          select cs;
@@ -353,9 +358,14 @@ namespace Sep.Git.Tfs.Core
             return TryParseChangesetInfo(currentCommit.Message, currentCommit.Sha);
         }
 
+        public TfsChangesetInfo GetTfsCommit(GitCommit commit)
+        {
+            return TryParseChangesetInfo(commit.Message, commit.Sha);
+        }
+
         public TfsChangesetInfo GetTfsCommit(string sha)
         {
-            return TryParseChangesetInfo(GetCommit(sha).Message, sha);
+            return GetTfsCommit(GetCommit(sha));
         }
 
         private TfsChangesetInfo TryParseChangesetInfo(string gitTfsMetaInfo, string commit)
@@ -474,7 +484,7 @@ namespace Sep.Git.Tfs.Core
                 if (IsBare)
                     return false;
                 return (from 
-                            entry in _repository.Index.RetrieveStatus()
+                            entry in _repository.RetrieveStatus()
                         where 
                             entry.State != FileStatus.Ignored &&
                             entry.State != FileStatus.Untracked
@@ -650,10 +660,25 @@ namespace Sep.Git.Tfs.Core
                 _repository.Checkout(commitish);
                 return true;
             }
-            catch (MergeConflictException ex)
+            catch (MergeConflictException)
             {
                 return false;
             }
+        }
+
+        public IEnumerable<GitCommit> FindParentCommits(string @from, string to)
+        {
+            var commits = _repository.Commits.QueryBy(
+                new CommitFilter() {Since = @from, Until = to, SortBy = CommitSortStrategies.Reverse, FirstParentOnly = true})
+                .Select(c=>new GitCommit(c));
+            var parent = to;
+            foreach (var gitCommit in commits)
+            {
+                if(!gitCommit.Parents.Any(c=>c.Sha == parent))
+                    return new List<GitCommit>();
+                parent = gitCommit.Sha;
+            }
+            return commits;
         }
     }
 }

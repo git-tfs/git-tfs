@@ -8,11 +8,13 @@ namespace Sep.Git.Tfs.Util
     public class PathResolver
     {
         readonly IGitTfsRemote _remote;
+        readonly string _relativePath;
         readonly IDictionary<string, GitObject> _initialTree;
 
-        public PathResolver(IGitTfsRemote remote, IDictionary<string, GitObject> initialTree)
+        public PathResolver(IGitTfsRemote remote, string relativePath, IDictionary<string, GitObject> initialTree)
         {
             _remote = remote;
+            _relativePath = relativePath;
             _initialTree = initialTree;
         }
 
@@ -26,6 +28,8 @@ namespace Sep.Git.Tfs.Util
             var pathInGitRepo = _remote.GetPathInGitRepo(tfsPath);
             if (pathInGitRepo == null)
                 return null;
+            if (!string.IsNullOrEmpty(_relativePath))
+                pathInGitRepo = _relativePath + "/" + pathInGitRepo;
             return Lookup(pathInGitRepo);
         }
 

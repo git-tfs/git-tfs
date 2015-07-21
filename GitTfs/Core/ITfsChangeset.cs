@@ -29,5 +29,7 @@ namespace Sep.Git.Tfs.Core
         /// Get parent that not was fetched
         /// </summary>
         string OmittedParentBranch { get; set; }
+
+        bool IsRenameChangeset { get; set; }
     }
 }

@@ -52,6 +52,8 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
+        protected int? InitialChangeset { get; set; }
+
         public virtual OptionSet OptionSet
         {
             get
@@ -76,6 +78,8 @@ namespace Sep.Git.Tfs.Commands
                         v => IgnoreBranches = v != null },
                     { "batch-size=", "Size of a the batch of tfs changesets fetched (-1 for all in one batch)",
                         v => BatchSizeOption = v },
+                    { "c|changeset=", "The changeset to clone from (must be a number)",
+                        v => InitialChangeset = Convert.ToInt32(v) },
                 }.Merge(remoteOptions.OptionSet);
             }
         }
@@ -120,16 +124,7 @@ namespace Sep.Git.Tfs.Commands
 
         protected virtual void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
-            if (remote.Repository.IsBare)
-            {
-                if(string.IsNullOrEmpty(BareBranch))
-                    throw new GitTfsException("error : specify a git branch to fetch on...");
-                if (!remote.Repository.HasRef(GitRepository.ShortToLocalName(BareBranch)))
-                    throw new GitTfsException("error : the specified git branch doesn't exist...");
-                if (!ForceFetch && remote.MaxCommitHash != remote.Repository.GetCommit(BareBranch).Sha)
-                    throw new GitTfsException("error : fetch is not allowed when there is ahead commits!",
-                        new List<string>() {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
-            }
+            var bareBranch = string.IsNullOrEmpty(BareBranch) ? remote.Id : BareBranch;
 
             // It is possible that we have outdated refs/remotes/tfs/<id>.
             // E.g. someone already fetched changesets from TFS into another git repository and we've pulled it since
@@ -137,51 +132,45 @@ namespace Sep.Git.Tfs.Commands
             // TFS exists (by checking git-tfs-id mark in commit's comments).
             // The process is similar to bootstrapping.
             if (!ForceFetch)
-                globals.Repository.MoveTfsRefForwardIfNeeded(remote);
-            var exportMetadatasFilePath = Path.Combine(globals.GitDir, "git-tfs_workitem_mapping.txt");
+            {
+                if (!remote.Repository.IsBare)
+                    remote.Repository.MoveTfsRefForwardIfNeeded(remote);
+                else
+                    remote.Repository.MoveTfsRefForwardIfNeeded(remote, bareBranch);
+            }
+
+            if (!ForceFetch &&
+                remote.Repository.IsBare &&
+                remote.Repository.HasRef(GitRepository.ShortToLocalName(bareBranch)) &&
+                remote.MaxCommitHash != remote.Repository.GetCommit(bareBranch).Sha)
+            {
+                throw new GitTfsException("error : fetch is not allowed when there is ahead commits!",
+                    new[] {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
+            }
+
+            var metadataExportInitializer = new ExportMetadatasInitializer(globals);
+            bool shouldExport = ExportMetadatas || remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true";
+
             if (ExportMetadatas)
             {
-                remote.ExportMetadatas = true;
-                remote.Repository.SetConfig(GitTfsConstants.ExportMetadatasConfigKey, "true");
-                if (!string.IsNullOrEmpty(ExportMetadatasFile))
-                {
-                    if (File.Exists(ExportMetadatasFile))
-                    {
-                        File.Copy(ExportMetadatasFile, exportMetadatasFilePath);
-                    }
-                    else
-                        throw new GitTfsException("error: the work items mapping file doesn't exist!");
-                }
+                metadataExportInitializer.InitializeConfig(remote.Repository, ExportMetadatasFile);
             }
-            else
-            {
-                if(remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true")
-                    remote.ExportMetadatas = true;
-            }
-            remote.ExportWorkitemsMapping = new Dictionary<string, string>();
-            if (remote.ExportMetadatas && File.Exists(exportMetadatasFilePath))
-            {
-                try
-                {
-                    foreach (var lineRead in File.ReadAllLines(exportMetadatasFilePath))
-                    {
-                        if (string.IsNullOrWhiteSpace(lineRead))
-                            continue;
-                        var values = lineRead.Split('|');
-                        var oldWorkitem = values[0].Trim();
-                        if(!remote.ExportWorkitemsMapping.ContainsKey(oldWorkitem))
-                            remote.ExportWorkitemsMapping.Add(oldWorkitem, values[1].Trim());
-                    }
-                }
-                catch (Exception)
-                {
-                    throw new GitTfsException("error: bad format of workitems mapping file! One line format should be: OldWorkItemId|NewWorkItemId");
-                }
-            }
+
+            metadataExportInitializer.InitializeRemote(remote, shouldExport);
 
             try
             {
-                remote.Fetch(stopOnFailMergeCommit);
+                if (InitialChangeset.HasValue)
+                {
+                    properties.InitialChangeset = InitialChangeset.Value;
+                    properties.PersistAllOverrides();
+                    remote.QuickFetch(InitialChangeset.Value);
+                    remote.Fetch(stopOnFailMergeCommit);
+                }
+                else
+                {
+                    remote.Fetch(stopOnFailMergeCommit);
+                }
 
             }
             finally
@@ -190,7 +179,7 @@ namespace Sep.Git.Tfs.Commands
                 remote.CleanupWorkspaceDirectory();
 
                 if (remote.Repository.IsBare)
-                    remote.Repository.UpdateRef(GitRepository.ShortToLocalName(BareBranch), remote.MaxCommitHash);
+                    remote.Repository.UpdateRef(GitRepository.ShortToLocalName(bareBranch), remote.MaxCommitHash);
             }
         }
 

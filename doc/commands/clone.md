@@ -34,6 +34,7 @@ a TFS source tree and fetch all the changesets
 								 Path to Work-items mapping export file
 		  --ignore-branches      Ignore fetching merged branches when encounter merge changesets
 		  --batch-size=VALUE          Size of a the batch of tfs changesets fetched (-1 for all in one batch)
+      -c, --changeset=VALUE      The changeset to clone from (must be a number)
 		  --with-branches        init all the TFS branches during the clone
 		  --resumable            if an error occurred, try to continue when you restart clone
 								 with same parameters
@@ -44,6 +45,18 @@ To clone all of `$/Project1` from your TFS 2010 server `tfs`
 into a new directory `Project1`, do this:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1
+
+### Clone from a specific changeset
+
+To clone from a specific changeset in the history of `$/Project1` from your TFS server `tfs`
+into a new directory `Project1`, do this:
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 -c=126
+
+where `126` is the id of the changeset to clone.
+
+This command will get all the history from this specific changeset.
+It could be especially useful when you have a huge history and also when the entire history could not be clone due to not supported tfs specificities!
 
 ### Clone only the trunk (with dependency branches)
 
@@ -108,6 +121,10 @@ If you want to clone your entire repository with all the branches or that the tf
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk --with-branches
 
 All the tfs history (and all the branches) and the merge changesets will consequently be fetched from TFS and created in the git repository!
+
+### Clone from a specific changeset
+
+See [quick-clone](quick-clone.md#clone-a-specific-changeset).
 
 ### Excludes
 
