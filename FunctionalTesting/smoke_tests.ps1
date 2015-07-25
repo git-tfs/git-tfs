@@ -11,7 +11,7 @@ $password = 'vtccds'
 $connectionParameter= "--username=$username --password=$password"
 $beforeTime = Get-Date
 
-Write-Host "PATH: $env:Path"
+#Write-Host "PATH: $env:Path"
 
 function VerifyRepository($folder, $cloneCommand, $refToVerify)
 {
