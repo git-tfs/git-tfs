@@ -1,6 +1,5 @@
 #appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
 version: 0.21.2.{build}
-#os: Visual Studio 2015 RC
 platform: Any CPU
 clone_folder: c:\gittfs
 clone_depth: 1
@@ -9,11 +8,9 @@ cache:
   - packages -> **\repositories.config  # preserve "packages" directory in the root of build folder but will reset it if repositories.config is modified
 init: []
 install:
-#- choco install tfs2010objectmodel -y
-#- choco install tfs2012objectmodel -y
-#- choco install tfs2013objectmodel -y
+  - choco install tfs2010objectmodel -y
 build_script:
-  - msbuild GitTfs.sln /t:GitTfs_Vs2012 /t:GitTfs_Vs2013 /t:GitTfs_Vs2015 /t:GitTfsTest /verbosity:minimal /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
+  - msbuild GitTfs.sln /t:GitTfs_Vs2010 /t:GitTfs_Vs2012 /t:GitTfs_Vs2013 /t:GitTfs_Vs2015 /t:GitTfsTest /verbosity:minimal /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
 after_build:
   - ps: |
       $libgit2Binaries=Get-ChildItem ".\packages\" -Filter "NativeBinaries" -Recurse | Select-Object -First 1 | % { $_.FullName }
