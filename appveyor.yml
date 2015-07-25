@@ -13,8 +13,10 @@ build_script:
   - msbuild GitTfs.sln /t:GitTfs_Vs2010 /t:GitTfs_Vs2012 /t:GitTfs_Vs2013 /t:GitTfs_Vs2015 /t:GitTfsTest /verbosity:minimal /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
 after_build:
   - ps: |
-      $libgit2Binaries=Get-ChildItem ".\packages\" -Filter "NativeBinaries" -Recurse | Select-Object -First 1 | % { $_.FullName }
-      Copy-Item $libgit2Binaries "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug" -Recurse
+      if ( ! (Test-Path -Path "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug\NativeBinaries")) {
+        $libgit2Binaries=Get-ChildItem ".\packages\" -Filter "NativeBinaries" -Recurse | Select-Object -First 1 | % { $_.FullName }
+        Copy-Item $libgit2Binaries "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug" -Recurse
+      }
       $zipFile= "git-tfs_$Env:APPVEYOR_REPO_COMMIT.zip"
       7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug\*" -xr!"*.pdb" -xr!"Microsoft.*"
 test:
