@@ -16,7 +16,7 @@ after_build:
       $libgit2Binaries=Get-ChildItem ".\packages\" -Filter "NativeBinaries" -Recurse | Select-Object -First 1 | % { $_.FullName }
       Copy-Item $libgit2Binaries "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug" -Recurse
       $zipFile= "git-tfs_$Env:APPVEYOR_REPO_COMMIT.zip"
-      7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug\*" -xr!"*.pdb"
+      7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug\*" -xr!"*.pdb" -xr!"Microsoft.*"
 test:
   assemblies: '**\GitTfsTest.dll'
 after_test:
