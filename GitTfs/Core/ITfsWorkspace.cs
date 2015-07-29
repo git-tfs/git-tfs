@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Core
         /// <summary>
         /// Evaluates check-in policies and checks in all pending changes.
         /// </summary>
-        int Checkin(CheckinOptions checkinOptions);
+        int Checkin(CheckinOptions checkinOptions, Func<string> generateCheckinComment = null);
         /// <summary>
         /// Populates the workspace with a snapshot, as of the given changeset.
         /// </summary>
