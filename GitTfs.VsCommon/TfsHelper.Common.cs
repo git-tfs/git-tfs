@@ -714,7 +714,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        private const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
+        protected const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
 
         private Type GetCheckinDialogType()
         {
@@ -726,7 +726,7 @@ namespace Sep.Git.Tfs.VsCommon
             return Assembly.LoadFrom(GetDialogAssemblyPath());
         }
 
-        private string GetDialogAssemblyPath()
+        protected virtual string GetDialogAssemblyPath()
         {
             return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
