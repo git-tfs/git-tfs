@@ -11,7 +11,7 @@ Normally, you should do this:
 > git status
 ```
 
-2. Set the auth.targets file with with your OAuth token (see auth.targets.example)
+2. Set the auth.targets file with your OAuth token (see auth.targets.example)
 
 3. Do a dry run of the release. Include the version (e.g. X.Y.Z) and the name of a changelog file (optional).
 
@@ -22,5 +22,5 @@ Normally, you should do this:
 4. Build the release. Include the version (e.g. X.Y.Z) and the name of a changelog file (optional).
 
 ```
-> msbuild Release.proj /t:Release /p:Version=X.Y.Z;DryRun=False
+> msbuild Release.proj /t:Release /p:Version=X.Y.Z /p:DryRun=False
 ```
