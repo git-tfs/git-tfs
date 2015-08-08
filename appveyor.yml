@@ -20,7 +20,7 @@ after_build:
         Copy-Item $libgit2Binaries "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config" -Recurse
       }
       $zipFile= "git-tfs_$Env:APPVEYOR_REPO_COMMIT.zip"
-      7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config\*" -xr!"*.pdb" -xr!"Microsoft.*"
+      7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config\*" -xr!"*.pdb"
 test:
   assemblies: '**\GitTfsTest.dll'
 after_test:
