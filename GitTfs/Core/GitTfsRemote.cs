@@ -919,7 +919,7 @@ namespace Sep.Git.Tfs.Core
             PendChangesToWorkspace(head, parent, workspace);
             if (!string.IsNullOrWhiteSpace(sourceTfsPath))
                 workspace.Merge(sourceTfsPath, TfsRepositoryPath);
-            return workspace.Checkin(options);
+            return workspace.Checkin(options, () => Repository.GetCommitMessage(head, parent));
         }
 
         public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
