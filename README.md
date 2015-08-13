@@ -126,9 +126,9 @@ This is the complete list of commands in the master branch on github.
 * [verify](doc/commands/verify.md): *verify the changesets fetched* - since [0.11][v0.11]
 * [autotag](doc/config.md#per-tfs-remote) option - since [0.12][v0.12]
 * [subtree](doc/commands/subtree.md): *manage sparse tfs pathes with git-tfs* - since [0.19](../../releases/tag/v0.19.0)
-* [reset-remote](doc/commands/reset-remote.md): *reset a tfs remote to a previous changeset to fecth again its history* - since [0.19](../../releases/tag/v0.19.0)
+* [reset-remote](doc/commands/reset-remote.md): *reset a tfs remote to a previous changeset to fetch again its history* - since [0.19](../../releases/tag/v0.19.0)
 * [checkout](doc/commands/checkout.md): *checkout a commit by a changeset id* - since [0.21](../../releases/tag/v0.21.0)
-* diagnostics (for git-tfs developpers only) - since 0.9
+* diagnostics (for git-tfs developers only) - since 0.9
 
 * [config file](doc/config.md)
 
