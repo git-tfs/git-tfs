@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Sep.Git.Tfs.Commands;
@@ -111,15 +112,47 @@ namespace Sep.Git.Tfs.Core
             }
 
             var policyOverride = GetPolicyOverrides(options, checkinProblems.Result);
-            var newChangeset = _workspace.Checkin(pendingChanges, options.CheckinComment, options.AuthorTfsUserId, checkinNote, workItemInfos, policyOverride, options.OverrideGatedCheckIn);
-            if (newChangeset == 0)
+            try
             {
-                throw new GitTfsException("Checkin failed!");
+                var newChangeset = _workspace.Checkin(pendingChanges, options.CheckinComment, options.AuthorTfsUserId, checkinNote, workItemInfos, policyOverride, options.OverrideGatedCheckIn);
+                if (newChangeset == 0)
+                {
+                    throw new GitTfsException("Checkin failed!");
+                }
+                else
+                {
+                    return newChangeset;
+                }
+            }
+            catch(GitTfsGatedCheckinException e)
+            {
+                return LaunchGatedCheckinBuild(e.AffectedBuildDefinitions, e.ShelvesetName, e.CheckInTicket);
+            }
+        }
+
+        private long LaunchGatedCheckinBuild(ReadOnlyCollection<KeyValuePair<string, Uri>> affectedBuildDefinitions, string shelvesetName, string checkInTicket)
+        {
+            _stdout.WriteLine("Due to a gated check-in, a shelveset '" + shelvesetName + "' containing your changes has been created and need to be built before it can be committed.");
+            KeyValuePair<string, Uri> buildDefinition;
+            if (affectedBuildDefinitions.Count == 1)
+            {
+                buildDefinition = affectedBuildDefinitions.First();
             }
             else
             {
-                return newChangeset;
+                int choice;
+                do
+                {
+                    _stdout.WriteLine("Build definitions that can be used:");
+                    for (int i = 0; i < affectedBuildDefinitions.Count; i++)
+                    {
+                        _stdout.WriteLine((i + 1) + ": " + affectedBuildDefinitions[i].Key);
+                    }
+                    _stdout.WriteLine("Please choose the build definition to trigger?");
+                } while (!int.TryParse(Console.ReadLine(), out choice) || choice <= 0 || choice > affectedBuildDefinitions.Count);
+                buildDefinition = affectedBuildDefinitions.ElementAt(choice - 1);
             }
+            return Remote.Tfs.QueueGatedCheckinBuild(buildDefinition.Value, buildDefinition.Key, shelvesetName, checkInTicket);
         }
 
         private TfsPolicyOverrideInfo GetPolicyOverrides(CheckinOptions options, ICheckinEvaluationResult checkinProblems)

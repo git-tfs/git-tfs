@@ -112,6 +112,7 @@
     <Compile Include="Commands\Subtree.cs" />
     <Compile Include="ConfigProperties.cs" />
     <Compile Include="Core\DirectoryTidier.cs" />
+    <Compile Include="Core\GitTfsGatedCheckinException.cs" />
     <Compile Include="Core\GitTreeBuilder.cs" />
     <Compile Include="Core\IGitTreeBuilder.cs" />
     <Compile Include="Core\ITfsWorkitem.cs" />

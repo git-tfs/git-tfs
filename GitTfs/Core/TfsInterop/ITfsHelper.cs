@@ -47,5 +47,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         /// <param name="versionToFetch">The TFS version to fetch from the server</param>
         /// <param name="action">The action to perform</param>
         void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
+        long QueueGatedCheckinBuild(Uri value, string buildDefinitionName, string shelvesetName, string checkInTicket);
     }
 }
