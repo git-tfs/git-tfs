@@ -282,7 +282,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)"</PostBuildEvent>
+    <PostBuildEvent>mkdir "$(SolutionDir)GitTfs\$(OutDir)\$(ProjectName)"
+xcopy /y "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)\$(ProjectName)"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <Import Project="..\packages\Microsoft.TeamFoundationServer.ExtendedClient.14.83.1\build\Microsoft.TeamFoundationServer.ExtendedClient.targets" Condition="Exists('..\packages\Microsoft.TeamFoundationServer.ExtendedClient.14.83.1\build\Microsoft.TeamFoundationServer.ExtendedClient.targets')" />

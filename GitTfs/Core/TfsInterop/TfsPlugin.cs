@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using StructureMap;
 using StructureMap.Graph;
+using System.IO;
 
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
@@ -29,9 +30,13 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         class PluginLoader
         {
             private List<Exception> _failures = new List<Exception>();
+            private static string VsPluginAssemblyFolder { get; set; }
 
             public TfsPlugin Try(string assembly, string pluginType)
             {
+                VsPluginAssemblyFolder = assembly;
+                AppDomain currentDomain = AppDomain.CurrentDomain;
+                currentDomain.AssemblyResolve += LoadFromSameFolder;
                 try
                 {
                     var plugin = (TfsPlugin)Activator.CreateInstance(Assembly.Load(assembly).GetType(pluginType));
@@ -44,7 +49,17 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 {
                     _failures.Add(e);
                 }
+                currentDomain.AssemblyResolve -= LoadFromSameFolder;
                 return null;
+            }
+
+            static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
+            {
+                string folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string assemblyPath = Path.Combine(folderPath, VsPluginAssemblyFolder, new AssemblyName(args.Name).Name + ".dll");
+                if (File.Exists(assemblyPath) == false) return null;
+                Assembly assembly = Assembly.LoadFrom(assemblyPath);
+                return assembly;
             }
 
             public TfsPlugin Fail()
