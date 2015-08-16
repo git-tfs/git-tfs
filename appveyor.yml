@@ -19,6 +19,7 @@ after_build:
         $libgit2Binaries=Get-ChildItem ".\packages\" -Filter "NativeBinaries" -Recurse | Select-Object -First 1 | % { $_.FullName }
         Copy-Item $libgit2Binaries "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config" -Recurse
       }
+      Get-ChildItem .\packages -Recurse -Filter Microsoft.WITDataStore*.dll | Copy-Item -Destination "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\Debug\"
       $zipFile= "git-tfs_$Env:APPVEYOR_REPO_COMMIT.zip"
       7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config\*" -xr!"*.pdb"
 test:
