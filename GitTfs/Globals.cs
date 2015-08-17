@@ -84,7 +84,7 @@ namespace Sep.Git.Tfs
                     }
 
                     _remoteId = foundRemote.Id;
-                    Stdout.WriteLine("Working with tfs remote: " + _remoteId);
+                    Stdout.WriteLine("Working with tfs remote: " + _remoteId + " => " + foundRemote.TfsRepositoryPath);
                     return _remoteId;
                 }
 
@@ -96,10 +96,11 @@ namespace Sep.Git.Tfs
                 if (allRemotes.Count() == 1)
                 {
                     //Case where the repository is just initialised
-                    _remoteId = allRemotes.First().Id;
+                    var foundRemote = allRemotes.First();
+                    _remoteId = foundRemote.Id;
                     if (_remoteId == GitTfsConstants.DefaultRepositoryId)
                     {
-                        Stdout.WriteLine("Working with tfs remote: " + _remoteId);
+                        Stdout.WriteLine("Working with tfs remote: " + _remoteId + " => " + foundRemote.TfsRepositoryPath);
                         return _remoteId;
                     }
                 }
