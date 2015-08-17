@@ -19,6 +19,7 @@ using StructureMap;
 using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
 using IdentityNotFoundException = Microsoft.TeamFoundation.VersionControl.Client.IdentityNotFoundException;
+using Microsoft.TeamFoundation.Build.Client;
 
 namespace Sep.Git.Tfs.VsCommon
 {
@@ -1303,6 +1304,37 @@ namespace Sep.Git.Tfs.VsCommon
                 Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + "|" + name + ": " + e);
             }
             return null;
+        }
+
+        public long QueueGatedCheckinBuild(Uri buildDefinitionUri, string buildDefinitionName, string shelvesetName, string checkInTicket)
+        {
+            var buildServer = (IBuildServer)_server.GetService(typeof(IBuildServer));
+ 
+            var buildRequest = buildServer.CreateBuildRequest(buildDefinitionUri);
+            buildRequest.ShelvesetName = shelvesetName;
+            buildRequest.Reason = BuildReason.CheckInShelveset; 
+            buildRequest.GatedCheckInTicket = checkInTicket;
+
+            _stdout.WriteLine("Launching build '" + buildDefinitionName + "' to validate your shelveset...");
+            var queuedBuild = buildServer.QueueBuild(buildRequest);
+
+            _stdout.WriteLine("Waiting for gated check-in build result...");
+            do
+            {
+                _stdout.Write(".");
+                System.Threading.Thread.Sleep(5000);
+                queuedBuild.Refresh(QueryOptions.Definitions);
+            } while (queuedBuild.Build == null || !queuedBuild.Build.BuildFinished);
+            _stdout.WriteLine(string.Empty);
+            if (queuedBuild.Build.Status == BuildStatus.Succeeded)
+            {
+                _stdout.WriteLine("Build success! Your changes have been checked in.");
+                return VersionControl.GetLatestChangesetId();
+            }
+            else
+            {
+                throw new GitTfsException("the build of the gated check-in has failed! Your changes has not been checked-in!");
+            }
         }
     }
 
