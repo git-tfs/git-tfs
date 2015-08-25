@@ -7,11 +7,13 @@ using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
+using System.ComponentModel;
 
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("verify")]
     [RequiresValidGitRepository]
+    [Description("verify [options] [commitish]\n   ex: git-tfs verify\n       git-tfs verify 889ad74c162\n       git-tfs verify tfs/mybranch")]
     public class Verify : GitTfsCommand
     {
         private readonly Globals _globals;
@@ -33,7 +35,7 @@ namespace Sep.Git.Tfs.Commands
             return Run("HEAD");
         }
 
-        private int Run(string commitish)
+        public int Run(string commitish)
         {
             // Warn, based on core.autocrlf or core.safecrlf value?
             //  -- autocrlf=true or safecrlf=true: TFS may have CRLF where git has LF
