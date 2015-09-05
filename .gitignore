@@ -5,6 +5,8 @@
 *.gpState
 _ReSharper.*
 .*.swp
+*.wixobj
+*.msi
 /Auth.targets
 
 # Build outputs
