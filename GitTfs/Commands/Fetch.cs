@@ -104,7 +104,8 @@ namespace Sep.Git.Tfs.Commands
             if (!FetchAll && IgnoreBranches)
                 globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true.ToString());
 
-            foreach (var remote in GetRemotesToFetch(args))
+            var remotesToFetch = GetRemotesToFetch(args).ToList();
+            foreach (var remote in remotesToFetch)
             {
                 FetchRemote(stopOnFailMergeCommit, remote);
             }
