@@ -42,11 +42,12 @@ namespace Sep.Git.Tfs.Commands
             var parents = _globals.Repository.GetLastParentTfsCommits(commitish);
             if(parents.IsEmpty())
                 throw new GitTfsException("No TFS parents found to compare!");
-            foreach(var parent in parents)
+            int foundDiff = GitTfsExitCodes.OK;
+            foreach (var parent in parents)
             {
-                _verifier.Verify(parent);
+                foundDiff = Math.Max(foundDiff, _verifier.Verify(parent));
             }
-            return GitTfsExitCodes.OK;
+            return foundDiff;
         }
     }
 
@@ -61,7 +62,7 @@ namespace Sep.Git.Tfs.Commands
             _tfs = tfs;
         }
 
-        public void Verify(TfsChangesetInfo changeset)
+        public int Verify(TfsChangesetInfo changeset)
         {
             _stdout.WriteLine("Comparing TFS changeset " + changeset.ChangesetId + " to git commit " + changeset.GitCommit);
             var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant().Replace("/",@"\"));
@@ -72,7 +73,7 @@ namespace Sep.Git.Tfs.Commands
             var tfsOnly = tfsTree.Keys.Except(gitTree.Keys);
             var gitOnly = gitTree.Keys.Except(tfsTree.Keys);
 
-            var foundDiff = false;
+            var foundDiff = GitTfsExitCodes.OK;
             foreach(var file in all.OrderBy(x => x))
             {
                 if(tfsTree.ContainsKey(file))
@@ -80,22 +81,23 @@ namespace Sep.Git.Tfs.Commands
                     if(gitTree.ContainsKey(file))
                     {
                         if (Compare(tfsTree[file], gitTree[file]))
-                            foundDiff = true;
+                            foundDiff = Math.Max(foundDiff, GitTfsExitCodes.VerifyContentMismatch);
                     }
                     else
                     {
                         _stdout.WriteLine("Only in TFS: " + tfsTree[file].FullName);
-                        foundDiff = true;
+                        foundDiff = Math.Max(foundDiff, GitTfsExitCodes.VerifyFileMissing);
                     }
                 }
                 else
                 {
                     _stdout.WriteLine("Only in git: " + gitTree[file].FullName);
-                    foundDiff = true;
+                    foundDiff = Math.Max(foundDiff, GitTfsExitCodes.VerifyFileMissing);
                 }
             }
-            if(!foundDiff)
+            if(foundDiff == GitTfsExitCodes.OK)
                 _stdout.WriteLine("No differences!");
+            return foundDiff;
         }
 
         private bool Compare(TfsTreeEntry tfsTreeEntry, GitTreeEntry gitTreeEntry)
