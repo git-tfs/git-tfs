@@ -812,7 +812,12 @@ namespace Sep.Git.Tfs.VsCommon
             var shelveset = shelvesets.First();
 
             var itemSpec = new ItemSpec(remote.TfsRepositoryPath, RecursionType.Full);
-            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] { itemSpec }).Single();
+            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] {itemSpec}).SingleOrDefault();
+            if (change == null)
+            {
+                throw new GitTfsException("There is no changes in this shelveset that apply to the current tfs remote.")
+                    .WithRecommendation("Try to apply the shelveset on another remote.");
+            }
             var wrapperForVersionControlServer =
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
             // TODO - containerify this (no `new`)!
