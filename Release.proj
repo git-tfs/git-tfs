@@ -110,7 +110,7 @@
   <!-- Internal: Called by Release to set the new version. -->
   <Target Name="UpdateVersion" DependsOnTargets="UpdateAssemblyVersionAttribute; UpdateVersionInReadme; UpdateVersionInAppVeyorConfig">
     <!-- This is OK to fail. If a previous release attempt failed, the commit will now be empty. -->
-    <Exec Condition="'$(DryRun)' == 'False'" Command="git commit -m v$(Version) $(VersionFilePath) README.md" IgnoreExitCode="true" />
+    <Exec Condition="'$(DryRun)' == 'False'" Command="git commit -m v$(Version) $(VersionFilePath) README.md appveyor.yml" IgnoreExitCode="true" />
     <Message Condition="'$(DryRun)' != 'False'" Text="(would git commit -m v$(Version) $(VersionFilePath) README.md)" />
   </Target>
 
