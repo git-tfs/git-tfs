@@ -13,16 +13,20 @@ namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("verify")]
     [RequiresValidGitRepository]
-    [Description("verify [options] [commitish]\n   ex: git-tfs verify\n       git-tfs verify 889ad74c162\n       git-tfs verify tfs/mybranch")]
+    [Description("verify [options] [commitish]\n   ex: git-tfs verify\n       git-tfs verify 889ad74c162\n       git-tfs verify tfs/mybranch\n       git-tfs verify --all")]
     public class Verify : GitTfsCommand
     {
+        private readonly Help _helper;
+        private readonly TextWriter _stdout;
         private readonly Globals _globals;
         private readonly TreeVerifier _verifier;
 
-        public Verify(Globals globals, TreeVerifier verifier)
+        public Verify(Globals globals, TreeVerifier verifier, TextWriter stdout, Help helper)
         {
             _globals = globals;
             _verifier = verifier;
+            _stdout = stdout;
+            _helper = helper;
         }
 
         public OptionSet OptionSet
@@ -31,17 +35,40 @@ namespace Sep.Git.Tfs.Commands
             {
                     { "ignore-path-case-mismatch", "Ignore the case mismatch in the path when comparing the files.",
                         v => IgnorePathCaseMismatch = v != null },
-            }; }
+                    { "all", "Verify all the tfs remotes",
+                        v => VerifyAllRemotes = v != null },
+            };
+            }
         }
+
+        public bool VerifyAllRemotes { get; set; }
 
         public bool IgnorePathCaseMismatch { get; set; }
 
         public int Run()
         {
-            return Run("HEAD");
+            if (!VerifyAllRemotes)
+                return Run("HEAD");
+            int foundDiff = GitTfsExitCodes.OK;
+            foreach (var remote in _globals.Repository.ReadAllTfsRemotes())
+            {
+                _stdout.WriteLine("Verifying remote '{0}' => '{1}' ...", remote.Id, remote.TfsRepositoryPath);
+                foundDiff = Math.Max(foundDiff, RunFromCommitish(remote.RemoteRef));
+            }
+            return foundDiff;
         }
 
         public int Run(string commitish)
+        {
+            if (VerifyAllRemotes)
+            {
+                _helper.Run(this);
+                return GitTfsExitCodes.Help;
+            }
+            return RunFromCommitish(commitish);
+        }
+
+        private int RunFromCommitish(string commitish)
         {
             // Warn, based on core.autocrlf or core.safecrlf value?
             //  -- autocrlf=true or safecrlf=true: TFS may have CRLF where git has LF
