@@ -27,8 +27,14 @@ namespace Sep.Git.Tfs.Commands
 
         public OptionSet OptionSet
         {
-            get { return new OptionSet(); }
+            get { return new OptionSet()
+            {
+                    { "ignore-path-case-mismatch", "Ignore the case mismatch in the path when comparing the files.",
+                        v => IgnorePathCaseMismatch = v != null },
+            }; }
         }
+
+        public bool IgnorePathCaseMismatch { get; set; }
 
         public int Run()
         {
@@ -45,7 +51,7 @@ namespace Sep.Git.Tfs.Commands
             int foundDiff = GitTfsExitCodes.OK;
             foreach (var parent in parents)
             {
-                foundDiff = Math.Max(foundDiff, _verifier.Verify(parent));
+                foundDiff = Math.Max(foundDiff, _verifier.Verify(parent, IgnorePathCaseMismatch));
             }
             return foundDiff;
         }
@@ -62,7 +68,7 @@ namespace Sep.Git.Tfs.Commands
             _tfs = tfs;
         }
 
-        public int Verify(TfsChangesetInfo changeset)
+        public int Verify(TfsChangesetInfo changeset, bool ignorePathCaseMismatch)
         {
             _stdout.WriteLine("Comparing TFS changeset " + changeset.ChangesetId + " to git commit " + changeset.GitCommit);
             var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant().Replace("/",@"\"));
@@ -80,7 +86,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     if(gitTree.ContainsKey(file))
                     {
-                        if (Compare(tfsTree[file], gitTree[file]))
+                        if (Compare(tfsTree[file], gitTree[file], ignorePathCaseMismatch))
                             foundDiff = Math.Max(foundDiff, GitTfsExitCodes.VerifyContentMismatch);
                     }
                     else
@@ -100,10 +106,10 @@ namespace Sep.Git.Tfs.Commands
             return foundDiff;
         }
 
-        private bool Compare(TfsTreeEntry tfsTreeEntry, GitTreeEntry gitTreeEntry)
+        private bool Compare(TfsTreeEntry tfsTreeEntry, GitTreeEntry gitTreeEntry, bool ignorePathCaseMismatch)
         {
             var different = false;
-            if (tfsTreeEntry.FullName.Replace("/",@"\") != gitTreeEntry.FullName)
+            if (!ignorePathCaseMismatch && tfsTreeEntry.FullName.Replace("/", @"\") != gitTreeEntry.FullName)
             {
                 _stdout.WriteLine("Name case mismatch:");
                 _stdout.WriteLine("  TFS: " + tfsTreeEntry.FullName);
