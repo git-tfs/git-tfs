@@ -1,0 +1,1 @@
+* Improve vrify command (check all remote option, add exit code, add ignore path case mismatch option) (#853, @pmiossec)

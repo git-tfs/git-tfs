@@ -13,40 +13,74 @@ namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("verify")]
     [RequiresValidGitRepository]
-    [Description("verify [options] [commitish]\n   ex: git-tfs verify\n       git-tfs verify 889ad74c162\n       git-tfs verify tfs/mybranch")]
+    [Description("verify [options] [commitish]\n   ex: git-tfs verify\n       git-tfs verify 889ad74c162\n       git-tfs verify tfs/mybranch\n       git-tfs verify --all")]
     public class Verify : GitTfsCommand
     {
+        private readonly Help _helper;
+        private readonly TextWriter _stdout;
         private readonly Globals _globals;
         private readonly TreeVerifier _verifier;
 
-        public Verify(Globals globals, TreeVerifier verifier)
+        public Verify(Globals globals, TreeVerifier verifier, TextWriter stdout, Help helper)
         {
             _globals = globals;
             _verifier = verifier;
+            _stdout = stdout;
+            _helper = helper;
         }
 
         public OptionSet OptionSet
         {
-            get { return new OptionSet(); }
+            get { return new OptionSet()
+            {
+                    { "ignore-path-case-mismatch", "Ignore the case mismatch in the path when comparing the files.",
+                        v => IgnorePathCaseMismatch = v != null },
+                    { "all", "Verify all the tfs remotes",
+                        v => VerifyAllRemotes = v != null },
+            };
+            }
         }
+
+        public bool VerifyAllRemotes { get; set; }
+
+        public bool IgnorePathCaseMismatch { get; set; }
 
         public int Run()
         {
-            return Run("HEAD");
+            if (!VerifyAllRemotes)
+                return Run("HEAD");
+            int foundDiff = GitTfsExitCodes.OK;
+            foreach (var remote in _globals.Repository.ReadAllTfsRemotes())
+            {
+                _stdout.WriteLine("Verifying remote '{0}' => '{1}' ...", remote.Id, remote.TfsRepositoryPath);
+                foundDiff = Math.Max(foundDiff, RunFromCommitish(remote.RemoteRef));
+            }
+            return foundDiff;
         }
 
         public int Run(string commitish)
+        {
+            if (VerifyAllRemotes)
+            {
+                _helper.Run(this);
+                return GitTfsExitCodes.Help;
+            }
+            return RunFromCommitish(commitish);
+        }
+
+        private int RunFromCommitish(string commitish)
         {
             // Warn, based on core.autocrlf or core.safecrlf value?
             //  -- autocrlf=true or safecrlf=true: TFS may have CRLF where git has LF
             var parents = _globals.Repository.GetLastParentTfsCommits(commitish);
             if(parents.IsEmpty())
                 throw new GitTfsException("No TFS parents found to compare!");
-            foreach(var parent in parents)
+            int foundDiff = GitTfsExitCodes.OK;
+            foreach (var parent in parents)
             {
-                _verifier.Verify(parent);
+                foundDiff = Math.Max(foundDiff, _verifier.Verify(parent, IgnorePathCaseMismatch));
             }
-            return GitTfsExitCodes.OK;
+            return foundDiff;
         }
     }
 
@@ -61,7 +95,7 @@ namespace Sep.Git.Tfs.Commands
             _tfs = tfs;
         }
 
-        public void Verify(TfsChangesetInfo changeset)
+        public int Verify(TfsChangesetInfo changeset, bool ignorePathCaseMismatch)
         {
             _stdout.WriteLine("Comparing TFS changeset " + changeset.ChangesetId + " to git commit " + changeset.GitCommit);
             var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant().Replace("/",@"\"));
@@ -72,36 +106,37 @@ namespace Sep.Git.Tfs.Commands
             var tfsOnly = tfsTree.Keys.Except(gitTree.Keys);
             var gitOnly = gitTree.Keys.Except(tfsTree.Keys);
 
-            var foundDiff = false;
+            var foundDiff = GitTfsExitCodes.OK;
             foreach(var file in all.OrderBy(x => x))
             {
                 if(tfsTree.ContainsKey(file))
                 {
                     if(gitTree.ContainsKey(file))
                     {
-                        if (Compare(tfsTree[file], gitTree[file]))
-                            foundDiff = true;
+                        if (Compare(tfsTree[file], gitTree[file], ignorePathCaseMismatch))
+                            foundDiff = Math.Max(foundDiff, GitTfsExitCodes.VerifyContentMismatch);
                     }
                     else
                     {
                         _stdout.WriteLine("Only in TFS: " + tfsTree[file].FullName);
-                        foundDiff = true;
+                        foundDiff = Math.Max(foundDiff, GitTfsExitCodes.VerifyFileMissing);
                     }
                 }
                 else
                 {
                     _stdout.WriteLine("Only in git: " + gitTree[file].FullName);
-                    foundDiff = true;
+                    foundDiff = Math.Max(foundDiff, GitTfsExitCodes.VerifyFileMissing);
                 }
             }
-            if(!foundDiff)
+            if(foundDiff == GitTfsExitCodes.OK)
                 _stdout.WriteLine("No differences!");
+            return foundDiff;
         }
 
-        private bool Compare(TfsTreeEntry tfsTreeEntry, GitTreeEntry gitTreeEntry)
+        private bool Compare(TfsTreeEntry tfsTreeEntry, GitTreeEntry gitTreeEntry, bool ignorePathCaseMismatch)
         {
             var different = false;
-            if (tfsTreeEntry.FullName.Replace("/",@"\") != gitTreeEntry.FullName)
+            if (!ignorePathCaseMismatch && tfsTreeEntry.FullName.Replace("/", @"\") != gitTreeEntry.FullName)
             {
                 _stdout.WriteLine("Name case mismatch:");
                 _stdout.WriteLine("  TFS: " + tfsTreeEntry.FullName);
