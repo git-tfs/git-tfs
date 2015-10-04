@@ -76,12 +76,12 @@ namespace Sep.Git.Tfs.Core
             return new ProcessStdoutReader(this, process);
         }
 
-        public class ProcessStdoutReader : TextReader
+        class ProcessStdoutReader : TextReader
         {
-            private readonly Process process;
+            private readonly GitProcess process;
             private readonly GitHelpers helper;
 
-            public ProcessStdoutReader(GitHelpers helper, Process process)
+            public ProcessStdoutReader(GitHelpers helper, GitProcess process)
             {
                 this.helper = helper;
                 this.process = process;
@@ -193,7 +193,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private void Close(Process process)
+        private void Close(GitProcess process)
         {
             // if caller doesn't read entire stdout to the EOF - it is possible that 
             // child process will hang waiting until there will be free space in stdout
@@ -208,7 +208,7 @@ namespace Sep.Git.Tfs.Core
             if (!process.WaitForExit((int)TimeSpan.FromSeconds(10).TotalMilliseconds))
                 throw new GitCommandException("Command did not terminate.", process);
             if(process.ExitCode != 0)
-                throw new GitCommandException(string.Format("Command exited with error code: {0}", process.ExitCode), process);
+                throw new GitCommandException(string.Format("Command exited with error code: {0}\n{1}", process.ExitCode, process.StandardErrorString), process);
         }
 
         private void RedirectStdout(ProcessStartInfo startInfo)
@@ -229,12 +229,12 @@ namespace Sep.Git.Tfs.Core
             // there is no StandardInputEncoding property, use extension method StreamWriter.WithEncoding instead
         }
 
-        private Process Start(string[] command)
+        private GitProcess Start(string[] command)
         {
             return Start(command, x => {});
         }
 
-        protected virtual Process Start(string [] command, Action<ProcessStartInfo> initialize)
+        protected virtual GitProcess Start(string [] command, Action<ProcessStartInfo> initialize)
         {
             var startInfo = new ProcessStartInfo();
             startInfo.FileName = "git";
@@ -245,18 +245,9 @@ namespace Sep.Git.Tfs.Core
             RedirectStderr(startInfo);
             initialize(startInfo);
             Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments, "git command");
-            var process = Process.Start(startInfo);
-            process.ErrorDataReceived += StdErrReceived;
-            process.BeginErrorReadLine();
+            var process = new GitProcess(Process.Start(startInfo));
+            process.ConsumeStandardError();
             return process;
-        }
-
-        private void StdErrReceived(object sender, DataReceivedEventArgs e)
-        {
-            if(e.Data != null && e.Data.Trim() != "")
-            {
-                Trace.WriteLine(e.Data.TrimEnd(), "git stderr");
-            }
         }
 
         /// <summary>
@@ -287,7 +278,54 @@ namespace Sep.Git.Tfs.Core
         private static void AssertValidCommand(string[] command)
         {
             if(command.Length < 1 || !ValidCommandName.IsMatch(command[0]))
-                throw new Exception("bad command: " + (command.Length == 0 ? "" : command[0]));
+                throw new Exception("bad git command: " + (command.Length == 0 ? "" : command[0]));
+        }
+
+        protected class GitProcess
+        {
+            Process _process;
+
+            public GitProcess(Process process)
+            {
+                _process = process;
+            }
+
+            public static implicit operator Process(GitProcess process)
+            {
+                return process._process;
+            }
+
+            public string StandardErrorString { get; private set; }
+
+            public void ConsumeStandardError()
+            {
+                StandardErrorString = "";
+                _process.ErrorDataReceived += StdErrReceived;
+                _process.BeginErrorReadLine();
+            }
+
+            private void StdErrReceived(object sender, DataReceivedEventArgs e)
+            {
+                if (e.Data != null && e.Data.Trim() != "")
+                {
+                    var data = e.Data;
+                    Trace.WriteLine(data.TrimEnd(), "git stderr");
+                    StandardErrorString += data;
+                }
+            }
+
+            // Delegate a bunch of things to the Process.
+
+            public ProcessStartInfo StartInfo { get { return _process.StartInfo; } }
+            public int ExitCode { get { return _process.ExitCode; } }
+
+            public StreamWriter StandardInput { get { return _process.StandardInput; } }
+            public StreamReader StandardOutput { get { return _process.StandardOutput; } }
+
+            public bool WaitForExit(int milliseconds)
+            {
+                return _process.WaitForExit(milliseconds);
+            }
         }
     }
 }
