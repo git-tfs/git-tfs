@@ -61,11 +61,16 @@ namespace Sep.Git.Tfs.Core
             return "refs/heads/" + branchName;
         }
 
+        public static string ShortToTfsRemoteName(string branchName)
+        {
+            return "refs/remotes/tfs/" + branchName;
+        }
+
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
 
-        protected override Process Start(string[] command, Action<ProcessStartInfo> initialize)
+        protected override GitProcess Start(string[] command, Action<ProcessStartInfo> initialize)
         {
             return base.Start(command, initialize.And(SetUpPaths));
         }
@@ -508,7 +513,26 @@ namespace Sep.Git.Tfs.Core
         {
             if (!Reference.IsValidName(ShortToLocalName(gitBranchName)))
                 throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
+            while (IsRefNameUsed(gitBranchName))
+            {
+                gitBranchName = "_" + gitBranchName;
+            }
             return gitBranchName;
+        }
+
+        private bool IsRefNameUsed(string gitBranchName)
+        {
+            var parts = gitBranchName.Split('/');
+            var refName = parts.First();
+            for (int i = 1; i <= parts.Length; i++)
+            {
+                if (HasRef(ShortToLocalName(refName)) || HasRef(ShortToTfsRemoteName(refName)))
+                    return true;
+                if (i < parts.Length)
+                    refName += '/' + parts[i];
+            }
+            
+            return false;
         }
 
         public bool CreateBranch(string gitBranchName, string target)
