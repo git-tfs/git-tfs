@@ -31,7 +31,7 @@ namespace Sep.Git.Tfs.Commands
             this.remoteOptions = remoteOptions;
             this.authors = authors;
             this.labels = labels;
-            this.upToChangeSet = -1;
+            this.changesetIdParsed = -1;
         }
 
 
@@ -55,15 +55,15 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        int upToChangeSet { get; set; }
-        public string UpToChangeSetOption
+        int changesetIdParsed { get; set; }
+        public string ChangesetIdParsed
         {
             set
             {
                 int tmp;
                 if (!int.TryParse(value, out tmp))
                     throw new GitTfsException("error: up-to parameter should be an integer.");
-                upToChangeSet = tmp;
+                changesetIdParsed = tmp;
             }
         }
         
@@ -96,7 +96,7 @@ namespace Sep.Git.Tfs.Commands
                     { "c|changeset=", "The changeset to clone from (must be a number)",
                         v => InitialChangeset = Convert.ToInt32(v) },
                     { "t|up-to=", "up-to changeset # (optional, -1 for up to maximum, must be a number, not prefixed with C)", 
-                        v => UpToChangeSetOption = v }
+                        v => ChangesetIdParsed = v }
                 }.Merge(remoteOptions.OptionSet);
             }
         }
@@ -187,7 +187,7 @@ namespace Sep.Git.Tfs.Commands
                 }
                 else
                 {
-                    remote.Fetch(stopOnFailMergeCommit,upToChangeSet);
+                    remote.Fetch(stopOnFailMergeCommit,changesetIdParsed);
                 }
 
             }
