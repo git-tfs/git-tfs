@@ -60,10 +60,10 @@ namespace Sep.Git.Tfs.Commands
         {
             set
             {
-                int tmp;
-                if (!int.TryParse(value, out tmp))
+                int changesetIdParsed;
+                if (!int.TryParse(value, out changesetIdParsed))
                     throw new GitTfsException("error: up-to parameter should be an integer.");
-                upToChangeSet = tmp;
+                upToChangeSet = changesetIdParsed;
             }
         }
         
