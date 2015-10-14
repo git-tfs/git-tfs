@@ -11,6 +11,7 @@ The fetch command fetch all the new changesets from a TFS remote
       -i, --tfs-remote, --remote, --id=VALUE
                                  The remote ID of the TFS to interact with
                                    default: default
+      -t, --up-to=VALUE,        up-to changeset # (optional, -1 for up to maximum, must be a number, not prefixed with C) 
       -I, --auto-tfs-remote, --auto-remote
                                  Auto-detect (from git history) the remote ID of
                                    the TFS to interact with

@@ -403,7 +403,7 @@ namespace Sep.Git.Tfs.Commands
             try
             {
                 Trace.WriteLine("Try fetching changesets...");
-                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit, renameResult);
+                var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit, renameResult: renameResult);
                 Trace.WriteLine("Changesets fetched!");
 
                 if (fetchResult.IsSuccess && createBranch && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)

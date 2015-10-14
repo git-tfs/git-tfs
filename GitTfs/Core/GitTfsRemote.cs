@@ -309,9 +309,9 @@ namespace Sep.Git.Tfs.Core
             public string LastParentCommitBeforeRename { get; set; }
         }
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, IRenameResult renameResult = null)
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null)
         {
-            return FetchWithMerge(-1, stopOnFailMergeCommit, renameResult);
+            return FetchWithMerge(-1, stopOnFailMergeCommit,lastChangesetIdToFetch, renameResult);
         }
 
         public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes)
@@ -655,7 +655,7 @@ namespace Sep.Git.Tfs.Core
                 {
                     try
                     {
-                        remote.Fetch(renameResult:renameResult);
+                        remote.Fetch(renameResult: renameResult);
                     }
                     finally
                     {
