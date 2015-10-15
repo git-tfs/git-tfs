@@ -240,7 +240,7 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        public long CheckinTool(string head, TfsChangesetInfo parentChangeset, CheckinOptions options)
         {
             throw DerivedRemoteException;
         }

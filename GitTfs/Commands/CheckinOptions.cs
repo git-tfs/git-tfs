@@ -40,8 +40,18 @@ namespace Sep.Git.Tfs.Commands
                         v => IgnoreMissingItems = v != null },
                     { "add-missing-files", "When applying an edit operation, add items that were expected to already be in TFS but were not found. Missing files indicates bad synchronization at some point. Use this option with care. This option is ignored if ignore-missing-files option is used.",
                         v => AddMissingItems = v != null },
+                    { "rename-threshold=", "The similarity threshold to use when detecting renames, e.g. --rename-threshold=30%. See \"find-renames\" under \"git help diff\"",
+                        v => RenameThreshold = ValidateRenameThreshold(v) },
                 };
             }
+        }
+
+        private static string ValidateRenameThreshold(string value)
+        {
+            if (!Regex.IsMatch(value, @"^\d+%?"))
+                throw new OptionException("error: Rename threshold must be an integer with optional percentage (%) sign", "rename-threshold");
+
+            return value;
         }
 
         private List<string> _workItemsToAssociate = new List<string>();
@@ -63,6 +73,6 @@ namespace Sep.Git.Tfs.Commands
         public Regex WorkItemAssociateRegex { get; set; }
         public bool IgnoreMissingItems { get; set; }
         public bool AddMissingItems { get; set; }
-
+        public string RenameThreshold { get; set; }
     }
 }
