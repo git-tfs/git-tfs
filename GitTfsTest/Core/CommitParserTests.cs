@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +31,7 @@ namespace Sep.Git.Tfs.Test.Core
 
 
         [Theory]
-        [PropertyData("Cases")]
+        [MemberData("Cases")]
         public void Run(string message, bool expectParsed, int expectId)
         {
             int id;
