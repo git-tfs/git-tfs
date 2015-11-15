@@ -1,7 +1,7 @@
 source https://www.nuget.org/api/v2/
 
 nuget NuGet.CommandLine
-nuget LibGit2Sharp 0.21.0.176
+nuget LibGit2Sharp 0.22.0
 nuget Microsoft.TeamFoundationServer.Client 14.89.0 framework: >= net45
 nuget Microsoft.TeamFoundationServer.ExtendedClient 14.89.0 framework: >= net45
 nuget WixSharp 1.0.22.3 framework: >= net40
