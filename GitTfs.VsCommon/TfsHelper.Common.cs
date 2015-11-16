@@ -168,7 +168,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false)
         {
             if (Is2008OrOlder)
             {
@@ -177,9 +177,9 @@ namespace Sep.Git.Tfs.VsCommon
                 yield break;
             }
 
-            var start = (int)startVersion;
+            var start = startVersion;
             Changeset[] changesets;
-            var lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec((int)lastVersion);
+            var lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec(lastVersion);
             do
             {
                 var startChangeset = new ChangesetVersionSpec(start);
@@ -199,10 +199,10 @@ namespace Sep.Git.Tfs.VsCommon
             } while (!byLots && changesets.Length == BatchCount);
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, long startVersion, IGitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, int startVersion, IGitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                                        null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue,
+                                                                        null, new ChangesetVersionSpec(startVersion), VersionSpec.Latest, int.MaxValue,
                                                                         true, true, true)
                                                           .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
             // don't take the enumerator produced by a foreach statement or a yield statement, as there are references
@@ -214,9 +214,9 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public virtual int FindMergeChangesetParent(string path, long targetChangeset, GitTfsRemote remote)
+        public virtual int FindMergeChangesetParent(string path, int targetChangeset, GitTfsRemote remote)
         {
-            var targetVersion = new ChangesetVersionSpec((int)targetChangeset);
+            var targetVersion = new ChangesetVersionSpec(targetChangeset);
             var searchTo = targetVersion;
             var mergeInfo = VersionControl.QueryMerges(null, null, path, targetVersion, null, searchTo, RecursionType.Full);
             if (mergeInfo.Length == 0) return -1;
@@ -693,7 +693,7 @@ namespace Sep.Git.Tfs.VsCommon
             return "git-tfs-" + Guid.NewGuid();
         }
 
-        public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
+        public int ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
                                      pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray(),
@@ -701,7 +701,7 @@ namespace Sep.Git.Tfs.VsCommon
                                      checkinComment);
         }
 
-        private long ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges,
+        private int ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges,
             WorkItemCheckedInfo[] checkedInfos, string checkinComment)
         {
             using (var parentForm = new ParentForm())
@@ -1311,7 +1311,7 @@ namespace Sep.Git.Tfs.VsCommon
             return null;
         }
 
-        public long QueueGatedCheckinBuild(Uri buildDefinitionUri, string buildDefinitionName, string shelvesetName, string checkInTicket)
+        public int QueueGatedCheckinBuild(Uri buildDefinitionUri, string buildDefinitionName, string shelvesetName, string checkInTicket)
         {
             var buildServer = (IBuildServer)_server.GetService(typeof(IBuildServer));
  

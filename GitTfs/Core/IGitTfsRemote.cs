@@ -9,7 +9,7 @@ namespace Sep.Git.Tfs.Core
     public interface IFetchResult : IRenameResult
     {
         bool IsSuccess { get; set; }
-        long LastFetchedChangesetId { get; set; }
+        int LastFetchedChangesetId { get; set; }
         int NewChangesetCount { get; set; }
         string ParentBranchTfsPath { get; set; }
     }
@@ -39,7 +39,7 @@ namespace Sep.Git.Tfs.Core
         string TfsPassword { get; set; }
         IGitRepository Repository { get; set; }
         ITfsHelper Tfs { get; set; }
-        long MaxChangesetId { get; set; }
+        int MaxChangesetId { get; set; }
         string MaxCommitHash { get; set; }
         string RemoteRef { get; }
         bool IsSubtree { get; }
@@ -49,33 +49,33 @@ namespace Sep.Git.Tfs.Core
         bool ExportMetadatas { get; set; }
         Dictionary<string, string> ExportWorkitemsMapping { get; set; }
         bool ShouldSkip(string path);
-        IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null);
+        IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null);
         string GetPathInGitRepo(string tfsPath);
         IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null);
-        IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes);
+        IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes);
         void QuickFetch();
         void QuickFetch(int changesetId);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force);
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies);
         bool HasShelveset(string shelvesetName);
-        long CheckinTool(string head, TfsChangesetInfo parentChangeset);
-        long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null);
+        int CheckinTool(string head, TfsChangesetInfo parentChangeset);
+        int Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null);
 
         /// <summary>
         /// Checks in to TFS set of changes from git repository between given commits (parent..head) onto given TFS changeset. Returns ID of the new changeset.
         /// </summary>
-        long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null);
+        int Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null);
         void CleanupWorkspace();
         void CleanupWorkspaceDirectory();
-        ITfsChangeset GetChangeset(long changesetId);
-        void UpdateTfsHead(string commitHash, long changesetId);
+        ITfsChangeset GetChangeset(int changesetId);
+        void UpdateTfsHead(string commitHash, int changesetId);
         void EnsureTfsAuthenticated();
         bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath);
     }
 
     public static class IGitTfsRemoteExt
     {
-        public static IFetchResult FetchWithMerge(this IGitTfsRemote remote, long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        public static IFetchResult FetchWithMerge(this IGitTfsRemote remote, int mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
         {
             return remote.FetchWithMerge(mergeChangesetId, stopOnFailMergeCommit, null, parentCommitsHashes);
         }

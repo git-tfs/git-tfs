@@ -149,7 +149,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 var p = Prefix.Replace(" ", "\\ ");
 
-                long latest = Math.Max(owner.MaxChangesetId, remote.MaxChangesetId);
+                int latest = Math.Max(owner.MaxChangesetId, remote.MaxChangesetId);
                 string msg = string.Format(GitTfsConstants.TfsCommitInfoFormat, owner.TfsUrl, owner.TfsRepositoryPath, latest);
                 msg = string.Format(@"Add '{0}/' from commit '{1}'
 

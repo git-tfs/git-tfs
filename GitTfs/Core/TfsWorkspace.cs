@@ -53,7 +53,7 @@ namespace Sep.Git.Tfs.Core
             _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
         }
 
-        public long CheckinTool(Func<string> generateCheckinComment)
+        public int CheckinTool(Func<string> generateCheckinComment)
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
@@ -75,7 +75,7 @@ namespace Sep.Git.Tfs.Core
             _workspace.Merge(sourceTfsPath, tfsRepositoryPath);
         }
 
-        public long Checkin(CheckinOptions options)
+        public int Checkin(CheckinOptions options)
         {
             if (options == null) options = _checkinOptions;
 
@@ -130,7 +130,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private long LaunchGatedCheckinBuild(ReadOnlyCollection<KeyValuePair<string, Uri>> affectedBuildDefinitions, string shelvesetName, string checkInTicket)
+        private int LaunchGatedCheckinBuild(ReadOnlyCollection<KeyValuePair<string, Uri>> affectedBuildDefinitions, string shelvesetName, string checkInTicket)
         {
             _stdout.WriteLine("Due to a gated check-in, a shelveset '" + shelvesetName + "' containing your changes has been created and need to be built before it can be committed.");
             KeyValuePair<string, Uri> buildDefinition;
@@ -217,7 +217,7 @@ namespace Sep.Git.Tfs.Core
 
         private void GetFromTfs(string path)
         {
-            _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), (int)_contextVersion.ChangesetId);
+            _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), _contextVersion.ChangesetId);
         }
 
         public void Get(int changesetId)

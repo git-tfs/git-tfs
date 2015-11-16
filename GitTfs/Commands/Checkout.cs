@@ -40,8 +40,8 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string id)
         {
-            long changesetId;
-            if(!long.TryParse(id, out changesetId))
+            int changesetId;
+            if(!int.TryParse(id, out changesetId))
                 throw new GitTfsException("error: wrong format for changeset id...");
             var sha = _globals.Repository.FindCommitHashByChangesetId(changesetId);
             if (string.IsNullOrEmpty(sha))

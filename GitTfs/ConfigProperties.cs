@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs
             get { return _loader.Get(GitTfsConstants.BatchSize, 100); }
         }
 
-        public long? InitialChangeset
+        public int? InitialChangeset
         {
             set
             {
@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs
             }
             get
             {
-                long? initialChangeset = _loader.Get<long>(GitTfsConstants.InitialChangeset, -1);
+                int? initialChangeset = _loader.Get<int>(GitTfsConstants.InitialChangeset, -1);
                 return initialChangeset == -1 ? null : initialChangeset;
             }
         }

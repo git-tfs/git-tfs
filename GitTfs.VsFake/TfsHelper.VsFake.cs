@@ -49,7 +49,7 @@ namespace Sep.Git.Tfs.VsFake
 
         public bool CanShowCheckinDialog { get { return false; } }
 
-        public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
+        public int ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             throw new NotImplementedException();
         }
@@ -75,7 +75,7 @@ namespace Sep.Git.Tfs.VsFake
             return _script.Changesets.LastOrDefault().Id;
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false)
         {
             if (!_script.Changesets.Any(c => c.IsBranchChangeset) && _script.Changesets.Any(c => c.IsMergeChangeset))
                 return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
@@ -85,7 +85,7 @@ namespace Sep.Git.Tfs.VsFake
                 .Select(x => BuildTfsChangeset(x, remote));
         }
 
-        public int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
+        public int FindMergeChangesetParent(string path, int firstChangeset, GitTfsRemote remote)
         {
             var firstChangesetOfBranch = _script.Changesets.FirstOrDefault(c => c.IsMergeChangeset && c.MergeChangesetDatas.MergeIntoBranch == path && c.MergeChangesetDatas.BeforeMergeChangesetId < firstChangeset);
             if (firstChangesetOfBranch != null)
@@ -518,7 +518,7 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
-        public long QueueGatedCheckinBuild(Uri value, string buildDefinitionName, string shelvesetName, string checkInTicket)
+        public int QueueGatedCheckinBuild(Uri value, string buildDefinitionName, string shelvesetName, string checkInTicket)
         {
             throw new NotImplementedException();
         }

@@ -66,7 +66,7 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
             var mockRemote = MockRepository.GenerateStub<IGitTfsRemote>();
             mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything, Arg<int>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true });
-            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(mockRemote);
+            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<int>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(mockRemote);
 
             gitRepository.Expect(x => x.ReadTfsRemote("default")).Return(remote).Repeat.Once();
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
@@ -92,7 +92,7 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs = mocks.Get<ITfsHelper>();
             var mockRemote = MockRepository.GenerateStub<IGitTfsRemote>();
             mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything, Arg<int>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true });
-            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(mockRemote);
+            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<int>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(mockRemote);
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch")).Return(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
 
             IGitTfsRemote existingBranchRemote = MockRepository.GenerateStub<IGitTfsRemote>();
@@ -168,7 +168,7 @@ namespace Sep.Git.Tfs.Test.Commands
             remote.Tfs = mocks.Get<ITfsHelper>();
             var mockRemote = MockRepository.GenerateStub<IGitTfsRemote>();
             mockRemote.Stub(r => r.Fetch(Arg<bool>.Is.Anything, Arg<int>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(new GitTfsRemote.FetchResult() { IsSuccess = true });
-            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<long>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(mockRemote);
+            remote.Stub(t => t.InitBranch(Arg<RemoteOptions>.Is.Anything, Arg<string>.Is.Anything, Arg<int>.Is.Anything, Arg<bool>.Is.Anything, Arg<string>.Is.Anything, Arg<IRenameResult>.Is.Anything)).Return(mockRemote);
             remote.Tfs.Stub(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, remote.TfsRepositoryPath)).Return(new List<RootBranch>() { new RootBranch(2008, "$/MyProject/MyBranch") });
 
             mocks.ClassUnderTest.ParentBranch = remote.TfsRepositoryPath;
