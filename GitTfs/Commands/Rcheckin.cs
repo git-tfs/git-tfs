@@ -122,7 +122,7 @@ namespace Sep.Git.Tfs.Commands
         {
             var tfsRemote = parentChangeset.Remote;
             string currentParent = parentChangeset.Remote.MaxCommitHash;
-            long newChangesetId = 0;
+            int newChangesetId = 0;
 
             foreach (var commit in commitsToCheckin)
             {

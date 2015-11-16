@@ -206,7 +206,7 @@ namespace Sep.Git.Tfs.Commands
             }
             var remote = commit.Remote;
             Trace.WriteLine("Creating branch in TFS...");
-            remote.Tfs.CreateBranch(remote.TfsRepositoryPath, tfsPath, (int)commit.ChangesetId, Comment ?? "Creation branch " + tfsPath);
+            remote.Tfs.CreateBranch(remote.TfsRepositoryPath, tfsPath, commit.ChangesetId, Comment ?? "Creation branch " + tfsPath);
             Trace.WriteLine("Init branch in local repository...");
             initBranch.DontCreateGitBranch = true;
             var returnCode = initBranch.Run(tfsPath, gitBranchNameExpected);

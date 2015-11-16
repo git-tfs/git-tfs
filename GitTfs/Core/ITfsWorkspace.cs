@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Core
         /// <summary>
         /// Evaluates check-in policies and checks in all pending changes.
         /// </summary>
-        long Checkin(CheckinOptions checkinOptions);
+        int Checkin(CheckinOptions checkinOptions);
         /// <summary>
         /// Populates the workspace with a snapshot, as of the given changeset.
         /// </summary>
@@ -48,7 +48,7 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         string GetLocalItemForServerItem(string serverItem);
 
-        long CheckinTool(Func<string> generateCheckinComment);
+        int CheckinTool(Func<string> generateCheckinComment);
         void Merge(string sourceTfsPath, string tfsRepositoryPath);
 
         /// <summary>

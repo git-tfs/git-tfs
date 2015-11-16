@@ -19,7 +19,7 @@ namespace Sep.Git.Tfs.Core
         private readonly TextWriter stdout;
         private readonly RemoteOptions remoteOptions;
         private readonly ConfigProperties properties;
-        private long? maxChangesetId;
+        private int? maxChangesetId;
         private string maxCommitHash;
         private bool isTfsAuthenticated;
         public RemoteInfo RemoteInfo { get; private set; }
@@ -138,7 +138,7 @@ namespace Sep.Git.Tfs.Core
         public bool ExportMetadatas { get; set; }
         public Dictionary<string, string> ExportWorkitemsMapping { get; set; }
 
-        public long MaxChangesetId
+        public int MaxChangesetId
         {
             get { InitHistory(); return maxChangesetId.Value; }
             set { maxChangesetId = value; }
@@ -150,7 +150,7 @@ namespace Sep.Git.Tfs.Core
             set { maxCommitHash = value; }
         }
 
-        private TfsChangesetInfo GetTfsChangesetById(long id)
+        private TfsChangesetInfo GetTfsChangesetById(int id)
         {
             return Repository.GetTfsChangesetById(RemoteRef, id);
         }
@@ -302,7 +302,7 @@ namespace Sep.Git.Tfs.Core
         public class FetchResult : IFetchResult
         {
             public bool IsSuccess { get; set; }
-            public long LastFetchedChangesetId { get; set; }
+            public int LastFetchedChangesetId { get; set; }
             public int NewChangesetCount { get; set; }
             public string ParentBranchTfsPath { get; set; }
             public bool IsProcessingRenameChangeset { get; set; }
@@ -314,12 +314,12 @@ namespace Sep.Git.Tfs.Core
             return FetchWithMerge(-1, stopOnFailMergeCommit,lastChangesetIdToFetch, renameResult);
         }
 
-        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes)
+        public IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes)
         {
             return FetchWithMerge(mergeChangesetId, stopOnFailMergeCommit, -1, renameResult, parentCommitsHashes);
         }
 
-        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null, params string[] parentCommitsHashes)
+        public IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null, params string[] parentCommitsHashes)
         {
             var fetchResult = new FetchResult { IsSuccess = true, NewChangesetCount = 0 };
             var latestChangesetId = GetLatestChangesetId();
@@ -690,9 +690,9 @@ namespace Sep.Git.Tfs.Core
             DoGcIfNeeded();
         }
 
-        private IEnumerable<ITfsChangeset> FetchChangesets(bool byLots, long lastVersion = -1)
+        private IEnumerable<ITfsChangeset> FetchChangesets(bool byLots, int lastVersion = -1)
         {
-            long lowerBoundChangesetId;
+            int lowerBoundChangesetId;
             if(properties.InitialChangeset.HasValue)
                 lowerBoundChangesetId = Math.Max(MaxChangesetId + 1, properties.InitialChangeset.Value);
             else
@@ -707,9 +707,9 @@ namespace Sep.Git.Tfs.Core
                 .OrderBy(x => x.Summary.ChangesetId);
         }
 
-        public ITfsChangeset GetChangeset(long changesetId)
+        public ITfsChangeset GetChangeset(int changesetId)
         {
-            return Tfs.GetChangeset((int)changesetId, this);
+            return Tfs.GetChangeset(changesetId, this);
         }
 
         private ITfsChangeset GetLatestChangeset()
@@ -727,7 +727,7 @@ namespace Sep.Git.Tfs.Core
             return globals.Repository.GetSubtrees(this).Select(x => Tfs.GetLatestChangesetId(x)).Max();
         }
 
-        public void UpdateTfsHead(string commitHash, long changesetId)
+        public void UpdateTfsHead(string commitHash, int changesetId)
         {
             MaxCommitHash = commitHash;
             MaxChangesetId = changesetId;
@@ -803,7 +803,7 @@ namespace Sep.Git.Tfs.Core
             return Repository.Commit(logEntry).Sha;
         }
 
-        private string BuildCommitMessage(string tfsCheckinComment, long changesetId)
+        private string BuildCommitMessage(string tfsCheckinComment, int changesetId)
         {
             var builder = new StringWriter();
             builder.WriteLine(tfsCheckinComment);
@@ -862,14 +862,14 @@ namespace Sep.Git.Tfs.Core
             workspace.Shelve(shelvesetName, evaluateCheckinPolicies, () => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
         }
 
-        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        public int CheckinTool(string head, TfsChangesetInfo parentChangeset)
         {
-            var changeset = 0L;
+            var changeset = 0;
             WithWorkspace(parentChangeset, workspace => changeset = CheckinTool(head, parentChangeset, workspace));
             return changeset;
         }
 
-        private long CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
+        private int CheckinTool(string head, TfsChangesetInfo parentChangeset, ITfsWorkspace workspace)
         {
             PendChangesToWorkspace(head, parentChangeset.GitCommit, workspace);
             return workspace.CheckinTool(() => Repository.GetCommitMessage(head, parentChangeset.GitCommit));
@@ -886,16 +886,16 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public long Checkin(string head, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
+        public int Checkin(string head, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
-            var changeset = 0L;
+            var changeset = 0;
             WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options, sourceTfsPath));
             return changeset;
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
+        public int Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
-            var changeset = 0L;
+            var changeset = 0;
             WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parent, workspace, options, sourceTfsPath));
             return changeset;
         }
@@ -914,7 +914,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        private long Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options, string sourceTfsPath)
+        private int Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options, string sourceTfsPath)
         {
             PendChangesToWorkspace(head, parent, workspace);
             if (!string.IsNullOrWhiteSpace(sourceTfsPath))
@@ -945,12 +945,12 @@ namespace Sep.Git.Tfs.Core
             return gitBranchName;
         }
 
-        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null, IRenameResult renameResult = null)
+        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null, IRenameResult renameResult = null)
         {
             return InitTfsBranch(remoteOptions, tfsRepositoryPath, rootChangesetId, fetchParentBranch, gitBranchNameExpected, renameResult);
         }
 
-        private IGitTfsRemote InitTfsBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null)
+        private IGitTfsRemote InitTfsBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null)
         {
             Trace.WriteLine("Begin process of creating branch for remote :" + tfsRepositoryPath);
             // TFS string representations of repository paths do not end in trailing slashes
@@ -967,7 +967,7 @@ namespace Sep.Git.Tfs.Core
             {
                 sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
                 if (fetchParentBranch && string.IsNullOrWhiteSpace(sha1RootCommit))
-                    sha1RootCommit = FindRootRemoteAndFetch((int)rootChangesetId, renameResult);
+                    sha1RootCommit = FindRootRemoteAndFetch(rootChangesetId, renameResult);
                 if (string.IsNullOrWhiteSpace(sha1RootCommit))
                     return null;
 

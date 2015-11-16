@@ -15,7 +15,7 @@ namespace Sep.Git.Tfs.Commands
         {
         }
 
-        protected override long DoCheckin(TfsChangesetInfo changeset, string refToCheckin)
+        protected override int DoCheckin(TfsChangesetInfo changeset, string refToCheckin)
         {
             return changeset.Remote.Checkin(refToCheckin, changeset, _checkinOptions);
         }

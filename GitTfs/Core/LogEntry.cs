@@ -22,7 +22,7 @@ namespace Sep.Git.Tfs.Core
         public Tree Tree { get; set; }
         public IList<string> CommitParents { get; private set; }
 
-        public long ChangesetId { get; set; }
+        public int ChangesetId { get; set; }
         public IGitTfsRemote Remote { get; set; }
     }
 }

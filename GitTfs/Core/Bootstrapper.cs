@@ -37,7 +37,7 @@ namespace Sep.Git.Tfs.Core
                 remote = changeset.Remote;
                 if (changeset.Remote.MaxChangesetId < changeset.ChangesetId)
                 {
-                    long oldChangeset = changeset.Remote.MaxChangesetId;
+                    int oldChangeset = changeset.Remote.MaxChangesetId;
                     _globals.Repository.MoveTfsRefForwardIfNeeded(changeset.Remote);
                     _stdout.WriteLine("-> existing remote {0} (updated from changeset {1})", changeset.Remote.Id, oldChangeset);
                 }
