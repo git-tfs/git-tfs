@@ -1331,15 +1331,22 @@ namespace Sep.Git.Tfs.VsCommon
                 queuedBuild.Refresh(QueryOptions.Definitions);
             } while (queuedBuild.Build == null || !queuedBuild.Build.BuildFinished);
             _stdout.WriteLine(string.Empty);
-            if (queuedBuild.Build.Status == BuildStatus.Succeeded)
+
+            var build = GetSpecificBuildFromQueuedBuild(queuedBuild, shelvesetName);
+            if (build.Status == BuildStatus.Succeeded)
             {
-                _stdout.WriteLine("Build success! Your changes have been checked in.");
+                _stdout.WriteLine("Build was successful! Your changes have been checked in.");
                 return VersionControl.GetLatestChangesetId();
             }
             else
             {
-                throw new GitTfsException("the build of the gated check-in has failed! Your changes has not been checked-in!");
+                throw new GitTfsException("The gated check-in has failed! Your changeset is rejected!");
             }
+        }
+
+        protected virtual IBuildDetail GetSpecificBuildFromQueuedBuild(IQueuedBuild queuedBuild, string shelvesetName)
+        {
+            return queuedBuild.Build;
         }
     }
 
