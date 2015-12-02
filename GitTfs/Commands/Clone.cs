@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.Commands
             get
             {
                 return init.OptionSet.Merge(fetch.OptionSet)
-                           .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null)
+                           .Add("with-branches", "initialize all the TFS branches during the clone", v => withBranches = v != null)
                            .Add("resumable", "if an error occurred, try to continue when you restart clone with same parameters", v => resumable = v != null);
             }
         }
@@ -97,13 +97,13 @@ namespace Sep.Git.Tfs.Commands
                     catch (IOException e)
                     {
                         // swallow IOException. Smth went wrong before this and we're much more interested in that error
-                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of IOException:\n{0}\n", e.IndentExceptionMessage());
+                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't clean up files because of IOException:\n{0}\n", e.IndentExceptionMessage());
                         Trace.WriteLine(msg);
                     }
                     catch (UnauthorizedAccessException e)
                     {
                         // swallow it also
-                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
+                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't clean up files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
                         Trace.WriteLine(msg);
                     }
                 }
@@ -142,7 +142,7 @@ namespace Sep.Git.Tfs.Commands
             catch (Exception ex)
             {
                 errorOccurs = true;
-                throw new GitTfsException("error: a problem occured when trying to clone the repository. Try to solve the problem described below.\nIn any case, after, try to continue using command `git tfs "
+                throw new GitTfsException("error: a problem occurred when trying to clone the repository. Try to solve the problem described below.\nIn any case, after, try to continue using command `git tfs "
                     + (withBranches ? "branch init --all" : "fetch") + "`\n", ex);
             }
             finally

@@ -286,8 +286,8 @@ namespace Sep.Git.Tfs.VsCommon
 
                 if (tfsParentBranch == null)
                 {
-                    throw new GitTfsException("error : the branch you try to init '" + tfsPathBranchToCreate + "' is a root branch (e.g. has no parents).",
-                        new List<string> { "Clone this branch from Tfs instead of trying to init it!\n   Command: git tfs clone " + Url + " " + tfsPathBranchToCreate });
+                    throw new GitTfsException("error : the branch you try to initialize '" + tfsPathBranchToCreate + "' is a root branch (e.g. has no parents).",
+                        new List<string> { "Clone this branch from Tfs instead of trying to initialize it!\n   Command: git tfs clone " + Url + " " + tfsPathBranchToCreate });
                 }
 
                 tfsPathParentBranch = tfsParentBranch;
@@ -302,7 +302,7 @@ namespace Sep.Git.Tfs.VsCommon
 
                     if (firstChangesetInBranchToCreate == null)
                     {
-                        throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find first changeset for " + tfsPathBranchToCreate);
+                        throw new GitTfsException("An unexpected error occurred when trying to find the root changeset.\nFailed to find first changeset for " + tfsPathBranchToCreate);
                     }
 
                     var mergedItemsToFirstChangesetInBranchToCreate = GetMergeInfo(tfsPathBranchToCreate, tfsPathParentBranch, firstChangesetInBranchToCreate.ChangesetId, lastChangesetIdToCheck);
@@ -318,7 +318,7 @@ namespace Sep.Git.Tfs.VsCommon
                 }
                 catch (VersionControlException)
                 {
-                    throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to query history for " + tfsPathBranchToCreate);
+                    throw new GitTfsException("An unexpected error occurred when trying to find the root changeset.\nFailed to query history for " + tfsPathBranchToCreate);
                 }
             }
             catch (FeatureNotSupportedException ex)
@@ -372,7 +372,7 @@ namespace Sep.Git.Tfs.VsCommon
                 {
                     if (upperBound == 1)
                     {
-                        throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find a previous changeset to changeset n�" + changesetIdsFirstChangesetInMainBranch + " in the branch!!!");
+                        throw new GitTfsException("An unexpected error occurred when trying to find the root changeset.\nFailed to find a previous changeset to changeset n°" + changesetIdsFirstChangesetInMainBranch + " in the branch!!!");
                     }
                     upperBound = Math.Max(upperBound - step, 1);
                     lowerBound = Math.Max(upperBound - step, 1);
@@ -1224,7 +1224,7 @@ namespace Sep.Git.Tfs.VsCommon
                             new List<string>()
                                 {
                                     "Verify that the name of the project '" + projectName +"' is well spelled",
-                                    "Create the team project folder in TFS before (recommanded)",
+                                    "Create the team project folder in TFS before (recommended)",
                                     "Use the flag '--create-project-folder' to create the team project folder during the process"
                                 });
                 }
