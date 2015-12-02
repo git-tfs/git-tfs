@@ -4,17 +4,21 @@ We'll try to review and merge documentation changes quickly.
 
 If you see something easy to change, you can probably even make the change in your browser!
 
+We are a small team and each of us have a different tfs history with different edge cases... Each fix or new use case supported will be much appreciated and will permit to build a tool usable for a maximum of people. Do not hesitate to contribute. Every little help will be appreciated!!
+
 ## Contributing code
 
-0. In your git-tfs clone, run `git config core.autocrlf true` so that all the line endings are unix line endings when you commit.
+0. Open an [issue](https://github.com/git-tfs/git-tfs/issues) if you want to add a new feature. That way, we could give you some advices, tell you where to look for in the source code,...
 
-1. **Read the source.** It's hopefully not that intimidating.
+1. In your git-tfs clone, run `git config core.autocrlf true` so that all the line endings are unix line endings when you commit.
 
-2. **Check for issues.** There are a few issues that are low-hanging fruit. Feel free to pick them.
+2. **Read the source.** It's hopefully not that intimidating.
 
-3. **Ask questions.** Feel free to drop me a line, or ask a question over at the [google group](http://groups.google.com/group/git-tfs-dev/), or join `#git-tfs` on FreeNode.
+3. **Check for issues.** There are a few issues that are low-hanging fruit. Feel free to pick them.
 
-4. Verify that you your editor is configured to use 4 spaces instead of tabs. You could even install the [EditorConfig Extension for VisualStudio](http://visualstudiogallery.msdn.microsoft.com/c8bccfe2-650c-4b42-bc5c-845e21f96328) (such plugin exists for other editors) , and the good space configuration will be set automatically when opening the git-tfs solution.
+4. **Ask questions.** Feel free to drop me a line, or ask a question over at the [google group](http://groups.google.com/group/git-tfs-dev/), or join `#git-tfs` on FreeNode.
+
+5. Verify that you your editor is configured to use 4 spaces instead of tabs. You could even install the [EditorConfig Extension for VisualStudio](http://visualstudiogallery.msdn.microsoft.com/c8bccfe2-650c-4b42-bc5c-845e21f96328) ([such plugins exists for other editors](http://editorconfig.org/#download)), and the good space configuration will be set automatically when opening the git-tfs solution.
 
 
 ## Pull Requests
