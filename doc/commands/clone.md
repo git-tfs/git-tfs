@@ -181,7 +181,7 @@ It could be used to migrate sources away from TFSVC. See [Migrate from tfs to gi
 ### Batch size of fetched changesets
 
 The option `--batch-size` permit to specify the number of changesets fetched from tfs at the same time (default:100).
-You could use this option to specify smaller batch size if git-tfs use too much memory because changesest are huge.
+You could use this option to specify smaller batch size if git-tfs use too much memory because some changesets are huge.
 This option is saved in the git config file (key `git-tfs.batch-size`). See [config file doc](../config.md). 
 Note: this option could also be specified during the `fetch`.
 
@@ -197,3 +197,8 @@ It is recommended, especially if the TFS repository is a big one, to run, after 
 * [init](init.md)
 * [fetch](fetch.md)
 * [quick-clone](quick-clone.md)
+
+Feel free also to look at some special use cases:
+* [Working with no branches](../usecases/working_with_no_branches.md)
+* [Manage TFS branches with git-tfs](../usecases/manage_tfs_branches.md)
+* [Migrate your history from TFSVC to a git repository](../usecases/migrate_tfs_to_git.md)
