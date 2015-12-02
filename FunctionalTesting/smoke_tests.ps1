@@ -15,11 +15,12 @@ $beforeTime = Get-Date
 
 function VerifyRepository($folder, $cloneCommand, $refToVerify)
 {
+	Write-Host "Scenario: $folder"
     if(Test-Path -Path $folder)
     {
         Remove-Item ".\$folder" -Recurse -Force
     }
-	New-Item ".\$folder" -Force -ItemType directory
+	New-Item ".\$folder" -Force -ItemType directory | out-null
     cd ".\$folder"
 	Write-Host "cmd: $cloneCommand"
 	Invoke-Expression $cloneCommand

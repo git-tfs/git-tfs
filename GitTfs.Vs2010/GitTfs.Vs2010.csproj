@@ -144,7 +144,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)"</PostBuildEvent>
+    <PostBuildEvent>xcopy /y /I "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)$(ProjectName)" /EXCLUDE:$(SolutionDir)files_to_ignore_during_post_build_copy.txt</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

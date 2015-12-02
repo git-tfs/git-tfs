@@ -61,6 +61,7 @@
       <ReleaseFiles Include="$(BuildDir)\*.config" />
       <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
       <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
+      <ReleaseFiles Include="$(BuildDir)\GitTfs.Vs20*\*.dll" />
     </ItemGroup>
   </Target>
 
