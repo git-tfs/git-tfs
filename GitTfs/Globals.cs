@@ -37,28 +37,7 @@ namespace Sep.Git.Tfs
         public bool ShowHelp { get; set; }
         public bool ShowVersion { get; set; }
 
-        public bool DebugOutput
-        {
-            get { return _debugTraceListener.HasValue; }
-            set
-            {
-                if (value)
-                {
-                    if (_debugTraceListener == null)
-                    {
-                        _debugTraceListener = Trace.Listeners.Add(new ConsoleTraceListener());
-                    }
-                }
-                else
-                {
-                    if (_debugTraceListener != null)
-                    {
-                        Trace.Listeners.RemoveAt(_debugTraceListener.Value);
-                    }
-                }
-            }
-        }
-        private int? _debugTraceListener;
+        public bool DebugOutput { get; set; }
 
         public string UserSpecifiedRemoteId { get; set; }
 

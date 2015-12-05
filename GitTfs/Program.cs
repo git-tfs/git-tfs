@@ -124,7 +124,11 @@ namespace Sep.Git.Tfs
             LogManager.Configuration = config;
 
             // Example usage
-            return LogManager.GetLogger("git-tfs");
+            var logger = LogManager.GetLogger("git-tfs");
+
+            Trace.Listeners.Add(new NLogTraceListener());
+
+            return logger;
         }
 
         public static void AddGitChangeTypes(ConfigurationExpression initializer)
