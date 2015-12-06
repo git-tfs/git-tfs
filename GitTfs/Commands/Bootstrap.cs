@@ -3,6 +3,7 @@ using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -14,14 +15,12 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly RemoteOptions _remoteOptions;
         private readonly Globals _globals;
-        private readonly TextWriter _stdout;
         private readonly Bootstrapper _bootstrapper;
 
-        public Bootstrap(RemoteOptions remoteOptions, Globals globals, TextWriter stdout, Bootstrapper bootstrapper)
+        public Bootstrap(RemoteOptions remoteOptions, Globals globals, Bootstrapper bootstrapper)
         {
             _remoteOptions = remoteOptions;
             _globals = globals;
-            _stdout = stdout;
             _bootstrapper = bootstrapper;
         }
 
@@ -41,13 +40,13 @@ namespace Sep.Git.Tfs.Commands
             foreach (var parent in tfsParents)
             {
                 GitCommit commit = _globals.Repository.GetCommit(parent.GitCommit);
-                _stdout.WriteLine("commit {0}\nAuthor: {1} <{2}>\nDate:   {3}\n\n    {4}",
+                Trace.TraceInformation("commit {0}\nAuthor: {1} <{2}>\nDate:   {3}\n\n    {4}",
                     commit.Sha,
                     commit.AuthorAndEmail.Item1, commit.AuthorAndEmail.Item2,
                     commit.When.ToString("ddd MMM d HH:mm:ss zzz"),
                     commit.Message.Replace("\n","\n    ").TrimEnd(' '));
                 _bootstrapper.CreateRemote(parent);
-                _stdout.WriteLine();
+                Trace.TraceInformation(string.Empty);
             }
             return GitTfsExitCodes.OK;
         }

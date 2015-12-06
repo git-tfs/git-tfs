@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             using (var repo = h.Repository("repo"))
             {
-                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var configProperties = new ConfigProperties(new ConfigPropertyLoader(new Globals() { Repository = gitRepository }));
                 Assert.Equal(100, configProperties.BatchSize);
 
@@ -52,7 +52,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.SetConfig("repo", GitTfsConstants.BatchSize, "25");
             using (var repo = h.Repository("repo"))
             {
-                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var configProperties = new ConfigProperties(new ConfigPropertyLoader(new Globals() { Repository = gitRepository }));
 
                 configProperties.BatchSize = 10;
@@ -71,7 +71,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.SetConfig("repo", GitTfsConstants.BatchSize, "5");
             using (var repo = h.Repository("repo"))
             {
-                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var configProperties = new ConfigProperties(new ConfigPropertyLoader(new Globals() { Repository = gitRepository }));
 
                 Assert.Equal(5, configProperties.BatchSize);
@@ -88,7 +88,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             using (var repo = h.Repository("repo"))
             {
-                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var configProperties = new ConfigProperties(new ConfigPropertyLoader(new Globals() { Repository = gitRepository }));
                 
                 configProperties.BatchSize = 7;

@@ -44,15 +44,15 @@ namespace Sep.Git.Tfs
             if(gitTfsException != null)
             {
                 Trace.WriteLine(gitTfsException);
-                Console.WriteLine(gitTfsException.Message);
+                Trace.TraceError(gitTfsException.Message);
                 if (gitTfsException.InnerException != null)
                     ReportException(gitTfsException.InnerException);
                 if (!gitTfsException.RecommendedSolutions.IsEmpty())
                 {
-                    Console.WriteLine("You may be able to resolve this problem.");
+                    Trace.TraceError("You may be able to resolve this problem.");
                     foreach (var solution in gitTfsException.RecommendedSolutions)
                     {
-                        Console.WriteLine("- " + solution);
+                        Trace.TraceError("- " + solution);
                     }
                 }
             }
@@ -71,9 +71,9 @@ namespace Sep.Git.Tfs
             {
                 var gitCommandException = e as GitCommandException;
                 if (gitCommandException != null)
-                    Console.WriteLine("error running command: " + gitCommandException.Process.StartInfo.FileName + " " + gitCommandException.Process.StartInfo.Arguments);
+                    Trace.TraceError("error running command: " + gitCommandException.Process.StartInfo.FileName + " " + gitCommandException.Process.StartInfo.Arguments);
 
-                Console.WriteLine(e.Message);
+                Trace.TraceError(e.Message);
                 e = e.InnerException;
             }
         }

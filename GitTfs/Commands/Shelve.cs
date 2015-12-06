@@ -4,6 +4,7 @@ using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
 using StructureMap;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -12,7 +13,6 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Shelve : GitTfsCommand
     {
-        private readonly TextWriter _stdout;
         private readonly CheckinOptions _checkinOptions;
         private readonly CheckinOptionsFactory _checkinOptionsFactory;
         private readonly TfsWriter _writer;
@@ -20,12 +20,11 @@ namespace Sep.Git.Tfs.Commands
 
         private bool EvaluateCheckinPolicies { get; set; }
 
-        public Shelve(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Globals globals)
+        public Shelve(CheckinOptions checkinOptions, TfsWriter writer, Globals globals)
         {
-            _stdout = stdout;
             _globals = globals;
             _checkinOptions = checkinOptions;
-            _checkinOptionsFactory = new CheckinOptionsFactory(_stdout, _globals);
+            _checkinOptionsFactory = new CheckinOptionsFactory(_globals);
             _writer = writer;
         }
 
@@ -54,7 +53,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 if (!_checkinOptions.Force && changeset.Remote.HasShelveset(shelvesetName))
                 {
-                    _stdout.WriteLine("Shelveset \"" + shelvesetName + "\" already exists. Use -f to replace it.");
+                    Trace.TraceInformation("Shelveset \"" + shelvesetName + "\" already exists. Use -f to replace it.");
                     return GitTfsExitCodes.ForceRequired;
                 }
 

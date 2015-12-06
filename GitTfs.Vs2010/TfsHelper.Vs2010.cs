@@ -10,7 +10,7 @@ namespace Sep.Git.Tfs.Vs2010
 {
     public class TfsHelper : TfsHelperBase
     {
-        public TfsHelper(TextWriter stdout, TfsApiBridge bridge, IContainer container) : base(stdout, bridge, container)
+        public TfsHelper(TfsApiBridge bridge, IContainer container) : base(bridge, container)
         {
         }
 

@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using NDesk.Options;
 using StructureMap;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Commands
 {
     [Pluggable("diagnostics")]
     public class Diagnostics : GitTfsCommand
     {
-        private readonly TextWriter _stdout;
         private readonly IContainer _container;
 
-        public Diagnostics(TextWriter stdout, IContainer container)
+        public Diagnostics(IContainer container)
         {
-            _stdout = stdout;
             _container = container;
         }
 
@@ -25,7 +24,7 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
-            _stdout.WriteLine(_container.WhatDoIHave());
+            Trace.TraceInformation(_container.WhatDoIHave());
             return GitTfsExitCodes.OK;
         }
     }

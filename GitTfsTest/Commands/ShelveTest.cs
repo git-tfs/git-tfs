@@ -15,7 +15,6 @@ namespace Sep.Git.Tfs.Test.Commands
         public ShelveTest()
         {
             mocks = new RhinoAutoMocker<Shelve>();
-            mocks.Inject<TextWriter>(new StringWriter());
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
         }
 

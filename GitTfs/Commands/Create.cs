@@ -3,6 +3,7 @@ using System.IO;
 using NDesk.Options;
 using StructureMap;
 using Sep.Git.Tfs.Core.TfsInterop;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -14,15 +15,13 @@ ex : git tfs create http://myTfsServer:8080/tfs/TfsRepository myProjectName
     public class Create : GitTfsCommand
     {
         private readonly Clone _clone;
-        private readonly TextWriter _stdout;
         private readonly ITfsHelper _tfsHelper;
         private readonly RemoteOptions _remoteOptions;
         private string _trunkName = "trunk";
         private bool _createTeamProjectFolder;
 
-        public Create(ITfsHelper tfsHelper, Clone clone, RemoteOptions remoteOptions, TextWriter stdout)
+        public Create(ITfsHelper tfsHelper, Clone clone, RemoteOptions remoteOptions)
         {
-            _stdout = stdout;
             _tfsHelper = tfsHelper;
             _clone = clone;
             _remoteOptions = remoteOptions;
@@ -52,9 +51,9 @@ ex : git tfs create http://myTfsServer:8080/tfs/TfsRepository myProjectName
             _tfsHelper.Password = _remoteOptions.Password;
 
             var absoluteGitRepositoryPath = Path.GetFullPath(gitRepositoryPath);
-            _stdout.WriteLine("Creating project folder...");
+            Trace.TraceInformation("Creating project folder...");
             _tfsHelper.CreateTfsRootBranch(projectName, _trunkName, absoluteGitRepositoryPath, _createTeamProjectFolder);
-            _stdout.WriteLine("Cloning new project...");
+            Trace.TraceInformation("Cloning new project...");
             _clone.Run(tfsUrl, "$/" + projectName + "/" + _trunkName, gitRepositoryPath);
 
             return GitTfsExitCodes.OK;

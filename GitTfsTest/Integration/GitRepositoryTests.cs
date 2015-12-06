@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             using (var repo = h.Repository("repo"))
             {
-                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var changesets = gitRepository.GetLastParentTfsCommits("HEAD");
                 Assert.Equal(1, changesets.Count());
                 Assert.Equal(c3, changesets.First().GitCommit);
@@ -76,7 +76,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             using (var repo = h.Repository("repo"))
             {
-                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var changesets = gitRepository.GetLastParentTfsCommits("HEAD");
                 Assert.Equal(2, changesets.Count());
                 //C3 must be returned first because that's the parent commit of the master branch where the other branch is merged
@@ -113,7 +113,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             using (var repo = h.Repository("repo"))
             {
-                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var changesets = gitRepository.GetLastParentTfsCommits("HEAD");
                 Assert.Equal(1, changesets.Count());
                 Assert.Equal(c4, changesets.First().GitCommit);
@@ -138,7 +138,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             using (var repo = h.Repository("repo"))
             {
-                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var changesets = gitRepository.GetLastParentTfsCommits("HEAD");
                 Assert.Equal(0, changesets.Count());
             }
@@ -181,7 +181,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             using (var repo = h.Repository("repo"))
             {
-                var gitRepository = new GitRepository(new StringWriter(), repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 //string revList = gitRepository.CommandOneline("rev-list", "--parents", "--ancestry-path", "--first-parent", "--reverse", c1 + ".." + c4);
 
                 var changesets = gitRepository.FindParentCommits(c5, c1);

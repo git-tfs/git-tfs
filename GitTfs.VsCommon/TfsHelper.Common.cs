@@ -25,15 +25,13 @@ namespace Sep.Git.Tfs.VsCommon
 {
     public abstract class TfsHelperBase : ITfsHelper
     {
-        protected readonly TextWriter _stdout;
         protected readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
         protected TfsTeamProjectCollection _server;
         private static bool _resolverInstalled;
 
-        public TfsHelperBase(TextWriter stdout, TfsApiBridge bridge, IContainer container)
+        public TfsHelperBase(TfsApiBridge bridge, IContainer container)
         {
-            _stdout = stdout;
             _bridge = bridge;
             _container = container;
             if (!_resolverInstalled)
@@ -139,12 +137,12 @@ namespace Sep.Git.Tfs.VsCommon
         {
            if (e.Failure != null)
            {
-              _stdout.WriteLine(e.Failure.Message);
+              Trace.TraceInformation(e.Failure.Message);
               Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
            }
            if (e.Exception != null)
            {
-              _stdout.WriteLine(e.Exception.Message);
+              Trace.TraceInformation(e.Exception.Message);
               Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
            }
         }
@@ -312,7 +310,8 @@ namespace Sep.Git.Tfs.VsCommon
                         GetRelevantChangesetBasedOnChangeType(mergedItemsToFirstChangesetInBranchToCreate, tfsPathParentBranch, tfsPathBranchToCreate, out renameFromBranch);
 
                     AddNewRootBranch(rootBranches, new RootBranch(rootChangesetInParentBranch, tfsPathBranchToCreate));
-                    Trace.WriteLineIf(renameFromBranch != null, "Found original branch '" + renameFromBranch + "' (renamed in branch '" + tfsPathBranchToCreate + "')");
+                    if(renameFromBranch != null)
+                        Trace.WriteLine("Found original branch '" + renameFromBranch + "' (renamed in branch '" + tfsPathBranchToCreate + "')");
                     if (renameFromBranch != null)
                         GetRootChangesetForBranch(rootBranches, renameFromBranch);
                 }
@@ -428,7 +427,7 @@ namespace Sep.Git.Tfs.VsCommon
                 }
                 if (merge == null)
                 {
-                    _stdout.WriteLine("warning: git-tfs was unable to find the root changeset (ie the last common commit) between the branch '"
+                    Trace.TraceWarning("warning: git-tfs was unable to find the root changeset (ie the last common commit) between the branch '"
                                       + tfsPathBranchToCreate + "' and its parent branch '" + tfsPathParentBranch + "'.\n"
                                       + "(Any help to add support of this special case is welcomed! Open an issue on https://github.com/git-tfs/git-tfs/issues )\n\n"
                                       + "To be able to continue to fetch the changesets from Tfs,\nplease enter the root changeset id between the branch '"
@@ -490,7 +489,7 @@ namespace Sep.Git.Tfs.VsCommon
             int changesetId;
             while (true)
             {
-                _stdout.Write("Please specify the root changeset id (or 'exit' to stop the process):");
+                Trace.TraceInformation("Please specify the root changeset id (or 'exit' to stop the process):");
                 var read = Console.ReadLine();
                 if (read == "exit")
                     throw new GitTfsException("Exiting...(fetching stopped by user!)");
@@ -548,7 +547,7 @@ namespace Sep.Git.Tfs.VsCommon
                     TargetChangeType = extendedMerge.TargetItem != null ? extendedMerge.TargetItem.ChangeType : 0
                 };
                 mergedItemsToFirstChangesetInBranchToCreate.Add(lastMerge);
-                Trace.WriteLine(lastMerge, "Merge");
+                Trace.WriteLine("Merge: " + lastMerge);
             }
             return mergedItemsToFirstChangesetInBranchToCreate;
         }
@@ -737,7 +736,7 @@ namespace Sep.Git.Tfs.VsCommon
                 {
                     // Normally, the workspace will have one mapping, mapped to the git-tfs
                     // workspace folder. In that case, we just delete the workspace.
-                    _stdout.WriteLine("Removing workspace \"" + workspace.DisplayName + "\".");
+                    Trace.TraceInformation("Removing workspace \"" + workspace.DisplayName + "\".");
                     workspace.Delete();
                 }
                 else
@@ -749,7 +748,7 @@ namespace Sep.Git.Tfs.VsCommon
                     var fullWorkingDirectoryPath = Path.GetFullPath(workingDirectory);
                     foreach (var mapping in workspace.Folders.Where(f => fullWorkingDirectoryPath.StartsWith(Path.GetFullPath(f.LocalItem), StringComparison.CurrentCultureIgnoreCase)))
                     {
-                        _stdout.WriteLine("Removing @\"" + mapping.LocalItem + "\" from workspace \"" + workspace.DisplayName + "\".");
+                        Trace.TraceInformation("Removing @\"" + mapping.LocalItem + "\" from workspace \"" + workspace.DisplayName + "\".");
                         workspace.DeleteMapping(mapping);
                     }
                 }
@@ -764,7 +763,7 @@ namespace Sep.Git.Tfs.VsCommon
         /// TFS randomly seems to report a workspace removed/deleted BUT subsequent calls by Git-TFS suggest that the delete hasn't actually been completed. 
         /// This suggest that deletes may be queued and take a lower priority than other actions, especially if the TFS server is under load.
         /// </remarks>
-        private static void TryToDeleteWorkspace(Workspace workspace)
+        private void TryToDeleteWorkspace(Workspace workspace)
         {
             //  Try and ensure the client and TFS Server are synchronized.
             workspace.Refresh();
@@ -812,7 +811,7 @@ namespace Sep.Git.Tfs.VsCommon
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
             // TODO - containerify this (no `new`)!
             var fakeChangeset = new Unshelveable(shelveset, change, wrapperForVersionControlServer, _bridge);
-            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, _stdout, null) { Summary = new TfsChangesetInfo { Remote = remote } };
+            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, null) { Summary = new TfsChangesetInfo { Remote = remote } };
             return tfsChangeset;
         }
 
@@ -826,12 +825,12 @@ namespace Sep.Git.Tfs.VsCommon
             }
             catch (IdentityNotFoundException)
             {
-                _stdout.WriteLine("User '{0}' not found", shelveList.Owner);
+                Trace.TraceInformation("User '{0}' not found", shelveList.Owner);
                 return GitTfsExitCodes.InvalidArguments;
             }
             if (shelvesets.Empty())
             {
-                _stdout.WriteLine("No changesets found.");
+                Trace.TraceInformation("No changesets found.");
                 return GitTfsExitCodes.OK;
             }
 
@@ -853,7 +852,7 @@ namespace Sep.Git.Tfs.VsCommon
                         shelvesets = shelvesets.OrderBy(s => s.Comment);
                         break;
                     default:
-                        _stdout.WriteLine("ERROR: sorting criteria '{0}' is invalid. Possible values are: date, owner, name, comment", sortBy);
+                        Trace.TraceInformation("ERROR: sorting criteria '{0}' is invalid. Possible values are: date, owner, name, comment", sortBy);
                         return GitTfsExitCodes.InvalidArguments;
                 }
             }
@@ -871,7 +870,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             foreach (var shelveset in shelvesets)
             {
-                _stdout.WriteLine("{0,-22} {1,-20}", shelveset.OwnerName, shelveset.Name);
+                Trace.TraceInformation("{0,-22} {1,-20}", shelveset.OwnerName, shelveset.Name);
             }
         }
 
@@ -879,11 +878,11 @@ namespace Sep.Git.Tfs.VsCommon
         {
             foreach (var shelveset in shelvesets)
             {
-                _stdout.WriteLine("Name   : {0}", shelveset.Name);
-                _stdout.WriteLine("Owner  : {0}", shelveset.OwnerName);
-                _stdout.WriteLine("Date   : {0:g}", shelveset.CreationDate);
-                _stdout.WriteLine("Comment: {0}", shelveset.Comment);
-                _stdout.WriteLine();
+                Trace.TraceInformation("Name   : {0}", shelveset.Name);
+                Trace.TraceInformation("Owner  : {0}", shelveset.OwnerName);
+                Trace.TraceInformation("Date   : {0:g}", shelveset.CreationDate);
+                Trace.TraceInformation("Comment: {0}", shelveset.Comment);
+                Trace.TraceInformation(string.Empty);
             }
         }
 
@@ -1364,22 +1363,22 @@ namespace Sep.Git.Tfs.VsCommon
             buildRequest.Reason = BuildReason.CheckInShelveset; 
             buildRequest.GatedCheckInTicket = checkInTicket;
 
-            _stdout.WriteLine("Launching build '" + buildDefinitionName + "' to validate your shelveset...");
+            Trace.TraceInformation("Launching build '" + buildDefinitionName + "' to validate your shelveset...");
             var queuedBuild = buildServer.QueueBuild(buildRequest);
 
-            _stdout.WriteLine("Waiting for gated check-in build result...");
+            Trace.TraceInformation("Waiting for gated check-in build result...");
             do
             {
-                _stdout.Write(".");
+                //Trace.TraceInformation(".");
                 System.Threading.Thread.Sleep(5000);
                 queuedBuild.Refresh(QueryOptions.Definitions);
             } while (queuedBuild.Build == null || !queuedBuild.Build.BuildFinished);
-            _stdout.WriteLine(string.Empty);
+            Trace.TraceInformation(string.Empty);
 
             var build = GetSpecificBuildFromQueuedBuild(queuedBuild, shelvesetName);
             if (build.Status == BuildStatus.Succeeded)
             {
-                _stdout.WriteLine("Build was successful! Your changes have been checked in.");
+                Trace.TraceInformation("Build was successful! Your changes have been checked in.");
                 return VersionControl.GetLatestChangesetId();
             }
             else

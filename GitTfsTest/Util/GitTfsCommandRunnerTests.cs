@@ -42,7 +42,6 @@ namespace Sep.Git.Tfs.Test.Util
         public GitTfsCommandRunnerTests()
         {
             _mocks = new RhinoAutoMocker<GitTfsCommandRunner>(MockMode.AAA);
-            _mocks.Inject<TextWriter>(new StringWriter());
         }
 
         IList<string> Args(params string[] args)

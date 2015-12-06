@@ -15,8 +15,8 @@ namespace Sep.Git.Tfs.VsCommon
     public abstract class TfsHelperVs2012Base : TfsHelperBase
     {
         protected abstract string TfsVersionString { get; }
-        protected TfsHelperVs2012Base(TextWriter stdout, TfsApiBridge bridge, IContainer container)
-            : base(stdout, bridge, container) { }
+        protected TfsHelperVs2012Base(TfsApiBridge bridge, IContainer container)
+            : base(bridge, container) { }
 
         protected override bool HasWorkItems(Changeset changeset)
         {

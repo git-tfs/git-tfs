@@ -9,13 +9,11 @@ namespace Sep.Git.Tfs.Commands
 {
     public abstract class CheckinBase : GitTfsCommand
     {
-        private readonly TextWriter _stdout;
         protected readonly CheckinOptions _checkinOptions;
         private readonly TfsWriter _writer;
 
-        protected CheckinBase(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
+        protected CheckinBase(CheckinOptions checkinOptions, TfsWriter writer)
         {
-            _stdout = stdout;
             _checkinOptions = checkinOptions;
             _writer = writer;
         }
@@ -41,12 +39,12 @@ namespace Sep.Git.Tfs.Commands
 
             if (_checkinOptions.NoMerge)
             {
-                _stdout.WriteLine("TFS Changeset #" + newChangesetId + " was created.");
+                Trace.TraceInformation("TFS Changeset #" + newChangesetId + " was created.");
                 parentChangeset.Remote.Fetch();
             }
             else
             {
-                _stdout.WriteLine("TFS Changeset #" + newChangesetId + " was created. Marking it as a merge commit...");
+                Trace.TraceInformation("TFS Changeset #" + newChangesetId + " was created. Marking it as a merge commit...");
                 parentChangeset.Remote.FetchWithMerge(newChangesetId, false, refToCheckin);
 
                 if (refToCheckin == "HEAD")

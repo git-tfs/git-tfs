@@ -10,8 +10,8 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Checkin : CheckinBase
     {
-        public Checkin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
-            : base(stdout, checkinOptions, writer)
+        public Checkin(CheckinOptions checkinOptions, TfsWriter writer)
+            : base(checkinOptions, writer)
         {
         }
 

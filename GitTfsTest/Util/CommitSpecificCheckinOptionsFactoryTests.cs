@@ -28,7 +28,7 @@ namespace Sep.Git.Tfs.Test.Util
             gitRepository.Stub(r => r.GitDir).Return(".");
             gitRepository.Stub(r => r.GetConfig(GitTfsConstants.WorkItemAssociateRegexConfigKey)).Return(workItemRegex);
 
-            return new CheckinOptionsFactory(new StringWriter(), mocks.Get<Globals>());
+            return new CheckinOptionsFactory(mocks.Get<Globals>());
         }
 
         [Fact]

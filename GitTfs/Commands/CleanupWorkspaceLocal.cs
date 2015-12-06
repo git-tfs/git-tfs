@@ -5,6 +5,7 @@ using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -13,13 +14,11 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class CleanupWorkspaceLocal : GitTfsCommand
     {
-        private readonly TextWriter _stdout;
         private readonly Globals _globals;
         private readonly CleanupOptions _cleanupOptions;
 
-        public CleanupWorkspaceLocal(TextWriter stdout, Globals globals, CleanupOptions cleanupOptions)
+        public CleanupWorkspaceLocal(Globals globals, CleanupOptions cleanupOptions)
         {
-            _stdout = stdout;
             _globals = globals;
             _cleanupOptions = cleanupOptions;
         }
@@ -52,7 +51,7 @@ namespace Sep.Git.Tfs.Commands
 
         private void Cleanup(IGitTfsRemote remote)
         {
-            _stdout.WriteLine("Cleaning up workspaces directory for TFS remote " + remote.Id);
+            Trace.TraceInformation("Cleaning up workspaces directory for TFS remote " + remote.Id);
             remote.CleanupWorkspaceDirectory();
         }
     }

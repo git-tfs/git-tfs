@@ -14,7 +14,6 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class ShelveList : GitTfsCommand
     {
-        private readonly TextWriter _stdout;
         private readonly Globals _globals;
 
         public string SortBy { get; set; }
@@ -37,9 +36,8 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public ShelveList(TextWriter stdout, Globals globals)
+        public ShelveList(Globals globals)
         {
-            _stdout = stdout;
             _globals = globals;
         }
 

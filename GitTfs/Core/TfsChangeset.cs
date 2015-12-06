@@ -12,16 +12,14 @@ namespace Sep.Git.Tfs.Core
     {
         private readonly ITfsHelper _tfs;
         private readonly IChangeset _changeset;
-        private readonly TextWriter _stdout;
         private readonly AuthorsFile _authors;
         public TfsChangesetInfo Summary { get; set; }
         public int BaseChangesetId { get; set; }
 
-        public TfsChangeset(ITfsHelper tfs, IChangeset changeset, TextWriter stdout, AuthorsFile authors)
+        public TfsChangeset(ITfsHelper tfs, IChangeset changeset, AuthorsFile authors)
         {
             _tfs = tfs;
             _changeset = changeset;
-            _stdout = stdout;
             _authors = authors;
             BaseChangesetId = _changeset.Changes.Max(c => c.Item.ChangesetId) - 1;
         }
@@ -73,7 +71,7 @@ namespace Sep.Git.Tfs.Core
             }
             else
             {
-                _stdout.WriteLine("Cannot checkout file '{0}' from TFS. Skip it", change.GitPath);
+                Trace.TraceInformation("Cannot checkout file '{0}' from TFS. Skip it", change.GitPath);
             }
         }
 
@@ -131,7 +129,7 @@ namespace Sep.Git.Tfs.Core
                     itemsCopied++;
                     if (DateTime.Now - startTime > TimeSpan.FromSeconds(30))
                     {
-                        _stdout.WriteLine("{0} objects created...", itemsCopied);
+                        Trace.TraceInformation("{0} objects created...", itemsCopied);
                         startTime = DateTime.Now;
                     }
                 }

@@ -16,7 +16,6 @@ namespace Sep.Git.Tfs.Core
         private static readonly Regex isInDotGit = new Regex("(?:^|/)\\.git(?:/|$)", RegexOptions.Compiled);
 
         private readonly Globals globals;
-        private readonly TextWriter stdout;
         private readonly RemoteOptions remoteOptions;
         private readonly ConfigProperties properties;
         private int? maxChangesetId;
@@ -25,11 +24,10 @@ namespace Sep.Git.Tfs.Core
         public RemoteInfo RemoteInfo { get; private set; }
 
         public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals,
-            ITfsHelper tfsHelper, TextWriter stdout, ConfigProperties properties)
+            ITfsHelper tfsHelper, ConfigProperties properties)
         {
             this.remoteOptions = remoteOptions;
             this.globals = globals;
-            this.stdout = stdout;
             this.properties = properties;
             Tfs = tfsHelper;
             Repository = repository;
@@ -394,7 +392,7 @@ namespace Sep.Git.Tfs.Core
         {
             if (!Tfs.CanGetBranchInformation)
             {
-                stdout.WriteLine("info: this changeset " + changeset.Summary.ChangesetId +
+                Trace.TraceInformation("info: this changeset " + changeset.Summary.ChangesetId +
                                  " is a merge changeset. But was not treated as is because this version of TFS can't manage branches...");
             }
             else if (!IsIgnoringBranches())
@@ -406,7 +404,7 @@ namespace Sep.Git.Tfs.Core
                     {
                         return false;
                     }
-                    stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
+                    Trace.TraceInformation("warning: this changeset " + changeset.Summary.ChangesetId +
                                      " is a merge changeset. But git-tfs is unable to determine the parent changeset.");
                     return true;
                 }
@@ -426,14 +424,14 @@ namespace Sep.Git.Tfs.Core
                     if (stopOnFailMergeCommit)
                         return false;
 
-                    stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
+                    Trace.TraceInformation("warning: this changeset " + changeset.Summary.ChangesetId +
                                      " is a merge changeset. But git-tfs failed to find and fetch the parent changeset "
                                      + parentChangesetId + ". Parent changeset will be ignored...");
                 }
             }
             else
             {
-                stdout.WriteLine("info: this changeset " + changeset.Summary.ChangesetId +
+                Trace.TraceInformation("info: this changeset " + changeset.Summary.ChangesetId +
                                  " is a merge changeset. But was not treated as is because of your git setting...");
                 changeset.OmittedParentBranch = ";C" + changeset.Summary.ChangesetId;
             }
@@ -447,12 +445,12 @@ namespace Sep.Git.Tfs.Core
             if (value != null && bool.TryParse(value, out isIgnoringBranches))
                 return isIgnoringBranches;
 
-            stdout.WriteLine("warning: no value found for branch management setting '" + GitTfsConstants.IgnoreBranches +
+            Trace.TraceInformation("warning: no value found for branch management setting '" + GitTfsConstants.IgnoreBranches +
                              "'...");
             var isIgnoringBranchesDetected = Repository.ReadAllTfsRemotes().Count() < 2;
-            stdout.WriteLine("=> Branch support " + (isIgnoringBranchesDetected ? "disabled!" : "enabled!"));
+            Trace.TraceInformation("=> Branch support " + (isIgnoringBranchesDetected ? "disabled!" : "enabled!"));
             if(isIgnoringBranchesDetected)
-                stdout.WriteLine("   if you want to enable branch support, use the command:" + Environment.NewLine
+                Trace.TraceInformation("   if you want to enable branch support, use the command:" + Environment.NewLine
                     + "    git config --local " + GitTfsConstants.IgnoreBranches + " false");
             globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, isIgnoringBranchesDetected.ToString());
             return isIgnoringBranchesDetected;
@@ -555,7 +553,7 @@ namespace Sep.Git.Tfs.Core
 
             if (tfsRemote != null && string.Compare(tfsRemote.TfsRepositoryPath, TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase) != 0)
             {
-                stdout.WriteLine("\tFetching from dependent TFS remote '{0}'...", tfsRemote.Id);
+                Trace.TraceInformation("\tFetching from dependent TFS remote '{0}'...", tfsRemote.Id);
                 try
                 {
                     var fetchResult = ((GitTfsRemote) tfsRemote).FetchWithMerge(-1, stopOnFailMergeCommit, parentChangesetId, renameResult);
@@ -606,13 +604,13 @@ namespace Sep.Git.Tfs.Core
 
                 if (mergeChangeset && tfsBranch != null && Repository.GetConfig(GitTfsConstants.IgnoreNotInitBranches) == true.ToString())
                 {
-                    stdout.WriteLine("warning: skip not initialized branch for path " + tfsBranch.Path);
+                    Trace.TraceInformation("warning: skip not initialized branch for path " + tfsBranch.Path);
                     tfsRemote = null;
                     omittedParentBranch = tfsBranch.Path + ";C" + parentChangesetId;
                 }
                 else if (tfsBranch == null)
                 {
-                    stdout.WriteLine("error: branch not found. Verify that all the folders have been converted to branches (or something else :().\n\tpath {0}", tfsPath);
+                    Trace.TraceInformation("error: branch not found. Verify that all the folders have been converted to branches (or something else :().\n\tpath {0}", tfsPath);
                     tfsRemote = null;
                     omittedParentBranch = ";C" + parentChangesetId;
                 }
@@ -642,8 +640,8 @@ namespace Sep.Git.Tfs.Core
                 remote = InitBranch(this.remoteOptions, tfsBranch.Path, rootChangesetId, true);
                 if (remote == null)
                 {
-                    stdout.WriteLine("warning: root commit not found corresponding to changeset " + rootChangesetId);
-                    stdout.WriteLine("=> continuing anyway by creating a branch without parent...");
+                    Trace.TraceInformation("warning: root commit not found corresponding to changeset " + rootChangesetId);
+                    Trace.TraceInformation("=> continuing anyway by creating a branch without parent...");
                     return InitTfsBranch(this.remoteOptions, tfsBranch.Path);
                 }
 
@@ -735,7 +733,7 @@ namespace Sep.Git.Tfs.Core
 
         private void LogCurrentMapping()
         {
-            stdout.WriteLine("C" + MaxChangesetId + " = " + MaxCommitHash);
+            Trace.TraceInformation("C" + MaxChangesetId + " = " + MaxCommitHash);
         }
 
         private string TagPrefix
@@ -828,7 +826,7 @@ namespace Sep.Git.Tfs.Core
                                 "Try applying the shelveset on the currently checkouted commit using the '--force' option"
                             }
                         );
-                stdout.WriteLine("warning: Parent changeset C" + parentId + " not found."
+                Trace.TraceInformation("warning: Parent changeset C" + parentId + " not found."
                                  + " Trying to apply the shelveset on the current commit...");
                 rootCommit = Repository.GetCurrentCommit();
             }
@@ -939,7 +937,7 @@ namespace Sep.Git.Tfs.Core
             var includeTeamProjectName = !Repository.IsInSameTeamProjectAsDefaultRepository(tfsRepositoryPath);
             var gitBranchName = tfsRepositoryPath.ToGitBranchNameFromTfsRepositoryPath(includeTeamProjectName);
             gitBranchName = Repository.AssertValidBranchName(gitBranchName);
-            stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
+            Trace.TraceInformation("The name of the local branch will be : " + gitBranchName);
             return gitBranchName;
         }
 

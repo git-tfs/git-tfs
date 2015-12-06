@@ -78,7 +78,7 @@ namespace Sep.Git.Tfs.Test.Integration
         public void SetupGitRepo(string path, Action<RepoBuilder> buildIt)
         {
             var fullPath = Path.Combine(Workdir, path);
-            System.Diagnostics.Trace.WriteLine("Repository path:" + fullPath);
+            Console.WriteLine("Repository path:" + fullPath);
             var repoPath = LibGit2Sharp.Repository.Init(fullPath);
             using (var repo = new Repository(repoPath))
                 buildIt(new RepoBuilder(repo));

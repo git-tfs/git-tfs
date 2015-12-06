@@ -7,6 +7,7 @@ using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
+using NLog;
 
 namespace Sep.Git.Tfs
 {
@@ -58,12 +59,12 @@ namespace Sep.Git.Tfs
                     var foundRemote = changesetsWithRemote.First().Remote;
                     if (foundRemote.IsDerived)
                     {
-                        Stdout.WriteLine("Bootstraping tfs remote...");
+                        Trace.TraceInformation("Bootstraping tfs remote...");
                         foundRemote = Bootstrapper.CreateRemote(changesetsWithRemote.First());
                     }
 
                     _remoteId = foundRemote.Id;
-                    Stdout.WriteLine("Working with tfs remote: " + _remoteId + " => " + foundRemote.TfsRepositoryPath);
+                    Trace.TraceInformation("Working with tfs remote: " + _remoteId + " => " + foundRemote.TfsRepositoryPath);
                     return _remoteId;
                 }
 
@@ -79,7 +80,7 @@ namespace Sep.Git.Tfs
                     _remoteId = foundRemote.Id;
                     if (_remoteId == GitTfsConstants.DefaultRepositoryId)
                     {
-                        Stdout.WriteLine("Working with tfs remote: " + _remoteId + " => " + foundRemote.TfsRepositoryPath);
+                        Trace.TraceInformation("Working with tfs remote: " + _remoteId + " => " + foundRemote.TfsRepositoryPath);
                         return _remoteId;
                     }
                 }
@@ -116,10 +117,10 @@ namespace Sep.Git.Tfs
             }
         }
 
-        public void WarnOnGitVersion(TextWriter stdout)
+        public void WarnOnGitVersion()
         {
             if (GitVersion != null && GitVersion.Contains("git version 1.8.4"))
-                stdout.WriteLine(@"WARNING!!!! You are using a version of git (1.8.4) that causes problems when using git-tfs!
+                Trace.TraceWarning(@"WARNING!!!! You are using a version of git (1.8.4) that causes problems when using git-tfs!
 If you are experiencing some crashes using git-tfs, perhaps you could get a newer or older version of git.
 For more information, see https://github.com/git-tfs/git-tfs/issues/448 ");
         }
@@ -129,7 +130,7 @@ For more information, see https://github.com/git-tfs/git-tfs/issues/448 ");
             get { return 200; }
         }
 
-        public TextWriter Stdout { get; set; }
+        public ILogger Logger { get; set; }
 
         public Bootstrapper Bootstrapper { get; set; }
         public string CommandLineRun { get; set; }

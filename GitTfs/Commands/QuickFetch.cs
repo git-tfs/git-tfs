@@ -17,8 +17,8 @@ namespace Sep.Git.Tfs.Commands
     public class QuickFetch : Fetch
     {
         private ConfigProperties _properties;
-        public QuickFetch(Globals globals, ConfigProperties properties, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors)
-            : base(globals, properties, stdout, remoteOptions, authors, null)
+        public QuickFetch(Globals globals, ConfigProperties properties, RemoteOptions remoteOptions, AuthorsFile authors)
+            : base(globals, properties, remoteOptions, authors, null)
         {
             _properties = properties;
         }

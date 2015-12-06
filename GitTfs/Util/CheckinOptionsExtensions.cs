@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Util
 {
@@ -41,7 +42,7 @@ namespace Sep.Git.Tfs.Util
             return clone;
         }
 
-        public static void ProcessWorkItemCommands(this CheckinOptions checkinOptions, TextWriter writer, bool isResolvable = true)
+        public static void ProcessWorkItemCommands(this CheckinOptions checkinOptions, bool isResolvable = true)
         {
             MatchCollection workitemMatches;
             if ((workitemMatches = GitTfsConstants.TfsWorkItemRegex.Matches(checkinOptions.CheckinComment)).Count > 0)
@@ -50,11 +51,11 @@ namespace Sep.Git.Tfs.Util
                 {
                     if (isResolvable && match.Groups["action"].Value == "resolve")
                     {
-                        writer.WriteLine("Resolving work item {0}", match.Groups["item_id"]);
+                        Trace.TraceInformation("Resolving work item {0}", match.Groups["item_id"]);
                         checkinOptions.WorkItemsToResolve.Add(match.Groups["item_id"].Value);
                     }
                     else {
-                        writer.WriteLine("Associating with work item {0}", match.Groups["item_id"]);
+                        Trace.TraceInformation("Associating with work item {0}", match.Groups["item_id"]);
                         checkinOptions.WorkItemsToAssociate.Add(match.Groups["item_id"].Value);
                     }
                 }
@@ -71,7 +72,7 @@ namespace Sep.Git.Tfs.Util
                         var workitem = match.Groups["item_id"].Value;
                         if (!checkinOptions.WorkItemsToAssociate.Contains(workitem))
                         {
-                            writer.WriteLine("Associating with work item {0}", workitem);
+                            Trace.TraceInformation("Associating with work item {0}", workitem);
                             checkinOptions.WorkItemsToAssociate.Add(workitem);
                         }
                     }
@@ -79,7 +80,7 @@ namespace Sep.Git.Tfs.Util
             }
         }
 
-        public static void ProcessCheckinNoteCommands(this CheckinOptions checkinOptions, TextWriter writer)
+        public static void ProcessCheckinNoteCommands(this CheckinOptions checkinOptions)
         {
             foreach (Match match in GitTfsConstants.TfsReviewerRegex.Matches(checkinOptions.CheckinComment))
             {
@@ -89,15 +90,15 @@ namespace Sep.Git.Tfs.Util
                     switch (match.Groups["type"].Value)
                     {
                         case "code":
-                            writer.WriteLine("Code reviewer: {0}", reviewer);
+                            Trace.TraceInformation("Code reviewer: {0}", reviewer);
                             checkinOptions.CheckinNotes.Add("Code Reviewer", reviewer);
                             break;
                         case "security":
-                            writer.WriteLine("Security reviewer: {0}", reviewer);
+                            Trace.TraceInformation("Security reviewer: {0}", reviewer);
                             checkinOptions.CheckinNotes.Add("Security Reviewer", reviewer);
                             break;
                         case "performance":
-                            writer.WriteLine("Performance reviewer: {0}", reviewer);
+                            Trace.TraceInformation("Performance reviewer: {0}", reviewer);
                             checkinOptions.CheckinNotes.Add("Performance Reviewer", reviewer);
                             break;
                     }
@@ -108,7 +109,7 @@ namespace Sep.Git.Tfs.Util
 
 
 
-        public static void ProcessForceCommand(this CheckinOptions checkinOptions, TextWriter writer)
+        public static void ProcessForceCommand(this CheckinOptions checkinOptions)
         {
             MatchCollection workitemMatches;
             if ((workitemMatches = GitTfsConstants.TfsForceRegex.Matches(checkinOptions.CheckinComment)).Count == 1)
@@ -117,7 +118,7 @@ namespace Sep.Git.Tfs.Util
 
                 if (!string.IsNullOrWhiteSpace(overrideReason))
                 {
-                    writer.WriteLine("Forcing the checkin: {0}", overrideReason);
+                    Trace.TraceInformation("Forcing the checkin: {0}", overrideReason);
                     checkinOptions.Force = true;
                     checkinOptions.OverrideReason = overrideReason;
                 }
@@ -127,7 +128,7 @@ namespace Sep.Git.Tfs.Util
 
 
 
-        public static void ProcessAuthor(this CheckinOptions checkinOptions, TextWriter writer, GitCommit commit, AuthorsFile authors)
+        public static void ProcessAuthor(this CheckinOptions checkinOptions, GitCommit commit, AuthorsFile authors)
         {
             if (!authors.IsParseSuccessfull)
                 return;
@@ -140,7 +141,7 @@ namespace Sep.Git.Tfs.Util
             }
 
             checkinOptions.AuthorTfsUserId = a.TfsUserId;
-            writer.WriteLine("Commit was authored by git user {0} {1} ({2})", a.Name, a.Email, a.TfsUserId);
+            Trace.TraceInformation("Commit was authored by git user {0} {1} ({2})", a.Name, a.Email, a.TfsUserId);
         }
     }
 }
