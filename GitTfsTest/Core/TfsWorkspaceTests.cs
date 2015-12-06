@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class TfsWorkspaceTests : BaseTest
+    public class TfsWorkspaceTests : BaseTest, IDisposable
     {
         [Fact]
         public void Nothing_to_checkin()
@@ -243,6 +243,11 @@ namespace Sep.Git.Tfs.Test.Core
             var result = tfsWorkspace.Checkin(checkinOptions);
 
             Assert.Contains("[OVERRIDDEN] Policy: No work items associated.", logger.ToString());
+        }
+
+        public void Dispose()
+        {
+            Trace.Listeners.Clear(); ;
         }
     }
 }
