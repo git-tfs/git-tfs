@@ -89,6 +89,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseTest.cs" />
     <Compile Include="Commands\ExtTest.cs" />
     <Compile Include="Commands\InitOptionsTest.cs" />
     <Compile Include="Commands\InitBranchTest.cs" />

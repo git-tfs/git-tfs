@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Util
 {
-    public class AuthorsFileUnitTest
+    public class AuthorsFileUnitTest : BaseTest
     {
         [Fact]
         public void AuthorsFileEmptyFile()

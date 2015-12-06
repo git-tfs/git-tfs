@@ -15,7 +15,7 @@ using NLog.Targets;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
-    public class HelpTest
+    public class HelpTest : BaseTest
     {
         private RhinoAutoMocker<Help> mocks;
 

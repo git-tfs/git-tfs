@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class DelimitedReaderTests
+    public class DelimitedReaderTests : BaseTest
     {
         [Fact]
         public void ShouldParseTwoNullTerminatedStrings()

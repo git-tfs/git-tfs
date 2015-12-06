@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class GitTfsRemoteTests
+    public class GitTfsRemoteTests : BaseTest
     {
         [Fact]
         public void MatchesUrlAndRepositoryPath_should_be_case_insensitive_for_tfs_url()

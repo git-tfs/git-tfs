@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class GlobalsTests
+    public class GlobalsTests : BaseTest
     {
         [Fact]
         public void WhenUserSpecifyARemote_ThenReturnIt()

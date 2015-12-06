@@ -8,7 +8,7 @@ using Xunit.Extensions;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class CommitParserTests
+    public class CommitParserTests : BaseTest
     {
         public static IEnumerable<object[]> Cases
         {

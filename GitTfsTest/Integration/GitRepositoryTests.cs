@@ -9,7 +9,7 @@ using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
-    public class GitRepositoryTests : IDisposable
+    public class GitRepositoryTests : BaseTest, IDisposable
     {
         IntegrationHelper h = new IntegrationHelper();
 

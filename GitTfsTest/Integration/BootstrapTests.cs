@@ -5,7 +5,7 @@ using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
-    public class BootstrapTests : IDisposable
+    public class BootstrapTests : BaseTest, IDisposable
     {
         IntegrationHelper h = new IntegrationHelper();
 

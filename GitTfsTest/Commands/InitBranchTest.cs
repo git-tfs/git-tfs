@@ -12,7 +12,7 @@ using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
-    public class InitBranchTest
+    public class InitBranchTest : BaseTest
     {
         #region Test Init
         private RhinoAutoMocker<InitBranch> mocks;

@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class GitTfsConstantsTest
+    public class GitTfsConstantsTest : BaseTest
     {
         [Fact]
         public void TestTfsCommitInfoRegex_WhenTheRepositoryContainsSquareBrackets_ThenWeGetTheCorrectValues()

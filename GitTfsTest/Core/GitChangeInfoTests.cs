@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class GitChangeInfoTests
+    public class GitChangeInfoTests : BaseTest
     {
         [Fact]
         public void GetsMode()

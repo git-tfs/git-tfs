@@ -3,7 +3,7 @@ using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
-    public class InitTests : IDisposable
+    public class InitTests : BaseTest, IDisposable
     {
         IntegrationHelper h;
 

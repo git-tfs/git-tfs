@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
-    public class ShelveTest
+    public class ShelveTest : BaseTest
     {
         private RhinoAutoMocker<Shelve> mocks;
 

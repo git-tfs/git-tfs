@@ -8,7 +8,7 @@ using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class DirectoryTidierTests : IDisposable
+    public class DirectoryTidierTests : BaseTest, IDisposable
     {
         MockRepository mocks;
         ITfsWorkspaceModifier mockWorkspace;

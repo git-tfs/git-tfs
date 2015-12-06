@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Util
 {
-    public class GitTfsCommandRunnerTests
+    public class GitTfsCommandRunnerTests : BaseTest
     {
         #region Base implementation of GitTfsCommand, for tests
 

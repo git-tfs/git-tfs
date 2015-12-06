@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class ModeTests
+    public class ModeTests : BaseTest
     {
         [Fact]
         public void ShouldGetNewFileMode()

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class ExtTests
+    public class ExtTests : BaseTest
     {
         #region Action.And()
 

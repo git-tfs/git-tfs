@@ -10,7 +10,7 @@ using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
-    public class ConfigPropertyLoaderTests : IDisposable
+    public class ConfigPropertyLoaderTests : BaseTest, IDisposable
     {
         IntegrationHelper h = new IntegrationHelper();
 

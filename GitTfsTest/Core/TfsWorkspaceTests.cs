@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class TfsWorkspaceTests
+    public class TfsWorkspaceTests : BaseTest
     {
         [Fact]
         public void Nothing_to_checkin()
