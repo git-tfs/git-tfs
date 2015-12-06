@@ -42,14 +42,26 @@ namespace Sep.Git.Tfs
 
         public int Run(IList<string> args)
         {
-            InitializeGlobals();
             _globals.CommandLineRun = "git tfs " + string.Join(" ", args);
             var command = ExtractCommand(args);
-            if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
+            UpdateLoggerOnDebugging();
             Trace.WriteLine("Command run:" + _globals.CommandLineRun);
+            InitializeGlobals();
+            if (RequiresValidGitRepository(command)) AssertValidGitRepository();
             ParseAuthors();
             return Main(command, unparsedArgs);
+        }
+
+        private void UpdateLoggerOnDebugging()
+        {
+            if (_globals.DebugOutput)
+            {
+                var consoleRule = LogManager.Configuration.LoggingRules.First();
+                consoleRule.EnableLoggingForLevel(LogLevel.Debug);
+                //consoleRule.DisableLoggingForLevel(LogLevel.Trace);
+                LogManager.ReconfigExistingLoggers();
+            }
         }
 
         public int Main(GitTfsCommand command, IList<string> unparsedArgs)
