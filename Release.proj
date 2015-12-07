@@ -223,7 +223,7 @@
         <ReplacementValue>$(DownloadUrl)</ReplacementValue>
       </ChocolateyTokens>
       <ChocolateyTokens Include="ReleaseNotesContents">
-        <ReplacementValue>@(ReleaseNotesContents, '%0a')</ReplacementValue>
+        <ReplacementValue>https://github.com/git-tfs/git-tfs/tree/master/doc/release-notes</ReplacementValue>
       </ChocolateyTokens>
     </ItemGroup>
     <TemplateFile
