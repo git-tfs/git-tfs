@@ -1,3 +1,0 @@
-* Improve verify command (check all remote option, add exit code, add ignore path case mismatch option) (#853, @pmiossec)
-* Always display the git errors messages to help git-tfs users (#820, @spraint & @pmiossec)
-* Fix support of TFS2015 by managing tfs assemblies with nuget (#837, @pmiossec)
