@@ -155,7 +155,7 @@
 
   <!-- Internal: Create a release on github.com -->
   <Target Name="ReleaseOnGitHub" DependsOnTargets="VersionRequired; AuthTokenRequired; MSBuildCommunityTasks">
-    <CreateRelease Condition="'$(DryRun)' == 'False'" Repository="$(GitHubOwner)/$(GitHubRepository)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" />
+    <CreateRelease Condition="'$(DryRun)' == 'False'" Repository="$(GitHubOwner)/$(GitHubRepository)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" ContinueOnError="ErrorAndContinue" />
     <Message Condition="'$(DryRun)' != 'False'" Text="(would create release on github.com)" />
   </Target>
 
