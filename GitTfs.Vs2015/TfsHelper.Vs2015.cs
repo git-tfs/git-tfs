@@ -13,7 +13,7 @@ namespace Sep.Git.Tfs.Vs2015
 
         protected override string GetDialogAssemblyPath()
         {
-            var tfsExtensionsFolder = TryGetUserRegString(@"Software\Microsoft\VisualStudio\14.0\ExtensionManager\EnabledExtensions", "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.23102");
+            var tfsExtensionsFolder = TryGetUserRegStringStartingWithName(@"Software\Microsoft\VisualStudio\14.0\ExtensionManager\EnabledExtensions", "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions");
             return Path.Combine(tfsExtensionsFolder, DialogAssemblyName + ".dll");
         }
     }

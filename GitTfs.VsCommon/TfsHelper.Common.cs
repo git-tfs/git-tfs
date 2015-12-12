@@ -1311,6 +1311,60 @@ namespace Sep.Git.Tfs.VsCommon
             return null;
         }
 
+        /// <summary>
+        /// Try to get the value of a key beginning with the name 'startOfName'
+        /// and present in the tree path 'path' in the 'Current user' registry root.
+        /// 
+        /// ex:
+        /// 
+        /// The value "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions" for parameter 'startOfName'
+        /// will find "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.24712"
+        /// and "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.23102"
+        /// </summary>
+        /// <param name="path">path in the registry tree</param>
+        /// <param name="startOfName">start of the name of the key to find</param>
+        /// <returns>the value corresponding to the key found</returns>
+        protected string TryGetUserRegStringStartingWithName(string path, string startOfName)
+        {
+            return TryGetRegStringStartingWithName(Registry.CurrentUser, path, startOfName);
+        }
+
+        /// <summary>
+        /// Try to get the value of a key beginning with the name 'startOfName'
+        /// and present in the tree path 'path' in the 'Local machine' registry root
+        /// ex:
+        /// The value "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions" for parameter 'startOfName'
+        /// will find "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.24712"
+        /// and "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.23102"
+        /// </summary>
+        /// <param name="path">path in the registry tree</param>
+        /// <param name="startOfName">start of the name of the key to find</param>
+        /// <returns>the value corresponding to the key found</returns>
+        protected string TryGetRegStringStartingWithName(string path, string startOfName)
+        {
+            return TryGetRegStringStartingWithName(Registry.LocalMachine, path, startOfName);
+        }
+
+        protected string TryGetRegStringStartingWithName(RegistryKey registryKey, string path, string startOfName)
+        {
+            try
+            {
+                Trace.WriteLine("Trying to get " + registryKey.Name + "\\" + path + "| starting with:" + startOfName);
+                var key = registryKey.OpenSubKey(path);
+                if (key != null)
+                {
+                    var keyFound = key.GetValueNames().FirstOrDefault(k => k.StartsWith(startOfName));
+                    Trace.WriteLine("Found registry key:" + keyFound);
+                    return key.GetValue(keyFound) as string;
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + "| starting with:" + startOfName + ": " + e);
+            }
+            return null;
+        }
+
         public int QueueGatedCheckinBuild(Uri buildDefinitionUri, string buildDefinitionName, string shelvesetName, string checkInTicket)
         {
             var buildServer = (IBuildServer)_server.GetService(typeof(IBuildServer));
