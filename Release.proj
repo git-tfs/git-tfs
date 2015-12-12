@@ -59,7 +59,11 @@
       <ReleaseFiles Include="$(SolutionDir)\NOTICE" />
       <ReleaseFiles Include="$(BuildDir)\git-tfs.exe" />
       <ReleaseFiles Include="$(BuildDir)\*.config" />
-      <ReleaseFiles Include="$(BuildDir)\*.dll" Exclude="$(BuildDir)\Microsoft.*.dll" />
+      <ReleaseFiles Include="$(BuildDir)\LibGit2Sharp.dll" />
+      <ReleaseFiles Include="$(BuildDir)\NDesk.Options.dll" />
+      <ReleaseFiles Include="$(BuildDir)\StructureMap.dll" />
+      <ReleaseFiles Include="$(BuildDir)\System.Net.Http.Formatting.dll" />
+      <ReleaseFiles Include="$(BuildDir)\System.Web.Http.dll" />
       <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
       <ReleaseFiles Include="$(BuildDir)\GitTfs.Vs20*\*.dll" />
     </ItemGroup>
