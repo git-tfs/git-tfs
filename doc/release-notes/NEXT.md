@@ -1,1 +1,0 @@
-* Other fixes (#886)
