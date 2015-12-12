@@ -65,7 +65,7 @@
       <ReleaseFiles Include="$(BuildDir)\System.Net.Http.Formatting.dll" />
       <ReleaseFiles Include="$(BuildDir)\System.Web.Http.dll" />
       <ReleaseFiles Include="$(BuildDir)\NativeBinaries\**\*.dll" />
-      <ReleaseFiles Include="$(BuildDir)\GitTfs.Vs2015\*.dll" />
+      <ReleaseFiles Include="$(BuildDir)\GitTfs.Vs20*\*.dll" />
     </ItemGroup>
   </Target>
 
