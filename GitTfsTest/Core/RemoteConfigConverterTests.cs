@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using Sep.Git.Tfs.Core;
 using LibGit2Sharp;
+using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Test.Core
 {
@@ -65,6 +66,64 @@ namespace Sep.Git.Tfs.Test.Core
                 AssertContainsConfig("tfs-remote.default.ignore-except", "def", config);
                 AssertContainsConfig("tfs-remote.default.legacy-urls", "http://abc,http://def", config);
                 AssertContainsConfig("tfs-remote.default.autotag", "true", config);
+            }
+
+            /// <summary>
+            /// Test to ensure that RemoteInfo properties are set correctly when populated via a RemoteOptions object.
+            /// </summary>
+            [Fact]
+            public void DumpsCompleteRemoteAlt()
+            {
+                var remote = new RemoteInfo
+                {
+                    Id = "default",
+                    Url = "http://server/path",
+                    Repository = "$/Project",
+                    RemoteOptions = new RemoteOptions
+                    {
+                        Username = "user",
+                        Password = "pass",
+                        IgnoreRegex = "abc",
+                        ExceptRegex = "def"
+                    },
+                    Autotag = true,
+                    Aliases = new[] { "http://abc", "http://def" },
+                };
+                var config = _dumper.Dump(remote);
+                AssertContainsConfig("tfs-remote.default.url", "http://server/path", config);
+                AssertContainsConfig("tfs-remote.default.repository", "$/Project", config);
+                AssertContainsConfig("tfs-remote.default.username", "user", config);
+                AssertContainsConfig("tfs-remote.default.password", "pass", config);
+                AssertContainsConfig("tfs-remote.default.ignore-paths", "abc", config);
+                AssertContainsConfig("tfs-remote.default.ignore-except", "def", config);
+                AssertContainsConfig("tfs-remote.default.legacy-urls", "http://abc,http://def", config);
+                AssertContainsConfig("tfs-remote.default.autotag", "true", config);
+            }
+
+            /// <summary>
+            /// Test to ensure that when the RemoteOptions object is retrieved from a RemoteInfo object it's properties are set correctly
+            /// </summary>
+            [Fact]
+            public void RetrieveRemoteOptionsFromRemoteInfo()
+            {
+                var remote = new RemoteInfo
+                {
+                    Id = "default",
+                    Url = "http://server/path",
+                    Repository = "$/Project",
+                    Username = "user",
+                    Password = "pass",
+                    IgnoreRegex = "abc",
+                    IgnoreExceptRegex = "def",
+                    Autotag = true,
+                    Aliases = new [] { "http://abc", "http://def" },
+                };
+                var remoteOptions = remote.RemoteOptions;
+
+                Assert.Equal("user", remoteOptions.Username);
+                Assert.Equal("pass", remoteOptions.Password);
+                Assert.Equal("abc", remoteOptions.IgnoreRegex);
+                Assert.Equal("def", remoteOptions.ExceptRegex);
             }
 
             private void AssertContainsConfig(string key, string value, IEnumerable<KeyValuePair<string, string>> configs)
