@@ -877,7 +877,7 @@ namespace Sep.Git.Tfs.Core
 
         private void PendChangesToWorkspace(string head, string parent, ITfsWorkspaceModifier workspace)
         {
-            using (var tidyWorkspace = new DirectoryTidier(workspace, GetLatestChangeset().GetFullTree()))
+            using (var tidyWorkspace = new DirectoryTidier(workspace, () => GetLatestChangeset().GetFullTree()))
             {
                 foreach (var change in Repository.GetChangedFiles(parent, head))
                 {
