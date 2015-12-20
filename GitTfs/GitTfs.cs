@@ -60,6 +60,7 @@ namespace Sep.Git.Tfs
             else if(_globals.ShowVersion)
             {
                 _container.GetInstance<TextWriter>().WriteLine(_gitTfsVersionProvider.GetVersionString());
+                _container.GetInstance<TextWriter>().WriteLine(GitTfsConstants.MessageForceVersion);
                 return GitTfsExitCodes.OK;
             }
             else

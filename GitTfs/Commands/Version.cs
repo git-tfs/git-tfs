@@ -34,6 +34,8 @@ namespace Sep.Git.Tfs.Commands
             stdout.WriteLine(versionProvider.GetVersionString());
             stdout.WriteLine(versionProvider.GetPathToGitTfsExecutable());
 
+            stdout.WriteLine(GitTfsConstants.MessageForceVersion);
+
             return GitTfsExitCodes.OK;
         }
 
