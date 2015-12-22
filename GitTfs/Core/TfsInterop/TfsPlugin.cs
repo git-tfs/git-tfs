@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using StructureMap;
 using StructureMap.Graph;
 using System.IO;
+using Microsoft.Win32;
 
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
@@ -20,11 +22,49 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 return x.Try("GitTfs.Vs" + explicitVersion, "Sep.Git.Tfs.TfsPlugin") ??
                        x.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");
             }
-            return x.Try("GitTfs.Vs2013", "Sep.Git.Tfs.TfsPlugin") ??
+            //http://blogs.msdn.com/b/heaths/archive/2015/04/13/detection-keys-for-visual-studio-2015.aspx
+            //HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\DevDiv\vs\Servicing\14.0\community Install=1
+            //HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\DevDiv\vs\Servicing\14.0\community
+            return (IsVisualStudioInstalled("14.0") ? x.Try("GitTfs.Vs2015", "Sep.Git.Tfs.TfsPlugin") : null) ??
+                   x.Try("GitTfs.Vs2013", "Sep.Git.Tfs.TfsPlugin") ??
                    x.Try("GitTfs.Vs2012", "Sep.Git.Tfs.TfsPlugin") ??
                    x.Try("GitTfs.Vs2010", "Sep.Git.Tfs.TfsPlugin") ??
                    x.Try("GitTfs.Vs2015", "Sep.Git.Tfs.TfsPlugin") ??
                    x.Fail();
+        }
+
+        private static bool IsVisualStudioInstalled(string version)
+        {
+            var isInstalled = TryGetRegString(@"SOFTWARE\Wow6432Node\Microsoft\DevDiv\vs\Servicing\" + version)
+                || TryGetRegString(@"SOFTWARE\Microsoft\DevDiv\vs\Servicing\" + version);
+            if (!isInstalled)
+            {
+                Trace.WriteLine("Visual Studio v"+ version + " not found...");
+            }
+            else
+            {
+                Trace.WriteLine("Visual Studio v"+ version + " detected...");
+            }
+            return isInstalled;
+        }
+
+        private static bool TryGetRegString(string path)
+        {
+            RegistryKey registryKey = Registry.LocalMachine;
+            try
+            {
+                Trace.WriteLine("Trying to get " + registryKey.Name + "\\" + path);
+                var key = registryKey.OpenSubKey(path);
+                if (key != null)
+                {
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + ": " + e);
+            }
+            return false;
         }
 
         class PluginLoader
