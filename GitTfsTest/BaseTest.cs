@@ -13,7 +13,8 @@ namespace Sep.Git.Tfs.Test
         public static bool DisplayTrace { get { return System.Diagnostics.Debugger.IsAttached || DebugTests; } }
         public BaseTest()
         {
-            if (!DisplayTrace)
+            Globals.DisableGarbageCollect = true;
+            if(!DisplayTrace)
             {
                 System.Diagnostics.Trace.Listeners.Clear();
             }

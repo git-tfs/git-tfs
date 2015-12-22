@@ -677,6 +677,8 @@ namespace Sep.Git.Tfs.Core
 
         public void GarbageCollect(bool auto, string additionalMessage)
         {
+            if (Globals.DisableGarbageCollect)
+                return;
             try
             {
                 if (auto)
