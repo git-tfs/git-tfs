@@ -48,6 +48,7 @@ namespace Sep.Git.Tfs.Core
         void MoveRemote(string oldRemoteName, string newRemoteName);
         void ResetHard(string sha);
         bool IsBare { get; }
+        /// <summary>
         /// Gets all configured "subtree" remotes which point to the same Tfs URL as the given remote.
         /// If the given remote is itself a subtree, an empty enumerable is returned.
         /// </summary>
