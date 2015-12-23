@@ -14,63 +14,43 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     {
         public static TfsPlugin Find()
         {
-            var x = new PluginLoader();
+            var pluginLoader = new PluginLoader();
             var explicitVersion = Environment.GetEnvironmentVariable("GIT_TFS_CLIENT");
             if (explicitVersion == "11") explicitVersion = "2012"; // GitTfs.Vs2012 was formerly called GitTfs.Vs11
             if(!String.IsNullOrEmpty(explicitVersion))
             {
-                return x.Try("GitTfs.Vs" + explicitVersion, "Sep.Git.Tfs.TfsPlugin") ??
-                       x.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");
+                return pluginLoader.TryLoadVsPluginVersion(explicitVersion) ??
+                       pluginLoader.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");
             }
-            //http://blogs.msdn.com/b/heaths/archive/2015/04/13/detection-keys-for-visual-studio-2015.aspx
-            //HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\DevDiv\vs\Servicing\14.0\community Install=1
-            //HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\DevDiv\vs\Servicing\14.0\community
-            return (IsVisualStudioInstalled("14.0") ? x.Try("GitTfs.Vs2015", "Sep.Git.Tfs.TfsPlugin") : null) ??
-                   x.Try("GitTfs.Vs2013", "Sep.Git.Tfs.TfsPlugin") ??
-                   x.Try("GitTfs.Vs2012", "Sep.Git.Tfs.TfsPlugin") ??
-                   x.Try("GitTfs.Vs2010", "Sep.Git.Tfs.TfsPlugin") ??
-                   x.Try("GitTfs.Vs2015", "Sep.Git.Tfs.TfsPlugin") ??
-                   x.Fail();
-        }
-
-        private static bool IsVisualStudioInstalled(string version)
-        {
-            var isInstalled = TryGetRegString(@"SOFTWARE\Wow6432Node\Microsoft\DevDiv\vs\Servicing\" + version)
-                || TryGetRegString(@"SOFTWARE\Microsoft\DevDiv\vs\Servicing\" + version);
-            if (!isInstalled)
-            {
-                Trace.WriteLine("Visual Studio v"+ version + " not found...");
-            }
-            else
-            {
-                Trace.WriteLine("Visual Studio v"+ version + " detected...");
-            }
-            return isInstalled;
-        }
-
-        private static bool TryGetRegString(string path)
-        {
-            RegistryKey registryKey = Registry.LocalMachine;
-            try
-            {
-                Trace.WriteLine("Trying to get " + registryKey.Name + "\\" + path);
-                var key = registryKey.OpenSubKey(path);
-                if (key != null)
-                {
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + ": " + e);
-            }
-            return false;
+            return pluginLoader.TryLoadVsPluginVersion("2015", true) ??
+                   pluginLoader.TryLoadVsPluginVersion("2013") ??
+                   pluginLoader.TryLoadVsPluginVersion("2012") ??
+                   pluginLoader.TryLoadVsPluginVersion("2010") ??
+                   pluginLoader.TryLoadVsPluginVersion("2015") ??
+                   pluginLoader.Fail();
         }
 
         class PluginLoader
         {
             private List<Exception> _failures = new List<Exception>();
             private static string VsPluginAssemblyFolder { get; set; }
+            private static readonly Dictionary<string,string> VisualStudioVersions = new Dictionary<string, string>()
+            {
+                {"2015", "14.0" },
+                {"2013", "12.0" },
+                {"2012", "11.0" },
+                {"2010", "10.0" },
+            };
+
+            public TfsPlugin TryLoadVsPluginVersion(string version, bool isVisualStudioRequired = false)
+            {
+                var assembly = "GitTfs.Vs" + version;
+                if (isVisualStudioRequired && !IsVisualStudioInstalled(version))
+                {
+                    return null;
+                }
+                return Try(assembly, "Sep.Git.Tfs.TfsPlugin");
+            }
 
             public TfsPlugin Try(string assembly, string pluginType)
             {
@@ -91,6 +71,49 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 }
                 currentDomain.AssemblyResolve -= LoadFromSameFolder;
                 return null;
+            }
+
+            private static bool IsVisualStudioInstalled(string version)
+            {
+                if (!VisualStudioVersions.ContainsKey(version))
+                {
+                    Trace.WriteLine("Visual Studio " + version + " not supported...");
+                    return false;
+                }
+
+                var versionCode = VisualStudioVersions[version];
+                //doc: http://blogs.msdn.com/b/heaths/archive/2015/04/13/detection-keys-for-visual-studio-2015.aspx
+                var isInstalled = TryGetRegString(@"SOFTWARE\Wow6432Node\Microsoft\DevDiv\vs\Servicing\" + versionCode)
+                    || TryGetRegString(@"SOFTWARE\Microsoft\DevDiv\vs\Servicing\" + versionCode);
+
+                if (!isInstalled)
+                {
+                    Trace.WriteLine("Visual Studio " + version + " not found...");
+                }
+                else
+                {
+                    Trace.WriteLine("Visual Studio " + version + " detected...");
+                }
+                return isInstalled;
+            }
+
+            private static bool TryGetRegString(string path)
+            {
+                RegistryKey registryKey = Registry.LocalMachine;
+                try
+                {
+                    Trace.WriteLine("Trying to get " + registryKey.Name + "\\" + path);
+                    var key = registryKey.OpenSubKey(path);
+                    if (key != null)
+                    {
+                        return true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + ": " + e);
+                }
+                return false;
             }
 
             static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
