@@ -12,13 +12,13 @@ See [clone](../commands/clone.md) command if you should use a password or an aut
  (recommended if you want an email address instead of a windows login in commit messages), ...
 
 Wait quite some time, fetching changesets from TFS is a slow process :(
- 
+
 ### Clean commits (optional)
 
 Clean all the git-tfs metadatas from the commit messages:
 
     git filter-branch -f --msg-filter 'sed "s/^git-tfs-id:.*$//g"' -- --all
-	
+
 Then verify that all is ok and delete the folder `.git/refs/original` ( to delete old branches)
 
 If you want to keep the old changesets ids in a more human format, you could use instead something like:
@@ -47,10 +47,10 @@ Migration is done!
 ## Migrate toward TFS2013 git repository (keeping workitems)
 
 ### Migrate your work-items
-Use [Total Tfs Migration](https://totaltfsmigration.codeplex.com/) to migrate your work-items from your old TFS(VC) project to your new TFS(Git) project.
+Use [Total Tfs Migration](https://totaltfsmigration.codeplex.com/) (or even [here](https://github.com/pmiossec/TotalTfsMigrationTool) for a version with some more bugfixes) to migrate your work-items from your old TFS(VC) project to your new TFS(Git) project.
 
 When process is done, you should have in the subdirectory `map` of the application,
- a file named `ID_map_[Project1]_to_[Project2].txt` containing the mapping between 
+ a file named `ID_map_[Project1]_to_[Project2].txt` containing the mapping between
  old work items and new work-items ids.
 
 Note :
@@ -68,13 +68,13 @@ See [clone](../commands/clone.md) command if you should use a password or an aut
  (recommended if you want an mail address instead of a windows login in commit messages), ...
 
 Wait quite some time, fetching changesets from TFS is a slow process :(
- 
+
 ### Clean commits (optional)
 
 Clean all the git-tfs metadatas from the commit messages:
 
     git filter-branch -f --msg-filter 'sed "s/^git-tfs-id:.*$//g"' -- --all
-	
+
 Then verify that all is ok and delete the folder `.git/refs/original` ( to delete old branches)
 
 Note: if you do that, you won't be able to fetch tfs changesets any more.
