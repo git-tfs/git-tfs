@@ -73,6 +73,6 @@ namespace Sep.Git.Tfs
         public static string MessageForceVersion = Environment.NewLine
             + "Note: If you want to force git-tfs to use another version of the tfs client library,"
             + Environment.NewLine
-            + "set the environment variable `GIT_TFS_CLIENT` with the wished version (ie: '2013' for Visual Stusio 2013,...)";
+            + "set the environment variable `GIT_TFS_CLIENT` with the wished version (ie: '2013' for Visual Studio 2013,...)";
     }
 }
