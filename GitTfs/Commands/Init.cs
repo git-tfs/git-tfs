@@ -46,8 +46,19 @@ namespace Sep.Git.Tfs.Commands
         {
             tfsRepositoryPath.AssertValidTfsPathOrRoot();
             DoGitInitDb();
+            CommitTheGitIgnoreFile(_initOptions.GitIgnorePath);
             GitTfsInit(tfsUrl, tfsRepositoryPath);
             return 0;
+        }
+
+        private void CommitTheGitIgnoreFile(string pathToGitIgnoreFile)
+        {
+            if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile))
+            {
+                Trace.WriteLine("No .gitignore file specified...");
+                return;
+            }
+            _globals.Repository.CommitGitIgnore(pathToGitIgnoreFile);
         }
 
         public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)

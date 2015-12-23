@@ -166,6 +166,18 @@ namespace Sep.Git.Tfs.Core
                 else
                 {
                     MaxChangesetId = 0;
+                    //Manage the special case where a .gitignore has been commited
+                    try
+                    {
+                        var gitCommit = Repository.GetCommit(RemoteRef);
+                        if (gitCommit != null)
+                        {
+                            MaxCommitHash = gitCommit.Sha;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             }
         }
@@ -231,7 +243,7 @@ namespace Sep.Git.Tfs.Core
 
         private bool IsIgnored(string path)
         {
-            return Ignorance.IsIncluded(path);
+            return Ignorance.IsIncluded(path) || Repository.IsPathIgnored(path);
         }
 
         private Bouncer _ignorance;
