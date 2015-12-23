@@ -70,7 +70,7 @@ You need .NET 4 and either the 2010, 2012 or 2013 version of Team Explorer insta
     git tfs rcheckin
 
     # or commit using the tfs checkin window
-    git tfs checkintool 
+    git tfs checkintool
 
     # or commit with a message
     git tfs checkin -m "Did stuff"
@@ -144,13 +144,13 @@ This is the complete list of commands in the master branch on github.
 
 ### Continuous Integration Status
 
-[![Teamcity build status](http://teamcity.codebetter.com/app/rest/builds/buildType:bt787/statusIcon)](http://teamcity.codebetter.com/project.html?projectId=GitTfs&guest=1) & 
+[![Teamcity build status](http://teamcity.codebetter.com/app/rest/builds/buildType:bt787/statusIcon)](http://teamcity.codebetter.com/project.html?projectId=GitTfs&guest=1) &
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/git-tfs/git-tfs)](https://ci.appveyor.com/project/pmiossec/git-tfs-v2qcm)
 ( Great thanks to [![Teamcity Icon](http://teamcity.codebetter.com/img/icons/TeamCity16.png?v8) Jetbrains Teamcity](http://www.jetbrains.com/teamcity) and [![AppVeyor Icon](http://www.appveyor.com/site/favicon.ico) AppVeyor](http://www.appveyor.com/)! )
 
-### Prerequisites 
+### Prerequisites
 
-* MSBuild (included in .NET 4) 
+* MSBuild (included in .NET 4)
 
 And depending of the version of TFS you use :
 
@@ -174,6 +174,7 @@ And depending of the version of TFS you use :
     rake build:debug
 
 **Note:** if the build fails because you don't have all the `Visual Studio SDK`, just unload in Visual Studio all the projects you are not interested in to be able to build and use your own version.
+You could also install, the Team Foundation Server Object Model for [Tfs 2010](https://visualstudiogallery.msdn.microsoft.com/a37e19fb-3052-4fc9-bef7-4a4682069a75) ([chocolatey](https://chocolatey.org/packages/tfs2010objectmodel)), [Tfs 2012](https://visualstudiogallery.msdn.microsoft.com/f30e5cc7-036e-449c-a541-d522299445aa) ([chocolatey](https://chocolatey.org/packages/tfs2012objectmodel)) and [Tfs 2013](https://visualstudiogallery.msdn.microsoft.com/3278bfa7-64a7-4a75-b0da-ec4ccb8d21b6) ([chocolatey](https://chocolatey.org/packages/tfs2013objectmodel)).
 
 ## Contributing
 Contributions are always welcome. Thanks to all our [contributors](https://github.com/git-tfs/git-tfs/graphs/contributors)!
@@ -182,7 +183,7 @@ There are some simple [guidelines](CONTRIBUTING.md).
 
 Especially, don't forget to set `core.autocrlf` to `true` (`git config core.autocrlf true`), and indentation using 4 spaces.
 
-## Migrations 
+## Migrations
 If you're migrating a TFS server from 2008 or 2005 to 2010, you might want to [Specify Alternate TFS URLs](doc/specify-alternate-tfs-urls.md).
 
 [v0.11]: http://mattonrails.wordpress.com/2011/03/11/git-tfs-0-11-0-release-notes/ "0.11 Release notes"
