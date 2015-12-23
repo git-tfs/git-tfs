@@ -85,7 +85,6 @@ namespace Sep.Git.Tfs.Test.Core
             public Base()
             {
                 BaseFixture = new FixtureClass();
-                var subject = BaseFixture.Subject;
                 BaseFixture.Mocks.ReplayAll();
             }
 
