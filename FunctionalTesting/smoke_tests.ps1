@@ -60,7 +60,7 @@ $refs=@(
 @('615ac5588d3cb6282c2c7d514f2828ad3aeaf5c7', 'refs/remotes/tfs/renamed3'           )
 )
 
-VerifyRepository "WithBranches" "git tfs clone https://tfs.codeplex.com:443/tfs/TFS16 $/vtccds/trunk . --with-branches $connectionParameter" $refs
+VerifyRepository "WithBranches" "git tfs clone https://tfs.codeplex.com:443/tfs/TFS16 $/vtccds/trunk . --branches=all $connectionParameter" $refs
 
 $refs=@(
 @('e7d54b14fbdcbbc184d58e82931b7c1ac4a2be70', 'refs/heads/master'                   ),
@@ -75,7 +75,7 @@ $refs=@(
 @('0c7153033940a8b077ef50aa94fdfd3e7bae0cc4', 'refs/remotes/tfs/default'            )
 )
 
-VerifyRepository "WithoutBranches" "git tfs clone https://tfs.codeplex.com:443/tfs/TFS16 $/vtccds/trunk . --ignore-branches $connectionParameter" $refs
+VerifyRepository "WithoutBranches" "git tfs clone https://tfs.codeplex.com:443/tfs/TFS16 $/vtccds/trunk . --branches=none $connectionParameter" $refs
 
 $refs=@(
 @('2d7fc48c4fafc4b4e13288a83a75adb56f412286', 'refs/heads/master'                   ),

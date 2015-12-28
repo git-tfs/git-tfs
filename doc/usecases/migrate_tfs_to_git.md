@@ -6,7 +6,7 @@ Git-tfs could be easily used to migrate source history from TFSVC to a git repos
 
 First fetch all the source history (with all branches) in a local git repository:
 
-    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --with-branches
+    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --branches=all
 
 See [clone](../commands/clone.md) command if you should use a password or an author file
  (recommended if you want an email address instead of a windows login in commit messages), ...
@@ -62,7 +62,7 @@ Extract the data to create a file with each line formatted following: OldWorkIte
 
 First fetch all the source history (with all branches) in a local git repository exporting work-items metadatas (using the mapping file obtained in the previous step):
 
-    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --with-branches --export --export-work-item-mapping="c:\workitems\mapping\file.txt"
+    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --branches=all --export --export-work-item-mapping="c:\workitems\mapping\file.txt"
 
 See [clone](../commands/clone.md) command if you should use a password or an author file
  (recommended if you want an mail address instead of a windows login in commit messages), ...

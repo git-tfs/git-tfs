@@ -173,7 +173,7 @@ namespace Sep.Git.Tfs.Test.Integration
         {
             CreateFakeRepositoryWithMergeChangeset();
 
-            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--with-branches");
+            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--branches=all");
 
             h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
             AssertNewClone("MyProject", RefsInNewClone,
@@ -209,7 +209,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 vtccds.Prepare(r);
             });
             h.TfsUrl = "https://tfs.codeplex.com:443/tfs/TFS16";
-            h.Run("clone", h.TfsUrl, "$/vtccds/trunk", "Vtccds", "--with-branches");
+            h.Run("clone", h.TfsUrl, "$/vtccds/trunk", "Vtccds", "--branches=all");
 
             AssertNewClone("Vtccds", new[] { "refs/heads/master", "refs/remotes/tfs/default" }, commit: "e7d54b14fbdcbbc184d58e82931b7c1ac4a2be70");
 
@@ -234,7 +234,7 @@ namespace Sep.Git.Tfs.Test.Integration
         {
             CreateFakeRepositoryWithMergeChangeset();
 
-            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--ignore-branches");
+            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--branches=none");
 
             h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
             AssertNewClone("MyProject", RefsInNewClone,

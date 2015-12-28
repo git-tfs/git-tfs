@@ -32,6 +32,7 @@ namespace Sep.Git.Tfs.Commands
             this.authors = authors;
             this.labels = labels;
             this.upToChangeSet = -1;
+            BranchStrategy = BranchStrategy = BranchStrategy.Auto;
         }
 
 
@@ -43,7 +44,7 @@ namespace Sep.Git.Tfs.Commands
         bool ForceFetch { get; set; }
         bool ExportMetadatas { get; set; }
         string ExportMetadatasFile { get; set; }
-        public bool IgnoreBranches { get; set; }
+        public BranchStrategy BranchStrategy { get; set; }
         public string BatchSizeOption
         {
             set
@@ -62,7 +63,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 int changesetIdParsed;
                 if (!int.TryParse(value, out changesetIdParsed))
-                    throw new GitTfsException("error: up-to parameter should be an integer.");
+                    throw new GitTfsException("error: 'up-to' parameter should be an integer.");
                 upToChangeSet = changesetIdParsed;
             }
         }
@@ -89,8 +90,18 @@ namespace Sep.Git.Tfs.Commands
                         v => ExportMetadatas = v != null },
                     { "export-work-item-mapping=", "Path to Work-items mapping export file",
                         v => ExportMetadatasFile = v },
-                    { "ignore-branches", "Ignore fetching merged branches when encounter merge changesets",
-                        v => IgnoreBranches = v != null },
+                    { "branches=", "Strategy to manage branches:"+
+                        Environment.NewLine + "* none: Ignore branches and merge changesets, fetching only the cloned tfs path"+
+                        Environment.NewLine + "* auto:(default) Manage the encountered merged changesets and initialize only the merged branches"+
+                        Environment.NewLine + "* all: Manage merged changesets and initialize all the branches during the clone",
+                        v =>
+                        {
+                            BranchStrategy branchStrategy;
+                            if (Enum.TryParse(v, true, out branchStrategy))
+                                BranchStrategy = branchStrategy;
+                            else
+                                throw new GitTfsException("error: 'branches' parameter should be of value none/auto/all.");
+                        } },
                     { "batch-size=", "Size of a the batch of tfs changesets fetched (-1 for all in one batch)",
                         v => BatchSizeOption = v },
                     { "c|changeset=", "The changeset to clone from (must be a number)",
@@ -118,7 +129,7 @@ namespace Sep.Git.Tfs.Commands
 
         private int Run(bool stopOnFailMergeCommit, params string[] args)
         {
-            if (!FetchAll && IgnoreBranches)
+            if (!FetchAll && BranchStrategy == BranchStrategy.None)
                 globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true.ToString());
 
             var remotesToFetch = GetRemotesToFetch(args).ToList();
@@ -212,5 +223,12 @@ namespace Sep.Git.Tfs.Commands
                 remotesToFetch = args.Select(arg => globals.Repository.ReadTfsRemote(arg));
             return remotesToFetch;
         }
+    }
+
+    public enum BranchStrategy
+    {
+        None,
+        Auto,
+        All
     }
 }
