@@ -17,13 +17,13 @@ Wait quite some time, fetching changesets from TFS is a slow process :(
 
 Clean all the git-tfs metadatas from the commit messages:
 
-    git filter-branch -f --msg-filter 'sed "s/^git-tfs-id:.*$//g"' -- --all
+    git filter-branch -f --msg-filter "sed 's/^git-tfs-id:.*$//g'" -- --all
 
 Then verify that all is ok and delete the folder `.git/refs/original` ( to delete old branches)
 
 If you want to keep the old changesets ids in a more human format, you could use instead something like:
 
-    git filter-branch -f --msg-filter 'sed "s/^git-tfs-id:.*;C\([0-9]*\)$/Changeset:\1/g"' -- --all
+    git filter-branch -f --msg-filter "sed 's/^git-tfs-id:.*;C\([0-9]*\)$/Changeset:\1/g'" -- --all
 
 Note: if you do that, you won't be able to fetch tfs changesets any more.
 You should do that if you want to migrate definitively away of TFS!
@@ -73,7 +73,7 @@ Wait quite some time, fetching changesets from TFS is a slow process :(
 
 Clean all the git-tfs metadatas from the commit messages:
 
-    git filter-branch -f --msg-filter 'sed "s/^git-tfs-id:.*$//g"' -- --all
+    git filter-branch -f --msg-filter "sed 's/^git-tfs-id:.*$//g'" -- --all
 
 Then verify that all is ok and delete the folder `.git/refs/original` ( to delete old branches)
 
