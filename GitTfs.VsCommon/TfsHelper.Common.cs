@@ -430,7 +430,7 @@ namespace Sep.Git.Tfs.VsCommon
                 {
                     _stdout.WriteLine("warning: git-tfs was unable to find the root changeset (ie the last common commit) between the branch '"
                                       + tfsPathBranchToCreate + "' and its parent branch '" + tfsPathParentBranch + "'.\n"
-                                      + "(Any help to add support of this special case is welcomed! Open an issue on https://github.com/git-tfs/git-tfs/issue )\n\n"
+                                      + "(Any help to add support of this special case is welcomed! Open an issue on https://github.com/git-tfs/git-tfs/issues )\n\n"
                                       + "To be able to continue to fetch the changesets from Tfs,\nplease enter the root changeset id between the branch '"
                                       + tfsPathBranchToCreate + "'\n and its parent branch '" + tfsPathParentBranch + "' by analysing the Tfs history...");
                     return AskForRootChangesetId();
