@@ -121,5 +121,4 @@
     <PostBuildEvent Condition="'$(OS)' == 'Windows_NT'">xcopy /y "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)"</PostBuildEvent>
     <PostBuildEvent Condition="'$(OS)' != 'Windows_NT'">cp "$(TargetDir)"*.dll "$(SolutionDir)GitTfs\$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>
