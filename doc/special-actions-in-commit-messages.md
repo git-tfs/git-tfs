@@ -1,4 +1,4 @@
-The [rcheckin](commands/rcheckin.md) command examines the commmit message for additional TFS specific
+The [rcheckin](commands/rcheckin.md) command examines the commit message for additional TFS specific
 notifications. The following may be appended as separate lines to the end of the commit message:
 
 * `git-tfs-work-item: <id>` will link the new changeset with the given work item and the default action type.
@@ -7,6 +7,10 @@ notifications. The following may be appended as separate lines to the end of the
 * `git-tfs-security-reviewer: <name>` sets the Security Reviewer field.
 * `git-tfs-performance-reviewer: <name>` sets the Performance Reviewer field.
 * `git-tfs-force: <reason>` will force the checkin, overriding TFS checkin policies with the given reason.
+
+The [shelve](commands/shelve.md) command also examines the commit message for the following TFS specific notifications, in the same matter as the rcheckin command:
+
+* `git-tfs-work-item: <id>` will link the new changeset with the given work item and the default action type.
 
 Additionally the text of the message is searched for work item IDs. If a string matching a # followed
 by a valid work-item ID number is found, then the commit will be associated with the specified TFS work-item.

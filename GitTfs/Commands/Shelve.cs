@@ -2,6 +2,7 @@
 using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
+using Sep.Git.Tfs.Util;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Commands
@@ -13,14 +14,18 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly TextWriter _stdout;
         private readonly CheckinOptions _checkinOptions;
+        private readonly ShelveSpecificCheckinOptionsFactory _checkinOptionsFactory;
         private readonly TfsWriter _writer;
+        private readonly Globals _globals;
 
         private bool EvaluateCheckinPolicies { get; set; }
 
-        public Shelve(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer)
+        public Shelve(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Globals globals)
         {
             _stdout = stdout;
+            _globals = globals;
             _checkinOptions = checkinOptions;
+            _checkinOptionsFactory = new ShelveSpecificCheckinOptionsFactory(_stdout, _globals);
             _writer = writer;
         }
 
@@ -52,9 +57,25 @@ namespace Sep.Git.Tfs.Commands
                     _stdout.WriteLine("Shelveset \"" + shelvesetName + "\" already exists. Use -f to replace it.");
                     return GitTfsExitCodes.ForceRequired;
                 }
-                changeset.Remote.Shelve(shelvesetName, referenceToShelve, changeset, EvaluateCheckinPolicies);
+
+                var commit = _globals.Repository.GetCommit(refToShelve);
+                var message = commit != null
+                    ? BuildCommitMessage(commit, !_checkinOptions.NoGenerateCheckinComment,
+                        changeset.Remote.MaxCommitHash)
+                    : string.Empty;
+
+                var shelveSpecificCheckinOptions = _checkinOptionsFactory.BuildShelveSetSpecificCheckinOptions(_checkinOptions, message);
+
+                changeset.Remote.Shelve(shelvesetName, referenceToShelve, changeset, shelveSpecificCheckinOptions, EvaluateCheckinPolicies);
                 return GitTfsExitCodes.OK;
             });
+        }
+
+        public string BuildCommitMessage(GitCommit commit, bool generateCheckinComment, string latest)
+        {
+            return generateCheckinComment
+                               ? _globals.Repository.GetCommitMessage(commit.Sha, latest)
+                               : _globals.Repository.GetCommit(commit.Sha).Message;
         }
     }
 }
