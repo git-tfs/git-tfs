@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly TextWriter _stdout;
         private readonly CheckinOptions _checkinOptions;
-        private readonly ShelveSpecificCheckinOptionsFactory _checkinOptionsFactory;
+        private readonly CheckinOptionsFactory _checkinOptionsFactory;
         private readonly TfsWriter _writer;
         private readonly Globals _globals;
 
@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs.Commands
             _stdout = stdout;
             _globals = globals;
             _checkinOptions = checkinOptions;
-            _checkinOptionsFactory = new ShelveSpecificCheckinOptionsFactory(_stdout, _globals);
+            _checkinOptionsFactory = new CheckinOptionsFactory(_stdout, _globals);
             _writer = writer;
         }
 

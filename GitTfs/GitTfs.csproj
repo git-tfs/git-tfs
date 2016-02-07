@@ -206,13 +206,12 @@
     <Compile Include="Util\ConfigPropertyLoader.cs" />
     <Compile Include="Util\ExportMetadatasInitializer.cs" />
     <Compile Include="Util\PathResolver.cs" />
-    <Compile Include="Util\CommitSpecificCheckinOptionsFactory.cs" />
+    <Compile Include="Util\CheckinOptionsFactory.cs" />
     <Compile Include="Core\GitTfsVersionProvider.cs" />
     <Compile Include="Util\ExceptionFormattingExtensions.cs" />
     <Compile Include="Util\GitTfsCommandFactory.cs" />
     <Compile Include="Util\GitTfsCommandRunner.cs" />
     <Compile Include="Core\IGitTfsVersionProvider.cs" />
-    <Compile Include="Util\ShelveSpecificCheckinOptionsFactory.cs" />
     <Compile Include="Util\TemporaryFile.cs" />
     <Compile Include="Util\WhenDynamicDoesntWork.cs" />
     <Compile Include="Util\PluggableWithAliases.cs" />

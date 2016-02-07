@@ -13,16 +13,14 @@ namespace Sep.Git.Tfs.Util
     /// enables special git-tfs commands: 
     /// https://github.com/git-tfs/git-tfs/blob/master/doc/Special-actions-in-commit-messages.md
     /// </remarks>
-    public class CommitSpecificCheckinOptionsFactory
+    public class CheckinOptionsFactory
     {
         private readonly TextWriter writer;
-        private readonly AuthorsFile authors;
         private readonly Globals globals;
 
-        public CommitSpecificCheckinOptionsFactory(TextWriter writer, Globals globals, AuthorsFile authors)
+        public CheckinOptionsFactory(TextWriter writer, Globals globals)
         {
             this.writer = writer;
-            this.authors = authors;
             this.globals = globals;
         }
 
@@ -41,11 +39,24 @@ namespace Sep.Git.Tfs.Util
             return customCheckinOptions;
         }
 
-        public CheckinOptions BuildCommitSpecificCheckinOptions(CheckinOptions sourceCheckinOptions, string commitMessage, GitCommit commit)
+        public CheckinOptions BuildCommitSpecificCheckinOptions(CheckinOptions sourceCheckinOptions,
+            string commitMessage, GitCommit commit, AuthorsFile authors)
         {
             var customCheckinOptions = BuildCommitSpecificCheckinOptions(sourceCheckinOptions, commitMessage);
 
             customCheckinOptions.ProcessAuthor(writer, commit, authors);
+
+            return customCheckinOptions;
+        }
+
+        public CheckinOptions BuildShelveSetSpecificCheckinOptions(CheckinOptions sourceCheckinOptions,
+            string commitMessage)
+        {
+            var customCheckinOptions = sourceCheckinOptions.Clone(this.globals);
+
+            customCheckinOptions.CheckinComment = commitMessage;
+
+            customCheckinOptions.ProcessWorkItemCommands(writer, false);
 
             return customCheckinOptions;
         }

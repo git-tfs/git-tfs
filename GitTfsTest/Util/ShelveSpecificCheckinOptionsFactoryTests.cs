@@ -9,11 +9,11 @@ namespace Sep.Git.Tfs.Test.Util
 {
     public class ShelveSpecificCheckinOptionsFactoryTests
     {
-        private RhinoAutoMocker<ShelveSpecificCheckinOptionsFactory> mocks;
+        private RhinoAutoMocker<CheckinOptionsFactory> mocks;
 
         public ShelveSpecificCheckinOptionsFactoryTests()
         {
-            mocks = new RhinoAutoMocker<ShelveSpecificCheckinOptionsFactory>();
+            mocks = new RhinoAutoMocker<CheckinOptionsFactory>();
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
         }
 
@@ -32,16 +32,16 @@ namespace Sep.Git.Tfs.Test.Util
 
 		";
 
-            var specificCheckinOptions = GetShelveSpecificCheckinOptions().BuildShelveSetSpecificCheckinOptions(new CheckinOptions(), commitMessage);
+            var specificCheckinOptions = GetCheckinOptionsFactory().BuildShelveSetSpecificCheckinOptions(new CheckinOptions(), commitMessage);
 
             Assert.Equal(1, specificCheckinOptions.WorkItemsToAssociate.Count);
             Assert.Contains("1234", specificCheckinOptions.WorkItemsToAssociate);
             Assert.Equal(expectedCheckinComment, specificCheckinOptions.CheckinComment);
         }
 
-        private ShelveSpecificCheckinOptionsFactory GetShelveSpecificCheckinOptions()
+        private CheckinOptionsFactory GetCheckinOptionsFactory()
         {
-            return new ShelveSpecificCheckinOptionsFactory(new StringWriter(), mocks.Get<Globals>());
+            return new CheckinOptionsFactory(new StringWriter(), mocks.Get<Globals>());
         }
     }
 }
