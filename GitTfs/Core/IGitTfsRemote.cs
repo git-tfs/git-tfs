@@ -56,7 +56,7 @@ namespace Sep.Git.Tfs.Core
         void QuickFetch();
         void QuickFetch(int changesetId);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force);
-        void Shelve(string shelvesetName, string head, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies);
+        void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies);
         bool HasShelveset(string shelvesetName);
         int CheckinTool(string head, TfsChangesetInfo parentChangeset);
         int Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null);
