@@ -59,7 +59,7 @@ namespace Sep.Git.Tfs.Commands
                 }
 
                 var commit = _globals.Repository.GetCommit(refToShelve);
-                var message = commit != null
+                var message = commit != null // this is only null in the unit tests
                     ? BuildCommitMessage(commit, !_checkinOptions.NoGenerateCheckinComment,
                         changeset.Remote.MaxCommitHash)
                     : string.Empty;
