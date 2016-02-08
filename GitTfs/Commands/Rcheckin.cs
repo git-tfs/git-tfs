@@ -16,7 +16,7 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly TextWriter _stdout;
         private readonly CheckinOptions _checkinOptions;
-        private readonly CommitSpecificCheckinOptionsFactory _checkinOptionsFactory;
+        private readonly CheckinOptionsFactory _checkinOptionsFactory;
         private readonly TfsWriter _writer;
         private readonly Globals _globals;
         private readonly AuthorsFile _authors;
@@ -28,7 +28,7 @@ namespace Sep.Git.Tfs.Commands
         {
             _stdout = stdout;
             _checkinOptions = checkinOptions;
-            _checkinOptionsFactory = new CommitSpecificCheckinOptionsFactory(_stdout, globals, authors);
+            _checkinOptionsFactory = new CheckinOptionsFactory(_stdout, globals);
             _writer = writer;
             _globals = globals;
             _authors = authors;
@@ -131,7 +131,7 @@ namespace Sep.Git.Tfs.Commands
                 var parents = commit.Parents.Where(c => c.Sha != currentParent).ToArray();
                 string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(tfsRemote, parents, target);
 
-                var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, message, commit);
+                var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, message, commit, _authors);
 
                 _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
                 try

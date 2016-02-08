@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Core
             this.Remote = remote;
         }
 
-        public void Shelve(string shelvesetName, bool evaluateCheckinPolicies, Func<string> generateCheckinComment)
+        public void Shelve(string shelvesetName, bool evaluateCheckinPolicies, CheckinOptions checkinOptions)
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
@@ -41,8 +41,8 @@ namespace Sep.Git.Tfs.Core
                 throw new GitTfsException("Nothing to shelve!");
 
             var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
-            shelveset.Comment = string.IsNullOrWhiteSpace(_checkinOptions.CheckinComment) && !_checkinOptions.NoGenerateCheckinComment ? generateCheckinComment() : _checkinOptions.CheckinComment;
-            shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
+            shelveset.Comment = checkinOptions.CheckinComment;
+            shelveset.WorkItemInfo = GetWorkItemInfos(checkinOptions).ToArray();
             if (evaluateCheckinPolicies)
             {
                 foreach (var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, null, shelveset.WorkItemInfo).Messages)

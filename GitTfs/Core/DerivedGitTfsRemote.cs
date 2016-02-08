@@ -230,7 +230,7 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
+        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies)
         {
             throw DerivedRemoteException;
         }

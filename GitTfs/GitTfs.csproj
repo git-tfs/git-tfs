@@ -202,10 +202,11 @@
     <Compile Include="Util\AuthorsFile.cs" />
     <Compile Include="Util\Bouncer.cs" />
     <Compile Include="Util\ChangeSieve.cs" />
+    <Compile Include="Util\CheckinOptionsExtensions.cs" />
     <Compile Include="Util\ConfigPropertyLoader.cs" />
     <Compile Include="Util\ExportMetadatasInitializer.cs" />
     <Compile Include="Util\PathResolver.cs" />
-    <Compile Include="Util\CommitSpecificCheckinOptionsFactory.cs" />
+    <Compile Include="Util\CheckinOptionsFactory.cs" />
     <Compile Include="Core\GitTfsVersionProvider.cs" />
     <Compile Include="Util\ExceptionFormattingExtensions.cs" />
     <Compile Include="Util\GitTfsCommandFactory.cs" />
