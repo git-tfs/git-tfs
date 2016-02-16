@@ -256,7 +256,7 @@ namespace Sep.Git.Tfs.Commands
         {
             var rootBranch = defaultRemote.Tfs.GetRootTfsBranchForRemotePath(defaultRemote.TfsRepositoryPath);
             if (rootBranch == null)
-                throw new GitTfsException("error: The use of the option '--with-branches' to init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '"
+                throw new GitTfsException("error: The use of the option '--branches=all' to init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '"
                     + defaultRemote.TfsRepositoryPath + "' is not a TFS branch!");
 
             return rootBranch.GetAllChildrenOfBranch(defaultRemote.TfsRepositoryPath).Select(b => new BranchDatas { TfsRepositoryPath = b.Path }).ToList();

@@ -141,7 +141,7 @@ namespace Sep.Git.Tfs.Commands
             
             _stdout.WriteLine("-> new remote " + remote.Id);
 
-            fetch.IgnoreBranches = true;
+            fetch.BranchStrategy = BranchStrategy.None;
 
             int result = fetch.Run(remote.Id);
             
