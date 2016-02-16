@@ -75,9 +75,13 @@ namespace Sep.Git.Tfs.Core
             _workspace.Merge(sourceTfsPath, tfsRepositoryPath);
         }
 
-        public int Checkin(CheckinOptions options)
+        public int Checkin(CheckinOptions options, Func<string> generateCheckinComment = null)
         {
             if (options == null) options = _checkinOptions;
+
+            var checkinComment = options.CheckinComment;
+            if (string.IsNullOrWhiteSpace(checkinComment) && !options.NoGenerateCheckinComment && generateCheckinComment != null)
+                checkinComment = generateCheckinComment();
 
             var pendingChanges = _workspace.GetPendingChanges();
 
@@ -87,7 +91,7 @@ namespace Sep.Git.Tfs.Core
             var workItemInfos = GetWorkItemInfos(options);
             var checkinNote = _tfsHelper.CreateCheckinNote(options.CheckinNotes);
 
-            var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, options.CheckinComment, checkinNote, workItemInfos);
+            var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, checkinComment, checkinNote, workItemInfos);
             if (checkinProblems.HasErrors)
             {
                 foreach (var message in checkinProblems.Messages)
@@ -114,7 +118,7 @@ namespace Sep.Git.Tfs.Core
             var policyOverride = GetPolicyOverrides(options, checkinProblems.Result);
             try
             {
-                var newChangeset = _workspace.Checkin(pendingChanges, options.CheckinComment, options.AuthorTfsUserId, checkinNote, workItemInfos, policyOverride, options.OverrideGatedCheckIn);
+                var newChangeset = _workspace.Checkin(pendingChanges, checkinComment, options.AuthorTfsUserId, checkinNote, workItemInfos, policyOverride, options.OverrideGatedCheckIn);
                 if (newChangeset == 0)
                 {
                     throw new GitTfsException("Checkin failed!");
