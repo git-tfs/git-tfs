@@ -146,7 +146,7 @@ This is the complete list of commands in the master branch on github.
 
 [![Teamcity build status](http://teamcity.codebetter.com/app/rest/builds/buildType:bt787/statusIcon)](http://teamcity.codebetter.com/project.html?projectId=GitTfs&guest=1) &
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/git-tfs/git-tfs)](https://ci.appveyor.com/project/pmiossec/git-tfs-v2qcm)
-( Great thanks to [![Teamcity Icon](http://teamcity.codebetter.com/img/icons/TeamCity16.png?v8) Jetbrains Teamcity](http://www.jetbrains.com/teamcity) and [![AppVeyor Icon](http://www.appveyor.com/site/favicon.ico) AppVeyor](http://www.appveyor.com/)! )
+( Great thanks to [<img src="http://teamcity.codebetter.com/img/icons/teamcity.svg" width="30" height="30" /> Jetbrains Teamcity](http://www.jetbrains.com/teamcity) and [![AppVeyor Icon](http://www.appveyor.com/site/favicon.ico) AppVeyor](http://www.appveyor.com/)! )
 
 ### Prerequisites
 
