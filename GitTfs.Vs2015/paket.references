@@ -1,0 +1,11 @@
+Microsoft.AspNet.WebApi.Client
+Microsoft.AspNet.WebApi.Core
+Microsoft.IdentityModel.Clients.ActiveDirectory
+Microsoft.TeamFoundationServer.Client
+Microsoft.TeamFoundationServer.ExtendedClient
+Microsoft.VisualStudio.Services.Client
+Microsoft.VisualStudio.Services.InteractiveClient
+Microsoft.WindowsAzure.ConfigurationManager
+Newtonsoft.Json
+System.IdentityModel.Tokens.Jwt
+WindowsAzure.ServiceBus
