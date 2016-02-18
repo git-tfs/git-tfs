@@ -32,6 +32,7 @@ NUGET
       System.IdentityModel.Tokens.Jwt (>= 4.0.0)
       WindowsAzure.ServiceBus (>= 2.5.1.0)
     Microsoft.WindowsAzure.ConfigurationManager (3.1.0) - framework: >= net45
+    MSBuildTasks (1.4.0.45) - framework: >= net40
     Newtonsoft.Json (7.0.1) - framework: >= net45
     NuGet.CommandLine (3.3.0)
     System.IdentityModel.Tokens.Jwt (4.0.2.206221351) - framework: >= net45

@@ -8,3 +8,4 @@ nuget xunit 1.9.2 framework: >= net40
 nuget xunit.extensions 1.9.2 framework: >= net40
 nuget xunit.runner.visualstudio 2.0.1 framework: >= net40
 nuget xunit.runners 1.9.2 framework: >= net40
+nuget MSBuildTasks 1.4.0.45 framework: >= net40
