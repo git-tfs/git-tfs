@@ -1,0 +1,11 @@
+source https://www.nuget.org/api/v2/
+
+nuget NuGet.CommandLine
+nuget LibGit2Sharp 0.21.0.176
+nuget Microsoft.TeamFoundationServer.Client 14.89.0 framework: >= net45
+nuget Microsoft.TeamFoundationServer.ExtendedClient 14.89.0 framework: >= net45
+nuget xunit 1.9.2 framework: >= net40
+nuget xunit.extensions 1.9.2 framework: >= net40
+nuget xunit.runner.visualstudio 2.0.1 framework: >= net40
+nuget xunit.runners 1.9.2 framework: >= net40
+nuget MSBuildTasks 1.4.0.45 framework: >= net40

@@ -16,3 +16,4 @@ obj
 # 3rd-party stuff copied during build
 /packages
 GitTfs/git2.*
+.paket/paket.exe

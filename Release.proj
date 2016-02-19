@@ -77,15 +77,13 @@
 
   <!-- Use nuget get dependencies. (Dependencies are not checked in to git.) -->
   <PropertyGroup>
-    <NugetExe>$(SolutionDir)\.nuget\nuget.exe</NugetExe>
-    <NugetPackagesDir>$(SolutionDir)/packages</NugetPackagesDir>
-    <MSBuildCommunityTasksPath>$(NugetPackagesDir)/MSBuildTasks.1.4.0.45/tools</MSBuildCommunityTasksPath>
+    <MSBuildCommunityTasksPath>$(SolutionDir)/packages/MSBuildTasks/tools</MSBuildCommunityTasksPath>
     <MSBuildCommunityTasksLib>$(MSBuildCommunityTasksPath)/MSBuild.Community.Tasks.dll</MSBuildCommunityTasksLib>
     <MSBuildGitTfsTasksLib>$(SolutionDir)/packages/MSBuildGitTfsTasks/GitTfsTasks.dll</MSBuildGitTfsTasksLib>
   </PropertyGroup>
   <Target Name="RestorePackages">
-    <Exec Command="$(NugetExe) restore -PackagesDirectory $(NugetPackagesDir) $(SolutionDir)/.nuget/packages.config" />
-    <Exec Command="$(NugetExe) restore -PackagesDirectory $(NugetPackagesDir) $(SolutionDir)/GitTfs/packages.config" />
+    <Exec Command="$(SolutionDir)\.paket\paket.bootstrapper.exe" />
+    <Exec Command="$(SolutionDir)\.paket\paket.exe restore" />
   </Target>
 
   <!-- Load some extra tasks. -->
