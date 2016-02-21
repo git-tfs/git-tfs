@@ -10,8 +10,11 @@ nuget LibGit2Sharp 0.22
 nuget Microsoft.TeamFoundationServer.Client 14.102.0 framework: >= net45
 nuget Microsoft.TeamFoundationServer.ExtendedClient 14.102.0 framework: >= net45
 nuget WixSharp 1.0.22.3 framework: >= net40
-nuget xunit 1.9.2 framework: >= net40
-nuget xunit.extensions 1.9.2 framework: >= net40
-nuget xunit.runner.visualstudio 2.0.1 framework: >= net40
-nuget xunit.runners 1.9.2 framework: >= net40
+nuget xunit 2.1.0 framework: >= net45
+nuget xunit.assert 2.1.0 framework: >= net45
+nuget xunit.runner.msbuild 2.1.0 framework: >= net45
 nuget MSBuildTasks 1.4.0.45 framework: >= net40
+nuget xunit.runner.visualstudio 2.1.0
+
+//console runner to be able to run it in the console
+nuget xunit.runner.console

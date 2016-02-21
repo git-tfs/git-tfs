@@ -11,9 +11,9 @@
     <MSBuild Projects="GitTfs.sln" Properties="Configuration=Debug;Platform=Any CPU;RequireRestoreConsent=false" Targets="GitTfsTest" />
   </Target>
 
-  <UsingTask AssemblyFile="packages/xunit.runners/tools/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
+  <UsingTask AssemblyFile="packages/xunit.runner.msbuild/build/portable-net45+win8+wp8+wpa81/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
   <Target Name="RunTests">
-    <xunit Assembly="GitTfsTest/bin/Debug/GitTfsTest.dll" />
+    <xunit Assemblies="GitTfsTest/bin/Debug/GitTfsTest.dll" />
   </Target>
 
 </Project>
