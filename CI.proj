@@ -8,7 +8,7 @@
   <Target Name="CI" DependsOnTargets="Build; RunTests" />
 
   <Target Name="Build">
-    <MSBuild Projects="GitTfs.sln" Properties="Configuration=Debug;Platform=Any CPU;RequireRestoreConsent=false" Targets="GitTfsTest" />
+    <MSBuild Projects="GitTfs.sln" Properties="Configuration=Debug;Platform=Any CPU;RequireRestoreConsent=false" Targets="GitTfsTest;GitTfs_Setup" />
   </Target>
 
   <UsingTask AssemblyFile="packages/xunit.runners/tools/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
