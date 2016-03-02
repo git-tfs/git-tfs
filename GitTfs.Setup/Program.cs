@@ -8,7 +8,8 @@ namespace GitTfs.Setup
 {
     class Program
     {
-        static void TxtToRtf(string inputFile, string outputFile) {
+        static void TxtToRtf(string inputFile, string outputFile)
+        {
             var lines = System.IO.File.ReadAllLines(inputFile);
 
             using (var f = new StreamWriter(outputFile))
@@ -25,22 +26,32 @@ namespace GitTfs.Setup
 
         static void Main()
         {
+            string ProjectName;
+            Guid GUID;
+            string Conf;
 #if DEBUG
-            var ProjectName = "GitTfsDebug";
-            var GUID = new Guid("6FE30B47-2577-43AD-9095-1861BA25889B");
-            var Conf = "Debug";
+            var IsDebug = true;
 #else
-            var ProjectName = "GitTfs";
-            var GUID = new Guid("98823CC2-0C2E-4CF7-B5ED-EA2DD26559BF");
-            var Conf = "Release";
+            var IsDebug = false;
 #endif
+            if (IsDebug)
+            {
+                ProjectName = "GitTfsDebug";
+                GUID = new Guid("6FE30B47-2577-43AD-9095-1861BA25889B");
+                Conf = "Debug";
+            }
+            else
+            {
+                ProjectName = "GitTfs";
+                GUID = new Guid("98823CC2-0C2E-4CF7-B5ED-EA2DD26559BF");
+                Conf = "Release";
+            }
             var SrcDir = @"..\GitTfs\bin\" + Conf;
             var project = new Project(ProjectName,
                              new Dir(@"%ProgramFiles%\GitTfs",
                                  new Files("*.*", f => !f.EndsWith(".pdb")
                                                     && !f.EndsWith(".xml")
-                                                    && !f.EndsWith(".rtf")
-                                                    && !Path.GetFileName(f).StartsWith("Microsoft."))),
+                                                    && !f.EndsWith(".rtf"))),
                              new EnvironmentVariable("PATH", "[INSTALLDIR]") { Part = EnvVarPart.last });
 
 
