@@ -135,4 +135,5 @@
     </When>
   </Choose>
   <Import Project="..\packages\WixSharp\build\$(__paket__WixSharp_targets).targets" Condition="Exists('..\packages\WixSharp\build\$(__paket__WixSharp_targets).targets')" Label="Paket" />
+  <Import Project="..\.paket\paket.targets" />
 </Project>
