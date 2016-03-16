@@ -497,6 +497,16 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public bool ReplicateTfsMerges
+        {
+            get
+            {
+                string val = GetConfig("tfs.replicateTfsMerges");
+                return val == null || val == "1";
+            }
+            set { SetConfig("tfs.replicateTfsMerges", value ? "1" : "0"); }
+        }
+
         public void CopyBlob(string sha, string outputFile)
         {
             Blob blob; 

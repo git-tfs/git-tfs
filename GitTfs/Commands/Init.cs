@@ -138,6 +138,7 @@ namespace Sep.Git.Tfs.Commands
 
         private void GitTfsInit(string tfsUrl, string tfsRepositoryPath)
         {
+            globals.Repository.ReplicateTfsMerges = initOptions.ReplicateTfsMerges;
             globals.Repository.CreateTfsRemote(new RemoteInfo
             {
                 Id = globals.RemoteId,

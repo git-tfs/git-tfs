@@ -10,7 +10,11 @@ namespace Sep.Git.Tfs.Commands
     {
         private const string default_autocrlf = "false";
 
-        public InitOptions() { GitInitAutoCrlf = default_autocrlf; }
+        public InitOptions()
+        {
+            GitInitAutoCrlf = default_autocrlf;
+            ReplicateTfsMerges = true;
+        }
 
         public OptionSet OptionSet
         {
@@ -27,6 +31,7 @@ namespace Sep.Git.Tfs.Commands
                     { "ignorecase=", "Ignore case in file paths (default: system default)",
                         v => GitInitIgnoreCase = ValidateIgnoreCaseValue(v) },
                     {"bare", "Clone the TFS repository in a bare git repository", v => IsBare = v != null},
+                    {"m|replicateTfsMerges", "Mark TFS merge changesets as merge commits in git; default is true", v => ReplicateTfsMerges = v != null},
                     {"workspace=", "Set tfs workspace to a specific folder (a shorter path is better!)", v => WorkspacePath = v},
                 };
             }
@@ -55,5 +60,6 @@ namespace Sep.Git.Tfs.Commands
         public object GitInitShared { get; set; }
         public string GitInitAutoCrlf { get; set; }
         public string GitInitIgnoreCase { get; set; }
+        public bool ReplicateTfsMerges { get; set; }
     }
 }

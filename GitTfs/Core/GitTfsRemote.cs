@@ -342,7 +342,7 @@ namespace Sep.Git.Tfs.Core
                     if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
                         return fetchResult;
                     string parentCommitSha = null;
-                    if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
+                    if (Repository.ReplicateTfsMerges && changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                     {
                         fetchResult.IsSuccess = false;
                         return fetchResult;
