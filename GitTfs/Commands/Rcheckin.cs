@@ -129,7 +129,9 @@ namespace Sep.Git.Tfs.Commands
                 var message = BuildCommitMessage(commit, !_checkinOptions.NoGenerateCheckinComment, currentParent);
                 string target = commit.Sha;
                 var parents = commit.Parents.Where(c => c.Sha != currentParent).ToArray();
-                string tfsRepositoryPathOfMergedBranch = FindTfsRepositoryPathOfMergedBranch(tfsRemote, parents, target);
+                string tfsRepositoryPathOfMergedBranch = _checkinOptions.NoMerge
+                                                             ? null
+                                                             : FindTfsRepositoryPathOfMergedBranch(tfsRemote, parents, target);
 
                 var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, message, commit, _authors);
 
