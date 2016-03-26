@@ -328,16 +328,18 @@ namespace Sep.Git.Tfs.Core
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
-            IEnumerable<ITfsChangeset> fetchedChangesets;
+                        
+            bool fetchRetrievedChangesets;
             do
             {
-                fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch);
-                if(!fetchedChangesets.Any())
-                    return fetchResult;
-
+                var fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch);
+                
                 var objects = BuildEntryDictionary();
+                fetchRetrievedChangesets = false;
                 foreach (var changeset in fetchedChangesets)
                 {
+                    fetchRetrievedChangesets = true;
+
                     fetchResult.NewChangesetCount++;
                     if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
                         return fetchResult;
@@ -378,7 +380,7 @@ namespace Sep.Git.Tfs.Core
                     }
                     DoGcIfNeeded();
                 }
-            } while (fetchedChangesets.Any() && latestChangesetId > fetchResult.LastFetchedChangesetId);
+            } while (fetchRetrievedChangesets && latestChangesetId > fetchResult.LastFetchedChangesetId);
             return fetchResult;
         }
 
