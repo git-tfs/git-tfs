@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Framework.Client;
 using Microsoft.TeamFoundation.Framework.Common;
-using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using StructureMap;
 using Sep.Git.Tfs.Core.TfsInterop;
@@ -42,19 +41,22 @@ namespace Sep.Git.Tfs.VsCommon
             return build != null ? build : queuedBuild.Build;
         }
 
-#pragma warning disable 618
-        private IGroupSecurityService GroupSecurityService
+        private IIdentityManagementService IdentityManagementService
         {
-            get { return GetService<IGroupSecurityService>(); }
+            get { return GetService<IIdentityManagementService>(); }
         }
 
         public override IIdentity GetIdentity(string username)
         {
-            return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
+            var identities = new Guid[] { new Guid(username) };
+            var teamFoundationIdentities = Retry.Do(() => IdentityManagementService.ReadIdentities(identities, MembershipQuery.None));
+            var teamFoundationIdentity = teamFoundationIdentities.First();
+            return _bridge.Wrap<WrapperForTeamFoundationIdentity, TeamFoundationIdentity>(teamFoundationIdentity);
         }
 
         protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
         {
+#pragma warning disable 618
             return HasCredentials ?
                 new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
                 new TfsTeamProjectCollection(uri, new UICredentialsProvider());

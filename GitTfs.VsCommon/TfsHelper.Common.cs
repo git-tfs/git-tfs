@@ -1142,7 +1142,7 @@ namespace Sep.Git.Tfs.VsCommon
             TfsWorkItemCheckinAction checkinAction,
             Func<string, WorkItemCheckinAction, TInstance> func
             )
-            where TWrapper : class
+            where TWrapper : WrapperFor<TInstance>
         {
             return (from workItem in workItems
                     select _bridge.Wrap<TWrapper, TInstance>(
