@@ -51,7 +51,7 @@ namespace Sep.Git.Tfs.VsCommon
             var identities = new Guid[] { new Guid(username) };
             var teamFoundationIdentities = Retry.Do(() => IdentityManagementService.ReadIdentities(identities, MembershipQuery.None));
             var teamFoundationIdentity = teamFoundationIdentities.First();
-            return _bridge.Wrap<WrapperForIdentity, TeamFoundationIdentity>(teamFoundationIdentity);
+            return _bridge.Wrap<WrapperForTeamFoundationIdentity, TeamFoundationIdentity>(teamFoundationIdentity);
         }
 
         protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.TeamFoundation.Framework.Client;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Sep.Git.Tfs.Core;
@@ -191,11 +190,11 @@ namespace Sep.Git.Tfs.VsCommon
         }
     }
 
-    public class WrapperForIdentity : WrapperFor<TeamFoundationIdentity>, IIdentity
+    public class WrapperForIdentity : WrapperFor<Identity>, IIdentity
     {
-        private readonly TeamFoundationIdentity _identity;
+        private readonly Identity _identity;
 
-        public WrapperForIdentity(TeamFoundationIdentity identity) : base(identity)
+        public WrapperForIdentity(Identity identity) : base(identity)
         {
             Debug.Assert(identity != null, "wrapped property must not be null.");
             _identity = identity;
@@ -203,7 +202,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public string MailAddress
         {
-            get { return _identity.UniqueName; } // when tested with VSTS this seems to be the property that email lives in
+            get { return _identity.MailAddress; }
         }
 
         public string DisplayName
