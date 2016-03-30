@@ -14,12 +14,12 @@ namespace Sep.Git.Tfs.VsCommon
             _container = container;
         }
 
-        public TWrapper Wrap<TWrapper, TWrapped>(TWrapped wrapped) where TWrapper : class
+        public TWrapper Wrap<TWrapper, TWrapped>(TWrapped wrapped) where TWrapper : WrapperFor<TWrapped>
         {
             return wrapped == null ? null : _container.With(this).With(wrapped).GetInstance<TWrapper>();
         }
 
-        public TWrapper[] Wrap<TWrapper, TWrapped>(IEnumerable wrapped) where TWrapper : class
+        public TWrapper[] Wrap<TWrapper, TWrapped>(IEnumerable wrapped) where TWrapper : WrapperFor<TWrapped>
         {
             return wrapped == null ? null : wrapped.OfType<TWrapped>().Select(x => Wrap<TWrapper, TWrapped>(x)).ToArray();
         }
