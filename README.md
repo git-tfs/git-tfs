@@ -197,3 +197,5 @@ If you have questions or suggestions about how we could improve git-tfs you coul
 
 Drop in and chat in [![gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/git-tfs/git-tfs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 We also have a [mailing list](https://groups.google.com/group/git-tfs-dev).
+
+:wave: appveyor
