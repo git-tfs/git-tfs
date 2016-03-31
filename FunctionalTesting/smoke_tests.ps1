@@ -38,6 +38,7 @@ function VerifyRepository($folder, $cloneCommand, $refToVerify)
 			}
 			if($sha1 -ne $expectedSha1)
 			{
+				git cat-file -p $sha1
 				throw "Reference $refPath not good! Expected:$expectedSha1 / Found:$sha1"
 			}
 			Write-Host "ref:"$refPath" ...OK"
