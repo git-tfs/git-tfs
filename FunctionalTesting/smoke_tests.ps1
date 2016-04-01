@@ -49,7 +49,7 @@ function VerifyRepository($folder, $cloneCommand, $refToVerify)
 
 $refs=@(
 @('002e960b98ccab707c7b8e8be4af5640fa7ad402', 'refs/heads/b1'                       ),
-@('e6e79221fd35b2002367a41535de9c43b626150a', 'refs/heads/b1.1'                     ),
+@('8f8ac82c31859fe2640dd308a2754f21dee8918b', 'refs/heads/b1.1'                     ),
 @('e7d54b14fbdcbbc184d58e82931b7c1ac4a2be70', 'refs/heads/master'                   ),
 @('003ca02adfd9561418f05a61c7a999386957a146', 'refs/heads/renameFile'               ),
 @('615ac5588d3cb6282c2c7d514f2828ad3aeaf5c7', 'refs/heads/renamed3'                 ),
