@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs.Core
         /// <summary>
         /// Shelves all pending changes, with the given shelveset name.
         /// </summary>
-        void Shelve(string shelvesetName, bool evaluateCheckinPolicies, CheckinOptions checkinOptions);
+        void Shelve(string shelvesetName, bool evaluateCheckinPolicies, CheckinOptions checkinOptions, Func<string> generateCheckinComment);
         /// <summary>
         /// Evaluates check-in policies and checks in all pending changes.
         /// </summary>
