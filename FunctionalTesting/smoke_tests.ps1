@@ -12,7 +12,7 @@ $connectionParameter= "--username=$username --password=$password"
 $beforeTime = Get-Date
 
 #Write-Host "PATH: $env:Path"
-$ok = true
+$ok = $true
 
 function VerifyRepository($folder, $cloneCommand, $refToVerify)
 {
@@ -41,7 +41,7 @@ function VerifyRepository($folder, $cloneCommand, $refToVerify)
 			{
 				git cat-file -p $sha1
 				echo "Reference $refPath not good! Expected:$expectedSha1 / Found:$sha1"
-                                $ok = false
+                                $ok = $false
 			}
 			Write-Host "ref:"$refPath" ...OK"
 		}
@@ -99,7 +99,7 @@ $time = $afterTime - $beforeTime
 $testTime = "{0}m {1}s" -f $time.Minutes, $time.Seconds
 
 Write-Host "Check, finished! ($testTime)"
-if ($ok -eq true)
+if ($ok -eq $true)
 {
   exit 0
 }
