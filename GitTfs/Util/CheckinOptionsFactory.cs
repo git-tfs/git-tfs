@@ -54,9 +54,15 @@ namespace Sep.Git.Tfs.Util
         {
             var customCheckinOptions = sourceCheckinOptions.Clone(this.globals);
 
+            // Use commit message comment in call to ProcessWorkItemCommands
             customCheckinOptions.CheckinComment = commitMessage;
-
             customCheckinOptions.ProcessWorkItemCommands(writer, false);
+
+            // This means a -m was provided. Override the shelveset comment with the -m value.
+            if (!string.IsNullOrWhiteSpace(sourceCheckinOptions.CheckinComment))
+            {
+                customCheckinOptions.CheckinComment = sourceCheckinOptions.CheckinComment;
+            }
 
             return customCheckinOptions;
         }
