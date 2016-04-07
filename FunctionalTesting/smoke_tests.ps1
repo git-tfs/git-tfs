@@ -12,6 +12,7 @@ $connectionParameter= "--username=$username --password=$password"
 $beforeTime = Get-Date
 
 #Write-Host "PATH: $env:Path"
+$ok = true
 
 function VerifyRepository($folder, $cloneCommand, $refToVerify)
 {
@@ -40,6 +41,7 @@ function VerifyRepository($folder, $cloneCommand, $refToVerify)
 			{
 				git cat-file -p $sha1
 				echo "Reference $refPath not good! Expected:$expectedSha1 / Found:$sha1"
+                                $ok = false
 			}
 			Write-Host "ref:"$refPath" ...OK"
 		}
@@ -97,7 +99,11 @@ $time = $afterTime - $beforeTime
 $testTime = "{0}m {1}s" -f $time.Minutes, $time.Seconds
 
 Write-Host "Check, finished! ($testTime)"
-exit 0
+if ($ok -eq true)
+{
+  exit 0
+}
+exit 1
 
 #Clone-TFS https://tfs.codeplex.com:443/tfs/TFS28 $/gittfssandbox/Tests/SimpleTest gittfssandbox-test1 2 $username $password
 #Clone-TFS https://tfs.codeplex.com:443/tfs/TFS28 $/gittfssandbox/Tests/UnicodeTest gittfssandbox-test2 1 $username $password
