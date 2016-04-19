@@ -42,7 +42,7 @@ namespace Sep.Git.Tfs.VsCommon
                 _resolverInstalled = true;
             }
         }
-        
+
         [SetterProperty]
         public Janitor Janitor { get; set; }
 
@@ -137,16 +137,16 @@ namespace Sep.Git.Tfs.VsCommon
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
-           if (e.Failure != null)
-           {
-              _stdout.WriteLine(e.Failure.Message);
-              Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
-           }
-           if (e.Exception != null)
-           {
-              _stdout.WriteLine(e.Exception.Message);
-              Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
-           }
+            if (e.Failure != null)
+            {
+                _stdout.WriteLine(e.Failure.Message);
+                Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
+            }
+            if (e.Exception != null)
+            {
+                _stdout.WriteLine(e.Exception.Message);
+                Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+            }
         }
 
         private void Getting(object sender, GettingEventArgs e)
@@ -297,8 +297,28 @@ namespace Sep.Git.Tfs.VsCommon
                 try
                 {
                     var changesets = VersionControl.QueryHistory(tfsPathBranchToCreate, VersionSpec.Latest, 0, RecursionType.Full,
-                        null, null, null, 1, false, false, false, true).Cast<Changeset>();
-                    var firstChangesetInBranchToCreate = changesets.FirstOrDefault();
+                        null, null, null, int.MaxValue, false, false, false, true).Cast<Changeset>();
+
+                    var firstChangesetInBranchToCreate = changesets.Where(ch =>
+                    {
+                        var changeset = VersionControl.GetChangeset(ch.ChangesetId);
+                        foreach (var change in changeset.Changes)
+                        {
+                            //return true the moment we find one change which has ChangeType.Branch as ChangeType. This is assuming that a changeset can not contain anything else if Branch is the changeType of something 
+                            if (change.ChangeType == ChangeType.Branch)
+                            {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }).OrderByDescending(ch => ch.ChangesetId).FirstOrDefault();
+
+                    if (firstChangesetInBranchToCreate == null)
+                    {
+                        changesets = VersionControl.QueryHistory(tfsPathBranchToCreate, VersionSpec.Latest, 0, RecursionType.Full,
+                            null, null, null, 1, false, false, false, true).Cast<Changeset>();
+                        firstChangesetInBranchToCreate = changesets.FirstOrDefault();
+                    }
 
                     if (firstChangesetInBranchToCreate == null)
                     {
@@ -561,12 +581,12 @@ namespace Sep.Git.Tfs.VsCommon
             if (HasWorkItems(changeset))
             {
                 tfsChangeset.Summary.Workitems = changeset.WorkItems.Select(wi => new TfsWorkitem
-                    {
-                        Id = wi.Id,
-                        Title = wi.Title,
-                        Description = wi.Description,
-                        Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
-                    });
+                {
+                    Id = wi.Id,
+                    Title = wi.Title,
+                    Description = wi.Description,
+                    Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
+                });
             }
             foreach (var checkinNote in changeset.CheckinNote.Values)
             {
@@ -584,7 +604,7 @@ namespace Sep.Git.Tfs.VsCommon
                 }
             }
             tfsChangeset.Summary.PolicyOverrideComment = changeset.PolicyOverride.Comment;
-            
+
             return tfsChangeset;
         }
 
@@ -731,7 +751,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
-        
+
         public void CleanupWorkspaces(string workingDirectory)
         {
             // workingDirectory is the path to a TFS workspace managed by git-tfs.
@@ -812,7 +832,7 @@ namespace Sep.Git.Tfs.VsCommon
             var shelveset = shelvesets.First();
 
             var itemSpec = new ItemSpec(remote.TfsRepositoryPath, RecursionType.Full);
-            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] {itemSpec}).SingleOrDefault();
+            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] { itemSpec }).SingleOrDefault();
             if (change == null)
             {
                 throw new GitTfsException("There is no changes in this shelveset that apply to the current tfs remote.")
@@ -1170,13 +1190,13 @@ namespace Sep.Git.Tfs.VsCommon
                     throw new GitTfsException("error: data for the label '" + labelDefinition.Name + "' can't be loaded!");
                 }
                 var tfsLabel = new TfsLabel
-                    {
-                        Id = label.LabelId,
-                        Name = label.Name,
-                        Comment = label.Comment,
-                        Owner = label.OwnerName,
-                        Date = label.LastModifiedDate,
-                    };
+                {
+                    Id = label.LabelId,
+                    Name = label.Name,
+                    Comment = label.Comment,
+                    Owner = label.OwnerName,
+                    Date = label.LastModifiedDate,
+                };
                 foreach (var item in label.Items)
                 {
                     if (item.ServerItem.StartsWith(tfsPathBranch))
@@ -1368,10 +1388,10 @@ namespace Sep.Git.Tfs.VsCommon
         public int QueueGatedCheckinBuild(Uri buildDefinitionUri, string buildDefinitionName, string shelvesetName, string checkInTicket)
         {
             var buildServer = (IBuildServer)_server.GetService(typeof(IBuildServer));
- 
+
             var buildRequest = buildServer.CreateBuildRequest(buildDefinitionUri);
             buildRequest.ShelvesetName = shelvesetName;
-            buildRequest.Reason = BuildReason.CheckInShelveset; 
+            buildRequest.Reason = BuildReason.CheckInShelveset;
             buildRequest.GatedCheckInTicket = checkInTicket;
 
             _stdout.WriteLine("Launching build '" + buildDefinitionName + "' to validate your shelveset...");
