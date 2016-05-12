@@ -241,7 +241,7 @@ namespace Sep.Git.Tfs.Core
             startInfo.SetArguments(command);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
-            startInfo.EnvironmentVariables.Add("GIT_PAGER", "cat");
+            startInfo.EnvironmentVariables["GIT_PAGER"] = "cat";
             RedirectStderr(startInfo);
             initialize(startInfo);
             Trace.WriteLine("Starting process: " + startInfo.FileName + " " + startInfo.Arguments, "git command");
