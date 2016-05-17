@@ -2,3 +2,4 @@
 * Revert "Also build the installer in CI" (#925, #922)
 * Eliminated multiple IEnumerable enumerations causing excessive TFS communication (#936 @ogvolkov)
 * Fix -m argument for shelve command, which was being ignored (#912)
+* Fix env var usage (#967)
