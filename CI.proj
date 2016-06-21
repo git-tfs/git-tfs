@@ -5,12 +5,17 @@
     <SolutionDir>./</SolutionDir>
     <RequireRestoreConsent>false</RequireRestoreConsent>
   </PropertyGroup>
-  <Target Name="CI" DependsOnTargets="Build; RunTests" />
+  <Target Name="CI" DependsOnTargets="Build; SetGitSettings; RunTests" />
 
   <Target Name="Build">
     <MSBuild Projects="GitTfs.sln" Properties="Configuration=Debug;Platform=Any CPU;RequireRestoreConsent=false" Targets="GitTfsTest" />
   </Target>
-
+  
+  <Target Name="SetGitSettings">
+    <Exec Command="git config --global user.name &quot;git-tfs&quot;"/>
+    <Exec Command="git config --global user.email &quot;placeholder@git-tfs.com&quot;"/>
+  </Target>
+  
   <UsingTask AssemblyFile="packages/xunit.runners/tools/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
   <Target Name="RunTests">
     <xunit Assembly="GitTfsTest/bin/Debug/GitTfsTest.dll" />
