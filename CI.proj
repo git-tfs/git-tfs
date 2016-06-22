@@ -12,7 +12,7 @@
   </Target>
   
   <Target Name="SetGitSettings">
-    <Exec Command="SET HOMEDRIVE=c: & SET HOMEPATH=git-tfs & git config --global user.name &quot;git-tfs&quot; & git config --global user.email &quot;placeholder@git-tfs.com&quot;"/>
+    <Exec Command="SET HOMEDRIVE=c: %26 SET HOMEPATH=git-tfs %26 git config --global user.name &quot;git-tfs&quot; %26 git config --global user.email &quot;placeholder@git-tfs.com&quot;"/>
   </Target>
   
   <UsingTask AssemblyFile="packages/xunit.runners/tools/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
