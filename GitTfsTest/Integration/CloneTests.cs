@@ -16,6 +16,7 @@ namespace Sep.Git.Tfs.Test.Integration
         public CloneTests()
         {
             h = new IntegrationHelper();
+            h.SetupGlobalGitConfig();
         }
 
         public void Dispose()
