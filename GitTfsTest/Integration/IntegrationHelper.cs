@@ -24,6 +24,7 @@ namespace Sep.Git.Tfs.Test.Integration
             Directory.CreateDirectory(xdggit);
             string config = Path.Combine(Workdir, "config");
             File.WriteAllText(config, "[user]\r\n\tname = Tests\r\n\temail = noreply@git-tfs.com\r\n");
+            
         }
 
         #endregion
