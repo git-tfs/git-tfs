@@ -53,7 +53,7 @@ namespace Sep.Git.Tfs.Core
             if (message == null)
                 _repository.Refs.Add(gitRefName, shaCommit, allowOverwrite: true);
             else
-                _repository.Refs.Add(gitRefName, shaCommit, _repository.Config.BuildSignature(DateTime.Now), message, true);
+                _repository.Refs.Add(gitRefName, shaCommit, message, true);
         }
 
         public static string ShortToLocalName(string branchName)
@@ -158,8 +158,8 @@ namespace Sep.Git.Tfs.Core
         public IEnumerable<string> GetGitRemoteBranches(string gitRemote)
         {
             gitRemote = gitRemote + "/";
-            var references = _repository.Branches.Where(b => b.IsRemote && b.Name.StartsWith(gitRemote) && !b.Name.EndsWith("/HEAD"));
-            return references.Select(r => r.Name);
+            var references = _repository.Branches.Where(b => b.IsRemote && b.FriendlyName.StartsWith(gitRemote) && !b.FriendlyName.EndsWith("/HEAD"));
+            return references.Select(r => r.FriendlyName);
         }
 
         private IDictionary<string, IGitTfsRemote> GetTfsRemotes()
@@ -423,7 +423,7 @@ namespace Sep.Git.Tfs.Core
         {
             var message = new System.Text.StringBuilder();
             foreach (Commit comm in
-                _repository.Commits.QueryBy(new CommitFilter { Since = head, Until = parentCommitish }))
+                _repository.Commits.QueryBy(new CommitFilter { IncludeReachableFrom = head, ExcludeReachableFrom = parentCommitish }))
             {
                 // Normalize commit message line endings to CR+LF style, so that message
                 // would be correctly shown in TFS commit dialog.
@@ -492,7 +492,7 @@ namespace Sep.Git.Tfs.Core
                             entry in _repository.RetrieveStatus()
                         where 
                             entry.State != FileStatus.Ignored &&
-                            entry.State != FileStatus.Untracked
+                            entry.State != FileStatus.NewInWorkdir
                         select entry).Any();
             }
         }
@@ -591,12 +591,12 @@ namespace Sep.Git.Tfs.Core
 
             var reachableFromRemoteBranches = new CommitFilter
             {
-                Since = _repository.Branches.Where(p => p.IsRemote),
+                IncludeReachableFrom = _repository.Branches.Where(p => p.IsRemote),
                 SortBy = CommitSortStrategies.Time
             };
 
             if (remoteRef != null)
-                reachableFromRemoteBranches.Since = _repository.Branches.Where(p => p.IsRemote && p.CanonicalName.EndsWith(remoteRef));
+                reachableFromRemoteBranches.IncludeReachableFrom = _repository.Branches.Where(p => p.IsRemote && p.CanonicalName.EndsWith(remoteRef));
             var commitsFromRemoteBranches = _repository.Commits.QueryBy(reachableFromRemoteBranches);
 
             Commit commit = null;
@@ -684,7 +684,7 @@ namespace Sep.Git.Tfs.Core
                 _repository.Checkout(commitish);
                 return true;
             }
-            catch (MergeConflictException)
+            catch (CheckoutConflictException)
             {
                 return false;
             }
@@ -693,7 +693,7 @@ namespace Sep.Git.Tfs.Core
         public IEnumerable<GitCommit> FindParentCommits(string @from, string to)
         {
             var commits = _repository.Commits.QueryBy(
-                new CommitFilter() {Since = @from, Until = to, SortBy = CommitSortStrategies.Reverse, FirstParentOnly = true})
+                new CommitFilter() { IncludeReachableFrom = @from, ExcludeReachableFrom = to, SortBy = CommitSortStrategies.Reverse, FirstParentOnly = true})
                 .Select(c=>new GitCommit(c));
             var parent = to;
             foreach (var gitCommit in commits)

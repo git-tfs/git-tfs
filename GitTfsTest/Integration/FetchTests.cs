@@ -11,6 +11,7 @@ namespace Sep.Git.Tfs.Test.Integration
         public FetchTests()
         {
             integrationHelper = new IntegrationHelper();
+            integrationHelper.SetupGlobalGitConfig();
         }
 
         public void Dispose()

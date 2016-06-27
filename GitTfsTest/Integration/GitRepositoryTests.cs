@@ -166,13 +166,13 @@ namespace Sep.Git.Tfs.Test.Integration
             string c6 = null;
             h.SetupGitRepo("repo", g =>
             {
-                c1 = g.Commit("C1-Common");
-                c2 = g.Commit("C2-Common");
+                c1 = g.Commit("C1-Common", "one_file.txt");
+                c2 = g.Commit("C2-Common", "one_file.txt");
                 g.CreateBranch("branch");
-                c4 = g.Commit("C4-branch");
-                c5 = g.Commit("C5-branch");
+                c4 = g.Commit("C4-branch", "another_file.txt");
+                c5 = g.Commit("C5-branch", "another_file.txt");
                 g.Checkout("master");
-                c3 = g.Commit("C3-master");
+                c3 = g.Commit("C3-master", "one_file.txt");
                 g.Merge("branch");
                 //Trick to create a merge commit similar to one fetched from TFS
                 c6 = g.Amend("C6-master (merge branch into)");

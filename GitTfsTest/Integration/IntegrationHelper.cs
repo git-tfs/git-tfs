@@ -14,6 +14,21 @@ namespace Sep.Git.Tfs.Test.Integration
 {
     class IntegrationHelper : IDisposable
     {
+        #region create a global git config file with a user.name and user.email
+
+        public void SetupGlobalGitConfig()
+        {
+            string xdg = Path.Combine(Workdir, "xdg");
+            Directory.CreateDirectory(xdg);
+            string xdggit = Path.Combine(Workdir, "git");
+            Directory.CreateDirectory(xdggit);
+            string config = Path.Combine(Workdir, "config");
+            File.WriteAllText(config, "[user]\r\n\tname = Tests\r\n\temail = noreply@git-tfs.com\r\n");
+            
+        }
+
+        #endregion
+
         #region manage the work directory
 
         string _workdir;
@@ -98,10 +113,10 @@ namespace Sep.Git.Tfs.Test.Integration
                 return new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
             }
 
-            public string Commit(string message)
+            public string Commit(string message, string filename = "README.txt")
             {
-                File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
-                _repo.Stage("README.txt");
+                File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, filename), message);
+                _repo.Stage(filename);
                 var committer = GetCommitter();
                 return _repo.Commit(message, committer, committer, new CommitOptions(){ AllowEmptyCommit = true}).Id.Sha;
             }
