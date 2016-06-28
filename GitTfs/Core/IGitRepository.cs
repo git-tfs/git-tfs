@@ -16,7 +16,7 @@ namespace Sep.Git.Tfs.Core
         IGitTfsRemote ReadTfsRemote(string remoteId);
         IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo, string autocrlf = null, string ignorecase = null);
         void DeleteTfsRemote(IGitTfsRemote remoteId);
-        IEnumerable<string> GetGitRemoteBranches(string gitRemote);
+        IEnumerable<string> GetGitRepositoryBranchRemotes(string gitRemote);
         bool HasRemote(string remoteId);
         bool HasRef(string gitRef);
         GitCommit Commit(LogEntry logEntry);

@@ -190,6 +190,12 @@ namespace Sep.Git.Tfs.Core
         public bool ExportMetadatas { get; set; }
         public Dictionary<string, string> ExportWorkitemsMapping { get; set; }
 
+        public int? InitialChangeset
+        {
+            get { throw DerivedRemoteException; }
+            set { throw DerivedRemoteException; }
+        }
+
         public bool ShouldSkip(string path)
         {
             throw DerivedRemoteException;

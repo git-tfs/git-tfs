@@ -5,19 +5,36 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     [DebuggerDisplay("{DebuggerDisplay}")]
     public class RootBranch
     {
-        public RootBranch(int rootChangeset, string tfsBranchPath)
+        public string TfsBranchPath { get; }
+
+        public int SourceBranchChangesetId { get; }
+
+        public int TargetBranchChangesetId { get; }
+
+        public RootBranch(int sourceBranchChangesetId, string tfsBranchPath)
+            : this(sourceBranchChangesetId, -1, tfsBranchPath)
         {
-            RootChangeset = rootChangeset;
+
+        }
+
+        public RootBranch(int sourceBranchChangesetId, int targetBranchChangesetId, string tfsBranchPath)
+        {
+            SourceBranchChangesetId = sourceBranchChangesetId;
+            TargetBranchChangesetId = targetBranchChangesetId;
             TfsBranchPath = tfsBranchPath;
         }
 
-        public int RootChangeset { get; private set; }
-        public string TfsBranchPath { get; private set; }
         public bool IsRenamedBranch { get; set; }
 
         private string DebuggerDisplay
         {
-            get { return string.Format("{0} C{1}{2}", TfsBranchPath, RootChangeset, (IsRenamedBranch ? " renamed" : "")); }
+            get
+            {
+                if (TargetBranchChangesetId > -1)
+                    return string.Format("{0} C{1} (target C{2}){3}", TfsBranchPath, SourceBranchChangesetId, TargetBranchChangesetId, IsRenamedBranch ? " renamed" : "");
+
+                return string.Format("{0} C{1}{2}", TfsBranchPath, SourceBranchChangesetId, IsRenamedBranch ? " renamed" : "");
+            }
         }
     }
 }
