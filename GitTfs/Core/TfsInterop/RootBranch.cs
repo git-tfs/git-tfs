@@ -5,11 +5,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     [DebuggerDisplay("{DebuggerDisplay}")]
     public class RootBranch
     {
-        public string TfsBranchPath { get; }
+        public string TfsBranchPath { get; private set; }
 
-        public int SourceBranchChangesetId { get; }
+        public int SourceBranchChangesetId { get; private set; }
 
-        public int TargetBranchChangesetId { get; }
+        public int TargetBranchChangesetId { get; private set; }
 
         public RootBranch(int sourceBranchChangesetId, string tfsBranchPath)
             : this(sourceBranchChangesetId, -1, tfsBranchPath)
