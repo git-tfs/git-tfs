@@ -1,40 +1,39 @@
 NUGET
   remote: https://www.nuget.org/api/v2
-  specs:
     LibGit2Sharp (0.21.0.176)
     Microsoft.AspNet.WebApi.Client (5.2.3) - framework: >= net45
-      Newtonsoft.Json (>= 6.0.4) - framework: >= net45, portable-wp80+win+net45+wp81+wpa81
+      Newtonsoft.Json (>= 6.0.4) - framework: >= net45, portable-wp80+win+wp81+wpa81
     Microsoft.AspNet.WebApi.Core (5.2.3) - framework: >= net45
       Microsoft.AspNet.WebApi.Client (>= 5.2.3)
     Microsoft.IdentityModel.Clients.ActiveDirectory (2.19.208020213) - framework: >= net45
-    Microsoft.TeamFoundationServer.Client (14.89.0) - framework: >= net45
+    Microsoft.TeamFoundationServer.Client (14.89) - framework: >= net45
       Microsoft.AspNet.WebApi.Client (>= 5.2.2)
       Microsoft.AspNet.WebApi.Core (>= 5.2.2)
-      Microsoft.VisualStudio.Services.Client (14.89.0)
+      Microsoft.VisualStudio.Services.Client (14.89)
       Newtonsoft.Json (>= 6.0.5)
-    Microsoft.TeamFoundationServer.ExtendedClient (14.89.0) - framework: >= net45
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2)
-      Microsoft.AspNet.WebApi.Core (>= 5.2.2)
-      Microsoft.IdentityModel.Clients.ActiveDirectory (>= 2.16.204221202)
-      Microsoft.TeamFoundationServer.Client (14.89.0)
-      Microsoft.VisualStudio.Services.InteractiveClient (14.89.0)
-      Newtonsoft.Json (>= 6.0.5)
-      System.IdentityModel.Tokens.Jwt (>= 4.0.0)
-    Microsoft.VisualStudio.Services.Client (14.89.0) - framework: >= net45
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2)
-      Newtonsoft.Json (>= 6.0.5)
-    Microsoft.VisualStudio.Services.InteractiveClient (14.89.0) - framework: >= net45
+    Microsoft.TeamFoundationServer.ExtendedClient (14.89) - framework: >= net45
       Microsoft.AspNet.WebApi.Client (>= 5.2.2)
       Microsoft.AspNet.WebApi.Core (>= 5.2.2)
       Microsoft.IdentityModel.Clients.ActiveDirectory (>= 2.16.204221202)
-      Microsoft.VisualStudio.Services.Client (14.89.0)
+      Microsoft.TeamFoundationServer.Client (14.89)
+      Microsoft.VisualStudio.Services.InteractiveClient (14.89)
       Newtonsoft.Json (>= 6.0.5)
-      System.IdentityModel.Tokens.Jwt (>= 4.0.0)
-      WindowsAzure.ServiceBus (>= 2.5.1.0)
-    Microsoft.WindowsAzure.ConfigurationManager (3.1.0) - framework: >= net45
+      System.IdentityModel.Tokens.Jwt (>= 4.0)
+    Microsoft.VisualStudio.Services.Client (14.89) - framework: >= net45
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2)
+      Newtonsoft.Json (>= 6.0.5)
+    Microsoft.VisualStudio.Services.InteractiveClient (14.89) - framework: >= net45
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2)
+      Microsoft.AspNet.WebApi.Core (>= 5.2.2)
+      Microsoft.IdentityModel.Clients.ActiveDirectory (>= 2.16.204221202)
+      Microsoft.VisualStudio.Services.Client (14.89)
+      Newtonsoft.Json (>= 6.0.5)
+      System.IdentityModel.Tokens.Jwt (>= 4.0)
+      WindowsAzure.ServiceBus (>= 2.5.1)
+    Microsoft.WindowsAzure.ConfigurationManager (3.1) - framework: >= net45
     MSBuildTasks (1.4.0.45) - framework: >= net40
     Newtonsoft.Json (7.0.1) - framework: >= net45
-    NuGet.CommandLine (3.3.0)
+    NuGet.CommandLine (3.3)
     System.IdentityModel.Tokens.Jwt (4.0.2.206221351) - framework: >= net45
     WindowsAzure.ServiceBus (3.0.9) - framework: >= net45
       Microsoft.WindowsAzure.ConfigurationManager
@@ -42,5 +41,5 @@ NUGET
     xunit (1.9.2) - framework: >= net40
     xunit.extensions (1.9.2) - framework: >= net40
       xunit (1.9.2)
-    xunit.runner.visualstudio (2.0.1) - framework: >= net40
+    xunit.runner.visualstudio (2.1) - framework: >= net40
     xunit.runners (1.9.2) - framework: >= net40

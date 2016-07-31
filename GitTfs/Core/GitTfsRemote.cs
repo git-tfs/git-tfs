@@ -19,9 +19,11 @@ namespace Sep.Git.Tfs.Core
         private readonly TextWriter stdout;
         private readonly RemoteOptions remoteOptions;
         private readonly ConfigProperties properties;
+
         private int? maxChangesetId;
         private string maxCommitHash;
         private bool isTfsAuthenticated;
+
         public RemoteInfo RemoteInfo { get; private set; }
 
         public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals,
@@ -68,6 +70,12 @@ namespace Sep.Git.Tfs.Core
                 return;
             Tfs.EnsureAuthenticated();
             isTfsAuthenticated = true;
+        }
+
+        public int? InitialChangeset
+        {
+            get { return properties.InitialChangeset; }
+            set { properties.InitialChangeset = value; }
         }
 
         public bool IsDerived
@@ -335,6 +343,7 @@ namespace Sep.Git.Tfs.Core
                 var fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch);
                 
                 var objects = BuildEntryDictionary();
+
                 fetchRetrievedChangesets = false;
                 foreach (var changeset in fetchedChangesets)
                 {
@@ -402,14 +411,12 @@ namespace Sep.Git.Tfs.Core
                 var parentChangesetId = Tfs.FindMergeChangesetParent(TfsRepositoryPath, changeset.Summary.ChangesetId, this);
                 if (parentChangesetId < 1)  // Handle missing merge parent info
                 {
-                    if (stopOnFailMergeCommit)
-                    {
-                        return false;
-                    }
-                    stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId +
-                                     " is a merge changeset. But git-tfs is unable to determine the parent changeset.");
+                    if (stopOnFailMergeCommit) return false;
+
+                    stdout.WriteLine("warning: this changeset " + changeset.Summary.ChangesetId + " is a merge changeset. But git-tfs is unable to determine the parent changeset.");
                     return true;
                 }
+
                 var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
                 if (shaParent == null)
                 {
@@ -417,6 +424,7 @@ namespace Sep.Git.Tfs.Core
                     shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, out omittedParentBranch);
                     changeset.OmittedParentBranch = omittedParentBranch;
                 }
+
                 if (shaParent != null)
                 {
                     parentCommit = shaParent;
@@ -644,7 +652,7 @@ namespace Sep.Git.Tfs.Core
             IGitTfsRemote remote = null;
             foreach (var branch in branchesDatas)
             {
-                var rootChangesetId = branch.RootChangeset;
+                var rootChangesetId = branch.SourceBranchChangesetId;
                 remote = InitBranch(this.remoteOptions, tfsBranch.Path, rootChangesetId, true);
                 if (remote == null)
                 {
@@ -695,10 +703,17 @@ namespace Sep.Git.Tfs.Core
         private IEnumerable<ITfsChangeset> FetchChangesets(bool byLots, int lastVersion = -1)
         {
             int lowerBoundChangesetId;
+
+            // If we're starting at the Root side of a branch commit (e.g. C1) but there are invalid commits between C1 and the actual branch-side of the commit operation
+            //  (e.g. a Folder with the branch name was created [C2] and then deleted [C3], THEN the root-side was branched [C4; C1 --branch--> C4]), this will detect
+            //  only the folder creation and deletion operations due to the lowerBound being detected as the root-side commit +1 (C1+1=C2) instead of referencing
+            //  the branch-side of the branching operation [C4].
+
             if(properties.InitialChangeset.HasValue)
                 lowerBoundChangesetId = Math.Max(MaxChangesetId + 1, properties.InitialChangeset.Value);
             else
                 lowerBoundChangesetId = MaxChangesetId + 1;
+
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + lowerBoundChangesetId +
                 " to " + lastVersion + " ...", "info");
             if (!IsSubtreeOwner)

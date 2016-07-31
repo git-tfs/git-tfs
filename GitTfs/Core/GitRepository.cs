@@ -155,7 +155,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public IEnumerable<string> GetGitRemoteBranches(string gitRemote)
+        public IEnumerable<string> GetGitRepositoryBranchRemotes(string gitRemote)
         {
             gitRemote = gitRemote + "/";
             var references = _repository.Branches.Where(b => b.IsRemote && b.Name.StartsWith(gitRemote) && !b.Name.EndsWith("/HEAD"));
