@@ -1,5 +1,9 @@
 source https://www.nuget.org/api/v2/
 
+//If you plan to update this file, you must first absolutly read our documentation on the subject
+//because there is some subtleties on how we use it in our project:
+//https://github.com/git-tfs/git-tfs/blob/master/doc/paket.md
+
 nuget NuGet.CommandLine
 nuget LibGit2Sharp 0.21.0.176
 nuget Microsoft.TeamFoundationServer.Client 14.95.3 framework: >= net45

@@ -1,2 +1,6 @@
+//If you plan to update this file, you must first absolutly read our documentation on the subject
+//because there is some subtleties on how we use it in our project:
+//https://github.com/git-tfs/git-tfs/blob/master/doc/paket.md
+
 Microsoft.TeamFoundationServer.Client
 Microsoft.TeamFoundationServer.ExtendedClient
