@@ -55,17 +55,6 @@ namespace Sep.Git.Tfs.Commands
                 properties.BatchSize = batchSize;
             }
         }
-        public string UpToChangeSetOption
-        {
-            set
-            {
-                int tmp;
-                if (!int.TryParse(value, out tmp))
-                    throw new GitTfsException("error: up-to parameter should be an integer.");
-                upToChangeSet = tmp;
-            }
-        }
-        int upToChangeSet { get; set; }
 
         int upToChangeSet { get; set; }
         public string UpToChangeSetOption
@@ -205,16 +194,9 @@ namespace Sep.Git.Tfs.Commands
                     properties.InitialChangeset = InitialChangeset.Value;
                     properties.PersistAllOverrides();
                     remote.QuickFetch(InitialChangeset.Value);
-                    remote.Fetch(stopOnFailMergeCommit);
-                }
-                else
-                {
-                    remote.Fetch(stopOnFailMergeCommit,upToChangeSet);
                 }
 
-            try
-            {
-                remote.Fetch(upToChangeSet, stopOnFailMergeCommit);
+                remote.Fetch(stopOnFailMergeCommit, upToChangeSet);
             }
             finally
             {

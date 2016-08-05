@@ -328,12 +328,11 @@ namespace Sep.Git.Tfs.Core
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
-                        
+
             bool fetchRetrievedChangesets;
 
             var changeSetsToIgnore = Tfs.ChangeSetNumbersToIgnore();
 
-            List<ITfsChangeset> fetchedChangesets;
             do
             {
                 var fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch);

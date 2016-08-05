@@ -168,7 +168,6 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false)
         public SortedSet<long> ChangeSetNumbersToIgnore()
         {
             SortedSet<long> result = new SortedSet<long>();
@@ -190,7 +189,7 @@ namespace Sep.Git.Tfs.VsCommon
             return result;
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false)
         {
             if (Is2008OrOlder)
             {
