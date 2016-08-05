@@ -101,7 +101,7 @@ namespace Sep.Git.Tfs.Test.Integration
             public string Commit(string message)
             {
                 File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
-                _repo.Index.Stage("README.txt");
+                _repo.Stage("README.txt");
                 var committer = GetCommitter();
                 return _repo.Commit(message, committer, committer, new CommitOptions(){ AllowEmptyCommit = true}).Id.Sha;
             }
@@ -116,9 +116,10 @@ namespace Sep.Git.Tfs.Test.Integration
                 _repo.Checkout(commitishName);
             }
 
-            public void Merge(string branch)
+            public string Merge(string branch)
             {
-                _repo.Merge(_repo.Branches[branch].Commits.First(), GetCommitter());
+                var mergeResult = _repo.Merge(_repo.Branches[branch].Commits.First(), GetCommitter());
+                return mergeResult.Commit.Sha;
             }
 
             public string Amend(string message)
@@ -150,6 +151,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 _script = script;
             }
 
+            public static string FakeCommiter;
             public FakeChangesetBuilder Changeset(int changesetId, string message, DateTime checkinDate)
             {
                 var changeset = new ScriptedChangeset
@@ -159,6 +161,7 @@ namespace Sep.Git.Tfs.Test.Integration
                     CheckinDate = checkinDate,
                     IsBranchChangeset = false,
                     IsMergeChangeset = false,
+                    Committer = FakeCommiter,
                 };
                 _script.Changesets.Add(changeset);
                 return new FakeChangesetBuilder(changeset);
@@ -173,6 +176,7 @@ namespace Sep.Git.Tfs.Test.Integration
                     CheckinDate = checkinDate,
                     IsBranchChangeset = true,
                     IsMergeChangeset = false,
+                    Committer = FakeCommiter,
                     BranchChangesetDatas = new BranchChangesetDatas
                     {
                         RootChangesetId = rootChangesetId,
@@ -193,6 +197,7 @@ namespace Sep.Git.Tfs.Test.Integration
                     CheckinDate = checkinDate,
                     IsBranchChangeset = false,
                     IsMergeChangeset = true,
+                    Committer = FakeCommiter,
                     MergeChangesetDatas = new MergeChangesetDatas
                     {
                         BeforeMergeChangesetId = lastChangesetId,
@@ -219,7 +224,12 @@ namespace Sep.Git.Tfs.Test.Integration
                 _changeset = changeset;
             }
 
-            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents = null, int? itemId = null)
+            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents, int? itemId = null)
+            {
+                return Change(changeType, itemType, tfsPath, Encoding.UTF8.GetBytes(contents), itemId);
+            }
+
+            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, byte[] contents = null, int? itemId = null)
             {
                 _changeset.Changes.Add(new ScriptedChange
                 {
@@ -237,7 +247,8 @@ namespace Sep.Git.Tfs.Test.Integration
 
         #region run git-tfs
 
-        public string TfsUrl { get { return "http://does/not/matter"; } }
+        private string _tfsUrl = "http://does/not/matter";
+        public string TfsUrl { get { return _tfsUrl; } set { _tfsUrl = value; } }
 
         public int Run(params string[] args)
         {
@@ -341,7 +352,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public void AssertCleanWorkspace(string repodir)
         {
-            var status = Repository(repodir).Index.RetrieveStatus();
+            var status = Repository(repodir).RetrieveStatus();
             AssertEqual(new List<string>(), status.Select(statusEntry => "" + statusEntry.State + ": " + statusEntry.FilePath).ToList(), "repo status");
         }
 

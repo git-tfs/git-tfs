@@ -95,18 +95,6 @@ namespace Sep.Git.Tfs.Test.Core
 
         #endregion
 
-        #region Stream.CopyTo()
-
-        [Fact]
-        public void ShouldCopyOneStreamToAnother()
-        {
-            var input = new MemoryStream(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0xfe, 0xff });
-            var output = new MemoryStream();
-            input.CopyTo(output);
-            Assert.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0xfe, 0xff }, output.ToArray());
-        }
-        #endregion
-
         #region ChangeType.IncludesOneOf()
 
         [Fact]

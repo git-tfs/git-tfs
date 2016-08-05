@@ -32,7 +32,9 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>0bcdcb18</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -80,21 +82,16 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="xunit, Version=1.9.2.1705, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\xunit.1.9.2\lib\net20\xunit.dll</HintPath>
-    </Reference>
-    <Reference Include="xunit.extensions">
-      <HintPath>..\packages\xunit.extensions.1.9.2\lib\net20\xunit.extensions.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ExtTest.cs" />
     <Compile Include="Commands\InitOptionsTest.cs" />
     <Compile Include="Commands\InitBranchTest.cs" />
+    <Compile Include="Commands\CloneTest.cs" />
     <Compile Include="Core\ChangeSieveTests.cs" />
     <Compile Include="Core\CommitParserTests.cs" />
     <Compile Include="Core\ConfigPropertyLoaderTests.cs" />
+    <Compile Include="Core\GitTfsConstantsTest.cs" />
     <Compile Include="Core\GlobalsTests.cs" />
     <Compile Include="Core\DirectoryTidierTests.cs" />
     <Compile Include="Core\GitTfsRemoteTests.cs" />
@@ -111,6 +108,7 @@
     <Compile Include="Core\TfsApiBridgeTest.cs" />
     <Compile Include="Core\StubbedCheckinEvaluationResult.cs" />
     <Compile Include="Core\TfsWorkspaceTests.cs" />
+    <Compile Include="Fixtures\vtccds.cs" />
     <Compile Include="GitTfsRegexTests.cs" />
     <Compile Include="Integration\BootstrapTests.cs" />
     <Compile Include="Integration\CloneTests.cs" />
@@ -124,6 +122,7 @@
     <Compile Include="Util\CommitSpecificCheckinOptionsFactoryTests.cs" />
     <Compile Include="Util\GitTfsCommandRunnerTests.cs" />
     <Compile Include="Util\BouncerTest.cs" />
+    <Compile Include="Util\ShelveSpecificCheckinOptionsFactoryTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GitTfs.VsFake\GitTfs.VsFake.csproj">
@@ -133,10 +132,6 @@
     <ProjectReference Include="..\GitTfs\GitTfs.csproj">
       <Project>{55C169E0-93CC-488C-9885-1D4EAF4EA236}</Project>
       <Name>GitTfs</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\lib\libgit2sharp\LibGit2Sharp\LibGit2Sharp.csproj">
-      <Project>{EE6ED99F-CB12-4683-B055-D28FC7357A34}</Project>
-      <Name>LibGit2Sharp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -165,13 +160,35 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <EmbeddedResource Include="Fixtures\vtccds\0445de4a590c27552a06ecda1b5ff2af" />
+    <EmbeddedResource Include="Fixtures\vtccds\1b9bf73806f680f3f6a79ca80e635dcf" />
+    <EmbeddedResource Include="Fixtures\vtccds\2ea0b9d555f39b93aa67d834aec81dec" />
+    <EmbeddedResource Include="Fixtures\vtccds\36eae6b6a4717375a4ff16287744cd1d" />
+    <EmbeddedResource Include="Fixtures\vtccds\4cd460612edcbab617997836871d7291" />
+    <EmbeddedResource Include="Fixtures\vtccds\4f4cd8afcb1708c003540aea8d64239d" />
+    <EmbeddedResource Include="Fixtures\vtccds\52c0fc9d4cfbf1ae07f36b8e711a5d6b" />
+    <EmbeddedResource Include="Fixtures\vtccds\5a18c163f1804fe83dfeae04f1d1d34e" />
+    <EmbeddedResource Include="Fixtures\vtccds\6553cc439299c73677e0c43dd0fd786e" />
+    <EmbeddedResource Include="Fixtures\vtccds\6c6060d9696edc7000396cc499ab8277" />
+    <EmbeddedResource Include="Fixtures\vtccds\70e6b3871859cf52ef78fba876bc37a4" />
+    <EmbeddedResource Include="Fixtures\vtccds\74687eb86f9a0c7a2ca65efbbae6a5ad" />
+    <EmbeddedResource Include="Fixtures\vtccds\86882c0ae4717b4969d54f676c0261e3" />
+    <EmbeddedResource Include="Fixtures\vtccds\96b58369f5bd2b081005ba208ac649b8" />
+    <EmbeddedResource Include="Fixtures\vtccds\9a975dd2be9a190424fc226a5a25d84f" />
+    <EmbeddedResource Include="Fixtures\vtccds\c02331d395d07dc7efaaa295ac474971" />
+    <EmbeddedResource Include="Fixtures\vtccds\d67034311a9ccd1a5a62cc0ecdaa1a6f" />
+    <EmbeddedResource Include="Fixtures\vtccds\fb5dcd187b5ab3729973b310f3c55596" />
+    <EmbeddedResource Include="Fixtures\vtccds\fba9507f41916830d82be84924dded7b" />
+    <EmbeddedResource Include="Fixtures\vtccds\fd30d6210bb40fd2c9b689f0bf8b2833" />
+    <None Include="paket.references" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <PropertyGroup>
     <PreBuildEvent Condition="'$(OS)' == 'Windows_NT'">xcopy /S /Y "$(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries" "$(TargetDir)"\NativeBinaries\</PreBuildEvent>
     <PreBuildEvent Condition="'$(OS)' != 'Windows_NT'">cp -Rp "$(SolutionDir)/lib/libgit2sharp/Lib/NativeBinaries" "$(TargetDir)"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent />
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -180,4 +197,54 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Import Project="..\.paket\paket.targets" />
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+      <PropertyGroup>
+        <__paket__LibGit2Sharp_props>net40\LibGit2Sharp</__paket__LibGit2Sharp_props>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Import Project="..\packages\LibGit2Sharp\build\$(__paket__LibGit2Sharp_props).props" Condition="Exists('..\packages\LibGit2Sharp\build\$(__paket__LibGit2Sharp_props).props')" Label="Paket" />
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+      <ItemGroup>
+        <Reference Include="LibGit2Sharp">
+          <HintPath>..\packages\LibGit2Sharp\lib\net40\LibGit2Sharp.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+      <ItemGroup>
+        <Reference Include="xunit">
+          <HintPath>..\packages\xunit\lib\net20\xunit.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+      <ItemGroup>
+        <Reference Include="xunit.extensions">
+          <HintPath>..\packages\xunit.extensions\lib\net20\xunit.extensions.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+      <PropertyGroup>
+        <__paket__xunit_runner_visualstudio_props>net20\xunit.runner.visualstudio</__paket__xunit_runner_visualstudio_props>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Import Project="..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_props).props" Condition="Exists('..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_props).props')" Label="Paket" />
 </Project>

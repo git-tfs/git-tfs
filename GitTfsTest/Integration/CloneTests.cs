@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Test.Fixtures;
 using Xunit;
 
 namespace Sep.Git.Tfs.Test.Integration
@@ -20,11 +21,6 @@ namespace Sep.Git.Tfs.Test.Integration
         public void Dispose()
         {
             h.Dispose();
-        }
-
-        [FactExceptOnUnix(Skip="eventually")]
-        public void FailOnNoProject()
-        {
         }
 
         [FactExceptOnUnix]
@@ -177,7 +173,7 @@ namespace Sep.Git.Tfs.Test.Integration
         {
             CreateFakeRepositoryWithMergeChangeset();
 
-            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--with-branches");
+            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--branches=all");
 
             h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
             AssertNewClone("MyProject", RefsInNewClone,
@@ -205,11 +201,40 @@ namespace Sep.Git.Tfs.Test.Integration
         }
 
         [FactExceptOnUnix]
+        public void WhenCloningFunctionalTestVtccdsWithBranchesRenaming_ThenAllRenamesShouldBeWellHandled()
+        {
+            h.SetupFake(r =>
+            {
+                r.SetRootBranch("$/vtccds/trunk");
+                vtccds.Prepare(r);
+            });
+            h.TfsUrl = "https://tfs.codeplex.com:443/tfs/TFS16";
+            h.Run("clone", h.TfsUrl, "$/vtccds/trunk", "Vtccds", "--branches=all");
+
+            AssertNewClone("Vtccds", new[] { "refs/heads/master", "refs/remotes/tfs/default" }, commit: "e7d54b14fbdcbbc184d58e82931b7c1ac4a2be70");
+
+            AssertNewClone("Vtccds", new[] { "refs/heads/b1", "refs/remotes/tfs/b1" }, commit: "3cdb2a311ac7cbda1e892a9b3371a76c871a696a");
+
+            AssertNewClone("Vtccds", new[] { "refs/heads/b1.1", "refs/remotes/tfs/b1.1" }, commit: "e6e79221fd35b2002367a41535de9c43b626150a");
+
+            AssertNewClone("Vtccds", new[] { "refs/heads/renameFile", "refs/remotes/tfs/renameFile" }, commit: "003ca02adfd9561418f05a61c7a999386957a146");
+
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/branch_from_nowhere" }, commit: "9cb91c60d76d00af182ae9f16da6e6aa77b88a5e");
+
+            AssertNewClone("Vtccds", new[] { "refs/heads/renamed3", "refs/remotes/tfs/renamed3" }, commit: "615ac5588d3cb6282c2c7d514f2828ad3aeaf5c7");
+
+            //No refs for renamed branches
+            h.AssertNoRef("Vtccds", "refs/remotes/tfs/renamedTwice");
+            h.AssertNoRef("Vtccds", "refs/remotes/tfs/afterRename");
+            h.AssertNoRef("Vtccds", "refs/remotes/tfs/testRename");
+        }
+
+        [FactExceptOnUnix]
         public void WhenCloningTrunkWithIgnoringBranches_ThenTheMergedBranchIsAutomaticallyInitialized()
         {
             CreateFakeRepositoryWithMergeChangeset();
 
-            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--ignore-branches");
+            h.Run("clone", h.TfsUrl, "$/MyProject/Main", "MyProject", "--branches=none");
 
             h.AssertFileInWorkspace("MyProject", "File.txt", "File contents_main_branch=>_merge");
             AssertNewClone("MyProject", RefsInNewClone,

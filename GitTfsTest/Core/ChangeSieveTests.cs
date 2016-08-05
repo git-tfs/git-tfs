@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Test.Core
             private ChangeSieve _changeSieve;
             public ChangeSieve Subject
             {
-                get { return _changeSieve ?? (_changeSieve = new ChangeSieve(Changeset, new PathResolver(Remote, InitialTree))); }
+                get { return _changeSieve ?? (_changeSieve = new ChangeSieve(Changeset, new PathResolver(Remote, "", InitialTree))); }
             }
 
             private Dictionary<string, GitObject> _initialTree;
@@ -78,20 +78,19 @@ namespace Sep.Git.Tfs.Test.Core
         // A base class for ChangeSieve test classes.
         public class Base<FixtureClass> : IDisposable where FixtureClass : BaseFixture, new()
         {
-            protected readonly FixtureClass Fixture;
-            protected ChangeSieve Subject { get { return Fixture.Subject; } }
-            protected IChange[] Changes { get { return Fixture.Changeset.Changes; } }
+            protected readonly FixtureClass BaseFixture;
+            protected ChangeSieve Subject { get { return BaseFixture.Subject; } }
+            protected IChange[] Changes { get { return BaseFixture.Changeset.Changes; } }
 
             public Base()
             {
-                Fixture = new FixtureClass();
-                var subject = Fixture.Subject;
-                Fixture.Mocks.ReplayAll();
+                BaseFixture = new FixtureClass();
+                BaseFixture.Mocks.ReplayAll();
             }
 
             public void Dispose()
             {
-                Fixture.Mocks.VerifyAll();
+                BaseFixture.Mocks.VerifyAll();
             }
 
             protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges)

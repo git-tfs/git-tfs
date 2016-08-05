@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Core;
@@ -51,7 +52,7 @@ namespace Sep.Git.Tfs.Test.Core
                 if (_tidy == null)
                 {
                     mocks.ReplayAll();
-                    _tidy = new DirectoryTidier(mockWorkspace, initialTfsTree);
+                    _tidy = new DirectoryTidier(mockWorkspace, () => initialTfsTree);
                 }
                 return _tidy;
             }
@@ -119,13 +120,19 @@ namespace Sep.Git.Tfs.Test.Core
             Tidy.Delete("dir1/dir2/dir3/lonelyFile.txt");
         }
 
+
         [Fact]
-        public void RemovingAndDeletingAllFilesFromDirectoryLeavesEmptyParent()
+        public void SourceDirectoryOfRenameShouldNotBeDeleted()
         {
+            // Even though a directory may end up empty after a file has been moved from it,
+            // TFS does not allow deleting that empty directory.
+            // See https://github.com/git-tfs/git-tfs/issues/313
+
             mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
             mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant));
             Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
             Tidy.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant);
+            // "topDir/midDir/bottomDir/" becomes empty but is not deleted
         }
 
         [Fact]
@@ -191,6 +198,34 @@ namespace Sep.Git.Tfs.Test.Core
             Tidy.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE2.TXT");
             Tidy.Delete("TOPDIR/MIDDIR/MIDFILE.TXT");
             Tidy.Delete("TOPDIR/TOPFILE.TXT");
+        }
+
+        [Fact]
+        public void HandlesEditAndRenameOnSameFile()
+        {
+            mockWorkspace.Expect(x => x.Edit("topDir/midDir/bottomDir/file1.txt"));
+            mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file1.txt", "topDir/midDir/bottomDir/file1renamed.txt", ScoreIsIrrelevant));
+            Tidy.Edit("topDir/midDir/bottomDir/file1.txt");
+            Tidy.Rename("topDir/midDir/bottomDir/file1.txt", "topDir/midDir/bottomDir/file1renamed.txt", ScoreIsIrrelevant);
+        }
+
+        [Fact]
+        public void TidyThrowsWhenMultipleOperationsOnTheSameFileOccur()
+        {
+            var workspace = mocks.StrictMock<ITfsWorkspaceModifier>();
+            ITfsWorkspaceModifier tidy = new DirectoryTidier(workspace, Enumerable.Empty<TfsTreeEntry>);
+
+            tidy.Delete("file.txt");
+            Assert.Throws<ArgumentException>(() =>
+                tidy.Add("FILE.TXT"));
+            Assert.Throws<ArgumentException>(() =>
+                tidy.Delete("File.TXT"));
+            Assert.Throws<ArgumentException>(() =>
+                tidy.Edit("File.txt"));
+            Assert.Throws<ArgumentException>(() =>
+                tidy.Rename("File.txt", "renamed.txt", ScoreIsIrrelevant));
+            Assert.Throws<ArgumentException>(() =>
+                tidy.Rename("oldFile.txt", "File.txt", ScoreIsIrrelevant));
         }
 
         TfsTreeEntry item(TfsItemType itemType, string gitPath)

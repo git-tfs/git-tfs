@@ -1,6 +1,6 @@
 ## Summary
 
-The quick-clone command creates a new git repository, initialized from the last change-set in a TFS source tree, ignoring the full history. 
+The quick-clone command creates a new git repository, initialized from the last changeset (or a specific changeset in history) in a TFS source tree, ignoring the full history. 
 Useful for making code changes or additions where past history isn't relevant.
 
 ## Synopsis
@@ -71,10 +71,23 @@ Useful for making code changes or additions where past history isn't relevant.
 
 ### Simple
 
-To clone the latest changeset in `$/Project1` from your TFS 2010 server `tfs`
+To clone the latest changeset in `$/Project1` from your TFS server `tfs`
 into a new directory `Project1`, do this:
 
     git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/Project1
+
+### Clone a specific changeset
+
+To clone a specific changeset in the history of `$/Project1` from your TFS server `tfs`
+into a new directory `Project1`, do this:
+
+    git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/Project1 -c=126
+
+where `126` is the id of the changeset to clone.
+
+If you want to get all the history from this specific changeset, then just do:
+
+    git tfs fetch
 
 ### Excludes
 

@@ -51,7 +51,7 @@ namespace Sep.Git.Tfs.Util
         /// <summary>
         /// Is the top-level folder deleted or renamed?
         /// </summary>
-        private bool RenameBranchCommmit
+        public bool RenameBranchCommmit
         {
             get
             {
@@ -71,19 +71,17 @@ namespace Sep.Git.Tfs.Util
             if (DeletesProject)
                 return Enumerable.Empty<IChange>();
 
-            if (RenameBranchCommmit)
-                return new List<IChange>();
-
             return NamedChanges.Where(c => IncludeInFetch(c)).Select(c => c.Change);
         }
 
-        public IEnumerable<ApplicableChange> GetChangesToApply()
+        /// <summary>
+        /// Get all the changes of a changeset to apply
+        /// </summary>
+        /// <param name="forceGetChanges">true - force get changes ignoring check what should be applied. </param>
+        public IEnumerable<ApplicableChange> GetChangesToApply(bool forceGetChanges = false)
         {
             if (DeletesProject)
                 return Enumerable.Empty<ApplicableChange>();
-
-            if (RenameBranchCommmit)
-                return new List<ApplicableChange>();
 
             var compartments = new {
                 Deleted = new List<ApplicableChange>(),
@@ -114,8 +112,13 @@ namespace Sep.Git.Tfs.Util
                 }
                 else
                 {
-                    if (IncludeInApply(change))
+                    if (forceGetChanges || IncludeInApply(change))
+                    {
+                        // for get changes only on first change set
+                        forceGetChanges = false;
+
                         compartments.Updated.Add(ApplicableChange.Update(change.GitPath, change.Info.Mode));
+                    }
                 }
             }
             return compartments.Deleted.Concat(compartments.Updated);
@@ -186,7 +189,12 @@ namespace Sep.Git.Tfs.Util
                     var history = item.VersionControlServer.QueryHistory(item.ServerItem, item.ChangesetId, 0,
                                                                      TfsRecursionType.None, null, 1, previousChangeset,
                                                                      1, true, false, false);
-                    var previousChange = history.First();
+                    var previousChange = history.FirstOrDefault();
+                    if(previousChange == null)
+                    {
+                        Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
+                        return null;
+                    }
                     oldItem = previousChange.Changes[0].Item;
                 }
                 catch

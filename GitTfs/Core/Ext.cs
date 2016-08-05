@@ -98,17 +98,6 @@ namespace Sep.Git.Tfs.Core
             return date.ToUniversalTime().ToString("s") + "Z";
         }
 
-        public static void CopyTo(this Stream source, Stream destination)
-        {
-            const int blockSize = 4*1024;
-            byte[] buffer = new byte[blockSize];
-            int n;
-            while(0 != (n = source.Read(buffer, 0, blockSize)))
-            {
-                destination.Write(buffer, 0, n);
-            }
-        }
-
         public static bool IsEmpty<T>(this IEnumerable<T> c)
         {
             return c == null || !c.Any();

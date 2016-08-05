@@ -7,7 +7,6 @@ using System.Net;
 using System.Reflection;
 using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.Client;
-using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Microsoft.Win32;
@@ -19,13 +18,15 @@ using Sep.Git.Tfs.Util;
 using StructureMap;
 using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
+using IdentityNotFoundException = Microsoft.TeamFoundation.VersionControl.Client.IdentityNotFoundException;
+using Microsoft.TeamFoundation.Build.Client;
 
 namespace Sep.Git.Tfs.VsCommon
 {
     public abstract class TfsHelperBase : ITfsHelper
     {
         protected readonly TextWriter _stdout;
-        private readonly TfsApiBridge _bridge;
+        protected readonly TfsApiBridge _bridge;
         private readonly IContainer _container;
         protected TfsTeamProjectCollection _server;
         private static bool _resolverInstalled;
@@ -41,6 +42,7 @@ namespace Sep.Git.Tfs.VsCommon
                 _resolverInstalled = true;
             }
         }
+        
         [SetterProperty]
         public Janitor Janitor { get; set; }
 
@@ -73,7 +75,8 @@ namespace Sep.Git.Tfs.VsCommon
                 {
                     // maybe it is not an Uri but instance name
                     var servers = RegisteredTfsConnections.GetConfigurationServers();
-                    var registered = servers.FirstOrDefault(s => String.Compare(s.Name, Url, StringComparison.OrdinalIgnoreCase) == 0);
+                    var registered = servers.FirstOrDefault(s => ((String.Compare(s.Name, Url, StringComparison.OrdinalIgnoreCase) == 0) ||
+                                                                  (String.Compare(s.Name, Uri.EscapeDataString(Url), StringComparison.OrdinalIgnoreCase) == 0)));
                     if (registered == null)
                         throw new GitTfsException("Given tfs name is not correct URI and not found as a registered TFS instance");
                     uri = registered.Uri;
@@ -83,20 +86,20 @@ namespace Sep.Git.Tfs.VsCommon
                     uri = new Uri(Url);
                 }
 
-                // TODO: Use TfsTeamProjectCollection constructor that takes a TfsClientCredentials object
-                _server = HasCredentials ?
-                    new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
-                    new TfsTeamProjectCollection(uri, new UICredentialsProvider());
+                _server = GetTfsCredential(uri);
 
                 _server.EnsureAuthenticated();
             }
         }
 
+        protected abstract TfsTeamProjectCollection GetTfsCredential(Uri uri);
 
-        private string[] _legacyUrls;
+        public abstract IIdentity GetIdentity(string username);
 
         protected NetworkCredential GetCredential()
         {
+            if (!HasCredentials)
+                return new NetworkCredential();
             var idx = Username.IndexOf('\\');
             if (idx >= 0)
             {
@@ -151,11 +154,6 @@ namespace Sep.Git.Tfs.VsCommon
             Trace.WriteLine("get [C" + e.Version + "]" + e.ServerItem);
         }
 
-        private IGroupSecurityService GroupSecurityService
-        {
-            get { return GetService<IGroupSecurityService>(); }
-        }
-
         private ILinking _linking;
         private ILinking Linking
         {
@@ -170,6 +168,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false)
         public SortedSet<long> ChangeSetNumbersToIgnore()
         {
             SortedSet<long> result = new SortedSet<long>();
@@ -200,9 +199,9 @@ namespace Sep.Git.Tfs.VsCommon
                 yield break;
             }
 
-            var start = (int)startVersion;
+            var start = startVersion;
             Changeset[] changesets;
-            var lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec((int)lastVersion);
+            var lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec(lastVersion);
             do
             {
                 var startChangeset = new ChangesetVersionSpec(start);
@@ -222,10 +221,10 @@ namespace Sep.Git.Tfs.VsCommon
             } while (!byLots && changesets.Length == BatchCount);
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, long startVersion, IGitTfsRemote remote)
+        public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, int startVersion, IGitTfsRemote remote)
         {
             var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                                        null, new ChangesetVersionSpec((int) startVersion), VersionSpec.Latest, int.MaxValue,
+                                                                        null, new ChangesetVersionSpec(startVersion), VersionSpec.Latest, int.MaxValue,
                                                                         true, true, true)
                                                           .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
             // don't take the enumerator produced by a foreach statement or a yield statement, as there are references
@@ -237,10 +236,11 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        public virtual int FindMergeChangesetParent(string path, long targetChangeset, GitTfsRemote remote)
+        public virtual int FindMergeChangesetParent(string path, int targetChangeset, GitTfsRemote remote)
         {
-            var targetVersion = new ChangesetVersionSpec((int)targetChangeset);
-            var mergeInfo = VersionControl.QueryMerges(null, null, path, targetVersion, targetVersion, targetVersion, RecursionType.Full);
+            var targetVersion = new ChangesetVersionSpec(targetChangeset);
+            var searchTo = targetVersion;
+            var mergeInfo = VersionControl.QueryMerges(null, null, path, targetVersion, null, searchTo, RecursionType.Full);
             if (mergeInfo.Length == 0) return -1;
             return mergeInfo.Max(x => x.SourceVersion);
         }
@@ -308,8 +308,8 @@ namespace Sep.Git.Tfs.VsCommon
 
                 if (tfsParentBranch == null)
                 {
-                    throw new GitTfsException("error : the branch you try to init '" + tfsPathBranchToCreate + "' is a root branch (e.g. has no parents).",
-                        new List<string> { "Clone this branch from Tfs instead of trying to init it!\n   Command: git tfs clone " + Url + " " + tfsPathBranchToCreate });
+                    throw new GitTfsException("error : the branch you try to initialize '" + tfsPathBranchToCreate + "' is a root branch (e.g. has no parents).",
+                        new List<string> { "Clone this branch from Tfs instead of trying to initialize it!\n   Command: git tfs clone " + Url + " " + tfsPathBranchToCreate });
                 }
 
                 tfsPathParentBranch = tfsParentBranch;
@@ -324,7 +324,7 @@ namespace Sep.Git.Tfs.VsCommon
 
                     if (firstChangesetInBranchToCreate == null)
                     {
-                        throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find first changeset for " + tfsPathBranchToCreate);
+                        throw new GitTfsException("An unexpected error occurred when trying to find the root changeset.\nFailed to find first changeset for " + tfsPathBranchToCreate);
                     }
 
                     var mergedItemsToFirstChangesetInBranchToCreate = GetMergeInfo(tfsPathBranchToCreate, tfsPathParentBranch, firstChangesetInBranchToCreate.ChangesetId, lastChangesetIdToCheck);
@@ -340,7 +340,7 @@ namespace Sep.Git.Tfs.VsCommon
                 }
                 catch (VersionControlException)
                 {
-                    throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to query history for " + tfsPathBranchToCreate);
+                    throw new GitTfsException("An unexpected error occurred when trying to find the root changeset.\nFailed to query history for " + tfsPathBranchToCreate);
                 }
             }
             catch (FeatureNotSupportedException ex)
@@ -394,7 +394,7 @@ namespace Sep.Git.Tfs.VsCommon
                 {
                     if (upperBound == 1)
                     {
-                        throw new GitTfsException("An unexpected error occured when trying to find the root changeset.\nFailed to find a previous changeset to changeset n�" + changesetIdsFirstChangesetInMainBranch + " in the branch!!!");
+                        throw new GitTfsException("An unexpected error occurred when trying to find the root changeset.\nFailed to find a previous changeset to changeset n°" + changesetIdsFirstChangesetInMainBranch + " in the branch!!!");
                     }
                     upperBound = Math.Max(upperBound - step, 1);
                     lowerBound = Math.Max(upperBound - step, 1);
@@ -452,7 +452,7 @@ namespace Sep.Git.Tfs.VsCommon
                 {
                     _stdout.WriteLine("warning: git-tfs was unable to find the root changeset (ie the last common commit) between the branch '"
                                       + tfsPathBranchToCreate + "' and its parent branch '" + tfsPathParentBranch + "'.\n"
-                                      + "(Any help to add support of this special case is welcomed! Open an issue on https://github.com/git-tfs/git-tfs/issue )\n\n"
+                                      + "(Any help to add support of this special case is welcomed! Open an issue on https://github.com/git-tfs/git-tfs/issues )\n\n"
                                       + "To be able to continue to fetch the changesets from Tfs,\nplease enter the root changeset id between the branch '"
                                       + tfsPathBranchToCreate + "'\n and its parent branch '" + tfsPathParentBranch + "' by analysing the Tfs history...");
                     return AskForRootChangesetId();
@@ -638,8 +638,12 @@ namespace Sep.Git.Tfs.VsCommon
             if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
                 Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
-                var folders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2))).ToArray();
-                _workspaces.Add(remote.Id, workspace = Retry.Do(() => GetWorkspace(folders)));
+                mappings = mappings.ToList(); // avoid iterating through the mappings more than once, and don't retry when this iteration raises an error.
+                _workspaces.Add(remote.Id, workspace = Retry.Do(() =>
+                {
+                    var workingFolders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2)));
+                    return GetWorkspace(workingFolders.ToArray());
+                }));
                 Janitor.CleanThisUpWhenWeClose(() => TryToDeleteWorkspace(workspace));
             }
             var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
@@ -676,13 +680,21 @@ namespace Sep.Git.Tfs.VsCommon
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
             try
             {
-                foreach (WorkingFolder folder in folders)
-                    workspace.CreateMapping(folder);
+                SetWorkspaceMappingFolders(workspace, folders);
             }
             catch (MappingConflictException e)
             {
-                TryToDeleteWorkspace(workspace);
-                throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
+                try
+                {
+                    foreach (WorkingFolder folder in folders)
+                        CleanupWorkspaces(folder.LocalItem);
+                    SetWorkspaceMappingFolders(workspace, folders);
+                }
+                catch
+                {
+                    TryToDeleteWorkspace(workspace);
+                    throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
+                }
             }
             catch
             {
@@ -692,12 +704,18 @@ namespace Sep.Git.Tfs.VsCommon
             return workspace;
         }
 
+        private static void SetWorkspaceMappingFolders(Workspace workspace, WorkingFolder[] folders)
+        {
+            foreach (WorkingFolder folder in folders)
+                workspace.CreateMapping(folder);
+        }
+
         private string GenerateWorkspaceName()
         {
             return "git-tfs-" + Guid.NewGuid();
         }
 
-        public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
+        public int ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
                                      pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray(),
@@ -705,7 +723,7 @@ namespace Sep.Git.Tfs.VsCommon
                                      checkinComment);
         }
 
-        private long ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges,
+        private int ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges,
             WorkItemCheckedInfo[] checkedInfos, string checkinComment)
         {
             using (var parentForm = new ParentForm())
@@ -719,7 +737,7 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
-        private const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
+        protected const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
 
         private Type GetCheckinDialogType()
         {
@@ -731,7 +749,7 @@ namespace Sep.Git.Tfs.VsCommon
             return Assembly.LoadFrom(GetDialogAssemblyPath());
         }
 
-        private string GetDialogAssemblyPath()
+        protected virtual string GetDialogAssemblyPath()
         {
             return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
@@ -816,7 +834,12 @@ namespace Sep.Git.Tfs.VsCommon
             var shelveset = shelvesets.First();
 
             var itemSpec = new ItemSpec(remote.TfsRepositoryPath, RecursionType.Full);
-            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] { itemSpec }).Single();
+            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] {itemSpec}).SingleOrDefault();
+            if (change == null)
+            {
+                throw new GitTfsException("There is no changes in this shelveset that apply to the current tfs remote.")
+                    .WithRecommendation("Try to apply the shelveset on another remote.");
+            }
             var wrapperForVersionControlServer =
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
             // TODO - containerify this (no `new`)!
@@ -1073,11 +1096,6 @@ namespace Sep.Git.Tfs.VsCommon
             return _bridge.Wrap<WrapperForShelveset, Shelveset>(shelveset);
         }
 
-        public IIdentity GetIdentity(string username)
-        {
-            return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
-        }
-
         public Changeset GetLatestChangeset(IGitTfsRemote remote, bool includeChanges)
         {
             var history = VersionControl.QueryHistory(remote.TfsRepositoryPath, VersionSpec.Latest, 0,
@@ -1228,7 +1246,7 @@ namespace Sep.Git.Tfs.VsCommon
                             new List<string>()
                                 {
                                     "Verify that the name of the project '" + projectName +"' is well spelled",
-                                    "Create the team project folder in TFS before (recommanded)",
+                                    "Create the team project folder in TFS before (recommended)",
                                     "Use the flag '--create-project-folder' to create the team project folder during the process"
                                 });
                 }
@@ -1313,6 +1331,98 @@ namespace Sep.Git.Tfs.VsCommon
                 Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + "|" + name + ": " + e);
             }
             return null;
+        }
+
+        /// <summary>
+        /// Try to get the value of a key beginning with the name 'startOfName'
+        /// and present in the tree path 'path' in the 'Current user' registry root.
+        /// 
+        /// ex:
+        /// 
+        /// The value "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions" for parameter 'startOfName'
+        /// will find "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.24712"
+        /// and "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.23102"
+        /// </summary>
+        /// <param name="path">path in the registry tree</param>
+        /// <param name="startOfName">start of the name of the key to find</param>
+        /// <returns>the value corresponding to the key found</returns>
+        protected string TryGetUserRegStringStartingWithName(string path, string startOfName)
+        {
+            return TryGetRegStringStartingWithName(Registry.CurrentUser, path, startOfName);
+        }
+
+        /// <summary>
+        /// Try to get the value of a key beginning with the name 'startOfName'
+        /// and present in the tree path 'path' in the 'Local machine' registry root
+        /// ex:
+        /// The value "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions" for parameter 'startOfName'
+        /// will find "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.24712"
+        /// and "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.23102"
+        /// </summary>
+        /// <param name="path">path in the registry tree</param>
+        /// <param name="startOfName">start of the name of the key to find</param>
+        /// <returns>the value corresponding to the key found</returns>
+        protected string TryGetRegStringStartingWithName(string path, string startOfName)
+        {
+            return TryGetRegStringStartingWithName(Registry.LocalMachine, path, startOfName);
+        }
+
+        protected string TryGetRegStringStartingWithName(RegistryKey registryKey, string path, string startOfName)
+        {
+            try
+            {
+                Trace.WriteLine("Trying to get " + registryKey.Name + "\\" + path + "| starting with:" + startOfName);
+                var key = registryKey.OpenSubKey(path);
+                if (key != null)
+                {
+                    var keyFound = key.GetValueNames().FirstOrDefault(k => k.StartsWith(startOfName));
+                    Trace.WriteLine("Found registry key:" + keyFound);
+                    return key.GetValue(keyFound) as string;
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + "| starting with:" + startOfName + ": " + e);
+            }
+            return null;
+        }
+
+        public int QueueGatedCheckinBuild(Uri buildDefinitionUri, string buildDefinitionName, string shelvesetName, string checkInTicket)
+        {
+            var buildServer = (IBuildServer)_server.GetService(typeof(IBuildServer));
+ 
+            var buildRequest = buildServer.CreateBuildRequest(buildDefinitionUri);
+            buildRequest.ShelvesetName = shelvesetName;
+            buildRequest.Reason = BuildReason.CheckInShelveset; 
+            buildRequest.GatedCheckInTicket = checkInTicket;
+
+            _stdout.WriteLine("Launching build '" + buildDefinitionName + "' to validate your shelveset...");
+            var queuedBuild = buildServer.QueueBuild(buildRequest);
+
+            _stdout.WriteLine("Waiting for gated check-in build result...");
+            do
+            {
+                _stdout.Write(".");
+                System.Threading.Thread.Sleep(5000);
+                queuedBuild.Refresh(QueryOptions.Definitions);
+            } while (queuedBuild.Build == null || !queuedBuild.Build.BuildFinished);
+            _stdout.WriteLine(string.Empty);
+
+            var build = GetSpecificBuildFromQueuedBuild(queuedBuild, shelvesetName);
+            if (build.Status == BuildStatus.Succeeded)
+            {
+                _stdout.WriteLine("Build was successful! Your changes have been checked in.");
+                return VersionControl.GetLatestChangesetId();
+            }
+            else
+            {
+                throw new GitTfsException("The gated check-in has failed! Your changeset is rejected!");
+            }
+        }
+
+        protected virtual IBuildDetail GetSpecificBuildFromQueuedBuild(IQueuedBuild queuedBuild, string shelvesetName)
+        {
+            return queuedBuild.Build;
         }
     }
 

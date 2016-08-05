@@ -527,7 +527,14 @@ namespace Sep.Git.Tfs.VsCommon
             if (author != null)
                 checkinParameters.Author = author;
 
-            return _workspace.CheckIn(checkinParameters);
+            try
+            {
+                return _workspace.CheckIn(checkinParameters);
+            }
+            catch (GatedCheckinException gatedException)
+            {
+                throw new GitTfsGatedCheckinException(gatedException.ShelvesetName, gatedException.AffectedBuildDefinitions, gatedException.CheckInTicket);
+            }
         }
     }
 

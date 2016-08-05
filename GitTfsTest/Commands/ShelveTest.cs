@@ -118,8 +118,8 @@ namespace Sep.Git.Tfs.Test.Commands
 
             mocks.ClassUnderTest.Run("shelveset name");
 
-            remote.AssertWasCalled(x => x.Shelve(null, null, null, false),
-                                   y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("HEAD"), Is.Anything(), Is.Anything()));
+            remote.AssertWasCalled(x => x.Shelve(null, null, null, null, false),
+                                   y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("HEAD"), Is.Anything(), Is.Anything(), Is.Anything()));
         }
 
         [Fact]
@@ -135,8 +135,8 @@ namespace Sep.Git.Tfs.Test.Commands
 
             mocks.ClassUnderTest.Run("shelveset name", "treeish");
 
-            remote.AssertWasCalled(x => x.Shelve(null, null, null, false),
-                                   y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("treeish"), Is.Anything(), Is.Anything()));
+            remote.AssertWasCalled(x => x.Shelve(null, null, null, null, false),
+                                   y => y.Constraints(Is.Equal("shelveset name"), Is.Equal("treeish"), Is.Anything(), Is.Anything(), Is.Anything()));
         }
 
         [Fact]
@@ -158,7 +158,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.ClassUnderTest.Run("shelveset name", "treeish");
 
             mocks.Get<IGitTfsRemote>().AssertWasNotCalled(
-                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything, Arg<bool>.Is.Anything));
+                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything, Arg<CheckinOptions>.Is.Anything, Arg<bool>.Is.Anything));
         }
 
         [Fact]
@@ -171,7 +171,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.ClassUnderTest.Run("shelveset name", "treeish");
 
             mocks.Get<IGitTfsRemote>().AssertWasCalled(
-                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything, Arg<bool>.Is.Anything));
+                x => x.Shelve(Arg<string>.Is.Anything, Arg<string>.Is.Anything, Arg<TfsChangesetInfo>.Is.Anything, Arg<CheckinOptions>.Is.Anything, Arg<bool>.Is.Anything));
         }
 
         private TfsChangesetInfo ChangesetForRemote(string remoteId)

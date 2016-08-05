@@ -1,6 +1,10 @@
 ## Summary
 Creates a TFS shelveset from a Git branch.
 
+## Features
+[Special actions in commit messages](../special-actions-in-commit-messages.md) can be inserted, to associate TFS work items.
+
+## Synopsis
 
     Usage: git-tfs shelve [options] shelveset-name [ref-to-shelve]
     where options are:

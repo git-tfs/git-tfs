@@ -59,6 +59,6 @@ namespace Sep.Git.Tfs.Commands
             return GitTfsExitCodes.OK;
         }
 
-        protected abstract long DoCheckin(TfsChangesetInfo changeset, string refToCheckin);
+        protected abstract int DoCheckin(TfsChangesetInfo changeset, string refToCheckin);
     }
 }

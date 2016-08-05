@@ -17,8 +17,8 @@ namespace Sep.Git.Tfs.Core
 
         public RemoteOptions RemoteOptions
         {
-            get { return new RemoteOptions { IgnoreRegex = IgnoreRegex, Username = Username, Password = Password }; }
-            set { IgnoreRegex = value.IgnoreRegex; Username = value.Username; Password = value.Password; }
+            get { return new RemoteOptions { IgnoreRegex = IgnoreRegex, ExceptRegex = IgnoreExceptRegex, Username = Username, Password = Password }; }
+            set { IgnoreRegex = value.IgnoreRegex; IgnoreExceptRegex = value.ExceptRegex; Username = value.Username; Password = value.Password; }
         }
     }
 }
