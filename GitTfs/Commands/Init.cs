@@ -66,7 +66,24 @@ namespace Sep.Git.Tfs.Commands
                 Environment.CurrentDirectory = gitRepositoryPath;
                 globals.GitDir = ".";
             }
-            return Run(tfsUrl, tfsRepositoryPath);
+            var runResult = Run(tfsUrl, tfsRepositoryPath);
+            try
+            {
+                File.WriteAllText(@".git\description", tfsRepositoryPath + "\n" + HideUserCredentials(globals.CommandLineRun));
+            }
+            catch (Exception)
+            {
+                Trace.WriteLine("warning: Unable to update de repository description!");
+            }
+            return runResult;
+        }
+
+        public static string HideUserCredentials(string commandLineRun)
+        {
+            Regex rgx = new Regex("(--username|-u)[= ][^ ]+");
+            commandLineRun = rgx.Replace(commandLineRun, "--username=xxx");
+            rgx = new Regex("(--password|-p)[= ][^ ]+");
+            return rgx.Replace(commandLineRun, "--password=xxx");
         }
 
         private void InitSubdir(string repositoryPath)

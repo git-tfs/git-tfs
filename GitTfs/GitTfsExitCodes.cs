@@ -25,5 +25,10 @@ namespace Sep.Git.Tfs
         public const int InvalidArguments = 2;
         public const int ForceRequired = 3;
         public const int ExceptionThrown = Byte.MaxValue - 1;
+
+        //Verify
+        public const int VerifyPathCaseMismatch = 100;
+        public const int VerifyFileMissing = 101;
+        public const int VerifyContentMismatch = 102;
     }
 }

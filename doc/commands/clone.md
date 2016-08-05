@@ -32,50 +32,79 @@ a TFS source tree and fetch all the changesets
 	  -x, --export               Export metadatas
 		  --export-work-item-mapping=VALUE
 								 Path to Work-items mapping export file
-		  --ignore-branches      Ignore fetching merged branches when encounter merge changesets
+		  --branches=VALUE       Strategy to manage branches:
+								 * none: Ignore branches and merge changesets,
+								 fetching only the clone tfs path
+								 * auto:(default) Manage merged changesets and
+								 initialize the merged branches
+								 * all: Manage merged changesets and initialize
+								 all the branches during the clone
 		  --batch-size=VALUE          Size of a the batch of tfs changesets fetched (-1 for all in one batch)
-		  --with-branches        init all the TFS branches during the clone
+      -c, --changeset=VALUE      The changeset to clone from (must be a number)
 		  --resumable            if an error occurred, try to continue when you restart clone
 								 with same parameters
 
 ## Examples
 ### Simple
-To clone all of `$/Project1` from your TFS 2010 server `tfs`
+To clone all of `$/Project1` from your TFS server `tfs`
 into a new directory `Project1`, do this:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1
 
+Note: Equivalent to cloning with dependency branches (with option `--branches=auto`) if you ar cloning the trunk branch.
+
+### Clone from a specific changeset
+
+To clone from a specific changeset in the history of `$/Project1` from your TFS server `tfs`
+into a new directory `Project1`, do this:
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 -c=126
+
+where `126` is the id of the changeset to clone.
+
+This command will get all the history from this specific changeset.
+It could be especially useful when you have a huge history and also when the entire history could not be clone due to not supported tfs specificities!
+
 ### Clone only the trunk (with dependency branches)
 
-Sometimes, it could be interesting to clone only a branch of a TFS repository (for example to extract only the trunk of your project and manage branches using the [branch](branch.md) command. 
+Sometimes, it could be interesting to clone only a branch of a TFS repository (for example to extract only the trunk of your project and manage branches using the [branch](branch.md) command.
 
 Suppose you have on TFS:
 
     A <- B <- C <- D <- E  $/Project1/Trunk
-               \                              
+               \
                 M <- N     $/Project1/Branch
 
 Then, do this (the clone will be done in the `MyProject1Directory` directory):
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory
 
+This command is equivalent to specifying explicitly the option `--branches=auto`:
 
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory --branches=auto
 
-Note : 
+Note:
 
 * Since v0.21, git-tfs will also initialize all the branches that have been merged in the trunk during its changeset history
 and will try to manage all the merge changesets accordingly (See [Merge changesets and branches](#merge-changesets-and-branches) for more details).
 * It is highly recommended to clone the root branch ( the branch that has no parents, here $/Project1/Trunk ) to be able to init the other branches after.
 If you clone the branch $/Project1/Branch, you will never able to init the root branch $/Project1/Trunk after.
+* Some complex branch scenario possible with Tfs are actually not supported and the clone could end up with an error.
+If that's the case, you will be obliged to clone without branch support and use the option `--branches=none`
 
 ### Clone only the trunk (without dependency branches or a branch)
 
 If you want to clone the trunk without cloning dependency branches (because for example it fails at managing these branches) or you want to clone a children branch instead,
-you could use the `--ignore-branches`.
+you could use the option `--branches=none`.
 
 Then, do this (the clone will be done in the `MyProject1Directory` directory):
 
-    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory --ignore-branches
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory --branches=none
+
+Note:
+    * This is way to clone that has the more chances to succeed (when you have a complex branch history with some cases not supported by git-tfs).
+    * This is the one to choose when you clone another tfs path that the trunk.
+    * All the merged branches are ignored and merges changesets are treated as normal changesets.
 
 ### Merge changesets and branches
 
@@ -84,12 +113,12 @@ Since version v0.21, when cloning the trunk from TFS, if git-tfs encounter a mer
 Suppose you have on TFS:
 
     A <- B <- C <- D <- E <- X <- Y <- Z $/Project1/Trunk
-               \           /                   
+               \           /
                 M <- N <- O <- P <- Q    $/Project1/Branch
 
 When cloning the tfs branch `$/Project1/Trunk`, after having fetch changesets A to E, git-tfs encounter merge changeset X. When it did, git-tfs initialize also the tfs branch `$/Project1/Branch` and fetch changeset M to O to be able to create the merge commit X and then continue to fetch changesets Y and Z.
 
-If you don't want to initialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--ignore-branches` to disable it!
+If you don't want to initialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--branches=none` to disable it!
 
 Note: To successfully process the merge changeset (and come from an older version than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right click on a folder and choose `Branching and Merging` -> `Convert to Branch`.
 
@@ -99,15 +128,23 @@ If you don't know exactly what repository path to clone, see [list-remote-branch
 
 ### Clone all the branches (and merge changesets)
 
-Prerequisite: To use this feature, all your source code folders corresponding to branches
+**Prerequisite**: To use this feature, all your source code folders corresponding to branches
 should be converted into branches (a notion introduced by TFS2010).
 To change that, you should open 'Source Control Explorer' and then, for each folder corresponding to a branch, right click on your source folder and select 'Branching and Merging' > 'Convert to branch'.
 
-If you want to clone your entire repository with all the branches or that the tfs branches are merged through merge changeset, perhaps you should use the option `--with-branches`:
+If you want to clone your entire repository with all the branches or that the tfs branches are merged through merge changeset, perhaps you should use the option `--branches=all`:
 
-    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk --with-branches
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk --branches=all
 
 All the tfs history (and all the branches) and the merge changesets will consequently be fetched from TFS and created in the git repository!
+
+Note:
+* Here again, some complex branch scenario possible with Tfs are actually not supported and the clone could end up with an error.
+If that's the case, you will be obliged to clone without branch support and use the option `--branches=none`
+
+### Clone from a specific changeset
+
+See [quick-clone](quick-clone.md#clone-a-specific-changeset).
 
 ### Excludes
 
@@ -164,8 +201,8 @@ It could be used to migrate sources away from TFSVC. See [Migrate from tfs to gi
 ### Batch size of fetched changesets
 
 The option `--batch-size` permit to specify the number of changesets fetched from tfs at the same time (default:100).
-You could use this option to specify smaller batch size if git-tfs use too much memory because changesest are huge.
-This option is saved in the git config file (key `git-tfs.batch-size`). See [config file doc](../config.md). 
+You could use this option to specify smaller batch size if git-tfs use too much memory because some changesets are huge.
+This option is saved in the git config file (key `git-tfs.batch-size`). See [config file doc](../config.md).
 Note: this option could also be specified during the `fetch`.
 
 ## After cloning a repository
@@ -180,3 +217,8 @@ It is recommended, especially if the TFS repository is a big one, to run, after 
 * [init](init.md)
 * [fetch](fetch.md)
 * [quick-clone](quick-clone.md)
+
+Feel free also to look at some special use cases:
+* [Working with no branches](../usecases/working_with_no_branches.md)
+* [Manage TFS branches with git-tfs](../usecases/manage_tfs_branches.md)
+* [Migrate your history from TFSVC to a git repository](../usecases/migrate_tfs_to_git.md)

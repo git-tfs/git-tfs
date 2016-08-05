@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Commands
         {
         }
 
-        protected override long DoCheckin(TfsChangesetInfo changeset, string refToCheckin)
+        protected override int DoCheckin(TfsChangesetInfo changeset, string refToCheckin)
         {
             if (!changeset.Remote.Tfs.CanShowCheckinDialog)
                 throw new GitTfsException(

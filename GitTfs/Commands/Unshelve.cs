@@ -50,7 +50,7 @@ namespace Sep.Git.Tfs.Commands
                 TfsBranch = _globals.RemoteId;
 
             var remote = _globals.Repository.ReadTfsRemote(TfsBranch);
-            remote.Unshelve(Owner, shelvesetName, destinationBranch, BuildErrorHandler());
+            remote.Unshelve(Owner, shelvesetName, destinationBranch, BuildErrorHandler(), Force);
             _stdout.WriteLine("Created branch " + destinationBranch + " from shelveset \"" + shelvesetName + "\".");
             return GitTfsExitCodes.OK;
         }

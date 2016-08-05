@@ -30,12 +30,19 @@ namespace Sep.Git.Tfs.Core
         {
             if (initialTree.Empty())
                 Summary.Remote.Repository.GetObjects(lastCommit, initialTree);
-            var resolver = new PathResolver(Summary.Remote, initialTree);
+            var remoteRelativeLocalPath = GetPathRelativeToWorkspaceLocalPath(workspace);
+            var resolver = new PathResolver(Summary.Remote, remoteRelativeLocalPath, initialTree);
             var sieve = new ChangeSieve(_changeset, resolver);
-            _changeset.Get(workspace, sieve.GetChangesToFetch(), ignorableErrorHandler);
-            foreach (var change in sieve.GetChangesToApply())
+            if (sieve.RenameBranchCommmit)
             {
-                ignorableErrorHandler.Catch(() => {
+                IsRenameChangeset = true;
+            }
+            _changeset.Get(workspace, sieve.GetChangesToFetch(), ignorableErrorHandler);
+            var forceGetChanges = lastCommit == null;
+            foreach (var change in sieve.GetChangesToApply(forceGetChanges))
+            {
+                ignorableErrorHandler.Catch(() =>
+                {
                     Apply(change, treeBuilder, workspace, initialTree);
                 });
             }
@@ -89,7 +96,7 @@ namespace Sep.Git.Tfs.Core
         public IEnumerable<TfsTreeEntry> GetFullTree()
         {
             var treeInfo = Summary.Remote.Repository.CreateObjectsDictionary();
-            var resolver = new PathResolver(Summary.Remote, treeInfo);
+            var resolver = new PathResolver(Summary.Remote, "", treeInfo);
             
             IItem[] tfsItems;
             if(Summary.Remote.TfsRepositoryPath != null)
@@ -150,6 +157,14 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        private string GetPathRelativeToWorkspaceLocalPath(ITfsWorkspace workspace)
+        {
+            if (workspace.Remote.MatchesUrlAndRepositoryPath(Summary.Remote.TfsUrl, Summary.Remote.TfsRepositoryPath))
+                return "";
+
+            return string.IsNullOrEmpty(Summary.Remote.TfsRepositoryPath) ? "" : Summary.Remote.Prefix;
+        }
+
         private LogEntry MakeNewLogEntry()
         {
             return MakeNewLogEntry(_changeset, Summary.Remote);
@@ -157,7 +172,14 @@ namespace Sep.Git.Tfs.Core
 
         private LogEntry MakeNewLogEntry(IChangeset changesetToLog, IGitTfsRemote remote = null)
         {
-            var identity = _tfs.GetIdentity(changesetToLog.Committer);
+            IIdentity identity = null;
+            try
+            {
+                identity = _tfs.GetIdentity(changesetToLog.Committer);
+            }
+            catch
+            {
+            } 
             var name = changesetToLog.Committer;
             var email = changesetToLog.Committer;
             if (_authors != null && _authors.Authors.ContainsKey(changesetToLog.Committer))
@@ -211,5 +233,6 @@ namespace Sep.Git.Tfs.Core
         }
 
         public string OmittedParentBranch { get; set; }
+        public bool IsRenameChangeset { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Sep.Git.Tfs.Commands;
@@ -26,13 +27,13 @@ namespace Sep.Git.Tfs.Core
             _contextVersion = contextVersion;
             _checkinOptions = checkinOptions;
             _tfsHelper = tfsHelper;
-            _localDirectory = localDirectory;
+            _localDirectory = remote.Repository.IsBare ? Path.GetFullPath(localDirectory) : localDirectory;
             _stdout = stdout;
 
             this.Remote = remote;
         }
 
-        public void Shelve(string shelvesetName, bool evaluateCheckinPolicies, Func<string> generateCheckinComment)
+        public void Shelve(string shelvesetName, bool evaluateCheckinPolicies, CheckinOptions checkinOptions, Func<string> generateCheckinComment)
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
@@ -41,7 +42,7 @@ namespace Sep.Git.Tfs.Core
 
             var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
             shelveset.Comment = string.IsNullOrWhiteSpace(_checkinOptions.CheckinComment) && !_checkinOptions.NoGenerateCheckinComment ? generateCheckinComment() : _checkinOptions.CheckinComment;
-            shelveset.WorkItemInfo = GetWorkItemInfos().ToArray();
+            shelveset.WorkItemInfo = GetWorkItemInfos(checkinOptions).ToArray();
             if (evaluateCheckinPolicies)
             {
                 foreach (var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, null, shelveset.WorkItemInfo).Messages)
@@ -52,7 +53,7 @@ namespace Sep.Git.Tfs.Core
             _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
         }
 
-        public long CheckinTool(Func<string> generateCheckinComment)
+        public int CheckinTool(Func<string> generateCheckinComment)
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
@@ -74,9 +75,13 @@ namespace Sep.Git.Tfs.Core
             _workspace.Merge(sourceTfsPath, tfsRepositoryPath);
         }
 
-        public long Checkin(CheckinOptions options)
+        public int Checkin(CheckinOptions options, Func<string> generateCheckinComment = null)
         {
             if (options == null) options = _checkinOptions;
+
+            var checkinComment = options.CheckinComment;
+            if (string.IsNullOrWhiteSpace(checkinComment) && !options.NoGenerateCheckinComment && generateCheckinComment != null)
+                checkinComment = generateCheckinComment();
 
             var pendingChanges = _workspace.GetPendingChanges();
 
@@ -86,7 +91,7 @@ namespace Sep.Git.Tfs.Core
             var workItemInfos = GetWorkItemInfos(options);
             var checkinNote = _tfsHelper.CreateCheckinNote(options.CheckinNotes);
 
-            var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, options.CheckinComment, checkinNote, workItemInfos);
+            var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, checkinComment, checkinNote, workItemInfos);
             if (checkinProblems.HasErrors)
             {
                 foreach (var message in checkinProblems.Messages)
@@ -111,15 +116,47 @@ namespace Sep.Git.Tfs.Core
             }
 
             var policyOverride = GetPolicyOverrides(options, checkinProblems.Result);
-            var newChangeset = _workspace.Checkin(pendingChanges, options.CheckinComment, options.AuthorTfsUserId, checkinNote, workItemInfos, policyOverride, options.OverrideGatedCheckIn);
-            if (newChangeset == 0)
+            try
             {
-                throw new GitTfsException("Checkin failed!");
+                var newChangeset = _workspace.Checkin(pendingChanges, checkinComment, options.AuthorTfsUserId, checkinNote, workItemInfos, policyOverride, options.OverrideGatedCheckIn);
+                if (newChangeset == 0)
+                {
+                    throw new GitTfsException("Checkin failed!");
+                }
+                else
+                {
+                    return newChangeset;
+                }
+            }
+            catch(GitTfsGatedCheckinException e)
+            {
+                return LaunchGatedCheckinBuild(e.AffectedBuildDefinitions, e.ShelvesetName, e.CheckInTicket);
+            }
+        }
+
+        private int LaunchGatedCheckinBuild(ReadOnlyCollection<KeyValuePair<string, Uri>> affectedBuildDefinitions, string shelvesetName, string checkInTicket)
+        {
+            _stdout.WriteLine("Due to a gated check-in, a shelveset '" + shelvesetName + "' containing your changes has been created and need to be built before it can be committed.");
+            KeyValuePair<string, Uri> buildDefinition;
+            if (affectedBuildDefinitions.Count == 1)
+            {
+                buildDefinition = affectedBuildDefinitions.First();
             }
             else
             {
-                return newChangeset;
+                int choice;
+                do
+                {
+                    _stdout.WriteLine("Build definitions that can be used:");
+                    for (int i = 0; i < affectedBuildDefinitions.Count; i++)
+                    {
+                        _stdout.WriteLine((i + 1) + ": " + affectedBuildDefinitions[i].Key);
+                    }
+                    _stdout.WriteLine("Please choose the build definition to trigger?");
+                } while (!int.TryParse(Console.ReadLine(), out choice) || choice <= 0 || choice > affectedBuildDefinitions.Count);
+                buildDefinition = affectedBuildDefinitions.ElementAt(choice - 1);
             }
+            return Remote.Tfs.QueueGatedCheckinBuild(buildDefinition.Value, buildDefinition.Key, shelvesetName, checkInTicket);
         }
 
         private TfsPolicyOverrideInfo GetPolicyOverrides(CheckinOptions options, ICheckinEvaluationResult checkinProblems)
@@ -143,11 +180,26 @@ namespace Sep.Git.Tfs.Core
 
         public void Edit(string path)
         {
-            path = GetLocalPath(path);
-            _stdout.WriteLine(" edit " + path);
-            GetFromTfs(path);
-            var edited = _workspace.PendEdit(path);
-            if (edited != 1) throw new Exception("One item should have been edited, but actually edited " + edited + " items.");
+            var localPath = GetLocalPath(path);
+            _stdout.WriteLine(" edit " + localPath);
+            GetFromTfs(localPath);
+            var edited = _workspace.PendEdit(localPath);
+            if (edited != 1)
+            {
+                if (_checkinOptions.IgnoreMissingItems)
+                {
+                    _stdout.WriteLine("Warning: One item should have been edited, but actually edited " + edited + ". Ignoring item.");
+                }
+                else if (edited == 0 && _checkinOptions.AddMissingItems)
+                {
+                    _stdout.WriteLine("Warning: One item should have been edited, but was not found. Adding the file instead.");
+                    Add(path);
+                }
+                else
+                {
+                    throw new Exception("One item should have been edited, but actually edited " + edited + " items.");
+                }
+            }
         }
 
         public void Delete(string path)
@@ -169,7 +221,7 @@ namespace Sep.Git.Tfs.Core
 
         private void GetFromTfs(string path)
         {
-            _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), (int)_contextVersion.ChangesetId);
+            _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), _contextVersion.ChangesetId);
         }
 
         public void Get(int changesetId)

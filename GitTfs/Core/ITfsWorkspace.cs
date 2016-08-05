@@ -25,11 +25,11 @@ namespace Sep.Git.Tfs.Core
         /// <summary>
         /// Shelves all pending changes, with the given shelveset name.
         /// </summary>
-        void Shelve(string shelvesetName, bool evaluateCheckinPolicies, Func<string> generateCheckinComment);
+        void Shelve(string shelvesetName, bool evaluateCheckinPolicies, CheckinOptions checkinOptions, Func<string> generateCheckinComment);
         /// <summary>
         /// Evaluates check-in policies and checks in all pending changes.
         /// </summary>
-        long Checkin(CheckinOptions checkinOptions);
+        int Checkin(CheckinOptions checkinOptions, Func<string> generateCheckinComment = null);
         /// <summary>
         /// Populates the workspace with a snapshot, as of the given changeset.
         /// </summary>
@@ -48,7 +48,7 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         string GetLocalItemForServerItem(string serverItem);
 
-        long CheckinTool(Func<string> generateCheckinComment);
+        int CheckinTool(Func<string> generateCheckinComment);
         void Merge(string sourceTfsPath, string tfsRepositoryPath);
 
         /// <summary>

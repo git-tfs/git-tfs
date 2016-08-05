@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -15,7 +16,7 @@ namespace Sep.Git.Tfs.Core
 
         public GitTfsException(string message, Exception e)
             : base(message, e)
-        {}
+        { }
 
         public GitTfsException(string message, IEnumerable<string> solutions)
             : base(message)
@@ -25,12 +26,12 @@ namespace Sep.Git.Tfs.Core
 
         public GitTfsException(string message)
             : base(message)
-        {}
+        { }
 
-        public GitTfsException WithRecommendation(params string [] recommendations)
+        public GitTfsException WithRecommendation(params string[] recommendations)
         {
             if (RecommendedSolutions == null)
-                RecommendedSolutions = (IEnumerable<string>) recommendations.Clone();
+                RecommendedSolutions = (IEnumerable<string>)recommendations.Clone();
             else
                 RecommendedSolutions = RecommendedSolutions.Append<string>(recommendations);
             return this;

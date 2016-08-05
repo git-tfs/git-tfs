@@ -110,7 +110,7 @@ Then use `branch` like this :
 
 Since version 0.20, if git-tfs encounters a merge changeset while initializing and fetching a TFS branch, it will automatically initialize and fetch the merged branch as well.
 
-If you don't want to initialize the merged branches automatically (or you can't because your version of TFS does not support this feature), you can use the option `--ignore-branches` to disable it!
+If you don't want to initialize the merged branches automatically (or you can't because your version of TFS does not support this feature), you can use the option `--branches=none` to disable it!
 
 Note: To successfully process the merge changeset (and come from an older version than TFS2010), you must first convert all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right click on a folder and choose `Branching and Merging` -> `Convert to Branch`.
 

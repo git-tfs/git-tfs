@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
@@ -20,7 +21,6 @@ namespace Sep.Git.Tfs.Commands
         private readonly Init init;
         private readonly Globals globals;
         private readonly InitBranch initBranch;
-        private bool withBranches;
         private bool resumable;
         private TextWriter stdout;
 
@@ -39,7 +39,6 @@ namespace Sep.Git.Tfs.Commands
             get
             {
                 return init.OptionSet.Merge(fetch.OptionSet)
-                           .Add("with-branches", "init all the TFS branches during the clone", v => withBranches = v != null)
                            .Add("resumable", "if an error occurred, try to continue when you restart clone with same parameters", v => resumable = v != null);
             }
         }
@@ -96,13 +95,13 @@ namespace Sep.Git.Tfs.Commands
                     catch (IOException e)
                     {
                         // swallow IOException. Smth went wrong before this and we're much more interested in that error
-                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of IOException:\n{0}\n", e.IndentExceptionMessage());
+                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't clean up files because of IOException:\n{0}\n", e.IndentExceptionMessage());
                         Trace.WriteLine(msg);
                     }
                     catch (UnauthorizedAccessException e)
                     {
                         // swallow it also
-                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't cleanup files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
+                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't clean up files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
                         Trace.WriteLine(msg);
                     }
                 }
@@ -112,21 +111,18 @@ namespace Sep.Git.Tfs.Commands
             bool errorOccurs = false;
             try
             {
-                if (withBranches && initBranch != null)
-                    fetch.IgnoreBranches = false;
-
                 if (tfsRepositoryPath == GitTfsConstants.TfsRoot)
-                    fetch.IgnoreBranches = true;
+                    fetch.BranchStrategy = BranchStrategy.None;
 
-                globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, fetch.IgnoreBranches.ToString());
+                globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, (fetch.BranchStrategy == BranchStrategy.None).ToString());
 
                 if (retVal == 0)
                 {
-                    fetch.Run(withBranches);
+                    fetch.Run(fetch.BranchStrategy == BranchStrategy.All);
                     globals.Repository.GarbageCollect();
                 }
 
-                if (withBranches && initBranch != null)
+                if (fetch.BranchStrategy == BranchStrategy.All && initBranch != null)
                 {
                     initBranch.CloneAllBranches = true;
 
@@ -141,8 +137,8 @@ namespace Sep.Git.Tfs.Commands
             catch (Exception ex)
             {
                 errorOccurs = true;
-                throw new GitTfsException("error: a problem occured when trying to clone the repository. Try to solve the problem described below.\nIn any case, after, try to continue using command `git tfs "
-                    + (withBranches ? "branch init --all" : "fetch") + "`\n", ex);
+                throw new GitTfsException("error: a problem occurred when trying to clone the repository. Try to solve the problem described below.\nIn any case, after, try to continue using command `git tfs "
+                    + (fetch.BranchStrategy == BranchStrategy.All ? "branch init --all" : "fetch") + "`\n", ex);
             }
             finally
             {
@@ -187,7 +183,7 @@ namespace Sep.Git.Tfs.Commands
                                     + " - " + tfsRootBranches.Aggregate((s1, s2) => s1 + "\n - " + s2)
                                     + "\n\nPS:if your branch is not listed here, perhaps you should convert the containing folder to a branch in TFS.";
                     
-                    if (withBranches)
+                    if (fetch.BranchStrategy == BranchStrategy.All)
                         throw new GitTfsException("error: cloning the whole repository or too high in the repository path doesn't permit to manage branches!\n" + cloneMsg);
                     stdout.WriteLine("warning: you are going to clone the whole repository or too high in the repository path !\n" + cloneMsg);
                     return;
@@ -200,10 +196,10 @@ namespace Sep.Git.Tfs.Commands
                 {
                     if (tfsBranchesPath.Select(e=>e.Path.ToLower()).Contains(tfsPathToClone))
                         stdout.WriteLine("info: you are going to clone a branch instead of the trunk ( {0} )\n"
-                            + "   => If you want to manage branches with git-tfs, clone {0} with '--with-branches' option instead...)", tfsTrunkRepositoryPath);
+                            + "   => If you want to manage branches with git-tfs, clone {0} with '--branches=all' option instead...)", tfsTrunkRepositoryPath);
                     else
                         stdout.WriteLine("warning: you are going to clone a subdirectory of a branch and won't be able to manage branches :(\n"
-                            + "   => If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " with '--with-branches' option instead...)");
+                            + "   => If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " with '--branches=all' option instead...)");
                 }
             }
             catch (GitTfsException)

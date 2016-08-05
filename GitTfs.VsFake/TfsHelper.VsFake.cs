@@ -49,13 +49,15 @@ namespace Sep.Git.Tfs.VsFake
 
         public bool CanShowCheckinDialog { get { return false; } }
 
-        public long ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
+        public int ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
         {
             throw new NotImplementedException();
         }
 
         public IIdentity GetIdentity(string username)
         {
+            if (username == "vtccds_cp")
+                return new FakeIdentity { DisplayName = username, MailAddress = "b8d46dada4dd62d2ab98a2bda7310285c42e46f6qvabajY2" };
             return new NullIdentity();
         }
 
@@ -78,16 +80,17 @@ namespace Sep.Git.Tfs.VsFake
             return _script.Changesets.LastOrDefault().Id;
         }
 
-        public IEnumerable<ITfsChangeset> GetChangesets(string path, long startVersion, IGitTfsRemote remote, long lastVersion = -1, bool byLots = false)
+        public IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false)
         {
             if (!_script.Changesets.Any(c => c.IsBranchChangeset) && _script.Changesets.Any(c => c.IsMergeChangeset))
                 return _script.Changesets.Where(x => x.Id >= startVersion).Select(x => BuildTfsChangeset(x, remote));
+            var branchPath = path + "/";
             return _script.Changesets
-                .Where(x => x.Id >= startVersion && x.Changes.Any(c => c.RepositoryPath.ToLower().IndexOf(path.ToLower()) == 0 || path.ToLower().IndexOf(c.RepositoryPath.ToLower()) == 0))
+                .Where(x => x.Id >= startVersion && x.Changes.Any(c => c.RepositoryPath.IndexOf(branchPath, StringComparison.CurrentCultureIgnoreCase) == 0 || branchPath.IndexOf(c.RepositoryPath, StringComparison.CurrentCultureIgnoreCase) == 0))
                 .Select(x => BuildTfsChangeset(x, remote));
         }
 
-        public int FindMergeChangesetParent(string path, long firstChangeset, GitTfsRemote remote)
+        public int FindMergeChangesetParent(string path, int firstChangeset, GitTfsRemote remote)
         {
             var firstChangesetOfBranch = _script.Changesets.FirstOrDefault(c => c.IsMergeChangeset && c.MergeChangesetDatas.MergeIntoBranch == path && c.MergeChangesetDatas.BeforeMergeChangesetId < firstChangeset);
             if (firstChangesetOfBranch != null)
@@ -121,7 +124,7 @@ namespace Sep.Git.Tfs.VsFake
 
             public string Committer
             {
-                get { return "todo"; }
+                get { return _changeset.Committer ?? "todo"; }
             }
 
             public DateTime CreationDate
@@ -131,7 +134,7 @@ namespace Sep.Git.Tfs.VsFake
 
             public string Comment
             {
-                get { return _changeset.Comment; }
+                get { return _changeset.Comment.Replace("\n", "\r\n"); }
             }
 
             public int ChangesetId
@@ -215,7 +218,8 @@ namespace Sep.Git.Tfs.VsFake
             TemporaryFile IItem.DownloadFile()
             {
                 var temp = new TemporaryFile();
-                using(var writer = new StreamWriter(temp))
+                using(var stream = File.Create(temp))
+                using(var writer = new BinaryWriter(stream))
                     writer.Write(_change.Content);
                 return temp;
             }
@@ -394,22 +398,67 @@ namespace Sep.Git.Tfs.VsFake
         public IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, int lastChangesetIdToCheck = -1, string tfsPathParentBranch = null)
         {
             var firstChangesetOfBranch = _script.Changesets.FirstOrDefault(c => c.IsBranchChangeset && c.BranchChangesetDatas.BranchPath == tfsPathBranchToCreate);
+            var rootBranches = new List<RootBranch>();
+            var branchChangeset = _script.Changesets.Where(c => c.IsBranchChangeset).ToList();
             if (firstChangesetOfBranch != null)
-                return new List<RootBranch> { new RootBranch(firstChangesetOfBranch.BranchChangesetDatas.RootChangesetId, tfsPathBranchToCreate) };
-            return new List<RootBranch> { new RootBranch(-1, tfsPathBranchToCreate) };
+            {
+                do
+                {
+                    var branch = new RootBranch(firstChangesetOfBranch.BranchChangesetDatas.RootChangesetId,
+                        firstChangesetOfBranch.BranchChangesetDatas.BranchPath);
+                    branch.IsRenamedBranch = DeletedBranchesPathes.Contains(branch.TfsBranchPath);
+                    rootBranches.Add(branch);
+                    firstChangesetOfBranch = branchChangeset.FirstOrDefault(
+                            c => c.BranchChangesetDatas.BranchPath == firstChangesetOfBranch.BranchChangesetDatas.ParentBranch);
+                } while (firstChangesetOfBranch != null);
+                rootBranches.Reverse();
+                return rootBranches;
+            }
+            rootBranches.Add(new RootBranch(-1, tfsPathBranchToCreate));
+            return rootBranches;
+        }
+
+        private List<string> _deletedBranchesPathes;
+        List<string> DeletedBranchesPathes
+        {
+            get
+            {
+                return _deletedBranchesPathes ?? (_deletedBranchesPathes = _script.Changesets.Where(c => c.IsBranchChangeset &&
+                      c.Changes.Any(ch => ch.ChangeType == TfsChangeType.Delete && ch.RepositoryPath == c.BranchChangesetDatas.ParentBranch))
+                      .Select(b => b.BranchChangesetDatas.ParentBranch).ToList());
+            }
         }
 
         public IEnumerable<IBranchObject> GetBranches(bool getDeletedBranches = false)
         {
+            var renamings = _script.Changesets.Where(
+                c => c.IsBranchChangeset &&
+                DeletedBranchesPathes.Any(b => b == c.BranchChangesetDatas.BranchPath)).ToList();
+            
             var branches = new List<IBranchObject>();
             branches.AddRange(_script.RootBranches.Select(b => new MockBranchObject { IsRoot = true, Path = b.BranchPath, ParentPath = null }));
             branches.AddRange(_script.Changesets.Where(c=>c.IsBranchChangeset).Select(c => new MockBranchObject
                     {
                         IsRoot = false,
                         Path = c.BranchChangesetDatas.BranchPath,
-                        ParentPath = c.BranchChangesetDatas.ParentBranch
+                        ParentPath = GetRealRootBranch(renamings, c.BranchChangesetDatas.ParentBranch)
                     }));
+            if (!getDeletedBranches)
+                branches.RemoveAll(b => DeletedBranchesPathes.Contains(b.Path));
+
             return branches;
+        }
+
+        private string GetRealRootBranch(List<ScriptedChangeset> deletedBranches, string branchPath)
+        {
+            var realRoot = branchPath;
+            while (true)
+            {
+                var parent = deletedBranches.FirstOrDefault(b => b.BranchChangesetDatas.BranchPath == realRoot);
+                if (parent == null)
+                    return realRoot;
+                realRoot = parent.BranchChangesetDatas.ParentBranch;
+            }
         }
         #endregion
 
@@ -470,6 +519,11 @@ namespace Sep.Git.Tfs.VsFake
         }
 
         public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int QueueGatedCheckinBuild(Uri value, string buildDefinitionName, string shelvesetName, string checkInTicket)
         {
             throw new NotImplementedException();
         }

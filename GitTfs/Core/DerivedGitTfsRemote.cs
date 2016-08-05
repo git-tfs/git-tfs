@@ -150,7 +150,7 @@ namespace Sep.Git.Tfs.Core
             set { throw DerivedRemoteException; }
         }
 
-        public long MaxChangesetId
+        public int MaxChangesetId
         {
             get { throw DerivedRemoteException; }
             set { throw DerivedRemoteException; }
@@ -195,7 +195,7 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, long shaRootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null)
+        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int shaRootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null, IRenameResult renameResult = null)
         {
             throw new NotImplementedException();
         }
@@ -205,12 +205,12 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public IFetchResult Fetch(int lastChangesetIdToFetch = -1, bool stopOnFailMergeCommit = false)
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false,  int lastChangesetIdToFetch = -1, IRenameResult renameResult = null)
         {
             throw DerivedRemoteException;
         }
 
-        public IFetchResult FetchWithMerge(long mergeChangesetId, bool stopOnFailMergeCommit = false, params string[] parentCommitsHashes)
+        public IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes)
         {
             throw DerivedRemoteException;
         }
@@ -225,12 +225,12 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public void Unshelve(string a, string b, string c, Action<Exception> h)
+        public void Unshelve(string a, string b, string c, Action<Exception> h, bool force)
         {
             throw DerivedRemoteException;
         }
 
-        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, bool evaluateCheckinPolicies)
+        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies)
         {
             throw DerivedRemoteException;
         }
@@ -240,17 +240,17 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public long CheckinTool(string head, TfsChangesetInfo parentChangeset)
+        public int CheckinTool(string head, TfsChangesetInfo parentChangeset)
         {
             throw DerivedRemoteException;
         }
 
-        public long Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
+        public int Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             throw DerivedRemoteException;
         }
 
-        public long Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
+        public int Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             throw DerivedRemoteException;
         }
@@ -265,12 +265,12 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
-        public ITfsChangeset GetChangeset(long changesetId)
+        public ITfsChangeset GetChangeset(int changesetId)
         {
             throw DerivedRemoteException;
         }
 
-        public void UpdateTfsHead(string commitHash, long changesetId)
+        public void UpdateTfsHead(string commitHash, int changesetId)
         {
             throw DerivedRemoteException;
         }

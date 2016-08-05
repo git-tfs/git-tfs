@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs
                           GitTfsPrefix +
                           "-id:\\s+" +
                           "\\[(?<url>.+)\\]" +
-                          "(?<repository>.+)?;" +
+                          "(?<repository>\\$.+)?;" +
                           "C(?<changeset>\\d+)" +
                           "\\s*$", RegexOptions.Multiline|RegexOptions.Compiled);
         // e.g. git-tfs-work-item: 24 associate
@@ -69,6 +69,11 @@ namespace Sep.Git.Tfs
         public const string IgnoreNotInitBranches = GitTfsPrefix + ".ignore-not-init-branches";
 
         public const string BatchSize = GitTfsPrefix + ".batch-size";
+        public static string InitialChangeset = GitTfsPrefix + ".initial-changeset";
+        public static string MessageForceVersion = Environment.NewLine
+            + "Note: If you want to force git-tfs to use another version of the tfs client library,"
+            + Environment.NewLine
+            + "set the environment variable `GIT_TFS_CLIENT` with the wished version (ie: '2013' for Visual Studio 2013,...)";
 
         public const string SkipChangeSets = GitTfsPrefix + ".skip-changesets";
     }
