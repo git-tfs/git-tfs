@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using StructureMap;
 using LibGit2Sharp;
+using Sep.Git.Tfs.Commands;
 using Branch = LibGit2Sharp.Branch;
 
 namespace Sep.Git.Tfs.Core
@@ -270,7 +271,20 @@ namespace Sep.Git.Tfs.Core
             return GetTfsRemotes().ContainsKey(remoteId);
         }
 
-        public bool HasRef(string gitRef)
+        public bool IsInSameTeamProjectAsDefaultRepository(string tfsRepositoryPath)
+        {
+            IGitTfsRemote defaultRepository;
+            if (!this.GetTfsRemotes().TryGetValue(GitTfsConstants.DefaultRepositoryId, out defaultRepository))
+            {
+                return true;
+            }
+
+            var teamProjectPath = defaultRepository.TfsRepositoryPath.ToTfsTeamProjectRepositoryPath();
+
+            return tfsRepositoryPath.StartsWith(teamProjectPath);
+        }
+
+		public bool HasRef(string gitRef)
         {
             return _repository.Refs[gitRef] != null;
         }

@@ -942,7 +942,9 @@ namespace Sep.Git.Tfs.Core
 
         private string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
         {
-            var gitBranchName = Repository.AssertValidBranchName(tfsRepositoryPath.ToGitBranchNameFromTfsRepositoryPath());
+            var includeTeamProjectName = !Repository.IsInSameTeamProjectAsDefaultRepository(tfsRepositoryPath);
+            var gitBranchName = tfsRepositoryPath.ToGitBranchNameFromTfsRepositoryPath(includeTeamProjectName);
+            gitBranchName = Repository.AssertValidBranchName(gitBranchName);
             stdout.WriteLine("The name of the local branch will be : " + gitBranchName);
             return gitBranchName;
         }
