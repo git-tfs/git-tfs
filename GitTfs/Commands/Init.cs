@@ -190,12 +190,36 @@ namespace Sep.Git.Tfs.Commands
             return expectedRefName.Trim('/');
         }
 
-        public static string ToGitBranchNameFromTfsRepositoryPath(this string tfsRepositoryPath)
+        public static string ToGitBranchNameFromTfsRepositoryPath(this string tfsRepositoryPath, bool includeTeamProjectName = false)
         {
+            if (includeTeamProjectName)
+            {
+                return tfsRepositoryPath
+                    .Replace("$/", String.Empty)
+                    .ToGitRefName();
+            }
+
             string gitBranchNameExpected = tfsRepositoryPath.IndexOf("$/") == 0
                 ? tfsRepositoryPath.Remove(0, tfsRepositoryPath.IndexOf('/', 2) + 1)
                 : tfsRepositoryPath;
+
             return gitBranchNameExpected.ToGitRefName();
+        }
+
+        public static string ToTfsTeamProjectRepositoryPath(this string tfsRepositoryPath)
+        {
+            if (!tfsRepositoryPath.StartsWith("$/"))
+            {
+                return tfsRepositoryPath;
+            }
+
+            var index = tfsRepositoryPath.IndexOf('/', 2);
+            if (index == -1)
+            {
+                return tfsRepositoryPath;
+            }
+
+            return tfsRepositoryPath.Remove(index, tfsRepositoryPath.Length - index);
         }
 
         public static string ToLocalGitRef(this string refName)
