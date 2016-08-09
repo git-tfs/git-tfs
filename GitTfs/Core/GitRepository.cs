@@ -284,7 +284,7 @@ namespace Sep.Git.Tfs.Core
             return tfsRepositoryPath.StartsWith(teamProjectPath);
         }
 
-		public bool HasRef(string gitRef)
+        public bool HasRef(string gitRef)
         {
             return _repository.Refs[gitRef] != null;
         }
