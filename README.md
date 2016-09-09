@@ -179,7 +179,7 @@ You could also install, the Team Foundation Server Object Model for [Tfs 2010](h
 ## Contributing
 Contributions are always welcome. Thanks to all our [contributors](https://github.com/git-tfs/git-tfs/graphs/contributors)!
 
-There are some simple [guidelines](CONTRIBUTING.md).
+Please, read our short and simple [guidelines](CONTRIBUTING.md) and our doc on how to use [paket](doc/paket.md), the package manager we use.
 
 Especially, don't forget to set `core.autocrlf` to `true` (`git config core.autocrlf true`), and indentation using 4 spaces.
 
