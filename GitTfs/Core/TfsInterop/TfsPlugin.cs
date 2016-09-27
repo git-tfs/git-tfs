@@ -121,7 +121,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 string folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 string assemblyPath = Path.Combine(folderPath, VsPluginAssemblyFolder, new AssemblyName(args.Name).Name + ".dll");
                 if (File.Exists(assemblyPath) == false) return null;
-                Assembly assembly = Assembly.LoadFrom(assemblyPath);
+                Assembly assembly = Assembly.LoadFile(assemblyPath);
                 return assembly;
             }
 
