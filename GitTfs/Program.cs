@@ -111,7 +111,7 @@ namespace Sep.Git.Tfs
             // Step 3. Set target properties 
             consoleTarget.Layout = @"${message}";
             fileTarget.FileName = @"${specialfolder:LocalApplicationData}\git-tfs\" + GitTfsConstants.LogFileName;
-            fileTarget.Layout = "${message}";
+            fileTarget.Layout = "${longdate} [${level}] ${message}";
 
             // Step 4. Define rules
             var consoleRule = new LoggingRule("*", LogLevel.Info, consoleTarget);
@@ -123,7 +123,6 @@ namespace Sep.Git.Tfs
             // Step 5. Activate the configuration
             LogManager.Configuration = config;
 
-            // Example usage
             var logger = LogManager.GetLogger("git-tfs");
 
             Trace.Listeners.Add(new NLogTraceListener());
