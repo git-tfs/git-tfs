@@ -58,6 +58,7 @@ NUGET
     Microsoft.Win32.Primitives (4.0.1) - framework: >= net461
     MSBuildTasks (1.4.0.45) - framework: >= net40
     Newtonsoft.Json (9.0.1) - framework: >= net45
+    NLog (4.3.9)
     NuGet.CommandLine (3.3)
     System.Collections (4.0.11) - framework: >= net461
     System.Collections.Concurrent (4.0.12) - framework: >= net461
