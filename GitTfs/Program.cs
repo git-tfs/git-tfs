@@ -128,6 +128,10 @@ namespace Sep.Git.Tfs
 
             Trace.Listeners.Add(new NLogTraceListener());
 
+            var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
+            string fileName = fileTarget.FileName.Render(logEventInfo);
+            Trace.TraceInformation("Logs store in file: " + fileName);
+
             return logger;
         }
 
