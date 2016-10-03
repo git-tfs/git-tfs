@@ -1,5 +1,5 @@
 ﻿#appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
-version: 0.25.0.{build}
+version: 0.25.1.{build}
 platform: Any CPU
 clone_folder: c:\gittfs
 clone_depth: 1
