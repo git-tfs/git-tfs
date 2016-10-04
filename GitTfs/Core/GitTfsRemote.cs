@@ -325,9 +325,12 @@ namespace Sep.Git.Tfs.Core
             var latestChangesetId = GetLatestChangesetId();
             if (lastChangesetIdToFetch != -1)
                 latestChangesetId = Math.Min(latestChangesetId, lastChangesetIdToFetch);
-            // TFS 2010 doesn't like when we ask for history past its last changeset.
+
             if (MaxChangesetId >= latestChangesetId)
+            {
+                Trace.WriteLine("TFS 2010 doesn't like when we ask for history past its last changeset.");
                 return fetchResult;
+            }
                         
             bool fetchRetrievedChangesets;
             do
