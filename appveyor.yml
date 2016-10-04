@@ -12,7 +12,7 @@ install:
 before_build:
   - ps: $env:Config = "Release"
 build_script:
-  - msbuild GitTfs.sln /t:GitTfs_Vs2010 /t:GitTfs_Vs2012 /t:GitTfs_Vs2013 /t:GitTfs_Vs2015 /t:GitTfsTest /t:GitTfs_Setup /verbosity:minimal /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
+  - msbuild GitTfs.sln /t:GitTfs_Vs2010 /t:GitTfs_Vs2012 /t:GitTfs_Vs2013 /t:GitTfs_Vs2015 /t:GitTfsTest /verbosity:minimal /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
 after_build:
   - ps: |
       if ( ! (Test-Path -Path "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config\NativeBinaries")) {
