@@ -102,7 +102,7 @@ namespace Sep.Git.Tfs.Commands
                             else
                                 throw new GitTfsException("error: 'branches' parameter should be of value none/auto/all.");
                         } },
-                    { "batch-size=", "Size of a the batch of tfs changesets fetched (-1 for all in one batch)",
+                    { "batch-size=", "Size of the batch of tfs changesets fetched (-1 for all in one batch)",
                         v => BatchSizeOption = v },
                     { "c|changeset=", "The changeset to clone from (must be a number)",
                         v => InitialChangeset = Convert.ToInt32(v) },
