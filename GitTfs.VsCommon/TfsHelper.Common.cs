@@ -310,10 +310,11 @@ namespace Sep.Git.Tfs.VsCommon
                         GetRelevantChangesetBasedOnChangeType(mergedItemsToFirstChangesetInBranchToCreate, tfsPathParentBranch, tfsPathBranchToCreate, out renameFromBranch);
 
                     AddNewRootBranch(rootBranches, new RootBranch(rootChangesetInParentBranch, tfsPathBranchToCreate));
-                    if(renameFromBranch != null)
-                        Trace.WriteLine("Found original branch '" + renameFromBranch + "' (renamed in branch '" + tfsPathBranchToCreate + "')");
                     if (renameFromBranch != null)
+                    {
+                        Trace.WriteLine("Found original branch '" + renameFromBranch + "' (renamed in branch '" + tfsPathBranchToCreate + "')");
                         GetRootChangesetForBranch(rootBranches, renameFromBranch);
+                    }
                 }
                 catch (VersionControlException)
                 {
@@ -1369,7 +1370,7 @@ namespace Sep.Git.Tfs.VsCommon
             Trace.TraceInformation("Waiting for gated check-in build result...");
             do
             {
-                //Trace.TraceInformation(".");
+                Console.Write(".");
                 System.Threading.Thread.Sleep(5000);
                 queuedBuild.Refresh(QueryOptions.Definitions);
             } while (queuedBuild.Build == null || !queuedBuild.Build.BuildFinished);

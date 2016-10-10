@@ -47,10 +47,7 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         public void CommandNoisy(params string[] command)
         {
-            var textWriter = new StringWriter();
-            CommandOutputPipe(stdout => textWriter.Write(stdout.ReadToEnd()), command);
-            Trace.TraceInformation(textWriter.ToString());
-
+            CommandOutputPipe(stdout => Trace.TraceInformation(stdout.ReadToEnd()), command);
         }
 
         /// <summary>

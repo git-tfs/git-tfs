@@ -42,12 +42,12 @@ namespace Sep.Git.Tfs
 
         public int Run(IList<string> args)
         {
+            InitializeGlobals();
             _globals.CommandLineRun = "git tfs " + string.Join(" ", args);
             var command = ExtractCommand(args);
             var unparsedArgs = ParseOptions(command, args);
             UpdateLoggerOnDebugging();
             Trace.WriteLine("Command run:" + _globals.CommandLineRun);
-            InitializeGlobals();
             if (RequiresValidGitRepository(command)) AssertValidGitRepository();
             ParseAuthors();
             return Main(command, unparsedArgs);
