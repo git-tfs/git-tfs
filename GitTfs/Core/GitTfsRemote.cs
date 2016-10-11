@@ -470,12 +470,12 @@ namespace Sep.Git.Tfs.Core
                 }
 
                 if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
-                    log.Log += "\n" + GitTfsConstants.GitTfsPolicyOverrideCommentPrefix + changeset.Summary.PolicyOverrideComment;
+                    log.Log += "\n" + GitTfsConstants.GitTfsPolicyOverrideCommentPrefix + " " + changeset.Summary.PolicyOverrideComment;
 
                 foreach (var checkinNote in changeset.Summary.CheckinNotes)
                 {
                     if (!string.IsNullOrWhiteSpace(checkinNote.Name) && !string.IsNullOrWhiteSpace(checkinNote.Value))
-                        log.Log += "\n" + GitTfsConstants.GitTfsPrefix + "-" + CamelCaseToDelimitedStringConverter.Convert(checkinNote.Name, "-") + ":" + checkinNote.Value;
+                        log.Log += "\n" + GitTfsConstants.GitTfsPrefix + "-" + CamelCaseToDelimitedStringConverter.Convert(checkinNote.Name, "-") + ": " + checkinNote.Value;
                 }
             }
 
@@ -504,12 +504,12 @@ namespace Sep.Git.Tfs.Core
             }
 
             if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
-                metadatas.Append("\nPolicy Override Comment:" + changeset.Summary.PolicyOverrideComment);
+                metadatas.Append("\nPolicy Override Comment: " + changeset.Summary.PolicyOverrideComment);
 
             foreach (var checkinNote in changeset.Summary.CheckinNotes)
             {
                 if (!string.IsNullOrWhiteSpace(checkinNote.Name) && !string.IsNullOrWhiteSpace(checkinNote.Value))
-                    metadatas.Append("\n" + checkinNote.Name + ":" + checkinNote.Value);
+                    metadatas.Append("\n" + checkinNote.Name + ": " + checkinNote.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(changeset.OmittedParentBranch))
