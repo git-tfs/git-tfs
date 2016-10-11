@@ -18,6 +18,8 @@ namespace Sep.Git.Tfs
     public class Program
     {
         private static ILogger Logger;
+        private static string _logFilePath;
+
         [STAThreadAttribute]
         public static void Main(string[] args)
         {
@@ -60,6 +62,8 @@ namespace Sep.Git.Tfs
             {
                 ReportInternalException(e);
             }
+
+            Trace.TraceWarning("All the logs could be found in the log file: " + _logFilePath);
         }
 
         private static void ReportInternalException(Exception e)
@@ -128,8 +132,7 @@ namespace Sep.Git.Tfs
             Trace.Listeners.Add(new NLogTraceListener());
 
             var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
-            string fileName = fileTarget.FileName.Render(logEventInfo);
-            Trace.TraceInformation("Logs store in file: " + fileName);
+            _logFilePath = fileTarget.FileName.Render(logEventInfo);
 
             return logger;
         }
