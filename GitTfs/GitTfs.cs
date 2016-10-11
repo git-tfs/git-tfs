@@ -23,11 +23,10 @@ namespace Sep.Git.Tfs
         private readonly IContainer _container;
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
-        private ILogger _logger;
         private Bootstrapper _bootstrapper;
 
         public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container,
-            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, ILogger logger, Bootstrapper bootstrapper)
+            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, Bootstrapper bootstrapper)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
@@ -36,7 +35,6 @@ namespace Sep.Git.Tfs
             _gitTfsVersionProvider = gitTfsVersionProvider;
             _runner = runner;
             _globals = globals;
-            _logger = logger;
             _bootstrapper = bootstrapper;
         }
 
@@ -113,7 +111,6 @@ namespace Sep.Git.Tfs
 
         public void InitializeGlobals()
         {
-            _globals.Logger = _logger;
             var git = _container.GetInstance<IGitHelpers>();
             try
             {

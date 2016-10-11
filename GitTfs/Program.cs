@@ -17,7 +17,6 @@ namespace Sep.Git.Tfs
 {
     public class Program
     {
-        private static ILogger Logger;
         private static string _logFilePath;
 
         [STAThreadAttribute]
@@ -89,52 +88,56 @@ namespace Sep.Git.Tfs
 
         private static void Initialize(ConfigurationExpression initializer)
         {
-            Logger = GetLogger();
+            ConfigureLogger();
             var tfsPlugin = TfsPlugin.Find();
             initializer.Scan(x => { Initialize(x); tfsPlugin.Initialize(x); });
             initializer.For<IGitRepository>().Add<GitRepository>();
-            initializer.For<ILogger>().Add(Logger);
             AddGitChangeTypes(initializer);
             DoCustomConfiguration(initializer);
             tfsPlugin.Initialize(initializer);
-
         }
 
-        private static ILogger GetLogger()
+        private static void ConfigureLogger()
         {
-            // Step 1. Create configuration object 
-            var config = new LoggingConfiguration();
+            try
+            {
+                //Step 1.Create configuration object
+                var config = new LoggingConfiguration();
 
-            // Step 2. Create targets and add them to the configuration 
-            var consoleTarget = new ColoredConsoleTarget();
-            config.AddTarget("console", consoleTarget);
+                // Step 2. Create targets and add them to the configuration 
+                var consoleTarget = new ColoredConsoleTarget();
+                config.AddTarget("console", consoleTarget);
 
-            var fileTarget = new FileTarget();
-            config.AddTarget("file", fileTarget);
+                var fileTarget = new FileTarget();
+                config.AddTarget("file", fileTarget);
 
-            // Step 3. Set target properties 
-            consoleTarget.Layout = @"${message}";
-            fileTarget.FileName = @"${specialfolder:LocalApplicationData}\git-tfs\" + GitTfsConstants.LogFileName;
-            fileTarget.Layout = "${longdate} [${level}] ${message}";
+                // Step 3. Set target properties 
+                consoleTarget.Layout = @"${message}";
+                fileTarget.FileName = @"${specialfolder:LocalApplicationData}\git-tfs\" + GitTfsConstants.LogFileName;
+                fileTarget.Layout = "${longdate} [${level}] ${message}";
 
-            // Step 4. Define rules
-            var consoleRule = new LoggingRule("*", LogLevel.Info, consoleTarget);
-            config.LoggingRules.Add(consoleRule);
+                // Step 4. Define rules
+                var consoleRule = new LoggingRule("*", LogLevel.Info, consoleTarget);
+                config.LoggingRules.Add(consoleRule);
 
-            var fileRule = new LoggingRule("*", LogLevel.Debug, fileTarget);
-            config.LoggingRules.Add(fileRule);
+                var fileRule = new LoggingRule("*", LogLevel.Debug, fileTarget);
+                config.LoggingRules.Add(fileRule);
 
-            // Step 5. Activate the configuration
-            LogManager.Configuration = config;
+                // Step 5. Activate the configuration
+                LogManager.Configuration = config;
 
-            var logger = LogManager.GetLogger("git-tfs");
+                var logger = LogManager.GetLogger("git-tfs");
 
-            Trace.Listeners.Add(new NLogTraceListener());
+                Trace.Listeners.Add(new NLogTraceListener());
 
-            var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
-            _logFilePath = fileTarget.FileName.Render(logEventInfo);
-
-            return logger;
+                var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
+                _logFilePath = fileTarget.FileName.Render(logEventInfo);
+            }
+            catch(Exception ex)
+            {
+                Trace.Listeners.Add(new ConsoleTraceListener());
+                Trace.TraceWarning("Fail to enable logging in file due to error:" + ex.Message);
+            }
         }
 
         public static void AddGitChangeTypes(ConfigurationExpression initializer)

@@ -130,8 +130,6 @@ For more information, see https://github.com/git-tfs/git-tfs/issues/448 ");
             get { return 200; }
         }
 
-        public ILogger Logger { get; set; }
-
         public Bootstrapper Bootstrapper { get; set; }
         public string CommandLineRun { get; set; }
     }
