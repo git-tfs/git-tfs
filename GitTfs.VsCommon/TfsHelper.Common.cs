@@ -568,21 +568,11 @@ namespace Sep.Git.Tfs.VsCommon
                         Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
                     });
             }
-            foreach (var checkinNote in changeset.CheckinNote.Values)
-            {
-                switch (checkinNote.Name)
+            tfsChangeset.Summary.CheckinNotes = changeset.CheckinNote.Values.Select(note => new TfsCheckinNote
                 {
-                    case GitTfsConstants.CodeReviewer:
-                        tfsChangeset.Summary.CodeReviewer = checkinNote.Value;
-                        break;
-                    case GitTfsConstants.SecurityReviewer:
-                        tfsChangeset.Summary.SecurityReviewer = checkinNote.Value;
-                        break;
-                    case GitTfsConstants.PerformanceReviewer:
-                        tfsChangeset.Summary.PerformanceReviewer = checkinNote.Value;
-                        break;
-                }
-            }
+                    Name = note.Name,
+                    Value = note.Value
+                });
             tfsChangeset.Summary.PolicyOverrideComment = changeset.PolicyOverride.Comment;
             
             return tfsChangeset;

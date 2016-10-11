@@ -14,9 +14,6 @@ namespace Sep.Git.Tfs
         public const string TfsRoot = "$/";
         public const string GitTfsPrefix = "git-tfs";
         public const string GitTfsWorkItemPrefix = GitTfsPrefix + "-work-item:";
-        public const string GitTfsCodeReviewerPrefix = GitTfsPrefix + "-code-reviewer:";
-        public const string GitTfsSecurityReviewerPrefix = GitTfsPrefix + "-security-reviewer:";
-        public const string GitTfsPerformanceReviewerPrefix = GitTfsPrefix + "-performance-reviewer:";
         public const string GitTfsPolicyOverrideCommentPrefix = GitTfsPrefix + "-force:";
        // e.g. git-tfs-id: [http://team:8080/]$/sandbox;C123
         public const string TfsCommitInfoFormat = "git-tfs-id: [{0}]{1};C{2}";
@@ -54,10 +51,6 @@ namespace Sep.Git.Tfs
         /// where {0} is the owning remote and {1} is the prefix
         /// </summary>
         public const string RemoteSubtreeFormat = "{0}_subtree/{1}";
-
-        public const string CodeReviewer = "Code Reviewer";
-        public const string SecurityReviewer = "Security Reviewer"; 
-        public const string PerformanceReviewer = "Performance Reviewer";
 
         public const string ExportMetadatasConfigKey = GitTfsPrefix + ".export-metadatas";
         public const string WorkspaceConfigKey = GitTfsPrefix + ".workspace-dir";

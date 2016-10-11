@@ -109,6 +109,7 @@
     <Compile Include="Core\GitTfsGatedCheckinException.cs" />
     <Compile Include="Core\GitTreeBuilder.cs" />
     <Compile Include="Core\IGitTreeBuilder.cs" />
+    <Compile Include="Core\ITfsCheckinNote.cs" />
     <Compile Include="Core\ITfsWorkitem.cs" />
     <Compile Include="Commands\Branch.cs" />
     <Compile Include="Core\BranchVisitors\BranchTreeContainsPathVisitor.cs" />
@@ -188,6 +189,7 @@
     <Compile Include="Core\TfsInterop\NullIdentity.cs" />
     <Compile Include="Core\TfsInterop\IChangeset.cs" />
     <Compile Include="Core\TfsTreeEntry.cs" />
+    <Compile Include="Core\TfsCheckinNote.cs" />
     <Compile Include="Core\TfsWorkitem.cs" />
     <Compile Include="Core\TfsWorkspace.cs" />
     <Compile Include="Core\TfsWriter.cs" />
@@ -197,6 +199,7 @@
     <Compile Include="Util\Bouncer.cs" />
     <Compile Include="Util\ChangeSieve.cs" />
     <Compile Include="Util\CheckinOptionsExtensions.cs" />
+    <Compile Include="Util\CamelCaseToDelimitedStringConverter.cs" />
     <Compile Include="Util\ConfigPropertyLoader.cs" />
     <Compile Include="Util\ExportMetadatasInitializer.cs" />
     <Compile Include="Util\PathResolver.cs" />
