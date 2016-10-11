@@ -21,6 +21,7 @@ The fetch command fetch all the new changesets from a TFS remote
                                    initialized tfs remotes
           --authors=VALUE        Path to an Authors file to map TFS users to Git
                                    users
+          --batch-size=VALUE     Size of the batch of tfs changesets fetched (-1 for all in one batch)
           --ignore-regex=VALUE   a regex of files to ignore
           --no-metadata          leave out the 'git-tfs-id:' tag in commit
                                    messages

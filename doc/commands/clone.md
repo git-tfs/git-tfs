@@ -39,7 +39,7 @@ a TFS source tree and fetch all the changesets
 								 initialize the merged branches
 								 * all: Manage merged changesets and initialize
 								 all the branches during the clone
-		  --batch-size=VALUE          Size of a the batch of tfs changesets fetched (-1 for all in one batch)
+		  --batch-size=VALUE     Size of the batch of tfs changesets fetched (-1 for all in one batch)
       -c, --changeset=VALUE      The changeset to clone from (must be a number)
 		  --resumable            if an error occurred, try to continue when you restart clone
 								 with same parameters
