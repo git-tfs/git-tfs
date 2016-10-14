@@ -42,8 +42,8 @@ namespace Sep.Git.Tfs.Util
 
             _namedChanges = changeset.Changes.Select(c => new NamedChange
             {
-                    Info = _resolver.GetGitObject(c.Item.ServerItem),
-                    Change = c,
+                Info = _resolver.GetGitObject(c.Item.ServerItem),
+                Change = c,
             });
         }
 
@@ -60,7 +60,7 @@ namespace Sep.Git.Tfs.Util
                     _renameBranchCommmit = NamedChanges.Any(c =>
                         c.Change.Item.ItemType == TfsItemType.Folder
                             && c.GitPath == string.Empty
-                            && c.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete, TfsChangeType.Rename));
+                            && c.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete));
                 }
                 return _renameBranchCommmit.Value;
             }
@@ -83,7 +83,8 @@ namespace Sep.Git.Tfs.Util
             if (DeletesProject)
                 return Enumerable.Empty<ApplicableChange>();
 
-            var compartments = new {
+            var compartments = new
+            {
                 Deleted = new List<ApplicableChange>(),
                 Updated = new List<ApplicableChange>(),
             };
@@ -190,7 +191,7 @@ namespace Sep.Git.Tfs.Util
                                                                      TfsRecursionType.None, null, 1, previousChangeset,
                                                                      1, true, false, false);
                     var previousChange = history.FirstOrDefault();
-                    if(previousChange == null)
+                    if (previousChange == null)
                     {
                         Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
                         return null;
