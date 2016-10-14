@@ -470,16 +470,13 @@ namespace Sep.Git.Tfs.Core
                 }
 
                 if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
-                    log.Log += "\n" + GitTfsConstants.GitTfsPolicyOverrideCommentPrefix + changeset.Summary.PolicyOverrideComment;
+                    log.Log += "\n" + GitTfsConstants.GitTfsPolicyOverrideCommentPrefix + " " + changeset.Summary.PolicyOverrideComment;
 
-                if (!string.IsNullOrWhiteSpace(changeset.Summary.CodeReviewer))
-                    log.Log += "\n" + GitTfsConstants.GitTfsCodeReviewerPrefix + changeset.Summary.CodeReviewer;
-
-                if (!string.IsNullOrWhiteSpace(changeset.Summary.SecurityReviewer))
-                    log.Log += "\n" + GitTfsConstants.GitTfsSecurityReviewerPrefix + changeset.Summary.SecurityReviewer;
-
-                if (!string.IsNullOrWhiteSpace(changeset.Summary.PerformanceReviewer))
-                    log.Log += "\n" + GitTfsConstants.GitTfsPerformanceReviewerPrefix + changeset.Summary.PerformanceReviewer;
+                foreach (var checkinNote in changeset.Summary.CheckinNotes)
+                {
+                    if (!string.IsNullOrWhiteSpace(checkinNote.Name) && !string.IsNullOrWhiteSpace(checkinNote.Value))
+                        log.Log += "\n" + GitTfsConstants.GitTfsPrefix + "-" + CamelCaseToDelimitedStringConverter.Convert(checkinNote.Name, "-") + ": " + checkinNote.Value;
+                }
             }
 
             var commitSha = Commit(log);
@@ -507,16 +504,13 @@ namespace Sep.Git.Tfs.Core
             }
 
             if (!string.IsNullOrWhiteSpace(changeset.Summary.PolicyOverrideComment))
-                metadatas.Append("\nPolicy Override Comment:" + changeset.Summary.PolicyOverrideComment);
+                metadatas.Append("\nPolicy Override Comment: " + changeset.Summary.PolicyOverrideComment);
 
-            if (!string.IsNullOrWhiteSpace(changeset.Summary.CodeReviewer))
-                metadatas.Append("\nCode Reviewer:" + changeset.Summary.CodeReviewer);
-
-            if (!string.IsNullOrWhiteSpace(changeset.Summary.SecurityReviewer))
-                metadatas.Append("\nSecurity Reviewer:" + changeset.Summary.SecurityReviewer);
-
-            if (!string.IsNullOrWhiteSpace(changeset.Summary.PerformanceReviewer))
-                metadatas.Append("\nPerformance Reviewer:" + changeset.Summary.PerformanceReviewer);
+            foreach (var checkinNote in changeset.Summary.CheckinNotes)
+            {
+                if (!string.IsNullOrWhiteSpace(checkinNote.Name) && !string.IsNullOrWhiteSpace(checkinNote.Value))
+                    metadatas.Append("\n" + checkinNote.Name + ": " + checkinNote.Value);
+            }
 
             if (!string.IsNullOrWhiteSpace(changeset.OmittedParentBranch))
                 metadatas.Append("\nOmitted parent branch: " + changeset.OmittedParentBranch);
