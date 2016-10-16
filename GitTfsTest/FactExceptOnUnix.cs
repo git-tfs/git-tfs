@@ -15,19 +15,6 @@ namespace Sep.Git.Tfs.Test
         class FactExceptOnUnixTestCommand : FactCommand
         {
             public FactExceptOnUnixTestCommand(IMethodInfo method) : base(method) { }
-
-            public override MethodResult Execute(object testClass)
-            {
-                if(IsUnix())
-                    return new SkipResult(testMethod, DisplayName, "This test does not work on unix-like OSes yet.");
-
-                return base.Execute(testClass);
-            }
-
-            private bool IsUnix()
-            {
-                return Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
-            }
         }
     }
 }
