@@ -194,13 +194,9 @@ namespace Sep.Git.Tfs.Commands
                     properties.InitialChangeset = InitialChangeset.Value;
                     properties.PersistAllOverrides();
                     remote.QuickFetch(InitialChangeset.Value);
-                    remote.Fetch(stopOnFailMergeCommit);
-                }
-                else
-                {
-                    remote.Fetch(stopOnFailMergeCommit,upToChangeSet);
                 }
 
+                remote.Fetch(stopOnFailMergeCommit, upToChangeSet);
             }
             finally
             {

@@ -65,6 +65,11 @@ namespace Sep.Git.Tfs.VsFake
 
         #region read changesets
 
+        public SortedSet<long> ChangeSetNumbersToIgnore()
+        {
+            return new SortedSet<long>();
+        }
+
         public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
         {
             return _script.Changesets.LastOrDefault().Try(x => BuildTfsChangeset(x, remote));

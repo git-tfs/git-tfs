@@ -311,7 +311,7 @@ namespace Sep.Git.Tfs.Core
 
         public IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null)
         {
-            return FetchWithMerge(-1, stopOnFailMergeCommit,lastChangesetIdToFetch, renameResult);
+            return FetchWithMerge(-1, stopOnFailMergeCommit, lastChangesetIdToFetch, renameResult);
         }
 
         public IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes)
@@ -328,8 +328,11 @@ namespace Sep.Git.Tfs.Core
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
-                        
+
             bool fetchRetrievedChangesets;
+
+            var changeSetsToIgnore = Tfs.ChangeSetNumbersToIgnore();
+
             do
             {
                 var fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch);
@@ -339,10 +342,19 @@ namespace Sep.Git.Tfs.Core
                 foreach (var changeset in fetchedChangesets)
                 {
                     fetchRetrievedChangesets = true;
-
-                    fetchResult.NewChangesetCount++;
                     if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
                         return fetchResult;
+
+                    if (changeSetsToIgnore.Contains(changeset.Summary.ChangesetId))
+                    {
+                        stdout.WriteLine(
+                            "info: changeset " + changeset.Summary.ChangesetId + " is in the ignore list (config:"
+                            + GitTfsConstants.SkipChangeSets + ") and will be skipped");
+                        continue;
+                    }
+
+                    fetchResult.NewChangesetCount++;
+
                     string parentCommitSha = null;
                     if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                     {
