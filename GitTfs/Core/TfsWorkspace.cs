@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core.TfsInterop;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Core
 {
@@ -12,7 +13,6 @@ namespace Sep.Git.Tfs.Core
     {
         private readonly IWorkspace _workspace;
         private readonly string _localDirectory;
-        private readonly TextWriter _stdout;
         private readonly TfsChangesetInfo _contextVersion;
         private readonly CheckinOptions _checkinOptions;
         private readonly ITfsHelper _tfsHelper;
@@ -20,7 +20,7 @@ namespace Sep.Git.Tfs.Core
 
         public IGitTfsRemote Remote { get; private set; }
 
-        public TfsWorkspace(IWorkspace workspace, string localDirectory, TextWriter stdout, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper, CheckinPolicyEvaluator policyEvaluator)
+        public TfsWorkspace(IWorkspace workspace, string localDirectory, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper, CheckinPolicyEvaluator policyEvaluator)
         {
             _workspace = workspace;
             _policyEvaluator = policyEvaluator;
@@ -28,7 +28,6 @@ namespace Sep.Git.Tfs.Core
             _checkinOptions = checkinOptions;
             _tfsHelper = tfsHelper;
             _localDirectory = remote.Repository.IsBare ? Path.GetFullPath(localDirectory) : localDirectory;
-            _stdout = stdout;
 
             this.Remote = remote;
         }
@@ -47,7 +46,7 @@ namespace Sep.Git.Tfs.Core
             {
                 foreach (var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, null, shelveset.WorkItemInfo).Messages)
                 {
-                    _stdout.WriteLine("[Checkin Policy] " + message);
+                    Trace.TraceWarning("[Checkin Policy] " + message);
                 }
             }
             _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
@@ -98,11 +97,11 @@ namespace Sep.Git.Tfs.Core
                 {
                     if (options.Force && string.IsNullOrWhiteSpace(options.OverrideReason) == false)
                     {
-                        _stdout.WriteLine("[OVERRIDDEN] " + message);
+                        Trace.TraceWarning("[OVERRIDDEN] " + message);
                     }
                     else
                     {
-                        _stdout.WriteLine("[ERROR] " + message);
+                        Trace.TraceError("[ERROR] " + message);
                     }
                 }
                 if (!options.Force)
@@ -136,7 +135,7 @@ namespace Sep.Git.Tfs.Core
 
         private int LaunchGatedCheckinBuild(ReadOnlyCollection<KeyValuePair<string, Uri>> affectedBuildDefinitions, string shelvesetName, string checkInTicket)
         {
-            _stdout.WriteLine("Due to a gated check-in, a shelveset '" + shelvesetName + "' containing your changes has been created and need to be built before it can be committed.");
+            Trace.TraceInformation("Due to a gated check-in, a shelveset '" + shelvesetName + "' containing your changes has been created and need to be built before it can be committed.");
             KeyValuePair<string, Uri> buildDefinition;
             if (affectedBuildDefinitions.Count == 1)
             {
@@ -147,12 +146,12 @@ namespace Sep.Git.Tfs.Core
                 int choice;
                 do
                 {
-                    _stdout.WriteLine("Build definitions that can be used:");
+                    Trace.TraceInformation("Build definitions that can be used:");
                     for (int i = 0; i < affectedBuildDefinitions.Count; i++)
                     {
-                        _stdout.WriteLine((i + 1) + ": " + affectedBuildDefinitions[i].Key);
+                        Trace.TraceInformation((i + 1) + ": " + affectedBuildDefinitions[i].Key);
                     }
-                    _stdout.WriteLine("Please choose the build definition to trigger?");
+                    Trace.TraceInformation("Please choose the build definition to trigger?");
                 } while (!int.TryParse(Console.ReadLine(), out choice) || choice <= 0 || choice > affectedBuildDefinitions.Count);
                 buildDefinition = affectedBuildDefinitions.ElementAt(choice - 1);
             }
@@ -173,7 +172,7 @@ namespace Sep.Git.Tfs.Core
 
         public void Add(string path)
         {
-            _stdout.WriteLine(" add " + path);
+            Trace.TraceInformation(" add " + path);
             var added = _workspace.PendAdd(GetLocalPath(path));
             if (added != 1) throw new Exception("One item should have been added, but actually added " + added + " items.");
         }
@@ -181,18 +180,18 @@ namespace Sep.Git.Tfs.Core
         public void Edit(string path)
         {
             var localPath = GetLocalPath(path);
-            _stdout.WriteLine(" edit " + localPath);
+            Trace.TraceInformation(" edit " + localPath);
             GetFromTfs(localPath);
             var edited = _workspace.PendEdit(localPath);
             if (edited != 1)
             {
                 if (_checkinOptions.IgnoreMissingItems)
                 {
-                    _stdout.WriteLine("Warning: One item should have been edited, but actually edited " + edited + ". Ignoring item.");
+                    Trace.TraceWarning("Warning: One item should have been edited, but actually edited " + edited + ". Ignoring item.");
                 }
                 else if (edited == 0 && _checkinOptions.AddMissingItems)
                 {
-                    _stdout.WriteLine("Warning: One item should have been edited, but was not found. Adding the file instead.");
+                    Trace.TraceWarning("Warning: One item should have been edited, but was not found. Adding the file instead.");
                     Add(path);
                 }
                 else
@@ -205,7 +204,7 @@ namespace Sep.Git.Tfs.Core
         public void Delete(string path)
         {
             path = GetLocalPath(path);
-            _stdout.WriteLine(" delete " + path);
+            Trace.TraceInformation(" delete " + path);
             GetFromTfs(path);
             var deleted = _workspace.PendDelete(path);
             if (deleted != 1) throw new Exception("One item should have been deleted, but actually deleted " + deleted + " items.");
@@ -213,7 +212,7 @@ namespace Sep.Git.Tfs.Core
 
         public void Rename(string pathFrom, string pathTo, string score)
         {
-            _stdout.WriteLine(" rename " + pathFrom + " to " + pathTo + " (score: " + score + ")");
+            Trace.TraceInformation(" rename " + pathFrom + " to " + pathTo + " (score: " + score + ")");
             GetFromTfs(GetLocalPath(pathFrom));
             var result = _workspace.PendRename(GetLocalPath(pathFrom), GetLocalPath(pathTo));
             if (result != 1) throw new ApplicationException("Unable to rename item from " + pathFrom + " to " + pathTo);

@@ -9,7 +9,6 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitHelpers : IGitHelpers
     {
-        protected readonly TextWriter realStdout;
         private readonly IContainer _container;
 
         /// <summary>
@@ -18,9 +17,8 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         private static Encoding _encoding = new UTF8Encoding(false, true);
 
-        public GitHelpers(TextWriter stdout, IContainer container)
+        public GitHelpers(IContainer container)
         {
-            realStdout = stdout;
             _container = container;
         }
 
@@ -49,7 +47,7 @@ namespace Sep.Git.Tfs.Core
         /// </summary>
         public void CommandNoisy(params string[] command)
         {
-            CommandOutputPipe(stdout => realStdout.Write(stdout.ReadToEnd()), command);
+            CommandOutputPipe(stdout => Trace.TraceInformation(stdout.ReadToEnd()), command);
         }
 
         /// <summary>

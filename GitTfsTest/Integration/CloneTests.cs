@@ -9,7 +9,7 @@ namespace Sep.Git.Tfs.Test.Integration
     //NOTE: All timestamps in these tests must specify a time zone. If they don't, the local time zone will be used in the DateTime,
     //      but the commit timestamp will use the ToUniversalTime() version of the DateTime.
     //      This will cause the hashes to differ on computers in different time zones.
-    public class CloneTests : IDisposable
+    public class CloneTests : BaseTest, IDisposable
     {
         IntegrationHelper h;
 

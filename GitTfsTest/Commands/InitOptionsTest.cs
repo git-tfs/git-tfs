@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
-    public class InitOptionsTest
+    public class InitOptionsTest : BaseTest
     {
         private RhinoAutoMocker<InitOptions> mocks;
 

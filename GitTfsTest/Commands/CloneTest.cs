@@ -9,7 +9,7 @@ using Xunit.Extensions;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
-    public class CloneTest
+    public class CloneTest : BaseTest
     {
         [Theory]
         [InlineData("-u=login", "--username=xxx")]

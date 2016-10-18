@@ -1,11 +1,12 @@
 ﻿using Sep.Git.Tfs.Core.TfsInterop;
+using Sep.Git.Tfs.Test;
 using Sep.Git.Tfs.VsCommon;
 using StructureMap.AutoMocking;
 using Xunit;
 
 namespace GitTfsTest.Core
 {
-    public class TfsApiBridgeTest
+    public class TfsApiBridgeTest : BaseTest
     {
         private RhinoAutoMocker<TfsApiBridge> _mocks;
 

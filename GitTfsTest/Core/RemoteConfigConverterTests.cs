@@ -8,9 +8,9 @@ using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class RemoteConfigConverterTests
+    public class RemoteConfigConverterTests : BaseTest
     {
-        public class DumpTests
+        public class DumpTests : BaseTest
         {
             RemoteConfigConverter _dumper = new RemoteConfigConverter();
 
@@ -132,7 +132,7 @@ namespace Sep.Git.Tfs.Test.Core
             }
         }
 
-        public class LoadTests
+        public class LoadTests : BaseTest
         {
             RemoteConfigConverter _loader = new RemoteConfigConverter();
 

@@ -23,7 +23,6 @@ namespace Sep.Git.Tfs.Commands
     public class Branch : GitTfsCommand
     {
         private Globals globals;
-        private TextWriter stdout;
         private readonly Help helper;
         private readonly Cleanup cleanup;
         private readonly InitBranch initBranch;
@@ -63,10 +62,9 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public Branch(Globals globals, TextWriter stdout, Help helper, Cleanup cleanup, InitBranch initBranch, Rcheckin rcheckin)
+        public Branch(Globals globals, Help helper, Cleanup cleanup, InitBranch initBranch, Rcheckin rcheckin)
         {
             this.globals = globals;
-            this.stdout = stdout;
             this.helper = helper;
             this.cleanup = cleanup;
             this.initBranch = initBranch;
@@ -95,7 +93,7 @@ namespace Sep.Git.Tfs.Commands
             if (!IsCommandWellUsed())
                 return helper.Run(this);
 
-            globals.WarnOnGitVersion(stdout);
+            globals.WarnOnGitVersion();
 
             VerifyCloneAllRepository();
 
@@ -118,7 +116,7 @@ namespace Sep.Git.Tfs.Commands
 
             VerifyCloneAllRepository();
 
-            globals.WarnOnGitVersion(stdout);
+            globals.WarnOnGitVersion();
 
             if (ShouldRenameRemote)
                 return helper.Run(this);
@@ -142,7 +140,7 @@ namespace Sep.Git.Tfs.Commands
 
             VerifyCloneAllRepository();
 
-            globals.WarnOnGitVersion(stdout);
+            globals.WarnOnGitVersion();
 
             if (ShouldDeleteRemote)
                 return helper.Run(this);
@@ -172,20 +170,20 @@ namespace Sep.Git.Tfs.Commands
         {
             var newRemoteNameExpected = globals.Repository.AssertValidBranchName(newRemoteName.ToGitRefName());
             if (newRemoteNameExpected != newRemoteName)
-                stdout.WriteLine("The name of the branch after renaming will be : " + newRemoteNameExpected);
+                Trace.TraceInformation("The name of the branch after renaming will be : " + newRemoteNameExpected);
 
             if (globals.Repository.HasRemote(newRemoteNameExpected))
             {
                 throw new GitTfsException("error: this remote name is already used!");
             }
 
-            stdout.WriteLine("Cleaning before processing rename...");
+            Trace.TraceInformation("Cleaning before processing rename...");
             cleanup.Run();
 
             globals.Repository.MoveRemote(oldRemoteName, newRemoteNameExpected);
 
             if(globals.Repository.RenameBranch(oldRemoteName, newRemoteName) == null)
-                stdout.WriteLine("warning: no local branch found to rename");
+                Trace.TraceWarning("warning: no local branch found to rename");
 
             return GitTfsExitCodes.OK;
         }
@@ -227,7 +225,7 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException(string.Format("Error: Remote \"{0}\" not found!", remoteName));
             }
 
-            stdout.WriteLine("Cleaning before processing delete...");
+            Trace.TraceInformation("Cleaning before processing delete...");
             cleanup.Run();
 
             globals.Repository.DeleteTfsRemote(remote);
@@ -246,8 +244,8 @@ namespace Sep.Git.Tfs.Commands
                 {
                     var remote = globals.Repository.ReadTfsRemote(remoteId);
 
-                    stdout.WriteLine("\nTFS branch structure:");
-                    WriteRemoteTfsBranchStructure(remote.Tfs, stdout, remote.TfsRepositoryPath, tfsRemotes);
+                    Trace.TraceInformation("\nTFS branch structure:");
+                    WriteRemoteTfsBranchStructure(remote.Tfs, remote.TfsRepositoryPath, tfsRemotes);
                     return GitTfsExitCodes.OK;
                 }
                 else
@@ -260,18 +258,18 @@ namespace Sep.Git.Tfs.Commands
                     foreach (var branch in remote.Tfs.GetBranches().Where(b=>b.IsRoot))
                     {
                         var root = remote.Tfs.GetRootTfsBranchForRemotePath(branch.Path);
-                        var visitor = new WriteBranchStructureTreeVisitor(remote.TfsRepositoryPath, stdout, tfsRemotes);
+                        var visitor = new WriteBranchStructureTreeVisitor(remote.TfsRepositoryPath, tfsRemotes);
                         root.AcceptVisitor(visitor);
                     }
                     return GitTfsExitCodes.OK;
                 }
             }
 
-            WriteTfsRemoteDetails(stdout, tfsRemotes);
+            WriteTfsRemoteDetails(tfsRemotes);
             return GitTfsExitCodes.OK;
         }
 
-        public static void WriteRemoteTfsBranchStructure(ITfsHelper tfsHelper, TextWriter writer, string tfsRepositoryPath, IEnumerable<IGitTfsRemote> tfsRemotes = null)
+        public static void WriteRemoteTfsBranchStructure(ITfsHelper tfsHelper, string tfsRepositoryPath, IEnumerable<IGitTfsRemote> tfsRemotes = null)
         {
             var root = tfsHelper.GetRootTfsBranchForRemotePath(tfsRepositoryPath);
 
@@ -279,59 +277,58 @@ namespace Sep.Git.Tfs.Commands
             {
                 throw new GitTfsException("error: this version of TFS doesn't support this functionality");
             }
-            var visitor = new WriteBranchStructureTreeVisitor(tfsRepositoryPath, writer, tfsRemotes);
+            var visitor = new WriteBranchStructureTreeVisitor(tfsRepositoryPath, tfsRemotes);
             root.AcceptVisitor(visitor);
         }
 
-        private void WriteTfsRemoteDetails(TextWriter writer, IEnumerable<IGitTfsRemote> tfsRemotes)
+        private void WriteTfsRemoteDetails(IEnumerable<IGitTfsRemote> tfsRemotes)
         {
-            writer.WriteLine("\nGit-tfs remote details:");
+            Trace.TraceInformation("\nGit-tfs remote details:");
             foreach (var remote in tfsRemotes)
             {
-                writer.WriteLine("\n {0} -> {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
-                writer.WriteLine("        {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
+                Trace.TraceInformation("\n {0} -> {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
+                Trace.TraceInformation("        {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
             }
         }
 
         private class WriteBranchStructureTreeVisitor : IBranchTreeVisitor
         {
-            private readonly TextWriter _stdout;
             private readonly string _targetPath;
             private readonly IEnumerable<IGitTfsRemote> _tfsRemotes;
 
-            public WriteBranchStructureTreeVisitor(string targetPath, TextWriter writer, IEnumerable<IGitTfsRemote> tfsRemotes = null)
+            public WriteBranchStructureTreeVisitor(string targetPath, IEnumerable<IGitTfsRemote> tfsRemotes = null)
             {
                 _targetPath = targetPath;
-                _stdout = writer;
                 _tfsRemotes = tfsRemotes;
             }
 
             public void Visit(BranchTree branch, int level)
             {
+                var writer = new StringWriter();
                 for (var i = 0; i < level; i++ )
-                    _stdout.Write(" | ");
+                    writer.Write(" | ");
                 
-                _stdout.WriteLine();
+                writer.WriteLine();
 
                 for (var i = 0; i < level - 1; i++)
-                    _stdout.Write(" | ");
+                    writer.Write(" | ");
 
                 if (level > 0)
-                    _stdout.Write(" +-");
+                    writer.Write(" +-");
 
-                _stdout.Write(" {0}", branch.Path);
+                writer.Write(" {0}", branch.Path);
 
                 if (_tfsRemotes != null)
                 {
                     var remote = _tfsRemotes.FirstOrDefault(r => r.TfsRepositoryPath == branch.Path);
                     if (remote != null)
-                        _stdout.Write(" -> " + remote.Id);
+                        writer.Write(" -> " + remote.Id);
                 }
 
                 if (branch.Path.Equals(_targetPath))
-                    _stdout.Write(" [*]");
+                    writer.Write(" [*]");
 
-                _stdout.WriteLine();
+                Trace.TraceInformation(writer.ToString());
             }
         }
     }

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core.TfsInterop
 {
-    public class BranchExtensionsTest
+    public class BranchExtensionsTest : BaseTest
     {
         [Fact]
         public void AllChildrenAlwaysReturnsAnEnumerable()

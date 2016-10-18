@@ -4,6 +4,7 @@ using System.IO;
 using NDesk.Options;
 using StructureMap;
 using Sep.Git.Tfs.Core;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -12,7 +13,6 @@ namespace Sep.Git.Tfs.Commands
     public class Version : GitTfsCommand
     {
         private Globals globals;
-        TextWriter stdout;
         IGitTfsVersionProvider versionProvider;
 
         /// <summary>
@@ -20,10 +20,9 @@ namespace Sep.Git.Tfs.Commands
         /// </summary>
         /// <param name="stdout"></param>
         /// <param name="versionProvider"></param>
-        public Version(Globals globals, TextWriter stdout, IGitTfsVersionProvider versionProvider)
+        public Version(Globals globals, IGitTfsVersionProvider versionProvider)
         {
             this.globals = globals;
-            this.stdout = stdout;
             this.versionProvider = versionProvider;
 
             this.OptionSet = globals.OptionSet;
@@ -31,10 +30,10 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run()
         {
-            stdout.WriteLine(versionProvider.GetVersionString());
-            stdout.WriteLine(versionProvider.GetPathToGitTfsExecutable());
+            Trace.TraceInformation(versionProvider.GetVersionString());
+            Trace.TraceInformation(versionProvider.GetPathToGitTfsExecutable());
 
-            stdout.WriteLine(GitTfsConstants.MessageForceVersion);
+            Trace.TraceInformation(GitTfsConstants.MessageForceVersion);
 
             return GitTfsExitCodes.OK;
         }

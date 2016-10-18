@@ -9,6 +9,8 @@ using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
+using NLog;
+using NLog.Targets;
 
 namespace Sep.Git.Tfs
 {
@@ -21,11 +23,10 @@ namespace Sep.Git.Tfs
         private readonly IContainer _container;
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
-        private TextWriter _stdout;
         private Bootstrapper _bootstrapper;
 
         public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container,
-            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, TextWriter stdout, Bootstrapper bootstrapper)
+            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, Bootstrapper bootstrapper)
         {
             this.tfsHelper = tfsHelper;
             this.commandFactory = commandFactory;
@@ -34,7 +35,6 @@ namespace Sep.Git.Tfs
             _gitTfsVersionProvider = gitTfsVersionProvider;
             _runner = runner;
             _globals = globals;
-            _stdout = stdout;
             _bootstrapper = bootstrapper;
         }
 
@@ -43,11 +43,23 @@ namespace Sep.Git.Tfs
             InitializeGlobals();
             _globals.CommandLineRun = "git tfs " + string.Join(" ", args);
             var command = ExtractCommand(args);
-            if(RequiresValidGitRepository(command)) AssertValidGitRepository();
             var unparsedArgs = ParseOptions(command, args);
+            UpdateLoggerOnDebugging();
             Trace.WriteLine("Command run:" + _globals.CommandLineRun);
+            if (RequiresValidGitRepository(command)) AssertValidGitRepository();
             ParseAuthors();
             return Main(command, unparsedArgs);
+        }
+
+        private void UpdateLoggerOnDebugging()
+        {
+            if (_globals.DebugOutput)
+            {
+                var consoleRule = LogManager.Configuration.LoggingRules.First();
+                consoleRule.EnableLoggingForLevel(LogLevel.Debug);
+                //consoleRule.DisableLoggingForLevel(LogLevel.Trace);
+                LogManager.ReconfigExistingLoggers();
+            }
         }
 
         public int Main(GitTfsCommand command, IList<string> unparsedArgs)
@@ -59,8 +71,8 @@ namespace Sep.Git.Tfs
             }
             else if(_globals.ShowVersion)
             {
-                _container.GetInstance<TextWriter>().WriteLine(_gitTfsVersionProvider.GetVersionString());
-                _container.GetInstance<TextWriter>().WriteLine(GitTfsConstants.MessageForceVersion);
+                Trace.TraceInformation(_gitTfsVersionProvider.GetVersionString());
+                Trace.TraceInformation(GitTfsConstants.MessageForceVersion);
                 return GitTfsExitCodes.OK;
             }
             else
@@ -89,11 +101,11 @@ namespace Sep.Git.Tfs
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex);
+                Trace.WriteLine("Error when parsing author file:" + ex);
                 if (!string.IsNullOrEmpty(_globals.AuthorsFilePath))
                     throw;
-                _stdout.WriteLine("warning: author file ignored due to a problem occuring when reading it :\n\t" + ex.Message);
-                _stdout.WriteLine("         Verify the file :" + Path.Combine(_globals.GitDir, AuthorsFile.GitTfsCachedAuthorsFileName));
+                Trace.TraceWarning("warning: author file ignored due to a problem occuring when reading it :\n\t" + ex.Message);
+                Trace.TraceWarning("         Verify the file :" + Path.Combine(_globals.GitDir, AuthorsFile.GitTfsCachedAuthorsFileName));
             }
         }
 
@@ -116,7 +128,6 @@ namespace Sep.Git.Tfs
             {
                 _globals.GitDir = ".git";
             }
-            _globals.Stdout = _stdout;
             _globals.Bootstrapper = _bootstrapper;
         }
 

@@ -19,8 +19,8 @@ namespace Sep.Git.Tfs.Core
         private Repository _repository;
         private RemoteConfigConverter _remoteConfigReader;
 
-        public GitRepository(TextWriter stdout, string gitDir, IContainer container, Globals globals, RemoteConfigConverter remoteConfigReader)
-            : base(stdout, container)
+        public GitRepository(string gitDir, IContainer container, Globals globals, RemoteConfigConverter remoteConfigReader)
+            : base(container)
         {
             _container = container;
             _globals = globals;
@@ -687,7 +687,7 @@ namespace Sep.Git.Tfs.Core
             catch (Exception e)
             {
                 Trace.WriteLine(e);
-                realStdout.WriteLine("Warning: `git gc` failed! " + additionalMessage);
+                Trace.TraceWarning("Warning: `git gc` failed! " + additionalMessage);
             }
         }
 

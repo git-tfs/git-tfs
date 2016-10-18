@@ -9,11 +9,16 @@ using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using StructureMap;
 using StructureMap.Graph;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace Sep.Git.Tfs
 {
     public class Program
     {
+        private static string _logFilePath;
+
         [STAThreadAttribute]
         public static void Main(string[] args)
         {
@@ -40,15 +45,15 @@ namespace Sep.Git.Tfs
             if(gitTfsException != null)
             {
                 Trace.WriteLine(gitTfsException);
-                Console.WriteLine(gitTfsException.Message);
+                Trace.TraceError(gitTfsException.Message);
                 if (gitTfsException.InnerException != null)
                     ReportException(gitTfsException.InnerException);
                 if (!gitTfsException.RecommendedSolutions.IsEmpty())
                 {
-                    Console.WriteLine("You may be able to resolve this problem.");
+                    Trace.TraceError("You may be able to resolve this problem.");
                     foreach (var solution in gitTfsException.RecommendedSolutions)
                     {
-                        Console.WriteLine("- " + solution);
+                        Trace.TraceError("- " + solution);
                     }
                 }
             }
@@ -56,6 +61,8 @@ namespace Sep.Git.Tfs
             {
                 ReportInternalException(e);
             }
+
+            Trace.TraceWarning("All the logs could be found in the log file: " + _logFilePath);
         }
 
         private static void ReportInternalException(Exception e)
@@ -67,9 +74,9 @@ namespace Sep.Git.Tfs
             {
                 var gitCommandException = e as GitCommandException;
                 if (gitCommandException != null)
-                    Console.WriteLine("error running command: " + gitCommandException.Process.StartInfo.FileName + " " + gitCommandException.Process.StartInfo.Arguments);
+                    Trace.TraceError("error running command: " + gitCommandException.Process.StartInfo.FileName + " " + gitCommandException.Process.StartInfo.Arguments);
 
-                Console.WriteLine(e.Message);
+                Trace.TraceError(e.Message);
                 e = e.InnerException;
             }
         }
@@ -81,13 +88,56 @@ namespace Sep.Git.Tfs
 
         private static void Initialize(ConfigurationExpression initializer)
         {
+            ConfigureLogger();
             var tfsPlugin = TfsPlugin.Find();
             initializer.Scan(x => { Initialize(x); tfsPlugin.Initialize(x); });
-            initializer.For<TextWriter>().Use(() => Console.Out);
             initializer.For<IGitRepository>().Add<GitRepository>();
             AddGitChangeTypes(initializer);
             DoCustomConfiguration(initializer);
             tfsPlugin.Initialize(initializer);
+        }
+
+        private static void ConfigureLogger()
+        {
+            try
+            {
+                //Step 1.Create configuration object
+                var config = new LoggingConfiguration();
+
+                // Step 2. Create targets and add them to the configuration 
+                var consoleTarget = new ColoredConsoleTarget();
+                config.AddTarget("console", consoleTarget);
+
+                var fileTarget = new FileTarget();
+                config.AddTarget("file", fileTarget);
+
+                // Step 3. Set target properties 
+                consoleTarget.Layout = @"${message}";
+                fileTarget.FileName = @"${specialfolder:LocalApplicationData}\git-tfs\" + GitTfsConstants.LogFileName;
+                fileTarget.Layout = "${longdate} [${level}] ${message}";
+
+                // Step 4. Define rules
+                var consoleRule = new LoggingRule("*", LogLevel.Info, consoleTarget);
+                config.LoggingRules.Add(consoleRule);
+
+                var fileRule = new LoggingRule("*", LogLevel.Debug, fileTarget);
+                config.LoggingRules.Add(fileRule);
+
+                // Step 5. Activate the configuration
+                LogManager.Configuration = config;
+
+                var logger = LogManager.GetLogger("git-tfs");
+
+                Trace.Listeners.Add(new NLogTraceListener());
+
+                var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
+                _logFilePath = fileTarget.FileName.Render(logEventInfo);
+            }
+            catch(Exception ex)
+            {
+                Trace.Listeners.Add(new ConsoleTraceListener());
+                Trace.TraceWarning("Fail to enable logging in file due to error:" + ex.Message);
+            }
         }
 
         public static void AddGitChangeTypes(ConfigurationExpression initializer)

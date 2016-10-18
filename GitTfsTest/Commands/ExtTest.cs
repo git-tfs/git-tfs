@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
-    public class ExtTest
+    public class ExtTest : BaseTest
     {
         [Fact]
         public void AssertValidTfsPathTest()

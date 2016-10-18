@@ -16,7 +16,6 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Labels : GitTfsCommand
     {
-        private readonly TextWriter _stdout;
         private readonly Globals _globals;
         private readonly AuthorsFile _authors;
 
@@ -27,9 +26,8 @@ namespace Sep.Git.Tfs.Commands
         public string NameFilter { get; set; }
         public string ExcludeNameFilter { get; set; }
 
-        public Labels(TextWriter stdout, Globals globals, AuthorsFile authors)
+        public Labels(Globals globals, AuthorsFile authors)
         {
-            this._stdout = stdout;
             this._globals = globals;
             this._authors = authors;
         }
@@ -87,9 +85,9 @@ namespace Sep.Git.Tfs.Commands
                 NameFilter = NameFilter.Trim();
 
             UpdateRemote(tfsRemote);
-            _stdout.WriteLine("Looking for label on " + tfsRemote.TfsRepositoryPath + "...");
+            Trace.TraceInformation("Looking for label on " + tfsRemote.TfsRepositoryPath + "...");
             var labels = tfsRemote.Tfs.GetLabels(tfsRemote.TfsRepositoryPath, NameFilter);
-            _stdout.WriteLine(labels.Count() +" labels found!");
+            Trace.TraceInformation(labels.Count() +" labels found!");
 
             Regex exludeRegex = null;
             if (ExcludeNameFilter != null)
@@ -124,7 +122,7 @@ namespace Sep.Git.Tfs.Commands
                     ownerEmail = label.Owner;
                 }
                 var labelName = (label.IsTransBranch ? label.Name + "(" + tfsRemote.Id + ")" : label.Name).ToGitRefName();
-                _stdout.WriteLine("Writing label '" + labelName + "'...");
+                Trace.TraceInformation("Writing label '" + labelName + "'...");
                 _globals.Repository.CreateTag(labelName, sha1TagCommit, label.Comment, ownerName, ownerEmail ,label.Date);
             }
             return GitTfsExitCodes.OK;

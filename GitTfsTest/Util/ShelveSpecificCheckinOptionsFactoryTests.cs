@@ -41,7 +41,7 @@ namespace Sep.Git.Tfs.Test.Util
 
         private CheckinOptionsFactory GetCheckinOptionsFactory()
         {
-            return new CheckinOptionsFactory(new StringWriter(), mocks.Get<Globals>());
+            return new CheckinOptionsFactory(mocks.Get<Globals>());
         }
     }
 }

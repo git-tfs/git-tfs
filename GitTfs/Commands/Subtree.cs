@@ -7,6 +7,7 @@ using System.Text;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -15,8 +16,6 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Subtree : GitTfsCommand
     {
-        
-        private readonly TextWriter _stdout;
         private readonly Fetch _fetch;
         private readonly QuickFetch _quickFetch;
         private readonly Globals _globals;
@@ -42,9 +41,8 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public Subtree(TextWriter stdout, Fetch fetch, QuickFetch quickFetch, Globals globals, RemoteOptions remoteOptions)
+        public Subtree(Fetch fetch, QuickFetch quickFetch, Globals globals, RemoteOptions remoteOptions)
         {
-            this._stdout = stdout;
             this._fetch = fetch;
             this._quickFetch = quickFetch;
             this._globals = globals;
@@ -54,11 +52,11 @@ namespace Sep.Git.Tfs.Commands
         public int Run(IList<string> args)
         {
             string command = args.FirstOrDefault() ?? "";
-            _stdout.WriteLine("executing subtree " + command);
+            Trace.TraceInformation("executing subtree " + command);
 
             if (string.IsNullOrEmpty(Prefix))
             {
-                _stdout.WriteLine("Prefix must be specified, use -p or -prefix");
+                Trace.TraceInformation("Prefix must be specified, use -p or -prefix");
                 return GitTfsExitCodes.InvalidArguments;
             }
 
@@ -74,7 +72,7 @@ namespace Sep.Git.Tfs.Commands
                     return DoSplit();
 
                 default:
-                    _stdout.WriteLine("Expected one of [add, pull, split]");
+                    Trace.TraceInformation("Expected one of [add, pull, split]");
                     return GitTfsExitCodes.InvalidArguments;
             }
         }
@@ -83,7 +81,7 @@ namespace Sep.Git.Tfs.Commands
         {
             if (File.Exists(Prefix) || Directory.Exists(Prefix))
             {
-                _stdout.WriteLine(string.Format("Directory {0} already exists", Prefix));
+                Trace.TraceInformation(string.Format("Directory {0} already exists", Prefix));
                 return GitTfsExitCodes.InvalidArguments;
             }
 
@@ -118,12 +116,12 @@ namespace Sep.Git.Tfs.Commands
                     Repository = null,
                     RemoteOptions = _remoteOptions
                 });
-                _stdout.WriteLine("-> new owning remote " + owner.Id);
+                Trace.TraceInformation("-> new owning remote " + owner.Id);
             }
             else
             {
                 ownerId = owner.Id;
-                _stdout.WriteLine("Attaching subtree to owning remote " + owner.Id);
+                Trace.TraceInformation("Attaching subtree to owning remote " + owner.Id);
             }
             
 
@@ -139,7 +137,7 @@ namespace Sep.Git.Tfs.Commands
                      RemoteOptions = _remoteOptions,
                  });
             
-            _stdout.WriteLine("-> new remote " + remote.Id);
+            Trace.TraceInformation("-> new remote " + remote.Id);
 
             fetch.BranchStrategy = BranchStrategy.None;
 

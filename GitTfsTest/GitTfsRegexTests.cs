@@ -2,7 +2,7 @@
 
 namespace Sep.Git.Tfs.Test
 {
-    public class GitTfsRegexTests
+    public class GitTfsRegexTests : BaseTest
     {
         [Fact]
         public void CommitRegexShouldApproveGitCommitTitle()

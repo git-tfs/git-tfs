@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
-    public class FetchTests : IDisposable
+    public class FetchTests : BaseTest, IDisposable
     {
         private readonly IntegrationHelper integrationHelper;
 

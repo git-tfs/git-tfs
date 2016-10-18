@@ -4,7 +4,7 @@ using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Test.Util
 {
-    public class BouncerTest
+    public class BouncerTest : BaseTest
     {
         Bouncer bouncer = new Bouncer();
 

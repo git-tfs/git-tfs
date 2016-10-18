@@ -15,7 +15,6 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly Fetch fetch;
         private readonly Globals globals;
-        private TextWriter stdout;
         private bool _shouldRebase;
 
         public OptionSet OptionSet
@@ -27,11 +26,10 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        public Pull(Globals globals, Fetch fetch, TextWriter stdout)
+        public Pull(Globals globals, Fetch fetch)
         {
             this.fetch = fetch;
             this.globals = globals;
-            this.stdout = stdout;
         }
 
         public int Run()
@@ -48,7 +46,7 @@ namespace Sep.Git.Tfs.Commands
                 var remote = globals.Repository.ReadTfsRemote(remoteId);
                 if (_shouldRebase)
                 {
-                    globals.WarnOnGitVersion(stdout);
+                    globals.WarnOnGitVersion();
 
                     if (globals.Repository.WorkingCopyHasUnstagedOrUncommitedChanges)
                     {

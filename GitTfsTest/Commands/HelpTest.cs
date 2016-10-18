@@ -6,46 +6,64 @@ using Sep.Git.Tfs.Test.TestHelpers;
 using StructureMap.AutoMocking;
 using NDesk.Options;
 using Xunit;
+using NLog;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using NLog.Config;
+using NLog.Targets;
 
 namespace Sep.Git.Tfs.Test.Commands
 {
-    public class HelpTest
+    public class HelpTest : BaseTest
     {
-        private StringWriter outputWriter;
         private RhinoAutoMocker<Help> mocks;
 
         public HelpTest()
         {
-            outputWriter = new StringWriter();
             mocks = new RhinoAutoMocker<Help>(MockMode.AAA);
-            mocks.Inject<TextWriter>(outputWriter);
+        }
+
+        public MemoryTarget GetTestLogger()
+        {
+            var memoryTarget = new MemoryTarget() { Layout = @"${message}" };
+
+            var config = new LoggingConfiguration();
+            config.AddTarget("memory", memoryTarget);
+            config.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, memoryTarget));
+
+            LogManager.Configuration = config;
+
+            Trace.Listeners.Add(new NLogTraceListener());
+
+            return memoryTarget;
         }
 
         [Fact]
         public void ShouldWriteGeneralHelp()
         {
+            var memoryTarget = GetTestLogger();
             mocks.Container.PluginGraph.CreateFamily(typeof(GitTfsCommand));
             mocks.Container.PluginGraph.FindFamily(typeof(GitTfsCommand)).AddType(typeof(TestCommand), "test");
             mocks.Container.Inject<GitTfsCommand>("test", new TestCommand());
             mocks.ClassUnderTest.Run();
 
-            var output = outputWriter.GetStringBuilder().ToString();
-            output.AssertStartsWith("Usage: git-tfs [command] [options]");
-            output.TrimEnd()
-                  .AssertEndsWith(" (use 'git-tfs help [command]' or 'git-tfs [command] --help' for more information)" + Environment.NewLine +
-                                  "\nFind more help in our online help : https://github.com/git-tfs/git-tfs");
+            memoryTarget.Logs[0].Equals("Usage: git-tfs [command] [options]");
+            memoryTarget.Logs[1].Contains("test");
+            memoryTarget.Logs[2].Equals(" (use 'git-tfs help [command]' or 'git-tfs [command] --help' for more information)");
+            memoryTarget.Logs[3].Equals("Find more help in our online help : https://github.com/git-tfs/git-tfs");
         }
 
         [Fact]
         public void ShouldWriteCommandHelp()
         {
+            var memoryTarget = GetTestLogger();
             mocks.Container.PluginGraph.CreateFamily(typeof (GitTfsCommand));
             mocks.Container.PluginGraph.FindFamily(typeof (GitTfsCommand)).AddType(typeof (TestCommand), "test");
             mocks.Container.Inject<GitTfsCommand>("test", new TestCommand());
             mocks.ClassUnderTest.Run(new[]{"test"});
 
-            var output = outputWriter.GetStringBuilder().ToString();
-            output.AssertStartsWith("Usage: git-tfs test [options]");
+            memoryTarget.Logs[0].Equals("Usage: git-tfs test [options]");
         }
 
         public class TestCommand : GitTfsCommand

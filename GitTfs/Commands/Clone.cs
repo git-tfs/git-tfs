@@ -22,15 +22,13 @@ namespace Sep.Git.Tfs.Commands
         private readonly Globals globals;
         private readonly InitBranch initBranch;
         private bool resumable;
-        private TextWriter stdout;
 
-        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch, TextWriter stdout)
+        public Clone(Globals globals, Fetch fetch, Init init, InitBranch initBranch)
         {
             this.fetch = fetch;
             this.init = init;
             this.globals = globals;
             this.initBranch = initBranch;
-            this.stdout = stdout;
             globals.GcCountdown = globals.GcPeriod;
         }
 
@@ -176,7 +174,7 @@ namespace Sep.Git.Tfs.Commands
                     var tfsRootBranches = remote.Tfs.GetAllTfsRootBranchesOrderedByCreation();
                     if (!tfsRootBranches.Any())
                     {
-                        stdout.WriteLine("info: no TFS root found !\n\nPS:perhaps you should convert your trunk folder into a branch in TFS.");
+                        Trace.TraceInformation("info: no TFS root found !\n\nPS:perhaps you should convert your trunk folder into a branch in TFS.");
                         return;
                     }
                     var cloneMsg = "   => If you want to manage branches with git-tfs, clone one of this branch instead :\n"
@@ -185,7 +183,7 @@ namespace Sep.Git.Tfs.Commands
                     
                     if (fetch.BranchStrategy == BranchStrategy.All)
                         throw new GitTfsException("error: cloning the whole repository or too high in the repository path doesn't permit to manage branches!\n" + cloneMsg);
-                    stdout.WriteLine("warning: you are going to clone the whole repository or too high in the repository path !\n" + cloneMsg);
+                    Trace.TraceWarning("warning: you are going to clone the whole repository or too high in the repository path !\n" + cloneMsg);
                     return;
                 }
 
@@ -195,10 +193,10 @@ namespace Sep.Git.Tfs.Commands
                 if (tfsPathToClone != tfsTrunkRepositoryPath.ToLower())
                 {
                     if (tfsBranchesPath.Select(e=>e.Path.ToLower()).Contains(tfsPathToClone))
-                        stdout.WriteLine("info: you are going to clone a branch instead of the trunk ( {0} )\n"
+                        Trace.TraceInformation("info: you are going to clone a branch instead of the trunk ( {0} )\n"
                             + "   => If you want to manage branches with git-tfs, clone {0} with '--branches=all' option instead...)", tfsTrunkRepositoryPath);
                     else
-                        stdout.WriteLine("warning: you are going to clone a subdirectory of a branch and won't be able to manage branches :(\n"
+                        Trace.TraceWarning("warning: you are going to clone a subdirectory of a branch and won't be able to manage branches :(\n"
                             + "   => If you want to manage branches with git-tfs, clone " + tfsTrunkRepositoryPath + " with '--branches=all' option instead...)");
                 }
             }
@@ -208,7 +206,7 @@ namespace Sep.Git.Tfs.Commands
             }
             catch (Exception ex)
             {
-                stdout.WriteLine("warning: a server error occurs when trying to verify the tfs path cloned:\n   " + ex.Message
+                Trace.TraceWarning("warning: a server error occurs when trying to verify the tfs path cloned:\n   " + ex.Message
                     + "\n   try to continue anyway...");
             }
         }

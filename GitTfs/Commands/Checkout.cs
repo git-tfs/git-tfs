@@ -5,6 +5,7 @@ using System.IO;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
+using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -14,12 +15,10 @@ namespace Sep.Git.Tfs.Commands
     public class Checkout : GitTfsCommand
     {
         private readonly Globals _globals;
-        private readonly TextWriter _stdout;
 
-        public Checkout(Globals globals, TextWriter stdout)
+        public Checkout(Globals globals)
         {
             _globals = globals;
-            _stdout = stdout;
         }
 
         public OptionSet OptionSet
@@ -48,7 +47,7 @@ namespace Sep.Git.Tfs.Commands
                 throw new GitTfsException("error: commit not found for this changeset id...");
             if (ReturnShaOnly)
             {
-                _stdout.Write(sha);
+                Trace.TraceInformation(sha);
                 return GitTfsExitCodes.OK;
             }
             string commitishToCheckout = sha;
@@ -57,7 +56,7 @@ namespace Sep.Git.Tfs.Commands
                 BranchName = _globals.Repository.AssertValidBranchName(BranchName);
                 if(!_globals.Repository.CreateBranch(BranchName.ToLocalGitRef(), sha))
                     throw new GitTfsException("error: can not create branch '" + BranchName + "'");
-                _stdout.WriteLine("Branch '" + BranchName + "' created...");
+                Trace.TraceInformation("Branch '" + BranchName + "' created...");
                 commitishToCheckout = BranchName;
             }
             if(!_globals.Repository.Checkout(commitishToCheckout))

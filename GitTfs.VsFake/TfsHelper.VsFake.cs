@@ -25,14 +25,12 @@ namespace Sep.Git.Tfs.VsFake
         #region misc/null
 
         IContainer _container;
-        TextWriter _stdout;
         Script _script;
         FakeVersionControlServer _versionControlServer;
 
-        public TfsHelper(IContainer container, TextWriter stdout, Script script)
+        public TfsHelper(IContainer container, Script script)
         {
             _container = container;
-            _stdout = stdout;
             _script = script;
             _versionControlServer = new FakeVersionControlServer(_script);
         }

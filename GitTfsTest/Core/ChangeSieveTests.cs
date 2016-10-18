@@ -10,7 +10,7 @@ using Rhino.Mocks.Constraints;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class ChangeSieveTests
+    public class ChangeSieveTests : BaseTest
     {
         #region Base fixture
 

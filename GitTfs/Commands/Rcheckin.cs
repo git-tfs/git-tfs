@@ -14,7 +14,6 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Rcheckin : GitTfsCommand
     {
-        private readonly TextWriter _stdout;
         private readonly CheckinOptions _checkinOptions;
         private readonly CheckinOptionsFactory _checkinOptionsFactory;
         private readonly TfsWriter _writer;
@@ -24,11 +23,10 @@ namespace Sep.Git.Tfs.Commands
         private bool AutoRebase { get; set; }
         private bool ForceCheckin { get; set; }
 
-        public Rcheckin(TextWriter stdout, CheckinOptions checkinOptions, TfsWriter writer, Globals globals, AuthorsFile authors)
+        public Rcheckin(CheckinOptions checkinOptions, TfsWriter writer, Globals globals, AuthorsFile authors)
         {
-            _stdout = stdout;
             _checkinOptions = checkinOptions;
-            _checkinOptionsFactory = new CheckinOptionsFactory(_stdout, globals);
+            _checkinOptionsFactory = new CheckinOptionsFactory(globals);
             _writer = writer;
             _globals = globals;
             _authors = authors;
@@ -49,7 +47,7 @@ namespace Sep.Git.Tfs.Commands
         // uses rebase and works only with HEAD
         public int Run()
         {
-            _globals.WarnOnGitVersion(_stdout);
+            _globals.WarnOnGitVersion();
 
             if (_globals.Repository.IsBare)
                 throw new GitTfsException("error: you should specify the local branch to checkin for a bare repository.");
@@ -60,7 +58,7 @@ namespace Sep.Git.Tfs.Commands
         // uses rebase and works only with HEAD in a none bare repository
         public int Run(string localBranch)
         {
-            _globals.WarnOnGitVersion(_stdout);
+            _globals.WarnOnGitVersion();
 
             if (!_globals.Repository.IsBare)
                 throw new GitTfsException("error: This syntax with one parameter is only allowed in bare repository.");
@@ -82,7 +80,7 @@ namespace Sep.Git.Tfs.Commands
             }
 
             // get latest changes from TFS to minimize possibility of late conflict
-            _stdout.WriteLine("Fetching changes from TFS to minimize possibility of late conflict...");
+            Trace.TraceInformation("Fetching changes from TFS to minimize possibility of late conflict...");
             parentChangeset.Remote.Fetch();
             if (parentChangeset.ChangesetId != parentChangeset.Remote.MaxChangesetId)
             {
@@ -135,7 +133,7 @@ namespace Sep.Git.Tfs.Commands
 
                 var commitSpecificCheckinOptions = _checkinOptionsFactory.BuildCommitSpecificCheckinOptions(_checkinOptions, message, commit, _authors);
 
-                _stdout.WriteLine("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
+                Trace.TraceInformation("Starting checkin of {0} '{1}'", target.Substring(0, 8), commitSpecificCheckinOptions.CheckinComment);
                 try
                 {
                     newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
@@ -152,7 +150,7 @@ namespace Sep.Git.Tfs.Commands
 
                     currentParent = target;
                     parentChangeset = new TfsChangesetInfo {ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote};
-                    _stdout.WriteLine("Done with {0}.", target);
+                    Trace.TraceInformation("Done with {0}.", target);
                 }
                 catch (Exception)
                 {
@@ -169,7 +167,7 @@ namespace Sep.Git.Tfs.Commands
                 _globals.Repository.UpdateRef(refToCheckin, tfsRemote.MaxCommitHash);
             else
                 _globals.Repository.ResetHard(tfsRemote.MaxCommitHash);
-            _stdout.WriteLine("No more to rcheckin.");
+            Trace.TraceInformation("No more to rcheckin.");
 
             Trace.WriteLine("Cleaning...");
             tfsRemote.CleanupWorkspaceDirectory();
@@ -188,9 +186,9 @@ namespace Sep.Git.Tfs.Commands
         {
             if (gitParents.Length != 0)
             {
-                _stdout.WriteLine("Working on the merge commit: " + target);
+                Trace.TraceInformation("Working on the merge commit: " + target);
                 if (gitParents.Length > 1)
-                    _stdout.WriteLine("warning: only 1 parent is supported by TFS for a merge changeset. The other parents won't be materialized in the TFS merge!");
+                    Trace.TraceWarning("warning: only 1 parent is supported by TFS for a merge changeset. The other parents won't be materialized in the TFS merge!");
                 foreach (var gitParent in gitParents)
                 {
                     var tfsCommit = _globals.Repository.GetTfsCommit(gitParent);
@@ -208,7 +206,7 @@ namespace Sep.Git.Tfs.Commands
                     }
                     else
                     {
-                        _stdout.WriteLine("warning: the parent " + gitParent + " does not belong to a TFS tracked branch (not checked in TFS) and will be ignored!");
+                        Trace.TraceWarning("warning: the parent " + gitParent + " does not belong to a TFS tracked branch (not checked in TFS) and will be ignored!");
                     }
                 }
             }

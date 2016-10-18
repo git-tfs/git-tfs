@@ -14,13 +14,11 @@ namespace Sep.Git.Tfs.Commands
     public class Info : GitTfsCommand
     {
         readonly Globals _globals;
-        readonly TextWriter _stdout;
         readonly IGitTfsVersionProvider _versionProvider;
 
-        public Info(Globals globals, TextWriter stdout, IGitTfsVersionProvider versionProvider)
+        public Info(Globals globals, IGitTfsVersionProvider versionProvider)
         {
             _globals = globals;
-            _stdout = stdout;
             _versionProvider = versionProvider;
         }
 
@@ -45,16 +43,16 @@ namespace Sep.Git.Tfs.Commands
         {
             DisplayReadabilityLineJump();
 
-            _stdout.WriteLine(_globals.GitVersion);
+            Trace.TraceInformation(_globals.GitVersion);
         }
 
         private void DescribeGitTfs()
         {
             DisplayReadabilityLineJump();
-            _stdout.WriteLine(_versionProvider.GetVersionString());
-            _stdout.WriteLine(" " + _versionProvider.GetPathToGitTfsExecutable());
+            Trace.TraceInformation(_versionProvider.GetVersionString());
+            Trace.TraceInformation(" " + _versionProvider.GetPathToGitTfsExecutable());
 
-            _stdout.WriteLine(GitTfsConstants.MessageForceVersion);
+            Trace.TraceInformation(GitTfsConstants.MessageForceVersion);
 
             DescribeGitRepository();
         }
@@ -69,7 +67,7 @@ namespace Sep.Git.Tfs.Commands
 
                 DisplayReadabilityLineJump();
 
-                _stdout.WriteLine("cloned from tfs path:" + string.Join(Environment.NewLine, repoDescription));
+                Trace.TraceInformation("cloned from tfs path:" + string.Join(Environment.NewLine, repoDescription));
             }
             catch (Exception)
             {
@@ -80,13 +78,13 @@ namespace Sep.Git.Tfs.Commands
         private void DescribeTfsRemotes(IGitTfsRemote remote)
         {
             DisplayReadabilityLineJump();
-            _stdout.WriteLine("remote tfs id: '{0}' {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
-            _stdout.WriteLine("               {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
+            Trace.TraceInformation("remote tfs id: '{0}' {1} {2}", remote.Id, remote.TfsUrl, remote.TfsRepositoryPath);
+            Trace.TraceInformation("               {0} - {1} @ {2}", remote.RemoteRef, remote.MaxCommitHash, remote.MaxChangesetId);
         }
 
         private void DisplayReadabilityLineJump()
         {
-            _stdout.WriteLine();
+            Trace.TraceInformation(string.Empty);
         }
     }
 }

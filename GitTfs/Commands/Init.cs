@@ -17,16 +17,14 @@ namespace Sep.Git.Tfs.Commands
         private readonly InitOptions initOptions;
         private readonly RemoteOptions remoteOptions;
         private readonly Globals globals;
-        private readonly TextWriter output;
         private readonly IGitHelpers gitHelper;
         private readonly IHelpHelper _help;
 
-        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, TextWriter output, IGitHelpers gitHelper, IHelpHelper help)
+        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, IGitHelpers gitHelper, IHelpHelper help)
         {
             this.remoteOptions = remoteOptions;
             this.gitHelper = gitHelper;
             _help = help;
-            this.output = output;
             this.globals = globals;
             this.initOptions = initOptions;
         }

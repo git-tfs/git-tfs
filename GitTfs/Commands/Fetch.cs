@@ -17,25 +17,21 @@ namespace Sep.Git.Tfs.Commands
     public class Fetch : GitTfsCommand
     {
         private readonly RemoteOptions remoteOptions;
-        private readonly TextWriter stdout;
         private readonly Globals globals;
         private readonly ConfigProperties properties;
         private readonly AuthorsFile authors;
         private readonly Labels labels;
 
-        public Fetch(Globals globals, ConfigProperties properties, TextWriter stdout, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
+        public Fetch(Globals globals, ConfigProperties properties, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
         {
             this.globals = globals;
             this.properties = properties;
-            this.stdout = stdout;
             this.remoteOptions = remoteOptions;
             this.authors = authors;
             this.labels = labels;
             this.upToChangeSet = -1;
             BranchStrategy = BranchStrategy = BranchStrategy.Auto;
         }
-
-
 
         bool FetchAll { get; set; }
         bool FetchLabels { get; set; }
@@ -142,11 +138,11 @@ namespace Sep.Git.Tfs.Commands
 
         private void FetchRemote(bool stopOnFailMergeCommit, IGitTfsRemote remote)
         {
-            stdout.WriteLine("Fetching from TFS remote '{0}'...", remote.Id);
+            Trace.TraceInformation("Fetching from TFS remote '{0}'...", remote.Id);
             DoFetch(remote, stopOnFailMergeCommit);
             if (labels != null && FetchLabels)
             {
-                stdout.WriteLine("Fetching labels from TFS remote '{0}'...", remote.Id);
+                Trace.TraceInformation("Fetching labels from TFS remote '{0}'...", remote.Id);
                 labels.Run(remote);
             }
         }

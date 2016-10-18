@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core
 {
-    public class GitTfsRemoteTests
+    public class GitTfsRemoteTests : BaseTest
     {
         [Fact]
         public void MatchesUrlAndRepositoryPath_should_be_case_insensitive_for_tfs_url()
@@ -58,7 +58,6 @@ namespace Sep.Git.Tfs.Test.Core
                 Aliases = legacyUrls,
             };
             var mocks = new RhinoAutoMocker<GitTfsRemote>();
-            mocks.Inject<TextWriter>(new StringWriter());
             mocks.Inject<RemoteInfo>(info);
             mocks.Inject<ITfsHelper>(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
             return mocks.ClassUnderTest;
@@ -112,7 +111,6 @@ namespace Sep.Git.Tfs.Test.Core
                 Repository = null,
             };
             var mocks = new RhinoAutoMocker<GitTfsRemote>();
-            mocks.Inject<TextWriter>(new StringWriter());
             mocks.Inject<RemoteInfo>(info);
             mocks.Inject<ITfsHelper>(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
 
