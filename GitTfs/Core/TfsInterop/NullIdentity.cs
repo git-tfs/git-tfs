@@ -1,3 +1,4 @@
+
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public class NullIdentity : IIdentity
@@ -19,5 +20,4 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
         public string DisplayName { get; set; }
     }
-
 }

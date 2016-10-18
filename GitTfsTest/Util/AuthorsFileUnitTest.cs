@@ -228,7 +228,7 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
                 @"Domain\Yet.Another.User = Mr. 3 <testuser@example.com>"
             };
 
-            AuthorsFile authFile = _SetupAuthorsFile(authors); 
+            AuthorsFile authFile = _SetupAuthorsFile(authors);
 
             Assert.NotNull(authFile.AuthorsByGitUserId);
 
@@ -250,7 +250,6 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
             Author a = authFile.FindAuthor(git_author);
             Assert.NotNull(a);
             Assert.Equal(a.TfsUserId, @"Domain\Test.User");
-
         }
 
 
@@ -264,7 +263,7 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
                 @"Domain\Yet.Another.User = Mr. 3 <testuser@example.com>"
             };
 
-            AuthorsFile authFile = _SetupAuthorsFile(authors); 
+            AuthorsFile authFile = _SetupAuthorsFile(authors);
 
             // find existing author
             Tuple<string, string> gitAuthor = new Tuple<string, string>("Test User", "TestUser@example.com");

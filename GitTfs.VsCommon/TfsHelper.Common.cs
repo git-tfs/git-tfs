@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.VsCommon
                 _resolverInstalled = true;
             }
         }
-        
+
         [SetterProperty]
         public Janitor Janitor { get; set; }
 
@@ -135,16 +135,16 @@ namespace Sep.Git.Tfs.VsCommon
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
-           if (e.Failure != null)
-           {
-              Trace.TraceInformation(e.Failure.Message);
-              Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
-           }
-           if (e.Exception != null)
-           {
-              Trace.TraceInformation(e.Exception.Message);
-              Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
-           }
+            if (e.Failure != null)
+            {
+                Trace.TraceInformation(e.Failure.Message);
+                Trace.WriteLine("Failure: " + e.Failure.Inspect(), "tfs non-fatal error");
+            }
+            if (e.Exception != null)
+            {
+                Trace.TraceInformation(e.Exception.Message);
+                Trace.WriteLine("Exception: " + e.Exception.Inspect(), "tfs non-fatal error");
+            }
         }
 
         private void Getting(object sender, GettingEventArgs e)
@@ -561,20 +561,20 @@ namespace Sep.Git.Tfs.VsCommon
             if (HasWorkItems(changeset))
             {
                 tfsChangeset.Summary.Workitems = changeset.WorkItems.Select(wi => new TfsWorkitem
-                    {
-                        Id = wi.Id,
-                        Title = wi.Title,
-                        Description = wi.Description,
-                        Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
-                    });
+                {
+                    Id = wi.Id,
+                    Title = wi.Title,
+                    Description = wi.Description,
+                    Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
+                });
             }
             tfsChangeset.Summary.CheckinNotes = changeset.CheckinNote.Values.Select(note => new TfsCheckinNote
-                {
-                    Name = note.Name,
-                    Value = note.Value
-                });
+            {
+                Name = note.Name,
+                Value = note.Value
+            });
             tfsChangeset.Summary.PolicyOverrideComment = changeset.PolicyOverride.Comment;
-            
+
             return tfsChangeset;
         }
 
@@ -598,7 +598,7 @@ namespace Sep.Git.Tfs.VsCommon
             return result != null && result.Length > 0;
         }
 
-        Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
+        private Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
@@ -721,7 +721,7 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
         }
-        
+
         public void CleanupWorkspaces(string workingDirectory)
         {
             // workingDirectory is the path to a TFS workspace managed by git-tfs.
@@ -774,7 +774,6 @@ namespace Sep.Git.Tfs.VsCommon
 
             // Include trace information about the success of the TFS API that deletes the workspace.
             Trace.WriteLine(string.Format(deleteWsCompleted ? "TFS Workspace '{0}' was removed." : "TFS Workspace '{0}' could not be removed", workspace.DisplayName));
-
         }
 
         public bool HasShelveset(string shelvesetName)
@@ -802,7 +801,7 @@ namespace Sep.Git.Tfs.VsCommon
             var shelveset = shelvesets.First();
 
             var itemSpec = new ItemSpec(remote.TfsRepositoryPath, RecursionType.Full);
-            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] {itemSpec}).SingleOrDefault();
+            var change = VersionControl.QueryShelvedChanges(shelveset, new ItemSpec[] { itemSpec }).SingleOrDefault();
             if (change == null)
             {
                 throw new GitTfsException("There is no changes in this shelveset that apply to the current tfs remote.")
@@ -1053,7 +1052,6 @@ namespace Sep.Git.Tfs.VsCommon
             {
                 _pendingChange.DownloadShelvedFile(workspace.GetLocalItemForServerItem(_pendingChange.ServerItem));
             }
-
         }
 
         #endregion
@@ -1160,13 +1158,13 @@ namespace Sep.Git.Tfs.VsCommon
                     throw new GitTfsException("error: data for the label '" + labelDefinition.Name + "' can't be loaded!");
                 }
                 var tfsLabel = new TfsLabel
-                    {
-                        Id = label.LabelId,
-                        Name = label.Name,
-                        Comment = label.Comment,
-                        Owner = label.OwnerName,
-                        Date = label.LastModifiedDate,
-                    };
+                {
+                    Id = label.LabelId,
+                    Name = label.Name,
+                    Comment = label.Comment,
+                    Owner = label.OwnerName,
+                    Date = label.LastModifiedDate,
+                };
                 foreach (var item in label.Items)
                 {
                     if (item.ServerItem.StartsWith(tfsPathBranch))
@@ -1261,7 +1259,7 @@ namespace Sep.Git.Tfs.VsCommon
         /// <summary>
         /// Help the TFS client find checkin policy assemblies.
         /// </summary>
-        Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
+        private Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
         {
             Trace.WriteLine("Looking for assembly " + args.Name + " ...");
             string folderPath = Path.Combine(GetVsInstallDir(), "PrivateAssemblies");
@@ -1358,10 +1356,10 @@ namespace Sep.Git.Tfs.VsCommon
         public int QueueGatedCheckinBuild(Uri buildDefinitionUri, string buildDefinitionName, string shelvesetName, string checkInTicket)
         {
             var buildServer = (IBuildServer)_server.GetService(typeof(IBuildServer));
- 
+
             var buildRequest = buildServer.CreateBuildRequest(buildDefinitionUri);
             buildRequest.ShelvesetName = shelvesetName;
-            buildRequest.Reason = BuildReason.CheckInShelveset; 
+            buildRequest.Reason = BuildReason.CheckInShelveset;
             buildRequest.GatedCheckInTicket = checkInTicket;
 
             Trace.TraceInformation("Launching build '" + buildDefinitionName + "' to validate your shelveset...");

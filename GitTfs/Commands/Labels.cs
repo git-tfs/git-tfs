@@ -28,8 +28,8 @@ namespace Sep.Git.Tfs.Commands
 
         public Labels(Globals globals, AuthorsFile authors)
         {
-            this._globals = globals;
-            this._authors = authors;
+            _globals = globals;
+            _authors = authors;
         }
 
         public OptionSet OptionSet
@@ -87,7 +87,7 @@ namespace Sep.Git.Tfs.Commands
             UpdateRemote(tfsRemote);
             Trace.TraceInformation("Looking for label on " + tfsRemote.TfsRepositoryPath + "...");
             var labels = tfsRemote.Tfs.GetLabels(tfsRemote.TfsRepositoryPath, NameFilter);
-            Trace.TraceInformation(labels.Count() +" labels found!");
+            Trace.TraceInformation(labels.Count() + " labels found!");
 
             Regex exludeRegex = null;
             if (ExcludeNameFilter != null)
@@ -110,7 +110,7 @@ namespace Sep.Git.Tfs.Commands
 
                 string ownerName;
                 string ownerEmail;
-                if(_authors.Authors.ContainsKey(label.Owner))
+                if (_authors.Authors.ContainsKey(label.Owner))
                 {
                     var author = _authors.Authors[label.Owner];
                     ownerName = author.Name;
@@ -123,7 +123,7 @@ namespace Sep.Git.Tfs.Commands
                 }
                 var labelName = (label.IsTransBranch ? label.Name + "(" + tfsRemote.Id + ")" : label.Name).ToGitRefName();
                 Trace.TraceInformation("Writing label '" + labelName + "'...");
-                _globals.Repository.CreateTag(labelName, sha1TagCommit, label.Comment, ownerName, ownerEmail ,label.Date);
+                _globals.Repository.CreateTag(labelName, sha1TagCommit, label.Comment, ownerName, ownerEmail, label.Date);
             }
             return GitTfsExitCodes.OK;
         }

@@ -33,13 +33,13 @@ namespace Sep.Git.Tfs.Commands
             BranchStrategy = BranchStrategy = BranchStrategy.Auto;
         }
 
-        bool FetchAll { get; set; }
-        bool FetchLabels { get; set; }
-        bool FetchParents { get; set; }
-        string BareBranch { get; set; }
-        bool ForceFetch { get; set; }
-        bool ExportMetadatas { get; set; }
-        string ExportMetadatasFile { get; set; }
+        private bool FetchAll { get; set; }
+        private bool FetchLabels { get; set; }
+        private bool FetchParents { get; set; }
+        private string BareBranch { get; set; }
+        private bool ForceFetch { get; set; }
+        private bool ExportMetadatas { get; set; }
+        private string ExportMetadatasFile { get; set; }
         public BranchStrategy BranchStrategy { get; set; }
         public string BatchSizeOption
         {
@@ -52,7 +52,7 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        int upToChangeSet { get; set; }
+        private int upToChangeSet { get; set; }
         public string UpToChangeSetOption
         {
             set
@@ -63,7 +63,7 @@ namespace Sep.Git.Tfs.Commands
                 upToChangeSet = changesetIdParsed;
             }
         }
-        
+
         protected int? InitialChangeset { get; set; }
 
         public virtual OptionSet OptionSet
@@ -102,7 +102,7 @@ namespace Sep.Git.Tfs.Commands
                         v => BatchSizeOption = v },
                     { "c|changeset=", "The changeset to clone from (must be a number)",
                         v => InitialChangeset = Convert.ToInt32(v) },
-                    { "t|up-to=", "up-to changeset # (optional, -1 for up to maximum, must be a number, not prefixed with C)", 
+                    { "t|up-to=", "up-to changeset # (optional, -1 for up to maximum, must be a number, not prefixed with C)",
                         v => UpToChangeSetOption = v }
                 }.Merge(remoteOptions.OptionSet);
             }
@@ -170,7 +170,7 @@ namespace Sep.Git.Tfs.Commands
                 remote.MaxCommitHash != remote.Repository.GetCommit(bareBranch).Sha)
             {
                 throw new GitTfsException("error : fetch is not allowed when there is ahead commits!",
-                    new[] {"Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)"});
+                    new[] { "Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)" });
             }
 
             var metadataExportInitializer = new ExportMetadatasInitializer(globals);
@@ -194,9 +194,8 @@ namespace Sep.Git.Tfs.Commands
                 }
                 else
                 {
-                    remote.Fetch(stopOnFailMergeCommit,upToChangeSet);
+                    remote.Fetch(stopOnFailMergeCommit, upToChangeSet);
                 }
-
             }
             finally
             {

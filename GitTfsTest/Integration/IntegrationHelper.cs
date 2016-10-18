@@ -12,16 +12,16 @@ using Xunit.Sdk;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
-    class IntegrationHelper : IDisposable
+    internal class IntegrationHelper : IDisposable
     {
         #region manage the work directory
 
-        string _workdir;
+        private string _workdir;
         private string Workdir
         {
             get
             {
-                if(_workdir == null)
+                if (_workdir == null)
                 {
                     _workdir = Path.GetTempFileName();
                     File.Delete(_workdir);
@@ -52,7 +52,7 @@ namespace Sep.Git.Tfs.Test.Integration
             }
         }
 
-        private Dictionary<string, Repository> _repositories = new Dictionary<string,Repository>();
+        private Dictionary<string, Repository> _repositories = new Dictionary<string, Repository>();
         public Repository Repository(string path)
         {
             path = Path.Combine(Workdir, path);
@@ -103,7 +103,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
                 _repo.Stage("README.txt");
                 var committer = GetCommitter();
-                return _repo.Commit(message, committer, committer, new CommitOptions(){ AllowEmptyCommit = true}).Id.Sha;
+                return _repo.Commit(message, committer, committer, new CommitOptions() { AllowEmptyCommit = true }).Id.Sha;
             }
 
             public void CreateBranch(string branchName)
@@ -125,7 +125,7 @@ namespace Sep.Git.Tfs.Test.Integration
             public string Amend(string message)
             {
                 var committer = GetCommitter();
-                return _repo.Commit(message, committer, committer, new CommitOptions(){ AmendPreviousCommit = true}).Id.Sha;
+                return _repo.Commit(message, committer, committer, new CommitOptions() { AmendPreviousCommit = true }).Id.Sha;
             }
         }
 
@@ -145,7 +145,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public class FakeHistoryBuilder
         {
-            Script _script;
+            private Script _script;
             public FakeHistoryBuilder(Script script)
             {
                 _script = script;
@@ -211,13 +211,13 @@ namespace Sep.Git.Tfs.Test.Integration
 
             public void SetRootBranch(string rootBranchPath)
             {
-                _script.RootBranches.Add(new ScriptedRootBranch(){BranchPath = rootBranchPath});
+                _script.RootBranches.Add(new ScriptedRootBranch() { BranchPath = rootBranchPath });
             }
         }
 
         public class FakeChangesetBuilder
         {
-            ScriptedChangeset _changeset;
+            private ScriptedChangeset _changeset;
 
             public FakeChangesetBuilder(ScriptedChangeset changeset)
             {
@@ -377,7 +377,7 @@ namespace Sep.Git.Tfs.Test.Integration
             Assert.Equal(expectedPaths.OrderBy(s => s), entries.OrderBy(s => s));
         }
 
-        public void AssertCommitMessage(string repodir, string commitish, params string [] expectedMessageLines)
+        public void AssertCommitMessage(string repodir, string commitish, params string[] expectedMessageLines)
         {
             var commit = Repository(repodir).Lookup<Commit>(commitish);
             AssertEqual(expectedMessageLines, Lines(commit.Message), "Commit message of " + commitish);

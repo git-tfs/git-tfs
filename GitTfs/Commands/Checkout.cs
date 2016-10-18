@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.Commands
         public int Run(string id)
         {
             int changesetId;
-            if(!int.TryParse(id, out changesetId))
+            if (!int.TryParse(id, out changesetId))
                 throw new GitTfsException("error: wrong format for changeset id...");
             var sha = _globals.Repository.FindCommitHashByChangesetId(changesetId);
             if (string.IsNullOrEmpty(sha))
@@ -54,14 +54,14 @@ namespace Sep.Git.Tfs.Commands
             if (!string.IsNullOrEmpty(BranchName))
             {
                 BranchName = _globals.Repository.AssertValidBranchName(BranchName);
-                if(!_globals.Repository.CreateBranch(BranchName.ToLocalGitRef(), sha))
+                if (!_globals.Repository.CreateBranch(BranchName.ToLocalGitRef(), sha))
                     throw new GitTfsException("error: can not create branch '" + BranchName + "'");
                 Trace.TraceInformation("Branch '" + BranchName + "' created...");
                 commitishToCheckout = BranchName;
             }
-            if(!_globals.Repository.Checkout(commitishToCheckout))
+            if (!_globals.Repository.Checkout(commitishToCheckout))
                 throw new GitTfsException("error: unable to checkout '" + commitishToCheckout + "' due to changes in your workspace!",
-                    new List<string> { "commit or stash your changes before retrying..."});
+                    new List<string> { "commit or stash your changes before retrying..." });
             return GitTfsExitCodes.OK;
         }
     }

@@ -11,8 +11,8 @@ namespace Sep.Git.Tfs.Util
     /// </summary>
     public class Bouncer
     {
-        List<Regex> includes = new List<Regex>();
-        List<Regex> excludes = new List<Regex>();
+        private List<Regex> includes = new List<Regex>();
+        private List<Regex> excludes = new List<Regex>();
 
         /// <summary>
         /// Add a regular expression for inclusion in the set.

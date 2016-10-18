@@ -1,6 +1,7 @@
-﻿namespace Sep.Git.Tfs
+﻿
+namespace Sep.Git.Tfs
 {
-    class TfsPlugin : Sep.Git.Tfs.Core.TfsInterop.TfsPlugin
+    internal class TfsPlugin : Sep.Git.Tfs.Core.TfsInterop.TfsPlugin
     {
         public override void Initialize(StructureMap.Graph.IAssemblyScanner scan)
         {

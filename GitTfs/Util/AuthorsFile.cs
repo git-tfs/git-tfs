@@ -16,16 +16,16 @@ namespace Sep.Git.Tfs.Util
             _gitUserId = BuildGitUserId(_gitAuthor);
         }
 
-        public string Name 
+        public string Name
         {
             get
             {
                 return _gitAuthor.Item1;
-            } 
+            }
         }
 
 
-        public string Email 
+        public string Email
         {
             get
             {
@@ -39,7 +39,7 @@ namespace Sep.Git.Tfs.Util
         {
             get
             {
-                return _gitUserId; 
+                return _gitUserId;
             }
         }
 
@@ -48,10 +48,10 @@ namespace Sep.Git.Tfs.Util
         // active directory name formatting rules.
         public static string BuildGitUserId(string email)
         {
-            return email.Trim(); 
+            return email.Trim();
         }
 
-        public static string BuildGitUserId(Tuple<string,string> gitUser)
+        public static string BuildGitUserId(Tuple<string, string> gitUser)
         {
             return BuildGitUserId(gitUser.Item2);
         }
@@ -69,7 +69,7 @@ namespace Sep.Git.Tfs.Util
         private readonly Dictionary<string, Author> _authorsByGitUserId = new Dictionary<string, Author>(StringComparer.OrdinalIgnoreCase);
 
         public AuthorsFile()
-        {}
+        { }
 
         public bool IsParseSuccessfull { get; set; }
 
@@ -79,7 +79,7 @@ namespace Sep.Git.Tfs.Util
         {
             get
             {
-                return this._authorsByTfsUserId;
+                return _authorsByTfsUserId;
             }
         }
 
@@ -88,12 +88,12 @@ namespace Sep.Git.Tfs.Util
         {
             get
             {
-                return this._authorsByGitUserId;
+                return _authorsByGitUserId;
             }
         }
 
 
-        public Author FindAuthor(Tuple<string,string> gitUser)
+        public Author FindAuthor(Tuple<string, string> gitUser)
         {
             string key = Author.BuildGitUserId(gitUser);
             Author a;
@@ -128,8 +128,8 @@ namespace Sep.Git.Tfs.Util
                     {
                         //git svn doesn't trim, but maybe this should?
                         string tfsUserId = match.Groups[1].Value; //.Trim();
-                        string name      = match.Groups[2].Value; //.Trim();
-                        string email     = match.Groups[3].Value; //.Trim();
+                        string name = match.Groups[2].Value; //.Trim();
+                        string email = match.Groups[3].Value; //.Trim();
 
                         Author a = new Author(tfsUserId, name, email);
 

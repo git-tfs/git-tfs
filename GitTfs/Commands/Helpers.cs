@@ -11,18 +11,18 @@ namespace Sep.Git.Tfs.Commands
         {
             var merged = new MergableOptionSet();
             merged.Merge(options);
-            foreach(var other in others)
+            foreach (var other in others)
                 merged.Merge(other);
             return merged;
         }
 
-        class MergableOptionSet : OptionSet
+        private class MergableOptionSet : OptionSet
         {
             public void Merge(OptionSet other)
             {
-                foreach(var option in other)
+                foreach (var option in other)
                 {
-                    if(!Contains(GetKeyForItem(option)))
+                    if (!Contains(GetKeyForItem(option)))
                     {
                         Add(option);
                     }

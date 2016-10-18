@@ -52,9 +52,9 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         {
             var branches = tfs.GetBranches();
             var branchTrees = branches.Aggregate(new Dictionary<string, BranchTree>(StringComparer.OrdinalIgnoreCase), (dict, branch) => dict.Tap(d => d.Add(branch.Path, new BranchTree(branch))));
-            foreach(var branch in branchTrees.Values)
+            foreach (var branch in branchTrees.Values)
             {
-                if(!branch.IsRoot)
+                if (!branch.IsRoot)
                 {
                     //in some strange cases there might be a branch which is not marked as IsRoot
                     //but the parent for this branch is missing.

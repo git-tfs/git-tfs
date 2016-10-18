@@ -23,6 +23,5 @@ namespace Sep.Git.Tfs.Test.Core
             Assert.Equal(repository, match.Groups["repository"].Value);
             Assert.Equal(changesetId, match.Groups["changeset"].Value);
         }
-
     }
 }

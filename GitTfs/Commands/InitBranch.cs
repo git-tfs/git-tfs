@@ -141,7 +141,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 Trace.WriteLine("Processing " + (rootBranch.IsRenamedBranch ? "renamed " : string.Empty) + "branch :"
                     + rootBranch.TfsBranchPath + " (" + rootBranch.RootChangeset + ")");
-                var cbd = new BranchCreationDatas() {RootChangesetId = rootBranch.RootChangeset, TfsRepositoryPath = rootBranch.TfsBranchPath};
+                var cbd = new BranchCreationDatas() { RootChangesetId = rootBranch.RootChangeset, TfsRepositoryPath = rootBranch.TfsBranchPath };
                 if (cbd.TfsRepositoryPath == tfsBranchPath)
                     cbd.GitBranchNameExpected = gitBranchNameExpected;
 
@@ -153,7 +153,7 @@ namespace Sep.Git.Tfs.Commands
                 if (rootBranch.IsRenamedBranch || !NoFetch)
                 {
                     fetchResult = FetchRemote(tfsRemote, false, !DontCreateGitBranch && !rootBranch.IsRenamedBranch, fetchResult);
-                    if(fetchResult.IsSuccess && rootBranch.IsRenamedBranch)
+                    if (fetchResult.IsSuccess && rootBranch.IsRenamedBranch)
                         remoteToDelete.Add(tfsRemote);
                 }
                 else
@@ -182,7 +182,7 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        class BranchCreationDatas
+        private class BranchCreationDatas
         {
             public string TfsRepositoryPath { get; set; }
             public string GitBranchNameExpected { get; set; }
@@ -190,7 +190,7 @@ namespace Sep.Git.Tfs.Commands
         }
 
         [DebuggerDisplay("{TfsRepositoryPath} C{RootChangesetId}")]
-        class BranchDatas
+        private class BranchDatas
         {
             public string TfsRepositoryPath { get; set; }
             public IGitTfsRemote TfsRemote { get; set; }
@@ -268,10 +268,10 @@ namespace Sep.Git.Tfs.Commands
             {
                 Trace.TraceInformation("- " + tfsBranchPath.TfsRepositoryPath);
                 var branchDatas = new BranchDatas
-                    {
-                        TfsRepositoryPath = tfsBranchPath.TfsRepositoryPath,
-                        TfsRemote = _globals.Repository.ReadAllTfsRemotes().FirstOrDefault(r => r.TfsRepositoryPath == tfsBranchPath.TfsRepositoryPath)
-                    };
+                {
+                    TfsRepositoryPath = tfsBranchPath.TfsRepositoryPath,
+                    TfsRemote = _globals.Repository.ReadAllTfsRemotes().FirstOrDefault(r => r.TfsRepositoryPath == tfsBranchPath.TfsRepositoryPath)
+                };
                 try
                 {
                     branchDatas.CreationBranchData = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath.TfsRepositoryPath);

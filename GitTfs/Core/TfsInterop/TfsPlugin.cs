@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             var pluginLoader = new PluginLoader();
             var explicitVersion = Environment.GetEnvironmentVariable("GIT_TFS_CLIENT");
             if (explicitVersion == "11") explicitVersion = "2012"; // GitTfs.Vs2012 was formerly called GitTfs.Vs11
-            if(!String.IsNullOrEmpty(explicitVersion))
+            if (!String.IsNullOrEmpty(explicitVersion))
             {
                 return pluginLoader.TryLoadVsPluginVersion(explicitVersion) ??
                        pluginLoader.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");
@@ -30,11 +30,11 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                    pluginLoader.Fail();
         }
 
-        class PluginLoader
+        private class PluginLoader
         {
             private List<Exception> _failures = new List<Exception>();
             private static string VsPluginAssemblyFolder { get; set; }
-            private static readonly Dictionary<string,string> VisualStudioVersions = new Dictionary<string, string>()
+            private static readonly Dictionary<string, string> VisualStudioVersions = new Dictionary<string, string>()
             {
                 {"2015", "14.0" },
                 {"2013", "12.0" },
@@ -60,7 +60,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 try
                 {
                     var plugin = (TfsPlugin)Activator.CreateInstance(Assembly.Load(assembly).GetType(pluginType));
-                    if(plugin.IsViable())
+                    if (plugin.IsViable())
                     {
                         return plugin;
                     }
@@ -116,7 +116,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 return false;
             }
 
-            static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
+            private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
             {
                 string folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 string assemblyPath = Path.Combine(folderPath, VsPluginAssemblyFolder, new AssemblyName(args.Name).Name + ".dll");
@@ -135,7 +135,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 throw new PluginLoaderException(message, _failures);
             }
 
-            class PluginLoaderException : Exception
+            private class PluginLoaderException : Exception
             {
                 public IEnumerable<Exception> InnerExceptions { get; private set; }
 
@@ -145,7 +145,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 }
 
                 public PluginLoaderException(IEnumerable<Exception> failures) : this("Unable to load any TFS assemblies!", failures)
-                {}
+                { }
             }
         }
 

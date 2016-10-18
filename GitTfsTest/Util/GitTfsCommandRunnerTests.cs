@@ -21,14 +21,14 @@ namespace Sep.Git.Tfs.Test.Util
             {
                 public Form Form { get; private set; }
                 public IList<string> Args { get; private set; }
-                private Invocation(){}
+                private Invocation() { }
                 public static Invocation List(IList<string> args)
                 {
-                    return new Invocation {Form = Form.List, Args = args};
+                    return new Invocation { Form = Form.List, Args = args };
                 }
-                public static Invocation Split(params string[]args)
+                public static Invocation Split(params string[] args)
                 {
-                    return new Invocation {Form = Form.Split, Args = args};
+                    return new Invocation { Form = Form.Split, Args = args };
                 }
             }
             internal List<Invocation> Calls = new List<Invocation>();
@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Test.Util
             _mocks = new RhinoAutoMocker<GitTfsCommandRunner>(MockMode.AAA);
         }
 
-        IList<string> Args(params string[] args)
+        private IList<string> Args(params string[] args)
         {
             return args;
         }

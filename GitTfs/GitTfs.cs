@@ -65,11 +65,11 @@ namespace Sep.Git.Tfs
         public int Main(GitTfsCommand command, IList<string> unparsedArgs)
         {
             Trace.WriteLine(_gitTfsVersionProvider.GetVersionString());
-            if(_globals.ShowHelp)
+            if (_globals.ShowHelp)
             {
                 return _help.ShowHelp(command);
             }
-            else if(_globals.ShowVersion)
+            else if (_globals.ShowVersion)
             {
                 Trace.TraceInformation(_gitTfsVersionProvider.GetVersionString());
                 Trace.TraceInformation(GitTfsConstants.MessageForceVersion);
@@ -90,7 +90,7 @@ namespace Sep.Git.Tfs
 
         public bool RequiresValidGitRepository(GitTfsCommand command)
         {
-            return ! command.GetType().GetCustomAttributes(typeof (RequiresValidGitRepositoryAttribute), false).IsEmpty();
+            return !command.GetType().GetCustomAttributes(typeof(RequiresValidGitRepositoryAttribute), false).IsEmpty();
         }
 
         private void ParseAuthors()
@@ -120,7 +120,7 @@ namespace Sep.Git.Tfs
             {
                 _globals.StartingRepositorySubDir = "";
             }
-            if(_globals.GitDir != null)
+            if (_globals.GitDir != null)
             {
                 _globals.GitDirSetByUser = true;
             }

@@ -6,18 +6,18 @@ namespace Sep.Git.Tfs.Core.TfsInterop
     [Flags]
     public enum TfsChangeType
     {
-        None     = 0x0001,
-        Add      = 0x0002,
-        Edit     = 0x0004,
+        None = 0x0001,
+        Add = 0x0002,
+        Edit = 0x0004,
         Encoding = 0x0008,
-        Rename   = 0x0010,
-        Delete   = 0x0020,
+        Rename = 0x0010,
+        Delete = 0x0020,
         Undelete = 0x0040,
-        Content  = 0x007F, // Rollup of the preceding change types
+        Content = 0x007F, // Rollup of the preceding change types
 
-        Branch   = 0x0080,
-        Merge    = 0x0100,
+        Branch = 0x0080,
+        Merge = 0x0100,
 
-        Lock     = 0x0200
+        Lock = 0x0200
     }
 }

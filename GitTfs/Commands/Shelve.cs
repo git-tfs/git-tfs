@@ -37,7 +37,7 @@ namespace Sep.Git.Tfs.Commands
                     { "p|evaluate-policies", "Evaluate checkin policies (default: false)",
                         v => EvaluateCheckinPolicies = v != null },
                     { "f|force", "Force a shelve, and overwrite an existing shelveset",
-                        v => { this._checkinOptions.Force = true; } },
+                        v => { _checkinOptions.Force = true; } },
                 }.Merge(_checkinOptions.OptionSet);
             }
         }

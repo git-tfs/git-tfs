@@ -26,7 +26,7 @@ namespace Sep.Git.Tfs.Test.Core
                 // Make this remote ignore any path that includes "ignored".
                 Remote.Stub(r => r.ShouldSkip(null))
                     .Constraints(Is.Anything())
-                    .Do(new Function<string,bool>(s => s.Contains("ignored")));
+                    .Do(new Function<string, bool>(s => s.Contains("ignored")));
             }
 
             private ChangeSieve _changeSieve;
@@ -98,14 +98,14 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal(Stringify(expectedChanges), Stringify(actualChanges));
             }
 
-            string Stringify(IEnumerable<ApplicableChange> changes)
+            private string Stringify(IEnumerable<ApplicableChange> changes)
             {
                 return string.Join("\n", changes.Select(c => "" + c.Type + ":" + c.GitPath));
             }
         }
 
         // A stub IChange implementation.
-        class FakeChange : IChange, IItem, IVersionControlServer
+        private class FakeChange : IChange, IItem, IVersionControlServer
         {
             public static IChange Add(string serverItem, TfsChangeType additionalChange = 0, int deletionId = 0)
             {
@@ -152,15 +152,15 @@ namespace Sep.Git.Tfs.Test.Core
                 return new FakeChange(TfsChangeType.Delete, TfsItemType.Folder, serverItem);
             }
 
-            const int ChangesetId = 10;
+            private const int ChangesetId = 10;
 
-            TfsChangeType _tfsChangeType;
-            TfsItemType _tfsItemType;
-            string _serverItem;
-            int _deletionId;
-            string _renamedFrom;
-            int _itemId;
-            static int _maxItemId = 0;
+            private TfsChangeType _tfsChangeType;
+            private TfsItemType _tfsItemType;
+            private string _serverItem;
+            private int _deletionId;
+            private string _renamedFrom;
+            private int _itemId;
+            private static int _maxItemId = 0;
 
             private FakeChange(TfsChangeType tfsChangeType, TfsItemType itemType, string serverItem, int deletionId = 0, string renamedFrom = null)
             {
@@ -229,9 +229,9 @@ namespace Sep.Git.Tfs.Test.Core
                 throw new NotImplementedException();
             }
 
-            class PreviousItem : IItem
+            private class PreviousItem : IItem
             {
-                string _oldName;
+                private string _oldName;
 
                 public PreviousItem(string oldName)
                 {
@@ -409,7 +409,7 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 public Fixture()
                 {
-                    Changeset.Changes = new IChange [] {
+                    Changeset.Changes = new IChange[] {
                         FakeChange.Rename("$/Project/file1.txt", from: "$/Project/oldfile1.txt", deletionId: 33),
                         FakeChange.Add("$/Project/deletedfile1.txt", deletionId: 33), // this seems like nonsense.
                     };
@@ -574,7 +574,7 @@ namespace Sep.Git.Tfs.Test.Core
                     ApplicableChange.Update("file10.txt"));
             }
         }
-       
+
         public class WithDeleteMainFolderBranchAndSubItems : Base<WithDeleteMainFolderBranchAndSubItems.Fixture>
         {
             public class Fixture : BaseFixture
@@ -667,13 +667,13 @@ namespace Sep.Git.Tfs.Test.Core
                     throw new AnExceptionTypeThatYouCannotCatch();
                 }
 
-                class AnExceptionTypeThatYouCannotCatch : Exception
+                private class AnExceptionTypeThatYouCannotCatch : Exception
                 {
                 }
 
                 // The rest of the implementation is pretty straight-forward.
 
-                readonly string _serverItem;
+                private readonly string _serverItem;
 
                 // Accept a name so that the name is more obviously matched between the Fixture
                 // and the assertion.

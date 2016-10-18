@@ -58,10 +58,10 @@ namespace Sep.Git.Tfs.Test.Commands
         public void ShouldWriteCommandHelp()
         {
             var memoryTarget = GetTestLogger();
-            mocks.Container.PluginGraph.CreateFamily(typeof (GitTfsCommand));
-            mocks.Container.PluginGraph.FindFamily(typeof (GitTfsCommand)).AddType(typeof (TestCommand), "test");
+            mocks.Container.PluginGraph.CreateFamily(typeof(GitTfsCommand));
+            mocks.Container.PluginGraph.FindFamily(typeof(GitTfsCommand)).AddType(typeof(TestCommand), "test");
             mocks.Container.Inject<GitTfsCommand>("test", new TestCommand());
-            mocks.ClassUnderTest.Run(new[]{"test"});
+            mocks.ClassUnderTest.Run(new[] { "test" });
 
             memoryTarget.Logs[0].Equals("Usage: git-tfs test [options]");
         }
@@ -70,7 +70,7 @@ namespace Sep.Git.Tfs.Test.Commands
         {
             public bool Flag { get; set; }
 
-            OptionSet TestOptions = new OptionSet();
+            private OptionSet TestOptions = new OptionSet();
 
             public OptionSet OptionSet
             {

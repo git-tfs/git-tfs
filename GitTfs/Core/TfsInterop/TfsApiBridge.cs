@@ -26,7 +26,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public TTfs Unwrap<TTfs>(object wrapper) where TTfs : class
         {
-            return wrapper == null ? null : ((WrapperFor<TTfs>) wrapper).Unwrap();
+            return wrapper == null ? null : ((WrapperFor<TTfs>)wrapper).Unwrap();
         }
 
         public TTfs[] Unwrap<TTfs>(IEnumerable wrappers) where TTfs : class
@@ -36,7 +36,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public TEnum Convert<TEnum>(object originalEnum)
         {
-            return (TEnum) originalEnum;
+            return (TEnum)originalEnum;
         }
     }
 }

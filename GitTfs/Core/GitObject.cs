@@ -1,3 +1,4 @@
+
 namespace Sep.Git.Tfs.Core
 {
     public class GitObject

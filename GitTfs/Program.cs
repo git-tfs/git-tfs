@@ -42,7 +42,7 @@ namespace Sep.Git.Tfs
         private static void ReportException(Exception e)
         {
             var gitTfsException = e as GitTfsException;
-            if(gitTfsException != null)
+            if (gitTfsException != null)
             {
                 Trace.WriteLine(gitTfsException);
                 Trace.TraceError(gitTfsException.Message);
@@ -68,7 +68,7 @@ namespace Sep.Git.Tfs
         private static void ReportInternalException(Exception e)
         {
             Trace.WriteLine(e);
-            while(e is TargetInvocationException && e.InnerException != null)
+            while (e is TargetInvocationException && e.InnerException != null)
                 e = e.InnerException;
             while (e != null)
             {
@@ -133,7 +133,7 @@ namespace Sep.Git.Tfs
                 var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
                 _logFilePath = fileTarget.FileName.Render(logEventInfo);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Trace.Listeners.Add(new ConsoleTraceListener());
                 Trace.TraceWarning("Fail to enable logging in file due to error:" + ex.Message);
@@ -161,9 +161,9 @@ namespace Sep.Git.Tfs
 
         private static void DoCustomConfiguration(ConfigurationExpression initializer)
         {
-            foreach(var type in typeof(Program).Assembly.GetTypes())
+            foreach (var type in typeof(Program).Assembly.GetTypes())
             {
-                foreach(ConfiguresStructureMap attribute in type.GetCustomAttributes(typeof(ConfiguresStructureMap), false))
+                foreach (ConfiguresStructureMap attribute in type.GetCustomAttributes(typeof(ConfiguresStructureMap), false))
                 {
                     attribute.Initialize(initializer, type);
                 }

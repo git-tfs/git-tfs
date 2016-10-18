@@ -24,7 +24,7 @@ namespace Sep.Git.Tfs.Test.Core
             ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
             CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
 
-            TfsWorkspace tfsWorkspace = new TfsWorkspace(workspace, localDirectory,  contextVersion, remote, checkinOptions, tfsHelper, policyEvaluator);
+            TfsWorkspace tfsWorkspace = new TfsWorkspace(workspace, localDirectory, contextVersion, remote, checkinOptions, tfsHelper, policyEvaluator);
 
             workspace.Stub(w => w.GetPendingChanges()).Return(null);
 

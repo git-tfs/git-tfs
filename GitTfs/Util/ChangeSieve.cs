@@ -33,8 +33,8 @@ namespace Sep.Git.Tfs.Util
 
     public class ChangeSieve
     {
-        readonly PathResolver _resolver;
-        readonly IEnumerable<NamedChange> _namedChanges;
+        private readonly PathResolver _resolver;
+        private readonly IEnumerable<NamedChange> _namedChanges;
 
         public ChangeSieve(IChangeset changeset, PathResolver resolver)
         {
@@ -42,12 +42,12 @@ namespace Sep.Git.Tfs.Util
 
             _namedChanges = changeset.Changes.Select(c => new NamedChange
             {
-                    Info = _resolver.GetGitObject(c.Item.ServerItem),
-                    Change = c,
+                Info = _resolver.GetGitObject(c.Item.ServerItem),
+                Change = c,
             });
         }
 
-        bool? _renameBranchCommmit;
+        private bool? _renameBranchCommmit;
         /// <summary>
         /// Is the top-level folder deleted or renamed?
         /// </summary>
@@ -83,7 +83,8 @@ namespace Sep.Git.Tfs.Util
             if (DeletesProject)
                 return Enumerable.Empty<ApplicableChange>();
 
-            var compartments = new {
+            var compartments = new
+            {
                 Deleted = new List<ApplicableChange>(),
                 Updated = new List<ApplicableChange>(),
             };
@@ -124,7 +125,7 @@ namespace Sep.Git.Tfs.Util
             return compartments.Deleted.Concat(compartments.Updated);
         }
 
-        bool? _deletesProject;
+        private bool? _deletesProject;
         private bool DeletesProject
         {
             get
@@ -141,14 +142,14 @@ namespace Sep.Git.Tfs.Util
             }
         }
 
-        class NamedChange
+        private class NamedChange
         {
             public GitObject Info { get; set; }
             public IChange Change { get; set; }
             public string GitPath { get { return Info.Try(x => x.Path); } }
         }
 
-        IEnumerable<NamedChange> NamedChanges
+        private IEnumerable<NamedChange> NamedChanges
         {
             get
             {
@@ -190,7 +191,7 @@ namespace Sep.Git.Tfs.Util
                                                                      TfsRecursionType.None, null, 1, previousChangeset,
                                                                      1, true, false, false);
                     var previousChange = history.FirstOrDefault();
-                    if(previousChange == null)
+                    if (previousChange == null)
                     {
                         Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
                         return null;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+
 namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public interface IVersionControlServer
@@ -7,7 +8,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         IItem GetItem(string itemPath, int changesetNumber);
         IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType);
         IEnumerable<IChangeset> QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion,
-            string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, 
+            string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode,
             bool includeDownloadInfo);
     }
 }

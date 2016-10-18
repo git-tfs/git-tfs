@@ -231,7 +231,7 @@ namespace Sep.Git.Tfs.Core
                 throw new GitTfsException(string.Format("error: this remote name \"{0}\" is already used!", newRemoteName));
 
             var oldRemote = ReadTfsRemote(oldRemoteName);
-            if(oldRemote == null)
+            if (oldRemote == null)
                 throw new GitTfsException(string.Format("error: the remote \"{0}\" doesn't exist!", oldRemoteName));
 
             var remoteInfo = oldRemote.RemoteInfo;
@@ -316,8 +316,8 @@ namespace Sep.Git.Tfs.Core
         public MergeResult Merge(string commitish)
         {
             var commit = _repository.Lookup<Commit>(commitish);
-            if(commit == null)
-                throw new GitTfsException("error: commit '"+ commitish + "' can't be found and merged into!");
+            if (commit == null)
+                throw new GitTfsException("error: commit '" + commitish + "' can't be found and merged into!");
             return _repository.Merge(commit, _repository.Config.BuildSignature(new DateTimeOffset(DateTime.Now)));
         }
 
@@ -456,7 +456,7 @@ namespace Sep.Git.Tfs.Core
 
         private void ParseEntries(IDictionary<string, GitObject> entries, Tree treeInfo, string commit)
         {
-            var treesToDescend = new Queue<Tree>(new[] {treeInfo});
+            var treesToDescend = new Queue<Tree>(new[] { treeInfo });
             while (treesToDescend.Any())
             {
                 var currentTree = treesToDescend.Dequeue();
@@ -493,7 +493,7 @@ namespace Sep.Git.Tfs.Core
 
         private IGitChangedFile BuildGitChangedFile(GitChangeInfo change)
         {
-            return change.ToGitChangedFile(_container.With((IGitRepository) this));
+            return change.ToGitChangedFile(_container.With((IGitRepository)this));
         }
 
         public bool WorkingCopyHasUnstagedOrUncommitedChanges
@@ -502,9 +502,9 @@ namespace Sep.Git.Tfs.Core
             {
                 if (IsBare)
                     return false;
-                return (from 
+                return (from
                             entry in _repository.RetrieveStatus()
-                        where 
+                        where
                             entry.State != FileStatus.Ignored &&
                             entry.State != FileStatus.Untracked
                         select entry).Any();
@@ -513,14 +513,14 @@ namespace Sep.Git.Tfs.Core
 
         public void CopyBlob(string sha, string outputFile)
         {
-            Blob blob; 
+            Blob blob;
             var destination = new FileInfo(outputFile);
             if (!destination.Directory.Exists)
                 destination.Directory.Create();
             if ((blob = _repository.Lookup<Blob>(sha)) != null)
                 using (Stream stream = blob.GetContentStream())
                 using (var outstream = File.Create(destination.FullName))
-                        stream.CopyTo(outstream);
+                    stream.CopyTo(outstream);
         }
 
         public string AssertValidBranchName(string gitBranchName)
@@ -545,7 +545,7 @@ namespace Sep.Git.Tfs.Core
                 if (i < parts.Length)
                     refName += '/' + parts[i];
             }
-            
+
             return false;
         }
 
@@ -707,12 +707,12 @@ namespace Sep.Git.Tfs.Core
         public IEnumerable<GitCommit> FindParentCommits(string @from, string to)
         {
             var commits = _repository.Commits.QueryBy(
-                new CommitFilter() {Since = @from, Until = to, SortBy = CommitSortStrategies.Reverse, FirstParentOnly = true})
-                .Select(c=>new GitCommit(c));
+                new CommitFilter() { Since = @from, Until = to, SortBy = CommitSortStrategies.Reverse, FirstParentOnly = true })
+                .Select(c => new GitCommit(c));
             var parent = to;
             foreach (var gitCommit in commits)
             {
-                if(!gitCommit.Parents.Any(c=>c.Sha == parent))
+                if (!gitCommit.Parents.Any(c => c.Sha == parent))
                     return new List<GitCommit>();
                 parent = gitCommit.Sha;
             }

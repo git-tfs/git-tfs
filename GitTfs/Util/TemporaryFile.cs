@@ -14,10 +14,10 @@ namespace Sep.Git.Tfs.Util
         {
             Path = path;
         }
-        
+
         public string Path { get; private set; }
 
-        public static implicit operator string(TemporaryFile f)
+        public static implicit operator string (TemporaryFile f)
         {
             return f.Path;
         }

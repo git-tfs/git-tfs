@@ -37,10 +37,10 @@ namespace Sep.Git.Tfs.VsFake
             }
         }
 
-        List<ScriptedChangeset> _changesets = new List<ScriptedChangeset>();
+        private List<ScriptedChangeset> _changesets = new List<ScriptedChangeset>();
         public List<ScriptedChangeset> Changesets { get { return _changesets; } }
 
-        List<ScriptedRootBranch> _rootBranches = new List<ScriptedRootBranch>();
+        private List<ScriptedRootBranch> _rootBranches = new List<ScriptedRootBranch>();
         public List<ScriptedRootBranch> RootBranches { get { return _rootBranches; } }
     }
 
@@ -60,7 +60,7 @@ namespace Sep.Git.Tfs.VsFake
         public MergeChangesetDatas MergeChangesetDatas { get; set; }
         public string Committer { get; set; }
 
-        List<ScriptedChange> _changes = new List<ScriptedChange>();
+        private List<ScriptedChange> _changes = new List<ScriptedChange>();
     }
 
     [Serializable]

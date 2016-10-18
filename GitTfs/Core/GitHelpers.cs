@@ -74,7 +74,7 @@ namespace Sep.Git.Tfs.Core
             return new ProcessStdoutReader(this, process);
         }
 
-        class ProcessStdoutReader : TextReader
+        private class ProcessStdoutReader : TextReader
         {
             private readonly GitProcess process;
             private readonly GitHelpers helper;
@@ -97,7 +97,7 @@ namespace Sep.Git.Tfs.Core
 
             protected override void Dispose(bool disposing)
             {
-                if(disposing && process != null)
+                if (disposing && process != null)
                 {
                     Close();
                 }
@@ -205,7 +205,7 @@ namespace Sep.Git.Tfs.Core
 
             if (!process.WaitForExit((int)TimeSpan.FromSeconds(10).TotalMilliseconds))
                 throw new GitCommandException("Command did not terminate.", process);
-            if(process.ExitCode != 0)
+            if (process.ExitCode != 0)
                 throw new GitCommandException(string.Format("Command exited with error code: {0}\n{1}", process.ExitCode, process.StandardErrorString), process);
         }
 
@@ -217,8 +217,8 @@ namespace Sep.Git.Tfs.Core
 
         private void RedirectStderr(ProcessStartInfo startInfo)
         {
-           startInfo.RedirectStandardError= true;
-           startInfo.StandardErrorEncoding = _encoding;
+            startInfo.RedirectStandardError = true;
+            startInfo.StandardErrorEncoding = _encoding;
         }
 
         private void RedirectStdin(ProcessStartInfo startInfo)
@@ -229,10 +229,10 @@ namespace Sep.Git.Tfs.Core
 
         private GitProcess Start(string[] command)
         {
-            return Start(command, x => {});
+            return Start(command, x => { });
         }
 
-        protected virtual GitProcess Start(string [] command, Action<ProcessStartInfo> initialize)
+        protected virtual GitProcess Start(string[] command, Action<ProcessStartInfo> initialize)
         {
             var startInfo = new ProcessStartInfo();
             startInfo.FileName = "git";
@@ -275,13 +275,13 @@ namespace Sep.Git.Tfs.Core
         private static readonly Regex ValidCommandName = new Regex("^[a-z0-9A-Z_-]+$");
         private static void AssertValidCommand(string[] command)
         {
-            if(command.Length < 1 || !ValidCommandName.IsMatch(command[0]))
+            if (command.Length < 1 || !ValidCommandName.IsMatch(command[0]))
                 throw new Exception("bad git command: " + (command.Length == 0 ? "" : command[0]));
         }
 
         protected class GitProcess
         {
-            Process _process;
+            private Process _process;
 
             public GitProcess(Process process)
             {

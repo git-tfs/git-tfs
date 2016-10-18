@@ -1,4 +1,5 @@
-﻿namespace Sep.Git.Tfs.Core.Changes.Git
+﻿
+namespace Sep.Git.Tfs.Core.Changes.Git
 {
     public class Delete : IGitChangedFile
     {

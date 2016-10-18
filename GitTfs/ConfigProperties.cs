@@ -7,7 +7,7 @@ namespace Sep.Git.Tfs
     // or overridden by some other means, like from the command line.
     public class ConfigProperties
     {
-        ConfigPropertyLoader _loader;
+        private ConfigPropertyLoader _loader;
 
         public ConfigProperties(ConfigPropertyLoader loader)
         {
@@ -18,7 +18,7 @@ namespace Sep.Git.Tfs
         {
             _loader.PersistAllOverrides();
         }
-        
+
         public int BatchSize
         {
             set { _loader.Override(GitTfsConstants.BatchSize, value); }
@@ -37,6 +37,5 @@ namespace Sep.Git.Tfs
                 return initialChangeset == -1 ? null : initialChangeset;
             }
         }
-
     }
 }

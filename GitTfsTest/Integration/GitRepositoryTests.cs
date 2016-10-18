@@ -11,7 +11,7 @@ namespace Sep.Git.Tfs.Test.Integration
 {
     public class GitRepositoryTests : BaseTest, IDisposable
     {
-        IntegrationHelper h = new IntegrationHelper();
+        private IntegrationHelper h = new IntegrationHelper();
 
         public GitRepositoryTests()
         {
@@ -66,7 +66,7 @@ namespace Sep.Git.Tfs.Test.Integration
             string c3 = null;
             h.SetupGitRepo("repo", g =>
             {
-                c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C"+ ChangesetIdToTrickFetch);
+                c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
                 g.CreateBranch("branch");
                 c2 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/branch;C" + ChangesetIdToTrickFetch);
                 g.Checkout("master");

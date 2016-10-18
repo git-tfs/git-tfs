@@ -7,8 +7,8 @@ namespace Sep.Git.Tfs.Util
     [StructureMapSingleton]
     public class ConfigPropertyLoader
     {
-        Globals _globals;
-        Dictionary<string, object> _overrides = new Dictionary<string, object>();
+        private Globals _globals;
+        private Dictionary<string, object> _overrides = new Dictionary<string, object>();
 
         public ConfigPropertyLoader(Globals globals)
         {
@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Util
         public T Get<T>(string key, T defaultValue)
         {
             if (_overrides.ContainsKey(key))
-                return (T) _overrides[key];
+                return (T)_overrides[key];
 
             return _globals.Repository.GetConfig<T>(key, defaultValue);
         }

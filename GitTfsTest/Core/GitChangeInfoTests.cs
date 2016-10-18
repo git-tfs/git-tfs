@@ -190,7 +190,7 @@ namespace Sep.Git.Tfs.Test.Core
             using (var reader = new System.IO.StringReader(input))
             {
                 var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
-                
+
                 Assert.Equal(5, changes.Length);
 
                 Assert.Equal("A", changes[0].Status);
@@ -246,6 +246,5 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal("TestFiles/試し4.txt", changes[4].path);
             }
         }
-
     }
 }

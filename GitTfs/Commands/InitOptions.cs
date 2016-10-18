@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Commands
             }
         }
 
-        string ValidateCrlfValue(string v)
+        private string ValidateCrlfValue(string v)
         {
             string[] valid = { "false", "true", "auto" };
             if (!Array.Exists(valid, s => v == s))
@@ -40,7 +40,7 @@ namespace Sep.Git.Tfs.Commands
             return v;
         }
 
-        string ValidateIgnoreCaseValue(string v)
+        private string ValidateIgnoreCaseValue(string v)
         {
             string[] valid = { "false", "true" };
             if (!Array.Exists(valid, s => v == s))

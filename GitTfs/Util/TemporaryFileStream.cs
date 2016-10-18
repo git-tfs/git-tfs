@@ -30,7 +30,7 @@ namespace Sep.Git.Tfs.Util
         {
             base.Dispose(disposing);
             if (_filename == null) return;
-            
+
             // doing the same both on disposing and finalizing
             try
             {
@@ -42,7 +42,7 @@ namespace Sep.Git.Tfs.Util
                 Trace.WriteLine("Unable to delete temp file: " + e);
                 // ignore!
             }
-            catch(UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException e)
             {
                 Trace.WriteLine("Unable to delete temp file - unauthorized access: " + e);
                 // ignore!

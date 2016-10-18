@@ -67,7 +67,7 @@ namespace Sep.Git.Tfs.Core
             if (string.IsNullOrWhiteSpace(remoteId))
                 return new List<KeyValuePair<string, string>>();
 
-            return Dump(new RemoteInfo {Id = remoteId});
+            return Dump(new RemoteInfo { Id = remoteId });
         }
     }
 }
