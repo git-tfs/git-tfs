@@ -1,4 +1,5 @@
-﻿namespace Sep.Git.Tfs.Core.TfsInterop
+﻿
+namespace Sep.Git.Tfs.Core.TfsInterop
 {
     public class WrapperFor<TFS_TYPE>
     {

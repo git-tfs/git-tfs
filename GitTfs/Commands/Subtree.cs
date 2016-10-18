@@ -43,10 +43,10 @@ namespace Sep.Git.Tfs.Commands
 
         public Subtree(Fetch fetch, QuickFetch quickFetch, Globals globals, RemoteOptions remoteOptions)
         {
-            this._fetch = fetch;
-            this._quickFetch = quickFetch;
-            this._globals = globals;
-            this._remoteOptions = remoteOptions;
+            _fetch = fetch;
+            _quickFetch = quickFetch;
+            _globals = globals;
+            _remoteOptions = remoteOptions;
         }
 
         public int Run(IList<string> args)
@@ -86,7 +86,7 @@ namespace Sep.Git.Tfs.Commands
             }
 
 
-            var fetch = Squash ? this._quickFetch : this._fetch;
+            var fetch = Squash ? _quickFetch : _fetch;
 
             IGitTfsRemote owner = null;
             string ownerId = _globals.RemoteId;
@@ -100,8 +100,8 @@ namespace Sep.Git.Tfs.Commands
                     ownerId = null;
                 }
             }
-            
-            if(string.IsNullOrEmpty(ownerId))
+
+            if (string.IsNullOrEmpty(ownerId))
             {
                 //check for any remote that has no TfsRepositoryPath
                 owner = _globals.Repository.ReadAllTfsRemotes().FirstOrDefault(x => string.IsNullOrEmpty(x.TfsRepositoryPath) && !x.IsSubtree);
@@ -123,26 +123,26 @@ namespace Sep.Git.Tfs.Commands
                 ownerId = owner.Id;
                 Trace.TraceInformation("Attaching subtree to owning remote " + owner.Id);
             }
-            
+
 
             //create a remote for the new subtree
             string remoteId = string.Format(GitTfsConstants.RemoteSubtreeFormat, owner.Id, Prefix);
-            IGitTfsRemote remote = _globals.Repository.HasRemote(remoteId) ? 
+            IGitTfsRemote remote = _globals.Repository.HasRemote(remoteId) ?
                 _globals.Repository.ReadTfsRemote(remoteId) :
                 _globals.Repository.CreateTfsRemote(new RemoteInfo
-                 {
-                     Id = remoteId,
-                     Url = tfsUrl,
-                     Repository = tfsRepositoryPath,
-                     RemoteOptions = _remoteOptions,
-                 });
-            
+                {
+                    Id = remoteId,
+                    Url = tfsUrl,
+                    Repository = tfsRepositoryPath,
+                    RemoteOptions = _remoteOptions,
+                });
+
             Trace.TraceInformation("-> new remote " + remote.Id);
 
             fetch.BranchStrategy = BranchStrategy.None;
 
             int result = fetch.Run(remote.Id);
-            
+
             if (result == GitTfsExitCodes.OK)
             {
                 var p = Prefix.Replace(" ", "\\ ");
@@ -165,11 +165,11 @@ namespace Sep.Git.Tfs.Commands
 
                 result = GitTfsExitCodes.OK;
             }
-            
+
 
             return result;
         }
-    
+
         public int DoPull(string remoteId)
         {
             ValidatePrefix();
@@ -177,7 +177,7 @@ namespace Sep.Git.Tfs.Commands
             remoteId = remoteId ?? string.Format(GitTfsConstants.RemoteSubtreeFormat, _globals.RemoteId ?? GitTfsConstants.DefaultRepositoryId, Prefix);
             IGitTfsRemote remote = _globals.Repository.ReadTfsRemote(remoteId);
 
-            int result = this._fetch.Run(remote.Id);
+            int result = _fetch.Run(remote.Id);
             if (result == GitTfsExitCodes.OK)
             {
                 var p = Prefix.Replace(" ", "\\ ");

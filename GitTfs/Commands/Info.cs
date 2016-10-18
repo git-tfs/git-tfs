@@ -13,8 +13,8 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Info : GitTfsCommand
     {
-        readonly Globals _globals;
-        readonly IGitTfsVersionProvider _versionProvider;
+        private readonly Globals _globals;
+        private readonly IGitTfsVersionProvider _versionProvider;
 
         public Info(Globals globals, IGitTfsVersionProvider versionProvider)
         {

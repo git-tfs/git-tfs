@@ -1,4 +1,5 @@
-﻿namespace Sep.Git.Tfs.Test
+﻿
+namespace Sep.Git.Tfs.Test
 {
     public class BaseTest
     {

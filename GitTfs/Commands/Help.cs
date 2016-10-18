@@ -41,7 +41,7 @@ namespace Sep.Git.Tfs.Commands
             foreach (var arg in args)
             {
                 var command = commandFactory.GetCommand(arg);
-                if(command != null)
+                if (command != null)
                 {
                     return Run(command);
                 }
@@ -59,10 +59,10 @@ namespace Sep.Git.Tfs.Commands
         public int Run()
         {
             Trace.TraceInformation("Usage: git-tfs [command] [options]");
-            foreach(var pair in GetCommandMap())
+            foreach (var pair in GetCommandMap())
             {
                 var command = "    " + pair.Key;
-                
+
                 if (pair.Value.Any())
                 {
                     command += " (" + string.Join(", ", pair.Value) + ")";
@@ -87,7 +87,7 @@ namespace Sep.Git.Tfs.Commands
             command.GetAllOptions(_container).WriteOptionDescriptions(writer);
             Trace.TraceInformation(writer.ToString());
 
-            Trace.TraceInformation("\nFind more help in our online help : https://github.com/git-tfs/git-tfs/blob/master/doc/commands/" + GetCommandName(command)+".md");
+            Trace.TraceInformation("\nFind more help in our online help : https://github.com/git-tfs/git-tfs/blob/master/doc/commands/" + GetCommandName(command) + ".md");
 
             return GitTfsExitCodes.Help;
         }
@@ -112,7 +112,7 @@ namespace Sep.Git.Tfs.Commands
         {
             return _container.Model
                 .PluginTypes
-                .Single(p => p.PluginType == typeof (GitTfsCommand))
+                .Single(p => p.PluginType == typeof(GitTfsCommand))
                 .Instances
                 .Where(i => i != null);
         }
@@ -120,7 +120,7 @@ namespace Sep.Git.Tfs.Commands
         private string GetCommandUsage(GitTfsCommand command)
         {
             var descriptionAttribute =
-                command.GetType().GetCustomAttributes(typeof (DescriptionAttribute), false).FirstOrDefault() as
+                command.GetType().GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault() as
                 DescriptionAttribute;
             var commandName = GetCommandName(command);
             return (descriptionAttribute != null)

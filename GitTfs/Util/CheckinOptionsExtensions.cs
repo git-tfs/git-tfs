@@ -54,7 +54,8 @@ namespace Sep.Git.Tfs.Util
                         Trace.TraceInformation("Resolving work item {0}", match.Groups["item_id"]);
                         checkinOptions.WorkItemsToResolve.Add(match.Groups["item_id"].Value);
                     }
-                    else {
+                    else
+                    {
                         Trace.TraceInformation("Associating with work item {0}", match.Groups["item_id"]);
                         checkinOptions.WorkItemsToAssociate.Add(match.Groups["item_id"].Value);
                     }

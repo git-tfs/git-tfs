@@ -15,7 +15,7 @@ namespace Sep.Git.Tfs
         public const string GitTfsPrefix = "git-tfs";
         public const string GitTfsWorkItemPrefix = GitTfsPrefix + "-work-item:";
         public const string GitTfsPolicyOverrideCommentPrefix = GitTfsPrefix + "-force:";
-       // e.g. git-tfs-id: [http://team:8080/]$/sandbox;C123
+        // e.g. git-tfs-id: [http://team:8080/]$/sandbox;C123
         public const string TfsCommitInfoFormat = "git-tfs-id: [{0}]{1};C{2}";
         public static readonly Regex TfsCommitInfoRegex =
                 new Regex("^\\s*" +
@@ -24,7 +24,7 @@ namespace Sep.Git.Tfs
                           "\\[(?<url>.+)\\]" +
                           "(?<repository>\\$.+)?;" +
                           "C(?<changeset>\\d+)" +
-                          "\\s*$", RegexOptions.Multiline|RegexOptions.Compiled);
+                          "\\s*$", RegexOptions.Multiline | RegexOptions.Compiled);
         // e.g. git-tfs-work-item: 24 associate
         public static readonly Regex TfsWorkItemRegex =
                 new Regex(GitTfsWorkItemPrefix + @"\s*(?<item_id>\d+)(\s*(?<action>associate|resolve))?");

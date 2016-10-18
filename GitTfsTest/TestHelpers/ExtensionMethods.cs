@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Test.TestHelpers
 
         public static void AssertEndsWith(this string s, string expected)
         {
-            if(!s.EndsWith(expected))
+            if (!s.EndsWith(expected))
                 throw new AssertActualExpectedException(expected, s, "Expected end of string");
         }
 

@@ -11,7 +11,7 @@ namespace Sep.Git.Tfs.Core
         public string CheckInTicket { get; set; }
 
         public GitTfsGatedCheckinException(string shelvesetName, ReadOnlyCollection<KeyValuePair<string, Uri>> affectedBuildDefinitions, string checkInTicket)
-            :base("Gated checkin detected!")
+            : base("Gated checkin detected!")
         {
             ShelvesetName = shelvesetName;
             AffectedBuildDefinitions = affectedBuildDefinitions;

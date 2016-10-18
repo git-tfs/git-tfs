@@ -9,7 +9,8 @@ namespace Sep.Git.Tfs.Vs2015
         protected override string TfsVersionString { get { return "14.0"; } }
 
         public TfsHelper(TfsApiBridge bridge, IContainer container)
-            : base(bridge, container) { }
+            : base(bridge, container)
+        { }
 
         protected override string GetDialogAssemblyPath()
         {

@@ -137,7 +137,7 @@ namespace Sep.Git.Tfs.Commands
                 try
                 {
                     newChangesetId = tfsRemote.Checkin(target, currentParent, parentChangeset, commitSpecificCheckinOptions, tfsRepositoryPathOfMergedBranch);
-                    var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, parents.Select(c=>c.Sha).ToArray());
+                    var fetchResult = tfsRemote.FetchWithMerge(newChangesetId, false, parents.Select(c => c.Sha).ToArray());
                     if (fetchResult.NewChangesetCount != 1)
                     {
                         var lastCommit = _globals.Repository.FindCommitHashByChangesetId(newChangesetId);
@@ -149,7 +149,7 @@ namespace Sep.Git.Tfs.Commands
                     }
 
                     currentParent = target;
-                    parentChangeset = new TfsChangesetInfo {ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote};
+                    parentChangeset = new TfsChangesetInfo { ChangesetId = newChangesetId, GitCommit = tfsRemote.MaxCommitHash, Remote = tfsRemote };
                     Trace.TraceInformation("Done with {0}.", target);
                 }
                 catch (Exception)
@@ -197,9 +197,9 @@ namespace Sep.Git.Tfs.Commands
                     var lastCheckinCommit = _globals.Repository.GetLastParentTfsCommits(gitParent.Sha).FirstOrDefault();
                     if (lastCheckinCommit != null)
                     {
-                        if(!ForceCheckin && lastCheckinCommit.Remote.Id != remoteToCheckin.Id)
+                        if (!ForceCheckin && lastCheckinCommit.Remote.Id != remoteToCheckin.Id)
                             throw new GitTfsException("error: the merged branch '" + lastCheckinCommit.Remote.Id
-                                + "' is a TFS tracked branch ("+lastCheckinCommit.Remote.TfsRepositoryPath
+                                + "' is a TFS tracked branch (" + lastCheckinCommit.Remote.TfsRepositoryPath
                                 + ") with some commits not checked in.\nIn this case, the local merge won't be materialized as a merge in tfs...")
                                 .WithRecommendation("check in all the commits of the tfs merged branch in TFS before trying to check in a merge commit",
                                 "use --ignore-merge option to ignore merged TFS branch and check in commit as a normal changeset (not a merge).");

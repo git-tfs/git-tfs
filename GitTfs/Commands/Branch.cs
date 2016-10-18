@@ -42,7 +42,8 @@ namespace Sep.Git.Tfs.Commands
 
         public OptionSet OptionSet
         {
-            get { 
+            get
+            {
                 return new OptionSet
                 {
                     { "r|remotes", "Display the TFS branches of the current TFS root branch existing on the TFS server", v => DisplayRemotes = (v != null) },
@@ -58,7 +59,7 @@ namespace Sep.Git.Tfs.Commands
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                 }
-                .Merge(globals.OptionSet); 
+                .Merge(globals.OptionSet);
             }
         }
 
@@ -85,7 +86,7 @@ namespace Sep.Git.Tfs.Commands
         public bool IsCommandWellUsed()
         {
             //Verify that some mutual exclusive options are not used together
-            return new[] {ShouldDeleteRemote, ShouldInitBranch, ShouldRenameRemote}.Count(b => b) <= 1;
+            return new[] { ShouldDeleteRemote, ShouldInitBranch, ShouldRenameRemote }.Count(b => b) <= 1;
         }
 
         public int Run()
@@ -159,8 +160,8 @@ namespace Sep.Git.Tfs.Commands
 
         private void VerifyCloneAllRepository()
         {
-	    if (!globals.Repository.HasRemote(GitTfsConstants.DefaultRepositoryId))
-	        return;
+            if (!globals.Repository.HasRemote(GitTfsConstants.DefaultRepositoryId))
+                return;
 
             if (globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId).TfsRepositoryPath == GitTfsConstants.TfsRoot)
                 throw new GitTfsException("error: you can't use the 'branch' command when you have cloned the whole repository '$/' !");
@@ -182,7 +183,7 @@ namespace Sep.Git.Tfs.Commands
 
             globals.Repository.MoveRemote(oldRemoteName, newRemoteNameExpected);
 
-            if(globals.Repository.RenameBranch(oldRemoteName, newRemoteName) == null)
+            if (globals.Repository.RenameBranch(oldRemoteName, newRemoteName) == null)
                 Trace.TraceWarning("warning: no local branch found to rename");
 
             return GitTfsExitCodes.OK;
@@ -198,7 +199,7 @@ namespace Sep.Git.Tfs.Commands
             {
                 checkInCurrentBranch = true;
                 var parents = globals.Repository.GetLastParentTfsCommits(globals.Repository.GetCurrentCommit());
-                if(!parents.Any())
+                if (!parents.Any())
                     throw new GitTfsException("error : no tfs remote parent found!");
                 commit = parents.First();
             }
@@ -208,10 +209,10 @@ namespace Sep.Git.Tfs.Commands
             Trace.WriteLine("Init branch in local repository...");
             initBranch.DontCreateGitBranch = true;
             var returnCode = initBranch.Run(tfsPath, gitBranchNameExpected);
-            
+
             if (returnCode != GitTfsExitCodes.OK || !checkInCurrentBranch)
                 return returnCode;
-            
+
             rcheckin.RebaseOnto(initBranch.RemoteCreated.RemoteRef, commit.GitCommit);
             globals.UserSpecifiedRemoteId = initBranch.RemoteCreated.Id;
             return rcheckin.Run();
@@ -255,7 +256,7 @@ namespace Sep.Git.Tfs.Commands
                     {
                         throw new GitTfsException("error: this version of TFS doesn't support this functionality");
                     }
-                    foreach (var branch in remote.Tfs.GetBranches().Where(b=>b.IsRoot))
+                    foreach (var branch in remote.Tfs.GetBranches().Where(b => b.IsRoot))
                     {
                         var root = remote.Tfs.GetRootTfsBranchForRemotePath(branch.Path);
                         var visitor = new WriteBranchStructureTreeVisitor(remote.TfsRepositoryPath, tfsRemotes);
@@ -305,9 +306,9 @@ namespace Sep.Git.Tfs.Commands
             public void Visit(BranchTree branch, int level)
             {
                 var writer = new StringWriter();
-                for (var i = 0; i < level; i++ )
+                for (var i = 0; i < level; i++)
                     writer.Write(" | ");
-                
+
                 writer.WriteLine();
 
                 for (var i = 0; i < level - 1; i++)

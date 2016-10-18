@@ -1,4 +1,5 @@
-﻿namespace Sep.Git.Tfs.Core
+﻿
+namespace Sep.Git.Tfs.Core
 {
     public class TfsWorkitem : ITfsWorkitem
     {

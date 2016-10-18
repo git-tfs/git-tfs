@@ -63,6 +63,5 @@ namespace Sep.Git.Tfs.Commands
         public Regex WorkItemAssociateRegex { get; set; }
         public bool IgnoreMissingItems { get; set; }
         public bool AddMissingItems { get; set; }
-
     }
 }

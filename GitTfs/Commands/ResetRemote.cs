@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Commands
                 var currentTfsCommit = globals.Repository.GetCurrentTfsCommit();
                 if (currentTfsCommit == null)
                     throw new GitTfsException("error : the current commit does not belong to a tfs remote!",
-                        new List<string> { "Use '--force' option to reset a remote from a commit not belonging a tfs remote"});
+                        new List<string> { "Use '--force' option to reset a remote from a commit not belonging a tfs remote" });
 
                 if (targetCommit.Remote.Id != currentTfsCommit.Remote.Id)
                     throw new GitTfsException("error : the commit where you want to reset the tfs remote does not belong to the current tfs remote \""

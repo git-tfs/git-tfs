@@ -13,7 +13,7 @@ namespace Sep.Git.Tfs.Commands
     public class Version : GitTfsCommand
     {
         private Globals globals;
-        IGitTfsVersionProvider versionProvider;
+        private IGitTfsVersionProvider versionProvider;
 
         /// <summary>
         /// Initializes a new instance of the Version class.

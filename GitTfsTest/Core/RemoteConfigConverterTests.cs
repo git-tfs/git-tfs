@@ -12,7 +12,7 @@ namespace Sep.Git.Tfs.Test.Core
     {
         public class DumpTests : BaseTest
         {
-            RemoteConfigConverter _dumper = new RemoteConfigConverter();
+            private RemoteConfigConverter _dumper = new RemoteConfigConverter();
 
             [Fact]
             public void DumpsNothingWithNoId()
@@ -116,7 +116,7 @@ namespace Sep.Git.Tfs.Test.Core
                     IgnoreRegex = "abc",
                     IgnoreExceptRegex = "def",
                     Autotag = true,
-                    Aliases = new [] { "http://abc", "http://def" },
+                    Aliases = new[] { "http://abc", "http://def" },
                 };
                 var remoteOptions = remote.RemoteOptions;
 
@@ -134,7 +134,7 @@ namespace Sep.Git.Tfs.Test.Core
 
         public class LoadTests : BaseTest
         {
-            RemoteConfigConverter _loader = new RemoteConfigConverter();
+            private RemoteConfigConverter _loader = new RemoteConfigConverter();
 
             private IEnumerable<RemoteInfo> Load(params ConfigurationEntry<string>[] configs)
             {
@@ -206,10 +206,9 @@ namespace Sep.Git.Tfs.Test.Core
                     c("tfs-remote.default.repository", "$/project"));
                 Assert.Equal(0, remotes.Count());
             }
-
         }
 
-        RemoteConfigConverter _converter = new RemoteConfigConverter();
+        private RemoteConfigConverter _converter = new RemoteConfigConverter();
 
         [Fact]
         public void MultipleRemotes()
@@ -248,10 +247,10 @@ namespace Sep.Git.Tfs.Test.Core
             return new TestConfigurationEntry(key, value);
         }
 
-        class TestConfigurationEntry : ConfigurationEntry<string>
+        private class TestConfigurationEntry : ConfigurationEntry<string>
         {
-            string _key;
-            string _value;
+            private string _key;
+            private string _value;
 
             public override string Key { get { return _key; } }
             public override string Value { get { return _value; } }

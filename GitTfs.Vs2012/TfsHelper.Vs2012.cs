@@ -9,6 +9,7 @@ namespace Sep.Git.Tfs.Vs2012
         protected override string TfsVersionString { get { return "11.0"; } }
 
         public TfsHelper(TfsApiBridge bridge, IContainer container)
-            : base(bridge, container) { }
+            : base(bridge, container)
+        { }
     }
 }

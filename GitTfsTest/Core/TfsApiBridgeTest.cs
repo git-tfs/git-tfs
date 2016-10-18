@@ -41,7 +41,7 @@ namespace GitTfsTest.Core
         [Fact]
         public void WrapsAndUnwrapsArray()
         {
-            var originalObjects = new [] { new OriginalType() };
+            var originalObjects = new[] { new OriginalType() };
             var wrappedObjects = _mocks.ClassUnderTest.Wrap<WrapperForOriginalType, OriginalType>(originalObjects);
             Assert.Equal(1, wrappedObjects.Length);
             Assert.Equal(originalObjects[0], _mocks.ClassUnderTest.Unwrap<OriginalType>(wrappedObjects)[0]);
@@ -57,7 +57,7 @@ namespace GitTfsTest.Core
         [Fact]
         public void WrapsNullArrayAsNull()
         {
-            OriginalType [] obj = null;
+            OriginalType[] obj = null;
             Assert.Null(_mocks.ClassUnderTest.Wrap<WrapperForOriginalType, OriginalType>(obj));
         }
 
@@ -89,7 +89,7 @@ namespace GitTfsTest.Core
             }
             public override bool Equals(object obj)
             {
-                return obj is OriginalType && ((OriginalType) obj)._id == _id;
+                return obj is OriginalType && ((OriginalType)obj)._id == _id;
             }
             public override int GetHashCode()
             {
@@ -100,10 +100,10 @@ namespace GitTfsTest.Core
                 return "OriginalObject:" + _id;
             }
         }
-        interface IOriginalType {}
+        private interface IOriginalType { }
         public class WrapperForOriginalType : WrapperFor<OriginalType>, IOriginalType
         {
-            public WrapperForOriginalType(OriginalType o) : base(o) {}
+            public WrapperForOriginalType(OriginalType o) : base(o) { }
         }
         public class WrapperForOriginalTypeWithBridge : WrapperFor<OriginalType>, IOriginalType
         {

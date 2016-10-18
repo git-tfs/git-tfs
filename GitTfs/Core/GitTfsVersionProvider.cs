@@ -15,9 +15,9 @@ namespace Sep.Git.Tfs.Core
 
         public string GetVersionString()
         {
-            return string.Format("git-tfs version {0} (TFS client library {1}) ({2}-bit)", 
-                       GetType().Assembly.GetName().Version, 
-                       tfsHelper.TfsClientLibraryVersion, 
+            return string.Format("git-tfs version {0} (TFS client library {1}) ({2}-bit)",
+                       GetType().Assembly.GetName().Version,
+                       tfsHelper.TfsClientLibraryVersion,
                        (Environment.Is64BitProcess ? "64" : "32"));
         }
 

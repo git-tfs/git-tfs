@@ -127,7 +127,7 @@ namespace Sep.Git.Tfs.Core
                     return newChangeset;
                 }
             }
-            catch(GitTfsGatedCheckinException e)
+            catch (GitTfsGatedCheckinException e)
             {
                 return LaunchGatedCheckinBuild(e.AffectedBuildDefinitions, e.ShelvesetName, e.CheckInTicket);
             }

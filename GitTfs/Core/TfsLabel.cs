@@ -1,4 +1,5 @@
-﻿namespace Sep.Git.Tfs.Core
+﻿
+namespace Sep.Git.Tfs.Core
 {
     public class TfsLabel
     {
@@ -10,5 +11,4 @@
         public System.DateTime Date { get; set; }
         public bool IsTransBranch { get; set; }
     }
-
 }

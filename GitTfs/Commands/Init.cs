@@ -86,7 +86,7 @@ namespace Sep.Git.Tfs.Commands
 
         private void InitSubdir(string repositoryPath)
         {
-            if(!Directory.Exists(repositoryPath))
+            if (!Directory.Exists(repositoryPath))
                 Directory.CreateDirectory(repositoryPath);
             Environment.CurrentDirectory = repositoryPath;
             globals.GitDir = ".git";
@@ -94,7 +94,7 @@ namespace Sep.Git.Tfs.Commands
 
         private void DoGitInitDb()
         {
-            if(!Directory.Exists(globals.GitDir) || initOptions.IsBare)
+            if (!Directory.Exists(globals.GitDir) || initOptions.IsBare)
             {
                 gitHelper.CommandNoisy(BuildInitCommand());
             }
@@ -108,7 +108,6 @@ namespace Sep.Git.Tfs.Commands
                 {
                     var dir = Directory.CreateDirectory(initOptions.WorkspacePath);
                     globals.Repository.SetConfig(GitTfsConstants.WorkspaceConfigKey, initOptions.WorkspacePath);
-
                 }
                 catch (Exception)
                 {
@@ -117,19 +116,18 @@ namespace Sep.Git.Tfs.Commands
             }
 
             globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, false.ToString());
-
         }
 
         private string[] BuildInitCommand()
         {
-            var initCommand = new List<string> {"init"};
-            if(initOptions.GitInitTemplate!= null)
+            var initCommand = new List<string> { "init" };
+            if (initOptions.GitInitTemplate != null)
                 initCommand.Add("--template=" + initOptions.GitInitTemplate);
-            if(initOptions.IsBare)
+            if (initOptions.IsBare)
                 initCommand.Add("--bare");
-            if(initOptions.GitInitShared is string)
+            if (initOptions.GitInitShared is string)
                 initCommand.Add("--shared=" + initOptions.GitInitShared);
-            else if(initOptions.GitInitShared != null)
+            else if (initOptions.GitInitShared != null)
                 initCommand.Add("--shared");
             return initCommand.ToArray();
         }
@@ -142,7 +140,7 @@ namespace Sep.Git.Tfs.Commands
                 Url = tfsUrl,
                 Repository = tfsRepositoryPath,
                 RemoteOptions = remoteOptions,
-            },initOptions.GitInitAutoCrlf,initOptions.GitInitIgnoreCase);
+            }, initOptions.GitInitAutoCrlf, initOptions.GitInitIgnoreCase);
         }
     }
 
@@ -224,6 +222,5 @@ namespace Sep.Git.Tfs.Commands
         {
             return "refs/heads/" + refName;
         }
-
     }
 }

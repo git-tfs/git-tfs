@@ -31,7 +31,7 @@ namespace Sep.Git.Tfs.Commands
         public int Run()
         {
             _cleanupOptions.Init();
-            foreach(var remote in _globals.Repository.ReadAllTfsRemotes())
+            foreach (var remote in _globals.Repository.ReadAllTfsRemotes())
             {
                 Cleanup(remote);
             }

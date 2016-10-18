@@ -30,7 +30,9 @@ namespace Sep.Git.Tfs.Commands
 
         public OptionSet OptionSet
         {
-            get { return new OptionSet()
+            get
+            {
+                return new OptionSet()
             {
                     { "ignore-path-case-mismatch", "Ignore the case mismatch in the path when comparing the files.",
                         v => IgnorePathCaseMismatch = v != null },
@@ -72,7 +74,7 @@ namespace Sep.Git.Tfs.Commands
             // Warn, based on core.autocrlf or core.safecrlf value?
             //  -- autocrlf=true or safecrlf=true: TFS may have CRLF where git has LF
             var parents = _globals.Repository.GetLastParentTfsCommits(commitish);
-            if(parents.IsEmpty())
+            if (parents.IsEmpty())
                 throw new GitTfsException("No TFS parents found to compare!");
             int foundDiff = GitTfsExitCodes.OK;
             foreach (var parent in parents)
@@ -95,7 +97,7 @@ namespace Sep.Git.Tfs.Commands
         public int Verify(TfsChangesetInfo changeset, bool ignorePathCaseMismatch)
         {
             Trace.TraceInformation("Comparing TFS changeset " + changeset.ChangesetId + " to git commit " + changeset.GitCommit);
-            var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant().Replace("/",@"\"));
+            var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant().Replace("/", @"\"));
             var gitTree = changeset.Remote.Repository.GetCommit(changeset.GitCommit).GetTree().ToDictionary(entry => entry.Entry.Path.ToLowerInvariant());
 
             var all = tfsTree.Keys.Union(gitTree.Keys);
@@ -104,11 +106,11 @@ namespace Sep.Git.Tfs.Commands
             var gitOnly = gitTree.Keys.Except(tfsTree.Keys);
 
             var foundDiff = GitTfsExitCodes.OK;
-            foreach(var file in all.OrderBy(x => x))
+            foreach (var file in all.OrderBy(x => x))
             {
-                if(tfsTree.ContainsKey(file))
+                if (tfsTree.ContainsKey(file))
                 {
-                    if(gitTree.ContainsKey(file))
+                    if (gitTree.ContainsKey(file))
                     {
                         if (Compare(tfsTree[file], gitTree[file], ignorePathCaseMismatch))
                             foundDiff = Math.Max(foundDiff, GitTfsExitCodes.VerifyContentMismatch);
@@ -125,7 +127,7 @@ namespace Sep.Git.Tfs.Commands
                     foundDiff = Math.Max(foundDiff, GitTfsExitCodes.VerifyFileMissing);
                 }
             }
-            if(foundDiff == GitTfsExitCodes.OK)
+            if (foundDiff == GitTfsExitCodes.OK)
                 Trace.TraceInformation("No differences!");
             return foundDiff;
         }
@@ -140,7 +142,7 @@ namespace Sep.Git.Tfs.Commands
                 Trace.TraceInformation("  git: " + gitTreeEntry.FullName);
                 different = true;
             }
-            if(Hash(tfsTreeEntry) != Hash(gitTreeEntry))
+            if (Hash(tfsTreeEntry) != Hash(gitTreeEntry))
             {
                 Trace.TraceInformation(gitTreeEntry.FullName + " differs.");
                 different = true;

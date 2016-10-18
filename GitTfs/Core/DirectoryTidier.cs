@@ -7,7 +7,7 @@ namespace Sep.Git.Tfs.Core
 {
     public class DirectoryTidier : ITfsWorkspaceModifier, IDisposable
     {
-        enum FileOperation
+        private enum FileOperation
         {
             Add,
             Remove,
@@ -17,11 +17,11 @@ namespace Sep.Git.Tfs.Core
             EditAndRenameFrom,
         }
 
-        ITfsWorkspaceModifier _workspace;
-        Func<IEnumerable<TfsTreeEntry>> _getInitialTfsTree;
-        List<string> _filesInTfs;
-        Dictionary<string, FileOperation> _fileOperations;
-        bool _disposed;
+        private ITfsWorkspaceModifier _workspace;
+        private Func<IEnumerable<TfsTreeEntry>> _getInitialTfsTree;
+        private List<string> _filesInTfs;
+        private Dictionary<string, FileOperation> _fileOperations;
+        private bool _disposed;
 
         public DirectoryTidier(ITfsWorkspaceModifier workspace, Func<IEnumerable<TfsTreeEntry>> getInitialTfsTree)
         {
@@ -55,7 +55,7 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        void DeleteEmptyDir(string dirName, List<string> deletedDirs)
+        private void DeleteEmptyDir(string dirName, List<string> deletedDirs)
         {
             if (dirName == null)
                 return;
@@ -71,12 +71,12 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        bool IsDirDeletedAlready(string downcasedDirName, IEnumerable<string> deletedDirs)
+        private bool IsDirDeletedAlready(string downcasedDirName, IEnumerable<string> deletedDirs)
         {
             return deletedDirs.Any(t => downcasedDirName.StartsWith(t + "/") || t == downcasedDirName);
         }
 
-        string GetDirectoryName(string path)
+        private string GetDirectoryName(string path)
         {
             var separatorIndex = path.LastIndexOf('/');
             if (separatorIndex == -1)
@@ -84,7 +84,7 @@ namespace Sep.Git.Tfs.Core
             return path.Substring(0, separatorIndex);
         }
 
-        bool HasEntryInDir(string dirName)
+        private bool HasEntryInDir(string dirName)
         {
             dirName = dirName + "/";
             return _filesInTfs.Any(file => file.StartsWith(dirName));
@@ -130,7 +130,7 @@ namespace Sep.Git.Tfs.Core
             _fileOperations.Add(pathTo, FileOperation.RenameTo);
         }
 
-        IEnumerable<string> CalculateCandidateDirectories()
+        private IEnumerable<string> CalculateCandidateDirectories()
         {
             var directoriesWithRemovedFiles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             var directoriesBlockedForRemoval = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);

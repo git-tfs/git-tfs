@@ -5,7 +5,6 @@ using Sep.Git.Tfs.Commands;
 
 namespace Sep.Git.Tfs.Core
 {
-
     public interface IFetchResult : IRenameResult
     {
         bool IsSuccess { get; set; }

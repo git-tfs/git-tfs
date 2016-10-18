@@ -114,7 +114,7 @@ namespace Sep.Git.Tfs.Core
         {
             Trace.WriteLine("Regex: " + regex);
             Trace.WriteLine("Input: " + input);
-            foreach(var groupName in regex.GetGroupNames())
+            foreach (var groupName in regex.GetGroupNames())
             {
                 Trace.WriteLine(" -> " + groupName + ": >>" + match.Groups[groupName].Value + "<<");
             }
@@ -132,11 +132,11 @@ namespace Sep.Git.Tfs.Core
 
         public string oldMode { get { return _match.Groups["srcmode"].Value; } }
         public string newMode { get { return _match.Groups["dstmode"].Value; } }
-        public string oldSha  { get { return _match.Groups["srcsha1"].Value; } }
-        public string newSha  { get { return _match.Groups["dstsha1"].Value; } }
-        public string path    { get { return _match.Groups["srcpath"].Value; } }
-        public string pathTo  { get { return _match.Groups["dstpath"].Value; } }
-        public string score   { get { return _match.Groups["score"].Value; } }
+        public string oldSha { get { return _match.Groups["srcsha1"].Value; } }
+        public string newSha { get { return _match.Groups["dstsha1"].Value; } }
+        public string path { get { return _match.Groups["srcpath"].Value; } }
+        public string pathTo { get { return _match.Groups["dstpath"].Value; } }
+        public string score { get { return _match.Groups["score"].Value; } }
 
         public IGitChangedFile ToGitChangedFile(ExplicitArgsExpression builder)
         {

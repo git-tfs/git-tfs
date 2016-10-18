@@ -6,8 +6,8 @@ namespace Sep.Git.Tfs.Core
 {
     public class Bootstrapper
     {
-        readonly Globals _globals;
-        readonly RemoteOptions _remoteOptions;
+        private readonly Globals _globals;
+        private readonly RemoteOptions _remoteOptions;
 
         public Bootstrapper(Globals globals, RemoteOptions remoteOptions)
         {
@@ -22,12 +22,12 @@ namespace Sep.Git.Tfs.Core
             {
                 var remoteId = GetRemoteId(changeset);
                 remote = _globals.Repository.CreateTfsRemote(new RemoteInfo
-                    {
-                        Id = remoteId,
-                        Url = changeset.Remote.TfsUrl,
-                        Repository = changeset.Remote.TfsRepositoryPath,
-                        RemoteOptions = _remoteOptions,
-                    }, string.Empty);
+                {
+                    Id = remoteId,
+                    Url = changeset.Remote.TfsUrl,
+                    Repository = changeset.Remote.TfsRepositoryPath,
+                    RemoteOptions = _remoteOptions,
+                }, string.Empty);
                 remote.UpdateTfsHead(changeset.GitCommit, changeset.ChangesetId);
                 Trace.TraceInformation("-> new remote '" + remote.Id + "'");
             }

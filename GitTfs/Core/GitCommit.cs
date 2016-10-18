@@ -17,11 +17,11 @@ namespace Sep.Git.Tfs.Core
 
         public IEnumerable<GitTreeEntry> GetTree()
         {
-            var treesToDescend = new Queue<Tree>(new[] {_commit.Tree});
-            while(treesToDescend.Any())
+            var treesToDescend = new Queue<Tree>(new[] { _commit.Tree });
+            while (treesToDescend.Any())
             {
                 var currentTree = treesToDescend.Dequeue();
-                foreach(var entry in currentTree)
+                foreach (var entry in currentTree)
                 {
                     if (entry.TargetType == TreeEntryTargetType.Tree)
                     {
@@ -39,11 +39,11 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
-        public Tuple<string,string> AuthorAndEmail
+        public Tuple<string, string> AuthorAndEmail
         {
             get
             {
-                return new Tuple<string,string>(_commit.Author.Name, _commit.Author.Email);
+                return new Tuple<string, string>(_commit.Author.Name, _commit.Author.Email);
             }
         }
 

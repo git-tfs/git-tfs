@@ -12,7 +12,7 @@ namespace Sep.Git.Tfs.Test.Core.TfsInterop
         [Fact]
         public void AllChildrenAlwaysReturnsAnEnumerable()
         {
-            IEnumerable<BranchTree> result = ((BranchTree) null).GetAllChildren();
+            IEnumerable<BranchTree> result = ((BranchTree)null).GetAllChildren();
 
             Assert.NotNull(result);
             Assert.Empty(result);
@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs.Test.Core.TfsInterop
 
             var branchTree = new BranchTree(branchObject);
 
-            if(parent != null)
+            if (parent != null)
                 parent.ChildBranches.Add(branchTree);
             return branchTree;
         }

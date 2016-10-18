@@ -12,13 +12,13 @@ namespace Sep.Git.Tfs.Test
             yield return new FactExceptOnUnixTestCommand(method);
         }
 
-        class FactExceptOnUnixTestCommand : FactCommand
+        private class FactExceptOnUnixTestCommand : FactCommand
         {
             public FactExceptOnUnixTestCommand(IMethodInfo method) : base(method) { }
 
             public override MethodResult Execute(object testClass)
             {
-                if(IsUnix())
+                if (IsUnix())
                     return new SkipResult(testMethod, DisplayName, "This test does not work on unix-like OSes yet.");
 
                 return base.Execute(testClass);

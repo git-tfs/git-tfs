@@ -30,26 +30,27 @@ namespace Sep.Git.Tfs.Core
             return expr(o);
         }
 
-        public static Action<T> And<T>(this Action<T> originalAction, params Action<T> [] additionalActions)
+        public static Action<T> And<T>(this Action<T> originalAction, params Action<T>[] additionalActions)
         {
-            return x => {
+            return x =>
+            {
                 originalAction(x);
-                foreach(var action in additionalActions)
+                foreach (var action in additionalActions)
                 {
                     action(x);
                 }
             };
         }
 
-        public static IEnumerable<T> Append<T>(this IEnumerable<T> set1, params IEnumerable<T> [] moreSets)
+        public static IEnumerable<T> Append<T>(this IEnumerable<T> set1, params IEnumerable<T>[] moreSets)
         {
-            foreach(var item in set1)
+            foreach (var item in set1)
             {
                 yield return item;
             }
-            foreach(var set in moreSets)
+            foreach (var set in moreSets)
             {
-                foreach(var item in set)
+                foreach (var item in set)
                 {
                     yield return item;
                 }
@@ -74,7 +75,7 @@ namespace Sep.Git.Tfs.Core
             return !e.Any();
         }
 
-        public static void SetArguments(this ProcessStartInfo startInfo, params string [] args)
+        public static void SetArguments(this ProcessStartInfo startInfo, params string[] args)
         {
             startInfo.Arguments = String.Join(" ", args.Select(arg => QuoteProcessArgument(arg)).ToArray());
         }
@@ -84,9 +85,9 @@ namespace Sep.Git.Tfs.Core
             return arg.Contains(" ") ? ("\"" + arg + "\"") : arg;
         }
 
-        public static string CombinePaths(string basePath, params string [] pathParts)
+        public static string CombinePaths(string basePath, params string[] pathParts)
         {
-            foreach(var part in pathParts)
+            foreach (var part in pathParts)
             {
                 basePath = Path.Combine(basePath, part);
             }
@@ -127,7 +128,8 @@ namespace Sep.Git.Tfs.Core
         /// create a new stream based on <paramref name="stream"/> that uses
         /// the given <paramref name="encoding"/> instead.
         /// </summary>
-        public static StreamWriter WithEncoding(this StreamWriter stream, Encoding encoding) {
+        public static StreamWriter WithEncoding(this StreamWriter stream, Encoding encoding)
+        {
             return new StreamWriter(stream.BaseStream, encoding);
         }
 

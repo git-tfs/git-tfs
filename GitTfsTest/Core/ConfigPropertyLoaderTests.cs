@@ -12,7 +12,7 @@ namespace Sep.Git.Tfs.Test.Integration
 {
     public class ConfigPropertyLoaderTests : BaseTest, IDisposable
     {
-        IntegrationHelper h = new IntegrationHelper();
+        private IntegrationHelper h = new IntegrationHelper();
 
         public ConfigPropertyLoaderTests()
         {
@@ -37,7 +37,6 @@ namespace Sep.Git.Tfs.Test.Integration
                 var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var configProperties = new ConfigProperties(new ConfigPropertyLoader(new Globals() { Repository = gitRepository }));
                 Assert.Equal(100, configProperties.BatchSize);
-
             }
         }
 
@@ -90,7 +89,7 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var configProperties = new ConfigProperties(new ConfigPropertyLoader(new Globals() { Repository = gitRepository }));
-                
+
                 configProperties.BatchSize = 7;
                 configProperties.PersistAllOverrides();
                 Assert.Equal("7", h.GetConfig<string>("repo", GitTfsConstants.BatchSize));

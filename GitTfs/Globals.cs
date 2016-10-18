@@ -86,7 +86,7 @@ namespace Sep.Git.Tfs
                 }
                 //We could no choose for the user which remote is the good one (if, eventualy we found one...)
                 throw new GitTfsException("error: no tfs remote to use found in parent commits.",
-                    new List<string>{"Checkout a current tfs branch", "Use '-i' option to define which one to use."});
+                    new List<string> { "Checkout a current tfs branch", "Use '-i' option to define which one to use." });
             }
         }
 

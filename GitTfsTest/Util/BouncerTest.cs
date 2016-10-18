@@ -6,7 +6,7 @@ namespace Sep.Git.Tfs.Test.Util
 {
     public class BouncerTest : BaseTest
     {
-        Bouncer bouncer = new Bouncer();
+        private Bouncer bouncer = new Bouncer();
 
         [Fact]
         public void NoExpressionsMeansNotMatched()

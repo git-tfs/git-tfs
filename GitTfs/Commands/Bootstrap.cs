@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Commands
                     commit.Sha,
                     commit.AuthorAndEmail.Item1, commit.AuthorAndEmail.Item2,
                     commit.When.ToString("ddd MMM d HH:mm:ss zzz"),
-                    commit.Message.Replace("\n","\n    ").TrimEnd(' '));
+                    commit.Message.Replace("\n", "\n    ").TrimEnd(' '));
                 _bootstrapper.CreateRemote(parent);
                 Trace.TraceInformation(string.Empty);
             }

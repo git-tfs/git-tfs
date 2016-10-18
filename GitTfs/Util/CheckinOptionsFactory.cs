@@ -24,7 +24,7 @@ namespace Sep.Git.Tfs.Util
 
         public CheckinOptions BuildCommitSpecificCheckinOptions(CheckinOptions sourceCheckinOptions, string commitMessage)
         {
-            var customCheckinOptions = sourceCheckinOptions.Clone(this.globals);
+            var customCheckinOptions = sourceCheckinOptions.Clone(globals);
 
             customCheckinOptions.CheckinComment = commitMessage;
 
@@ -50,7 +50,7 @@ namespace Sep.Git.Tfs.Util
         public CheckinOptions BuildShelveSetSpecificCheckinOptions(CheckinOptions sourceCheckinOptions,
             string commitMessage)
         {
-            var customCheckinOptions = sourceCheckinOptions.Clone(this.globals);
+            var customCheckinOptions = sourceCheckinOptions.Clone(globals);
 
             customCheckinOptions.CheckinComment = commitMessage;
 

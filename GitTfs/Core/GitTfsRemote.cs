@@ -113,15 +113,15 @@ namespace Sep.Git.Tfs.Core
         /// Gets the TFS server-side paths of all subtrees of this remote.
         /// Valid if the remote has subtrees, which occurs when <see cref="TfsRepositoryPath"/> is null.
         /// </summary>
-        public string[] TfsSubtreePaths 
-        { 
+        public string[] TfsSubtreePaths
+        {
             get
             {
                 if (tfsSubtreePaths == null)
                     tfsSubtreePaths = Repository.GetSubtrees(this).Select(x => x.TfsRepositoryPath).ToArray();
 
                 return tfsSubtreePaths;
-            } 
+            }
         }
         private string[] tfsSubtreePaths = null;
 
@@ -179,7 +179,7 @@ namespace Sep.Git.Tfs.Core
 
                 if (this.IsSubtree)
                 {
-                    if(dir != null)
+                    if (dir != null)
                     {
                         return Path.Combine(dir, this.Prefix);
                     }
@@ -277,7 +277,7 @@ namespace Sep.Git.Tfs.Core
             else
             {
                 //look through the subtrees
-                var p = this.globals.Repository.GetSubtrees(this)
+                var p = globals.Repository.GetSubtrees(this)
                             .Where(x => x.IsSubtree)
                             .FirstOrDefault(x => tfsPath.StartsWith(x.TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase)
                                 && (tfsPath.Length == x.TfsRepositoryPath.Length || tfsPath[x.TfsRepositoryPath.Length] == '/'));
@@ -291,7 +291,7 @@ namespace Sep.Git.Tfs.Core
                 else
                     tfsPath = p.Prefix + "/" + tfsPath;
             }
-            
+
             while (tfsPath.StartsWith("/"))
                 tfsPath = tfsPath.Substring(1);
             return tfsPath;
@@ -309,7 +309,7 @@ namespace Sep.Git.Tfs.Core
 
         public IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null)
         {
-            return FetchWithMerge(-1, stopOnFailMergeCommit,lastChangesetIdToFetch, renameResult);
+            return FetchWithMerge(-1, stopOnFailMergeCommit, lastChangesetIdToFetch, renameResult);
         }
 
         public IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes)
@@ -326,12 +326,12 @@ namespace Sep.Git.Tfs.Core
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
-                        
+
             bool fetchRetrievedChangesets;
             do
             {
                 var fetchedChangesets = FetchChangesets(true, lastChangesetIdToFetch);
-                
+
                 var objects = BuildEntryDictionary();
                 fetchRetrievedChangesets = false;
                 foreach (var changeset in fetchedChangesets)
@@ -449,7 +449,7 @@ namespace Sep.Git.Tfs.Core
                              "'...");
             var isIgnoringBranchesDetected = Repository.ReadAllTfsRemotes().Count() < 2;
             Trace.TraceInformation("=> Branch support " + (isIgnoringBranchesDetected ? "disabled!" : "enabled!"));
-            if(isIgnoringBranchesDetected)
+            if (isIgnoringBranchesDetected)
                 Trace.TraceInformation("   if you want to enable branch support, use the command:" + Environment.NewLine
                     + "    git config --local " + GitTfsConstants.IgnoreBranches + " false");
             globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, isIgnoringBranchesDetected.ToString());
@@ -460,9 +460,11 @@ namespace Sep.Git.Tfs.Core
         {
             if (ExportMetadatas)
             {
-                if (changeset.Summary.Workitems.Any()) {
+                if (changeset.Summary.Workitems.Any())
+                {
                     var workItemIds = TranslateWorkItems(changeset.Summary.Workitems.Select(wi => wi.Id.ToString()));
-                    if (workItemIds != null) {
+                    if (workItemIds != null)
+                    {
                         log.Log += "\nwork-items: " + string.Join(", ", workItemIds.Select(s => "#" + s));
                     }
                 }
@@ -556,7 +558,7 @@ namespace Sep.Git.Tfs.Core
                 Trace.TraceInformation("\tFetching from dependent TFS remote '{0}'...", tfsRemote.Id);
                 try
                 {
-                    var fetchResult = ((GitTfsRemote) tfsRemote).FetchWithMerge(-1, stopOnFailMergeCommit, parentChangesetId, renameResult);
+                    var fetchResult = ((GitTfsRemote)tfsRemote).FetchWithMerge(-1, stopOnFailMergeCommit, parentChangesetId, renameResult);
                 }
                 finally
                 {
@@ -595,7 +597,7 @@ namespace Sep.Git.Tfs.Core
                     tfsPath = tfsPath.EndsWith("/") ? tfsPath : tfsPath + "/";
 
                     tfsBranch = allBranches.SingleOrDefault(b => tfsPath.StartsWith(b.Path.EndsWith("/") ? b.Path : b.Path + "/"));
-                    if(tfsBranch != null)
+                    if (tfsBranch != null)
                     {
                         // we found a branch, we stop here
                         break;
@@ -628,7 +630,7 @@ namespace Sep.Git.Tfs.Core
         {
             if (tfsBranch.IsRoot)
             {
-                return InitTfsBranch(this.remoteOptions, tfsBranch.Path);
+                return InitTfsBranch(remoteOptions, tfsBranch.Path);
             }
 
             var branchesDatas = Tfs.GetRootChangesetForBranch(tfsBranch.Path, parentChangesetId);
@@ -637,12 +639,12 @@ namespace Sep.Git.Tfs.Core
             foreach (var branch in branchesDatas)
             {
                 var rootChangesetId = branch.RootChangeset;
-                remote = InitBranch(this.remoteOptions, tfsBranch.Path, rootChangesetId, true);
+                remote = InitBranch(remoteOptions, tfsBranch.Path, rootChangesetId, true);
                 if (remote == null)
                 {
                     Trace.TraceInformation("warning: root commit not found corresponding to changeset " + rootChangesetId);
                     Trace.TraceInformation("=> continuing anyway by creating a branch without parent...");
-                    return InitTfsBranch(this.remoteOptions, tfsBranch.Path);
+                    return InitTfsBranch(remoteOptions, tfsBranch.Path);
                 }
 
                 if (branch.IsRenamedBranch)
@@ -687,7 +689,7 @@ namespace Sep.Git.Tfs.Core
         private IEnumerable<ITfsChangeset> FetchChangesets(bool byLots, int lastVersion = -1)
         {
             int lowerBoundChangesetId;
-            if(properties.InitialChangeset.HasValue)
+            if (properties.InitialChangeset.HasValue)
                 lowerBoundChangesetId = Math.Max(MaxChangesetId + 1, properties.InitialChangeset.Value);
             else
                 lowerBoundChangesetId = MaxChangesetId + 1;
@@ -782,7 +784,8 @@ namespace Sep.Git.Tfs.Core
         private LogEntry CopyTree(string lastCommit, ITfsChangeset changeset)
         {
             LogEntry result = null;
-            WithWorkspace(changeset.Summary, workspace => {
+            WithWorkspace(changeset.Summary, workspace =>
+            {
                 var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(null);
                 result = changeset.CopyTree(treeBuilder, workspace);
                 result.Tree = treeBuilder.GetTree();
@@ -809,7 +812,7 @@ namespace Sep.Git.Tfs.Core
         public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force)
         {
             var destinationRef = GitRepository.ShortToLocalName(destinationBranch);
-            if(Repository.HasRef(destinationRef))
+            if (Repository.HasRef(destinationRef))
                 throw new GitTfsException("ERROR: Destination branch (" + destinationBranch + ") already exists!");
 
             var shelvesetChangeset = Tfs.GetShelvesetData(this, shelvesetOwner, shelvesetName);
@@ -918,12 +921,12 @@ namespace Sep.Git.Tfs.Core
 
         public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
         {
-            if(!MatchesTfsUrl(tfsUrl))
+            if (!MatchesTfsUrl(tfsUrl))
                 return false;
 
-            if(TfsRepositoryPath == null)
+            if (TfsRepositoryPath == null)
                 return tfsRepositoryPath == null;
-            
+
             return TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
         }
 

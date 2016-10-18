@@ -1,3 +1,4 @@
+
 namespace Sep.Git.Tfs.Core.Changes.Git
 {
     public class RenameEdit : IGitChangedFile

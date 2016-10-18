@@ -34,7 +34,7 @@ namespace Sep.Git.Tfs.Commands
                 {
                     { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to search all shelvesets.",
                         v => Owner = v },
-                    { "b|branch=", "Git Branch to apply Shelveset to? (default: TFS current remote)", 
+                    { "b|branch=", "Git Branch to apply Shelveset to? (default: TFS current remote)",
                         v => TfsBranch = v },
                     { "force", "Get as much of the Shelveset as possible, and log any other errors",
                         v => Force = v != null },

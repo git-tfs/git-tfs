@@ -94,11 +94,11 @@ namespace Sep.Git.Tfs.Core
         {
             var treeInfo = Summary.Remote.Repository.CreateObjectsDictionary();
             var resolver = new PathResolver(Summary.Remote, "", treeInfo);
-            
+
             IItem[] tfsItems;
-            if(Summary.Remote.TfsRepositoryPath != null)
+            if (Summary.Remote.TfsRepositoryPath != null)
             {
-                tfsItems = _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full);   
+                tfsItems = _changeset.VersionControlServer.GetItems(Summary.Remote.TfsRepositoryPath, _changeset.ChangesetId, TfsRecursionType.Full);
             }
             else
             {
@@ -176,7 +176,7 @@ namespace Sep.Git.Tfs.Core
             }
             catch
             {
-            } 
+            }
             var name = changesetToLog.Committer;
             var email = changesetToLog.Committer;
             if (_authors != null && _authors.Authors.ContainsKey(changesetToLog.Committer))
@@ -217,16 +217,16 @@ namespace Sep.Git.Tfs.Core
                 email = "unknown@tfs.local";
             }
             return new LogEntry
-                       {
-                           Date = changesetToLog.CreationDate,
-                           Log = changesetToLog.Comment + Environment.NewLine,
-                           ChangesetId = changesetToLog.ChangesetId,
-                           CommitterName = name,
-                           AuthorName = name,
-                           CommitterEmail = email,
-                           AuthorEmail = email,
-                           Remote = remote
-                       };
+            {
+                Date = changesetToLog.CreationDate,
+                Log = changesetToLog.Comment + Environment.NewLine,
+                ChangesetId = changesetToLog.ChangesetId,
+                CommitterName = name,
+                AuthorName = name,
+                CommitterEmail = email,
+                AuthorEmail = email,
+                Remote = remote
+            };
         }
 
         public string OmittedParentBranch { get; set; }
