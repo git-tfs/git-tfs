@@ -90,6 +90,8 @@ Task("Run-Unit-Tests")
 	Environment.SetEnvironmentVariable("GIT_AUTHOR_EMAIL", "test@test.com");
 	Environment.SetEnvironmentVariable("GIT_COMMITTER_NAME", "git-tfs test");
 	Environment.SetEnvironmentVariable("GIT_COMMITTER_EMAIL", "test@test.com");
+	Console.WriteLine("GIT_AUTHOR_EMAIL:" + EnvironmentVariable("GIT_AUTHOR_EMAIL"));
+	
     XUnit2("./**/bin/" + configuration + "/GitTfsTest.dll", new XUnit2Settings()
 		{
 			XmlReport = true,
