@@ -86,11 +86,9 @@ Task("Run-Unit-Tests")
     .IsDependentOn("Build")
     .Does(() =>
 {
-	Environment.SetEnvironmentVariable("GIT_AUTHOR_NAME", "git-tfs test");
-	Environment.SetEnvironmentVariable("GIT_AUTHOR_EMAIL", "test@test.com");
-	Environment.SetEnvironmentVariable("GIT_COMMITTER_NAME", "git-tfs test");
-	Environment.SetEnvironmentVariable("GIT_COMMITTER_EMAIL", "test@test.com");
-	Console.WriteLine("GIT_AUTHOR_EMAIL:" + EnvironmentVariable("GIT_AUTHOR_EMAIL"));
+	//Merge with libgit2sharp now require having user name and email to be set!
+	StartProcess("git.exe", "config --global user.name \"git-tfs user for merge in unit tests\"");
+	StartProcess("git.exe", "config --global user.email \"git-tfs@unit-tests.com\"");
 	
     XUnit2("./**/bin/" + configuration + "/GitTfsTest.dll", new XUnit2Settings()
 		{

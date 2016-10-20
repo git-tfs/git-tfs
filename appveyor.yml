@@ -25,6 +25,7 @@ build_script:
 #      7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config\*" -xr!"*.pdb"
 #      git config --global user.name "For gittfs test"
 #      git config --global user.email gittfs@fortest.com
+test: off
 #test:
 #  assemblies: '**\GitTfsTest.dll'
 #after_test:
