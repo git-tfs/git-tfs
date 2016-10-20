@@ -1,7 +1,4 @@
-<?xml version="1.0"?>
-<Project ToolsVersion="4.0" DefaultTargets="Help" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <!-- Set an auth token here. You can create one at https://github.com/settings/applications. -->
-    <GitHubAuthToken><!-- token goes here --></GitHubAuthToken>
-  </PropertyGroup>
-</Project>
+[Place Holder... Replace this first line by your personal token!]
+You can create one at https://github.com/settings/tokens (Add at least the scope 'repo' or 'public_repo') 
+
+

@@ -75,9 +75,6 @@
     <Compile Include="..\GitTfs.VsCommon\TfsPlugin.cs">
       <Link>TfsPlugin.cs</Link>
     </Compile>
-    <Compile Include="..\Version.cs">
-      <Link>Properties\Version.cs</Link>
-    </Compile>
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Common.cs">
       <Link>TfsHelper.Common.cs</Link>
     </Compile>
@@ -95,12 +92,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-      <!-- Change to the solution directory instead of passing it directly to
-           /escape since that option can't deal with paths with spaces -->
-      cd $(SolutionDir)
-      xcopy /y /I "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)$(ProjectName)" /EXCLUDE:files_to_ignore_during_post_build_copy.txt
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy /y /I "$(TargetPath)" "$(SolutionDir)GitTfs\$(OutDir)$(ProjectName)\*"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

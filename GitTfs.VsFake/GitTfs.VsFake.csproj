@@ -79,9 +79,6 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Version.cs">
-      <Link>Properties\Version.cs</Link>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Script.cs" />
     <Compile Include="TfsHelper.VsFake.cs" />
@@ -121,5 +118,8 @@
   <PropertyGroup>
     <PostBuildEvent Condition="'$(OS)' == 'Windows_NT'">xcopy /y "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)"</PostBuildEvent>
     <PostBuildEvent Condition="'$(OS)' != 'Windows_NT'">cp "$(TargetDir)"*.dll "$(SolutionDir)GitTfs\$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y /I "$(TargetPath)" "$(SolutionDir)GitTfs\$(OutDir)*"</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -98,9 +98,6 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Version.cs">
-      <Link>Properties\Version.cs</Link>
-    </Compile>
     <Compile Include="Commands\Checkout.cs" />
     <Compile Include="Commands\ResetRemote.cs" />
     <Compile Include="Commands\Create.cs" />

@@ -1,31 +1,16 @@
 ﻿#appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
-version: 0.25.1.{build}
-platform: x86
+#version: 0.25.1.{build}
+#platform: x86
 clone_folder: c:\gittfs
 clone_depth: 1
 # build cache to preserve files/folders between builds
 cache:
   - packages -> paket.lock  # preserve "packages" directory in the root of build folder but will reset it if `paket.lock` is modified
 init: []
-install:
-  - choco install tfs2010objectmodel -y
-before_build:
-  - ps: |
-      .\paket.exe restore
-      $env:Config = "Release"
+#install:
+#  - choco install tfs2010objectmodel -y
+#before_build:
+#  - ps: $env:Config = "Release"
 build_script:
-  - msbuild GitTfs.sln /t:GitTfs_Vs2010 /t:GitTfs_Vs2012 /t:GitTfs_Vs2013 /t:GitTfs_Vs2015 /t:GitTfsTest /verbosity:minimal /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
-after_build:
-  - ps: |
-      Get-ChildItem .\packages -Recurse -Filter Microsoft.WITDataStore*.dll | Copy-Item -Destination "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config\GitTfs.Vs2015\"
-      $zipFile= "git-tfs_$Env:APPVEYOR_REPO_COMMIT.zip"
-      7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config\*" -xr!"*.pdb"
-      Push-AppveyorArtifact $zipFile
-      git config --global user.name "For gittfs test"
-      git config --global user.email gittfs@fortest.com
-test:
-  assemblies: '**\GitTfsTest.dll'
-after_test:
-  - ps: |
-      & ".\FunctionalTesting\smoke_tests.ps1" "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config"
-      Get-ChildItem .\GitTfs.Setup\GitTfs-*.msi | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+- ps: .\build.ps1 -Target "AppVeyor"
+test: off
