@@ -77,7 +77,9 @@ Task("Build")
 {
       // Use MSBuild
       MSBuild(pathToSln, settings =>
-        settings.SetConfiguration(configuration));
+        settings.SetConfiguration(configuration)
+				.WithTarget("GitTfs_Vs2015")
+				.WithTarget("GitTfsTest"));
 });
 
 Task("Run-Unit-Tests")
@@ -101,7 +103,7 @@ Task("Run-Unit-Tests")
 //////////////////////////////////////////////////////////////////////
 
 Task("Default")
-    .IsDependentOn("Build");
+    .IsDependentOn("Run-Unit-Tests");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
