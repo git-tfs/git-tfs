@@ -40,9 +40,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="app.config.install.xdt">
-      <Paket>True</Paket>
-    </Content>
     <Reference Include="StructureMap">
       <HintPath>..\lib\StructureMap\StructureMap.dll</HintPath>
     </Reference>
