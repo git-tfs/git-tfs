@@ -7,27 +7,24 @@ namespace Sep.Git.Tfs.Test
 {
     public class FactExceptOnUnixAttribute : FactAttribute
     {
-        protected override IEnumerable<ITestCommand> EnumerateTestCommands(IMethodInfo method)
+        public override string Skip
         {
-            yield return new FactExceptOnUnixTestCommand(method);
-        }
-
-        private class FactExceptOnUnixTestCommand : FactCommand
-        {
-            public FactExceptOnUnixTestCommand(IMethodInfo method) : base(method) { }
-
-            public override MethodResult Execute(object testClass)
+            get
             {
                 if (IsUnix())
-                    return new SkipResult(testMethod, DisplayName, "This test does not work on unix-like OSes yet.");
-
-                return base.Execute(testClass);
+                    return "Skipped because run on Unix";
+                return base.Skip;
             }
 
-            private bool IsUnix()
+            set
             {
-                return Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
+                base.Skip = value;
             }
+        }
+
+        private bool IsUnix()
+        {
+            return Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
         }
     }
 }

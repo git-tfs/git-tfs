@@ -103,8 +103,18 @@ NUGET
     System.Xml.XDocument (4.0.11) - framework: >= net461
     WindowsAzure.ServiceBus (3.4) - framework: >= net45
     WixSharp (1.0.22.3) - framework: >= net40
-    xunit (1.9.2) - framework: >= net40
-    xunit.extensions (1.9.2) - framework: >= net40
-      xunit (1.9.2)
-    xunit.runner.visualstudio (2.0.1) - framework: >= net40
-    xunit.runners (1.9.2) - framework: >= net40
+    xunit (2.1) - framework: >= net45
+      xunit.assert (2.1)
+      xunit.core (2.1)
+    xunit.abstractions (2.0) - framework: >= net45
+    xunit.assert (2.1) - framework: >= net45
+    xunit.core (2.1) - framework: >= net45
+      xunit.extensibility.core (2.1) - framework: >= net45, dnx451, dnxcore50, monoandroid, monotouch, portable-net45+win80+wp80+wpa81, xamarinios, winv4.5, wpv8.0, wpav8.1
+      xunit.extensibility.execution (2.1) - framework: >= net45, dnx451, dnxcore50, monoandroid, monotouch, portable-net45+win80+wp80+wpa81, xamarinios, winv4.5, wpv8.0, wpav8.1
+    xunit.extensibility.core (2.1) - framework: >= net45
+      xunit.abstractions (2.0)
+    xunit.extensibility.execution (2.1) - framework: >= net45
+      xunit.extensibility.core (2.1) - framework: >= net45, dnx451, dnxcore50, monoandroid, monotouch, xamarinios, winv4.5, wpv8.0, wpav8.1
+    xunit.runner.console (2.1)
+    xunit.runner.msbuild (2.1) - framework: >= net45
+    xunit.runner.visualstudio (2.1)

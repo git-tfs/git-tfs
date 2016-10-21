@@ -1,6 +1,4 @@
 LibGit2Sharp
 xunit
-xunit.extensions
 xunit.runner.visualstudio
-xunit.runners
 nlog

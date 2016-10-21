@@ -9,12 +9,12 @@ namespace Sep.Git.Tfs.Test.Commands
         [Fact]
         public void AssertValidTfsPathTest()
         {
-            Assert.DoesNotThrow(() => "$/test".AssertValidTfsPath());
+            "$/test".AssertValidTfsPath();
             Assert.Throws(typeof(GitTfsException), () => "$test".AssertValidTfsPath());
             Assert.Throws(typeof(GitTfsException), () => "/test".AssertValidTfsPath());
             Assert.Throws(typeof(GitTfsException), () => "test".AssertValidTfsPath());
             Assert.Throws(typeof(GitTfsException), () => "$/".AssertValidTfsPath());
-            Assert.DoesNotThrow(() => "$/".AssertValidTfsPathOrRoot());
+            "$/".AssertValidTfsPathOrRoot();
         }
 
         [Fact]
