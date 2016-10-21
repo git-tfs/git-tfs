@@ -98,10 +98,10 @@ namespace Sep.Git.Tfs.Test.Integration
                 return new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
             }
 
-            public string Commit(string message)
+            public string Commit(string message, string filename = "README.txt")
             {
-                File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, "README.txt"), message);
-                _repo.Stage("README.txt");
+                File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, filename), message);
+                _repo.Stage(filename);
                 var committer = GetCommitter();
                 return _repo.Commit(message, committer, committer, new CommitOptions() { AllowEmptyCommit = true }).Id.Sha;
             }
