@@ -87,6 +87,8 @@ Task("Run-Unit-Tests")
     .Does(() =>
 {
 	//Merge with libgit2sharp now require having user name and email to be set!
+	Environment.SetEnvironmentVariable("HOMEDRIVE", "%tmp%");
+	Environment.SetEnvironmentVariable("HOMEPATH", "git-tfs");
 	StartProcess("git.exe", "config --global user.name \"git-tfs user for merge in unit tests\"");
 	StartProcess("git.exe", "config --global user.email \"git-tfs@unit-tests.com\"");
 	
