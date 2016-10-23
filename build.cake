@@ -86,10 +86,14 @@ Task("Run-Unit-Tests")
     .IsDependentOn("Build")
     .Does(() =>
 {
-	//Merge with libgit2sharp now require having user name and email to be set!
+	//Merge with libgit2sharp now require having user name and email to be set! =>
 	//Z:\TeamCityAgent\work\9756d8a3b58da7a4
 	Environment.SetEnvironmentVariable("HOMEDRIVE", "z:");
 	Environment.SetEnvironmentVariable("HOMEPATH", @"TeamCityAgent\work\9756d8a3b58da7a4\gitconfig");
+	CreateDirectory(@"z:\TeamCityAgent\work\9756d8a3b58da7a4\gitconfig");
+	using (FileStream fs = File.Create(@"z:\TeamCityAgent\work\9756d8a3b58da7a4\gitconfig\.gitconfig"))
+	{
+	}
 	
 	StartProcess("git.exe", "config --global user.name \"git-tfs user for merge in unit tests\"");
 	StartProcess("git.exe", "config --global user.email \"git-tfs@unit-tests.com\"");
