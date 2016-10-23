@@ -91,7 +91,7 @@ Task("Run-Unit-Tests")
 	Environment.SetEnvironmentVariable("HOMEDRIVE", "z:");
 	Environment.SetEnvironmentVariable("HOMEPATH", @"TeamCityAgent\work\9756d8a3b58da7a4\gitconfig");
 	CreateDirectory(@"z:\TeamCityAgent\work\9756d8a3b58da7a4\gitconfig");
-	using (FileStream fs = File.Create(@"z:\TeamCityAgent\work\9756d8a3b58da7a4\gitconfig\.gitconfig"))
+	using (System.IO.FileStream fs = System.IO.File.Create(@"z:\TeamCityAgent\work\9756d8a3b58da7a4\gitconfig\.gitconfig"))
 	{
 	}
 	
