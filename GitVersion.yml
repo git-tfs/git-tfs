@@ -1,0 +1,2 @@
+assembly-informational-format: "{Major}.{Minor}.{CommitsSinceVersionSource}+{Sha}.{BranchName}"
+mode: ContinuousDelivery

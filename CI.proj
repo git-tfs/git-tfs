@@ -5,15 +5,14 @@
     <SolutionDir>./</SolutionDir>
     <RequireRestoreConsent>false</RequireRestoreConsent>
   </PropertyGroup>
-  <Target Name="CI" DependsOnTargets="Build; RunTests" />
+  <Target Name="CI" DependsOnTargets="Test; Cake" />
 
-  <Target Name="Build">
-    <MSBuild Projects="GitTfs.sln" Properties="Configuration=Debug;Platform=Any CPU;RequireRestoreConsent=false" Targets="GitTfsTest" />
+  <Target Name="Test">
+     <Exec Command='powershell -Command "Write-Host &quot;Hello, world!&quot;"' />
   </Target>
 
-  <UsingTask AssemblyFile="packages/xunit.runner.msbuild/build/portable-net45+win8+wp8+wpa81/xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
-  <Target Name="RunTests">
-    <xunit Assemblies="GitTfsTest/bin/Debug/GitTfsTest.dll" />
+  <Target Name="Cake">
+     <Exec Command='powershell -Command "./build.ps1"' />
   </Target>
 
 </Project>

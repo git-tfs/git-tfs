@@ -19,3 +19,6 @@ obj
 /packages
 GitTfs/git2.*
 .paket/paket.exe
+
+#Cake
+/tools
