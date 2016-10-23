@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<Project ToolsVersion="4.0" DefaultTargets="CI" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <SolutionDir>./</SolutionDir>
+    <RequireRestoreConsent>false</RequireRestoreConsent>
+  </PropertyGroup>
+  <Target Name="CI" DependsOnTargets="Test; Cake" />
+
+  <Target Name="Test">
+     <Exec Command='powershell -Command "Write-Host &quot;Hello, world!&quot;"' />
+  </Target>
+
+  <Target Name="Cake">
+     <Exec Command='powershell -Command "./build.ps1"' />
+  </Target>
+
+</Project>
