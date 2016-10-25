@@ -10,9 +10,12 @@ Here is a small guide to help you with the basics...
 
 ## The paket files
 
-The executables are in the folder `.paket`. It should contains (at least):
+Normally, The paket executables are in the number of 2:
 * `paket.bootstrapper.exe` which automatically download the `paket.exe` file. It must be committed in the git repository.
 * `paket.exe` which is the main executable that we will call if needed.  It must NOT be committed in the git repository (paket team release very often!!!).
+
+But to easy the use of paket, we use it in [magic mode](https://fsprojects.github.io/Paket/bootstrapper.html#Magic-mode)!
+The `paket.bootstrapper.exe` has been renamed to `paket.exe` and will download `paket.exe` automatically if needed (to stay up to date!) and 'forward' the command to it.
 
 The others files used by paket are (all must be committed):
 * the `paket.dependencies` file, situated along the sln file, which contains all the nuget packages used in the project with the wished version.
@@ -29,11 +32,11 @@ There is nothing to do. The `paket.exe` file is automatically downloaded and the
 ### When updating a package
 
 To update a package, the easier is surely to modify the version number in the `paket.dependencies` file.
-After that, you should run `.paket\paket.exe install` that will regenerate the `paket.lock` file with the new versions.  
+After that, you should run `paket.exe install` that will regenerate the `paket.lock` file with the new versions.  
 
 You could also do that calling:
 
-     .paket\paket.exe update nuget <id_of_the_nuget_package>
+     paket.exe update nuget <id_of_the_nuget_package>
 
 **Very important note**:
 
@@ -47,11 +50,11 @@ To reduce the git-tfs package size, we have excluded the useless references from
 
 Use the command line, if the package should be added to only one project:
 
-      .paket\paket.exe add nuget <id_of_the_nuget_package> project <project_name>
+      paket.exe add nuget <id_of_the_nuget_package> project <project_name>
 
 Or in interactive mode to add to multiple projects:
 
-      .paket\paket.exe add nuget <id_of_the_nuget_package> -i
+      paket.exe add nuget <id_of_the_nuget_package> -i
 
 
 It will take care to update all the paket files and the csproj file(s).
