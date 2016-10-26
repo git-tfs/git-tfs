@@ -3,7 +3,7 @@
 [git-tfs](http://git-tfs.com/) is a two-way bridge between TFS (Team Foundation Server) and git, similar to git-svn.
 It fetches TFS commits into a git repository, and lets you push your updates back to TFS.
 
-The most recent version is __0.25.1__. See the [change history](https://github.com/git-tfs/git-tfs/releases) for details.
+[![git-tfs version](https://img.shields.io/github/release/git-tfs/git-tfs.svg?label=Actual%20Version:)](https://github.com/git-tfs/git-tfs/releases). See the [change history](https://github.com/git-tfs/git-tfs/releases) for details and download.
 
 If you're having problems, check out the [troubleshooting](doc/TROUBLESHOOTING.md) page.
 And read [how to report an issue](doc/reporting-issues.md), before doing so ;)
