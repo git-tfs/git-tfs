@@ -1,6 +1,6 @@
 #tool "nuget:?package=GitVersion.CommandLine"
 #tool "nuget:?package=xunit.runner.console"
-#r "./tools/Octokit/lib/net45/Octokit.dll"
+#r "./build/Octokit.dll" //Use our custom version because offical one has a http request timeout of 100s preventing upload of github release asset :( https://github.com/octokit/octokit.net/issues/963
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
