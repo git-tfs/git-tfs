@@ -83,7 +83,7 @@ Task("Restore-NuGet-Packages").Description("Restore nuget dependencies")
 	.IsDependentOn("Clean")
 	.Does(() =>
 {
-		if(FileExists("paket.exe"))
+	if(FileExists("paket.exe"))
 		StartProcess("paket.exe", "restore");
 	else
 		StartProcess(@".paket\paket.exe", "restore");
@@ -164,15 +164,29 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 		{
 			XmlReport = true,
 			OutputDirectory = "."
-		}
-		);
+		});
 });
 
 Task("Run-Smoke-Tests").Description("Run the functional/smoke tests")
-	.IsDependentOn("Build")
+	.IsDependentOn("Run-Unit-Tests")
 	.Does(() =>
 {
-	//TODO!!
+	var tmpDirectory = System.IO.Path.Combine(EnvironmentVariable("TMP"), "gittfs");
+	EnsureDirectoryExists(tmpDirectory);
+	CleanDirectory(tmpDirectory);
+
+	var aboluteBuildDir = MakeAbsolute(Directory(buildDir));
+	var absoluteSmokeTestsScript = MakeAbsolute(File(@".\build\FunctionalTesting\smoke_tests.ps1"));
+
+	var exitCode = StartProcess("powershell.exe", new ProcessSettings
+		{
+			Arguments = "-file \""+ absoluteSmokeTestsScript +"\" -gittfsFolder \""+ aboluteBuildDir + "\"",
+			WorkingDirectory = tmpDirectory
+		});
+	if(exitCode != 0)
+	{
+		throw new Exception("Fail to run the somke tests");
+	}
 });
 
 Task("Package").Description("Generate the release zip file")
@@ -300,7 +314,7 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 	.IsDependentOn("Package")
 	.Does(() =>
 {
-	CreateDirectory(ChocolateyBuildDir);
+	EnsureDirectoryExists(ChocolateyBuildDir);
 	CleanDirectory(ChocolateyBuildDir);
 
 	CopyFiles(@".\build\ChocolateyTemplates\*.*", ChocolateyBuildDir);
@@ -352,6 +366,7 @@ Task("Default").Description("")
 
 Task("AppVeyor").Description("Do the continuous integration build with AppVeyor")
 	.IsDependentOn("InstallTfsModels")
+	.IsDependentOn("Run-Smoke-Tests")
 	.IsDependentOn("Package");
 
 Task("Release").Description("Build the release and put it on github.com")
