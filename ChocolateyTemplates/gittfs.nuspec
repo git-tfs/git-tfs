@@ -8,6 +8,7 @@
     <owners>Matt Burke</owners>
     <summary>Git Tfs - Work smarter</summary>
     <description>git-tfs is a two-way bridge between a TFS server and a local git repository, similar to git-svn. It fetches TFS changesets into a git repository, and lets you push your updates back to TFS. It could also be used to migrate from TFVC to a git repository.</description>
+	<iconUrl>https://raw.githubusercontent.com/git-tfs/git-tfs/master/doc/logo/git-tfs_logo.png</iconUrl>
     <projectUrl>https://github.com/git-tfs/git-tfs</projectUrl>
     <mailingListUrl>https://groups.google.com/forum/#!forum/git-tfs-dev</mailingListUrl>
     <packageSourceUrl>https://github.com/git-tfs/git-tfs/releases</packageSourceUrl>
@@ -20,7 +21,7 @@ ${ReleaseNotesContents}
     <licenseUrl>https://github.com/git-tfs/git-tfs/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
-      <dependency id="git" />
+      <dependency id="git" version="1.9.5.20150320" />
     </dependencies>
   </metadata>
 </package>
