@@ -1,44 +1,19 @@
+FRAMEWORK: NET40, NET45
 NUGET
   remote: https://www.nuget.org/api/v2
     LibGit2Sharp (0.22)
       LibGit2Sharp.NativeBinaries (1.0.129)
     LibGit2Sharp.NativeBinaries (1.0.129)
-    Microsoft.AspNet.WebApi.Client (5.2.3) - framework: >= net45
-      Newtonsoft.Json (>= 6.0.4) - framework: >= net45, portable-wp80+win+wp81+wpa81
-    Microsoft.AspNet.WebApi.Core (5.2.3) - framework: >= net45
+    Microsoft.AspNet.WebApi.Client (5.2.3)
+      Newtonsoft.Json (>= 6.0.4) - framework: net45
+    Microsoft.AspNet.WebApi.Core (5.2.3)
       Microsoft.AspNet.WebApi.Client (>= 5.2.3)
-    Microsoft.IdentityModel.Clients.ActiveDirectory (3.13.5) - framework: >= net45
-      System.Collections (>= 4.0.11) - framework: >= net461, >= netstandard14
-      System.Collections.Concurrent (>= 4.0.12) - framework: >= net461, >= netstandard14
-      System.Diagnostics.Debug (>= 4.0.11) - framework: >= net461, >= netstandard14
-      System.Globalization (>= 4.0.11) - framework: >= net461, >= netstandard14
-      System.IO (>= 4.1) - framework: >= net461, >= netstandard14
-      System.Linq (>= 4.1) - framework: >= net461, >= netstandard14
-      System.Net.Http (>= 4.0.1) - framework: >= net461, >= netstandard14
-      System.Net.Primitives (>= 4.0.11) - framework: >= net461, >= netstandard14
-      System.Reflection (>= 4.1) - framework: >= net461, >= netstandard14
-      System.Reflection.Extensions (>= 4.0.1) - framework: >= net461, >= netstandard14
-      System.Runtime (>= 4.1) - framework: >= net461, >= netstandard14
-      System.Runtime.Extensions (>= 4.1) - framework: >= net461, >= netstandard14
-      System.Runtime.InteropServices (>= 4.1) - framework: >= net461, >= netstandard14
-      System.Runtime.Serialization.Json (>= 4.0.2) - framework: >= net461, >= netstandard14
-      System.Runtime.Serialization.Primitives (>= 4.1.1) - framework: >= net461, >= netstandard14
-      System.Text.Encoding (>= 4.0.11) - framework: >= net461, >= netstandard14
-      System.Text.Encoding.Extensions (>= 4.0.11) - framework: >= net461, >= netstandard14
-      System.Text.RegularExpressions (>= 4.0.12) - framework: >= net461, >= netstandard14
-      System.Threading (>= 4.0.11) - framework: >= net461, >= netstandard14
-      System.Threading.Tasks (>= 4.0.11) - framework: >= net461, >= netstandard14
-      System.Xml.ReaderWriter (>= 4.0.11) - framework: >= net461, >= netstandard14
-      System.Xml.XDocument (>= 4.0.11) - framework: >= net461, >= netstandard14
-    Microsoft.IdentityModel.Logging (1.0) - framework: >= net451
-    Microsoft.IdentityModel.Tokens (5.0) - framework: >= net451
-      Microsoft.IdentityModel.Logging (>= 1.0) - framework: >= net451, >= netstandard14
-      Newtonsoft.Json (>= 9.0.1) - framework: >= net451, >= netstandard14
-    Microsoft.TeamFoundationServer.Client (14.102) - framework: >= net45
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: >= net45
-      Microsoft.VisualStudio.Services.Client (14.102) - framework: >= net45
-      Newtonsoft.Json (>= 6.0.8) - framework: >= net45
-    Microsoft.TeamFoundationServer.ExtendedClient (14.102) - framework: >= net45
+    Microsoft.IdentityModel.Clients.ActiveDirectory (3.13.5)
+    Microsoft.TeamFoundationServer.Client (14.102)
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45
+      Microsoft.VisualStudio.Services.Client (14.102) - framework: net45
+      Newtonsoft.Json (>= 6.0.8) - framework: net45
+    Microsoft.TeamFoundationServer.ExtendedClient (14.102)
       Microsoft.AspNet.WebApi.Client (>= 5.2.2)
       Microsoft.AspNet.WebApi.Core (>= 5.2.2)
       Microsoft.IdentityModel.Clients.ActiveDirectory (>= 2.16.204221202)
@@ -47,74 +22,35 @@ NUGET
       Microsoft.VisualStudio.Services.InteractiveClient (14.102)
       Newtonsoft.Json (>= 6.0.8)
       System.IdentityModel.Tokens.Jwt (>= 4.0)
-    Microsoft.VisualStudio.Services.Client (14.102) - framework: >= net45
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: >= net45
-      Newtonsoft.Json (>= 6.0.8) - framework: >= net45
-    Microsoft.VisualStudio.Services.InteractiveClient (14.102) - framework: >= net45
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: >= net45
-      Microsoft.IdentityModel.Clients.ActiveDirectory (>= 2.16.204221202) - framework: >= net45
-      Microsoft.VisualStudio.Services.Client (14.102) - framework: >= net45
-      Newtonsoft.Json (>= 6.0.8) - framework: >= net45
-      System.IdentityModel.Tokens.Jwt (>= 4.0) - framework: >= net45
-      WindowsAzure.ServiceBus (>= 2.5.1) - framework: >= net45
-    Microsoft.Win32.Primitives (4.0.1) - framework: >= net461
+    Microsoft.VisualStudio.Services.Client (14.102)
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45
+      Newtonsoft.Json (>= 6.0.8) - framework: net45
+    Microsoft.VisualStudio.Services.InteractiveClient (14.102)
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45
+      Microsoft.IdentityModel.Clients.ActiveDirectory (>= 2.16.204221202) - framework: net45
+      Microsoft.VisualStudio.Services.Client (14.102) - framework: net45
+      Newtonsoft.Json (>= 6.0.8) - framework: net45
+      System.IdentityModel.Tokens.Jwt (>= 4.0) - framework: net45
+      WindowsAzure.ServiceBus (>= 2.5.1) - framework: net45
     MSBuildTasks (1.4.0.45) - framework: >= net40
-    Newtonsoft.Json (9.0.1) - framework: >= net45
-    NLog (4.3.9)
-    NuGet.CommandLine (3.3)
-    System.Collections (4.0.11) - framework: >= net461
-    System.Collections.Concurrent (4.0.12) - framework: >= net461
-    System.Diagnostics.Debug (4.0.11) - framework: >= net461
-    System.Diagnostics.DiagnosticSource (4.0) - framework: >= net461
-    System.Globalization (4.0.11) - framework: >= net461
-    System.IdentityModel.Tokens.Jwt (5.0) - framework: >= net45
-      Microsoft.IdentityModel.Tokens (>= 5.0) - framework: >= net451, >= netstandard14
-    System.IO (4.1) - framework: >= net461
-    System.Linq (4.1) - framework: >= net461
-    System.Net.Http (4.1) - framework: >= net461
-      Microsoft.Win32.Primitives (>= 4.0.1) - framework: >= net46, netstandard13
-      System.Diagnostics.DiagnosticSource (>= 4.0) - framework: >= net46, dnxcore50, netstandard13, >= netstandard16
-      System.Security.Cryptography.X509Certificates (>= 4.1) - framework: >= net46, dnxcore50, netstandard13, >= netstandard16
-    System.Net.Primitives (4.0.11) - framework: >= net461
-    System.Reflection (4.1) - framework: >= net461
-    System.Reflection.Extensions (4.0.1) - framework: >= net461
-    System.Runtime (4.1) - framework: >= net461
-    System.Runtime.Extensions (4.1) - framework: >= net461
-    System.Runtime.InteropServices (4.1) - framework: >= net461
-      System.Runtime (>= 4.1) - framework: >= net462, dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15
-    System.Runtime.Serialization.Json (4.0.2) - framework: >= net461
-    System.Runtime.Serialization.Primitives (4.1.1) - framework: >= net461
-    System.Security.Cryptography.Algorithms (4.2) - framework: >= net461
-      System.IO (>= 4.1) - framework: >= net463, dnxcore50, netstandard13, netstandard14, >= netstandard16
-      System.Runtime (>= 4.1) - framework: >= net463, dnxcore50, netstandard13, netstandard14, >= netstandard16
-      System.Security.Cryptography.Encoding (>= 4.0) - framework: >= net463, dnxcore50, >= netstandard16
-      System.Security.Cryptography.Primitives (>= 4.0) - framework: net46, net461, >= net463, dnxcore50, netstandard13, netstandard14, >= netstandard16
-    System.Security.Cryptography.Encoding (4.0) - framework: >= net461
-    System.Security.Cryptography.Primitives (4.0) - framework: net461, >= net463
-    System.Security.Cryptography.X509Certificates (4.1) - framework: >= net461
-      System.Security.Cryptography.Algorithms (>= 4.2) - framework: net46, >= net461, dnxcore50, netstandard13, netstandard14, >= netstandard16
-      System.Security.Cryptography.Encoding (>= 4.0) - framework: net46, >= net461, dnxcore50, netstandard13, netstandard14, >= netstandard16
-    System.Text.Encoding (4.0.11) - framework: >= net461
-    System.Text.Encoding.Extensions (4.0.11) - framework: >= net461
-    System.Text.RegularExpressions (4.1) - framework: >= net461
-    System.Threading (4.0.11) - framework: >= net461
-    System.Threading.Tasks (4.0.11) - framework: >= net461
-    System.Xml.ReaderWriter (4.0.11) - framework: >= net461
-    System.Xml.XDocument (4.0.11) - framework: >= net461
-    WindowsAzure.ServiceBus (3.4) - framework: >= net45
+    Newtonsoft.Json (9.0.1)
+    NLog (4.3.10)
+    NuGet.CommandLine (3.4.3)
+    System.IdentityModel.Tokens.Jwt (5.0)
+    WindowsAzure.ServiceBus (3.4) - framework: net45
     WixSharp (1.0.22.3) - framework: >= net40
-    xunit (2.1) - framework: >= net45
+    xunit (2.1)
       xunit.assert (2.1)
       xunit.core (2.1)
-    xunit.abstractions (2.0) - framework: >= net45
-    xunit.assert (2.1) - framework: >= net45
-    xunit.core (2.1) - framework: >= net45
-      xunit.extensibility.core (2.1) - framework: >= net45, dnx451, dnxcore50, monoandroid, monotouch, portable-net45+win80+wp80+wpa81, xamarinios, winv4.5, wpv8.0, wpav8.1
-      xunit.extensibility.execution (2.1) - framework: >= net45, dnx451, dnxcore50, monoandroid, monotouch, portable-net45+win80+wp80+wpa81, xamarinios, winv4.5, wpv8.0, wpav8.1
-    xunit.extensibility.core (2.1) - framework: >= net45
+    xunit.abstractions (2.0) - framework: net45
+    xunit.assert (2.1)
+    xunit.core (2.1)
+      xunit.extensibility.core (2.1) - framework: net45
+      xunit.extensibility.execution (2.1) - framework: net45
+    xunit.extensibility.core (2.1) - framework: net45
       xunit.abstractions (2.0)
-    xunit.extensibility.execution (2.1) - framework: >= net45
-      xunit.extensibility.core (2.1) - framework: >= net45, dnx451, dnxcore50, monoandroid, monotouch, xamarinios, winv4.5, wpv8.0, wpav8.1
+    xunit.extensibility.execution (2.1) - framework: net45
+      xunit.extensibility.core (2.1) - framework: net45
     xunit.runner.console (2.1)
-    xunit.runner.msbuild (2.1) - framework: >= net45
+    xunit.runner.msbuild (2.1)
     xunit.runner.visualstudio (2.1)
