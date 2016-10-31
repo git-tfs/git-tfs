@@ -5,7 +5,7 @@ using Sep.Git.Tfs.VsFake;
 
 namespace Sep.Git.Tfs
 {
-    internal class TfsPlugin : Sep.Git.Tfs.Core.TfsInterop.TfsPlugin
+    internal class TfsPlugin : Core.TfsInterop.TfsPlugin
     {
         /*
         public override void Initialize(StructureMap.Graph.IAssemblyScanner scan)

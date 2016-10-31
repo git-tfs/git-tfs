@@ -12,12 +12,12 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class ResetRemote : GitTfsCommand
     {
-        private readonly Globals globals;
+        private readonly Globals _globals;
         private bool ForceResetRemote;
 
         public ResetRemote(Globals globals)
         {
-            this.globals = globals;
+            _globals = globals;
         }
 
         public virtual OptionSet OptionSet
@@ -33,13 +33,13 @@ namespace Sep.Git.Tfs.Commands
 
         public int Run(string commitRef)
         {
-            var targetCommit = globals.Repository.GetTfsCommit(commitRef);
+            var targetCommit = _globals.Repository.GetTfsCommit(commitRef);
             if (targetCommit == null)
                 throw new GitTfsException("error : the commit where you want to reset the tfs remote does not belong to a tfs remote!");
 
             if (!ForceResetRemote)
             {
-                var currentTfsCommit = globals.Repository.GetCurrentTfsCommit();
+                var currentTfsCommit = _globals.Repository.GetCurrentTfsCommit();
                 if (currentTfsCommit == null)
                     throw new GitTfsException("error : the current commit does not belong to a tfs remote!",
                         new List<string> { "Use '--force' option to reset a remote from a commit not belonging a tfs remote" });
@@ -52,7 +52,7 @@ namespace Sep.Git.Tfs.Commands
                                               + currentTfsCommit.Remote.Id + "\"" });
             }
 
-            globals.Repository.ResetRemote(targetCommit.Remote, targetCommit.GitCommit);
+            _globals.Repository.ResetRemote(targetCommit.Remote, targetCommit.GitCommit);
 
             Trace.TraceInformation("Remote 'tfs/" + targetCommit.Remote.Id + "' reset successfully.\n");
             Trace.TraceInformation("Note: remember to use the '--force' option when doing the next 'fetch' to force git-tfs to fetch again the changesets!");

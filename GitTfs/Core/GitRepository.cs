@@ -25,7 +25,7 @@ namespace Sep.Git.Tfs.Core
             _container = container;
             _globals = globals;
             GitDir = gitDir;
-            _repository = new LibGit2Sharp.Repository(GitDir);
+            _repository = new Repository(GitDir);
             _remoteConfigReader = remoteConfigReader;
         }
 
@@ -177,7 +177,7 @@ namespace Sep.Git.Tfs.Core
             // When creating branches we use the empty string to indicate that we do not want to set the value at all.
             if (autocrlf == null)
                 autocrlf = "false";
-            if (autocrlf != String.Empty)
+            if (autocrlf != string.Empty)
                 _repository.Config.Set("core.autocrlf", autocrlf);
 
             if (ignorecase != null)
@@ -274,7 +274,7 @@ namespace Sep.Git.Tfs.Core
         public bool IsInSameTeamProjectAsDefaultRepository(string tfsRepositoryPath)
         {
             IGitTfsRemote defaultRepository;
-            if (!this.GetTfsRemotes().TryGetValue(GitTfsConstants.DefaultRepositoryId, out defaultRepository))
+            if (!GetTfsRemotes().TryGetValue(GitTfsConstants.DefaultRepositoryId, out defaultRepository))
             {
                 return true;
             }
@@ -633,7 +633,7 @@ namespace Sep.Git.Tfs.Core
             return commit;
         }
 
-        public void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, System.DateTime creationDate)
+        public void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, DateTime creationDate)
         {
             if (_repository.Tags[name] == null)
                 _repository.ApplyTag(name, sha, new Signature(Owner, emailOwner, new DateTimeOffset(creationDate)), comment);

@@ -42,7 +42,7 @@ namespace Sep.Git.Tfs.Core
                         var lastChangeSet = tfsParents.OrderByDescending(x => x.ChangesetId).First();
                         if (lastChangeSet.Remote.IsSubtree)
                             lastChangeSet.Remote = _globals.Repository.ReadTfsRemote(lastChangeSet.Remote.OwningRemoteId);
-                        Trace.TraceInformation(string.Format("Basing from parent '{0}:{1}', use -i to override", lastChangeSet.Remote.Id, lastChangeSet.ChangesetId));
+                        Trace.TraceInformation("Basing from parent '{0}:{1}', use -i to override", lastChangeSet.Remote.Id, lastChangeSet.ChangesetId);
                         return write(lastChangeSet, refToWrite);
                     }
 

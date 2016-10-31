@@ -4,11 +4,11 @@ namespace Sep.Git.Tfs.Core
 {
     public class DelimitedReader
     {
-        private readonly TextReader reader;
+        private readonly TextReader _reader;
 
         public DelimitedReader(TextReader reader)
         {
-            this.reader = reader;
+            _reader = reader;
             Delimiter = "\0";
         }
 
@@ -16,10 +16,10 @@ namespace Sep.Git.Tfs.Core
 
         public string Read()
         {
-            if (-1 == reader.Peek()) return null;
+            if (-1 == _reader.Peek()) return null;
             var nextString = "";
             int nextChar;
-            while (-1 != (nextChar = reader.Read()))
+            while (-1 != (nextChar = _reader.Read()))
             {
                 nextString = nextString + (char)nextChar;
                 if (nextString.EndsWith(Delimiter))

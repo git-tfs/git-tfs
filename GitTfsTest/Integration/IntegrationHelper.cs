@@ -297,7 +297,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public void ChangeConfigSetting(string repodir, string key, string value)
         {
-            var repo = new LibGit2Sharp.Repository(Path.Combine(Workdir, repodir));
+            var repo = new Repository(Path.Combine(Workdir, repodir));
             repo.Config.Set(key, value);
         }
 

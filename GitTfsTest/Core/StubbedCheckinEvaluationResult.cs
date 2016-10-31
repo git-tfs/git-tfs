@@ -51,13 +51,13 @@ namespace Sep.Git.Tfs.Test.Core
 
         public StubbedCheckinEvaluationResult WithException(Exception ex)
         {
-            this.PolicyEvaluationException = ex;
+            PolicyEvaluationException = ex;
             return this;
         }
 
         public StubbedCheckinEvaluationResult WithException(string message)
         {
-            return this.WithException(new Exception(message ?? string.Empty));
+            return WithException(new Exception(message ?? string.Empty));
         }
     }
 

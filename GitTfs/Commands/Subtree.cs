@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;
-using System.Diagnostics;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -21,7 +21,7 @@ namespace Sep.Git.Tfs.Commands
         private readonly RemoteOptions _remoteOptions;
 
         private string Prefix;
-        private bool Squash = false;
+        private bool Squash;
 
         public OptionSet OptionSet
         {
@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Commands
                     { "p|prefix=",
                         v => Prefix = v},
                     { "squash",
-                        v => Squash = v != null},
+                        v => Squash = v != null}
                     //                    { "r|revision=",
                     //                        v => RevisionToFetch = Convert.ToInt32(v) },
                 }
@@ -80,7 +80,7 @@ namespace Sep.Git.Tfs.Commands
         {
             if (File.Exists(Prefix) || Directory.Exists(Prefix))
             {
-                Trace.TraceInformation(string.Format("Directory {0} already exists", Prefix));
+                Trace.TraceInformation("Directory {0} already exists", Prefix);
                 return GitTfsExitCodes.InvalidArguments;
             }
 
@@ -133,7 +133,7 @@ namespace Sep.Git.Tfs.Commands
                     Id = remoteId,
                     Url = tfsUrl,
                     Repository = tfsRepositoryPath,
-                    RemoteOptions = _remoteOptions,
+                    RemoteOptions = _remoteOptions
                 });
 
             Trace.TraceInformation("-> new remote " + remote.Id);

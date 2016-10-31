@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Core
             _tfsHelper = tfsHelper;
             _localDirectory = remote.Repository.IsBare ? Path.GetFullPath(localDirectory) : localDirectory;
 
-            this.Remote = remote;
+            Remote = remote;
         }
 
         public void Shelve(string shelvesetName, bool evaluateCheckinPolicies, CheckinOptions checkinOptions, Func<string> generateCheckinComment)

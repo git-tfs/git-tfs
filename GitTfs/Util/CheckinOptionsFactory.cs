@@ -14,16 +14,16 @@ namespace Sep.Git.Tfs.Util
     /// </remarks>
     public class CheckinOptionsFactory
     {
-        private readonly Globals globals;
+        private readonly Globals _globals;
 
         public CheckinOptionsFactory(Globals globals)
         {
-            this.globals = globals;
+            _globals = globals;
         }
 
         public CheckinOptions BuildCommitSpecificCheckinOptions(CheckinOptions sourceCheckinOptions, string commitMessage)
         {
-            var customCheckinOptions = sourceCheckinOptions.Clone(globals);
+            var customCheckinOptions = sourceCheckinOptions.Clone(_globals);
 
             customCheckinOptions.CheckinComment = commitMessage;
 
@@ -49,7 +49,7 @@ namespace Sep.Git.Tfs.Util
         public CheckinOptions BuildShelveSetSpecificCheckinOptions(CheckinOptions sourceCheckinOptions,
             string commitMessage)
         {
-            var customCheckinOptions = sourceCheckinOptions.Clone(globals);
+            var customCheckinOptions = sourceCheckinOptions.Clone(_globals);
 
             customCheckinOptions.CheckinComment = commitMessage;
 

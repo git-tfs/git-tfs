@@ -25,11 +25,8 @@ namespace Sep.Git.Tfs.Commands
         }
 
         public string IgnoreRegex { get; set; }
-
         public string ExceptRegex { get; set; }
-
         public string Username { get; set; }
-
         public string Password { get; set; }
     }
 }

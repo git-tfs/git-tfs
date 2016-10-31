@@ -21,11 +21,11 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Branch : GitTfsCommand
     {
-        private readonly Globals globals;
-        private readonly Help helper;
-        private readonly Cleanup cleanup;
-        private readonly InitBranch initBranch;
-        private readonly Rcheckin rcheckin;
+        private readonly Globals _globals;
+        private readonly Help _helper;
+        private readonly Cleanup _cleanup;
+        private readonly InitBranch _initBranch;
+        private readonly Rcheckin _rcheckin;
         public bool DisplayRemotes { get; set; }
         public bool ManageAll { get; set; }
         public bool ShouldRenameRemote { get; set; }
@@ -58,28 +58,28 @@ namespace Sep.Git.Tfs.Commands
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                 }
-                .Merge(globals.OptionSet);
+                .Merge(_globals.OptionSet);
             }
         }
 
         public Branch(Globals globals, Help helper, Cleanup cleanup, InitBranch initBranch, Rcheckin rcheckin)
         {
-            this.globals = globals;
-            this.helper = helper;
-            this.cleanup = cleanup;
-            this.initBranch = initBranch;
-            this.rcheckin = rcheckin;
+            _globals = globals;
+            _helper = helper;
+            _cleanup = cleanup;
+            _initBranch = initBranch;
+            _rcheckin = rcheckin;
         }
 
         public void SetInitBranchParameters()
         {
-            initBranch.TfsUsername = TfsUsername;
-            initBranch.TfsPassword = TfsPassword;
-            initBranch.CloneAllBranches = ManageAll;
-            initBranch.ParentBranch = ParentBranch;
-            initBranch.IgnoreRegex = IgnoreRegex;
-            initBranch.ExceptRegex = ExceptRegex;
-            initBranch.NoFetch = NoFetch;
+            _initBranch.TfsUsername = TfsUsername;
+            _initBranch.TfsPassword = TfsPassword;
+            _initBranch.CloneAllBranches = ManageAll;
+            _initBranch.ParentBranch = ParentBranch;
+            _initBranch.IgnoreRegex = IgnoreRegex;
+            _initBranch.ExceptRegex = ExceptRegex;
+            _initBranch.NoFetch = NoFetch;
         }
 
         public bool IsCommandWellUsed()
@@ -91,19 +91,19 @@ namespace Sep.Git.Tfs.Commands
         public int Run()
         {
             if (!IsCommandWellUsed())
-                return helper.Run(this);
+                return _helper.Run(this);
 
-            globals.WarnOnGitVersion();
+            _globals.WarnOnGitVersion();
 
             VerifyCloneAllRepository();
 
             if (ShouldRenameRemote || ShouldDeleteRemote)
-                return helper.Run(this);
+                return _helper.Run(this);
 
             if (ShouldInitBranch)
             {
                 SetInitBranchParameters();
-                return initBranch.Run();
+                return _initBranch.Run();
             }
 
             return DisplayBranchData();
@@ -112,19 +112,19 @@ namespace Sep.Git.Tfs.Commands
         public int Run(string param)
         {
             if (!IsCommandWellUsed())
-                return helper.Run(this);
+                return _helper.Run(this);
 
             VerifyCloneAllRepository();
 
-            globals.WarnOnGitVersion();
+            _globals.WarnOnGitVersion();
 
             if (ShouldRenameRemote)
-                return helper.Run(this);
+                return _helper.Run(this);
 
             if (ShouldInitBranch)
             {
                 SetInitBranchParameters();
-                return initBranch.Run(param);
+                return _initBranch.Run(param);
             }
 
             if (ShouldDeleteRemote)
@@ -136,19 +136,19 @@ namespace Sep.Git.Tfs.Commands
         public int Run(string param1, string param2)
         {
             if (!IsCommandWellUsed())
-                return helper.Run(this);
+                return _helper.Run(this);
 
             VerifyCloneAllRepository();
 
-            globals.WarnOnGitVersion();
+            _globals.WarnOnGitVersion();
 
             if (ShouldDeleteRemote)
-                return helper.Run(this);
+                return _helper.Run(this);
 
             if (ShouldInitBranch)
             {
                 SetInitBranchParameters();
-                return initBranch.Run(param1, param2);
+                return _initBranch.Run(param1, param2);
             }
 
             if (ShouldRenameRemote)
@@ -159,30 +159,30 @@ namespace Sep.Git.Tfs.Commands
 
         private void VerifyCloneAllRepository()
         {
-            if (!globals.Repository.HasRemote(GitTfsConstants.DefaultRepositoryId))
+            if (!_globals.Repository.HasRemote(GitTfsConstants.DefaultRepositoryId))
                 return;
 
-            if (globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId).TfsRepositoryPath == GitTfsConstants.TfsRoot)
+            if (_globals.Repository.ReadTfsRemote(GitTfsConstants.DefaultRepositoryId).TfsRepositoryPath == GitTfsConstants.TfsRoot)
                 throw new GitTfsException("error: you can't use the 'branch' command when you have cloned the whole repository '$/' !");
         }
 
         private int RenameRemote(string oldRemoteName, string newRemoteName)
         {
-            var newRemoteNameExpected = globals.Repository.AssertValidBranchName(newRemoteName.ToGitRefName());
+            var newRemoteNameExpected = _globals.Repository.AssertValidBranchName(newRemoteName.ToGitRefName());
             if (newRemoteNameExpected != newRemoteName)
                 Trace.TraceInformation("The name of the branch after renaming will be : " + newRemoteNameExpected);
 
-            if (globals.Repository.HasRemote(newRemoteNameExpected))
+            if (_globals.Repository.HasRemote(newRemoteNameExpected))
             {
                 throw new GitTfsException("error: this remote name is already used!");
             }
 
             Trace.TraceInformation("Cleaning before processing rename...");
-            cleanup.Run();
+            _cleanup.Run();
 
-            globals.Repository.MoveRemote(oldRemoteName, newRemoteNameExpected);
+            _globals.Repository.MoveRemote(oldRemoteName, newRemoteNameExpected);
 
-            if (globals.Repository.RenameBranch(oldRemoteName, newRemoteName) == null)
+            if (_globals.Repository.RenameBranch(oldRemoteName, newRemoteName) == null)
                 Trace.TraceWarning("warning: no local branch found to rename");
 
             return GitTfsExitCodes.OK;
@@ -193,11 +193,11 @@ namespace Sep.Git.Tfs.Commands
             bool checkInCurrentBranch = false;
             tfsPath.AssertValidTfsPath();
             Trace.WriteLine("Getting commit informations...");
-            var commit = globals.Repository.GetCurrentTfsCommit();
+            var commit = _globals.Repository.GetCurrentTfsCommit();
             if (commit == null)
             {
                 checkInCurrentBranch = true;
-                var parents = globals.Repository.GetLastParentTfsCommits(globals.Repository.GetCurrentCommit());
+                var parents = _globals.Repository.GetLastParentTfsCommits(_globals.Repository.GetCurrentCommit());
                 if (!parents.Any())
                     throw new GitTfsException("error : no tfs remote parent found!");
                 commit = parents.First();
@@ -206,29 +206,29 @@ namespace Sep.Git.Tfs.Commands
             Trace.WriteLine("Creating branch in TFS...");
             remote.Tfs.CreateBranch(remote.TfsRepositoryPath, tfsPath, commit.ChangesetId, Comment ?? "Creation branch " + tfsPath);
             Trace.WriteLine("Init branch in local repository...");
-            initBranch.DontCreateGitBranch = true;
-            var returnCode = initBranch.Run(tfsPath, gitBranchNameExpected);
+            _initBranch.DontCreateGitBranch = true;
+            var returnCode = _initBranch.Run(tfsPath, gitBranchNameExpected);
 
             if (returnCode != GitTfsExitCodes.OK || !checkInCurrentBranch)
                 return returnCode;
 
-            rcheckin.RebaseOnto(initBranch.RemoteCreated.RemoteRef, commit.GitCommit);
-            globals.UserSpecifiedRemoteId = initBranch.RemoteCreated.Id;
-            return rcheckin.Run();
+            _rcheckin.RebaseOnto(_initBranch.RemoteCreated.RemoteRef, commit.GitCommit);
+            _globals.UserSpecifiedRemoteId = _initBranch.RemoteCreated.Id;
+            return _rcheckin.Run();
         }
 
         private int DeleteRemote(string remoteName)
         {
-            var remote = globals.Repository.ReadTfsRemote(remoteName);
+            var remote = _globals.Repository.ReadTfsRemote(remoteName);
             if (remote == null)
             {
                 throw new GitTfsException(string.Format("Error: Remote \"{0}\" not found!", remoteName));
             }
 
             Trace.TraceInformation("Cleaning before processing delete...");
-            cleanup.Run();
+            _cleanup.Run();
 
-            globals.Repository.DeleteTfsRemote(remote);
+            _globals.Repository.DeleteTfsRemote(remote);
             return GitTfsExitCodes.OK;
         }
 
@@ -237,12 +237,12 @@ namespace Sep.Git.Tfs.Commands
             // should probably pull this from options so that it is settable from the command-line
             const string remoteId = GitTfsConstants.DefaultRepositoryId;
 
-            var tfsRemotes = globals.Repository.ReadAllTfsRemotes();
+            var tfsRemotes = _globals.Repository.ReadAllTfsRemotes();
             if (DisplayRemotes)
             {
                 if (!ManageAll)
                 {
-                    var remote = globals.Repository.ReadTfsRemote(remoteId);
+                    var remote = _globals.Repository.ReadTfsRemote(remoteId);
 
                     Trace.TraceInformation("\nTFS branch structure:");
                     WriteRemoteTfsBranchStructure(remote.Tfs, remote.TfsRepositoryPath, tfsRemotes);

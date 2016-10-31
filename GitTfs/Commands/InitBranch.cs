@@ -13,7 +13,6 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly Globals _globals;
         private readonly Help _helper;
-        private readonly AuthorsFile _authors;
 
         private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
@@ -31,7 +30,6 @@ namespace Sep.Git.Tfs.Commands
         {
             _globals = globals;
             _helper = helper;
-            _authors = authors;
         }
 
         public OptionSet OptionSet

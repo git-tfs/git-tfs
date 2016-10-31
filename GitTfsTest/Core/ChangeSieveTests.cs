@@ -189,7 +189,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             int IItem.ChangesetId
             {
-                get { return FakeChange.ChangesetId; }
+                get { return ChangesetId; }
             }
 
             string IItem.ServerItem

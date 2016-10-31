@@ -1,5 +1,4 @@
 ﻿using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
 {
@@ -12,9 +11,9 @@ namespace Sep.Git.Tfs.Commands
     //  2. Load the correct set of extant casing.
     public class QuickFetch : Fetch
     {
-        private ConfigProperties _properties;
-        public QuickFetch(Globals globals, ConfigProperties properties, RemoteOptions remoteOptions, AuthorsFile authors)
-            : base(globals, properties, remoteOptions, authors, null)
+        private readonly ConfigProperties _properties;
+        public QuickFetch(Globals globals, ConfigProperties properties, RemoteOptions remoteOptions)
+            : base(globals, properties, remoteOptions, null)
         {
             _properties = properties;
         }

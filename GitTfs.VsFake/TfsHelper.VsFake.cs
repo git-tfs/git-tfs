@@ -141,7 +141,7 @@ namespace Sep.Git.Tfs.VsFake
 
             public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
             {
-                workspace.Get(this.ChangesetId, changes);
+                workspace.Get(ChangesetId, changes);
             }
         }
 

@@ -4,13 +4,13 @@ namespace Sep.Git.Tfs.Core.BranchVisitors
 {
     public class BranchTreeContainsPathVisitor : IBranchTreeVisitor
     {
-        private readonly string searchPath;
-        private readonly bool searchExactPath;
+        private readonly string _searchPath;
+        private readonly bool _searchExactPath;
 
         public BranchTreeContainsPathVisitor(string searchPath, bool searchExactPath)
         {
-            this.searchPath = searchPath;
-            this.searchExactPath = searchExactPath;
+            _searchPath = searchPath;
+            _searchExactPath = searchExactPath;
         }
 
         public bool Found { get; private set; }
@@ -18,8 +18,8 @@ namespace Sep.Git.Tfs.Core.BranchVisitors
         public void Visit(BranchTree childBranch, int level)
         {
             if (Found == false
-                && ((searchExactPath && searchPath.ToLower() == childBranch.Path.ToLower())
-                || (!searchExactPath && searchPath.ToLower().IndexOf(childBranch.Path.ToLower()) == 0)))
+                && ((_searchExactPath && _searchPath.ToLower() == childBranch.Path.ToLower())
+                || (!_searchExactPath && _searchPath.ToLower().IndexOf(childBranch.Path.ToLower()) == 0)))
             {
                 Found = true;
             }

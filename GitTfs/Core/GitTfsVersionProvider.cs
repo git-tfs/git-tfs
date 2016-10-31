@@ -6,18 +6,18 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitTfsVersionProvider : IGitTfsVersionProvider
     {
-        private readonly ITfsHelper tfsHelper;
+        private readonly ITfsHelper _tfsHelper;
 
         public GitTfsVersionProvider(ITfsHelper tfsHelper)
         {
-            this.tfsHelper = tfsHelper;
+            _tfsHelper = tfsHelper;
         }
 
         public string GetVersionString()
         {
             return string.Format("git-tfs version {0} (TFS client library {1}) ({2}-bit)",
                        GetType().Assembly.GetName().Version,
-                       tfsHelper.TfsClientLibraryVersion,
+                       _tfsHelper.TfsClientLibraryVersion,
                        (Environment.Is64BitProcess ? "64" : "32"));
         }
 
