@@ -255,11 +255,11 @@ namespace Sep.Git.Tfs.Test.Integration
         private void AssertNewClone(string repodir, string[] refs, string commit = null, string tree = null)
         {
             const string format = "{0}: {1} / {2}";
-            var expected = String.Join("\n", refs.Select(gitref => String.Format(format, gitref, commit, tree)));
-            var actual = String.Join("\n", refs.Select(gitref =>
+            var expected = string.Join("\n", refs.Select(gitref => string.Format(format, gitref, commit, tree)));
+            var actual = string.Join("\n", refs.Select(gitref =>
             {
                 var actualCommit = h.RevParseCommit(repodir, gitref);
-                return String.Format(format, gitref,
+                return string.Format(format, gitref,
                     commit == null || actualCommit == null ? null : actualCommit.Sha,
                     tree == null || actualCommit == null ? null : actualCommit.Tree.Sha);
             }));

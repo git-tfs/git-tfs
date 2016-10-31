@@ -91,13 +91,13 @@ namespace Sep.Git.Tfs.Commands
                     catch (IOException e)
                     {
                         // swallow IOException. Smth went wrong before this and we're much more interested in that error
-                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't clean up files because of IOException:\n{0}\n", e.IndentExceptionMessage());
+                        string msg = string.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't clean up files because of IOException:\n{0}\n", e.IndentExceptionMessage());
                         Trace.WriteLine(msg);
                     }
                     catch (UnauthorizedAccessException e)
                     {
                         // swallow it also
-                        string msg = String.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't clean up files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
+                        string msg = string.Format("warning: Something went wrong while cleaning file after internal error (See below).\n    Can't clean up files because of UnauthorizedAccessException:\n{0}\n", e.IndentExceptionMessage());
                         Trace.WriteLine(msg);
                     }
                 }

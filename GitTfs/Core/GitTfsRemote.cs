@@ -498,7 +498,7 @@ namespace Sep.Git.Tfs.Core
                             workitemUrl = workitemUrl.Replace(oldWorkitemId, workitemId);
                         }
                     }
-                    workitemNote += String.Format("[{0}] {1}\n    {2}\n", workitemId, workitem.Title, workitemUrl);
+                    workitemNote += string.Format("[{0}] {1}\n    {2}\n", workitemId, workitem.Title, workitemUrl);
                 }
                 metadatas.Append(workitemNote);
             }
@@ -777,7 +777,7 @@ namespace Sep.Git.Tfs.Core
                 result = changeset.Apply(parent, treeBuilder, workspace, entries, ignorableErrorHandler);
                 result.Tree = treeBuilder.GetTree();
             });
-            if (!String.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);
+            if (!string.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);
             return result;
         }
 
@@ -790,7 +790,7 @@ namespace Sep.Git.Tfs.Core
                 result = changeset.CopyTree(treeBuilder, workspace);
                 result.Tree = treeBuilder.GetTree();
             });
-            if (!String.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
+            if (!string.IsNullOrEmpty(lastCommit)) result.CommitParents.Add(lastCommit);
             return result;
         }
 

@@ -35,7 +35,7 @@ namespace Sep.Git.Tfs.Util
 
         public bool ShouldIncludeGitItem(string gitPath)
         {
-            return !String.IsNullOrEmpty(gitPath) && !_remote.ShouldSkip(gitPath);
+            return !string.IsNullOrEmpty(gitPath) && !_remote.ShouldSkip(gitPath);
         }
 
         public bool Contains(string pathInGitRepo)

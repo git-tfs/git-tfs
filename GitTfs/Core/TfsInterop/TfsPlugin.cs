@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
             var pluginLoader = new PluginLoader();
             var explicitVersion = Environment.GetEnvironmentVariable("GIT_TFS_CLIENT");
             if (explicitVersion == "11") explicitVersion = "2012"; // GitTfs.Vs2012 was formerly called GitTfs.Vs11
-            if (!String.IsNullOrEmpty(explicitVersion))
+            if (!string.IsNullOrEmpty(explicitVersion))
             {
                 return pluginLoader.TryLoadVsPluginVersion(explicitVersion) ??
                        pluginLoader.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");

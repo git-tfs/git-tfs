@@ -142,11 +142,11 @@ namespace Sep.Git.Tfs
                                          () =>
                                              {
                                                  cdUp = git.CommandOneline("rev-parse", "--show-cdup");
-                                                 if (String.IsNullOrEmpty(cdUp))
+                                                 if (string.IsNullOrEmpty(cdUp))
                                                      gitDir = ".";
                                                  else
                                                      cdUp = cdUp.TrimEnd();
-                                                 if (String.IsNullOrEmpty(cdUp))
+                                                 if (string.IsNullOrEmpty(cdUp))
                                                      cdUp = ".";
                                              });
                 Environment.CurrentDirectory = cdUp;

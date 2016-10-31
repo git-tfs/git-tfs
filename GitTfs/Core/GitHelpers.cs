@@ -187,7 +187,7 @@ namespace Sep.Git.Tfs.Core
             finally
             {
                 var end = DateTime.Now;
-                Trace.WriteLine(String.Format("[{0}] {1}", end - start, String.Join(" ", command)), "git command time");
+                Trace.WriteLine(string.Format("[{0}] {1}", end - start, string.Join(" ", command)), "git command time");
             }
         }
 
@@ -261,7 +261,7 @@ namespace Sep.Git.Tfs.Core
             }
             catch (GitCommandException e)
             {
-                throw new Exception(String.Format(exceptionMessage, e.Process.StartInfo.FileName + " " + e.Process.StartInfo.Arguments, e.Process.ExitCode), e);
+                throw new Exception(string.Format(exceptionMessage, e.Process.StartInfo.FileName + " " + e.Process.StartInfo.Arguments, e.Process.ExitCode), e);
             }
         }
 

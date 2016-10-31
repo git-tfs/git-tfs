@@ -24,7 +24,7 @@ namespace Sep.Git.Tfs.Util
             try
             {
                 string re = globals.Repository.GetConfig(GitTfsConstants.WorkItemAssociateRegexConfigKey);
-                if (String.IsNullOrEmpty(re))
+                if (string.IsNullOrEmpty(re))
                     clone.WorkItemAssociateRegex = GitTfsConstants.TfsWorkItemAssociateRegex;
                 else
                     clone.WorkItemAssociateRegex = new Regex(re);
