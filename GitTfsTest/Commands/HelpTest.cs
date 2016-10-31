@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Test.TestHelpers;
 using StructureMap.AutoMocking;
 using NDesk.Options;
 using Xunit;
 using NLog;
-using System.ComponentModel;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using NLog.Config;
 using NLog.Targets;

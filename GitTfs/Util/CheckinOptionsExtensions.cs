@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Text.RegularExpressions;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;

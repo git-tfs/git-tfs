@@ -3,33 +3,28 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using StructureMap;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using NLog;
-using NLog.Targets;
 
 namespace Sep.Git.Tfs
 {
     public class GitTfs
     {
-        private IGitTfsVersionProvider _gitTfsVersionProvider;
-        private ITfsHelper tfsHelper;
-        private GitTfsCommandFactory commandFactory;
+        private readonly IGitTfsVersionProvider _gitTfsVersionProvider;
+        private readonly GitTfsCommandFactory _commandFactory;
         private readonly IHelpHelper _help;
         private readonly IContainer _container;
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
-        private Bootstrapper _bootstrapper;
+        private readonly Bootstrapper _bootstrapper;
 
-        public GitTfs(ITfsHelper tfsHelper, GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container,
+        public GitTfs(GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container,
             IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, Bootstrapper bootstrapper)
         {
-            this.tfsHelper = tfsHelper;
-            this.commandFactory = commandFactory;
+            _commandFactory = commandFactory;
             _help = help;
             _container = container;
             _gitTfsVersionProvider = gitTfsVersionProvider;
@@ -168,7 +163,7 @@ namespace Sep.Git.Tfs
         {
             for (int i = 0; i < args.Count; i++)
             {
-                var command = commandFactory.GetCommand(args[i]);
+                var command = _commandFactory.GetCommand(args[i]);
                 if (command != null)
                 {
                     args.RemoveAt(i);

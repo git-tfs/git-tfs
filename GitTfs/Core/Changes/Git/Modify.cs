@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Sep.Git.Tfs.Core.Changes.Git
+﻿namespace Sep.Git.Tfs.Core.Changes.Git
 {
     public class Modify : IGitChangedFile
     {

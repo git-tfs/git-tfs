@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Sep.Git.Tfs.Commands;
+﻿using Sep.Git.Tfs.Commands;
 using StructureMap.AutoMocking;
 using NDesk.Options;
 using Xunit;

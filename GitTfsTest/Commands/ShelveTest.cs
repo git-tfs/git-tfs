@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Rhino.Mocks;
+﻿using Rhino.Mocks;
 using Rhino.Mocks.Constraints;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Core;

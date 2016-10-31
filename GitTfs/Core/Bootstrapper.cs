@@ -1,4 +1,3 @@
-using System.IO;
 using Sep.Git.Tfs.Commands; // ToGitRefName() and RemoteOptions
 using System.Diagnostics;
 

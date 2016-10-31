@@ -1,11 +1,8 @@
-using System.ComponentModel;
 using NDesk.Options;
 using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Commands
 {
-    using System;
-
     [StructureMapSingleton]
     public class RemoteOptions
     {

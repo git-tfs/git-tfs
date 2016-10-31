@@ -1,5 +1,4 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Test.Util

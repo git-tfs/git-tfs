@@ -3,7 +3,6 @@ using System.Linq;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.Changes.Git;
 using StructureMap;
-using LibGit2Sharp;
 using Xunit;
 
 namespace Sep.Git.Tfs.Test.Core

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -7,7 +6,6 @@ using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
 using StructureMap;
-using StructureMap.Pipeline;
 using StructureMap.Query;
 using IContainer = StructureMap.IContainer;
 using System.Diagnostics;

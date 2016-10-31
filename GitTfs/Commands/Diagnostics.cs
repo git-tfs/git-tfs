@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using NDesk.Options;
+﻿using NDesk.Options;
 using StructureMap;
 using System.Diagnostics;
 

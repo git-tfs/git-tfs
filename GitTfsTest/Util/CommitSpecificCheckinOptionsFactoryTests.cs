@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Util;
 using Xunit;

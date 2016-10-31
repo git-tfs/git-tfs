@@ -1,12 +1,8 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Util;
 using StructureMap;
 using Xunit;
-using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {

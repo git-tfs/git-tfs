@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
 using StructureMap.AutoMocking;
 using Xunit;
 

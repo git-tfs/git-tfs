@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.IO;
 using StructureMap;
 
 namespace Sep.Git.Tfs.Commands

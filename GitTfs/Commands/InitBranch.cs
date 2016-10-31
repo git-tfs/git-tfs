@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
-using StructureMap;
 using Sep.Git.Tfs.Util;
 using Sep.Git.Tfs.Core.TfsInterop;
 

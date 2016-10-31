@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using NDesk.Options;
 using StructureMap;
