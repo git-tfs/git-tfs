@@ -11,6 +11,8 @@ readonly var IsDryRun = Argument<bool>("dryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
 readonly var IdGitHubReleaseToDelete = Argument<int>("idGitHubReleaseToDelete", -1);
+var GitHubOAuthToken = Argument("gitHubToken", "temporary_test_of_argument_passing");
+var ChocolateyToken = Argument("chocolateyToken", "");
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
@@ -57,6 +59,24 @@ Task("PrepareRelease").Description("TODO")
 {
 	//Create Release Note
 	//Create Tag
+});
+
+Task("Debug").Description("TODO")
+	.Does(() =>
+{
+	Information("1.Target:" + Target);
+	Information("1.GitHubOAuthToken:" + GitHubOAuthToken);
+	Information("1.ChocolateyToken:" + ChocolateyToken);
+
+});
+
+Task("Debug2").Description("TODO")
+	.Does(() =>
+{
+	Information("2.Target:" + Target);
+	Information("2.GitHubOAuthToken:" + GitHubOAuthToken);
+	Information("2.ChocolateyToken:" + ChocolateyToken);
+
 });
 
 Task("Clean").Description("Clean the working directory")
@@ -290,7 +310,7 @@ Task("CreateGithubRelease").Description("Create a GithHub release")
 	UploadReleaseAsset(client, gitHubRelease);
 });
 
-Task("DeleteRelease").Description("Delete a (broken) GithHub release")
+Task("DeleteRelease").Description("Delete a (broken) GitHub release")
 	.WithCriteria(IdGitHubReleaseToDelete != -1)
 	.Does(() =>
 {

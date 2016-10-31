@@ -7,10 +7,23 @@ clone_folder: c:\gittfs
 cache:
   - packages -> paket.lock  # preserve "packages" directory in the root of build folder but will reset it if `paket.lock` is modified
 init: []
-#install:
-#  - choco install tfs2010objectmodel -y
 #before_build:
 #  - ps: $env:Config = "Release"
 build_script:
-- ps: .\build.ps1 -Target "AppVeyorBuild"
+- ps: |
+    echo "target: $env:target"
+    echo "gitHubToken: $env:gitHubToken"
+    echo "chocolateyToken: $env:chocolateyToken"
+    if($env:target -eq $null)
+    {
+      $target = "Debug2"
+      #"AppVeyorBuild"
+    }
+    else
+    {
+      $target = $env:target
+    }
+
+    echo "target: $target"
+    .\build.ps1 -Target "$target" -ScriptArgs '-gitHubToken="$env:gitHubToken" -chocolateyToken="$env:chocolateyToken"'
 test: off
