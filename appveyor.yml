@@ -2,7 +2,7 @@
 #version: 0.25.1.{build}
 #platform: x86
 clone_folder: c:\gittfs
-clone_depth: 1
+#clone_depth: 1 #Do not use this parameter when using GitVersion!!!!
 # build cache to preserve files/folders between builds
 cache:
   - packages -> paket.lock  # preserve "packages" directory in the root of build folder but will reset it if `paket.lock` is modified
