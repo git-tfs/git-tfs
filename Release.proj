@@ -102,7 +102,7 @@
   </Target>
 
   <!-- Public: Build the release and put it on github.com -->
-  <Target Name="Release" DependsOnTargets="EverythingRequired; UpdateVersion; Build; TagSource; PushSource; Package; ReleaseOnGitHub; UpdateWebSite; Chocolatey">
+  <Target Name="Release" DependsOnTargets="EverythingRequired; UpdateVersion; Build; TagSource; PushSource; Package; ReleaseOnGitHub; Chocolatey">
   </Target>
 
   <!-- Internal: If we don't have all the information we need, bail early. -->
@@ -110,20 +110,15 @@
   </Target>
 
   <!-- Internal: Called by Release to set the new version. -->
-  <Target Name="UpdateVersion" DependsOnTargets="UpdateAssemblyVersionAttribute; UpdateVersionInReadme; UpdateVersionInAppVeyorConfig">
+  <Target Name="UpdateVersion" DependsOnTargets="UpdateAssemblyVersionAttribute; UpdateVersionInAppVeyorConfig">
     <!-- This is OK to fail. If a previous release attempt failed, the commit will now be empty. -->
-    <Exec Condition="'$(DryRun)' == 'False'" Command="git commit -m v$(Version) $(VersionFilePath) README.md appveyor.yml" IgnoreExitCode="true" />
-    <Message Condition="'$(DryRun)' != 'False'" Text="(would git commit -m v$(Version) $(VersionFilePath) README.md)" />
+    <Exec Condition="'$(DryRun)' == 'False'" Command="git commit -m v$(Version) $(VersionFilePath) appveyor.yml" IgnoreExitCode="true" />
+    <Message Condition="'$(DryRun)' != 'False'" Text="(would git commit -m v$(Version) $(VersionFilePath) appveyor.yml)" />
   </Target>
 
   <!-- Internal. -->
   <Target Name="UpdateAssemblyVersionAttribute" DependsOnTargets="VersionRequired">
     <WriteLinesToFile File="$(VersionFilePath)" Lines="partial class GitTfsProperties ; { ; public const string Version = %22$(Version)%22%3B ; }" Overwrite="true" Encoding="ASCII"/>
-  </Target>
-
-  <!-- Internal. -->
-  <Target Name="UpdateVersionInReadme" DependsOnTargets="VersionRequired; MSBuildCommunityTasks">
-    <FileUpdate Files="README.md" Regex="The most recent version is __.*__\." ReplacementText="The most recent version is __$(Version)__." />
   </Target>
 
   <!-- Internal. -->
@@ -158,22 +153,6 @@
   <Target Name="ReleaseOnGitHub" DependsOnTargets="VersionRequired; AuthTokenRequired; MSBuildCommunityTasks">
     <CreateRelease Condition="'$(DryRun)' == 'False'" Repository="$(GitHubOwner)/$(GitHubRepository)" TagName="v$(Version)" Files="@(ArchiveFile)" OauthToken="$(GitHubAuthToken)" ReleaseNotesFile="$(ReleaseNotes)" ContinueOnError="ErrorAndContinue" />
     <Message Condition="'$(DryRun)' != 'False'" Text="(would create release on github.com)" />
-  </Target>
-
-  <!-- Internal: Update the "download" button on git-tfs.com -->
-  <Target Name="UpdateWebSite" DependsOnTargets="VersionRequired; ClonePagesRepository">
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git fetch" />
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git checkout -B v$(Version) origin/master" />
-    <WriteLinesToFile File="$(WebSiteDir)/$(DownloadButton)" Lines="&lt;a href=%22$(DownloadUrl)%22 class=%22download-button%22&gt;Download v$(Version)&lt;/a&gt;" Overwrite="true" Encoding="ASCII"/>
-    <!-- If the previous attempt was aborted, we might have already updated the button and this commit will be empty. -->
-    <Exec WorkingDirectory="$(WebSiteDir)" Command="git commit -m %22v$(Version)%22 $(DownloadButton)" IgnoreExitCode="true" />
-    <Exec Condition="'$(DryRun)' == 'False'" WorkingDirectory="$(WebSiteDir)" Command="git push $(WebSiteRepository) HEAD:refs/heads/master" />
-    <Message Condition="'$(DryRun)' != 'False'" Text="(would push pages site to github.com)" />
-  </Target>
-
-  <!-- Internal. -->
-  <Target Name="ClonePagesRepository" Condition="!Exists($(WebSiteDir))">
-    <Exec Command="git clone $(WebSiteRepository) $(WebSiteDir)" />
   </Target>
 
   <!-- Internal: Build and upload a chocolatey package. -->
