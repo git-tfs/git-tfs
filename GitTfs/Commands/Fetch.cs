@@ -79,7 +79,7 @@ namespace Sep.Git.Tfs.Commands
                         v => BareBranch = v },
                     { "force", "Force fetch of tfs changesets when there is ahead commits (ahead commits will be lost!)",
                         v => ForceFetch = v != null },
-                    { "x|export", "Export metadatas",
+                    { "x|export", "Export metadata",
                         v => ExportMetadatas = v != null },
                     { "export-work-item-mapping=", "Path to Work-items mapping export file",
                         v => ExportMetadatasFile = v },

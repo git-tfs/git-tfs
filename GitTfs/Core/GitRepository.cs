@@ -720,5 +720,32 @@ namespace Sep.Git.Tfs.Core
             }
             return commits;
         }
+
+        public bool IsPathIgnored(string relativePath)
+        {
+            return _repository.Ignore.IsPathIgnored(relativePath);
+        }
+
+        public string CommitGitIgnore(string pathToGitIgnoreFile)
+        {
+            if (!File.Exists(pathToGitIgnoreFile))
+            {
+                Trace.TraceWarning("warning: the .gitignore file specified '{0}' does not exist!", pathToGitIgnoreFile);
+            }
+            var gitTreeBuilder = new GitTreeBuilder(_repository.ObjectDatabase);
+            gitTreeBuilder.Add(".gitignore", pathToGitIgnoreFile, LibGit2Sharp.Mode.NonExecutableFile);
+            var tree = gitTreeBuilder.GetTree();
+            var signature = new Signature("git-tfs", "git-tfs@noreply.com", new DateTimeOffset(2000, 1, 1, 0, 0, 0, new TimeSpan(0)));
+            var sha = _repository.ObjectDatabase.CreateCommit(signature, signature, ".gitignore", tree, new Commit[0], false).Sha;
+            Trace.WriteLine(".gitignore commit created: " + sha);
+
+            _repository.Refs.Add(ShortToTfsRemoteName("default"), new ObjectId(sha));
+            _repository.Refs.Add(ShortToLocalName("master"), new ObjectId(sha));
+            //Should add ourself the rules to the temporary rules because committing directly to the git database
+            //prevent libgit2sharp to detect the new .gitignore file
+            _repository.Ignore.AddTemporaryRules(File.ReadLines(pathToGitIgnoreFile));
+
+            return sha;
+        }
     }
 }

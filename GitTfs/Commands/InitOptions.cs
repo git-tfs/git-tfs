@@ -27,6 +27,7 @@ namespace Sep.Git.Tfs.Commands
                         v => GitInitIgnoreCase = ValidateIgnoreCaseValue(v) },
                     {"bare", "Clone the TFS repository in a bare git repository", v => IsBare = v != null},
                     {"workspace=", "Set tfs workspace to a specific folder (a shorter path is better!)", v => WorkspacePath = v},
+                    {"gitignore=", "Path toward the .gitignore file which be committed and used to ignore files", v => GitIgnorePath = v},
                 };
             }
         }
@@ -54,5 +55,6 @@ namespace Sep.Git.Tfs.Commands
         public object GitInitShared { get; set; }
         public string GitInitAutoCrlf { get; set; }
         public string GitInitIgnoreCase { get; set; }
+        public string GitIgnorePath { get; set; }
     }
 }

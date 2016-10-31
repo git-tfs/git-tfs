@@ -20,6 +20,8 @@ a TFS source tree and fetch all the changesets
 		  --ignorecase=VALUE     Ignore case in file paths (default: system default)
 		  --bare                 clone the TFS repository in a bare git repository
 		  --workspace=VALUE      set tfs workspace to a specific folder (a shorter path is better!)
+		  --gitignore=VALUE      Path toward the .gitignore file which be
+								   committed and used to ignore files
 		  --ignore-regex=VALUE   a regex of files to ignore
 		  --except-regex=VALUE   a regex of exceptions to ignore-regex
 	  -u, --username=VALUE       TFS username
@@ -29,7 +31,7 @@ a TFS source tree and fetch all the changesets
 		  --authors=VALUE        Path to an Authors file to map TFS users to Git users
 	  -l, --with-labels, --fetch-labels
 								 Fetch the labels also when fetching TFS changesets
-	  -x, --export               Export metadatas
+	  -x, --export               Export metadata
 		  --export-work-item-mapping=VALUE
 								 Path to Work-items mapping export file
 		  --branches=VALUE       Strategy to manage branches:
@@ -130,7 +132,7 @@ If you don't know exactly what repository path to clone, see [list-remote-branch
 
 **Prerequisite**: To use this feature, all your source code folders corresponding to branches
 should be converted into branches (a notion introduced by TFS2010).
-To change that, you should open 'Source Control Explorer' and then, for each folder corresponding to a branch, right click on your source folder and select 'Branching and Merging' > 'Convert to branch'.
+To change that, you should open 'Source Control Explorer' and then, for each folder corresponding to a branch, right-click on your source folder and select 'Branching and Merging' > 'Convert to branch'.
 
 If you want to clone your entire repository with all the branches or that the tfs branches are merged through merge changeset, perhaps you should use the option `--branches=all`:
 
@@ -152,6 +154,21 @@ Let's say you want to clone `$/Project`, but you don't want to
 clone exes.
 
     git tfs clone --ignore-regex=exe$ http://tfs:8080/tfs/DefaultCollection $/Project1
+
+You could also use the _--except-regex_ parameter to add an exception to the previous rule:
+
+    git tfs clone --ignore-regex=exe$ --except-regex=i_want_this.exe$ http://tfs:8080/tfs/DefaultCollection $/Project1
+
+### Exclude with a `.gitignore` file
+
+To ignore some files, and prevent theses files to be committed, you could also provide a `.gitignore` file to git-tfs.
+The `.gitignore` file will be committed as the first commit of the repository and then will be used by git-tfs to ignore all the files
+matching one of the regex in the file. You need to give the path toward of an external `.gitignore` which will be used as a template.
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --gitignore="c:\path\toward\a\.gitignore"
+
+You could download a `.gitignore` file for your language or project from the [github repository](https://github.com/github/gitignore)
+ or generate one for multiple languages using [gitignore.io](https://www.gitignore.io/)
 
 ### Authentication
 
