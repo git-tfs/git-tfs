@@ -12,5 +12,5 @@ init: []
 #before_build:
 #  - ps: $env:Config = "Release"
 build_script:
-- ps: .\build.ps1 -Target "AppVeyor"
+- ps: .\build.ps1 -Target "AppVeyorBuild"
 test: off

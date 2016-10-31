@@ -34,6 +34,7 @@ string _zipFilePath;
 string _zipFilename;
 string _downloadUrl;
 string _releaseVersion;
+bool _buildAllVersion = (Target == "AppVeyorRelease");
 
 //////////////////////////////////////////////////////////////////////
 // TASKS
@@ -69,7 +70,10 @@ Task("InstallTfsModels").Description("Install the missing TFS object models to b
 {
 	if(BuildSystem.IsRunningOnAppVeyor)
 	{
-		ChocolateyInstall("tfs2010objectmodel");
+		if(_buildAllVersion)
+		{
+			ChocolateyInstall("tfs2010objectmodel");
+		}
 	}
 	else
 	{
@@ -132,15 +136,20 @@ Task("Build").Description("Build git-tfs")
 {
 	// Use MSBuild
 	// /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
-	MSBuild(PathToSln, settings =>
+	MSBuild(PathToSln, settings => {
+
 		settings.SetConfiguration(Configuration)
 			.SetVerbosity(Verbosity.Minimal)
-			.SetMaxCpuCount(4)
-			// .WithTarget("GitTfs_Vs2010")
-			// .WithTarget("GitTfs_Vs2012")
-			.WithTarget("GitTfs_Vs2013")
-			.WithTarget("GitTfs_Vs2015")
-			.WithTarget("GitTfsTest"));
+			.SetMaxCpuCount(4);
+		if(_buildAllVersion)
+		{
+			settings.WithTarget("GitTfs_Vs2010")
+				.WithTarget("GitTfs_Vs2012")
+				.WithTarget("GitTfs_Vs2013");
+		}
+		settings.WithTarget("GitTfs_Vs2015")
+			.WithTarget("GitTfsTest");
+	});
 });
 
 void SetGitUserConfig()
@@ -364,14 +373,18 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 Task("Default").Description("")
 	.IsDependentOn("Package");
 
-Task("AppVeyor").Description("Do the continuous integration build with AppVeyor")
+Task("AppVeyorBuild").Description("Do the continuous integration build with AppVeyor")
+	.IsDependentOn("Run-Smoke-Tests")
+	.IsDependentOn("Package");
+
+Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("InstallTfsModels")
 	.IsDependentOn("Run-Smoke-Tests")
 	.IsDependentOn("Package");
 
 Task("Release").Description("Build the release and put it on github.com")
 	.IsDependentOn("Chocolatey");
-//Release =>Package; ReleaseOnGitHub; UpdateWebSite; Chocolatey
+//Release =>Package; ReleaseOnGitHub; Chocolatey
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
