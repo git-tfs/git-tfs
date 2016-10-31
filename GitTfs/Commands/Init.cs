@@ -146,7 +146,7 @@ namespace Sep.Git.Tfs.Commands
 
     public static class Ext
     {
-        private static Regex ValidTfsPath = new Regex("^\\$/.+");
+        private static readonly Regex ValidTfsPath = new Regex("^\\$/.+");
         public static bool IsValidTfsPath(this string tfsPath)
         {
             return ValidTfsPath.IsMatch(tfsPath);

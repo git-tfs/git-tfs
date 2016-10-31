@@ -8,7 +8,7 @@ namespace Sep.Git.Tfs.Test.Util
 {
     public class ShelveSpecificCheckinOptionsFactoryTests
     {
-        private RhinoAutoMocker<CheckinOptionsFactory> mocks;
+        private readonly RhinoAutoMocker<CheckinOptionsFactory> mocks;
 
         public ShelveSpecificCheckinOptionsFactoryTests()
         {

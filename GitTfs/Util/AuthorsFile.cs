@@ -57,8 +57,8 @@ namespace Sep.Git.Tfs.Util
         }
 
         #region (private)
-        private Tuple<string, string> _gitAuthor;
-        private string _gitUserId;
+        private readonly Tuple<string, string> _gitAuthor;
+        private readonly string _gitUserId;
         #endregion
     }
 

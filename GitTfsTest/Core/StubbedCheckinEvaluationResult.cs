@@ -7,9 +7,9 @@ namespace Sep.Git.Tfs.Test.Core
 {
     public class StubbedCheckinEvaluationResult : ICheckinEvaluationResult
     {
-        private HashSet<ICheckinConflict> conflicts;
-        private HashSet<ICheckinNoteFailure> noteFailures;
-        private HashSet<IPolicyFailure> policyFailures;
+        private readonly HashSet<ICheckinConflict> conflicts;
+        private readonly HashSet<ICheckinNoteFailure> noteFailures;
+        private readonly HashSet<IPolicyFailure> policyFailures;
 
         public StubbedCheckinEvaluationResult()
         {

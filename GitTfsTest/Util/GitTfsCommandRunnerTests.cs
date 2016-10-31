@@ -35,7 +35,7 @@ namespace Sep.Git.Tfs.Test.Util
         }
         #endregion
 
-        private RhinoAutoMocker<GitTfsCommandRunner> _mocks;
+        private readonly RhinoAutoMocker<GitTfsCommandRunner> _mocks;
 
         public GitTfsCommandRunnerTests()
         {

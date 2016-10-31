@@ -15,7 +15,7 @@ namespace Sep.Git.Tfs.Core
         /// Starting with version 1.7.10, Git uses UTF-8.
         /// Use this encoding for Git input and output.
         /// </summary>
-        private static Encoding _encoding = new UTF8Encoding(false, true);
+        private static readonly Encoding _encoding = new UTF8Encoding(false, true);
 
         public GitHelpers(IContainer container)
         {
@@ -281,7 +281,7 @@ namespace Sep.Git.Tfs.Core
 
         protected class GitProcess
         {
-            private Process _process;
+            private readonly Process _process;
 
             public GitProcess(Process process)
             {

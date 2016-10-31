@@ -16,8 +16,8 @@ namespace Sep.Git.Tfs.Core
         private readonly IContainer _container;
         private readonly Globals _globals;
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
-        private Repository _repository;
-        private RemoteConfigConverter _remoteConfigReader;
+        private readonly Repository _repository;
+        private readonly RemoteConfigConverter _remoteConfigReader;
 
         public GitRepository(string gitDir, IContainer container, Globals globals, RemoteConfigConverter remoteConfigReader)
             : base(container)

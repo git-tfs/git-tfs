@@ -4,8 +4,8 @@ namespace Sep.Git.Tfs.Core.BranchVisitors
 {
     public class BranchTreeContainsPathVisitor : IBranchTreeVisitor
     {
-        private string searchPath;
-        private bool searchExactPath;
+        private readonly string searchPath;
+        private readonly bool searchExactPath;
 
         public BranchTreeContainsPathVisitor(string searchPath, bool searchExactPath)
         {

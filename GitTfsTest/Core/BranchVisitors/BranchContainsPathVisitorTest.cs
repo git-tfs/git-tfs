@@ -7,7 +7,7 @@ namespace Sep.Git.Tfs.Test.Core.BranchVisitors
 {
     public class BranchContainsPathVisitorTest : BaseTest
     {
-        private BranchTree branch;
+        private readonly BranchTree branch;
 
         public BranchContainsPathVisitorTest()
         {

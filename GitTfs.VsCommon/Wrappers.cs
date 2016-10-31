@@ -540,7 +540,7 @@ namespace Sep.Git.Tfs.VsCommon
 
     public class WrapperForBranchObject : WrapperFor<BranchObject>, IBranchObject
     {
-        private BranchObject _branch;
+        private readonly BranchObject _branch;
 
         public WrapperForBranchObject(BranchObject branch)
             : base(branch)

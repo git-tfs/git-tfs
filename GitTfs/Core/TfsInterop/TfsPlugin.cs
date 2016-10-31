@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
         private class PluginLoader
         {
-            private List<Exception> _failures = new List<Exception>();
+            private readonly List<Exception> _failures = new List<Exception>();
             private static string VsPluginAssemblyFolder { get; set; }
             private static readonly Dictionary<string, string> VisualStudioVersions = new Dictionary<string, string>()
             {

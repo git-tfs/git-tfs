@@ -11,7 +11,7 @@ namespace Sep.Git.Tfs.Test.Core
     {
         public class DumpTests : BaseTest
         {
-            private RemoteConfigConverter _dumper = new RemoteConfigConverter();
+            private readonly RemoteConfigConverter _dumper = new RemoteConfigConverter();
 
             [Fact]
             public void DumpsNothingWithNoId()
@@ -133,7 +133,7 @@ namespace Sep.Git.Tfs.Test.Core
 
         public class LoadTests : BaseTest
         {
-            private RemoteConfigConverter _loader = new RemoteConfigConverter();
+            private readonly RemoteConfigConverter _loader = new RemoteConfigConverter();
 
             private IEnumerable<RemoteInfo> Load(params ConfigurationEntry<string>[] configs)
             {
@@ -207,7 +207,7 @@ namespace Sep.Git.Tfs.Test.Core
             }
         }
 
-        private RemoteConfigConverter _converter = new RemoteConfigConverter();
+        private readonly RemoteConfigConverter _converter = new RemoteConfigConverter();
 
         [Fact]
         public void MultipleRemotes()
@@ -248,8 +248,8 @@ namespace Sep.Git.Tfs.Test.Core
 
         private class TestConfigurationEntry : ConfigurationEntry<string>
         {
-            private string _key;
-            private string _value;
+            private readonly string _key;
+            private readonly string _value;
 
             public override string Key { get { return _key; } }
             public override string Value { get { return _value; } }

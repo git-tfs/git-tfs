@@ -6,7 +6,7 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitTfsVersionProvider : IGitTfsVersionProvider
     {
-        private ITfsHelper tfsHelper;
+        private readonly ITfsHelper tfsHelper;
 
         public GitTfsVersionProvider(ITfsHelper tfsHelper)
         {

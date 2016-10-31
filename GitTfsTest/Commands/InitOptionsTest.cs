@@ -7,7 +7,7 @@ namespace Sep.Git.Tfs.Test.Commands
 {
     public class InitOptionsTest : BaseTest
     {
-        private RhinoAutoMocker<InitOptions> mocks;
+        private readonly RhinoAutoMocker<InitOptions> mocks;
 
         public InitOptionsTest()
         {

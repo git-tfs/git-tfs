@@ -9,7 +9,7 @@ namespace Sep.Git.Tfs.Test.Commands
 {
     public class ShelveTest : BaseTest
     {
-        private RhinoAutoMocker<Shelve> mocks;
+        private readonly RhinoAutoMocker<Shelve> mocks;
 
         public ShelveTest()
         {

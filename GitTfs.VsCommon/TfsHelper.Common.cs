@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -598,7 +598,7 @@ namespace Sep.Git.Tfs.VsCommon
             return result != null && result.Length > 0;
         }
 
-        private Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
+        private readonly Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {

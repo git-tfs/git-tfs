@@ -8,7 +8,7 @@ namespace Sep.Git.Tfs.Test.Integration
 {
     public class ConfigPropertyLoaderTests : BaseTest, IDisposable
     {
-        private IntegrationHelper h = new IntegrationHelper();
+        private readonly IntegrationHelper h = new IntegrationHelper();
 
         public ConfigPropertyLoaderTests()
         {

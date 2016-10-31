@@ -13,7 +13,7 @@ namespace Sep.Git.Tfs.Test.Commands
     public class InitBranchTest : BaseTest
     {
         #region Test Init
-        private RhinoAutoMocker<InitBranch> mocks;
+        private readonly RhinoAutoMocker<InitBranch> mocks;
 
         public InitBranchTest()
         {

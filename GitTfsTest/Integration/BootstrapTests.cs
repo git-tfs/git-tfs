@@ -7,7 +7,7 @@ namespace Sep.Git.Tfs.Test.Integration
 {
     public class BootstrapTests : BaseTest, IDisposable
     {
-        private IntegrationHelper h = new IntegrationHelper();
+        private readonly IntegrationHelper h = new IntegrationHelper();
 
         public BootstrapTests()
         {

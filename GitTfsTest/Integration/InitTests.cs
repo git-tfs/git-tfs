@@ -5,7 +5,7 @@ namespace Sep.Git.Tfs.Test.Integration
 {
     public class InitTests : BaseTest, IDisposable
     {
-        private IntegrationHelper h;
+        private readonly IntegrationHelper h;
 
         public InitTests()
         {

@@ -21,7 +21,7 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Branch : GitTfsCommand
     {
-        private Globals globals;
+        private readonly Globals globals;
         private readonly Help helper;
         private readonly Cleanup cleanup;
         private readonly InitBranch initBranch;

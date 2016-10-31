@@ -12,7 +12,7 @@ namespace Sep.Git.Tfs.Test.Commands
 {
     public class HelpTest : BaseTest
     {
-        private RhinoAutoMocker<Help> mocks;
+        private readonly RhinoAutoMocker<Help> mocks;
 
         public HelpTest()
         {
@@ -65,7 +65,7 @@ namespace Sep.Git.Tfs.Test.Commands
         {
             public bool Flag { get; set; }
 
-            private OptionSet TestOptions = new OptionSet();
+            private readonly OptionSet TestOptions = new OptionSet();
 
             public OptionSet OptionSet
             {

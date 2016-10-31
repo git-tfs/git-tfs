@@ -8,7 +8,7 @@ namespace Sep.Git.Tfs.Core
     [StructureMapSingleton]
     public class Janitor : IDisposable
     {
-        private Queue<Action> _actions = new Queue<Action>();
+        private readonly Queue<Action> _actions = new Queue<Action>();
 
         public void CleanThisUpWhenWeClose(Action action)
         {

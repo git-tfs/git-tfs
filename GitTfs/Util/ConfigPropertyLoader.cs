@@ -6,8 +6,8 @@ namespace Sep.Git.Tfs.Util
     [StructureMapSingleton]
     public class ConfigPropertyLoader
     {
-        private Globals _globals;
-        private Dictionary<string, object> _overrides = new Dictionary<string, object>();
+        private readonly Globals _globals;
+        private readonly Dictionary<string, object> _overrides = new Dictionary<string, object>();
 
         public ConfigPropertyLoader(Globals globals)
         {

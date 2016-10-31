@@ -10,7 +10,7 @@ namespace Sep.Git.Tfs.Test.Util
 {
     public class CommitSpecificCheckinOptionsFactoryTests : BaseTest
     {
-        private RhinoAutoMocker<CheckinOptionsFactory> mocks;
+        private readonly RhinoAutoMocker<CheckinOptionsFactory> mocks;
 
         public CommitSpecificCheckinOptionsFactoryTests()
         {

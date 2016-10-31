@@ -52,7 +52,7 @@ namespace Sep.Git.Tfs.Test.Integration
             }
         }
 
-        private Dictionary<string, Repository> _repositories = new Dictionary<string, Repository>();
+        private readonly Dictionary<string, Repository> _repositories = new Dictionary<string, Repository>();
         public Repository Repository(string path)
         {
             path = Path.Combine(Workdir, path);
@@ -86,7 +86,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public class RepoBuilder
         {
-            private Repository _repo;
+            private readonly Repository _repo;
 
             public RepoBuilder(Repository repo)
             {
@@ -145,7 +145,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public class FakeHistoryBuilder
         {
-            private Script _script;
+            private readonly Script _script;
             public FakeHistoryBuilder(Script script)
             {
                 _script = script;
@@ -217,7 +217,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
         public class FakeChangesetBuilder
         {
-            private ScriptedChangeset _changeset;
+            private readonly ScriptedChangeset _changeset;
 
             public FakeChangesetBuilder(ScriptedChangeset changeset)
             {
