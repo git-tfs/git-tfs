@@ -110,7 +110,7 @@ namespace Sep.Git.Tfs.VsCommon
 
         public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
         {
-            workspace.Get(this.ChangesetId, changes);
+            workspace.Get(ChangesetId, changes);
         }
     }
 
@@ -540,7 +540,7 @@ namespace Sep.Git.Tfs.VsCommon
 
     public class WrapperForBranchObject : WrapperFor<BranchObject>, IBranchObject
     {
-        private BranchObject _branch;
+        private readonly BranchObject _branch;
 
         public WrapperForBranchObject(BranchObject branch)
             : base(branch)

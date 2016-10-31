@@ -189,13 +189,13 @@ namespace Sep.Git.Tfs.Core
                 //This can be null if the user was deleted from AD.
                 //We want to keep their original history around with as little 
                 //hassle to the end user as possible
-                if (!String.IsNullOrWhiteSpace(identity.DisplayName))
+                if (!string.IsNullOrWhiteSpace(identity.DisplayName))
                     name = identity.DisplayName;
 
-                if (!String.IsNullOrWhiteSpace(identity.MailAddress))
+                if (!string.IsNullOrWhiteSpace(identity.MailAddress))
                     email = identity.MailAddress;
             }
-            else if (!String.IsNullOrWhiteSpace(changesetToLog.Committer))
+            else if (!string.IsNullOrWhiteSpace(changesetToLog.Committer))
             {
                 string[] split = changesetToLog.Committer.Split('\\');
                 if (split.Length == 2)
@@ -208,11 +208,11 @@ namespace Sep.Git.Tfs.Core
             // committer's & author's name and email MUST NOT be empty as otherwise they would be picked
             // by git from user.name and user.email config settings which is bad thing because commit could
             // be different depending on whose machine it fetched
-            if (String.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 name = "Unknown TFS user";
             }
-            if (String.IsNullOrWhiteSpace(email))
+            if (string.IsNullOrWhiteSpace(email))
             {
                 email = "unknown@tfs.local";
             }

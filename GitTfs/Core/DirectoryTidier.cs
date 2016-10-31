@@ -17,10 +17,10 @@ namespace Sep.Git.Tfs.Core
             EditAndRenameFrom,
         }
 
-        private ITfsWorkspaceModifier _workspace;
-        private Func<IEnumerable<TfsTreeEntry>> _getInitialTfsTree;
+        private readonly ITfsWorkspaceModifier _workspace;
+        private readonly Func<IEnumerable<TfsTreeEntry>> _getInitialTfsTree;
         private List<string> _filesInTfs;
-        private Dictionary<string, FileOperation> _fileOperations;
+        private readonly Dictionary<string, FileOperation> _fileOperations;
         private bool _disposed;
 
         public DirectoryTidier(ITfsWorkspaceModifier workspace, Func<IEnumerable<TfsTreeEntry>> getInitialTfsTree)

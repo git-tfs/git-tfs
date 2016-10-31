@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NDesk.Options;
+﻿using NDesk.Options;
 
 namespace Sep.Git.Tfs.Commands
 {

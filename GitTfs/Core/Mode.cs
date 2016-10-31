@@ -1,5 +1,4 @@
 ﻿using System;
-using LibGit2Sharp.Core;
 
 namespace Sep.Git.Tfs.Core
 {

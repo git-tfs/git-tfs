@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using WixSharp;
 using System.IO;
-using File = WixSharp.File;
 
 namespace GitTfs.Setup
 {

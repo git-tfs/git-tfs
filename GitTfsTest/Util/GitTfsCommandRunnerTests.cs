@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Util;
@@ -37,7 +35,7 @@ namespace Sep.Git.Tfs.Test.Util
         }
         #endregion
 
-        private RhinoAutoMocker<GitTfsCommandRunner> _mocks;
+        private readonly RhinoAutoMocker<GitTfsCommandRunner> _mocks;
 
         public GitTfsCommandRunnerTests()
         {

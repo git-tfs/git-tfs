@@ -42,7 +42,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
 
         public override string ToString()
         {
-            return string.Format("{0} [{1} children]", this.Path, this.ChildBranches.Count);
+            return string.Format("{0} [{1} children]", Path, ChildBranches.Count);
         }
     }
 

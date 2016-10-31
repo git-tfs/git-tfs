@@ -4,8 +4,8 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitTreeBuilder : IGitTreeBuilder
     {
-        private TreeDefinition _treeDefinition;
-        private ObjectDatabase _objectDatabase;
+        private readonly TreeDefinition _treeDefinition;
+        private readonly ObjectDatabase _objectDatabase;
 
         public GitTreeBuilder(ObjectDatabase objectDatabase)
         {

@@ -24,9 +24,9 @@ namespace Sep.Git.Tfs.VsFake
     {
         #region misc/null
 
-        private IContainer _container;
-        private Script _script;
-        private FakeVersionControlServer _versionControlServer;
+        private readonly IContainer _container;
+        private readonly Script _script;
+        private readonly FakeVersionControlServer _versionControlServer;
 
         public TfsHelper(IContainer container, Script script)
         {
@@ -100,8 +100,8 @@ namespace Sep.Git.Tfs.VsFake
 
         private class Changeset : IChangeset
         {
-            private IVersionControlServer _versionControlServer;
-            private ScriptedChangeset _changeset;
+            private readonly IVersionControlServer _versionControlServer;
+            private readonly ScriptedChangeset _changeset;
 
             public Changeset(IVersionControlServer versionControlServer, ScriptedChangeset changeset)
             {
@@ -141,15 +141,15 @@ namespace Sep.Git.Tfs.VsFake
 
             public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
             {
-                workspace.Get(this.ChangesetId, changes);
+                workspace.Get(ChangesetId, changes);
             }
         }
 
         private class Change : IChange, IItem
         {
-            private IVersionControlServer _versionControlServer;
-            private ScriptedChangeset _changeset;
-            private ScriptedChange _change;
+            private readonly IVersionControlServer _versionControlServer;
+            private readonly ScriptedChangeset _changeset;
+            private readonly ScriptedChange _change;
 
             public Change(IVersionControlServer versionControlServer, ScriptedChangeset changeset, ScriptedChange change)
             {
@@ -249,8 +249,8 @@ namespace Sep.Git.Tfs.VsFake
 
         private class FakeWorkspace : IWorkspace
         {
-            private string _directory;
-            private string _repositoryRoot;
+            private readonly string _directory;
+            private readonly string _repositoryRoot;
 
             public FakeWorkspace(string directory, string repositoryRoot)
             {
@@ -524,7 +524,7 @@ namespace Sep.Git.Tfs.VsFake
 
         private class FakeVersionControlServer : IVersionControlServer
         {
-            private Script _script;
+            private readonly Script _script;
 
             public FakeVersionControlServer(Script script)
             {

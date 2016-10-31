@@ -1,8 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using NDesk.Options;
 using StructureMap;
 using Sep.Git.Tfs.Core;

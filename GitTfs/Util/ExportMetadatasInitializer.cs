@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Sep.Git.Tfs.Core;
 
 namespace Sep.Git.Tfs.Util

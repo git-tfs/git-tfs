@@ -154,12 +154,12 @@ namespace Sep.Git.Tfs.Test.Core
 
             private const int ChangesetId = 10;
 
-            private TfsChangeType _tfsChangeType;
-            private TfsItemType _tfsItemType;
-            private string _serverItem;
-            private int _deletionId;
-            private string _renamedFrom;
-            private int _itemId;
+            private readonly TfsChangeType _tfsChangeType;
+            private readonly TfsItemType _tfsItemType;
+            private readonly string _serverItem;
+            private readonly int _deletionId;
+            private readonly string _renamedFrom;
+            private readonly int _itemId;
             private static int _maxItemId = 0;
 
             private FakeChange(TfsChangeType tfsChangeType, TfsItemType itemType, string serverItem, int deletionId = 0, string renamedFrom = null)
@@ -189,7 +189,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             int IItem.ChangesetId
             {
-                get { return FakeChange.ChangesetId; }
+                get { return ChangesetId; }
             }
 
             string IItem.ServerItem
@@ -231,7 +231,7 @@ namespace Sep.Git.Tfs.Test.Core
 
             private class PreviousItem : IItem
             {
-                private string _oldName;
+                private readonly string _oldName;
 
                 public PreviousItem(string oldName)
                 {

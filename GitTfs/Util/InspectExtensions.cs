@@ -27,20 +27,20 @@ namespace SEP.Extensions
         {
             if (o == null) return Inspect((object)o);
             var entries = o.Keys.Cast<object>().Select(key => InspectSimple(key) + " => " + InspectSimple(o[key]));
-            return "{" + String.Join(", ", entries.ToArray()) + "}";
+            return "{" + string.Join(", ", entries.ToArray()) + "}";
         }
 
         public static string Inspect(this IEnumerable o)
         {
             if (o == null) return Inspect((object)o);
-            return "[" + String.Join(", ", o.Cast<object>().Select(obj => InspectSimple(obj)).ToArray()) + "]";
+            return "[" + string.Join(", ", o.Cast<object>().Select(obj => InspectSimple(obj)).ToArray()) + "]";
         }
 
         private static string InspectWithProperties(object o)
         {
             var inspected = "#<";
             inspected += InspectType(o.GetType());
-            inspected += String.Join(",",
+            inspected += string.Join(",",
                                      o.GetType().GetProperties().Select(p => " " + p.Name + "=" + InspectSimple(p.GetValue(o, null)))
                                          .ToArray());
             inspected += ">";
@@ -111,7 +111,7 @@ namespace SEP.Extensions
         {
             var name = Undecorate(type.FullName);
             name += "<";
-            name += String.Join(",", type.GetGenericArguments().Select(t => InspectType(t)).ToArray());
+            name += string.Join(",", type.GetGenericArguments().Select(t => InspectType(t)).ToArray());
             name += ">";
             return name;
         }

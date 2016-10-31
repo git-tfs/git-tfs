@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Test.TestHelpers;
 using StructureMap.AutoMocking;
 using NDesk.Options;
 using Xunit;
 using NLog;
-using System.ComponentModel;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using NLog.Config;
 using NLog.Targets;
@@ -17,7 +12,7 @@ namespace Sep.Git.Tfs.Test.Commands
 {
     public class HelpTest : BaseTest
     {
-        private RhinoAutoMocker<Help> mocks;
+        private readonly RhinoAutoMocker<Help> mocks;
 
         public HelpTest()
         {
@@ -70,7 +65,7 @@ namespace Sep.Git.Tfs.Test.Commands
         {
             public bool Flag { get; set; }
 
-            private OptionSet TestOptions = new OptionSet();
+            private readonly OptionSet TestOptions = new OptionSet();
 
             public OptionSet OptionSet
             {

@@ -77,7 +77,7 @@ namespace Sep.Git.Tfs.Core
 
         public static void SetArguments(this ProcessStartInfo startInfo, params string[] args)
         {
-            startInfo.Arguments = String.Join(" ", args.Select(arg => QuoteProcessArgument(arg)).ToArray());
+            startInfo.Arguments = string.Join(" ", args.Select(arg => QuoteProcessArgument(arg)).ToArray());
         }
 
         private static string QuoteProcessArgument(string arg)

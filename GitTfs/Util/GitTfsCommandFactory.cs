@@ -7,11 +7,11 @@ namespace Sep.Git.Tfs.Util
     [StructureMapSingleton]
     public class GitTfsCommandFactory
     {
-        private readonly IContainer container;
+        private readonly IContainer _container;
 
         public GitTfsCommandFactory(IContainer container)
         {
-            this.container = container;
+            _container = container;
         }
 
         private Dictionary<string, string> _aliasMap;
@@ -23,7 +23,7 @@ namespace Sep.Git.Tfs.Util
         private Dictionary<string, string> CreateAliasMap()
         {
             var aliasMap = new Dictionary<string, string>();
-            var commandPluginType = container.Model.PluginTypes.First(p => p.PluginType == typeof(GitTfsCommand));
+            var commandPluginType = _container.Model.PluginTypes.First(p => p.PluginType == typeof(GitTfsCommand));
 
             foreach (var instance in commandPluginType.Instances)
             {
@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Util
 
         public GitTfsCommand GetCommand(string name)
         {
-            return container.TryGetInstance<GitTfsCommand>(GetCommandName(name));
+            return _container.TryGetInstance<GitTfsCommand>(GetCommandName(name));
         }
 
         private string GetCommandName(string name)

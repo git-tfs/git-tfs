@@ -57,8 +57,8 @@ namespace Sep.Git.Tfs.Util
         }
 
         #region (private)
-        private Tuple<string, string> _gitAuthor;
-        private string _gitUserId;
+        private readonly Tuple<string, string> _gitAuthor;
+        private readonly string _gitUserId;
         #endregion
     }
 
@@ -119,8 +119,8 @@ namespace Sep.Git.Tfs.Util
                     //regex pulled from git svn script here: https://github.com/git/git/blob/master/git-svn.perl
                     Regex ex = new Regex(@"^(.+?|\(no author\))\s*=\s*(.+?)\s*<(.+)>\s*$");
                     Match match = ex.Match(line);
-                    if (match.Groups.Count != 4 || String.IsNullOrWhiteSpace(match.Groups[1].Value) || String.IsNullOrWhiteSpace(match.Groups[2].Value) ||
-                        String.IsNullOrWhiteSpace(match.Groups[3].Value))
+                    if (match.Groups.Count != 4 || string.IsNullOrWhiteSpace(match.Groups[1].Value) || string.IsNullOrWhiteSpace(match.Groups[2].Value) ||
+                        string.IsNullOrWhiteSpace(match.Groups[3].Value))
                     {
                         throw new GitTfsException("Invalid format of Authors file on line " + lineCount + ".");
                     }
@@ -149,7 +149,7 @@ namespace Sep.Git.Tfs.Util
         public bool Parse(string authorsFilePath, string gitDir)
         {
             var savedAuthorFile = Path.Combine(gitDir, GitTfsCachedAuthorsFileName);
-            if (!String.IsNullOrWhiteSpace(authorsFilePath))
+            if (!string.IsNullOrWhiteSpace(authorsFilePath))
             {
                 if (!File.Exists(authorsFilePath))
                 {

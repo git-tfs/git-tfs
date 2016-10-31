@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
+﻿using System.ComponentModel;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using StructureMap;

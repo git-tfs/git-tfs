@@ -30,10 +30,9 @@ namespace Sep.Git.Tfs.Commands
 
         private int RunAll(params Func<int>[] cleaners)
         {
-            var result = GitTfsExitCodes.OK;
             foreach (var cleaner in cleaners)
             {
-                result = cleaner();
+                var result = cleaner();
                 if (result != GitTfsExitCodes.OK)
                     return result;
             }

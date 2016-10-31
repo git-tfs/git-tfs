@@ -48,7 +48,7 @@ namespace Sep.Git.Tfs.Core
             string line;
             while (null != (line = GetDiffTreeLine(reader)))
             {
-                var change = GitChangeInfo.Parse(line);
+                var change = Parse(line);
 
                 if (FileMode.GitLink == change.NewMode)
                     continue;

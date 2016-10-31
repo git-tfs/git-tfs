@@ -1,4 +1,3 @@
-using System.IO;
 using Sep.Git.Tfs.Util;
 
 namespace Sep.Git.Tfs.Core.TfsInterop

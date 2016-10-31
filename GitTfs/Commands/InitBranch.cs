@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
-using StructureMap;
 using Sep.Git.Tfs.Util;
 using Sep.Git.Tfs.Core.TfsInterop;
 
@@ -16,7 +13,6 @@ namespace Sep.Git.Tfs.Commands
     {
         private readonly Globals _globals;
         private readonly Help _helper;
-        private readonly AuthorsFile _authors;
 
         private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
@@ -34,7 +30,6 @@ namespace Sep.Git.Tfs.Commands
         {
             _globals = globals;
             _helper = helper;
-            _authors = authors;
         }
 
         public OptionSet OptionSet

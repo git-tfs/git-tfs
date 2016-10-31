@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using NDesk.Options;
 using Sep.Git.Tfs.Core;
@@ -16,20 +15,18 @@ namespace Sep.Git.Tfs.Commands
     [RequiresValidGitRepository]
     public class Fetch : GitTfsCommand
     {
-        private readonly RemoteOptions remoteOptions;
-        private readonly Globals globals;
-        private readonly ConfigProperties properties;
-        private readonly AuthorsFile authors;
-        private readonly Labels labels;
+        private readonly RemoteOptions _remoteOptions;
+        private readonly Globals _globals;
+        private readonly ConfigProperties _properties;
+        private readonly Labels _labels;
 
-        public Fetch(Globals globals, ConfigProperties properties, RemoteOptions remoteOptions, AuthorsFile authors, Labels labels)
+        public Fetch(Globals globals, ConfigProperties properties, RemoteOptions remoteOptions, Labels labels)
         {
-            this.globals = globals;
-            this.properties = properties;
-            this.remoteOptions = remoteOptions;
-            this.authors = authors;
-            this.labels = labels;
-            this.upToChangeSet = -1;
+            _globals = globals;
+            _properties = properties;
+            _remoteOptions = remoteOptions;
+            _labels = labels;
+            upToChangeSet = -1;
             BranchStrategy = BranchStrategy = BranchStrategy.Auto;
         }
 
@@ -48,7 +45,7 @@ namespace Sep.Git.Tfs.Commands
                 int batchSize;
                 if (!int.TryParse(value, out batchSize))
                     throw new GitTfsException("error: batch size parameter should be an integer.");
-                properties.BatchSize = batchSize;
+                _properties.BatchSize = batchSize;
             }
         }
 
@@ -104,18 +101,18 @@ namespace Sep.Git.Tfs.Commands
                         v => InitialChangeset = Convert.ToInt32(v) },
                     { "t|up-to=", "up-to changeset # (optional, -1 for up to maximum, must be a number, not prefixed with C)",
                         v => UpToChangeSetOption = v }
-                }.Merge(remoteOptions.OptionSet);
+                }.Merge(_remoteOptions.OptionSet);
             }
         }
 
         public int Run()
         {
-            return Run(globals.RemoteId);
+            return Run(_globals.RemoteId);
         }
 
         public void Run(bool stopOnFailMergeCommit)
         {
-            Run(stopOnFailMergeCommit, globals.RemoteId);
+            Run(stopOnFailMergeCommit, _globals.RemoteId);
         }
 
         public int Run(params string[] args)
@@ -126,7 +123,7 @@ namespace Sep.Git.Tfs.Commands
         private int Run(bool stopOnFailMergeCommit, params string[] args)
         {
             if (!FetchAll && BranchStrategy == BranchStrategy.None)
-                globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true.ToString());
+                _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true.ToString());
 
             var remotesToFetch = GetRemotesToFetch(args).ToList();
             foreach (var remote in remotesToFetch)
@@ -140,10 +137,10 @@ namespace Sep.Git.Tfs.Commands
         {
             Trace.TraceInformation("Fetching from TFS remote '{0}'...", remote.Id);
             DoFetch(remote, stopOnFailMergeCommit);
-            if (labels != null && FetchLabels)
+            if (_labels != null && FetchLabels)
             {
                 Trace.TraceInformation("Fetching labels from TFS remote '{0}'...", remote.Id);
-                labels.Run(remote);
+                _labels.Run(remote);
             }
         }
 
@@ -173,7 +170,7 @@ namespace Sep.Git.Tfs.Commands
                     new[] { "Remove ahead commits and retry", "use the --force option (ahead commits will be lost!)" });
             }
 
-            var metadataExportInitializer = new ExportMetadatasInitializer(globals);
+            var metadataExportInitializer = new ExportMetadatasInitializer(_globals);
             bool shouldExport = ExportMetadatas || remote.Repository.GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true";
 
             if (ExportMetadatas)
@@ -187,8 +184,8 @@ namespace Sep.Git.Tfs.Commands
             {
                 if (InitialChangeset.HasValue)
                 {
-                    properties.InitialChangeset = InitialChangeset.Value;
-                    properties.PersistAllOverrides();
+                    _properties.InitialChangeset = InitialChangeset.Value;
+                    _properties.PersistAllOverrides();
                     remote.QuickFetch(InitialChangeset.Value);
                     remote.Fetch(stopOnFailMergeCommit);
                 }
@@ -211,11 +208,11 @@ namespace Sep.Git.Tfs.Commands
         {
             IEnumerable<IGitTfsRemote> remotesToFetch;
             if (FetchParents)
-                remotesToFetch = globals.Repository.GetLastParentTfsCommits("HEAD").Select(commit => commit.Remote);
+                remotesToFetch = _globals.Repository.GetLastParentTfsCommits("HEAD").Select(commit => commit.Remote);
             else if (FetchAll)
-                remotesToFetch = globals.Repository.ReadAllTfsRemotes();
+                remotesToFetch = _globals.Repository.ReadAllTfsRemotes();
             else
-                remotesToFetch = args.Select(arg => globals.Repository.ReadTfsRemote(arg));
+                remotesToFetch = args.Select(arg => _globals.Repository.ReadTfsRemote(arg));
             return remotesToFetch;
         }
     }

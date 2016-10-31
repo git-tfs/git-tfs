@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Rhino.Mocks;
@@ -10,9 +9,9 @@ namespace Sep.Git.Tfs.Test.Core
 {
     public class DirectoryTidierTests : BaseTest, IDisposable
     {
-        private MockRepository mocks;
-        private ITfsWorkspaceModifier mockWorkspace;
-        private TfsTreeEntry[] initialTfsTree;
+        private readonly MockRepository mocks;
+        private readonly ITfsWorkspaceModifier mockWorkspace;
+        private readonly TfsTreeEntry[] initialTfsTree;
         private DirectoryTidier _tidy;
 
         public DirectoryTidierTests()

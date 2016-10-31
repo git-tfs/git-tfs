@@ -8,7 +8,7 @@ namespace GitTfsTest.Core
 {
     public class TfsApiBridgeTest : BaseTest
     {
-        private RhinoAutoMocker<TfsApiBridge> _mocks;
+        private readonly RhinoAutoMocker<TfsApiBridge> _mocks;
 
         public TfsApiBridgeTest()
         {

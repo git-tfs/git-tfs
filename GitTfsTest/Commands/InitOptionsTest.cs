@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Sep.Git.Tfs.Commands;
+﻿using Sep.Git.Tfs.Commands;
 using StructureMap.AutoMocking;
 using NDesk.Options;
 using Xunit;
@@ -8,7 +7,7 @@ namespace Sep.Git.Tfs.Test.Commands
 {
     public class InitOptionsTest : BaseTest
     {
-        private RhinoAutoMocker<InitOptions> mocks;
+        private readonly RhinoAutoMocker<InitOptions> mocks;
 
         public InitOptionsTest()
         {

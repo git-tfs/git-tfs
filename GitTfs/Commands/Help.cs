@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -7,7 +6,6 @@ using NDesk.Options;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Util;
 using StructureMap;
-using StructureMap.Pipeline;
 using StructureMap.Query;
 using IContainer = StructureMap.IContainer;
 using System.Diagnostics;
@@ -18,12 +16,12 @@ namespace Sep.Git.Tfs.Commands
     [Description("help [command-name]")]
     public class Help : GitTfsCommand
     {
-        private readonly GitTfsCommandFactory commandFactory;
+        private readonly GitTfsCommandFactory _commandFactory;
         private readonly IContainer _container;
 
         public Help(GitTfsCommandFactory commandFactory, IContainer container)
         {
-            this.commandFactory = commandFactory;
+            _commandFactory = commandFactory;
             _container = container;
         }
 
@@ -40,7 +38,7 @@ namespace Sep.Git.Tfs.Commands
         {
             foreach (var arg in args)
             {
-                var command = commandFactory.GetCommand(arg);
+                var command = _commandFactory.GetCommand(arg);
                 if (command != null)
                 {
                     return Run(command);
@@ -98,7 +96,7 @@ namespace Sep.Git.Tfs.Commands
                     where instance.Name != null
                     orderby instance.Name
                     select instance.Name)
-                .ToDictionary(s => s, s => commandFactory.GetAliasesForCommandName(s));
+                .ToDictionary(s => s, s => _commandFactory.GetAliasesForCommandName(s));
         }
 
         private string GetCommandName(GitTfsCommand command)

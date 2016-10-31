@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using Sep.Git.Tfs.Commands;
 using Sep.Git.Tfs.Util;
 using Xunit;
@@ -12,7 +10,7 @@ namespace Sep.Git.Tfs.Test.Util
 {
     public class CommitSpecificCheckinOptionsFactoryTests : BaseTest
     {
-        private RhinoAutoMocker<CheckinOptionsFactory> mocks;
+        private readonly RhinoAutoMocker<CheckinOptionsFactory> mocks;
 
         public CommitSpecificCheckinOptionsFactoryTests()
         {

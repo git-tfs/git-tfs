@@ -1,11 +1,5 @@
-﻿using System.IO;
-using Rhino.Mocks;
-using Rhino.Mocks.Constraints;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
-using StructureMap.AutoMocking;
+﻿using Sep.Git.Tfs.Commands;
 using Xunit;
-using Xunit.Extensions;
 
 namespace Sep.Git.Tfs.Test.Commands
 {

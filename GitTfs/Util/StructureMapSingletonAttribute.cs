@@ -1,6 +1,5 @@
 ﻿using System;
 using StructureMap;
-using StructureMap.Attributes;
 
 namespace Sep.Git.Tfs.Util
 {

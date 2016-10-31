@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using Rhino.Mocks;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
 using StructureMap.AutoMocking;
 using Xunit;
 
@@ -58,8 +56,8 @@ namespace Sep.Git.Tfs.Test.Core
                 Aliases = legacyUrls,
             };
             var mocks = new RhinoAutoMocker<GitTfsRemote>();
-            mocks.Inject<RemoteInfo>(info);
-            mocks.Inject<ITfsHelper>(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
+            mocks.Inject(info);
+            mocks.Inject(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
             return mocks.ClassUnderTest;
         }
 
@@ -111,13 +109,13 @@ namespace Sep.Git.Tfs.Test.Core
                 Repository = null,
             };
             var mocks = new RhinoAutoMocker<GitTfsRemote>();
-            mocks.Inject<RemoteInfo>(info);
-            mocks.Inject<ITfsHelper>(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
+            mocks.Inject(info);
+            mocks.Inject(MockRepository.GenerateStub<ITfsHelper>()); // GitTfsRemote backs the TfsUrl with this.
 
             var mockGitRepository = mocks.Get<IGitRepository>();
             mockGitRepository.Stub(t => t.GetSubtrees(Arg<IGitTfsRemote>.Is.Anything)).Return(remotes);
 
-            mocks.Inject<Globals>(new Globals() { Repository = mockGitRepository });
+            mocks.Inject(new Globals() { Repository = mockGitRepository });
             return mocks.ClassUnderTest;
         }
     }

@@ -26,8 +26,7 @@ namespace Sep.Git.Tfs.Core
             {
                 return ((Blob)_entry.Target).GetContentStream();
             }
-            else
-                throw new InvalidOperationException("Invalid object type");
+            throw new InvalidOperationException("Invalid object type");
         }
     }
 }

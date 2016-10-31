@@ -1,17 +1,15 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using Sep.Git.Tfs.Core;
 using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 using Xunit;
-using LibGit2Sharp;
 
 namespace Sep.Git.Tfs.Test.Integration
 {
     public class GitRepositoryTests : BaseTest, IDisposable
     {
-        private IntegrationHelper h = new IntegrationHelper();
+        private readonly IntegrationHelper h = new IntegrationHelper();
 
         public GitRepositoryTests()
         {

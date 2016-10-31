@@ -29,7 +29,7 @@ namespace Sep.Git.Tfs.Core
             _tfsHelper = tfsHelper;
             _localDirectory = remote.Repository.IsBare ? Path.GetFullPath(localDirectory) : localDirectory;
 
-            this.Remote = remote;
+            Remote = remote;
         }
 
         public void Shelve(string shelvesetName, bool evaluateCheckinPolicies, CheckinOptions checkinOptions, Func<string> generateCheckinComment)
@@ -108,7 +108,7 @@ namespace Sep.Git.Tfs.Core
                 {
                     throw new GitTfsException("No changes checked in.");
                 }
-                if (String.IsNullOrWhiteSpace(options.OverrideReason))
+                if (string.IsNullOrWhiteSpace(options.OverrideReason))
                 {
                     throw new GitTfsException("A reason must be supplied (-f REASON) to override the policy violations.");
                 }
@@ -160,7 +160,7 @@ namespace Sep.Git.Tfs.Core
 
         private TfsPolicyOverrideInfo GetPolicyOverrides(CheckinOptions options, ICheckinEvaluationResult checkinProblems)
         {
-            if (!options.Force || String.IsNullOrWhiteSpace(options.OverrideReason))
+            if (!options.Force || string.IsNullOrWhiteSpace(options.OverrideReason))
                 return null;
             return new TfsPolicyOverrideInfo { Comment = options.OverrideReason, Failures = checkinProblems.PolicyFailures };
         }

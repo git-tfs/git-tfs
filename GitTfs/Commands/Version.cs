@@ -1,6 +1,4 @@
-using System;
 using System.ComponentModel;
-using System.IO;
 using NDesk.Options;
 using StructureMap;
 using Sep.Git.Tfs.Core;
@@ -12,26 +10,23 @@ namespace Sep.Git.Tfs.Commands
     [Description("version")]
     public class Version : GitTfsCommand
     {
-        private Globals globals;
-        private IGitTfsVersionProvider versionProvider;
+        private readonly IGitTfsVersionProvider _versionProvider;
 
         /// <summary>
         /// Initializes a new instance of the Version class.
         /// </summary>
-        /// <param name="stdout"></param>
+        /// <param name="globals"></param>
         /// <param name="versionProvider"></param>
         public Version(Globals globals, IGitTfsVersionProvider versionProvider)
         {
-            this.globals = globals;
-            this.versionProvider = versionProvider;
-
-            this.OptionSet = globals.OptionSet;
+            _versionProvider = versionProvider;
+            OptionSet = globals.OptionSet;
         }
 
         public int Run()
         {
-            Trace.TraceInformation(versionProvider.GetVersionString());
-            Trace.TraceInformation(versionProvider.GetPathToGitTfsExecutable());
+            Trace.TraceInformation(_versionProvider.GetVersionString());
+            Trace.TraceInformation(_versionProvider.GetPathToGitTfsExecutable());
 
             Trace.TraceInformation(GitTfsConstants.MessageForceVersion);
 
