@@ -11,8 +11,6 @@ readonly var IsDryRun = Argument<bool>("dryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
 readonly var IdGitHubReleaseToDelete = Argument<int>("idGitHubReleaseToDelete", -1);
-var GitHubOAuthToken = Argument("gitHubToken", "temporary_test_of_argument_passing");
-var ChocolateyToken = Argument("chocolateyToken", "");
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
@@ -229,26 +227,48 @@ Task("Package").Description("Generate the release zip file")
 
 void DisplayAuthTokenErrorMessage()
 {
-	var errorMessage = @"Please create a file 'Auth.targets' containing only your authentication token generated from https://github.com/settings/tokens
-See the file 'auth.targets.example'.
-(Add at least the scope 'repo' or 'public_repo')";
+	var errorMessage = @"Please create a file 'PersonalTokens.config' containing your authentication tokens
+See the file 'PersonalTokens.config.example' for the format and content.";
 
 	throw new Exception(errorMessage);
 }
 
-string ReadGithubAuthToken()
+string ReadToken(string tokenKey, string tokenRegexFormat = null)
 {
-	var regexToken = new System.Text.RegularExpressions.Regex("^[0-9a-f]{40}$");
-	var authTargetsFile = "Auth.targets";
+	var authTargetsFile = "PersonalTokens.config";
+
 	if(!FileExists(authTargetsFile))
 		DisplayAuthTokenErrorMessage();
-	var authTargetsContent = System.IO.File.ReadAllLines(authTargetsFile);
-	if(authTargetsContent.Length == 0)
+
+	var personalToken = System.IO.File.ReadAllLines(authTargetsFile).FirstOrDefault(l => l.StartsWith(tokenKey + "="));
+	if(personalToken == null)
 		DisplayAuthTokenErrorMessage();
-	var personalToken = authTargetsContent[0].Trim();
+
+	personalToken = personalToken.Trim();
+	personalToken = personalToken.Substring(tokenKey.Length+1,personalToken.Length-tokenKey.Length-1);
+	if(tokenRegexFormat == null)
+		return personalToken;
+	
+	var regexToken = new System.Text.RegularExpressions.Regex(tokenRegexFormat);
 	if(!regexToken.IsMatch(personalToken))
 		DisplayAuthTokenErrorMessage();
 	return personalToken;
+}
+
+string GetChocolateyToken()
+{
+	var chocolateyToken = Argument("chocolateyToken", "");
+	if(!string.IsNullOrEmpty(chocolateyToken))
+		return chocolateyToken;
+	return ReadToken("Chocolatey");
+}
+
+string GetGithubAuthToken()
+{
+	var gitHubOAuthToken = Argument("gitHubToken", "");
+	if(!string.IsNullOrEmpty(gitHubOAuthToken))
+		return gitHubOAuthToken;
+	return ReadToken("GitHub", "^[0-9a-f]{40}$");
 }
 
 string ReadReleaseNotes()
@@ -260,14 +280,20 @@ string ReadReleaseNotes()
 
 Octokit.GitHubClient GetGithubClient()
 {
-	var githubToken = ReadGithubAuthToken();
+	var githubToken = GetGithubAuthToken();
 	var client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("git-tfs-releasing"));
 	var tokenAuth = new Octokit.Credentials(githubToken);
 	client.Credentials = tokenAuth;
 	return client;
 }
 
-Task("CreateGithubRelease").Description("Create a GithHub release")
+Task("TriggerRelease").Description("Trigger a release from the build server")
+	.Does(() =>
+{
+	GetGithubAuthToken();
+});
+
+Task("CreateGithubRelease").Description("Create a GitHub release")
 	.IsDependentOn("Package")
 	.WithCriteria(!IsDryRun)
 	.Does(() =>
@@ -353,17 +379,17 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 	if(!IsDryRun)
 	{
 		ChocolateyPush(chocolateyPackagePath, new ChocolateyPushSettings {
-			Source				= "http://example.com/chocolateyfeed",
-			ApiKey				= "4003d786-cc37-4004-bfdf-c4f3e8ef9b3a",
+			Source				= "https://chocolatey.org/",
+			ApiKey				= GetChocolateyToken(),
 			Timeout				= TimeSpan.FromSeconds(300),
 			Debug				= false,
 			Verbose				= false,
 			Force				= false,
 			Noop				= false,
 			LimitOutput			= false,
-			ExecutionTimeout	= 13,
-			CacheLocation		= @"C:\temp",
-			AllowUnofficial		= false
+			ExecutionTimeout	= 13
+			// CacheLocation		= @"C:\temp",
+			// AllowUnofficial		= false
 		});
 	}
 });
