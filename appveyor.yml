@@ -11,13 +11,9 @@ init: []
 #  - ps: $env:Config = "Release"
 build_script:
 - ps: |
-    echo "target: $env:target"
-    echo "gitHubToken: $env:gitHubToken"
-    echo "chocolateyToken: $env:chocolateyToken"
     if($env:target -eq $null)
     {
-      $target = "Debug2"
-      #"AppVeyorBuild"
+      $target = "AppVeyorBuild"
     }
     else
     {

@@ -1,6 +1,7 @@
 //Don't define #tool here. Just add there to 'paket.dependencies' 'build' group
 //Don't use #addin here. Use #r to load the dll found in the nuget package.
 #r "./build/Octokit.dll" //Use our custom version because offical one has a http request timeout of 100s preventing upload of github release asset :( https://github.com/octokit/octokit.net/issues/963
+#r "System.Net.Http.dll"
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -293,10 +294,36 @@ Octokit.GitHubClient GetGithubClient()
 	return client;
 }
 
-Task("TriggerRelease").Description("Trigger a release from the build server")
+Task("TriggerRelease").Description("Trigger a release from the AppVeyor build server")
 	.Does(() =>
 {
-	GetGithubAuthToken();
+	var httpClient = new System.Net.Http.HttpClient();
+	var content = @"{
+accountName: 'git-tfs',
+projectSlug: 'git-tfs-v2qcm',
+branch: 'master',
+environmentVariables: {
+ target: 'AppVeyorRelease',
+ chocolateyToken: '"+ GetChocolateyToken() + @"',
+ gitHubToken: '" + GetGithubAuthToken() + @"'
+ }
+}";
+	var appVeyorToken = ReadToken("AppVeyor");
+	httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", appVeyorToken);
+	httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+	var taskTriggerRelease = httpClient.PostAsync("https://ci.appveyor.com/api/builds", 
+		new System.Net.Http.StringContent(content, System.Text.Encoding.UTF8, "application/json"));
+	taskTriggerRelease.Wait();
+	var httpResponseMessage = taskTriggerRelease.Result;
+	if(httpResponseMessage.IsSuccessStatusCode)
+	{
+		Information("Release build successfully triggered.");
+	}
+	else
+	{
+		Error("Fail to trigger the release build:" + httpResponseMessage.ReasonPhrase);
+	}
 });
 
 Task("CreateGithubRelease").Description("Create a GitHub release")
