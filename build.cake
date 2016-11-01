@@ -61,24 +61,6 @@ Task("PrepareRelease").Description("TODO")
 	//Create Tag
 });
 
-Task("Debug").Description("TODO")
-	.Does(() =>
-{
-	Information("1.Target:" + Target);
-	Information("1.GitHubOAuthToken:" + GitHubOAuthToken);
-	Information("1.ChocolateyToken:" + ChocolateyToken);
-
-});
-
-Task("Debug2").Description("TODO")
-	.Does(() =>
-{
-	Information("2.Target:" + Target);
-	Information("2.GitHubOAuthToken:" + GitHubOAuthToken);
-	Information("2.ChocolateyToken:" + ChocolateyToken);
-
-});
-
 Task("Clean").Description("Clean the working directory")
 	.Does(() =>
 {
