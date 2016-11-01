@@ -1,5 +1,5 @@
-#tool "nuget:?package=GitVersion.CommandLine"
-#tool "nuget:?package=xunit.runner.console"
+//Don't define #tool here. Just add there to 'paket.dependencies' 'build' group
+//Don't use #addin here. Use #r to load the dll found in the nuget package.
 #r "./build/Octokit.dll" //Use our custom version because offical one has a http request timeout of 100s preventing upload of github release asset :( https://github.com/octokit/octokit.net/issues/963
 
 //////////////////////////////////////////////////////////////////////
@@ -163,7 +163,6 @@ void SetGitUserConfig()
 		StartProcess("git.exe", "config --global user.email \"git-tfs@unit-tests.com\"");
 	}
 }
-
 
 Task("Run-Unit-Tests").Description("Run the unit tests")
 	.IsDependentOn("Build")

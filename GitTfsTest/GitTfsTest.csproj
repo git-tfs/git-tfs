@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\xunit.runner.visualstudio\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\packages\xunit.runner.visualstudio\build\net20\xunit.runner.visualstudio.props')" Label="Paket" />
   <Import Project="..\packages\LibGit2Sharp.NativeBinaries\build\LibGit2Sharp.NativeBinaries.props" Condition="Exists('..\packages\LibGit2Sharp.NativeBinaries\build\LibGit2Sharp.NativeBinaries.props')" Label="Paket" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -195,14 +196,6 @@
     <None Include="paket.references" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
-      <PropertyGroup>
-        <__paket__xunit_runner_visualstudio_props>net20\xunit.runner.visualstudio</__paket__xunit_runner_visualstudio_props>
-      </PropertyGroup>
-    </When>
-  </Choose>
-  <Import Project="..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_props).props" Condition="Exists('..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_props).props')" Label="Paket" />
   <PropertyGroup>
     <PreBuildEvent Condition="'$(OS)' == 'Windows_NT'">xcopy /S /Y "$(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries" "$(TargetDir)"\NativeBinaries\</PreBuildEvent>
     <PreBuildEvent Condition="'$(OS)' != 'Windows_NT'">cp -Rp "$(SolutionDir)/lib/libgit2sharp/Lib/NativeBinaries" "$(TargetDir)"</PreBuildEvent>

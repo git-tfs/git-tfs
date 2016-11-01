@@ -6,16 +6,20 @@ source https://www.nuget.org/api/v2/
 //https://github.com/git-tfs/git-tfs/blob/master/doc/paket.md
 
 nuget nlog
-nuget NuGet.CommandLine
 nuget LibGit2Sharp
 nuget Microsoft.TeamFoundationServer.Client ~> 14.0
 nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
 nuget WixSharp 1.0.22.3 framework: >= net40
 nuget xunit
 nuget xunit.assert
-nuget xunit.runner.msbuild
-nuget MSBuildTasks 1.4.0.45 framework: >= net40
 nuget xunit.runner.visualstudio
 
-//console runner to be able to run it in the console
+group Build
+    framework: 4.5
+    redirects: off
+    source https://nuget.org/api/v2
+
+nuget Cake
+nuget GitVersion.CommandLine
+//nuget Octokit //We can't use the official version at the moment :( https://github.com/octokit/octokit.net/issues/963
 nuget xunit.runner.console
