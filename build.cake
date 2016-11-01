@@ -400,11 +400,13 @@ Task("AppVeyorBuild").Description("Do the continuous integration build with AppV
 Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("InstallTfsModels")
 	.IsDependentOn("Run-Smoke-Tests")
-	.IsDependentOn("Package");
+	.IsDependentOn("Package")
+	//.IsDependentOn("CreateGithubRelease")
+	//.IsDependentOn("Chocolatey")
+	;
 
 Task("Release").Description("Build the release and put it on github.com")
 	.IsDependentOn("Chocolatey");
-//Release =>Package; ReleaseOnGitHub; Chocolatey
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
