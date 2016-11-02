@@ -20,6 +20,7 @@ group Build
     source https://nuget.org/api/v2
 
 nuget Cake
+nuget Cake.Git
 nuget GitVersion.CommandLine
 //nuget Octokit //We can't use the official version at the moment :( https://github.com/octokit/octokit.net/issues/963
 nuget xunit.runner.console

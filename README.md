@@ -164,14 +164,11 @@ And depending of the version of TFS you use :
     git clone git://github.com/git-tfs/git-tfs.git
     cd git-tfs
 
-    #building with MSBuild (with the default configuration: debug)
-    msbuild GitTfs.sln
+    #building with Cake (in a powershell console). It will also run the unit tests ;)
+    .\build.ps1
 
-    #or building with MSBuild in release
-    msbuild GitTfs.sln /p:Configuration=release
-
-    #or with Rake (Ruby)
-    rake build:debug
+    #help on the different targets
+    .\build.ps1 -Target "Help"
 
 **Note:** if the build fails because you don't have all the `Visual Studio SDK`, just unload in Visual Studio all the projects you are not interested in to be able to build and use your own version.
 You could also install, the Team Foundation Server Object Model for [Tfs 2010](https://visualstudiogallery.msdn.microsoft.com/a37e19fb-3052-4fc9-bef7-4a4682069a75) ([chocolatey](https://chocolatey.org/packages/tfs2010objectmodel)), [Tfs 2012](https://visualstudiogallery.msdn.microsoft.com/f30e5cc7-036e-449c-a541-d522299445aa) ([chocolatey](https://chocolatey.org/packages/tfs2012objectmodel)) and [Tfs 2013](https://visualstudiogallery.msdn.microsoft.com/3278bfa7-64a7-4a75-b0da-ec4ccb8d21b6) ([chocolatey](https://chocolatey.org/packages/tfs2013objectmodel)).

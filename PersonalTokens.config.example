@@ -1,3 +1,5 @@
+//Github user name (to be able to create the release tag)
+GitHubUserAccount=[Place Holder... Replace this place holder by your github username!]
 //GitHub personal token. You can create one at https://github.com/settings/tokens (Add at least the scope 'repo' or 'public_repo')
 GitHub=[Place Holder... Replace this place holder by your personal token!]
 //Chocolatey token. Get it from you Chocolatey account https://chocolatey.org/account

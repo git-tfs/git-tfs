@@ -1,6 +1,7 @@
 //Don't define #tool here. Just add there to 'paket.dependencies' 'build' group
 //Don't use #addin here. Use #r to load the dll found in the nuget package.
 #r "./build/Octokit.dll" //Use our custom version because offical one has a http request timeout of 100s preventing upload of github release asset :( https://github.com/octokit/octokit.net/issues/963
+#r "./packages/build/Cake.Git/Cake.Git.dll"
 #r "System.Net.Http.dll"
 
 //////////////////////////////////////////////////////////////////////
@@ -8,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 readonly var Target = Argument("target", "Default");
 readonly var Configuration = Argument("configuration", "Release");
-readonly var IsDryRun = Argument<bool>("dryRun", true);
+readonly var IsDryRun = Argument<bool>("isDryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
 readonly var IdGitHubReleaseToDelete = Argument<int>("idGitHubReleaseToDelete", -1);
@@ -23,7 +24,7 @@ const string PathToSln = ApplicationPath + ".sln";
 const string BuildDirectory = ApplicationPath + "/bin";
 const string buildAssetPath = @".\tmp\";
 const string DownloadUrlTemplate ="https://github.com/git-tfs/git-tfs/releases/download/v{0}/";
-const string ReleaseNotesPath = @"doc\release-notes\NEXT.md";
+string ReleaseNotesPath = @"doc\release-notes\NEXT.md";
 const string ChocolateyBuildDir = buildAssetPath + "choc";
 readonly var OutputDirectory = BuildDirectory + "/" + Configuration;
 
@@ -45,19 +46,39 @@ Task("Help").Description("This help...")
 {
 	Information("Release process:");
 	Information("----------------");
-	Information("1. Tag the commit with a version following the format 'v1.4'");
-	Information("2. run `Cake.exe build.cake -target=Release`");
+	Information("1. Setup the personal data in `PersonalTokens.config` file");
+	Information("2. run `.\build.ps1 -Target \"TriggerRelease\"`");
 	Information("");
 
 	Information("Available tasks:");
 	StartProcess("cake.exe", "build.cake -showdescription");
 });
 
-Task("PrepareRelease").Description("TODO")
+Task("TagVersion").Description("Handle release note and tag the new version")
 	.Does(() =>
 {
-	//Create Release Note
-	//Create Tag
+	var version = GitVersion();
+	var tag = version.Major + "." + (version.Minor + 1);
+	var nextVersion = tag + ".0";
+	Information("Next version will be:" + nextVersion);
+
+	if(!IsDryRun)
+	{
+		Information("Creating release tag...");
+		if(FileExists(ReleaseNotesPath))
+		{
+			var newReleaseNotePath = @"doc\release-notes\v" + nextVersion + ".md";
+			MoveFile(ReleaseNotesPath, newReleaseNotePath);
+
+			GitAdd(".", newReleaseNotePath);
+			GitRemove(".", false, ReleaseNotesPath);
+			GitCommit(".", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release v" + tag);
+			ReleaseNotesPath = newReleaseNotePath;
+			GitPush(".", GetGithubUserAccount(), GetGithubAuthToken(), "master");
+		}
+		GitTag(".", "v" + tag);
+		GitPushRef(".", GetGithubUserAccount(), GetGithubAuthToken(), "origin", "refs/tags/v" + tag);
+	}
 });
 
 Task("Clean").Description("Clean the working directory")
@@ -84,7 +105,7 @@ Task("InstallTfsModels").Description("Install the missing TFS object models to b
 	}
 });
 
-Task("Restore-NuGet-Packages").Description("Restore nuget dependencies")
+Task("Restore-NuGet-Packages").Description("Restore nuget dependencies (with paket)")
 	.IsDependentOn("Clean")
 	.Does(() =>
 {
@@ -270,6 +291,14 @@ string GetChocolateyToken()
 	return ReadToken("Chocolatey");
 }
 
+string GetGithubUserAccount()
+{
+	var gitHubOAuthToken = Argument("gitHubUserAccount", "");
+	if(!string.IsNullOrEmpty(gitHubOAuthToken))
+		return gitHubOAuthToken;
+	return ReadToken("GitHubUserAccount");
+}
+
 string GetGithubAuthToken()
 {
 	var gitHubOAuthToken = Argument("gitHubToken", "");
@@ -298,13 +327,15 @@ Task("TriggerRelease").Description("Trigger a release from the AppVeyor build se
 	.Does(() =>
 {
 	var httpClient = new System.Net.Http.HttpClient();
+	//AppVeyor build data to trigger the git-tfs build + parameters passed to the release build 
 	var content = @"{
-accountName: 'git-tfs',
+accountName: 'pmiossec',
 projectSlug: 'git-tfs-v2qcm',
 branch: 'master',
 environmentVariables: {
  target: 'AppVeyorRelease',
  chocolateyToken: '"+ GetChocolateyToken() + @"',
+ gitHubUserAccount: '"+ GetGithubUserAccount() + @"',
  gitHubToken: '" + GetGithubAuthToken() + @"'
  }
 }";
@@ -430,23 +461,30 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
-Task("Default").Description("")
-	.IsDependentOn("Package");
+Task("Default").Description("Run the unit tests")
+	.IsDependentOn("Run-Unit-Tests");
 
 Task("AppVeyorBuild").Description("Do the continuous integration build with AppVeyor")
 	.IsDependentOn("Run-Smoke-Tests")
 	.IsDependentOn("Package");
 
 Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
+	.IsDependentOn("TagVersion")
 	.IsDependentOn("InstallTfsModels")
 	.IsDependentOn("Run-Smoke-Tests")
 	.IsDependentOn("Package")
-	//.IsDependentOn("CreateGithubRelease")
-	//.IsDependentOn("Chocolatey")
+	.IsDependentOn("CreateGithubRelease")
+	.IsDependentOn("Chocolatey")
 	;
 
 Task("Release").Description("Build the release and put it on github.com")
 	.IsDependentOn("Chocolatey");
+
+//TODO:
+//- 'Clean all' Task!
+//CodeFormatter!!!!!
+//Sonar
+//Coverage
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION

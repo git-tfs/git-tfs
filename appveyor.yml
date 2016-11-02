@@ -14,12 +14,16 @@ build_script:
     if($env:target -eq $null)
     {
       $target = "AppVeyorBuild"
+      echo "target: $target"
+      .\build.ps1 -Target "$target" -ScriptArgs '-isDryRun=true -gitHubUserAccount"$env:gitHubUserAccount" -gitHubToken="$env:gitHubToken" -chocolateyToken="$env:chocolateyToken"'
+      #$UseDryRun = "false"
     }
     else
     {
       $target = $env:target
+      echo "target: $target"
+      .\build.ps1 -Target "$target" -ScriptArgs '-isDryRun=false -gitHubUserAccount"$env:gitHubUserAccount" -gitHubToken="$env:gitHubToken" -chocolateyToken="$env:chocolateyToken"'
+      #$UseDryRun = "true"
     }
 
-    echo "target: $target"
-    .\build.ps1 -Target "$target" -ScriptArgs '-gitHubToken="$env:gitHubToken" -chocolateyToken="$env:chocolateyToken"'
 test: off
