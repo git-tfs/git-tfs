@@ -94,6 +94,7 @@ Task("InstallTfsModels").Description("Install the missing TFS object models to b
 	{
 		if(_buildAllVersion)
 		{
+			Information("Installing Tfs object model 2010 to be able to release for all versions...");
 			ChocolateyInstall("tfs2010objectmodel");
 		}
 	}
@@ -144,6 +145,7 @@ Task("UpdateAssemblyInfo").Description("Update AssemblyInfo properties with the 
 {
 	if(BuildSystem.IsRunningOnAppVeyor)
 	{
+		Information("Updating Appveyor version to... " + _semanticVersionShort);
 		AppVeyor.UpdateBuildVersion(_semanticVersionShort);
 	}
 	
@@ -184,6 +186,7 @@ void SetGitUserConfig()
 {
 	if(BuildSystem.IsRunningOnAppVeyor)
 	{
+		Information("Setting git user config to run some integration tests...");
 		//Merge with libgit2sharp now require having user name and email to be set!
 		StartProcess("git.exe", "config --global user.name \"git-tfs user for merge in unit tests\"");
 		StartProcess("git.exe", "config --global user.email \"git-tfs@unit-tests.com\"");
@@ -245,7 +248,7 @@ Task("Package").Description("Generate the release zip file")
 	Zip(OutputDirectory, _zipFilePath);
 	if(BuildSystem.IsRunningOnAppVeyor)
 	{
-		// Upload artifact to AppVeyor.
+		Information("Upload artifact to AppVeyor...");
 		BuildSystem.AppVeyor.UploadArtifact(_zipFilePath);
 		var msiFile = @".\GitTfs.Setup\GitTfs.Setup.msi";
 		if(FileExists(msiFile))
@@ -264,6 +267,8 @@ See the file 'PersonalTokens.config.example' for the format and content.";
 string ReadToken(string tokenKey, string tokenRegexFormat = null)
 {
 	var authTargetsFile = "PersonalTokens.config";
+
+	Information("Reading token..." + tokenKey);
 
 	if(!FileExists(authTargetsFile))
 		DisplayAuthTokenErrorMessage();
