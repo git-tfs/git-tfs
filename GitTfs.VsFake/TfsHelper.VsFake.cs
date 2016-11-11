@@ -389,20 +389,25 @@ namespace Sep.Git.Tfs.VsFake
 
         public IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, int lastChangesetIdToCheck = -1, string tfsPathParentBranch = null)
         {
-            var firstChangesetOfBranch = _script.Changesets.FirstOrDefault(c => c.IsBranchChangeset && c.BranchChangesetDatas.BranchPath == tfsPathBranchToCreate);
+            var branchChangesets = _script.Changesets.Where(c => c.IsBranchChangeset);
+            var firstBranchChangeset = branchChangesets.FirstOrDefault(c => c.BranchChangesetDatas.BranchPath == tfsPathBranchToCreate);
+
             var rootBranches = new List<RootBranch>();
-            var branchChangeset = _script.Changesets.Where(c => c.IsBranchChangeset).ToList();
-            if (firstChangesetOfBranch != null)
+            if (firstBranchChangeset != null)
             {
                 do
                 {
-                    var branch = new RootBranch(firstChangesetOfBranch.BranchChangesetDatas.RootChangesetId,
-                        firstChangesetOfBranch.BranchChangesetDatas.BranchPath);
-                    branch.IsRenamedBranch = DeletedBranchesPathes.Contains(branch.TfsBranchPath);
-                    rootBranches.Add(branch);
-                    firstChangesetOfBranch = branchChangeset.FirstOrDefault(
-                            c => c.BranchChangesetDatas.BranchPath == firstChangesetOfBranch.BranchChangesetDatas.ParentBranch);
-                } while (firstChangesetOfBranch != null);
+                    var rootBranch = new RootBranch(
+                        firstBranchChangeset.BranchChangesetDatas.RootChangesetId,
+                        firstBranchChangeset.Id,
+                        firstBranchChangeset.BranchChangesetDatas.BranchPath
+                    );
+
+                    rootBranch.IsRenamedBranch = DeletedBranchesPathes.Contains(rootBranch.TfsBranchPath);
+                    rootBranches.Add(rootBranch);
+
+                    firstBranchChangeset = branchChangesets.FirstOrDefault(c => c.BranchChangesetDatas.BranchPath == firstBranchChangeset.BranchChangesetDatas.ParentBranch);
+                } while (firstBranchChangeset != null);
                 rootBranches.Reverse();
                 return rootBranches;
             }
