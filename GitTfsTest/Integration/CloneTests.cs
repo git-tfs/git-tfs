@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using LibGit2Sharp;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Test.Fixtures;
 using Xunit;
@@ -324,5 +325,67 @@ namespace Sep.Git.Tfs.Test.Integration
         }
 
         #endregion
+
+        [FactExceptOnUnix]
+        public void CloneWithAllBranchesShouldHandleFolderDeletedAndRecreatedAsBranch()
+        {
+            h.SetupFake(r =>
+            {
+                r.SetRootBranch("$/MyTeamProject/Root");
+
+                r.Changeset(1, "Create initial team project.", DateTime.Now)
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyTeamProject");
+
+                r.Changeset(2, "Create root branch.", DateTime.Now)
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyTeamProject/Root");
+
+                r.Changeset(3, @"Create ""branch"" (as a folder).", DateTime.Now)
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyTeamProject/Branch");
+
+                r.Changeset(4, @"Delete the ""branch"" folder.", DateTime.Now)
+                    .Change(TfsChangeType.Delete, TfsItemType.Folder, "$/MyTeamProject/Branch");
+
+                r.BranchChangeset(5, "Create a proper branch (though, with the same name as the previously deleted folder)",
+                        DateTime.Now, "$/MyTeamProject/Root", "$/MyTeamProject/Branch", 2)
+                    .Change(TfsChangeType.Branch, TfsItemType.Folder, "$/MyTeamProject/Branch");
+            });
+
+            h.Run("clone", h.TfsUrl, "$/MyTeamProject/Root", "MyTeamProject", "--branches=all");
+
+            h.AssertGitRepo("MyTeamProject");
+
+            var branchCollection = h.Repository("MyTeamProject").Branches.Cast<Branch>().ToList();
+            var branch = branchCollection.FirstOrDefault(b => b.Name == "Branch");
+            Assert.NotNull(branch);
+
+            // So, it turns out GetRootChangesetForBranch is really the unit under test here.
+            // Because it's faked out for unit tests, this test is worthless except as an
+            // illustration of expected behavior in the actual implementation.
+
+            // Ensure we didn't migrate our branch from the "folder creation" point of
+            // $/MyTeamProject/Branch (e.g. C2 -> C3, C4...
+            Assert.False(branch.Commits.Any(c => c.Message.IndexOf(@"Create ""branch"" (as a folder).", StringComparison.InvariantCultureIgnoreCase) >= 0));
+
+            // Ensure we migrated the branch from it's creation point, e.g. C2 immediately followed by C5 (C2 -> C5)
+            var expectedBranchChangesetParentCommit = branch.Commits.Where(c => c.Message.IndexOf("Create root branch.", StringComparison.InvariantCultureIgnoreCase) >= 0).FirstOrDefault();
+            Assert.NotNull(expectedBranchChangesetParentCommit);
+
+            var branchChangesetCommit = branch.Commits.Where(c => c.Message.IndexOf("Create a proper branch (though, with the same name as the previously deleted folder)", StringComparison.InvariantCultureIgnoreCase) >= 0).FirstOrDefault();
+            Assert.NotNull(branchChangesetCommit);
+
+            // This wasn't part of the original test by @jeremy-sylvis-tmg, but this does ensure the relationship
+            // C2 -> C5; it may not be enough to just ensure C5 exists.
+            Assert.True(branchChangesetCommit.Parents.Contains(expectedBranchChangesetParentCommit));
+
+            var refs = new[]
+            {
+                "HEAD",
+                "refs/remotes/tfs/default",
+                "refs/heads/master",
+                "refs/heads/tfs/branch",
+                "refs/heads/Branch"
+            };
+            AssertNewClone("MyTeamProject", refs);
+        }
     }
 }

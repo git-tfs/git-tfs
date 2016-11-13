@@ -73,6 +73,16 @@ namespace Sep.Git.Tfs.Core
             get { return false; }
         }
 
+        public int? GetInitialChangeset()
+        {
+            return _properties.InitialChangeset;
+        }
+
+        public void SetInitialChangeset(int? changesetId)
+        {
+            _properties.InitialChangeset = changesetId;
+        }
+
         public bool IsSubtree { get; private set; }
 
         public bool IsSubtreeOwner
@@ -650,7 +660,7 @@ namespace Sep.Git.Tfs.Core
             IGitTfsRemote remote = null;
             foreach (var branch in branchesDatas)
             {
-                var rootChangesetId = branch.RootChangeset;
+                var rootChangesetId = branch.SourceBranchChangesetId;
                 remote = InitBranch(_remoteOptions, tfsBranch.Path, rootChangesetId, true);
                 if (remote == null)
                 {
@@ -701,6 +711,14 @@ namespace Sep.Git.Tfs.Core
         private IEnumerable<ITfsChangeset> FetchChangesets(bool byLots, int lastVersion = -1)
         {
             int lowerBoundChangesetId;
+
+            // If we're starting at the Root side of a branch commit (e.g. C1), but there ar
+            // invalid commits between C1 and the actual branch side of the commit operation
+            // (e.g. a Folder with the branch name was created [C2] and then deleted [C3],
+            // then the root-side was branched [C4; C1 --branch--> C4]), this will detecte
+            // only the folder creation and deletion operations due to the lowerBound being
+            // detected as the root-side of the commit +1 (C1+1=C2) instead of referencing
+            // the branch-side of the branching operation [C4].
             if (_properties.InitialChangeset.HasValue)
                 lowerBoundChangesetId = Math.Max(MaxChangesetId + 1, _properties.InitialChangeset.Value);
             else
