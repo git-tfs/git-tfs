@@ -1,3 +1,4 @@
+-------Please read and delete this text before creating the issue-------
 To report a good issue, please verify that you validate these points:
 
 - [ ] you have read the documentation about [command line options](../../#available-commands--options) and [advanced use cases](../../#more-advanced-use-cases)
@@ -5,3 +6,5 @@ To report a good issue, please verify that you validate these points:
 - [ ] specify the version you are using
 - [ ] include steps you followed to reproduce the problem
 - [ ] if the problem occurs when using a git-tfs command, please provide the output of the command when using the `--debug` command line option (providing a gist could be a clever idea ;))
+
+------------------------------------------------------------------------
