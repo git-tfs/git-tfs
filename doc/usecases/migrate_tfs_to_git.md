@@ -2,8 +2,14 @@ Git-tfs could be easily used to migrate source history from TFSVC to a git repos
 
 ## Migrate toward external git repository
 
-### Fetch All History
+### Fetch TFS (TFVC) History
 
+Depending on the TFVC changesets history, git-tfs could have more or less difficulties to retrieve the history
+(Especially in case of renamed branches).
+Here are described, in order, the different options that could be tried to retrieve as much history as possible. 
+If you are not insterested by all the history (because it could be very long), you could just choose the option that suits you the best...
+
+#### Fetch all the history, for all branches
 First fetch all the source history (with all branches) in a local git repository:
 
     git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --branches=all
@@ -12,6 +18,50 @@ See [clone](../commands/clone.md) command if you should use a password or an aut
  (recommended if you want an email address instead of a windows login in commit messages), ...
 
 Wait quite some time, fetching changesets from TFS is a slow process :(
+
+#### Fetch all the history, for only merged branches
+
+If only the complete history of the main branch is important for you, you could fetch only the history
+of the main branch and onk=ly the branches merged into it.
+
+To do that, do not specify the `--branches` or use the default value of the option `--branches=auto`, like that:
+
+    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --branches=auto
+
+#### Fetch all the history, for just the main branch (ignoring all the other branches)
+
+Unfortunately, the way how changesets are store in TFVC history, make that git-tfs is not able to handle every cases.
+If you still want to retrieve the history, one of the solution is to fetch the history of only one branch ignoring 
+all the other branches and the merge changesets.
+
+
+To do that, use the option `--branches=none`, like that:
+
+    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --branches=none
+
+#### Ignoring history before a specific changeset
+
+Sometimes, the history is too long and take too much time too retrieve. Or too messy and git-tfs fails to retrieve it :(
+In this case, you could try to retrieve less history by passing to git-tfs, the id of a changeset from where to fetch the history.
+
+To do that, use the option `--changeset=3245`, and run:
+
+    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --changeset=3245
+
+#### Fetch only the last changeset
+
+In the last resort, when none of the solution before has worked, your only solution remains to clone only the last Changeset.
+Even if it's the way that Microsoft recommend to migrate to git (surely because they doesn't provide a better way!?!), that's 
+for us the last solution to try (or if you don't care about your history...).
+You could do it by running:
+
+    git tfs quick-clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk .
+
+#### Speed up process by providing a `.gitignore` file
+
+For every way to clone, you could provide to git-tfs a `.gitignore` file.
+That way, all the files that will be ignored won't be downloaded, speeding the process.
+That could be particulary usefull to ignore dependencies packages that has been commited but that should not...
 
 ### Clean commits (optional)
 
@@ -27,8 +77,6 @@ If you want to keep the old changesets ids in a more human format, you could use
 
 Note: if you do that, you won't be able to fetch tfs changesets any more.
 You should do that if you want to migrate definitively away of TFS!
-
-
 
 ### Add a remote toward git central repository
 
