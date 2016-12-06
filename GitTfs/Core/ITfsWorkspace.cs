@@ -14,7 +14,14 @@ namespace Sep.Git.Tfs.Core
         void Add(string path);
         void Edit(string path);
         void Delete(string path);
-        void Rename(string pathFrom, string pathTo, string score);
+        void Rename(string pathFrom, string pathTo);
+    }
+    public interface ITfsWorkspaceCopy
+    {
+        void Add(string path, string shaFile);
+        void Edit(string path, string shaFile);
+        void Delete(string path);
+        void Rename(string pathFrom, string pathTo);
     }
 
     /// <summary>

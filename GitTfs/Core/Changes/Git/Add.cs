@@ -14,11 +14,9 @@ namespace Sep.Git.Tfs.Core.Changes.Git
             NewSha = changeInfo.newSha;
         }
 
-        public void Apply(ITfsWorkspaceModifier workspace)
+        void IGitChangedFile.Apply(ITfsWorkspaceCopy workspace)
         {
-            var workspaceFile = workspace.GetLocalPath(Path);
-            Repository.CopyBlob(NewSha, workspaceFile);
-            workspace.Add(Path);
+            workspace.Add(Path, NewSha);
         }
     }
 

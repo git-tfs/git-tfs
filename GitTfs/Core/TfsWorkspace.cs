@@ -210,9 +210,9 @@ namespace Sep.Git.Tfs.Core
             if (deleted != 1) throw new Exception("One item should have been deleted, but actually deleted " + deleted + " items.");
         }
 
-        public void Rename(string pathFrom, string pathTo, string score)
+        public void Rename(string pathFrom, string pathTo)
         {
-            Trace.TraceInformation(" rename " + pathFrom + " to " + pathTo + " (score: " + score + ")");
+            Trace.TraceInformation(" rename " + pathFrom + " to " + pathTo);
             GetFromTfs(GetLocalPath(pathFrom));
             var result = _workspace.PendRename(GetLocalPath(pathFrom), GetLocalPath(pathTo));
             if (result != 1) throw new ApplicationException("Unable to rename item from " + pathFrom + " to " + pathTo);

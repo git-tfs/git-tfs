@@ -18,12 +18,10 @@ namespace Sep.Git.Tfs.Core.Changes.Git
             Score = changeInfo.score;
         }
 
-        public void Apply(ITfsWorkspaceModifier workspace)
+        void IGitChangedFile.Apply(ITfsWorkspaceCopy workspace)
         {
-            workspace.Edit(Path);
-            workspace.Rename(Path, PathTo, Score);
-            var workspaceFile = workspace.GetLocalPath(PathTo);
-            _repository.CopyBlob(NewSha, workspaceFile);
+            workspace.Edit(Path, NewSha);
+            workspace.Rename(Path, PathTo);
         }
     }
 }
