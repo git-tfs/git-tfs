@@ -92,6 +92,7 @@ Task("InstallTfsModels").Description("Install the missing TFS object models to b
 {
 	if(BuildSystem.IsRunningOnAppVeyor)
 	{
+		//AppVeyor build VM already contains tfs object model >= 2012
 		if(_buildAllVersion)
 		{
 			Information("Installing Tfs object model 2010 to be able to release for all versions...");
@@ -107,7 +108,6 @@ Task("InstallTfsModels").Description("Install the missing TFS object models to b
 });
 
 Task("Restore-NuGet-Packages").Description("Restore nuget dependencies (with paket)")
-	.IsDependentOn("Clean")
 	.Does(() =>
 {
 	if(FileExists("paket.exe"))
@@ -117,7 +117,6 @@ Task("Restore-NuGet-Packages").Description("Restore nuget dependencies (with pak
 });
 
 Task("Version").Description("Get the version using GitVersion")
-	.IsDependentOn("Clean")
 	.Does(() =>
 {
 	var version = GitVersion();
