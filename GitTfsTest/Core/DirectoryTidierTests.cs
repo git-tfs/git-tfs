@@ -63,13 +63,6 @@ namespace Sep.Git.Tfs.Test.Core
         }
 
         [Fact]
-        public void PassesThroughGetLocalPath()
-        {
-            mockWorkspace.Expect(x => x.GetLocalPath("git-path")).Return("tfs-path");
-            //Assert.Equal("tfs-path", Tidy.GetLocalPath("git-path"));
-        }
-
-        [Fact]
         public void NoChangesMeansNoChanges()
         {
             // nothing!
@@ -206,25 +199,6 @@ namespace Sep.Git.Tfs.Test.Core
             mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file1.txt", "topDir/midDir/bottomDir/file1renamed.txt"));
             Tidy.Edit("topDir/midDir/bottomDir/file1.txt", "");
             Tidy.Rename("topDir/midDir/bottomDir/file1.txt", "topDir/midDir/bottomDir/file1renamed.txt");
-        }
-
-        [Fact]
-        public void TidyThrowsWhenMultipleOperationsOnTheSameFileOccur()
-        {
-            var workspace = mocks.StrictMock<ITfsWorkspaceModifier>();
-            ITfsWorkspaceCopy tidy = new DirectoryTidier(workspace, null,Enumerable.Empty<TfsTreeEntry>);
-
-            tidy.Delete("file.txt");
-            Assert.Throws<ArgumentException>(() =>
-                tidy.Add("FILE.TXT", ""));
-            Assert.Throws<ArgumentException>(() =>
-                tidy.Delete("File.TXT"));
-            Assert.Throws<ArgumentException>(() =>
-                tidy.Edit("File.txt", ""));
-            Assert.Throws<ArgumentException>(() =>
-                tidy.Rename("File.txt", "renamed.txt"));
-            Assert.Throws<ArgumentException>(() =>
-                tidy.Rename("oldFile.txt", "File.txt"));
         }
 
         private TfsTreeEntry item(TfsItemType itemType, string gitPath)

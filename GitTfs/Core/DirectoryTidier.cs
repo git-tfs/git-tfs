@@ -50,26 +50,26 @@ namespace Sep.Git.Tfs.Core
                         _workspace.Add(fileOperation.Key);
                         break;
                     case FileOperation.Edit:
+                    case FileOperation.EditAndRenameFrom:
                            _workspace.Edit(fileOperation.Key);
                         break;
                     case FileOperation.Remove:
                          _workspace.Delete(fileOperation.Key);
                         break;
                     case FileOperation.RenameTo:
-                         _workspace.Rename(fileOperation.Key, _renameOperations[fileOperation.Key]);
+                         _workspace.Rename(_renameOperations[fileOperation.Key], fileOperation.Key);
                         break;
 
-                    case FileOperation.EditAndRenameFrom:
-                        case FileOperation.RenameFrom:
+                    case FileOperation.RenameFrom:
                         break;
                 }
             }
 
             foreach(var editOperation in _editOperations)
             {
-                var file = GetLocalPath(editOperation.Key);
                 if (_reprository != null)
                 {
+                    var file = GetLocalPath(editOperation.Key);
                     _reprository.CopyBlob(editOperation.Value, file);
                 }
             }
