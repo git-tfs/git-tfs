@@ -191,13 +191,13 @@ Once the clone is done, the file is store in the `.git` folder (with the name `g
 
 Note: You could use the `tf history` command to help you find all the Tfs users logins that should be found in the `authors.txt` file.
 
-    tf history $/Project1/Trunk /collection:"http://tfs:8080/tfs/TeamProjectCollectionUrl" /recursive | cut -b 11-28 | tail -n+3 | uniq | sort | uniq > authors.txt
+    tf history $/Project1/Trunk /collection:"http://tfs:8080/tfs/TeamProjectCollectionUrl" /recursive | awk '{print $2}' | tail -n+3 | sort -u > authors.txt
 
-Be aware that the parameters of the `cut` command (column of beginning and column of end) depends of multiple parameters and that you surely will have to find them experimentally.
-The best way is perhaps to run the command in 2 times and look inside the first file generated `authors_tmp.txt` where the users column began and end.
+Be aware that if your user logins contain spaces, you will need to use the `cut` command instead. The parameters of the `cut` command (column of beginning and column of end) depend on multiple parameters and you surely will have to find them experimentally.
+The best way is perhaps to run the command 2 times and look inside the first file generated `authors_tmp.txt` where the users column began and end.
 
     tf history $/Project1/Trunk /collection:"http://tfs:8080/tfs/TeamProjectCollectionUrl" /recursive > authors_tmp.txt
-    cat authors_tmp.txt | cut -b 11-28 | tail -n+3 | uniq | sort | uniq > authors.txt
+    cat authors_tmp.txt | cut -b 11-28 | tail -n+3 | sort -u > authors.txt
 
 ### Set a custom Tfs Workspace directory
 
