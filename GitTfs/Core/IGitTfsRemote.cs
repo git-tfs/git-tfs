@@ -72,6 +72,7 @@ namespace Sep.Git.Tfs.Core
         void UpdateTfsHead(string commitHash, int changesetId);
         void EnsureTfsAuthenticated();
         bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath);
+        void DeleteShelveset(string shelvesetName);
     }
 
     public static class IGitTfsRemoteExt
