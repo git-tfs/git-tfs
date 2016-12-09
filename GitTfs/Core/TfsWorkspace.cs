@@ -52,6 +52,11 @@ namespace Sep.Git.Tfs.Core
             _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
         }
 
+        public void DeleteShelveset(string shelvesetName)
+        {
+            _tfsHelper.DeleteShelveset(_workspace, shelvesetName);
+        }
+
         public int CheckinTool(Func<string> generateCheckinComment)
         {
             var pendingChanges = _workspace.GetPendingChanges();
