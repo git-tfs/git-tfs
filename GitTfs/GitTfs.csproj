@@ -105,6 +105,7 @@
     <Compile Include="Commands\ResetRemote.cs" />
     <Compile Include="Commands\Create.cs" />
     <Compile Include="Commands\ListRemoteBranches.cs" />
+    <Compile Include="Commands\ShelveDelete.cs" />
     <Compile Include="Commands\Subtree.cs" />
     <Compile Include="ConfigProperties.cs" />
     <Compile Include="Core\DirectoryTidier.cs" />
