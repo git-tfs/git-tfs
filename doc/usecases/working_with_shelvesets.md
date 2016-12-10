@@ -58,4 +58,10 @@ To create the shelveset, just do:
 
     git tfs shelve "try to solve bug234"
 
+# Delete a shelveset
+
+When you no longer need the shelveset, you can delete it from TFS by using:
+
+    git tfs shelve-delete "try to solve bug234"
+
 
