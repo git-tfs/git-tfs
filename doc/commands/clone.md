@@ -53,7 +53,7 @@ into a new directory `Project1`, do this:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1
 
-Note: Equivalent to cloning with dependency branches (with option `--branches=auto`) if you ar cloning the trunk branch.
+Note: Equivalent to cloning with dependency branches (with option `--branches=auto`) if you are cloning the trunk branch.
 
 ### Clone from a specific changeset
 
@@ -91,26 +91,25 @@ Note:
 and will try to manage all the merge changesets accordingly (See [Merge changesets and branches](#merge-changesets-and-branches) for more details).
 * It is highly recommended to clone the root branch ( the branch that has no parents, here $/Project1/Trunk ) to be able to init the other branches after.
 If you clone the branch $/Project1/Branch, you will never able to init the root branch $/Project1/Trunk after.
-* Some complex branch scenario possible with Tfs are actually not supported and the clone could end up with an error.
+* Some complex branch scenario possible with TFS are actually not supported and the clone could end up with an error.
 If that's the case, you will be obliged to clone without branch support and use the option `--branches=none`
 
 ### Clone only the trunk (without dependency branches or a branch)
 
-If you want to clone the trunk without cloning dependency branches (because for example it fails at managing these branches) or you want to clone a children branch instead,
-you could use the option `--branches=none`.
+If you want to clone the trunk without cloning dependency branches (because for example it fails at managing these branches) or you want to clone a child branch instead, you could use the option `--branches=none`.
 
 Then, do this (the clone will be done in the `MyProject1Directory` directory):
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk MyProject1Directory --branches=none
 
 Note:
-    * This is way to clone that has the more chances to succeed (when you have a complex branch history with some cases not supported by git-tfs).
+    * This is a way to clone that has the more chances to succeed (when you have a complex branch history with some cases not supported by git-tfs).
     * This is the one to choose when you clone another tfs path that the trunk.
-    * All the merged branches are ignored and merges changesets are treated as normal changesets.
+    * All the merged branches are ignored and merge changesets are treated as normal changesets.
 
 ### Merge changesets and branches
 
-Since version v0.21, when cloning the trunk from TFS, if git-tfs encounter a merge changeset, it initialize and fetch automatically the other branch merged.
+Since version v0.21, when cloning the trunk from TFS, if git-tfs encounters a merge changeset, it initializes and fetches automatically the other branch merged.
 
 Suppose you have on TFS:
 
@@ -118,11 +117,11 @@ Suppose you have on TFS:
                \           /
                 M <- N <- O <- P <- Q    $/Project1/Branch
 
-When cloning the tfs branch `$/Project1/Trunk`, after having fetch changesets A to E, git-tfs encounter merge changeset X. When it did, git-tfs initialize also the tfs branch `$/Project1/Branch` and fetch changeset M to O to be able to create the merge commit X and then continue to fetch changesets Y and Z.
+When cloning the tfs branch `$/Project1/Trunk`, after having fetched changesets A to E, git-tfs encountered merge changeset X. When it did, git-tfs also initialized the TFS branch `$/Project1/Branch` and fetched changesets M to O to be able to create the merge commit X and then continued to fetch changesets Y and Z.
 
-If you don't want to initialize the merged branches automatically ( or you can't because your use of TFS is not supported), you could use the option `--branches=none` to disable it!
+If you don't want to initialize the merged branches automatically (or you can't because your use of TFS is not supported), you could use the option `--branches=none` to disable it.
 
-Note: To successfully process the merge changeset (and come from an older version than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right click on a folder and choose `Branching and Merging` -> `Convert to Branch`.
+Note: To successfully process the merge changeset (or come from a version older than TFS2010), you should have converted all the folders corresponding to a TFS branch to a branch in TFS (even the old deleted branches). To do that, open the 'Source Control Explorer', right click on a folder and choose `Branching and Merging` -> `Convert to Branch`.
 
 ### What repository path to clone?
 
@@ -132,16 +131,16 @@ If you don't know exactly what repository path to clone, see [list-remote-branch
 
 **Prerequisite**: To use this feature, all your source code folders corresponding to branches
 should be converted into branches (a notion introduced by TFS2010).
-To change that, you should open 'Source Control Explorer' and then, for each folder corresponding to a branch, right-click on your source folder and select 'Branching and Merging' > 'Convert to branch'.
+To change that, you should open 'Source Control Explorer' and then, for each folder corresponding to a branch, right-click on your source folder and select `Branching and Merging` -> `Convert to Branch`.
 
-If you want to clone your entire repository with all the branches or that the tfs branches are merged through merge changeset, perhaps you should use the option `--branches=all`:
+If you want to clone your entire repository with all the branches or that the TFS branches are merged through merge changeset, perhaps you should use the option `--branches=all`:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1/Trunk --branches=all
 
-All the tfs history (and all the branches) and the merge changesets will consequently be fetched from TFS and created in the git repository!
+All the TFS history (and all the branches) and the merge changesets will consequently be fetched from TFS and created in the git repository.
 
 Note:
-* Here again, some complex branch scenario possible with Tfs are actually not supported and the clone could end up with an error.
+* Here again, some complex branch scenario possible with TFS are actually not supported and the clone could end up with an error.
 If that's the case, you will be obliged to clone without branch support and use the option `--branches=none`
 
 ### Clone from a specific changeset
@@ -191,13 +190,13 @@ Once the clone is done, the file is store in the `.git` folder (with the name `g
 
 Note: You could use the `tf history` command to help you find all the Tfs users logins that should be found in the `authors.txt` file.
 
-    tf history $/Project1/Trunk /collection:"http://tfs:8080/tfs/TeamProjectCollectionUrl" /recursive | cut -b 11-28 | tail -n+3 | uniq | sort | uniq > authors.txt
+    tf history $/Project1/Trunk /collection:"http://tfs:8080/tfs/TeamProjectCollectionUrl" /recursive | awk '{print $2}' | tail -n+3 | sort -u > authors.txt
 
-Be aware that the parameters of the `cut` command (column of beginning and column of end) depends of multiple parameters and that you surely will have to find them experimentally.
-The best way is perhaps to run the command in 2 times and look inside the first file generated `authors_tmp.txt` where the users column began and end.
+Be aware that if your user logins contain spaces, you will need to use the `cut` command instead. The parameters of the `cut` command (column of beginning and column of end) depend on multiple parameters and you surely will have to find them experimentally.
+The best way is perhaps to run the command 2 times and look inside the first file generated `authors_tmp.txt` where the users column began and end.
 
     tf history $/Project1/Trunk /collection:"http://tfs:8080/tfs/TeamProjectCollectionUrl" /recursive > authors_tmp.txt
-    cat authors_tmp.txt | cut -b 11-28 | tail -n+3 | uniq | sort | uniq > authors.txt
+    cat authors_tmp.txt | cut -b 11-28 | tail -n+3 | sort -u > authors.txt
 
 ### Set a custom Tfs Workspace directory
 
