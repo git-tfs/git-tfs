@@ -1440,6 +1440,11 @@ namespace Sep.Git.Tfs.VsCommon
             }
         }
 
+        public void DeleteShelveset(IWorkspace workspace, string shelvesetName)
+        {
+            VersionControl.DeleteShelveset(shelvesetName, workspace.OwnerName);
+        }
+
         protected virtual IBuildDetail GetSpecificBuildFromQueuedBuild(IQueuedBuild queuedBuild, string shelvesetName)
         {
             return queuedBuild.Build;

@@ -295,6 +295,11 @@ namespace Sep.Git.Tfs.Core
             throw DerivedRemoteException;
         }
 
+        public void DeleteShelveset(string shelvesetName)
+        {
+            throw DerivedRemoteException;
+        }
+
         public RemoteInfo RemoteInfo
         {
             get { throw DerivedRemoteException; }

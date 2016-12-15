@@ -51,6 +51,8 @@ namespace Sep.Git.Tfs.Core
         int CheckinTool(Func<string> generateCheckinComment);
         void Merge(string sourceTfsPath, string tfsRepositoryPath);
 
+        void DeleteShelveset(string shelvesetName);
+
         /// <summary>
         /// Gets the remote for which this workspace was created.
         /// </summary>

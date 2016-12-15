@@ -525,6 +525,11 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
+        public void DeleteShelveset(IWorkspace workspace, string shelvesetName)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         private class FakeVersionControlServer : IVersionControlServer
