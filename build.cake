@@ -90,7 +90,12 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 Task("Clean").Description("Clean the working directory")
 	.Does(() =>
 {
- //	CleanDirectory(buildDir);
+	MSBuild(PathToSln, settings => {
+
+		settings.SetConfiguration(Configuration)
+			.SetVerbosity(Verbosity.Minimal)
+			.WithTarget("Clean");
+	});
 });
 
 Task("InstallTfsModels").Description("Install the missing TFS object models to be able to build git-tfs")
