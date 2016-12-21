@@ -960,6 +960,11 @@ namespace Sep.Git.Tfs.Core
             return TfsRepositoryPath.Equals(tfsRepositoryPath, StringComparison.OrdinalIgnoreCase);
         }
 
+        public void DeleteShelveset(string shelvesetName)
+        {
+            WithWorkspace(null, workspace => workspace.DeleteShelveset(shelvesetName));
+        }
+
         private bool MatchesTfsUrl(string tfsUrl)
         {
             return TfsUrl.Equals(tfsUrl, StringComparison.OrdinalIgnoreCase) || Aliases.Contains(tfsUrl, StringComparison.OrdinalIgnoreCase);

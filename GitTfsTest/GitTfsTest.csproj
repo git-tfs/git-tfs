@@ -97,6 +97,7 @@
     <Compile Include="Commands\InitOptionsTest.cs" />
     <Compile Include="Commands\InitBranchTest.cs" />
     <Compile Include="Commands\CloneTest.cs" />
+    <Compile Include="Commands\ShelveDeleteTest.cs" />
     <Compile Include="Core\ChangeSieveTests.cs" />
     <Compile Include="Core\CommitParserTests.cs" />
     <Compile Include="Core\ConfigPropertyLoaderTests.cs" />

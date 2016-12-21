@@ -119,6 +119,7 @@ This is the complete list of commands in the master branch on github.
 * [checkin](doc/commands/checkin.md): *checkin your git commits as one tfs changeset* - since 0.10
 * [checkintool](doc/commands/checkintool.md): *checkin in tfs using the tfs checkin dialog* - since 0.10
 * [shelve](doc/commands/shelve.md): *create a shelveset from git commits* - since 0.9
+* [shelve-delete](doc/commands/shelve-delete.md): *delete a shelveset on tfs* - since 0.25
 
 ### Manage TFS branches
 
