@@ -8,7 +8,7 @@
 // ARGUMENTS
 //////////////////////////////////////////////////////////////////////
 readonly var Target = Argument("target", "Default");
-readonly var Configuration = Argument("configuration", "Release");
+readonly var Configuration = Argument("configuration", "Debug");
 readonly var IsDryRun = Argument<bool>("isDryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
@@ -44,10 +44,16 @@ bool _buildAllVersion = (Target == "AppVeyorRelease");
 Task("Help").Description("This help...")
 	.Does(() =>
 {
-	Information("Release process:");
-	Information("----------------");
+	Information("Trigger the release process to AppVeyor:");
+	Information("----------------------------------------");
 	Information("1. Setup the personal data in `PersonalTokens.config` file");
 	Information("2. run `.\build.ps1 -Target \"TriggerRelease\"`");
+	Information("");
+
+	Information("Release process from local machine:");
+	Information("-----------------------------------");
+	Information("1. Setup the personal data in `PersonalTokens.config` file");
+	Information("2. run `.\build.ps1 -Target \"Release\" -Configuration \"Release\"`");
 	Information("");
 
 	Information("Available tasks:");
