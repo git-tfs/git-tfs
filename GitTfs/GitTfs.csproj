@@ -288,10 +288,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <PropertyGroup>
-    <PreBuildEvent Condition="'$(OS)' == 'Windows_NT'">xcopy /S /Y "$(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries" "$(TargetDir)"\NativeBinaries\</PreBuildEvent>
-    <PreBuildEvent Condition="'$(OS)' != 'Windows_NT'">cp -Rp "$(SolutionDir)/lib/libgit2sharp/Lib/NativeBinaries" "$(TargetDir)"</PreBuildEvent>
-  </PropertyGroup>
   <Import Project="..\.paket\paket.targets" />
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5')">
