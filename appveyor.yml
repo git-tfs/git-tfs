@@ -22,6 +22,7 @@ after_build:
       Get-ChildItem .\packages -Recurse -Filter Microsoft.WITDataStore*.dll | Copy-Item -Destination "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config\GitTfs.Vs2015\"
       $zipFile= "git-tfs_$Env:APPVEYOR_REPO_COMMIT.zip"
       7z a $zipFile "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config\*" -xr!"*.pdb"
+      Push-AppveyorArtifact $zipFile
       git config --global user.name "For gittfs test"
       git config --global user.email gittfs@fortest.com
 test:
@@ -29,5 +30,4 @@ test:
 after_test:
   - ps: |
       & ".\FunctionalTesting\smoke_tests.ps1" "$Env:APPVEYOR_BUILD_FOLDER\GitTfs\bin\$env:Config"
-      Push-AppveyorArtifact $zipFile
       Get-ChildItem .\GitTfs.Setup\GitTfs-*.msi | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
