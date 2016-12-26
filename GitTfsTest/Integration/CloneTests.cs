@@ -355,7 +355,7 @@ namespace Sep.Git.Tfs.Test.Integration
             h.AssertGitRepo("MyTeamProject");
 
             var branchCollection = h.Repository("MyTeamProject").Branches.Cast<Branch>().ToList();
-            var branch = branchCollection.FirstOrDefault(b => b.Name == "Branch");
+            var branch = branchCollection.FirstOrDefault(b => b.FriendlyName == "Branch");
             Assert.NotNull(branch);
 
             // So, it turns out GetRootChangesetForBranch is really the unit under test here.

@@ -1,6 +1,6 @@
 ﻿#appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
 version: 0.25.1.{build}
-platform: Any CPU
+platform: x86
 clone_folder: c:\gittfs
 clone_depth: 1
 # build cache to preserve files/folders between builds

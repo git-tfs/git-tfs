@@ -9,7 +9,7 @@
     <VersionFilePath>$(SolutionDir)\Version.cs</VersionFilePath>
 
     <!-- git-tfs can run as 32-bit or 64-bit. -->
-    <TargetPlatform>Any CPU</TargetPlatform>
+    <TargetPlatform>x86</TargetPlatform>
 
     <!-- Where git-tfs.exe and its dependencies are built. -->
     <BuildDir>$(SolutionDir)/GitTfs/bin/Release</BuildDir>
