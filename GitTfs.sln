@@ -87,7 +87,4 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = GitTfs1.vsmdi
-	EndGlobalSection
 EndGlobal
