@@ -43,6 +43,8 @@ a TFS source tree and fetch all the changesets
 								 all the branches during the clone
 		  --batch-size=VALUE     Size of the batch of tfs changesets fetched (-1 for all in one batch)
       -c, --changeset=VALUE      The changeset to clone from (must be a number)
+      -t, --up-to=VALUE          up-to changeset # (optional, -1 for up to 
+                                   maximum, must be a number, not prefixed with C)
 		  --resumable            if an error occurred, try to continue when you restart clone
 								 with same parameters
 
