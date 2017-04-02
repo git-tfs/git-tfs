@@ -1,0 +1,402 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7BEA3EC2-7111-4A5A-831F-2920C95EA356}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GitTfs.Vs2017</RootNamespace>
+    <AssemblyName>GitTfs.Vs2017</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\GitTfs.VsCommon\ParentForm.cs">
+      <Link>ParentForm.cs</Link>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\GitTfs.VsCommon\Retry.cs">
+      <Link>Retry.cs</Link>
+    </Compile>
+    <Compile Include="..\GitTfs.VsCommon\TfsHelper.Common.cs">
+      <Link>TfsHelper.Common.cs</Link>
+    </Compile>
+    <Compile Include="..\GitTfs.VsCommon\TfsPlugin.cs">
+      <Link>TfsPlugin.cs</Link>
+    </Compile>
+    <Compile Include="..\GitTfs.VsCommon\Wrappers.cs">
+      <Link>Wrappers.cs</Link>
+    </Compile>
+    <Compile Include="..\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="paket.references" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5')">
+      <PropertyGroup>
+        <__paket__Microsoft_TeamFoundationServer_ExtendedClient_targets>Microsoft.TeamFoundationServer.ExtendedClient</__paket__Microsoft_TeamFoundationServer_ExtendedClient_targets>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y /I "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)$(ProjectName)" /EXCLUDE:$(SolutionDir)files_to_ignore_during_post_build_copy.txt</PostBuildEvent>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="System.Net.Http.Formatting">
+          <HintPath>..\packages\vs2017\Microsoft.AspNet.WebApi.Client\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="System.Web.Http">
+          <HintPath>..\packages\vs2017\Microsoft.AspNet.WebApi.Core\lib\net45\System.Web.Http.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory">
+          <HintPath>..\packages\vs2017\Microsoft.IdentityModel.Clients.ActiveDirectory\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory.Platform">
+          <HintPath>..\packages\vs2017\Microsoft.IdentityModel.Clients.ActiveDirectory\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.TeamFoundation.DistributedTask.Common.Contracts">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundation.DistributedTask.Common\lib\net45\Microsoft.TeamFoundation.DistributedTask.Common.Contracts.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.TeamFoundation.Build2.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.Build2.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Chat.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.Chat.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Core.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.Core.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Dashboards.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.Dashboards.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Policy.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.Policy.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.SourceControl.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.SourceControl.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Test.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.Test.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.TestManagement.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.TestManagement.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Work.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.Work.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.Client\lib\net45\Microsoft.TeamFoundation.WorkItemTracking.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.TeamFoundation.Build.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Build.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Build.Common">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Build.Common.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.DeleteTeamProject">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.DeleteTeamProject.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Diff">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Diff.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Discussion.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Discussion.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Git.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Git.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Lab.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Lab.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Lab.Common">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Lab.Common.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Lab.TestIntegration.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Lab.TestIntegration.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.Lab.WorkflowIntegration.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.Lab.WorkflowIntegration.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.ProjectManagement">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.ProjectManagement.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.SharePointReporting.Integration">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.SharePointReporting.Integration.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.TestImpact.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.TestImpact.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.TestManagement.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.TestManagement.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.TestManagement.Common">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.TestManagement.Common.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.VersionControl.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.VersionControl.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.VersionControl.Common">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.VersionControl.Common.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.VersionControl.Common.Integration">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.VersionControl.Common.Integration.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.Client">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.WorkItemTracking.Client.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.Client.DataStoreLoader">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.WorkItemTracking.Client.DataStoreLoader.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.Client.QueryLanguage">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.WorkItemTracking.Client.QueryLanguage.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.Common">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.WorkItemTracking.Common.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.Proxy">
+          <HintPath>..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\lib\net45\Microsoft.TeamFoundation.WorkItemTracking.Proxy.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="System.Threading.Tasks.Dataflow">
+          <HintPath>..\packages\vs2017\Microsoft.Tpl.Dataflow\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.TeamFoundation.Common">
+          <HintPath>..\packages\vs2017\Microsoft.VisualStudio.Services.Client\lib\net45\Microsoft.TeamFoundation.Common.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.Services.Common">
+          <HintPath>..\packages\vs2017\Microsoft.VisualStudio.Services.Client\lib\net45\Microsoft.VisualStudio.Services.Common.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.Services.WebApi">
+          <HintPath>..\packages\vs2017\Microsoft.VisualStudio.Services.Client\lib\net45\Microsoft.VisualStudio.Services.WebApi.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.Services.Client.Interactive">
+          <HintPath>..\packages\vs2017\Microsoft.VisualStudio.Services.InteractiveClient\lib\net45\Microsoft.VisualStudio.Services.Client.Interactive.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.0'">
+      <ItemGroup>
+        <Reference Include="Newtonsoft.Json">
+          <HintPath>..\packages\vs2017\Newtonsoft.Json\lib\net40\Newtonsoft.Json.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="Newtonsoft.Json">
+          <HintPath>..\packages\vs2017\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="System.Runtime.Serialization">
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="System.ServiceModel">
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Microsoft.ServiceBus">
+          <HintPath>..\packages\vs2017\WindowsAzure.ServiceBus\lib\net45-full\Microsoft.ServiceBus.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\build\$(__paket__Microsoft_TeamFoundationServer_ExtendedClient_targets).targets" Condition="Exists('..\packages\vs2017\Microsoft.TeamFoundationServer.ExtendedClient\build\$(__paket__Microsoft_TeamFoundationServer_ExtendedClient_targets).targets')" Label="Paket" />
+</Project>

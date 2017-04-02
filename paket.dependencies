@@ -23,3 +23,11 @@ group VS2015
 	source https://www.nuget.org/api/v2/
 	nuget Microsoft.TeamFoundationServer.Client ~> 14.0
 	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
+
+group VS2017
+	framework: auto-detect
+	source https://www.nuget.org/api/v2/
+	nuget Microsoft.TeamFoundationServer.Client ~> 15.0
+	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 15.0
+	nuget Microsoft.VisualStudio.Setup.Configuration.Interop
+

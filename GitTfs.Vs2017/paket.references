@@ -1,0 +1,5 @@
+﻿group VS2017
+Microsoft.TeamFoundationServer.Client
+Microsoft.TeamFoundationServer.ExtendedClient
+Microsoft.VisualStudio.Setup.Configuration.Interop
+
