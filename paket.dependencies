@@ -8,8 +8,6 @@ source https://www.nuget.org/api/v2/
 nuget nlog
 nuget NuGet.CommandLine
 nuget LibGit2Sharp
-nuget Microsoft.TeamFoundationServer.Client ~> 14.0
-nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
 nuget WixSharp 1.0.22.3 framework: >= net40
 nuget xunit
 nuget xunit.assert
@@ -19,3 +17,9 @@ nuget xunit.runner.visualstudio
 
 //console runner to be able to run it in the console
 nuget xunit.runner.console
+
+group VS2015
+	framework: auto-detect
+	source https://www.nuget.org/api/v2/
+	nuget Microsoft.TeamFoundationServer.Client ~> 14.0
+	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0

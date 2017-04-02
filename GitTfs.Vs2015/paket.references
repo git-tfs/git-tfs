@@ -1,2 +1,3 @@
+group VS2015
 Microsoft.TeamFoundationServer.Client
 Microsoft.TeamFoundationServer.ExtendedClient
