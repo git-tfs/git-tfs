@@ -347,7 +347,7 @@ namespace Sep.Git.Tfs.Core
 
                 alreadyVisitedCommits.Add(commit.Sha);
 
-                var changesetInfo = TryParseChangesetInfo(commit.Message, commit.Sha);
+                var changesetInfo = TryParseChangesetInfo(commit);
                 if (changesetInfo == null)
                 {
                     // If commit was not a TFS commit, continue searching all new parents of the commit
@@ -368,18 +368,18 @@ namespace Sep.Git.Tfs.Core
             var commit = FindCommitByChangesetId(changesetId, remoteRef);
             if (commit == null)
                 return null;
-            return TryParseChangesetInfo(commit.Message, commit.Sha);
+            return TryParseChangesetInfo(commit);
         }
 
         public TfsChangesetInfo GetCurrentTfsCommit()
         {
             var currentCommit = _repository.Head.Commits.First();
-            return TryParseChangesetInfo(currentCommit.Message, currentCommit.Sha);
+            return TryParseChangesetInfo(currentCommit);
         }
 
         public TfsChangesetInfo GetTfsCommit(GitCommit commit)
         {
-            return TryParseChangesetInfo(commit.Message, commit.Sha);
+            return TryParseChangesetInfo(commit);
         }
 
         public TfsChangesetInfo GetTfsCommit(string sha)
@@ -399,6 +399,16 @@ namespace Sep.Git.Tfs.Core
                 return commitInfo;
             }
             return null;
+        }
+
+        private TfsChangesetInfo TryParseChangesetInfo(Commit commit)
+        {
+            return TryParseChangesetInfo(commit.Message, commit.Sha);
+        }
+
+        private TfsChangesetInfo TryParseChangesetInfo(GitCommit commit)
+        {
+            return TryParseChangesetInfo(commit.Message, commit.Sha);
         }
 
         public IDictionary<string, GitObject> CreateObjectsDictionary()
