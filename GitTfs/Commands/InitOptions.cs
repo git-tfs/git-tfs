@@ -28,6 +28,8 @@ namespace Sep.Git.Tfs.Commands
                     {"bare", "Clone the TFS repository in a bare git repository", v => IsBare = v != null},
                     {"workspace=", "Set tfs workspace to a specific folder (a shorter path is better!)", v => WorkspacePath = v},
                     {"gitignore=", "Path toward the .gitignore file which be committed and used to ignore files", v => GitIgnorePath = v},
+                    { "changeset-id-notes", "If true, save TFS changeset IDs in Git notes, otherwise use Git commit messages (default: false)",
+                        v => ChangesetIdNotes = v != null }
                 };
             }
         }
@@ -56,5 +58,6 @@ namespace Sep.Git.Tfs.Commands
         public string GitInitAutoCrlf { get; set; }
         public string GitInitIgnoreCase { get; set; }
         public string GitIgnorePath { get; set; }
+        public bool ChangesetIdNotes { get; set; }
     }
 }

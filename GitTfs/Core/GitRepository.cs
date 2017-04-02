@@ -13,6 +13,8 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitRepository : GitHelpers, IGitRepository
     {
+        private const string NotesNamespace = "commits";
+
         private readonly IContainer _container;
         private readonly Globals _globals;
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
@@ -27,6 +29,7 @@ namespace Sep.Git.Tfs.Core
             GitDir = gitDir;
             _repository = new Repository(GitDir);
             _remoteConfigReader = remoteConfigReader;
+            ChangesetIdNotes = GetConfig(GitTfsConstants.ChangesetIdNotes, false);
         }
 
         ~GitRepository()
@@ -35,17 +38,37 @@ namespace Sep.Git.Tfs.Core
                 _repository.Dispose();
         }
 
+        private string BuildCommitMessage(string message, string commitInfo)
+        {
+            var builder = new StringWriter();
+            builder.WriteLine(message);
+            builder.WriteLine(commitInfo);
+            message = builder.ToString(); return message;
+        }
+
         public GitCommit Commit(LogEntry logEntry)
         {
             var parents = logEntry.CommitParents.Select(sha => _repository.Lookup<Commit>(sha));
+            var author = new Signature(logEntry.AuthorName, logEntry.AuthorEmail, logEntry.Date.ToUniversalTime());
+            var committer = new Signature(logEntry.CommitterName, logEntry.CommitterEmail, logEntry.Date.ToUniversalTime());
+            var commitInfo = String.Format(
+                GitTfsConstants.TfsCommitInfoFormat,
+                logEntry.Remote.TfsUrl,
+                logEntry.Remote.TfsRepositoryPath,
+                logEntry.ChangesetId);
+            var message = ChangesetIdNotes ? logEntry.Log : BuildCommitMessage(logEntry.Log, commitInfo);
             var commit = _repository.ObjectDatabase.CreateCommit(
-                new Signature(logEntry.AuthorName, logEntry.AuthorEmail, logEntry.Date.ToUniversalTime()),
-                new Signature(logEntry.CommitterName, logEntry.CommitterEmail, logEntry.Date.ToUniversalTime()),
-                logEntry.Log,
+                author,
+                committer,
+                message,
                 logEntry.Tree,
                 parents,
                 false);
             changesetsCache[logEntry.ChangesetId] = commit.Sha;
+
+            if (ChangesetIdNotes)
+                _repository.Notes.Add(commit.Id, commitInfo, author, committer, NotesNamespace);
+
             return new GitCommit(commit);
         }
 
@@ -70,6 +93,7 @@ namespace Sep.Git.Tfs.Core
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
+        public bool ChangesetIdNotes { get; set; }
 
         protected override GitProcess Start(string[] command, Action<ProcessStartInfo> initialize)
         {
@@ -403,12 +427,20 @@ namespace Sep.Git.Tfs.Core
 
         private TfsChangesetInfo TryParseChangesetInfo(Commit commit)
         {
-            return TryParseChangesetInfo(commit.Message, commit.Sha);
+            if (!ChangesetIdNotes)
+                return TryParseChangesetInfo(commit.Message, commit.Sha);
+
+            var note = _repository.Notes[NotesNamespace, commit.Id];
+            return note != null ? TryParseChangesetInfo(note.Message, commit.Sha) : null;
         }
 
         private TfsChangesetInfo TryParseChangesetInfo(GitCommit commit)
         {
-            return TryParseChangesetInfo(commit.Message, commit.Sha);
+            if (!ChangesetIdNotes)
+                return TryParseChangesetInfo(commit.Message, commit.Sha);
+
+            var note = _repository.Notes[NotesNamespace, commit.Id];
+            return note != null ? TryParseChangesetInfo(note.Message, commit.Sha) : null;
         }
 
         public IDictionary<string, GitObject> CreateObjectsDictionary()
@@ -454,7 +486,11 @@ namespace Sep.Git.Tfs.Core
                 message.AppendLine(NormalizeLineEndings(comm.Message));
             }
 
-            return GitTfsConstants.TfsCommitInfoRegex.Replace(message.ToString(), "").Trim(' ', '\r', '\n');
+            var messageStr = message.ToString();
+            if (!ChangesetIdNotes)
+                messageStr = GitTfsConstants.TfsCommitInfoRegex.Replace(messageStr, "");
+
+            return messageStr.Trim(' ', '\r', '\n');
         }
 
         private static string NormalizeLineEndings(string input)
@@ -626,8 +662,20 @@ namespace Sep.Git.Tfs.Core
             Commit commit = null;
             foreach (var c in commitsFromRemoteBranches)
             {
+                string message;
+                if (!ChangesetIdNotes)
+                    message = c.Message;
+                else
+                {
+                    var note = _repository.Notes[NotesNamespace, c.Id];
+                    if (note == null)
+                        continue;
+
+                    message = note.Message;
+                }
+
                 int id;
-                if (TryParseChangesetId(c.Message, out id))
+                if (TryParseChangesetId(message, out id))
                 {
                     changesetsCache[id] = c.Sha;
                     if (id == changesetId)
@@ -652,7 +700,7 @@ namespace Sep.Git.Tfs.Core
         public void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate)
         {
             Signature author = new Signature(owner, emailOwner, creationDate);
-            _repository.Notes.Add(new ObjectId(sha), content, author, author, "commits");
+            _repository.Notes.Add(new ObjectId(sha), content, author, author, NotesNamespace);
         }
 
         public void ResetHard(string sha)

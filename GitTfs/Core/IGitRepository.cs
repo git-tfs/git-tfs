@@ -8,6 +8,7 @@ namespace Sep.Git.Tfs.Core
     public interface IGitRepository : IGitHelpers
     {
         string GitDir { get; set; }
+        bool ChangesetIdNotes { get; set; }
         string GetConfig(string key);
         T GetConfig<T>(string key);
         T GetConfig<T>(string key, T defaultValue);
