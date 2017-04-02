@@ -187,7 +187,7 @@ namespace Sep.Git.Tfs.VsCommon
                 if (changesets.Length > 0)
                     start = changesets[changesets.Length - 1].ChangesetId + 1;
 
-                // don't take the enumerator produced by a foreach statement or a yield statement, as there are references 
+                // don't take the enumerator produced by a foreach statement or a yield statement, as there are references
                 // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
                 for (int i = 0; i < changesets.Length; i++)
                 {
@@ -451,7 +451,7 @@ namespace Sep.Git.Tfs.VsCommon
         }
 
         /// <summary>
-        /// Gets the relevant TFS <see cref="ChangesetSummary"/> for the root changeset given a set 
+        /// Gets the relevant TFS changeset ID for the root changeset given a set
         /// of <see cref="ExtendedMerge"/> objects and a given <paramref name="tfsPathParentBranch"/>.
         /// </summary>
         /// <param name="merges">An array of <see cref="ExtendedMerge"/> objects describing the a set of merges.</param>
@@ -459,12 +459,11 @@ namespace Sep.Git.Tfs.VsCommon
         /// <param name="tfsPathBranchToCreate">The tfs Path Branch To Create.</param>
         /// <param name="renameFromBranch"></param>
         /// <remarks>
-        /// Each <see cref="ChangeType"/> uses the SourceChangeset, SourceItem, TargetChangeset, and TargetItem 
+        /// Each <see cref="ChangeType"/> uses the SourceChangeset, SourceItem, TargetChangeset, and TargetItem
         /// properties with different semantics, depending on what it needs to describe, so the strategy to determine
         /// whether we are interested in a given ExtendedMerge summary depends on the SourceItem's <see cref="ChangeType"/>.
         /// </remarks>
-        /// <returns>the <see cref="ChangesetSummary"/> of the changeset found.
-        /// </returns>
+        /// <returns>Returns an integer representing the found changeset ID.</returns>
         private int GetRelevantChangesetBasedOnChangeType(IEnumerable<MergeInfo> merges, string tfsPathParentBranch, string tfsPathBranchToCreate, out string renameFromBranch)
         {
             renameFromBranch = null;
@@ -811,11 +810,11 @@ namespace Sep.Git.Tfs.VsCommon
         }
         /// <summary>
         /// Method to help improve the process that deletes workspaces used by Git-TFS.
-        /// The the delete fails, the process pauses for 5 seconds and retry 25 times before reporting failures.        
+        /// The the delete fails, the process pauses for 5 seconds and retry 25 times before reporting failures.
         /// </summary>
         /// <param name="workspace"></param>
         /// <remarks>
-        /// TFS randomly seems to report a workspace removed/deleted BUT subsequent calls by Git-TFS suggest that the delete hasn't actually been completed. 
+        /// TFS randomly seems to report a workspace removed/deleted BUT subsequent calls by Git-TFS suggest that the delete hasn't actually been completed.
         /// This suggest that deletes may be queued and take a lower priority than other actions, especially if the TFS server is under load.
         /// </remarks>
         private void TryToDeleteWorkspace(Workspace workspace)
@@ -823,7 +822,7 @@ namespace Sep.Git.Tfs.VsCommon
             //  Try and ensure the client and TFS Server are synchronized.
             workspace.Refresh();
 
-            //  When deleting a workspace we may need to allow the TFS server some time to complete existing processing or re-try the workspace delete.            
+            //  When deleting a workspace we may need to allow the TFS server some time to complete existing processing or re-try the workspace delete.
             var deleteWsCompleted = Retry.Do(() => workspace.Delete(), TimeSpan.FromSeconds(5), 25);
 
             // Include trace information about the success of the TFS API that deletes the workspace.
@@ -1084,7 +1083,7 @@ namespace Sep.Git.Tfs.VsCommon
                         throw new InvalidOperationException("You can't query ContentLength before downloading the file");
                     // It is not great solution, but at least makes the contract explicit.
                     // We can't actually save downloaded file in this class, because if nobody asks
-                    // for it - we won't know when it is safe to delete it and it will stay in the 
+                    // for it - we won't know when it is safe to delete it and it will stay in the
                     // system forever, which is bad. Implementing finalizer to delete file is also bad solution:
                     // suppose process was killed in the middle of many-megabyte operation on thousands of files
                     // if we delete them as soon as they are not used - only current file will remain. Otherwise
@@ -1356,9 +1355,9 @@ namespace Sep.Git.Tfs.VsCommon
         /// <summary>
         /// Try to get the value of a key beginning with the name 'startOfName'
         /// and present in the tree path 'path' in the 'Current user' registry root.
-        /// 
+        ///
         /// ex:
-        /// 
+        ///
         /// The value "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions" for parameter 'startOfName'
         /// will find "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.24712"
         /// and "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions,14.0.23102"
