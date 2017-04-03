@@ -1,55 +1,46 @@
-FRAMEWORK: NET452
+FRAMEWORK: NET40, NET45, NET452
 NUGET
   remote: https://www.nuget.org/api/v2
-<<<<<<< HEAD
     LibGit2Sharp (0.23.1)
       LibGit2Sharp.NativeBinaries (1.0.164)
     LibGit2Sharp.NativeBinaries (1.0.164)
-=======
-    LibGit2Sharp (0.22)
-      LibGit2Sharp.NativeBinaries (1.0.129)
-    LibGit2Sharp.NativeBinaries (1.0.129)
     MSBuildTasks (1.4.0.45)
-    NLog (4.3.10)
-    NuGet.CommandLine (3.4.3)
+    NLog (4.4.5)
+    NuGet.CommandLine (3.5)
     WixSharp (1.0.22.3)
-    xunit (2.1)
-      xunit.assert (2.1)
-      xunit.core (2.1)
-    xunit.abstractions (2.0) - framework: net45
-    xunit.assert (2.1)
-    xunit.core (2.1)
-      xunit.extensibility.core (2.1) - framework: net45
-      xunit.extensibility.execution (2.1) - framework: net45
-    xunit.extensibility.core (2.1) - framework: net45
-      xunit.abstractions (2.0)
-    xunit.extensibility.execution (2.1) - framework: net45
-      xunit.extensibility.core (2.1) - framework: net45
-    xunit.runner.console (2.1)
-    xunit.runner.msbuild (2.1)
-    xunit.runner.visualstudio (2.1)
+    xunit (2.2)
+      xunit.assert (2.2)
+      xunit.core (2.2)
+    xunit.abstractions (2.0.1) - framework: net452
+    xunit.assert (2.2)
+    xunit.core (2.2)
+      xunit.extensibility.core (2.2)
+      xunit.extensibility.execution (2.2)
+    xunit.extensibility.core (2.2)
+      xunit.abstractions (>= 2.0.1) - framework: net452
+    xunit.extensibility.execution (2.2)
+      xunit.extensibility.core (2.2) - framework: net452
+    xunit.runner.console (2.2)
+    xunit.runner.msbuild (2.2)
+    xunit.runner.visualstudio (2.2)
 
 GROUP VS2015
-FRAMEWORK: NET40, NET45
+FRAMEWORK: NET40, NET45, NET452
 NUGET
   remote: https://www.nuget.org/api/v2
->>>>>>> Add VS2015 dependency group to paket.depenencies
     Microsoft.AspNet.WebApi.Client (5.2.3)
-      Newtonsoft.Json (>= 6.0.4)
+      Newtonsoft.Json (>= 6.0.4) - framework: net45, net452
     Microsoft.AspNet.WebApi.Core (5.2.3)
       Microsoft.AspNet.WebApi.Client (>= 5.2.3)
     Microsoft.IdentityModel.Clients.ActiveDirectory (3.13.9)
-<<<<<<< HEAD
-    Microsoft.IdentityModel.Logging (1.1.3)
-    Microsoft.IdentityModel.Tokens (5.1.3)
-      Microsoft.IdentityModel.Logging (>= 1.1.3)
-      Newtonsoft.Json (>= 9.0.1)
-=======
->>>>>>> Add VS2015 dependency group to paket.depenencies
+    Microsoft.IdentityModel.Logging (1.1.3) - framework: net452
+    Microsoft.IdentityModel.Tokens (5.1.3) - framework: net452
+      Microsoft.IdentityModel.Logging (>= 1.1.3) - framework: net452
+      Newtonsoft.Json (>= 9.0.1) - framework: net452
     Microsoft.TeamFoundationServer.Client (14.102)
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2)
-      Microsoft.VisualStudio.Services.Client (14.102)
-      Newtonsoft.Json (>= 6.0.8)
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45, net452
+      Microsoft.VisualStudio.Services.Client (14.102) - framework: net45, net452
+      Newtonsoft.Json (>= 6.0.8) - framework: net45, net452
     Microsoft.TeamFoundationServer.ExtendedClient (14.102)
       Microsoft.AspNet.WebApi.Client (>= 5.2.2)
       Microsoft.AspNet.WebApi.Core (>= 5.2.2)
@@ -60,37 +51,42 @@ NUGET
       Newtonsoft.Json (>= 6.0.8)
       System.IdentityModel.Tokens.Jwt (>= 4.0)
     Microsoft.VisualStudio.Services.Client (14.102)
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2)
-      Newtonsoft.Json (>= 6.0.8)
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45, net452
+      Newtonsoft.Json (>= 6.0.8) - framework: net45, net452
     Microsoft.VisualStudio.Services.InteractiveClient (14.102)
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45
-      Microsoft.IdentityModel.Clients.ActiveDirectory (>= 2.16.204221202) - framework: net45
-      Microsoft.VisualStudio.Services.Client (14.102) - framework: net45
-      Newtonsoft.Json (>= 6.0.8) - framework: net45
-      System.IdentityModel.Tokens.Jwt (>= 4.0) - framework: net45
-      WindowsAzure.ServiceBus (>= 2.5.1) - framework: net45
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45, net452
+      Microsoft.IdentityModel.Clients.ActiveDirectory (>= 2.16.204221202) - framework: net45, net452
+      Microsoft.VisualStudio.Services.Client (14.102) - framework: net45, net452
+      Newtonsoft.Json (>= 6.0.8) - framework: net45, net452
+      System.IdentityModel.Tokens.Jwt (>= 4.0) - framework: net45, net452
+      WindowsAzure.ServiceBus (>= 2.5.1) - framework: net45, net452
     Newtonsoft.Json (10.0.2)
     System.IdentityModel.Tokens.Jwt (5.1.3)
-    WindowsAzure.ServiceBus (4.0) - framework: net45
+      Microsoft.IdentityModel.Tokens (>= 5.1.3) - framework: net452
+    WindowsAzure.ServiceBus (4.0) - framework: net45, net452
 
 GROUP VS2017
-FRAMEWORK: NET40, NET45
+FRAMEWORK: NET40, NET45, NET452
 NUGET
   remote: https://www.nuget.org/api/v2
     Microsoft.AspNet.WebApi.Client (5.2.3)
-      Newtonsoft.Json (>= 6.0.4) - framework: net45
+      Newtonsoft.Json (>= 6.0.4) - framework: net45, net452
     Microsoft.AspNet.WebApi.Core (5.2.3)
       Microsoft.AspNet.WebApi.Client (>= 5.2.3)
     Microsoft.IdentityModel.Clients.ActiveDirectory (3.13.9)
-    Microsoft.TeamFoundation.DistributedTask.Common (15.112.1) - framework: net45
-      Microsoft.Tpl.Dataflow (>= 4.5.24) - framework: net45
-      Microsoft.VisualStudio.Services.Client (15.112.1) - framework: net45
-      Newtonsoft.Json (>= 8.0.3) - framework: net45
+    Microsoft.IdentityModel.Logging (1.1.3) - framework: net452
+    Microsoft.IdentityModel.Tokens (5.1.3) - framework: net452
+      Microsoft.IdentityModel.Logging (>= 1.1.3) - framework: net452
+      Newtonsoft.Json (>= 9.0.1) - framework: net452
+    Microsoft.TeamFoundation.DistributedTask.Common (15.112.1) - framework: net45, net452
+      Microsoft.Tpl.Dataflow (>= 4.5.24) - framework: net45, net452
+      Microsoft.VisualStudio.Services.Client (15.112.1) - framework: net45, net452
+      Newtonsoft.Json (>= 8.0.3) - framework: net45, net452
     Microsoft.TeamFoundationServer.Client (15.112.1)
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45
-      Microsoft.TeamFoundation.DistributedTask.Common (15.112.1) - framework: net45
-      Microsoft.VisualStudio.Services.Client (15.112.1) - framework: net45
-      Newtonsoft.Json (>= 8.0.3) - framework: net45
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45, net452
+      Microsoft.TeamFoundation.DistributedTask.Common (15.112.1) - framework: net45, net452
+      Microsoft.VisualStudio.Services.Client (15.112.1) - framework: net45, net452
+      Newtonsoft.Json (>= 8.0.3) - framework: net45, net452
     Microsoft.TeamFoundationServer.ExtendedClient (15.112.1)
       Microsoft.AspNet.WebApi.Client (>= 5.2.2)
       Microsoft.AspNet.WebApi.Core (>= 5.2.2)
@@ -100,17 +96,19 @@ NUGET
       Microsoft.VisualStudio.Services.InteractiveClient (15.112.1)
       Newtonsoft.Json (>= 8.0.3)
       System.IdentityModel.Tokens.Jwt (>= 4.0.2.206221351)
-    Microsoft.Tpl.Dataflow (4.5.24) - framework: net45
+    Microsoft.Tpl.Dataflow (4.5.24) - framework: net45, net452
     Microsoft.VisualStudio.Services.Client (15.112.1)
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45
-      Newtonsoft.Json (>= 8.0.3) - framework: net45
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45, net452
+      Newtonsoft.Json (>= 8.0.3) - framework: net45, net452
     Microsoft.VisualStudio.Services.InteractiveClient (15.112.1)
-      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45
-      Microsoft.IdentityModel.Clients.ActiveDirectory (>= 3.13.5) - framework: net45
-      Microsoft.VisualStudio.Services.Client (15.112.1) - framework: net45
-      Newtonsoft.Json (>= 8.0.3) - framework: net45
-      System.IdentityModel.Tokens.Jwt (>= 4.0.2.206221351) - framework: net45
-      WindowsAzure.ServiceBus (>= 3.3.2) - framework: net45
+      Microsoft.AspNet.WebApi.Client (>= 5.2.2) - framework: net45, net452
+      Microsoft.IdentityModel.Clients.ActiveDirectory (>= 3.13.5) - framework: net45, net452
+      Microsoft.VisualStudio.Services.Client (15.112.1) - framework: net45, net452
+      Newtonsoft.Json (>= 8.0.3) - framework: net45, net452
+      System.IdentityModel.Tokens.Jwt (>= 4.0.2.206221351) - framework: net45, net452
+      WindowsAzure.ServiceBus (>= 3.3.2) - framework: net45, net452
+    Microsoft.VisualStudio.Setup.Configuration.Interop (1.8.24)
     Newtonsoft.Json (10.0.2)
     System.IdentityModel.Tokens.Jwt (5.1.3)
-    WindowsAzure.ServiceBus (4.0) - framework: net45
+      Microsoft.IdentityModel.Tokens (>= 5.1.3) - framework: net452
+    WindowsAzure.ServiceBus (4.0) - framework: net45, net452

@@ -196,13 +196,21 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
       <PropertyGroup>
         <__paket__xunit_runner_visualstudio_props>net20\xunit.runner.visualstudio</__paket__xunit_runner_visualstudio_props>
       </PropertyGroup>
     </When>
   </Choose>
   <Import Project="..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_props).props" Condition="Exists('..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_props).props')" Label="Paket" />
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
+      <PropertyGroup>
+        <__paket__LibGit2Sharp_NativeBinaries_props>LibGit2Sharp.NativeBinaries</__paket__LibGit2Sharp_NativeBinaries_props>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Import Project="..\packages\LibGit2Sharp.NativeBinaries\build\$(__paket__LibGit2Sharp_NativeBinaries_props).props" Condition="Exists('..\packages\LibGit2Sharp.NativeBinaries\build\$(__paket__LibGit2Sharp_NativeBinaries_props).props')" Label="Paket" />
   <PropertyGroup>
     <PreBuildEvent Condition="'$(OS)' == 'Windows_NT'">xcopy /S /Y "$(SolutionDir)\lib\libgit2sharp\Lib\NativeBinaries" "$(TargetDir)"\NativeBinaries\</PreBuildEvent>
     <PreBuildEvent Condition="'$(OS)' != 'Windows_NT'">cp -Rp "$(SolutionDir)/lib/libgit2sharp/Lib/NativeBinaries" "$(TargetDir)"</PreBuildEvent>
@@ -219,7 +227,7 @@
   -->
   <Import Project="..\.paket\paket.targets" />
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
       <ItemGroup>
         <Reference Include="LibGit2Sharp">
           <HintPath>..\packages\LibGit2Sharp\lib\net40\LibGit2Sharp.dll</HintPath>
@@ -230,7 +238,16 @@
     </When>
   </Choose>
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.0'">
+      <ItemGroup>
+        <Reference Include="NLog">
+          <HintPath>..\packages\NLog\lib\net40\NLog.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
       <ItemGroup>
         <Reference Include="NLog">
           <HintPath>..\packages\NLog\lib\net45\NLog.dll</HintPath>
@@ -252,7 +269,7 @@
     </When>
   </Choose>
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
       <ItemGroup>
         <Reference Include="xunit.assert">
           <HintPath>..\packages\xunit.assert\lib\netstandard1.1\xunit.assert.dll</HintPath>
@@ -263,7 +280,7 @@
     </When>
   </Choose>
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
       <ItemGroup>
         <Reference Include="xunit.core">
           <HintPath>..\packages\xunit.extensibility.core\lib\netstandard1.1\xunit.core.dll</HintPath>
@@ -278,6 +295,15 @@
       <ItemGroup>
         <Reference Include="xunit.execution.desktop">
           <HintPath>..\packages\xunit.extensibility.execution\lib\net452\xunit.execution.desktop.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5'">
+      <ItemGroup>
+        <Reference Include="xunit.execution.dotnet">
+          <HintPath>..\packages\xunit.extensibility.execution\lib\netstandard1.1\xunit.execution.dotnet.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

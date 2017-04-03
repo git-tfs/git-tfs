@@ -99,6 +99,13 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
+      <PropertyGroup>
+        <__paket__WixSharp_targets>WixSharp</__paket__WixSharp_targets>
+      </PropertyGroup>
+    </When>
+  </Choose>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -109,7 +116,7 @@
   <UsingTask AssemblyFile="packages\WixSharp.1.0.22.3\build\SetEnvVar.dll" TaskName="SetEnvVar" />
   <Import Project="..\.paket\paket.targets" />
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
       <ItemGroup>
         <Reference Include="Microsoft.Deployment.WindowsInstaller">
           <HintPath>..\packages\WixSharp\lib\Microsoft.Deployment.WindowsInstaller.dll</HintPath>

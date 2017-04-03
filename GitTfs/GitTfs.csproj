@@ -281,7 +281,15 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
+      <PropertyGroup>
+        <__paket__LibGit2Sharp_NativeBinaries_props>LibGit2Sharp.NativeBinaries</__paket__LibGit2Sharp_NativeBinaries_props>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Import Project="..\packages\LibGit2Sharp.NativeBinaries\build\$(__paket__LibGit2Sharp_NativeBinaries_props).props" Condition="Exists('..\packages\LibGit2Sharp.NativeBinaries\build\$(__paket__LibGit2Sharp_NativeBinaries_props).props')" Label="Paket" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
@@ -290,7 +298,7 @@
   -->
   <Import Project="..\.paket\paket.targets" />
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
       <ItemGroup>
         <Reference Include="LibGit2Sharp">
           <HintPath>..\packages\LibGit2Sharp\lib\net40\LibGit2Sharp.dll</HintPath>
@@ -301,7 +309,16 @@
     </When>
   </Choose>
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.0'">
+      <ItemGroup>
+        <Reference Include="NLog">
+          <HintPath>..\packages\NLog\lib\net40\NLog.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.2')">
       <ItemGroup>
         <Reference Include="NLog">
           <HintPath>..\packages\NLog\lib\net45\NLog.dll</HintPath>
