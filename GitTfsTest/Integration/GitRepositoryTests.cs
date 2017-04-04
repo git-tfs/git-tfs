@@ -66,6 +66,7 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
                 g.CreateBranch("branch");
+                g.Checkout("branch");
                 c2 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/branch;C" + ChangesetIdToTrickFetch);
                 g.Checkout("master");
                 c3 = g.Commit("A merge commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
@@ -101,6 +102,7 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
                 g.CreateBranch("branch");
+                g.Checkout("branch");
                 c2 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/branch;C" + ChangesetIdToTrickFetch);
                 g.Checkout("master");
                 c3 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
@@ -167,6 +169,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 c1 = g.Commit("C1-Common", "one_file.txt");
                 c2 = g.Commit("C2-Common", "one_file.txt");
                 g.CreateBranch("branch");
+                g.Checkout("branch");
                 c4 = g.Commit("C4-branch", "another_file.txt");
                 c5 = g.Commit("C5-branch", "another_file.txt");
                 g.Checkout("master");

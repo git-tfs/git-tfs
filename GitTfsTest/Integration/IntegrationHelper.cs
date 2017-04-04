@@ -46,7 +46,9 @@ namespace Sep.Git.Tfs.Test.Integration
                     Directory.Delete(_workdir);
                     _workdir = null;
                 }
+#pragma warning disable RECS0022 // A catch clause that catches System.Exception and has an empty body
                 catch (Exception)
+#pragma warning restore RECS0022 // A catch clause that catches System.Exception and has an empty body
                 {
                 }
             }
@@ -108,7 +110,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             public void CreateBranch(string branchName)
             {
-                LibGit2Sharp.Commands.Checkout(_repo, _repo.CreateBranch(branchName));
+                _repo.CreateBranch(branchName);
             }
 
             public void Checkout(string commitishName)

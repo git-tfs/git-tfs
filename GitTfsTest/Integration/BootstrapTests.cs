@@ -91,6 +91,7 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
                 g.CreateBranch("branch");
+                g.Checkout("branch");
                 c2 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/branch;C" + ChangesetIdToTrickFetch);
             });
 
@@ -125,6 +126,7 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 c1 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
                 g.CreateBranch("branch");
+                g.Checkout("branch");
                 c2 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/branch;C" + ChangesetIdToTrickFetch);
                 g.Checkout("master");
                 c3 = g.Commit("A sample commit from TFS.\n\ngit-tfs-id: [http://server/tfs]$/MyProject/trunk;C" + ChangesetIdToTrickFetch);
