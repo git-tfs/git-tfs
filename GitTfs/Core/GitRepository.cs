@@ -29,7 +29,6 @@ namespace Sep.Git.Tfs.Core
             GitDir = gitDir;
             _repository = new Repository(GitDir);
             _remoteConfigReader = remoteConfigReader;
-            ChangesetIdNotes = GetConfig(GitTfsConstants.ChangesetIdNotes, false);
         }
 
         ~GitRepository()
@@ -93,7 +92,19 @@ namespace Sep.Git.Tfs.Core
         public string GitDir { get; set; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
-        public bool ChangesetIdNotes { get; set; }
+
+        public bool ChangesetIdNotes
+        {
+            get
+            {
+                return GetConfig(GitTfsConstants.ChangesetIdNotes, false);
+            }
+
+            set
+            {
+                SetConfig(GitTfsConstants.ChangesetIdNotes, value.ToString());
+            }
+        }
 
         protected override GitProcess Start(string[] command, Action<ProcessStartInfo> initialize)
         {

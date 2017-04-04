@@ -125,7 +125,7 @@ namespace Sep.Git.Tfs.Commands
             }
 
             _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, false.ToString());
-            _globals.Repository.SetConfig(GitTfsConstants.ChangesetIdNotes, _initOptions.ChangesetIdNotes.ToString());
+            _globals.Repository.ChangesetIdNotes = _initOptions.ChangesetIdNotes;
         }
 
         private string[] BuildInitCommand()
