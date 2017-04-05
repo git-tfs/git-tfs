@@ -146,6 +146,9 @@ namespace Sep.Git.Tfs.Commands
 
         protected virtual void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
+            if (upToChangeSet > 0 && InitialChangeset.HasValue && InitialChangeset.Value > upToChangeSet)
+                throw new GitTfsException("error: up-to changeset # must not be less than the initial one");
+
             var bareBranch = string.IsNullOrEmpty(BareBranch) ? remote.Id : BareBranch;
 
             // It is possible that we have outdated refs/remotes/tfs/<id>.
@@ -187,7 +190,7 @@ namespace Sep.Git.Tfs.Commands
                     _properties.InitialChangeset = InitialChangeset.Value;
                     _properties.PersistAllOverrides();
                     remote.QuickFetch(InitialChangeset.Value);
-                    remote.Fetch(stopOnFailMergeCommit);
+                    remote.Fetch(stopOnFailMergeCommit, upToChangeSet);
                 }
                 else
                 {
