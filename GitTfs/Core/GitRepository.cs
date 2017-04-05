@@ -42,7 +42,7 @@ namespace Sep.Git.Tfs.Core
             var builder = new StringWriter();
             builder.WriteLine(message);
             builder.WriteLine(commitInfo);
-            message = builder.ToString(); return message;
+            return builder.ToString();
         }
 
         public GitCommit Commit(LogEntry logEntry)
