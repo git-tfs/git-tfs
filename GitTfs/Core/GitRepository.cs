@@ -711,7 +711,14 @@ namespace Sep.Git.Tfs.Core
         public void CreateNote(string sha, string content, string owner, string emailOwner, DateTime creationDate)
         {
             Signature author = new Signature(owner, emailOwner, creationDate);
-            _repository.Notes.Add(new ObjectId(sha), content, author, author, NotesNamespace);
+            ObjectId objectId = new ObjectId(sha);
+
+            // Preserve existing note's contents
+            Note existingNote = _repository.Notes[NotesNamespace, objectId];
+            if (existingNote != null)
+                content = existingNote.Message + '\n' + content;
+
+            _repository.Notes.Add(objectId, content, author, author, NotesNamespace);
         }
 
         public void ResetHard(string sha)
