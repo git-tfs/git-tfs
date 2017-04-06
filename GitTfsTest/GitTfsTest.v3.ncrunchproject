@@ -1,0 +1,12 @@
+﻿<ProjectConfiguration>
+  <Settings>
+    <AdditionalFilesToIncludeForProject>
+      <Value>bin\Debug\lib\**.*</Value>
+    </AdditionalFilesToIncludeForProject>
+    <CopyReferencedAssembliesToWorkspace>True</CopyReferencedAssembliesToWorkspace>
+    <PreloadReferencedAssemblies>False</PreloadReferencedAssemblies>
+    <PreviouslyBuiltSuccessfully>True</PreviouslyBuiltSuccessfully>
+    <RunPostBuildEvents>True</RunPostBuildEvents>
+    <UseCPUArchitecture>AutoDetect</UseCPUArchitecture>
+  </Settings>
+</ProjectConfiguration>

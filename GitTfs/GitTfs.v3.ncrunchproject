@@ -1,0 +1,10 @@
+﻿<ProjectConfiguration>
+  <Settings>
+    <AdditionalFilesToIncludeForProject>
+      <Value>bin\Debug\lib\**.*</Value>
+    </AdditionalFilesToIncludeForProject>
+    <CopyReferencedAssembliesToWorkspace>True</CopyReferencedAssembliesToWorkspace>
+    <PreviouslyBuiltSuccessfully>True</PreviouslyBuiltSuccessfully>
+    <RunPostBuildEvents>True</RunPostBuildEvents>
+  </Settings>
+</ProjectConfiguration>
