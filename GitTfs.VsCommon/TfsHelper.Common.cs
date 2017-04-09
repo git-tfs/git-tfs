@@ -36,7 +36,7 @@ namespace Sep.Git.Tfs.VsCommon
             _container = container;
             if (!_resolverInstalled)
             {
-                AppDomain.CurrentDomain.AssemblyResolve += LoadFromVsFolder;
+                AppDomain.CurrentDomain.AssemblyResolve += _LoadFromVsFolder;
                 _resolverInstalled = true;
             }
         }
@@ -1309,20 +1309,15 @@ namespace Sep.Git.Tfs.VsCommon
 
         protected abstract string GetVsInstallDir();
 
+        private Assembly _LoadFromVsFolder(object sender, ResolveEventArgs args)
+        {
+            return LoadFromVsFolder(sender, args);
+        }
+
         /// <summary>
         /// Help the TFS client find checkin policy assemblies.
         /// </summary>
-        private Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
-        {
-            Trace.WriteLine("Looking for assembly " + args.Name + " ...");
-            string folderPath = Path.Combine(GetVsInstallDir(), "PrivateAssemblies");
-            string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
-            if (File.Exists(assemblyPath) == false)
-                return null;
-            Trace.WriteLine("... loading " + args.Name + " from " + assemblyPath);
-            Assembly assembly = Assembly.LoadFrom(assemblyPath);
-            return assembly;
-        }
+        protected abstract Assembly LoadFromVsFolder(object sender, ResolveEventArgs args);
 
         protected string TryGetUserRegString(string path, string name)
         {
