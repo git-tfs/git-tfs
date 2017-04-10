@@ -22,7 +22,7 @@ Wait quite some time, fetching changesets from TFS is a slow process :(
 #### Fetch all the history, for only merged branches
 
 If only the complete history of the main branch is important for you, you could fetch only the history
-of the main branch and onk=ly the branches merged into it.
+of the main branch and only the branches merged into it.
 
 To do that, do not specify the `--branches` or use the default value of the option `--branches=auto`, like that:
 
