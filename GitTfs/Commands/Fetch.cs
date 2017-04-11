@@ -146,7 +146,7 @@ namespace Sep.Git.Tfs.Commands
 
         protected virtual void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
-            if (upToChangeSet > 0 && InitialChangeset.HasValue && InitialChangeset.Value > upToChangeSet)
+            if (upToChangeSet != -1 && InitialChangeset.HasValue && InitialChangeset.Value > upToChangeSet)
                 throw new GitTfsException("error: up-to changeset # must not be less than the initial one");
 
             var bareBranch = string.IsNullOrEmpty(BareBranch) ? remote.Id : BareBranch;
