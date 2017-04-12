@@ -697,7 +697,8 @@ namespace Sep.Git.Tfs.Core
         {
             try
             {
-                _repository.Checkout(commitish);
+
+                LibGit2Sharp.Commands.Checkout(_repository, commitish);
                 return true;
             }
             catch (CheckoutConflictException)
