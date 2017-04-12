@@ -101,19 +101,19 @@ namespace Sep.Git.Tfs.Test.Integration
             public string Commit(string message, string filename = "README.txt")
             {
                 File.WriteAllText(Path.Combine(_repo.Info.WorkingDirectory, filename), message);
-                _repo.Stage(filename);
+                LibGit2Sharp.Commands.Stage(_repo, filename);
                 var committer = GetCommitter();
                 return _repo.Commit(message, committer, committer, new CommitOptions() { AllowEmptyCommit = true }).Id.Sha;
             }
 
             public void CreateBranch(string branchName)
             {
-                _repo.Checkout(_repo.CreateBranch(branchName));
+                LibGit2Sharp.Commands.Checkout(_repo, _repo.CreateBranch(branchName));
             }
 
             public void Checkout(string commitishName)
             {
-                _repo.Checkout(commitishName);
+                LibGit2Sharp.Commands.Checkout(_repo, commitishName);
             }
 
             public string Merge(string branch)
