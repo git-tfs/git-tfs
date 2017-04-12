@@ -1,4 +1,4 @@
-framework: auto-detect
+framework: net452
 source https://www.nuget.org/api/v2/
 
 //If you plan to update this file, you must first absolutly read our documentation on the subject
@@ -8,8 +8,8 @@ source https://www.nuget.org/api/v2/
 nuget nlog
 nuget NuGet.CommandLine
 nuget LibGit2Sharp
-nuget Microsoft.TeamFoundationServer.Client
-nuget Microsoft.TeamFoundationServer.ExtendedClient
+nuget Microsoft.TeamFoundationServer.Client ~> 14.0
+nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
 nuget WixSharp 1.0.22.3 framework: >= net40
 nuget xunit
 nuget xunit.assert

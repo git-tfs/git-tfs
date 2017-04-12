@@ -110,7 +110,7 @@
   <UsingTask AssemblyFile="packages\WixSharp.1.0.22.3\build\SetEnvVar.dll" TaskName="SetEnvVar" />
   <Import Project="..\.paket\paket.targets" />
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5')">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.5.2'">
       <ItemGroup>
         <Reference Include="Microsoft.Deployment.WindowsInstaller">
           <HintPath>..\packages\WixSharp\lib\Microsoft.Deployment.WindowsInstaller.dll</HintPath>
