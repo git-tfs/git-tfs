@@ -1,10 +1,11 @@
 # Local-only VS/Re#/etc files
 *.suo
 *.vs/
+*.vscode/
 *.user
 *.gpState
-_ReSharper.*
 .*.swp
+*.wxs
 *.wixobj
 *.msi
 /Auth.targets
@@ -19,3 +20,20 @@ obj
 /packages
 GitTfs/git2.*
 .paket/paket.exe
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+*.ncrunch*
+
+# ReSharper is a .NET coding add-in
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# DotCover is a Code Coverage Tool
+*.dotCover
+
+# DevTracker files
+*.dt
