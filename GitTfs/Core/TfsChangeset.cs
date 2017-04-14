@@ -216,6 +216,8 @@ namespace Sep.Git.Tfs.Core
             {
                 email = "unknown@tfs.local";
             }
+            if (remote == null)
+                remote = Summary.Remote;
             return new LogEntry
             {
                 Date = changesetToLog.CreationDate,
