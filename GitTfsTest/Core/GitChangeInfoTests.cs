@@ -245,5 +245,104 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.Equal("TestFiles/試し4.txt", changes[4].path);
             }
         }
+
+        [Fact]
+        public void ShouldDetectNormalRename_AndReturnOneRenameChange()
+        {
+            string input = ":100644 100644 ab6422c94fcb11e61378a231b0f3ce36958206d4 bb6422c94fcb11e61378a231b0f3ce36958206d4 R100\0TestFiles/Test0.txt\0TestFiles/Test_moved.txt\0";
+
+            using (var reader = new System.IO.StringReader(input))
+            {
+                var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
+
+                Assert.Equal(1, changes.Length);
+
+                Assert.Equal("R", changes[0].Status);
+                Assert.Equal("TestFiles/Test_moved.txt", changes[0].pathTo);
+            }
+        }
+
+        [Fact]
+        public void ShouldDetectCaseOnlyRenameWithNoContentChange_AndReturnNoChanges()
+        {
+            string input = ":100644 100644 fb6422c94fcb11e61378a231b0f3ce36958206d4 fb6422c94fcb11e61378a231b0f3ce36958206d4 R100\0TestFiles/Test2.txt\0TestFiles/test2.txt\0";
+
+            using (var reader = new System.IO.StringReader(input))
+            {
+                var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
+
+                Assert.Empty(changes);
+            }
+        }
+
+        [Fact]
+        public void ShouldDetectCaseOnlyRenameWithContentChange_AndReturnOneModificationChanges()
+        {
+            string input = ":100644 100644 aaaac94fcb11e61378a231b0f3ce36958206d4dd bbbb22c94fcb11e61378a231b0f3ce36958206d4 R100\0TestFiles/Test1.txt\0TestFiles/test1.txt\0";
+
+            using (var reader = new System.IO.StringReader(input))
+            {
+                var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
+
+                Assert.Equal(1, changes.Length);
+
+                Assert.Equal("M", changes[0].Status);
+                Assert.Equal("TestFiles/Test1.txt", changes[0].path);
+            }
+        }
+
+        [Fact]
+        public void ShouldDetectAddDeleteCorrespondingToCaseRenameWithContentChange_AndReturnOneModificationChange()
+        {
+            string input =
+                ":000000 100644 0000000000000000000000000000000000000000 ed61b923604692e7c8b14763bd94412f471d91cc A\0TestFiles/Test0.txt\0" +
+                ":100644 000000 de4ea28b4e441777cf99329788d545986456183f 0000000000000000000000000000000000000000 D\0TestFiles/test0.txt\0";
+
+            using (var reader = new System.IO.StringReader(input))
+            {
+                var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
+
+                Assert.Equal(1, changes.Length);
+
+                Assert.Equal("M", changes[0].Status);
+                Assert.Equal("TestFiles/Test0.txt", changes[0].path);
+            }
+        }
+
+        [Fact]
+        public void ShouldDetectAddDeleteNotCorrespondingToCaseRenameWithContentChange_AndReturnOneAdditionAndOneDeletionChange()
+        {
+            string input =
+                ":100644 000000 de4ea28b4e441777cf99329788d545986456183f 0000000000000000000000000000000000000000 D\0TestFiles/Test1.txt\0" +
+                ":000000 100644 0000000000000000000000000000000000000000 ed61b923604692e7c8b14763bd94412f471d91cc A\0TestFiles/Test2.txt\0";
+
+            using (var reader = new System.IO.StringReader(input))
+            {
+                var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
+
+                Assert.Equal(2, changes.Length);
+
+                Assert.Equal("D", changes[0].Status);
+                Assert.Equal("TestFiles/Test1.txt", changes[0].path);
+
+                Assert.Equal("A", changes[1].Status);
+                Assert.Equal("TestFiles/Test2.txt", changes[1].path);
+            }
+        }
+
+        [Fact]
+        public void ShouldDetectAddDeleteCorrespondingToCaseRenameWithoutContentChange_AndReturnNoChanges()
+        {
+            string input =
+                ":000000 100644 0000000000000000000000000000000000000000 ed61b923604692e7c8b14763bd94412f471d91cc A\0TestFiles/Test3.txt\0" +
+                ":100644 000000 ed61b923604692e7c8b14763bd94412f471d91cc 0000000000000000000000000000000000000000 D\0TestFiles/test3.txt\0";
+
+            using (var reader = new System.IO.StringReader(input))
+            {
+                var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
+
+                Assert.Empty(changes);
+            }
+        }
     }
 }

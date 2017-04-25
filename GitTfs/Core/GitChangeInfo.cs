@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using StructureMap;
@@ -11,6 +12,7 @@ namespace Sep.Git.Tfs.Core
 {
     public class GitChangeInfo
     {
+        const string ElementToRemove = "[ElementToRemove]";
         public struct ChangeType
         {
             public const string ADD = "A";
@@ -46,6 +48,7 @@ namespace Sep.Git.Tfs.Core
         public static IEnumerable<GitChangeInfo> GetChangedFiles(TextReader reader)
         {
             string line;
+            var changes = new List<GitChangeInfo>();
             while (null != (line = GetDiffTreeLine(reader)))
             {
                 var change = Parse(line);
@@ -53,9 +56,57 @@ namespace Sep.Git.Tfs.Core
                 if (FileMode.GitLink == change.NewMode)
                     continue;
 
-                yield return change;
+                changes.Add(change);
+            }
+            return FilterChangesIntroducedByCaseRenaming(changes);
+        }
+
+        /// <summary>
+        /// Filter changes made when renames are "case only" because such changes are not supported by TFS
+        /// </summary>
+        /// <param name="changes">changes to filter</param>
+        /// <returns>changes once filtered</returns>
+        private static IEnumerable<GitChangeInfo> FilterChangesIntroducedByCaseRenaming(IEnumerable<GitChangeInfo> changes)
+        {
+            //filter out "case only renames" because they cannot be represented in TFS
+            var remainingChanges = changes.Where(change => change.Status != ChangeType.RENAMEEDIT ||
+                String.Compare(change.path, change.pathTo, StringComparison.OrdinalIgnoreCase) != 0 ||
+                change.newSha != change.oldSha).ToList();
+
+            UpdateChangeStatusForCaseOnlyRenames(remainingChanges);
+
+            UpdateChangeStatusForAddedAndDeletedCaseOnlyRenames(remainingChanges);
+
+            return remainingChanges.Where(c => c.Status != ElementToRemove);
+        }
+
+        private static void UpdateChangeStatusForCaseOnlyRenames(List<GitChangeInfo> remainingChanges)
+        {
+            foreach (var change in remainingChanges.Where(c => c.Status == ChangeType.RENAMEEDIT))
+            {
+                if (String.Compare(change.path, change.pathTo, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    change.Status = ChangeType.MODIFY;
+                }
             }
         }
+
+        private static void UpdateChangeStatusForAddedAndDeletedCaseOnlyRenames(List<GitChangeInfo> remainingChanges)
+        {
+            var deletes = remainingChanges.Where(c => c.Status == ChangeType.DELETE).ToArray();
+            foreach (var addChange in remainingChanges.Where(c => c.Status == ChangeType.ADD))
+            {
+                //change adds to renameedit, if the file name is the same as a delete
+                var matchingDelete = deletes.FirstOrDefault(
+                    d => String.Equals(addChange.path, d.path, StringComparison.OrdinalIgnoreCase));
+                if (matchingDelete != null)
+                {
+                    addChange.Status = addChange.newSha != matchingDelete.oldSha ? ChangeType.MODIFY : ElementToRemove;
+                    matchingDelete.Status = ElementToRemove;
+                }
+            }
+        }
+
 
         private static string GetDiffTreeLine(TextReader reader)
         {
@@ -121,14 +172,15 @@ namespace Sep.Git.Tfs.Core
         }
 
         private readonly Match _match;
+        public string Status { get; set; }
 
         private GitChangeInfo(Match match)
         {
             _match = match;
+            Status = _match.Groups["status"].Value;
         }
 
         public LibGit2Sharp.Mode NewMode { get { return _match.Groups["dstmode"].Value.ToFileMode(); } }
-        public string Status { get { return _match.Groups["status"].Value; } }
 
         public string oldMode { get { return _match.Groups["srcmode"].Value; } }
         public string newMode { get { return _match.Groups["dstmode"].Value; } }
