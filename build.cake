@@ -103,15 +103,17 @@ Task("InstallTfsModels").Description("Install the missing TFS object models to b
 {
 	if(BuildSystem.IsRunningOnAppVeyor)
 	{
-		//AppVeyor build VM already contains tfs object model >= 2012
+		//AppVeyor build VM already contains tfs object model >= 2012 ...
 		if(_buildAllVersion)
 		{
+			//...so need to install "tfs2010objectmodel" only when releasing from AppVeyor build (to speed up the build otherwise.)
 			Information("Installing Tfs object model 2010 to be able to release for all versions...");
 			ChocolateyInstall("tfs2010objectmodel");
 		}
 	}
 	else
 	{
+		//Could be call locally and manually to install all the versions needed to release a git-tfs version
 		ChocolateyInstall("tfs2010objectmodel");
 		ChocolateyInstall("tfs2012objectmodel");
 		ChocolateyInstall("tfs2013objectmodel");
