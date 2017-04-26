@@ -158,7 +158,7 @@ Task("UpdateAssemblyInfo").Description("Update AssemblyInfo properties with the 
 		Information("Updating Appveyor version to... " + _semanticVersionShort);
 		AppVeyor.UpdateBuildVersion(_semanticVersionShort);
 	}
-	
+
 	CreateAssemblyInfo("CommonAssemblyInfo.cs", new AssemblyInfoSettings {
 		Company="SEP",
 		Product = "GitTfs",
@@ -212,7 +212,8 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 	XUnit2("./**/bin/" + Configuration + "/GitTfsTest.dll", new XUnit2Settings()
 		{
 			XmlReport = true,
-			OutputDirectory = "."
+			OutputDirectory = ".",
+			UseX86 =  true
 		});
 });
 
@@ -291,7 +292,7 @@ string ReadToken(string tokenKey, string tokenRegexFormat = null)
 	personalToken = personalToken.Substring(tokenKey.Length+1,personalToken.Length-tokenKey.Length-1);
 	if(tokenRegexFormat == null)
 		return personalToken;
-	
+
 	var regexToken = new System.Text.RegularExpressions.Regex(tokenRegexFormat);
 	if(!regexToken.IsMatch(personalToken))
 		DisplayAuthTokenErrorMessage();
@@ -342,7 +343,7 @@ Task("TriggerRelease").Description("Trigger a release from the AppVeyor build se
 	.Does(() =>
 {
 	var httpClient = new System.Net.Http.HttpClient();
-	//AppVeyor build data to trigger the git-tfs build + parameters passed to the release build 
+	//AppVeyor build data to trigger the git-tfs build + parameters passed to the release build
 	var content = @"{
 accountName: 'pmiossec',
 projectSlug: 'git-tfs-v2qcm',
@@ -358,7 +359,7 @@ environmentVariables: {
 	httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", appVeyorToken);
 	httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-	var taskTriggerRelease = httpClient.PostAsync("https://ci.appveyor.com/api/builds", 
+	var taskTriggerRelease = httpClient.PostAsync("https://ci.appveyor.com/api/builds",
 		new System.Net.Http.StringContent(content, System.Text.Encoding.UTF8, "application/json"));
 	taskTriggerRelease.Wait();
 	var httpResponseMessage = taskTriggerRelease.Result;
@@ -410,7 +411,7 @@ void UploadReleaseAsset(Octokit.GitHubClient client, Octokit.Release release)
 {
 	Information("Uploading asset...");
 	var archiveContents = System.IO.File.OpenRead(_zipFilePath);
-	var assetUpload = new Octokit.ReleaseAssetUpload() 
+	var assetUpload = new Octokit.ReleaseAssetUpload()
 	{
 		FileName = _zipFilename,
 		ContentType = "application/zip",
