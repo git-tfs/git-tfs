@@ -68,30 +68,25 @@ namespace Sep.Git.Tfs.Core
         /// <returns>changes once filtered</returns>
         private static IEnumerable<GitChangeInfo> FilterChangesIntroducedByCaseRenaming(IEnumerable<GitChangeInfo> changes)
         {
-            //filter out "case only renames" because they cannot be represented in TFS
-            var remainingChanges = changes.Where(change => change.Status != ChangeType.RENAMEEDIT ||
-                String.Compare(change.path, change.pathTo, StringComparison.OrdinalIgnoreCase) != 0 ||
-                change.newSha != change.oldSha).ToList();
+            UpdateChangeStatusForCaseOnlyRenames(changes);
 
-            UpdateChangeStatusForCaseOnlyRenames(remainingChanges);
+            UpdateChangeStatusForAddedAndDeletedCaseOnlyRenames(changes);
 
-            UpdateChangeStatusForAddedAndDeletedCaseOnlyRenames(remainingChanges);
-
-            return remainingChanges.Where(c => c.Status != ElementToRemove);
+            return changes.Where(c => c.Status != ElementToRemove);
         }
 
-        private static void UpdateChangeStatusForCaseOnlyRenames(List<GitChangeInfo> remainingChanges)
+        private static void UpdateChangeStatusForCaseOnlyRenames(IEnumerable<GitChangeInfo> remainingChanges)
         {
             foreach (var change in remainingChanges.Where(c => c.Status == ChangeType.RENAMEEDIT))
             {
                 if (String.Compare(change.path, change.pathTo, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    change.Status = ChangeType.MODIFY;
+                    change.Status = change.newSha != change.oldSha ? ChangeType.MODIFY : ElementToRemove;
                 }
             }
         }
 
-        private static void UpdateChangeStatusForAddedAndDeletedCaseOnlyRenames(List<GitChangeInfo> remainingChanges)
+        private static void UpdateChangeStatusForAddedAndDeletedCaseOnlyRenames(IEnumerable<GitChangeInfo> remainingChanges)
         {
             var deletes = remainingChanges.Where(c => c.Status == ChangeType.DELETE).ToArray();
             foreach (var addChange in remainingChanges.Where(c => c.Status == ChangeType.ADD))
