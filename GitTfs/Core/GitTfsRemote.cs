@@ -485,8 +485,10 @@ namespace Sep.Git.Tfs.Core
                 if (changeset.Summary.Workitems.Any())
                 {
                     var workItemIds = TranslateWorkItems(changeset.Summary.Workitems.Select(wi => wi.Id.ToString()));
+                    var workItemTitles = changeset.Summary.Workitems.Select(wi => wi.Title);
                     if (workItemIds != null)
                     {
+                        log.Log += "\n" + string.Join(", ", workItemTitles.Select(s => s));
                         log.Log += "\nwork-items: " + string.Join(", ", workItemIds.Select(s => "#" + s));
                     }
                 }
