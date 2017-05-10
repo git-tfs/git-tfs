@@ -144,7 +144,7 @@ namespace Sep.Git.Tfs.Core
 
         public string Prefix { get; private set; }
         public bool ExportMetadatas { get; set; }
-        public Dictionary<string, string> ExportWorkitemsMapping { get; set; }
+        public Dictionary<string, IExportWorkItem> ExportWorkitemsMapping { get; set; }
 
         public int MaxChangesetId
         {
@@ -484,12 +484,13 @@ namespace Sep.Git.Tfs.Core
             {
                 if (changeset.Summary.Workitems.Any())
                 {
-                    var workItemIds = TranslateWorkItems(changeset.Summary.Workitems.Select(wi => wi.Id.ToString()));
-                    var workItemTitles = changeset.Summary.Workitems.Select(wi => wi.Title);
-                    if (workItemIds != null)
+                    var workItems = TranslateWorkItems(changeset.Summary.Workitems.Select(wi => new ExportWorkItem(wi)));
+                    if (workItems != null)
                     {
-                        log.Log += "\n" + string.Join(", ", workItemTitles.Select(s => s));
-                        log.Log += "\nwork-items: " + string.Join(", ", workItemIds.Select(s => "#" + s));
+                        foreach (var workItem in workItems)
+                        {
+                            log.Log += "\n#" + workItem.Id+" "+ workItem.Title;
+                        }                        
                     }
                 }
 
@@ -518,7 +519,7 @@ namespace Sep.Git.Tfs.Core
                         if (ExportWorkitemsMapping.ContainsKey(workitemId))
                         {
                             var oldWorkitemId = workitemId;
-                            workitemId = ExportWorkitemsMapping[workitemId];
+                            workitemId = ExportWorkitemsMapping[workitemId].Id;
                             workitemUrl = workitemUrl.Replace(oldWorkitemId, workitemId);
                         }
                     }
@@ -544,17 +545,17 @@ namespace Sep.Git.Tfs.Core
             return commitSha;
         }
 
-        private IEnumerable<string> TranslateWorkItems(IEnumerable<string> workItemsOriginal)
+        private IEnumerable<IExportWorkItem> TranslateWorkItems(IEnumerable<IExportWorkItem> workItemsOriginal)
         {
             if (ExportWorkitemsMapping.Count == 0)
                 return workItemsOriginal;
-            List<string> workItemsTranslated = new List<string>();
+            List<IExportWorkItem> workItemsTranslated = new List<IExportWorkItem>();
             if (workItemsOriginal == null)
                 return workItemsTranslated;
             foreach (var oldWorkItemId in workItemsOriginal)
             {
-                string translatedWorkItemId = null;
-                if (oldWorkItemId != null && !ExportWorkitemsMapping.TryGetValue(oldWorkItemId, out translatedWorkItemId))
+                IExportWorkItem translatedWorkItemId = null;
+                if (oldWorkItemId != null && !ExportWorkitemsMapping.TryGetValue(oldWorkItemId.Id.ToString(), out translatedWorkItemId))
                     translatedWorkItemId = oldWorkItemId;
                 if (translatedWorkItemId != null)
                     workItemsTranslated.Add(translatedWorkItemId);

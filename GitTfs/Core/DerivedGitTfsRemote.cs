@@ -188,7 +188,7 @@ namespace Sep.Git.Tfs.Core
         }
 
         public bool ExportMetadatas { get; set; }
-        public Dictionary<string, string> ExportWorkitemsMapping { get; set; }
+        public Dictionary<string, IExportWorkItem> ExportWorkitemsMapping { get; set; }
 
         public int? GetInitialChangeset()
         {

@@ -19,6 +19,13 @@ namespace Sep.Git.Tfs.Core
         string LastParentCommitBeforeRename { get; set; }
     }
 
+    // Internal WorItem representation for export scenarios
+    public interface IExportWorkItem
+    {
+        string Id { get; set; }
+        string Title { get; set; }
+    }
+
     public interface IGitTfsRemote
     {
         bool IsDerived { get; }
@@ -46,7 +53,7 @@ namespace Sep.Git.Tfs.Core
         string OwningRemoteId { get; }
         string Prefix { get; }
         bool ExportMetadatas { get; set; }
-        Dictionary<string, string> ExportWorkitemsMapping { get; set; }
+        Dictionary<string, IExportWorkItem> ExportWorkitemsMapping { get; set; }
         int? GetInitialChangeset();
         void SetInitialChangeset(int? changesetId);
         bool ShouldSkip(string path);
