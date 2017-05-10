@@ -487,6 +487,7 @@ namespace Sep.Git.Tfs.Core
                     var workItems = TranslateWorkItems(changeset.Summary.Workitems.Select(wi => new ExportWorkItem(wi)));
                     if (workItems != null)
                     {
+                        log.Log += "\nWorkitems:";
                         foreach (var workItem in workItems)
                         {
                             log.Log += "\n#" + workItem.Id+" "+ workItem.Title;
