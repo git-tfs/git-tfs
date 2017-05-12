@@ -58,12 +58,8 @@ namespace Sep.Git.Tfs.Util
                         var values = lineRead.Split('|');
                         var oldWorkitem = values[0].Trim();
                         if (!remote.ExportWorkitemsMapping.ContainsKey(oldWorkitem))
-                            remote.ExportWorkitemsMapping.Add(oldWorkitem, 
-                                new ExportWorkItem()
-                                {
-                                    Id = values[1].Trim(),
-                                    Title = String.Empty // TODO: Read workitem title from TFS here if necessary
-                                });
+                            remote.ExportWorkitemsMapping.Add(oldWorkitem,
+                                new ExportWorkItem(values[1].Trim(), String.Empty /* TODO: Read workitem title from TFS here if necessary */));
                     }
                 }
                 catch (Exception)

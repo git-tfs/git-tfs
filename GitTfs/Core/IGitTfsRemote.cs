@@ -22,8 +22,8 @@ namespace Sep.Git.Tfs.Core
     // Internal WorItem representation for export scenarios
     public interface IExportWorkItem
     {
-        string Id { get; set; }
-        string Title { get; set; }
+        string Id { get; }
+        string Title { get; }
     }
 
     public interface IGitTfsRemote

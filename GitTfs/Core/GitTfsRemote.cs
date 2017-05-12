@@ -555,11 +555,11 @@ namespace Sep.Git.Tfs.Core
                 return workItemsTranslated;
             foreach (var oldWorkItemId in workItemsOriginal)
             {
-                IExportWorkItem translatedWorkItemId = null;
-                if (oldWorkItemId != null && !ExportWorkitemsMapping.TryGetValue(oldWorkItemId.Id.ToString(), out translatedWorkItemId))
-                    translatedWorkItemId = oldWorkItemId;
-                if (translatedWorkItemId != null)
-                    workItemsTranslated.Add(translatedWorkItemId);
+                IExportWorkItem translatedWorkItem = null;
+                if (oldWorkItemId != null && !ExportWorkitemsMapping.TryGetValue(oldWorkItemId.Id, out translatedWorkItem))
+                    translatedWorkItem = oldWorkItemId;
+                if (translatedWorkItem != null)
+                    workItemsTranslated.Add(translatedWorkItem);
             }
             return workItemsTranslated;
         }
