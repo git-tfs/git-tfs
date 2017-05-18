@@ -168,7 +168,10 @@ namespace Sep.Git.Tfs.Util
                         File.Copy(authorsFilePath, savedAuthorFile, true);
                         return parseSuccess;
                     }
-                    catch (Exception) { }
+                    catch (Exception)
+                    {
+                        Trace.TraceWarning("Failed to copy authors file from \"" + authorsFilePath + "\" to \"" + savedAuthorFile + "\".");
+                    }
                 }
             }
             else if (File.Exists(savedAuthorFile))
