@@ -45,7 +45,7 @@ namespace Sep.Git.Tfs.Util
         public void InitializeRemote(IGitTfsRemote remote, bool shouldExportMetadata)
         {
             remote.ExportMetadatas = shouldExportMetadata;
-            remote.ExportWorkitemsMapping = new Dictionary<string, string>();
+            remote.ExportWorkitemsMapping = new Dictionary<string, IExportWorkItem>();
 
             if (shouldExportMetadata && File.Exists(exportMetadatasFilePath))
             {
@@ -58,7 +58,8 @@ namespace Sep.Git.Tfs.Util
                         var values = lineRead.Split('|');
                         var oldWorkitem = values[0].Trim();
                         if (!remote.ExportWorkitemsMapping.ContainsKey(oldWorkitem))
-                            remote.ExportWorkitemsMapping.Add(oldWorkitem, values[1].Trim());
+                            remote.ExportWorkitemsMapping.Add(oldWorkitem,
+                                new ExportWorkItem(values[1].Trim(), String.Empty /* TODO: Read workitem title from TFS here if necessary */));
                     }
                 }
                 catch (Exception)
