@@ -128,6 +128,7 @@
     <Compile Include="Integration\InitTests.cs" />
     <Compile Include="Integration\IntegrationHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestHelpers\AssertTimeout.cs" />
     <Compile Include="TestHelpers\ExtensionMethods.cs" />
     <Compile Include="Util\AuthorsFileUnitTest.cs" />
     <Compile Include="Util\CamelCaseToDelimitedStringConverterTests.cs" />

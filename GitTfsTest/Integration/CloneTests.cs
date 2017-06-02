@@ -3,6 +3,7 @@ using System.Linq;
 using LibGit2Sharp;
 using Sep.Git.Tfs.Core.TfsInterop;
 using Sep.Git.Tfs.Test.Fixtures;
+using Sep.Git.Tfs.Test.TestHelpers;
 using Xunit;
 
 namespace Sep.Git.Tfs.Test.Integration
@@ -386,6 +387,44 @@ namespace Sep.Git.Tfs.Test.Integration
                 "refs/heads/Branch"
             };
             AssertNewClone("MyTeamProject", refs);
+        }
+
+
+        [FactExceptOnUnix]
+        public void CloneAllBranchesShouldHandleMergeFromRenameChangeset()
+        {
+            h.SetupFake(r =>
+            {
+                r.SetRootBranch("$/MyTeamProject/Root");
+
+                r.Changeset(1, "Create root branch", DateTime.Now)
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyTeamProject/Root")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyTeamProject/Root/File.txt", new byte[0], itemId: 100);
+
+                r.BranchChangeset(2, "Create another branch", DateTime.Now, "$/MyTeamProject/Root", "$/MyTeamProject/Branch", 1)
+                    .Change(TfsChangeType.Branch, TfsItemType.Folder, "$/MyTeamProject/Branch")
+                    .Change(TfsChangeType.Branch, TfsItemType.File, "$/MyTeamProject/Branch/File.txt", new byte[0], itemId: 100);
+
+                r.BranchChangeset(3, "Rename other branch", DateTime.Now, "$/MyTeamProject/Branch", "$/MyTeamProject/BranchRenamed", 2)
+                    .Change(TfsChangeType.Rename, TfsItemType.Folder, "$/MyTeamProject/BranchRenamed")
+                    .Change(TfsChangeType.Rename, TfsItemType.File, "$/MyTeamProject/BranchRenamed/File.txt", new byte[0], itemId: 100);
+
+                r.MergeChangeset(4, "Merge renamed branch back to root", DateTime.Now, "$/MyTeamProject/BranchRenamed", "$/MyTeamProject/Root", 3)
+                    .Change(TfsChangeType.Merge, TfsItemType.File, "$/MyTeamProject/Root/File.txt", new byte[0], itemId: 100);
+            });
+
+            // Timeout in worst-case scenario, rather than looping forever. Roughly 6x longer than it really needs.
+            AssertTimeout.For(TimeSpan.FromSeconds(10), () =>
+                h.Run("clone", h.TfsUrl, "$/MyTeamProject/Root", "MyTeamProject", "--branches=all"));
+
+
+            h.AssertGitRepo("MyTeamProject");
+            var branches = h.Repository("MyTeamProject").Branches;
+
+            var masterBranch = Assert.Single(branches, b => b.FriendlyName == "master");
+            Assert.Equal(4, masterBranch.Commits.Count());
+            var otherBranch = Assert.Single(branches, b => b.FriendlyName == "BranchRenamed");
+            Assert.Equal(3, otherBranch.Commits.Count());
         }
     }
 }
