@@ -677,7 +677,14 @@ namespace Sep.Git.Tfs.Core
                 {
                     try
                     {
-                        remote.Fetch(renameResult: renameResult);
+                        var fetchResult = remote.Fetch(renameResult: renameResult);
+                        if (fetchResult.IsProcessingRenameChangeset)
+                        {
+                            if (renameResult == null) renameResult = new FetchResult();
+                            renameResult.IsProcessingRenameChangeset = true;
+                            renameResult.LastParentCommitBeforeRename = fetchResult.LastParentCommitBeforeRename;
+                            remote.Fetch(renameResult: renameResult);
+                        }
                     }
                     finally
                     {
