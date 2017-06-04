@@ -527,10 +527,6 @@ namespace Sep.Git.Tfs.Core
         {
             if (!Reference.IsValidName(ShortToLocalName(gitBranchName)))
                 throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
-            while (IsRefNameUsed(gitBranchName))
-            {
-                gitBranchName = "_" + gitBranchName;
-            }
             return gitBranchName;
         }
 
