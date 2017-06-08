@@ -13,11 +13,9 @@
             Path = changeInfo.path;
         }
 
-        public void Apply(ITfsWorkspaceModifier workspace)
+        void IGitChangedFile.Apply(ITfsWorkspaceCopy workspace)
         {
-            workspace.Edit(Path);
-            var workspaceFile = workspace.GetLocalPath(Path);
-            _repository.CopyBlob(NewSha, workspaceFile);
+            workspace.Edit(Path, NewSha);
         }
     }
 }

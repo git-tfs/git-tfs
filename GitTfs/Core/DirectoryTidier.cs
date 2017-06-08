@@ -5,7 +5,7 @@ using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace Sep.Git.Tfs.Core
 {
-    public class DirectoryTidier : ITfsWorkspaceModifier, IDisposable
+    public class DirectoryTidier : ITfsWorkspaceCopy, IDisposable
     {
         private enum FileOperation
         {
@@ -18,16 +18,22 @@ namespace Sep.Git.Tfs.Core
         }
 
         private readonly ITfsWorkspaceModifier _workspace;
+        private readonly IGitRepository _reprository;
         private readonly Func<IEnumerable<TfsTreeEntry>> _getInitialTfsTree;
         private List<string> _filesInTfs;
         private readonly Dictionary<string, FileOperation> _fileOperations;
+        private readonly Dictionary<string, string> _renameOperations;
+        private readonly Dictionary<string, string> _editOperations;
         private bool _disposed;
 
-        public DirectoryTidier(ITfsWorkspaceModifier workspace, Func<IEnumerable<TfsTreeEntry>> getInitialTfsTree)
+        public DirectoryTidier(ITfsWorkspaceModifier workspace, IGitRepository repository, Func<IEnumerable<TfsTreeEntry>> getInitialTfsTree)
         {
             _workspace = workspace;
+            _reprository = repository;
             _getInitialTfsTree = getInitialTfsTree;
             _fileOperations = new Dictionary<string, FileOperation>(StringComparer.InvariantCultureIgnoreCase);
+            _renameOperations = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            _editOperations = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         }
 
         public void Dispose()
@@ -35,6 +41,38 @@ namespace Sep.Git.Tfs.Core
             if (_disposed)
                 return;
             _disposed = true;
+
+            foreach(var fileOperation in _fileOperations)
+            {
+                switch (fileOperation.Value)
+                {
+                    case FileOperation.Add:
+                        _workspace.Add(fileOperation.Key);
+                        break;
+                    case FileOperation.Edit:
+                    case FileOperation.EditAndRenameFrom:
+                           _workspace.Edit(fileOperation.Key);
+                        break;
+                    case FileOperation.Remove:
+                         _workspace.Delete(fileOperation.Key);
+                        break;
+                    case FileOperation.RenameTo:
+                         _workspace.Rename(_renameOperations[fileOperation.Key], fileOperation.Key);
+                        break;
+
+                    case FileOperation.RenameFrom:
+                        break;
+                }
+            }
+
+            foreach(var editOperation in _editOperations)
+            {
+                if (_reprository != null)
+                {
+                    var file = GetLocalPath(editOperation.Key);
+                    _reprository.CopyBlob(editOperation.Value, file);
+                }
+            }
 
             var candidateDirectories = CalculateCandidateDirectories();
             if (!candidateDirectories.Any())
@@ -90,44 +128,88 @@ namespace Sep.Git.Tfs.Core
             return _filesInTfs.Any(file => file.StartsWith(dirName));
         }
 
-        string ITfsWorkspaceModifier.GetLocalPath(string path)
+        string GetLocalPath(string path)
         {
             return _workspace.GetLocalPath(path);
         }
 
-        void ITfsWorkspaceModifier.Add(string path)
+        void ITfsWorkspaceCopy.Add(string path, string shaFile)
         {
-            _workspace.Add(path);
-            _fileOperations.Add(path, FileOperation.Add);
-        }
-
-        void ITfsWorkspaceModifier.Edit(string path)
-        {
-            _workspace.Edit(path);
-            _fileOperations.Add(path, FileOperation.Edit);
-        }
-
-        void ITfsWorkspaceModifier.Delete(string path)
-        {
-            _workspace.Delete(path);
-            _fileOperations.Add(path, FileOperation.Remove);
-        }
-
-        void ITfsWorkspaceModifier.Rename(string pathFrom, string pathTo, string score)
-        {
-            _workspace.Rename(pathFrom, pathTo, score);
-
-            FileOperation pathFromOperation;
-            if (_fileOperations.TryGetValue(pathFrom, out pathFromOperation) &&
-                pathFromOperation == FileOperation.Edit)
+            if (!_fileOperations.ContainsKey(path))
             {
-                _fileOperations[pathFrom] = FileOperation.EditAndRenameFrom;
+                _fileOperations.Add(path, FileOperation.Add);
             }
             else
             {
-                _fileOperations.Add(pathFrom, FileOperation.RenameFrom);
+                //git rename is split into add/delete with only case difference
+                if (_fileOperations[path] == FileOperation.Remove)
+                {
+                    _fileOperations[path] = FileOperation.Edit;
+                }
+                else
+                {
+                    throw new ApplicationException("Unable to add item " + path + " it was already modified.");
+                }
             }
-            _fileOperations.Add(pathTo, FileOperation.RenameTo);
+            _editOperations.Add(path, shaFile);
+        }
+
+        void ITfsWorkspaceCopy.Edit(string path, string shaFile)
+        {
+            FileOperation pathFromOperation;
+            if (_fileOperations.TryGetValue(path, out pathFromOperation) &&
+                pathFromOperation == FileOperation.RenameFrom)
+            {
+                _fileOperations[path] = FileOperation.EditAndRenameFrom;
+            }
+            else
+            {
+                _fileOperations.Add(path, FileOperation.Edit);
+            }
+            _editOperations.Add(path, shaFile);
+        }
+
+        void ITfsWorkspaceCopy.Delete(string path)
+        {
+            if (!_fileOperations.ContainsKey(path))
+            {
+                _fileOperations.Add(path, FileOperation.Remove);
+            }
+            else
+            {
+                //git rename is split into add/delete with only case difference
+                if (_fileOperations[path] == FileOperation.Remove)
+                {
+                    _fileOperations[path] = FileOperation.Edit;
+                }
+                else
+                {
+                    throw new ApplicationException("Unable to delete item " + path + " it was already modified.");
+                }
+            }
+        }
+
+        void ITfsWorkspaceCopy.Rename(string pathFrom, string pathTo)
+        {
+            if (pathFrom.ToLower().CompareTo(pathTo.ToLower()) != 0)
+            {
+                FileOperation pathFromOperation;
+                if (_fileOperations.TryGetValue(pathFrom, out pathFromOperation) &&
+                    pathFromOperation == FileOperation.Edit)
+                {
+                    _fileOperations[pathFrom] = FileOperation.EditAndRenameFrom;
+                }
+                else
+                {
+                    _fileOperations.Add(pathFrom, FileOperation.RenameFrom);
+                }
+                _fileOperations.Add(pathTo, FileOperation.RenameTo);
+                _renameOperations.Add(pathTo, pathFrom);
+            }
+            else
+            {
+                //git rename with only case changes is impossible to transfer to tfs
+            }
         }
 
         private IEnumerable<string> CalculateCandidateDirectories()
