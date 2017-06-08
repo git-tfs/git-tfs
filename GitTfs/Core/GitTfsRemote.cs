@@ -366,6 +366,7 @@ namespace Sep.Git.Tfs.Core
                     string parentCommitSha = null;
                     if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                     {
+                        fetchResult.NewChangesetCount--; // Merge wasn't successful - so don't count the changeset we found
                         fetchResult.IsSuccess = false;
                         return fetchResult;
                     }
