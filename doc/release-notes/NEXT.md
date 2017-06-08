@@ -5,3 +5,4 @@
 * Add support for deleting TFS shelvesets using the shelve-delete command
 * Allow using both "--changeset" and "--up-to" options at the same time (#1057) to fetch a specific range of TFS changesets
 * Added a TraceWarning message when the authors file fails to copy to the cache location (#1071)
+* Prevent infinite loop when barent changeset cannot be found
