@@ -530,6 +530,11 @@ namespace Sep.Git.Tfs.VsFake
             throw new NotImplementedException();
         }
 
+        public IPendingSet[] QueryPendingSets(string[] items, TfsRecursionType recursionType, string queryWorkspace, string queryUser) 
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         private class FakeVersionControlServer : IVersionControlServer

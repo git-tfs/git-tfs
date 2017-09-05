@@ -309,6 +309,11 @@ namespace Sep.Git.Tfs.Core
         {
             throw DerivedRemoteException;
         }
+
+        public IPendingSet[] QueryPendingSets(TfsChangesetInfo parentChangeset, string[] items, TfsRecursionType recursionType, string queryWorkspace, string queryUser) 
+        {
+            throw DerivedRemoteException;
+        }
         #endregion
     }
 }

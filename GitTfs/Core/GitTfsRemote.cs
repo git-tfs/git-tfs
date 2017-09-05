@@ -224,7 +224,7 @@ namespace Sep.Git.Tfs.Core
 
         public void CleanupWorkspace()
         {
-            Tfs.CleanupWorkspaces(WorkingDirectory);
+            Tfs.CleanupWorkspaces(WorkingDirectory);            
         }
 
         public void CleanupWorkspaceDirectory()
@@ -1041,6 +1041,22 @@ namespace Sep.Git.Tfs.Core
             }
             Trace.WriteLine("Remote created!");
             return tfsRemote;
+        }
+
+        public IPendingSet[] QueryPendingSets(TfsChangesetInfo parentChangeset, string[] items, TfsRecursionType recursionType, string queryWorkspace, string queryUser) 
+        {
+            IPendingSet[] ret = null;
+
+            WithWorkspace(parentChangeset, workspace => 
+            {
+                var workspaceItems = items
+                .Select(x => workspace.GetLocalPath(x))
+                .ToArray();
+
+                ret = Tfs.QueryPendingSets(workspaceItems, recursionType, queryWorkspace, queryUser);
+            });
+
+            return ret;
         }
     }
 }

@@ -252,8 +252,84 @@ namespace Sep.Git.Tfs.VsCommon
 
     public class WrapperForPendingChange : WrapperFor<PendingChange>, IPendingChange
     {
-        public WrapperForPendingChange(PendingChange pendingChange) : base(pendingChange)
+        private readonly TfsApiBridge _bridge;
+        private readonly PendingChange _pendingChange;
+
+        public WrapperForPendingChange(TfsApiBridge bridge, PendingChange pendingChange) : base(pendingChange)
         {
+            this._bridge = bridge;
+            this._pendingChange = pendingChange;
+        }
+
+        public string FileName {
+            get {
+                return _pendingChange.FileName;
+            }
+        }
+
+        public bool IsLock {
+            get {
+                return _pendingChange.IsLock;
+            }
+        }
+
+        public TfsLockLevel LockLevel {
+            get {
+                return _bridge.Convert<TfsLockLevel>(_pendingChange.LockLevel);
+            }
+        }
+
+        public string LocalItem {
+            get {
+                return _pendingChange.LocalItem;
+            }
+        }
+
+        public string ServerItem {
+            get {
+                return _pendingChange.ServerItem;
+            }
+        }
+    }
+
+    public class WrapperForPendingSet : WrapperFor<PendingSet>, IPendingSet {
+        private readonly TfsApiBridge _bridge;
+        private readonly PendingSet _pendingSet;
+
+        public WrapperForPendingSet(TfsApiBridge bridge, PendingSet pendingSet) : base(pendingSet)
+        {
+            this._bridge = bridge;
+            this._pendingSet = pendingSet;
+        }
+
+        public IPendingChange[] PendingChanges {
+            get {
+                return _bridge.Wrap<WrapperForPendingChange, PendingChange>(_pendingSet.PendingChanges);
+            }
+        }
+
+        public string Computer {
+            get {
+                return _pendingSet.Computer;
+            }
+        }
+
+        public string Name {
+            get {
+                return _pendingSet.Name;
+            }
+        }
+
+        public string OwnerDisplayName {
+            get {
+                return _pendingSet.OwnerDisplayName;
+            }
+        }
+
+        public string OwnerName {
+            get {
+                return _pendingSet.OwnerName;
+            }
         }
     }
 

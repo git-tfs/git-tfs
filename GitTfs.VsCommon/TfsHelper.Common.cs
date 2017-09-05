@@ -1448,6 +1448,23 @@ namespace Sep.Git.Tfs.VsCommon
         {
             return queuedBuild.Build;
         }
+
+        public IPendingSet[] QueryPendingSets(string[] items, TfsRecursionType recursionType, string queryWorkspaceName, string queryUserName) 
+        {
+
+            Trace.WriteLine($"Getting pending changes for \n\t{string.Join("\n\t",items)}\n, Workspace: {queryWorkspaceName ?? "<null>"}, UserName: {queryUserName ?? "<null>"}");
+
+            var pendingSets = VersionControl.QueryPendingSets(
+                items,
+                _bridge.Convert<RecursionType>(recursionType),
+                queryWorkspaceName,
+                queryUserName
+            );
+
+            return _bridge.Wrap<WrapperForPendingSet, PendingSet>(pendingSets);
+        }
+
+
     }
 
     public class ItemDownloadStrategy : IItemDownloadStrategy

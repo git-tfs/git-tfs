@@ -21,6 +21,7 @@ namespace Sep.Git.Tfs.Commands
 
         private bool AutoRebase { get; set; }
         private bool ForceCheckin { get; set; }
+        private bool CheckLock { get; set; }
 
         public Rcheckin(CheckinOptions checkinOptions, TfsWriter writer, Globals globals, AuthorsFile authors)
         {
@@ -39,6 +40,7 @@ namespace Sep.Git.Tfs.Commands
                     {
                         {"a|autorebase", "Continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
                         {"ignore-merge", "Force check in ignoring parent tfs branches in merge commits", v => ForceCheckin = v != null},
+                        {"check-lock", "Checks if there is no lock on any file before checkin ", v => CheckLock = v != null }
                     }.Merge(_checkinOptions.OptionSet);
             }
         }
@@ -103,9 +105,56 @@ namespace Sep.Git.Tfs.Commands
             if (!commitsToCheckin.Any())
                 throw new GitTfsException("error: latest TFS commit should be parent of commits being checked in");
 
+            Trace.WriteLine("Checking locks");
+            if (CheckLock) 
+            {
+                CheckLocks(parentChangeset, refToCheckin);
+            }
+
             SetupMetadataExport(parentChangeset.Remote);
 
             return _PerformRCheckinQuick(parentChangeset, refToCheckin, commitsToCheckin);
+        }
+
+        private void CheckLocks(TfsChangesetInfo parentChangeset, string refToCheckin) 
+        {
+            string[] changedFiles = _globals.Repository.GetChangedFiles(parentChangeset.GitCommit, refToCheckin)
+                .Select( x=> {
+                    if (x is Core.Changes.Git.Modify) {
+                        return ((Core.Changes.Git.Modify)x).Path;
+                    } else if (x is Core.Changes.Git.RenameEdit) {
+                        return ((Core.Changes.Git.RenameEdit)x).Path;
+                    } else {
+                        return null;
+                    }
+                })
+                .Where(x => !String.IsNullOrEmpty(x))
+                .ToArray()
+            ;
+
+
+            if (changedFiles.Length == 0) { return; }
+
+            var pendingSets = parentChangeset.Remote.QueryPendingSets(
+                    parentChangeset,
+                    changedFiles,
+                    Core.TfsInterop.TfsRecursionType.None,
+                    queryWorkspace: null,
+                    queryUser: null
+                );
+
+            var lockedChanges = pendingSets
+                .SelectMany( set => set.PendingChanges, (set, change) => Tuple.Create(set, change))
+                .Where( change => change.Item2.LockLevel != Core.TfsInterop.TfsLockLevel.None)
+                .Select( change => $"{change.Item2.ServerItem} has been locked ({change.Item2.LockLevel.ToString()}) by {change.Item1.OwnerDisplayName};{change.Item1.Computer}")
+                .ToArray();
+            
+            if (lockedChanges.Length > 0) 
+            {
+                throw new GitTfsException($"error: Some files are exclusive locked.\n{String.Join("\n", lockedChanges)}");
+            }
+
+            
         }
 
         private void SetupMetadataExport(IGitTfsRemote remote)
