@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using GitTfs.Commands;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Util;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace GitTfs.Core
 {
@@ -224,7 +225,7 @@ namespace GitTfs.Core
 
         public void CleanupWorkspace()
         {
-            Tfs.CleanupWorkspaces(WorkingDirectory);
+            Tfs.CleanupWorkspaces(WorkingDirectory);            
         }
 
         public void CleanupWorkspaceDirectory()
@@ -1043,6 +1044,22 @@ namespace GitTfs.Core
             }
             Trace.WriteLine("Remote created!");
             return tfsRemote;
+        }
+
+        public IPendingSet[] QueryPendingSets(TfsChangesetInfo parentChangeset, string[] items, TfsRecursionType recursionType, string queryWorkspace, string queryUser) 
+        {
+            IPendingSet[] ret = null;
+
+            WithWorkspace(parentChangeset, workspace => 
+            {
+                var workspaceItems = items
+                .Select(x => workspace.GetLocalPath(x))
+                .ToArray();
+
+                ret = Tfs.QueryPendingSets(workspaceItems, recursionType, queryWorkspace, queryUser);
+            });
+
+            return ret;
         }
     }
 }
