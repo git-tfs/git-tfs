@@ -11,6 +11,7 @@ rcheckin differs from [checkin](checkin.md) in that the latter squashes the comm
 ## Synopsis
 
     Usage: git-tfs rcheckin [options]
+    where options are:
       -h, -H, --help
       -V, --version
       -d, --debug                Show debug output about everything git-tfs does
