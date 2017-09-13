@@ -11,24 +11,55 @@ rcheckin differs from [checkin](checkin.md) in that the latter squashes the comm
 ## Synopsis
 
     Usage: git-tfs rcheckin [options]
-    where options are:
+      -h, -H, --help
+      -V, --version
+      -d, --debug                Show debug output about everything git-tfs does
+      -i, --tfs-remote, --remote, --id=VALUE
+                                 The remote ID of the TFS to interact with
+                                   default: default
+      -A, --authors=VALUE        Path to an Authors file to map TFS users to Git
+                                   users (will be kept in cache and used for all
+                                   the following commands)
+      -a, --autorebase           Continue and rebase if new TFS changesets found
+          --ignore-merge         Force check in ignoring parent tfs branches in
+                                   merge commits
+      -m, --comment=VALUE        A comment for the changeset
+          --no-build-default-comment
+                                 Do not concatenate commit comments for the
+                                   changeset comment.
+          --no-merge             Omits setting commit being checked in as parent,
+                                   thus allowing to rebase remaining onto TFS
+                                   changeset without exceeding merge commits.
+      -f, --force=VALUE          The policy override reason.
+      -w, --work-item[=VALUE1:VALUE2]
+                                 Associated work items
+                                   e.g. -w12345 to associate with 12345
+                                   or -w12345:resolve to resolve 12345
+      -c, --code-reviewer=VALUE  Set code reviewer
+                                   e.g. -c "John Smith"
+      -s, --security-reviewer=VALUE
+                                 Set security reviewer
+                                   e.g. -s "John Smith"
+      -p, --performance-reviewer=VALUE
+                                 Set performance reviewer
+                                   e.g. -p "John Smith"
+      -n, --checkin-note=VALUE1:VALUE2
+                                 Add checkin note
+                                   e.g. -n "Unit Test Reviewer" "John Smith"
+          --no-gate              Disables gated checkin.
+          --author=VALUE         TFS User ID to check in on behalf of
+          --ignore-missing-files When applying an edit operation, ignores items
+                                   that were expected to already be in TFS but were
+                                   not found. Missing files indicates bad
+                                   synchronization at some point. Use this option
+                                   with care.
+          --add-missing-files    When applying an edit operation, add items that
+                                   were expected to already be in TFS but were not
+                                   found. Missing files indicates bad
+                                   synchronization at some point. Use this option
+                                   with care. This option is ignored if ignore-
+                                   missing-files option is used.
 
-        -i, --tfs-remote, --id, --remote
-            (Type: Value required, Value Type:[String])
-            An optional remote ID, useful if this repository will track multiple TFS repositories.
-        -I, --auto-tfs-remote, --auto-remote
-                                   Autodetect (from git history) the remote ID of
-                                     the TFS to interact with
-
-        -A, --authors=VALUE        Path to an Authors file to map TFS users to Git users
-
-        -d, --debug
-            (Type: Flag, Value Type:[Boolean])
-            Show lots of output.
-
-        -h, -H, --help
-            (Type: Flag, Value Type:[Boolean])
-            ShowHelp
 
 ## Examples
 
