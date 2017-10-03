@@ -1033,6 +1033,8 @@ namespace Sep.Git.Tfs.Core
                     Repository = tfsRepositoryPath,
                     RemoteOptions = remoteOptions
                 }, string.Empty);
+                tfsRemote.ExportMetadatas = ExportMetadatas;
+                tfsRemote.ExportWorkitemsMapping = ExportWorkitemsMapping;
             }
             if (sha1RootCommit != null && !Repository.HasRef(tfsRemote.RemoteRef))
             {
