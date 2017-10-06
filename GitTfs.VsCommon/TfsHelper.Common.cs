@@ -1452,7 +1452,7 @@ namespace Sep.Git.Tfs.VsCommon
         public IPendingSet[] QueryPendingSets(string[] items, TfsRecursionType recursionType, string queryWorkspaceName, string queryUserName) 
         {
 
-            Trace.WriteLine($"Getting pending changes for \n\t{string.Join("\n\t",items)}\n, Workspace: {queryWorkspaceName ?? "<null>"}, UserName: {queryUserName ?? "<null>"}");
+            Trace.WriteLine(string.Format("Getting pending changes for \n\t{0}\n, Workspace: {1}, UserName: {2}", string.Join("\n\t", items), queryWorkspaceName ?? "<null>", queryUserName ?? "<null>"));
 
             var pendingSets = VersionControl.QueryPendingSets(
                 items,

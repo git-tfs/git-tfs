@@ -146,12 +146,12 @@ namespace Sep.Git.Tfs.Commands
             var lockedChanges = pendingSets
                 .SelectMany( set => set.PendingChanges, (set, change) => Tuple.Create(set, change))
                 .Where( change => change.Item2.LockLevel != Core.TfsInterop.TfsLockLevel.None)
-                .Select( change => $"{change.Item2.ServerItem} has been locked ({change.Item2.LockLevel.ToString()}) by {change.Item1.OwnerDisplayName};{change.Item1.Computer}")
+                .Select( change => string.Format("{0} has been locked ({1}) by {2};{3}", change.Item2.ServerItem, change.Item2.LockLevel.ToString(), change.Item1.OwnerDisplayName, change.Item1.Computer))
                 .ToArray();
             
             if (lockedChanges.Length > 0) 
             {
-                throw new GitTfsException($"error: Some files are exclusive locked.\n{String.Join("\n", lockedChanges)}");
+                throw new GitTfsException(string.Format("error: Some files are exclusive locked.\n{0}", String.Join("\n", lockedChanges)));
             }
 
             
