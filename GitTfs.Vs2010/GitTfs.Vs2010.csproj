@@ -145,6 +145,11 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y /I "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)$(ProjectName)" /EXCLUDE:$(SolutionDir)files_to_ignore_during_post_build_copy.txt</PostBuildEvent>
+    <PostBuildEvent>
+      <!-- Change to the solution directory instead of passing it directly to
+           /escape since that option can't deal with paths with spaces -->
+      cd $(SolutionDir)
+      xcopy /y /I "$(TargetDir)*.dll" "$(SolutionDir)GitTfs\$(OutDir)$(ProjectName)" /EXCLUDE:files_to_ignore_during_post_build_copy.txt
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
