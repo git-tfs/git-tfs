@@ -24,6 +24,8 @@ rcheckin differs from [checkin](checkin.md) in that the latter squashes the comm
       -a, --autorebase           Continue and rebase if new TFS changesets found
           --ignore-merge         Force check in ignoring parent tfs branches in
                                    merge commits
+      --check-lock               Checks if there is no lock on any file before
+                                   checkin
       -m, --comment=VALUE        A comment for the changeset
           --no-build-default-comment
                                  Do not concatenate commit comments for the
@@ -66,7 +68,7 @@ rcheckin differs from [checkin](checkin.md) in that the latter squashes the comm
 
 ### Simple
 
-Suppose you have 
+Suppose you have
 
     A [tfs/default, C1] <- B <- C [master, HEAD]
 
@@ -135,7 +137,7 @@ You could check in commits of other users in TFS. To be able to do that, you mus
 
     git tfs rcheckin --authors="c:\path\to\authors.txt"
 
-Note : To be able to check in commits of other users, you should have a special right defined in TFS. To activate, Right click on the TFS project, then "Security..." and select "Allow" to the "Check in other user's changes" permission (CheckinOther). 
+Note : To be able to check in commits of other users, you should have a special right defined in TFS. To activate, Right click on the TFS project, then "Security..." and select "Allow" to the "Check in other user's changes" permission (CheckinOther).
 
 ## Internals
 
