@@ -6,3 +6,4 @@
 * Allow using both "--changeset" and "--up-to" options at the same time (#1057) to fetch a specific range of TFS changesets
 * Added a TraceWarning message when the authors file fails to copy to the cache location (#1071)
 * Prevent infinite loop when parent changeset cannot be found
+* Added a `--check-lock` option for `rcheckin` command

@@ -22,6 +22,9 @@ rcheckin differs from [checkin](checkin.md) in that the latter squashes the comm
 
         -A, --authors=VALUE        Path to an Authors file to map TFS users to Git users
 
+        --check-lock               Checks if there is no lock on any file before
+                                     checkin
+
         -d, --debug
             (Type: Flag, Value Type:[Boolean])
             Show lots of output.
@@ -34,7 +37,7 @@ rcheckin differs from [checkin](checkin.md) in that the latter squashes the comm
 
 ### Simple
 
-Suppose you have 
+Suppose you have
 
     A [tfs/default, C1] <- B <- C [master, HEAD]
 
@@ -103,7 +106,7 @@ You could check in commits of other users in TFS. To be able to do that, you mus
 
     git tfs rcheckin --authors="c:\path\to\authors.txt"
 
-Note : To be able to check in commits of other users, you should have a special right defined in TFS. To activate, Right click on the TFS project, then "Security..." and select "Allow" to the "Check in other user's changes" permission (CheckinOther). 
+Note : To be able to check in commits of other users, you should have a special right defined in TFS. To activate, Right click on the TFS project, then "Security..." and select "Allow" to the "Check in other user's changes" permission (CheckinOther).
 
 ## Internals
 
