@@ -84,8 +84,8 @@ namespace Sep.Git.Tfs.Commands
                     { "export-work-item-mapping=", "Path to Work-items mapping export file",
                         v => ExportMetadatasFile = v },
                     { "branches=", "Strategy to manage branches:"+
-                        Environment.NewLine + "* none: Ignore branches and merge changesets, fetching only the cloned tfs path"+
                         Environment.NewLine + "* auto:(default) Manage the encountered merged changesets and initialize only the merged branches"+
+                        Environment.NewLine + "* none: Ignore branches and merge changesets, fetching only the cloned tfs path"+
                         Environment.NewLine + "* all: Manage merged changesets and initialize all the branches during the clone",
                         v =>
                         {
@@ -97,9 +97,9 @@ namespace Sep.Git.Tfs.Commands
                         } },
                     { "batch-size=", "Size of the batch of tfs changesets fetched (-1 for all in one batch)",
                         v => BatchSizeOption = v },
-                    { "c|changeset=", "The changeset to clone from (must be a number)",
+                    { "c|changeset|from=", "The changeset to clone from (must be a number)",
                         v => InitialChangeset = Convert.ToInt32(v) },
-                    { "t|up-to=", "up-to changeset # (optional, -1 for up to maximum, must be a number, not prefixed with C)",
+                    { "t|up-to|to=", "up-to changeset # (optional, -1 for up to maximum, must be a number, not prefixed with 'C')",
                         v => UpToChangeSetOption = v }
                 }.Merge(_remoteOptions.OptionSet);
             }
