@@ -26,11 +26,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{4A46FEEE-B8A
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CDE05FFA-9DDB-4694-8CA6-6DB7B235CD7F}"
-	ProjectSection(SolutionItems) = preProject
-		CI.proj = CI.proj
-		Release.proj = Release.proj
-		Releasing.md = Releasing.md
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChocolateyTemplates", "ChocolateyTemplates", "{AC0FE25D-D76B-4EE7-9EA8-470204451C9F}"
 	ProjectSection(SolutionItems) = preProject
@@ -45,6 +40,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Setup", "GitTfs.Setup\GitTfs.Setup.csproj", "{0A4AED21-360F-40CC-8870-B4D106B34CC1}"
 	ProjectSection(ProjectDependencies) = postProject
 		{55C169E0-93CC-488C-9885-1D4EAF4EA236} = {55C169E0-93CC-488C-9885-1D4EAF4EA236}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7E25ACEF-468A-4E93-9549-8BBFC72294DF}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		build.cake = build.cake
+		build.ps1 = build.ps1
 	EndProjectSection
 EndProject
 Global

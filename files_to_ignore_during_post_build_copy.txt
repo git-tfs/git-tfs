@@ -1,3 +1,0 @@
-LibGit2Sharp.dll
-NDesk.Options.dll
-StructureMap.dll
