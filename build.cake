@@ -306,14 +306,24 @@ string GetChocolateyToken()
 	var chocolateyToken = Argument("chocolateyToken", "");
 	if(!string.IsNullOrEmpty(chocolateyToken))
 		return chocolateyToken;
+
+	chocolateyToken = EnvironmentVariable("chocolateyToken");
+	if(!string.IsNullOrEmpty(chocolateyToken))
+		return chocolateyToken;
+
 	return ReadToken("Chocolatey");
 }
 
 string GetGithubUserAccount()
 {
-	var gitHubOAuthToken = Argument("gitHubUserAccount", "");
-	if(!string.IsNullOrEmpty(gitHubOAuthToken))
-		return gitHubOAuthToken;
+	var gitHubUserAccount = Argument("gitHubUserAccount", "");
+	if(!string.IsNullOrEmpty(gitHubUserAccount))
+		return gitHubUserAccount;
+
+	gitHubUserAccount = EnvironmentVariable("gitHubUserAccount");
+	if(!string.IsNullOrEmpty(gitHubUserAccount))
+		return gitHubUserAccount;
+
 	return ReadToken("GitHubUserAccount");
 }
 
@@ -322,6 +332,11 @@ string GetGithubAuthToken()
 	var gitHubOAuthToken = Argument("gitHubToken", "");
 	if(!string.IsNullOrEmpty(gitHubOAuthToken))
 		return gitHubOAuthToken;
+
+	gitHubOAuthToken = EnvironmentVariable("gitHubToken");
+	if(!string.IsNullOrEmpty(gitHubOAuthToken))
+		return gitHubOAuthToken;
+
 	return ReadToken("GitHub", "^[0-9a-f]{40}$");
 }
 
@@ -344,6 +359,7 @@ Octokit.GitHubClient GetGithubClient()
 Task("TriggerRelease").Description("Trigger a release from the AppVeyor build server")
 	.Does(() =>
 {
+	Information("gitHubUserAccount: "+ GetGithubUserAccount());
 	var httpClient = new System.Net.Http.HttpClient();
 	//AppVeyor build data to trigger the git-tfs build + parameters passed to the release build
 	var content = @"{
