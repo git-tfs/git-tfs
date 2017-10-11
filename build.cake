@@ -303,39 +303,57 @@ string ReadToken(string tokenKey, string tokenRegexFormat = null)
 
 string GetChocolateyToken()
 {
-	var chocolateyToken = Argument("chocolateyToken", "");
-	if(!string.IsNullOrEmpty(chocolateyToken))
-		return chocolateyToken;
+	var token = Argument("chocolateyToken", "");
+	if(!string.IsNullOrEmpty(token))
+	{
+		Information("Chocolatey token found in arguments!");
+		return token;
+	}
 
-	chocolateyToken = EnvironmentVariable("chocolateyToken");
-	if(!string.IsNullOrEmpty(chocolateyToken))
-		return chocolateyToken;
+	token = EnvironmentVariable("chocolateyToken");
+	if(!string.IsNullOrEmpty(token))
+	{
+		Information("Chocolatey token found in env variables!");
+		return token;
+	}
 
 	return ReadToken("Chocolatey");
 }
 
 string GetGithubUserAccount()
 {
-	var gitHubUserAccount = Argument("gitHubUserAccount", "");
-	if(!string.IsNullOrEmpty(gitHubUserAccount))
-		return gitHubUserAccount;
+	var token = Argument("gitHubUserAccount", "");
+	if(!string.IsNullOrEmpty(token))
+	{
+		Information("GitHub user account '" + token + "' found in script arguments!");
+		return token;
+	}
 
-	gitHubUserAccount = EnvironmentVariable("gitHubUserAccount");
-	if(!string.IsNullOrEmpty(gitHubUserAccount))
-		return gitHubUserAccount;
+	token = EnvironmentVariable("gitHubUserAccount");
+	if(!string.IsNullOrEmpty(token))
+	{
+		Information("GitHub user account '" + token + "' found in env variables!");
+		return token;
+	}
 
 	return ReadToken("GitHubUserAccount");
 }
 
 string GetGithubAuthToken()
 {
-	var gitHubOAuthToken = Argument("gitHubToken", "");
-	if(!string.IsNullOrEmpty(gitHubOAuthToken))
-		return gitHubOAuthToken;
+	var token = Argument("gitHubToken", "");
+	if(!string.IsNullOrEmpty(token))
+	{
+		Information("GitHub token found in script arguments!");
+		return token;
+	}
 
-	gitHubOAuthToken = EnvironmentVariable("gitHubToken");
-	if(!string.IsNullOrEmpty(gitHubOAuthToken))
-		return gitHubOAuthToken;
+	token = EnvironmentVariable("gitHubToken");
+	if(!string.IsNullOrEmpty(token))
+	{
+		Information("GitHub token found in env variables!");
+		return token;
+	}
 
 	return ReadToken("GitHub", "^[0-9a-f]{40}$");
 }
