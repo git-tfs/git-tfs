@@ -512,7 +512,7 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 			Force				= false,
 			Noop				= false,
 			LimitOutput			= false,
-			ExecutionTimeout	= 13
+			ExecutionTimeout	= 300
 			// CacheLocation		= @"C:\temp",
 			// AllowUnofficial		= false
 		});
