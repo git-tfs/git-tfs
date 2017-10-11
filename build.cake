@@ -47,13 +47,13 @@ Task("Help").Description("This help...")
 	Information("Trigger the release process to AppVeyor:");
 	Information("----------------------------------------");
 	Information("1. Setup the personal data in `PersonalTokens.config` file");
-	Information("2. run `.\build.ps1 -Target \"TriggerRelease\"`");
+	Information("2. run `.\\build.ps1 -Target \"TriggerRelease\"`");
 	Information("");
 
 	Information("Release process from local machine:");
 	Information("-----------------------------------");
 	Information("1. Setup the personal data in `PersonalTokens.config` file");
-	Information("2. run `.\build.ps1 -Target \"Release\" -Configuration \"Release\"`");
+	Information("2. run `.\\build.ps1 -Target \"Release\" -Configuration \"Release\"`");
 	Information("");
 
 	Information("Available tasks:");
@@ -485,13 +485,22 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 		releaseNotes = "See https://github.com/git-tfs/git-tfs/releases/tag/v" + _semanticVersionShort;
 	}
 	//http://cakebuild.net/dsl/chocolatey
+	Information("Creating Chocolatey package:" + nuspecPathInBuildDir);
 	ChocolateyPack(nuspecPathInBuildDir, new ChocolateyPackSettings {
 								Version			= _semanticVersionShort,
 								ReleaseNotes	= releaseNotes.Split(new string[] { Environment.NewLine }, StringSplitOptions.None),
 								OutputDirectory = ChocolateyBuildDir
 								});
+
 	var chocolateyPackage = "gittfs." + _semanticVersionShort + ".nupkg";
 	var chocolateyPackagePath = System.IO.Path.Combine(ChocolateyBuildDir, chocolateyPackage);
+
+	if(BuildSystem.IsRunningOnAppVeyor)
+	{
+		Information("Uploading chocolatey package as AppVeyor artifact...");
+		BuildSystem.AppVeyor.UploadArtifact(chocolateyPackagePath);
+	}
+
 	if(!IsDryRun)
 	{
 		ChocolateyPush(chocolateyPackagePath, new ChocolateyPushSettings {
@@ -503,7 +512,7 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 			Force				= false,
 			Noop				= false,
 			LimitOutput			= false,
-			ExecutionTimeout	= 13
+			ExecutionTimeout	= 300
 			// CacheLocation		= @"C:\temp",
 			// AllowUnofficial		= false
 		});
