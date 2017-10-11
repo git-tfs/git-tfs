@@ -37,6 +37,8 @@ string _zipFilename;
 string _downloadUrl;
 string _releaseVersion;
 bool _buildAllVersion = (Target == "AppVeyorRelease");
+string _appVeyorBuildVersion;
+
 
 //////////////////////////////////////////////////////////////////////
 // TASKS
@@ -139,11 +141,14 @@ Task("Version").Description("Get the version using GitVersion")
 	Information("Semantic version (long ):" + _semanticVersionLong);
 
 	//Update all the variables now that we know the version number
-	var postFix = (version.BranchName == "master") ? string.Empty : "-" + version.Sha.Substring(0,8) + "." + NormalizeBrancheName(version.BranchName);
+	var normalizedBranchName = NormalizeBrancheName(version.BranchName);
+	var postFix = (version.BranchName == "master") ? string.Empty : "-" + version.Sha.Substring(0,8) + "." + normalizedBranchName;
 	_zipFilename = string.Format(ZipFileTemplate, _semanticVersionShort + postFix);
 	_zipFilePath = System.IO.Path.Combine(buildAssetPath, _zipFilename);
 	_downloadUrl = string.Format(DownloadUrlTemplate, _semanticVersionShort) + _zipFilename;
 	_releaseVersion = "v" + _semanticVersionShort;
+	_appVeyorBuildVersion = _semanticVersionShort
+			+ ((version.BranchName == "master") ? string.Empty : "+" + normalizedBranchName);
 });
 
 string NormalizeBrancheName(string branchName)
@@ -157,8 +162,8 @@ Task("UpdateAssemblyInfo").Description("Update AssemblyInfo properties with the 
 {
 	if(BuildSystem.IsRunningOnAppVeyor)
 	{
-		Information("Updating Appveyor version to... " + _semanticVersionShort);
-		AppVeyor.UpdateBuildVersion(_semanticVersionShort);
+		Information("Updating Appveyor version to... " + _appVeyorBuildVersion);
+		AppVeyor.UpdateBuildVersion(_appVeyorBuildVersion);
 	}
 
 	CreateAssemblyInfo("CommonAssemblyInfo.cs", new AssemblyInfoSettings {
