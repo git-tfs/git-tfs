@@ -47,13 +47,13 @@ Task("Help").Description("This help...")
 	Information("Trigger the release process to AppVeyor:");
 	Information("----------------------------------------");
 	Information("1. Setup the personal data in `PersonalTokens.config` file");
-	Information("2. run `.\build.ps1 -Target \"TriggerRelease\"`");
+	Information("2. run `.\\build.ps1 -Target \"TriggerRelease\"`");
 	Information("");
 
 	Information("Release process from local machine:");
 	Information("-----------------------------------");
 	Information("1. Setup the personal data in `PersonalTokens.config` file");
-	Information("2. run `.\build.ps1 -Target \"Release\" -Configuration \"Release\"`");
+	Information("2. run `.\\build.ps1 -Target \"Release\" -Configuration \"Release\"`");
 	Information("");
 
 	Information("Available tasks:");
