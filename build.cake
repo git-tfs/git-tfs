@@ -485,13 +485,22 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 		releaseNotes = "See https://github.com/git-tfs/git-tfs/releases/tag/v" + _semanticVersionShort;
 	}
 	//http://cakebuild.net/dsl/chocolatey
+	Information("Creating Chocolatey package:" + nuspecPathInBuildDir);
 	ChocolateyPack(nuspecPathInBuildDir, new ChocolateyPackSettings {
 								Version			= _semanticVersionShort,
 								ReleaseNotes	= releaseNotes.Split(new string[] { Environment.NewLine }, StringSplitOptions.None),
 								OutputDirectory = ChocolateyBuildDir
 								});
+
 	var chocolateyPackage = "gittfs." + _semanticVersionShort + ".nupkg";
 	var chocolateyPackagePath = System.IO.Path.Combine(ChocolateyBuildDir, chocolateyPackage);
+
+	if(BuildSystem.IsRunningOnAppVeyor)
+	{
+		Information("Uploading chocolatey package as AppVeyor artifact...");
+		BuildSystem.AppVeyor.UploadArtifact(chocolateyPackagePath);
+	}
+
 	if(!IsDryRun)
 	{
 		ChocolateyPush(chocolateyPackagePath, new ChocolateyPushSettings {
