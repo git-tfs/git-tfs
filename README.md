@@ -146,7 +146,7 @@ This is the complete list of commands in the master branch on github.
 ### Continuous Integration Status
 
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/git-tfs/git-tfs)](https://ci.appveyor.com/project/pmiossec/git-tfs-v2qcm)
-( Great thanks to [![AppVeyor Icon](http://www.appveyor.com/site/favicon.ico) AppVeyor](http://www.appveyor.com/)! )
+( Great thanks to [<img src="https://www.appveyor.com/assets/img/favicons/favicon.ico" height="20"> AppVeyor](http://www.appveyor.com/)! )
 
 ### Prerequisites
 
