@@ -44,19 +44,18 @@ bool _buildAllVersion = (Target == "AppVeyorRelease");
 Task("Help").Description("This help...")
 	.Does(() =>
 {
-	Information("Trigger the release process to AppVeyor:");
-	Information("----------------------------------------");
-	Information("1. Setup the personal data in `PersonalTokens.config` file");
-	Information("2. run `.\\build.ps1 -Target \"TriggerRelease\"`");
-	Information("");
+	Information(
+@"Trigger the release process to AppVeyor:
+----------------------------------------
+1. Setup the personal data in `PersonalTokens.config` file
+2. run `.\build.ps1 -Target ""TriggerRelease""`
 
-	Information("Release process from local machine:");
-	Information("-----------------------------------");
-	Information("1. Setup the personal data in `PersonalTokens.config` file");
-	Information("2. run `.\\build.ps1 -Target \"Release\" -Configuration \"Release\"`");
-	Information("");
+Release process from local machine:
+-----------------------------------
+1. Setup the personal data in `PersonalTokens.config` file
+2. run `.\build.ps1 -Target ""Release"" -Configuration ""Release""`
 
-	Information("Available tasks:");
+Available tasks:");
 	StartProcess("cake.exe", "build.cake -showdescription");
 });
 
