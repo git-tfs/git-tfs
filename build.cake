@@ -37,8 +37,6 @@ string _zipFilename;
 string _downloadUrl;
 string _releaseVersion;
 bool _buildAllVersion = (Target == "AppVeyorRelease");
-string _appVeyorBuildVersion;
-
 
 //////////////////////////////////////////////////////////////////////
 // TASKS
@@ -142,13 +140,21 @@ Task("Version").Description("Get the version using GitVersion")
 
 	//Update all the variables now that we know the version number
 	var normalizedBranchName = NormalizeBrancheName(version.BranchName);
-	var postFix = (version.BranchName == "master") ? string.Empty : "-" + version.Sha.Substring(0,8) + "." + normalizedBranchName;
+	var shortSha1 = version.Sha.Substring(0,8);
+	var postFix = (version.BranchName == "master") ? string.Empty : "-" + shortSha1 + "." + normalizedBranchName;
 	_zipFilename = string.Format(ZipFileTemplate, _semanticVersionShort + postFix);
 	_zipFilePath = System.IO.Path.Combine(buildAssetPath, _zipFilename);
 	_downloadUrl = string.Format(DownloadUrlTemplate, _semanticVersionShort) + _zipFilename;
 	_releaseVersion = "v" + _semanticVersionShort;
-	_appVeyorBuildVersion = _semanticVersionShort
-			+ ((version.BranchName == "master") ? string.Empty : "+" + normalizedBranchName);
+
+	if(BuildSystem.IsRunningOnAppVeyor)
+	{
+		var appVeyorBuildVersion = _semanticVersionShort
+				+ ((version.BranchName == "master") ? string.Empty : "+" + shortSha1 + "." + normalizedBranchName);
+		appVeyorBuildVersion = appVeyorBuildVersion + "." + EnvironmentVariable("APPVEYOR_BUILD_NUMBER");
+		Information("Updating Appveyor version to... " + appVeyorBuildVersion);
+		AppVeyor.UpdateBuildVersion(appVeyorBuildVersion);
+	}
 });
 
 string NormalizeBrancheName(string branchName)
@@ -160,12 +166,6 @@ Task("UpdateAssemblyInfo").Description("Update AssemblyInfo properties with the 
 	.IsDependentOn("Version")
 	.Does(() =>
 {
-	if(BuildSystem.IsRunningOnAppVeyor)
-	{
-		Information("Updating Appveyor version to... " + _appVeyorBuildVersion);
-		AppVeyor.UpdateBuildVersion(_appVeyorBuildVersion);
-	}
-
 	CreateAssemblyInfo("CommonAssemblyInfo.cs", new AssemblyInfoSettings {
 		Company="SEP",
 		Product = "GitTfs",
