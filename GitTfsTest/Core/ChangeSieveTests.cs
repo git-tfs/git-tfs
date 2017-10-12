@@ -595,14 +595,14 @@ namespace Sep.Git.Tfs.Test.Core
             [Fact]
             public void WhenMainBranchFolderIsDeleted_ThenKeepFileInGitCommitByDoingNothing()
             {
-                Assert.Equal(0, Subject.GetChangesToApply().Count());
+                Assert.Empty(Subject.GetChangesToApply());
             }
 
             [Fact]
             public void DoNotFetch()
             {
                 // Because we're not going to apply changes, don't waste time fetching any.
-                Assert.Equal(0, Subject.GetChangesToFetch().Count());
+                Assert.Empty(Subject.GetChangesToFetch());
             }
         }
 

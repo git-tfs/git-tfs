@@ -19,7 +19,7 @@ namespace Sep.Git.Tfs.Test.Core
             var reader = new DelimitedReader(new StreamReader(new MemoryStream(bytes.ToArray())));
             Assert.Equal("abc", reader.Read());
             Assert.Equal("def", reader.Read());
-            Assert.Equal(null, reader.Read());
+            Assert.Null(reader.Read());
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Sep.Git.Tfs.Test.Core
             var reader = new DelimitedReader(new StreamReader(new MemoryStream(bytes.ToArray())));
             Assert.Equal("abc", reader.Read());
             Assert.Equal("def", reader.Read());
-            Assert.Equal(null, reader.Read());
+            Assert.Null(reader.Read());
         }
     }
 }

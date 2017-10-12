@@ -74,7 +74,7 @@ namespace Sep.Git.Tfs.Test.Core.TfsInterop
             IEnumerable<BranchTree> result = branch1.GetAllChildren();
 
             Assert.NotNull(result);
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace Sep.Git.Tfs.Test.Core.TfsInterop
             IEnumerable<BranchTree> result = trunk.GetAllChildrenOfBranch("$/Project/Branch1");
 
             Assert.NotNull(result);
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
     }
 }

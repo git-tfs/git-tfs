@@ -17,7 +17,7 @@ namespace Sep.Git.Tfs.Test.Util
             AuthorsFile authFile = new AuthorsFile();
             authFile.Parse(sr);
             Assert.NotNull(authFile.Authors);
-            Assert.Equal<int>(0, authFile.Authors.Count);
+            Assert.Empty(authFile.Authors);
         }
 
         [Fact]
@@ -27,11 +27,11 @@ namespace Sep.Git.Tfs.Test.Util
             AuthorsFile authFile = new AuthorsFile();
             authFile.Parse(new StreamReader(new MemoryStream(Encoding.ASCII.GetBytes(author))));
             Assert.NotNull(authFile.Authors);
-            Assert.Equal<int>(1, authFile.Authors.Count);
+            Assert.Single(authFile.Authors);
             Assert.True(authFile.Authors.ContainsKey(@"Domain\Test.User"));
             Author auth = authFile.Authors[@"Domain\Test.User"];
-            Assert.Equal<string>("Test User", auth.Name);
-            Assert.Equal<string>("TestUser@example.com", auth.Email);
+            Assert.Equal("Test User", auth.Name);
+            Assert.Equal("TestUser@example.com", auth.Email);
         }
 
         [Fact]
@@ -41,11 +41,11 @@ namespace Sep.Git.Tfs.Test.Util
             AuthorsFile authFile = new AuthorsFile();
             authFile.Parse(new StreamReader(new MemoryStream(Encoding.ASCII.GetBytes(author))));
             Assert.NotNull(authFile.Authors);
-            Assert.Equal<int>(1, authFile.Authors.Count);
+            Assert.Single(authFile.Authors);
             Assert.True(authFile.Authors.ContainsKey(@"domain\Test.User"));
             Author auth = authFile.Authors[@"domain\Test.User"];
-            Assert.Equal<string>("Test User", auth.Name);
-            Assert.Equal<string>("TestUser@example.com", auth.Email);
+            Assert.Equal("Test User", auth.Name);
+            Assert.Equal("TestUser@example.com", auth.Email);
         }
 
         [Fact]
@@ -61,13 +61,13 @@ Domain\Different.User = Three Name User < TestUser@example.com >";
 
             Assert.True(authFile.Authors.ContainsKey(@"Domain\Test.User"));
             Author auth = authFile.Authors[@"Domain\Test.User"];
-            Assert.Equal<string>("Test User", auth.Name);
-            Assert.Equal<string>("TestUser@example.com", auth.Email);
+            Assert.Equal("Test User", auth.Name);
+            Assert.Equal("TestUser@example.com", auth.Email);
 
             Assert.True(authFile.Authors.ContainsKey(@"Domain\Different.User"));
             auth = authFile.Authors[@"Domain\Different.User"];
-            Assert.Equal<string>("Three Name User", auth.Name);
-            Assert.Equal<string>(" TestUser@example.com ", auth.Email);
+            Assert.Equal("Three Name User", auth.Name);
+            Assert.Equal(" TestUser@example.com ", auth.Email);
         }
 
         [Fact]
@@ -99,7 +99,7 @@ Domain\Different.User = Three Name User < TestUser@example.com >";
             AuthorsFile authFile = new AuthorsFile();
             authFile.Parse(new StreamReader(new MemoryStream(Encoding.ASCII.GetBytes(author))));
             Assert.NotNull(authFile.Authors);
-            Assert.Equal<int>(1, authFile.Authors.Count);
+            Assert.Single(authFile.Authors);
 
             Assert.True(authFile.Authors.ContainsKey(@"Domain\Test.User"));
             Assert.False(authFile.Authors.ContainsKey(@"Domain\Different.User"));
@@ -127,11 +127,11 @@ D#omain\Different.User = Three Name User < TestUser@example.com >";
             AuthorsFile authFile = new AuthorsFile();
             authFile.Parse(new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(author))));
             Assert.NotNull(authFile.Authors);
-            Assert.Equal<int>(1, authFile.Authors.Count);
+            Assert.Single(authFile.Authors);
             Assert.True(authFile.Authors.ContainsKey(@"domain\Blåbærsyltetøy"));
             Author auth = authFile.Authors[@"domain\Blåbærsyltetøy"];
-            Assert.Equal<string>("ÆØÅ User", auth.Name);
-            Assert.Equal<string>("ÆØÅ@example.com", auth.Email);
+            Assert.Equal("ÆØÅ User", auth.Name);
+            Assert.Equal("ÆØÅ@example.com", auth.Email);
         }
 
         [Fact]
@@ -145,13 +145,13 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
             Assert.Equal<int>(2, authFile.Authors.Count);
             Assert.True(authFile.Authors.ContainsKey(@"domain\Blåbærsyltetøy"));
             Author auth = authFile.Authors[@"domain\Blåbærsyltetøy"];
-            Assert.Equal<string>("ÆØÅ User", auth.Name);
-            Assert.Equal<string>("ÆØÅ@example.com", auth.Email);
+            Assert.Equal("ÆØÅ User", auth.Name);
+            Assert.Equal("ÆØÅ@example.com", auth.Email);
 
             Assert.True(authFile.Authors.ContainsKey(@"differentDomain\Blåbærsyltetøy"));
             auth = authFile.Authors[@"differentDomain\Blåbærsyltetøy"];
-            Assert.Equal<string>("ÆØÅ User", auth.Name);
-            Assert.Equal<string>("ÆØÅ@example.com", auth.Email);
+            Assert.Equal("ÆØÅ User", auth.Name);
+            Assert.Equal("ÆØÅ@example.com", auth.Email);
         }
 
         [Fact]
@@ -162,7 +162,7 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
             AuthorsFile authFile = new AuthorsFile();
             authFile.Parse(new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(author))));
             Assert.NotNull(authFile.Authors);
-            Assert.Equal<int>(1, authFile.Authors.Count);
+            Assert.Single(authFile.Authors);
             Assert.True(authFile.Authors.ContainsKey(@"domain\Blåbærsyltetøy"));
         }
 
@@ -232,7 +232,7 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
 
             // multiple users with the same email -> 3 tfs users, 1 git user
             Assert.Equal<int>(authors.Length, authFile.Authors.Count);
-            Assert.Equal<int>(1, authFile.AuthorsByGitUserId.Count);
+            Assert.Single(authFile.AuthorsByGitUserId);
 
             // contains all tfs users
             Assert.True(authFile.Authors.ContainsKey(@"Domain\Test.User"));
@@ -247,7 +247,7 @@ differentDomain\Blåbærsyltetøy = ÆØÅ User <ÆØÅ@example.com>";
             Tuple<string, string> git_author = new Tuple<string, string>("Test User", "TestUser@example.com");
             Author a = authFile.FindAuthor(git_author);
             Assert.NotNull(a);
-            Assert.Equal(a.TfsUserId, @"Domain\Test.User");
+            Assert.Equal(@"Domain\Test.User", a.TfsUserId);
         }
 
 

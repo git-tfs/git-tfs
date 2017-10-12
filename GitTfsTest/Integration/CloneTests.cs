@@ -364,7 +364,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             // Ensure we didn't migrate our branch from the "folder creation" point of
             // $/MyTeamProject/Branch (e.g. C2 -> C3, C4...
-            Assert.False(branch.Commits.Any(c => c.Message.IndexOf(@"Create ""branch"" (as a folder).", StringComparison.InvariantCultureIgnoreCase) >= 0));
+            Assert.DoesNotContain(branch.Commits, c => c.Message.IndexOf(@"Create ""branch"" (as a folder).", StringComparison.InvariantCultureIgnoreCase) >= 0);
 
             // Ensure we migrated the branch from it's creation point, e.g. C2 immediately followed by C5 (C2 -> C5)
             var expectedBranchChangesetParentCommit = branch.Commits.Where(c => c.Message.IndexOf("Create root branch.", StringComparison.InvariantCultureIgnoreCase) >= 0).FirstOrDefault();
@@ -375,7 +375,7 @@ namespace Sep.Git.Tfs.Test.Integration
 
             // This wasn't part of the original test by @jeremy-sylvis-tmg, but this does ensure the relationship
             // C2 -> C5; it may not be enough to just ensure C5 exists.
-            Assert.True(branchChangesetCommit.Parents.Contains(expectedBranchChangesetParentCommit));
+            Assert.Contains(expectedBranchChangesetParentCommit, branchChangesetCommit.Parents);
 
             var refs = new[]
             {

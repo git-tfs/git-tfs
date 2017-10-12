@@ -73,8 +73,8 @@ namespace Sep.Git.Tfs.Test.Core
         public void GivenTheTfsPathsInAnotherBranchFolder_WhenGettingPathInGitRepo_ThenShouldGetNothing()
         {
             var remote = BuildRemote(url: "test", repository: "$/Project/MyBranch");
-            Assert.Equal(null, remote.GetPathInGitRepo("$/Project/MyBranch_other"));
-            Assert.Equal(null, remote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
+            Assert.Null(remote.GetPathInGitRepo("$/Project/MyBranch_other"));
+            Assert.Null(remote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
         }
 
         [Fact]
@@ -96,8 +96,8 @@ namespace Sep.Git.Tfs.Test.Core
                 {
                     BuildRemote(url: "MyBranch", repository: "$/Project/MyBranch", id:"test_subtree/MyBranch"),
                 });
-            Assert.Equal(null, subtreeRemote.GetPathInGitRepo("$/Project/MyBranch_other"));
-            Assert.Equal(null, subtreeRemote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
+            Assert.Null(subtreeRemote.GetPathInGitRepo("$/Project/MyBranch_other"));
+            Assert.Null(subtreeRemote.GetPathInGitRepo("$/Project/MyBranch_other/file.txt"));
         }
 
         private GitTfsRemote BuildSubTreeOwnerRemote(IEnumerable<IGitTfsRemote> remotes)

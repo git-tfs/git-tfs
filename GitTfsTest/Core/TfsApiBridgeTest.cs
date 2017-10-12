@@ -43,7 +43,7 @@ namespace GitTfsTest.Core
         {
             var originalObjects = new[] { new OriginalType() };
             var wrappedObjects = _mocks.ClassUnderTest.Wrap<WrapperForOriginalType, OriginalType>(originalObjects);
-            Assert.Equal(1, wrappedObjects.Length);
+            Assert.Single(wrappedObjects);
             Assert.Equal(originalObjects[0], _mocks.ClassUnderTest.Unwrap<OriginalType>(wrappedObjects)[0]);
         }
 
