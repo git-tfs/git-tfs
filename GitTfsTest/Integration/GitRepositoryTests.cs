@@ -44,7 +44,7 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var changesets = gitRepository.GetLastParentTfsCommits("HEAD");
-                Assert.Equal(1, changesets.Count());
+                Assert.Single(changesets);
                 Assert.Equal(c3, changesets.First().GitCommit);
             }
         }
@@ -113,7 +113,7 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var changesets = gitRepository.GetLastParentTfsCommits("HEAD");
-                Assert.Equal(1, changesets.Count());
+                Assert.Single(changesets);
                 Assert.Equal(c4, changesets.First().GitCommit);
             }
         }
@@ -138,7 +138,7 @@ namespace Sep.Git.Tfs.Test.Integration
             {
                 var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
                 var changesets = gitRepository.GetLastParentTfsCommits("HEAD");
-                Assert.Equal(0, changesets.Count());
+                Assert.Empty(changesets);
             }
         }
 
@@ -195,7 +195,7 @@ namespace Sep.Git.Tfs.Test.Integration
                 Assert.Equal(c6, changesets.ElementAt(2).Sha);
 
                 changesets = gitRepository.FindParentCommits(c5, c3);
-                Assert.Equal(0, changesets.Count());
+                Assert.Empty(changesets);
             }
         }
     }

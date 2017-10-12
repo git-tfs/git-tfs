@@ -10,10 +10,10 @@ namespace Sep.Git.Tfs.Test.Commands
         public void AssertValidTfsPathTest()
         {
             "$/test".AssertValidTfsPath();
-            Assert.Throws(typeof(GitTfsException), () => "$test".AssertValidTfsPath());
-            Assert.Throws(typeof(GitTfsException), () => "/test".AssertValidTfsPath());
-            Assert.Throws(typeof(GitTfsException), () => "test".AssertValidTfsPath());
-            Assert.Throws(typeof(GitTfsException), () => "$/".AssertValidTfsPath());
+            Assert.Throws<GitTfsException>(() => "$test".AssertValidTfsPath());
+            Assert.Throws<GitTfsException>(() => "/test".AssertValidTfsPath());
+            Assert.Throws<GitTfsException>(() => "test".AssertValidTfsPath());
+            Assert.Throws<GitTfsException>(() => "$/".AssertValidTfsPath());
             "$/".AssertValidTfsPathOrRoot();
         }
 

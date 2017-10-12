@@ -255,7 +255,7 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
 
-                Assert.Equal(1, changes.Length);
+                Assert.Single(changes);
 
                 Assert.Equal("R", changes[0].Status);
                 Assert.Equal("TestFiles/Test_moved.txt", changes[0].pathTo);
@@ -284,7 +284,7 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
 
-                Assert.Equal(1, changes.Length);
+                Assert.Single(changes);
 
                 Assert.Equal("M", changes[0].Status);
                 Assert.Equal("TestFiles/Test1.txt", changes[0].path);
@@ -302,7 +302,7 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 var changes = GitChangeInfo.GetChangedFiles(reader).ToArray();
 
-                Assert.Equal(1, changes.Length);
+                Assert.Single(changes);
 
                 Assert.Equal("M", changes[0].Status);
                 Assert.Equal("TestFiles/Test0.txt", changes[0].path);

@@ -26,7 +26,9 @@ namespace Sep.Git.Tfs.Test.Core
         [Fact]
         public void ShouldDetectGitLinkWithEqualityBackwards()
         {
-            Assert.Equal("160000".ToFileMode(), LibGit2Sharp.Mode.GitLink);
+#pragma warning disable xUnit2000 // Expected value should be first
+            Assert.Equal("160000".ToFileMode(), actual: LibGit2Sharp.Mode.GitLink);
+#pragma warning restore xUnit2000 // Expected value should be first
         }
     }
 }

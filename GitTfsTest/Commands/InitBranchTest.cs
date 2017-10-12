@@ -124,7 +124,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
             gitRepository.Expect(x => x.CommandOneline(Arg<string[]>.Is.Anything)).Return("foo!").Repeat.Never();
 
-            Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
+            Assert.Throws<GitTfsException>(() => mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
 
             gitRepository.VerifyAllExpectations();
         }
@@ -144,7 +144,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Return(GIT_BRANCH_TO_INIT).Repeat.Never();
 
-            var ex = Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
+            var ex = Assert.Throws<GitTfsException>(() => mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
             Assert.Equal("error: Couldn't fetch parent branch\n", ex.Message);
 
             gitRepository.VerifyAllExpectations();
@@ -200,7 +200,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.ReadAllTfsRemotes()).Return(new List<IGitTfsRemote> { remote }).Repeat.Once();
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT)).Return(GIT_BRANCH_TO_INIT).Repeat.Never();
 
-            Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
+            Assert.Throws<GitTfsException>(() => mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
 
             gitRepository.VerifyAllExpectations();
         }
@@ -324,7 +324,7 @@ namespace Sep.Git.Tfs.Test.Commands
             mocks.ClassUnderTest.CloneAllBranches = true;
             mocks.ClassUnderTest.NoFetch = true;
 
-            var ex = Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run());
+            var ex = Assert.Throws<GitTfsException>(() => mocks.ClassUnderTest.Run());
             Assert.Equal("error: --no-fetch cannot be used with --all", ex.Message);
         }
 
@@ -368,7 +368,7 @@ namespace Sep.Git.Tfs.Test.Commands
             gitRepository.Expect(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT2)).Return(GIT_BRANCH_TO_INIT2).Repeat.Never();
             #endregion
 
-            var ex = Assert.Throws(typeof(GitTfsException), () => mocks.ClassUnderTest.Run());
+            var ex = Assert.Throws<GitTfsException>(() => mocks.ClassUnderTest.Run());
 
             Assert.Equal("error: The use of the option '--branches=all' to init all the branches is only possible when 'git tfs clone' was done from the trunk!!! '$/MyProject/Trunk' is not a TFS branch!", ex.Message);
 
@@ -396,7 +396,7 @@ namespace Sep.Git.Tfs.Test.Commands
 
             //Not Very Clean!!! Don't know how to test that :(
             //If the InvalidOperationException is thrown, it's that the Helper.Run() is Called => That's what is expected!
-            Assert.Throws(typeof(InvalidOperationException), () => mocks.ClassUnderTest.Run());
+            Assert.Throws<InvalidOperationException>(() => mocks.ClassUnderTest.Run());
             gitRepository.VerifyAllExpectations();
         }
         #endregion

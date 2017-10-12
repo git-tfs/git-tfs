@@ -162,7 +162,7 @@ namespace Sep.Git.Tfs.Test.Core
                 var remotes = Load(
                     c("tfs-remote.default.url", "http://server/path"),
                     c("tfs-remote.default.repository", "$/project"));
-                Assert.Equal(1, remotes.Count());
+                Assert.Single(remotes);
                 var remote = remotes.First();
                 Assert.Equal("default", remote.Id);
                 Assert.Equal("http://server/path", remote.Url);
@@ -184,7 +184,7 @@ namespace Sep.Git.Tfs.Test.Core
                     c("tfs-remote.default.ignore-except", "dontignorethis.zip"),
                     c("tfs-remote.default.legacy-urls", "http://old:8080/,http://other/"),
                     c("tfs-remote.default.autotag", "true"));
-                Assert.Equal(1, remotes.Count());
+                Assert.Single(remotes);
                 var remote = remotes.First();
                 Assert.Equal("default", remote.Id);
                 Assert.Equal("http://server/path", remote.Url);
@@ -203,7 +203,7 @@ namespace Sep.Git.Tfs.Test.Core
             {
                 var remotes = Load(
                     c("tfs-remote.default.repository", "$/project"));
-                Assert.Equal(0, remotes.Count());
+                Assert.Empty(remotes);
             }
         }
 
@@ -232,7 +232,7 @@ namespace Sep.Git.Tfs.Test.Core
                 Assert.True(entry.Key.StartsWith("tfs-remote.has.dots.in.it."), entry.Key + " should start with tfs-remote.has.dots.in.it");
 
             var remotes = _converter.Load(magic(config));
-            Assert.Equal(1, remotes.Count());
+            Assert.Single(remotes);
             Assert.Equal("has.dots.in.it", remotes.First().Id);
         }
 

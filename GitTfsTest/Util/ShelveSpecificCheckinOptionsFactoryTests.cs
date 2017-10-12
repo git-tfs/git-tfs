@@ -33,7 +33,7 @@ namespace Sep.Git.Tfs.Test.Util
 
             var specificCheckinOptions = GetCheckinOptionsFactory().BuildShelveSetSpecificCheckinOptions(new CheckinOptions(), commitMessage);
 
-            Assert.Equal(1, specificCheckinOptions.WorkItemsToAssociate.Count);
+            Assert.Single(specificCheckinOptions.WorkItemsToAssociate);
             Assert.Contains("1234", specificCheckinOptions.WorkItemsToAssociate);
             Assert.Equal(expectedCheckinComment, specificCheckinOptions.CheckinComment);
         }

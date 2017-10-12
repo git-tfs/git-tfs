@@ -68,7 +68,7 @@ namespace Sep.Git.Tfs.Test.Util
             var command = new UsesList();
             var args = Args();
             _mocks.ClassUnderTest.Run(command, args);
-            Assert.Equal(1, command.Calls.Count);
+            Assert.Single(command.Calls);
             Assert.Equal(TestCommandBase.Form.List, command.Calls[0].Form);
             Assert.Same(args, command.Calls[0].Args);
         }
@@ -93,7 +93,7 @@ namespace Sep.Git.Tfs.Test.Util
             var command = new UsesOverloads();
             var args = Args("a");
             _mocks.ClassUnderTest.Run(command, args);
-            Assert.Equal(1, command.Calls.Count);
+            Assert.Single(command.Calls);
             Assert.Equal(TestCommandBase.Form.Split, command.Calls[0].Form);
             Assert.Equal(args, command.Calls[0].Args);
         }
@@ -104,7 +104,7 @@ namespace Sep.Git.Tfs.Test.Util
             var command = new UsesOverloads();
             var args = Args("a", "b");
             _mocks.ClassUnderTest.Run(command, args);
-            Assert.Equal(1, command.Calls.Count);
+            Assert.Single(command.Calls);
             Assert.Equal(TestCommandBase.Form.Split, command.Calls[0].Form);
             Assert.Equal(args, command.Calls[0].Args);
         }
@@ -148,7 +148,7 @@ namespace Sep.Git.Tfs.Test.Util
             var command = new UsesOverloadsOrDefault();
             var args = Args();
             _mocks.ClassUnderTest.Run(command, args);
-            Assert.Equal(1, command.Calls.Count);
+            Assert.Single(command.Calls);
             Assert.Equal(TestCommandBase.Form.Split, command.Calls[0].Form);
             Assert.Equal(args, command.Calls[0].Args);
         }
@@ -159,7 +159,7 @@ namespace Sep.Git.Tfs.Test.Util
             var command = new UsesOverloadsOrDefault();
             var args = Args("a");
             _mocks.ClassUnderTest.Run(command, args);
-            Assert.Equal(1, command.Calls.Count);
+            Assert.Single(command.Calls);
             Assert.Equal(TestCommandBase.Form.Split, command.Calls[0].Form);
             Assert.Equal(args, command.Calls[0].Args);
         }
@@ -170,7 +170,7 @@ namespace Sep.Git.Tfs.Test.Util
             var command = new UsesOverloadsOrDefault();
             var args = Args("a", "b");
             _mocks.ClassUnderTest.Run(command, args);
-            Assert.Equal(1, command.Calls.Count);
+            Assert.Single(command.Calls);
             Assert.Equal(TestCommandBase.Form.List, command.Calls[0].Form);
             Assert.Same(args, command.Calls[0].Args);
         }

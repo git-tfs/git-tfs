@@ -97,7 +97,7 @@ namespace Sep.Git.Tfs.Test.Core
                    .Return(new List<TfsChangesetInfo>());
             globals.Repository.Stub(r => r.ReadAllTfsRemotes())
                    .Return(new List<GitTfsRemote>() { new GitTfsRemote(new RemoteInfo() { Id = "myRemote" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new ConfigProperties(null)) });
-            Assert.Throws(typeof(GitTfsException), () => globals.RemoteId);
+            Assert.Throws<GitTfsException>(() => globals.RemoteId);
         }
 
         [Fact]
@@ -114,7 +114,7 @@ namespace Sep.Git.Tfs.Test.Core
                            new GitTfsRemote(new RemoteInfo() { Id = "myRemote" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new ConfigProperties(null)),
                            new GitTfsRemote(new RemoteInfo() { Id = "myRemote2" }, gitRepoMock, new RemoteOptions(), globals, mocker.Get<ITfsHelper>(), new ConfigProperties(null))
                        });
-            Assert.Throws(typeof(GitTfsException), () => globals.RemoteId);
+            Assert.Throws<GitTfsException>(() => globals.RemoteId);
         }
     }
 }
