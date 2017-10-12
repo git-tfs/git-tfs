@@ -63,7 +63,7 @@ REDIRECTS: OFF
 RESTRICTION: == net45
 NUGET
   remote: https://www.nuget.org/api/v2
-    Cake (0.19.4)
-    Cake.Git (0.14)
+    Cake (0.23)
+    Cake.Git (0.16.1)
     GitVersion.CommandLine (3.6.5)
     xunit.runner.console (2.2)
