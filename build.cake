@@ -260,7 +260,7 @@ Task("Package").Description("Generate the release zip file")
 	}
 	CopyFiles(@".\packages\**\Microsoft.WITDataStore*.dll", OutputDirectory + @"\GitTfs.Vs2015\");
 	CopyFiles(new[] {"README.md", "LICENSE", "NOTICE"}, OutputDirectory);
-	DeleteFiles(OutputDirectory + @"\*.pdb");
+	DeleteFiles(OutputDirectory + @"\**\*.pdb");
 
 	//Create the zip
 	Zip(OutputDirectory, _zipFilePath);
