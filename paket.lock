@@ -1,9 +1,9 @@
 RESTRICTION: == net452
 NUGET
   remote: https://www.nuget.org/api/v2
-    LibGit2Sharp (0.23.1)
-      LibGit2Sharp.NativeBinaries (1.0.164)
-    LibGit2Sharp.NativeBinaries (1.0.164)
+    LibGit2Sharp (0.24)
+      LibGit2Sharp.NativeBinaries (1.0.185)
+    LibGit2Sharp.NativeBinaries (1.0.185)
     Microsoft.AspNet.WebApi.Client (5.2.3)
       Newtonsoft.Json (>= 6.0.4)
     Microsoft.AspNet.WebApi.Core (5.2.3)
@@ -63,7 +63,7 @@ REDIRECTS: OFF
 RESTRICTION: == net45
 NUGET
   remote: https://www.nuget.org/api/v2
-    Cake (0.19.4)
-    Cake.Git (0.14)
+    Cake (0.23)
+    Cake.Git (0.16.1)
     GitVersion.CommandLine (3.6.5)
-    xunit.runner.console (2.2)
+    xunit.runner.console (2.3)
