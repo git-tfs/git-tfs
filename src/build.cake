@@ -22,9 +22,9 @@ const string ZipFileTemplate = ApplicationName + "-{0}.zip";
 const string ApplicationPath = "./" + ApplicationName;
 const string PathToSln = ApplicationPath + ".sln";
 const string BuildDirectory = ApplicationPath + "/bin";
-const string buildAssetPath = @".\tmp\";
+const string buildAssetPath = @".\.build\";
 const string DownloadUrlTemplate ="https://github.com/git-tfs/git-tfs/releases/download/v{0}/";
-string ReleaseNotesPath = @"doc\release-notes\NEXT.md";
+string ReleaseNotesPath = @"..\doc\release-notes\NEXT.md";
 const string ChocolateyBuildDir = buildAssetPath + "choc";
 readonly var OutputDirectory = BuildDirectory + "/" + Configuration;
 
@@ -258,7 +258,7 @@ Task("Package").Description("Generate the release zip file")
 		CopyDirectory(@".\packages\LibGit2Sharp.NativeBinaries\runtimes\win7-x86\native", libgit2NativeBinariesFolder);
 	}
 	CopyFiles(@".\packages\**\Microsoft.WITDataStore*.dll", OutputDirectory + @"\GitTfs.Vs2015\");
-	CopyFiles(new[] {"README.md", "LICENSE", "NOTICE"}, OutputDirectory);
+	CopyFiles(new[] {@"..\README.md", @"..\LICENSE", @"..\NOTICE"}, OutputDirectory);
 	DeleteFiles(OutputDirectory + @"\**\*.pdb");
 
 	//Create the zip
@@ -283,7 +283,7 @@ See the file 'PersonalTokens.config.example' for the format and content.";
 
 string ReadToken(string tokenKey, string tokenRegexFormat = null)
 {
-	var authTargetsFile = "PersonalTokens.config";
+	var authTargetsFile = @"..\PersonalTokens.config";
 
 	Information("Reading token..." + tokenKey);
 

@@ -239,15 +239,15 @@
     <Compile Include="Util\TemporaryFileStream.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\LICENSE">
+    <None Include="..\..\LICENSE">
       <Link>LICENSE</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\NOTICE">
+    <None Include="..\..\NOTICE">
       <Link>NOTICE</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\README.md">
+    <None Include="..\..\README.md">
       <Link>README.md</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

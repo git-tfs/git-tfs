@@ -46,7 +46,7 @@ Param(
 
 Write-Host "Preparing to run build script..."
 
-$PS_SCRIPT_ROOT = split-path -parent $MyInvocation.MyCommand.Definition;
+$PSScriptRoot = split-path -parent $MyInvocation.MyCommand.Definition;
 $PAKET_EXE = Join-Path $PSScriptRoot "paket.exe"
 $TOOLS_DIR = Join-Path $PSScriptRoot "packages/build"
 $CAKE_EXE = Join-Path $TOOLS_DIR "Cake/Cake.exe"

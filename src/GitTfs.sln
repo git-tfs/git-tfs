@@ -19,18 +19,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2012", "GitTfs.Vs2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{4A46FEEE-B8A2-4445-B9D1-8160520C7301}"
 	ProjectSection(SolutionItems) = preProject
-		doc\develop-on-mono.md = doc\develop-on-mono.md
-		doc\release-notes\NEXT.md = doc\release-notes\NEXT.md
-		README.md = README.md
-		doc\running-the-unit-tests.md = doc\running-the-unit-tests.md
+		..\doc\develop-on-mono.md = ..\doc\develop-on-mono.md
+		..\doc\release-notes\NEXT.md = ..\doc\release-notes\NEXT.md
+		..\README.md = ..\README.md
+		..\doc\running-the-unit-tests.md = ..\doc\running-the-unit-tests.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CDE05FFA-9DDB-4694-8CA6-6DB7B235CD7F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChocolateyTemplates", "ChocolateyTemplates", "{AC0FE25D-D76B-4EE7-9EA8-470204451C9F}"
 	ProjectSection(SolutionItems) = preProject
-		ChocolateyTemplates\chocolateyInstall.ps1 = ChocolateyTemplates\chocolateyInstall.ps1
-		ChocolateyTemplates\gittfs.nuspec = ChocolateyTemplates\gittfs.nuspec
+		build\ChocolateyTemplates\chocolateyInstall.ps1 = build\ChocolateyTemplates\chocolateyInstall.ps1
+		build\ChocolateyTemplates\gittfs.nuspec = build\ChocolateyTemplates\gittfs.nuspec
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2013", "GitTfs.Vs2013\GitTfs.Vs2013.csproj", "{101D3C78-27CC-446A-98EC-E2DE88BF0641}"
@@ -44,7 +44,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Setup", "GitTfs.Setu
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7E25ACEF-468A-4E93-9549-8BBFC72294DF}"
 	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
+		..\appveyor.yml = ..\appveyor.yml
 		build.cake = build.cake
 		build.ps1 = build.ps1
 	EndProjectSection
