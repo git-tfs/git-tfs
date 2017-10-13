@@ -831,17 +831,7 @@ namespace Sep.Git.Tfs.Core
 
         private string Commit(LogEntry logEntry)
         {
-            logEntry.Log = BuildCommitMessage(logEntry.Log, logEntry.ChangesetId);
             return Repository.Commit(logEntry).Sha;
-        }
-
-        private string BuildCommitMessage(string tfsCheckinComment, int changesetId)
-        {
-            var builder = new StringWriter();
-            builder.WriteLine(tfsCheckinComment);
-            builder.WriteLine(GitTfsConstants.TfsCommitInfoFormat,
-                TfsUrl, TfsRepositoryPath, changesetId);
-            return builder.ToString();
         }
 
         public void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force)

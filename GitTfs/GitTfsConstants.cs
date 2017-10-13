@@ -63,6 +63,7 @@ namespace Sep.Git.Tfs
 
         public const string BatchSize = GitTfsPrefix + ".batch-size";
         public static string InitialChangeset = GitTfsPrefix + ".initial-changeset";
+        public const string ChangesetIdNotes = GitTfsPrefix + ".changeset-id-notes";
         public static string MessageForceVersion = Environment.NewLine
             + "Note: If you want to force git-tfs to use another version of the tfs client library,"
             + Environment.NewLine

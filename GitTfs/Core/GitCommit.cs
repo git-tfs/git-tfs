@@ -55,6 +55,14 @@ namespace Sep.Git.Tfs.Core
             }
         }
 
+        public ObjectId Id
+        {
+            get
+            {
+                return _commit.Id;
+            }
+        }
+
         public string Sha
         {
             get
