@@ -27,6 +27,7 @@ const string DownloadUrlTemplate ="https://github.com/git-tfs/git-tfs/releases/d
 string ReleaseNotesPath = @"..\doc\release-notes\NEXT.md";
 const string ChocolateyBuildDir = buildAssetPath + "choc";
 readonly var OutputDirectory = BuildDirectory + "/" + Configuration;
+const string TestProjectName = "GitTfsTest";
 
 // Define directories.
 readonly var buildDir = Directory(BuildDirectory) + Directory(Configuration);
@@ -211,7 +212,7 @@ Task("Build").Description("Build git-tfs")
 				.WithTarget("GitTfs_Vs2013");
 		}
 		settings.WithTarget("GitTfs_Vs2015")
-			.WithTarget("GitTfsTest");
+			.WithTarget(TestProjectName);
 	});
 });
 
@@ -232,12 +233,32 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 {
 	SetGitUserConfig();
 
-	XUnit2("./**/bin/" + Configuration + "/GitTfsTest.dll", new XUnit2Settings()
+	EnsureDirectoryExists(buildAssetPath);
+	var coverageFile = System.IO.Path.Combine(buildAssetPath, "coverage.xml");
+	OpenCover(tool => {
+		tool.XUnit2("./"+ TestProjectName + "/bin/" + Configuration + "/" + TestProjectName +".dll", new XUnit2Settings()
 		{
 			XmlReport = true,
 			OutputDirectory = ".",
 			UseX86 =  true
 		});
+	},
+	new FilePath(coverageFile),
+	new OpenCoverSettings()
+		{
+			WorkingDirectory = MakeAbsolute(Directory("./"+ TestProjectName + "/bin/" + Configuration)),
+			Register = "user"
+		}
+		 .WithFilter("+[git-tfs*]*")
+		 .WithFilter("-[LibGit2Sharp]*")
+		);
+
+	if(BuildSystem.IsRunningOnAppVeyor)
+	{
+		Information("Upload coverage to AppVeyor...");
+		BuildSystem.AppVeyor.UploadArtifact(coverageFile);
+	}
+	//ReportGenerator("./build/32+64bit/OpenCover/OpenCover.xml", "./build/32+64bit/OpenCover");
 });
 
 Task("Run-Smoke-Tests").Description("Run the functional/smoke tests")
@@ -287,6 +308,10 @@ Task("Package").Description("Generate the release zip file")
 		var msiFile = @".\GitTfs.Setup\GitTfs.Setup.msi";
 		if(FileExists(msiFile))
 			BuildSystem.AppVeyor.UploadArtifact(msiFile);
+		else
+		{
+			Information("Fail to find msi file to upload...");
+		}
 	}
 });
 

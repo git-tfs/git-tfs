@@ -67,4 +67,5 @@ NUGET
     Cake.Git (0.16.1)
     GitVersion.CommandLine (3.6.5)
     Octokit.CodeFormatter (1.0.0-preview)
+    OpenCover (4.6.519)
     xunit.runner.console (2.3)
