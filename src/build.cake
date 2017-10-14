@@ -71,13 +71,16 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 	.Does(() =>
 {
 	var version = GitVersion();
-	var tag = version.Major + "." + (version.Minor + 1);
-	var nextVersion = tag + ".0";
+	var tagVersion = version.Major + "." + (version.Minor + 1);
+	var tag =  "v" + tagVersion;
+	var nextVersion = tagVersion + ".0";
 	Information("Next version will be:" + nextVersion);
 
 	if(!IsDryRun)
 	{
 		Information("Creating release tag...");
+		var githubAccount = GetGithubUserAccount();
+		var githubToken = GetGithubAuthToken();
 		if(FileExists(ReleaseNotesPath))
 		{
 			var newReleaseNotePath = @"doc\release-notes\v" + nextVersion + ".md";
@@ -85,12 +88,17 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 
 			GitAdd(".", newReleaseNotePath);
 			GitRemove(".", false, ReleaseNotesPath);
-			GitCommit(".", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release v" + tag);
+			var releaseNoteCommit = GitCommit(".", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release v" + tag);
+			Information("Release note commit created:" + releaseNoteCommit.Sha);
+
 			ReleaseNotesPath = newReleaseNotePath;
-			GitPush(".", GetGithubUserAccount(), GetGithubAuthToken(), "master");
+			GitPush(".", githubAccount, githubToken, "master");
 		}
-		GitTag(".", "v" + tag);
-		GitPushRef(".", GetGithubUserAccount(), GetGithubAuthToken(), "origin", "refs/tags/v" + tag);
+		GitTag(".", tag);
+		GitPushRef(".", githubAccount, githubToken, "origin", "refs/tags/" + tag);
+	}
+	else{
+		Information("[DryRun] Should create the release tag: " + tag);
 	}
 });
 
@@ -530,6 +538,10 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 			// CacheLocation		= @"C:\temp",
 			// AllowUnofficial		= false
 		});
+	}
+	else
+	{
+		Information("[DryRun] Should upload chocolatey package...");
 	}
 });
 
