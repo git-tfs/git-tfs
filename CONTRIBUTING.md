@@ -20,6 +20,7 @@ We are a small team and each of us have a different tfs history with different e
 
 5. Verify that your editor is configured to use 4 spaces instead of tabs. You could even install the [EditorConfig Extension for VisualStudio](http://visualstudiogallery.msdn.microsoft.com/c8bccfe2-650c-4b42-bc5c-845e21f96328) ([such plugins exists for other editors](http://editorconfig.org/#download)), and the good space configuration will be set automatically when opening the git-tfs solution.
 
+6. Run the build task `.\build.ps1 -Target "FormatCode"` before committing to keep code formatting consistent (and make pull request review easier and quicker!)
 
 ## Pull Requests
 

@@ -178,7 +178,11 @@ Contributions are always welcome. Thanks to all our [contributors](https://githu
 
 Please, read our short and simple [guidelines](CONTRIBUTING.md) and our doc on how to use [paket](doc/paket.md), the package manager we use.
 
-Especially, don't forget to set `core.autocrlf` to `true` (`git config core.autocrlf true`), and indentation using 4 spaces.
+Especially, don't forget:
+
+* to run the build task `.\build.ps1 -Target "FormatCode"` before committing (to keep code formatting consistent, and pull request easier to review)
+* to set `core.autocrlf` to `true` (`git config core.autocrlf true`)
+* to indent your code using 4 spaces (even if `.editorconfig` should take care of that).
 
 ## Migrations
 If you're migrating a TFS server from 2008 or 2005 to 2010, you might want to [Specify Alternate TFS URLs](doc/specify-alternate-tfs-urls.md).

@@ -36,6 +36,7 @@ string _zipFilePath;
 string _zipFilename;
 string _downloadUrl;
 string _releaseVersion;
+string _sha1;
 bool _buildAllVersion = (Target == "AppVeyorRelease");
 
 //////////////////////////////////////////////////////////////////////
@@ -70,13 +71,16 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 	.Does(() =>
 {
 	var version = GitVersion();
-	var tag = version.Major + "." + (version.Minor + 1);
-	var nextVersion = tag + ".0";
+	var tagVersion = version.Major + "." + (version.Minor + 1);
+	var tag =  "v" + tagVersion;
+	var nextVersion = tagVersion + ".0";
 	Information("Next version will be:" + nextVersion);
 
 	if(!IsDryRun)
 	{
 		Information("Creating release tag...");
+		var githubAccount = GetGithubUserAccount();
+		var githubToken = GetGithubAuthToken();
 		if(FileExists(ReleaseNotesPath))
 		{
 			var newReleaseNotePath = @"doc\release-notes\v" + nextVersion + ".md";
@@ -84,12 +88,17 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 
 			GitAdd(".", newReleaseNotePath);
 			GitRemove(".", false, ReleaseNotesPath);
-			GitCommit(".", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release v" + tag);
+			var releaseNoteCommit = GitCommit(".", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release v" + tag);
+			Information("Release note commit created:" + releaseNoteCommit.Sha);
+
 			ReleaseNotesPath = newReleaseNotePath;
-			GitPush(".", GetGithubUserAccount(), GetGithubAuthToken(), "master");
+			GitPush(".", githubAccount, githubToken, "master");
 		}
-		GitTag(".", "v" + tag);
-		GitPushRef(".", GetGithubUserAccount(), GetGithubAuthToken(), "origin", "refs/tags/v" + tag);
+		GitTag(".", tag);
+		GitPushRef(".", githubAccount, githubToken, "origin", "refs/tags/" + tag);
+	}
+	else{
+		Information("[DryRun] Should create the release tag: " + tag);
 	}
 });
 
@@ -146,6 +155,7 @@ Task("Version").Description("Get the version using GitVersion")
 
 	//Update all the variables now that we know the version number
 	var normalizedBranchName = NormalizeBrancheName(version.BranchName);
+	_sha1 = version.Sha;
 	var shortSha1 = version.Sha.Substring(0,8);
 	var postFix = (version.BranchName == "master") ? string.Empty : "-" + shortSha1 + "." + normalizedBranchName;
 	_zipFilename = string.Format(ZipFileTemplate, _semanticVersionShort + postFix);
@@ -248,7 +258,7 @@ Task("Run-Smoke-Tests").Description("Run the functional/smoke tests")
 		});
 	if(exitCode != 0)
 	{
-		throw new Exception("Fail to run the somke tests");
+		throw new Exception("Fail to run the smoke tests");
 	}
 });
 
@@ -434,6 +444,7 @@ Task("CreateGithubRelease").Description("Create a GitHub release")
 	newRelease.Body = releaseNotes;
 	newRelease.Draft = false;
 	newRelease.Prerelease = false;
+	newRelease.TargetCommitish = _sha1;
 
 	var taskCreateRelease = client.Repository.Release.Create(GitHubOwner, GitHubRepository, newRelease);
 	taskCreateRelease.Wait();
@@ -528,6 +539,22 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 			// AllowUnofficial		= false
 		});
 	}
+	else
+	{
+		Information("[DryRun] Should upload chocolatey package...");
+	}
+});
+
+Task("FormatCode").Description("Format c# code source to keep formatting consistent")
+	.Does(() =>
+{
+	var codeFormatter = @"packages\build\Octokit.CodeFormatter\tools\CodeFormatter.exe";
+	var args = "GitTfs.sln /rule-:FieldNames /nounicode /nocopyright";
+	Information("Will run:" + codeFormatter + " " + args);
+	var exitCode = StartProcess(codeFormatter, new ProcessSettings
+	{
+		Arguments = args
+	});
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -563,8 +590,6 @@ RunTarget(Target);
 
 //TODO:
 // - Being able to do a minor release (without tagging)
-// - Fix double tagging & creation of github release
-// - CodeFormatter!!!!!
 // - Sonar
 // - Coverage
 // - 'Clean all' Task!

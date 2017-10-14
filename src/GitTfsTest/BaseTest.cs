@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Test
         public BaseTest()
         {
             Globals.DisableGarbageCollect = true;
-            if(!DisplayTrace)
+            if (!DisplayTrace)
             {
                 System.Diagnostics.Trace.Listeners.Clear();
             }
