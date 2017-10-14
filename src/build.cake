@@ -36,6 +36,7 @@ string _zipFilePath;
 string _zipFilename;
 string _downloadUrl;
 string _releaseVersion;
+string _sha1;
 bool _buildAllVersion = (Target == "AppVeyorRelease");
 
 //////////////////////////////////////////////////////////////////////
@@ -146,6 +147,7 @@ Task("Version").Description("Get the version using GitVersion")
 
 	//Update all the variables now that we know the version number
 	var normalizedBranchName = NormalizeBrancheName(version.BranchName);
+	_sha1 = version.Sha;
 	var shortSha1 = version.Sha.Substring(0,8);
 	var postFix = (version.BranchName == "master") ? string.Empty : "-" + shortSha1 + "." + normalizedBranchName;
 	_zipFilename = string.Format(ZipFileTemplate, _semanticVersionShort + postFix);
@@ -434,6 +436,7 @@ Task("CreateGithubRelease").Description("Create a GitHub release")
 	newRelease.Body = releaseNotes;
 	newRelease.Draft = false;
 	newRelease.Prerelease = false;
+	newRelease.TargetCommitish = _sha1;
 
 	var taskCreateRelease = client.Repository.Release.Create(GitHubOwner, GitHubRepository, newRelease);
 	taskCreateRelease.Wait();
@@ -563,7 +566,6 @@ RunTarget(Target);
 
 //TODO:
 // - Being able to do a minor release (without tagging)
-// - Fix double tagging & creation of github release
 // - CodeFormatter!!!!!
 // - Sonar
 // - Coverage
