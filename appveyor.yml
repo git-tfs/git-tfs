@@ -2,7 +2,7 @@
 clone_folder: c:\gittfs
 # build cache to preserve files/folders between builds
 cache:
-  - packages -> src\paket.lock  # preserve "packages" directory in the root of build folder but will reset it if `paket.lock` is modified
+  - src\packages -> src\paket.lock  # preserve "packages" directory in the root of build folder but will reset it if `paket.lock` is modified
 init: []
 build_script:
 - ps: |
