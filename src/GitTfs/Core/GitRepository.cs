@@ -693,7 +693,6 @@ namespace Sep.Git.Tfs.Core
         {
             try
             {
-
                 LibGit2Sharp.Commands.Checkout(_repository, commitish);
                 return true;
             }

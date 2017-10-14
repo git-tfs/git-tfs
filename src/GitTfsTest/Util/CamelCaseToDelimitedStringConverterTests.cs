@@ -1,9 +1,8 @@
-﻿
+﻿using Sep.Git.Tfs.Util;
+using Xunit;
+
 namespace Sep.Git.Tfs.Test.Util
 {
-    using Tfs.Util;
-    using Xunit;
-
     public class CamelCaseToDelimitedStringConverterTests
     {
         [Theory]

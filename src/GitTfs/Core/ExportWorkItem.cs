@@ -6,7 +6,7 @@ namespace Sep.Git.Tfs.Core
     {
         public ExportWorkItem(ITfsWorkitem wi = null)
         {
-            if(wi!=null)
+            if (wi != null)
             {
                 this.Id = wi.Id.ToString();
                 this.Title = wi.Title;
@@ -20,7 +20,7 @@ namespace Sep.Git.Tfs.Core
             this.Id = id;
 
             // Substitute null with the empty string to avoid exceptions
-            this.Title = title==null ? string.Empty : title;
+            this.Title = title == null ? string.Empty : title;
         }
         public string Id { get; private set; }
 

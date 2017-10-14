@@ -491,8 +491,8 @@ namespace Sep.Git.Tfs.Core
                         log.Log += "\nWorkitems:";
                         foreach (var workItem in workItems)
                         {
-                            log.Log += "\n#" + workItem.Id+" "+ workItem.Title;
-                        }                        
+                            log.Log += "\n#" + workItem.Id + " " + workItem.Title;
+                        }
                     }
                 }
 

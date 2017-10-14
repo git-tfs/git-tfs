@@ -8,7 +8,6 @@ namespace Sep.Git.Tfs.Core.TfsInterop
         public RootBranch(int sourceBranchChangesetId, string tfsBranchPath)
             : this(sourceBranchChangesetId, -1, tfsBranchPath)
         {
-
         }
 
         public RootBranch(int sourceBranchChangesetId, int targetBranchChangesetId, string tfsBranchPath)
