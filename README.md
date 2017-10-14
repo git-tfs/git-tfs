@@ -162,7 +162,7 @@ And depending of the version of TFS you use :
 
     #get the source code
     git clone git://github.com/git-tfs/git-tfs.git
-    cd git-tfs
+    cd git-tfs\src
 
     #building with Cake (in a powershell console). It will also run the unit tests ;)
     .\build.ps1

@@ -308,3 +308,6 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+/src/packages/
+/src/GitTfsTest.dll.xml
+/src/.build

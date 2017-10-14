@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 readonly var Target = Argument("target", "Default");
 readonly var Configuration = Argument("configuration", "Debug");
-readonly var IsDryRun = Argument<bool>("isDryRun", true);
+var IsDryRun = Argument<bool>("isDryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
 readonly var IdGitHubReleaseToDelete = Argument<int>("idGitHubReleaseToDelete", -1);
@@ -22,9 +22,9 @@ const string ZipFileTemplate = ApplicationName + "-{0}.zip";
 const string ApplicationPath = "./" + ApplicationName;
 const string PathToSln = ApplicationPath + ".sln";
 const string BuildDirectory = ApplicationPath + "/bin";
-const string buildAssetPath = @".\tmp\";
+const string buildAssetPath = @".\.build\";
 const string DownloadUrlTemplate ="https://github.com/git-tfs/git-tfs/releases/download/v{0}/";
-string ReleaseNotesPath = @"doc\release-notes\NEXT.md";
+string ReleaseNotesPath = @"..\doc\release-notes\NEXT.md";
 const string ChocolateyBuildDir = buildAssetPath + "choc";
 readonly var OutputDirectory = BuildDirectory + "/" + Configuration;
 
@@ -57,6 +57,13 @@ Release process from local machine:
 
 Available tasks:");
 	StartProcess("cake.exe", "build.cake -showdescription");
+});
+
+Task("DryRun").Description("Set the dry-run flag")
+	.Does(() =>
+{
+	Information("Doing a dry run!!!!");
+	IsDryRun = true;
 });
 
 Task("TagVersion").Description("Handle release note and tag the new version")
@@ -258,7 +265,7 @@ Task("Package").Description("Generate the release zip file")
 		CopyDirectory(@".\packages\LibGit2Sharp.NativeBinaries\runtimes\win7-x86\native", libgit2NativeBinariesFolder);
 	}
 	CopyFiles(@".\packages\**\Microsoft.WITDataStore*.dll", OutputDirectory + @"\GitTfs.Vs2015\");
-	CopyFiles(new[] {"README.md", "LICENSE", "NOTICE"}, OutputDirectory);
+	CopyFiles(new[] {@"..\README.md", @"..\LICENSE", @"..\NOTICE"}, OutputDirectory);
 	DeleteFiles(OutputDirectory + @"\**\*.pdb");
 
 	//Create the zip
@@ -283,7 +290,7 @@ See the file 'PersonalTokens.config.example' for the format and content.";
 
 string ReadToken(string tokenKey, string tokenRegexFormat = null)
 {
-	var authTargetsFile = "PersonalTokens.config";
+	var authTargetsFile = @"..\PersonalTokens.config";
 
 	Information("Reading token..." + tokenKey);
 
@@ -545,13 +552,19 @@ Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 Task("Release").Description("Build the release and put it on github.com")
 	.IsDependentOn("Chocolatey");
 
-//TODO:
-//- 'Clean all' Task!
-//CodeFormatter!!!!!
-//Sonar
-//Coverage
+Task("DryRunRelease").Description("Do a 'dry-run' release to verify easily most of the release tasks")
+	.IsDependentOn("DryRun")
+	.IsDependentOn("Release");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
 //////////////////////////////////////////////////////////////////////
 RunTarget(Target);
+
+//TODO:
+// - Being able to do a minor release (without tagging)
+// - Fix double tagging & creation of github release
+// - CodeFormatter!!!!!
+// - Sonar
+// - Coverage
+// - 'Clean all' Task!
