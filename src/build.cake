@@ -258,7 +258,7 @@ Task("Run-Smoke-Tests").Description("Run the functional/smoke tests")
 		});
 	if(exitCode != 0)
 	{
-		throw new Exception("Fail to run the somke tests");
+		throw new Exception("Fail to run the smoke tests");
 	}
 });
 
@@ -545,6 +545,18 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 	}
 });
 
+Task("FormatCode").Description("Format c# code source to keep formatting consistent")
+	.Does(() =>
+{
+	var codeFormatter = @"packages\build\Octokit.CodeFormatter\tools\CodeFormatter.exe";
+	var args = "GitTfs.sln /rule-:FieldNames /nounicode /nocopyright";
+	Information("Will run:" + codeFormatter + " " + args);
+	var exitCode = StartProcess(codeFormatter, new ProcessSettings
+	{
+		Arguments = args
+	});
+});
+
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
@@ -578,7 +590,6 @@ RunTarget(Target);
 
 //TODO:
 // - Being able to do a minor release (without tagging)
-// - CodeFormatter!!!!!
 // - Sonar
 // - Coverage
 // - 'Clean all' Task!
