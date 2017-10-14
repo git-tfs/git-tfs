@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 
-namespace Sep.Git.Tfs.VsCommon
+namespace GitTfs.VsCommon
 {
     public static class Retry
     {

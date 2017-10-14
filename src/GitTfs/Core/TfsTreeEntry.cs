@@ -1,8 +1,8 @@
 ﻿using System.IO;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Util;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class TfsTreeEntry : ITreeEntry
     {

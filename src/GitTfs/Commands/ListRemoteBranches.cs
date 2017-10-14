@@ -2,11 +2,11 @@ using System.ComponentModel;
 using System.Linq;
 using NDesk.Options;
 using StructureMap;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("list-remote-branches")]
     [Description("list-remote-branches tfs-url-or-instance-name \n       git tfs list-remote-branches http://myTfsServer:8080/tfs/TfsRepository\n")]

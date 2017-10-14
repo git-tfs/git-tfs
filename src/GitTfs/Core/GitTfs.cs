@@ -1,4 +1,4 @@
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     public class GitTfs // TODO: extract IGitTfs
     {

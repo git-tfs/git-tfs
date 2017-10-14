@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using StructureMap;
-using Sep.Git.Tfs.Util;
+using GitTfs.Util;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("labels")]
     [Description("labels [options] [tfsRemoteId]\n ex : git tfs labels\n      git tfs labels -i myRemoteBranche\n      git tfs labels --all")]

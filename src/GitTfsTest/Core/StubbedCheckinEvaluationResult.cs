@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Test.Core
+namespace GitTfs.Test.Core
 {
     public class StubbedCheckinEvaluationResult : ICheckinEvaluationResult
     {

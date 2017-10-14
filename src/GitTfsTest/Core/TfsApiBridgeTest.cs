@@ -1,6 +1,6 @@
-﻿using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Test;
-using Sep.Git.Tfs.VsCommon;
+﻿using GitTfs.Core.TfsInterop;
+using GitTfs.Test;
+using GitTfs.VsCommon;
 using StructureMap.AutoMocking;
 using Xunit;
 

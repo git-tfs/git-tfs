@@ -1,8 +1,8 @@
-﻿using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
+﻿using GitTfs.Commands;
+using GitTfs.Core;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Commands
+namespace GitTfs.Test.Commands
 {
     public class ExtTest : BaseTest
     {

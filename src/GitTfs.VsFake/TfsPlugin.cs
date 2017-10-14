@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.VsFake;
+using GitTfs.Core;
+using GitTfs.VsFake;
 
-namespace Sep.Git.Tfs
+namespace GitTfs
 {
     internal class TfsPlugin : Core.TfsInterop.TfsPlugin
     {

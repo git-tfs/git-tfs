@@ -8,7 +8,7 @@ using StructureMap.Graph;
 using System.IO;
 using Microsoft.Win32;
 
-namespace Sep.Git.Tfs.Core.TfsInterop
+namespace GitTfs.Core.TfsInterop
 {
     public abstract class TfsPlugin
     {
@@ -49,7 +49,7 @@ namespace Sep.Git.Tfs.Core.TfsInterop
                 {
                     return null;
                 }
-                return Try(assembly, "Sep.Git.Tfs.TfsPlugin");
+                return Try(assembly, "GitTfs.TfsPlugin");
             }
 
             public TfsPlugin Try(string assembly, string pluginType)

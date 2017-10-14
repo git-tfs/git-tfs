@@ -10,7 +10,7 @@
     <ProjectGuid>{DDFB4746-2BCE-4B34-8E45-056324CF140D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sep.Git.Tfs.Test</RootNamespace>
+    <RootNamespace>GitTfs.Test</RootNamespace>
     <AssemblyName>GitTfsTest</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <LangVersion>5</LangVersion>

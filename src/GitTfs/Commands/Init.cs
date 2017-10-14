@@ -5,10 +5,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("init")]
     [Description("init [options] tfs-url-or-instance-name repository-path [git-repository]")]

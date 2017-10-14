@@ -1,6 +1,6 @@
 ﻿using NDesk.Options;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     public static class Helpers
     {

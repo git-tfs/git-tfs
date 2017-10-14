@@ -1,8 +1,8 @@
 using System.IO;
-using Sep.Git.Tfs.VsCommon;
+using GitTfs.VsCommon;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Vs2015
+namespace GitTfs.Vs2015
 {
     public class TfsHelper : TfsHelperVs2012Base
     {

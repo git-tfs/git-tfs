@@ -1,7 +1,7 @@
-﻿using Sep.Git.Tfs.Commands;
+﻿using GitTfs.Commands;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Commands
+namespace GitTfs.Test.Commands
 {
     public class CloneTest : BaseTest
     {

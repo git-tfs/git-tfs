@@ -2,10 +2,10 @@
 using System.Linq;
 using Xunit;
 using Rhino.Mocks;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Test.Core
+namespace GitTfs.Test.Core
 {
     public class DirectoryTidierTests : BaseTest, IDisposable
     {

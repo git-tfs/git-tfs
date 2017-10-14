@@ -1,10 +1,10 @@
-﻿using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Util;
+﻿using GitTfs.Commands;
+using GitTfs.Core;
+using GitTfs.Util;
 using StructureMap.AutoMocking;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Util
+namespace GitTfs.Test.Util
 {
     public class ShelveSpecificCheckinOptionsFactoryTests
     {

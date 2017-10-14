@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace Sep.Git.Tfs.Test
+namespace GitTfs.Test
 {
     public class GitTfsRegexTests : BaseTest
     {

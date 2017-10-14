@@ -1,11 +1,11 @@
 ﻿using Rhino.Mocks;
 using Rhino.Mocks.Constraints;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
+using GitTfs.Commands;
+using GitTfs.Core;
 using StructureMap.AutoMocking;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Commands
+namespace GitTfs.Test.Commands
 {
     public class ShelveDeleteTest : BaseTest
     {

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Commands;
+using GitTfs.Core.TfsInterop;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class TfsWorkspace : ITfsWorkspace
     {

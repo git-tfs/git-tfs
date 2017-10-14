@@ -1,7 +1,7 @@
 ﻿using System;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Test.Integration
+namespace GitTfs.Test.Integration
 {
     public class InitTests : BaseTest, IDisposable
     {

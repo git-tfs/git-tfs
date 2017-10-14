@@ -1,7 +1,7 @@
 ﻿using Xunit;
-using Sep.Git.Tfs.Util;
+using GitTfs.Util;
 
-namespace Sep.Git.Tfs.Test.Util
+namespace GitTfs.Test.Util
 {
     public class BouncerTest : BaseTest
     {

@@ -2,13 +2,13 @@
 using System.Linq;
 using System.Security.Cryptography;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
 using StructureMap;
 using System.ComponentModel;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("verify")]
     [RequiresValidGitRepository]

@@ -1,10 +1,10 @@
 using System.ComponentModel;
 using NDesk.Options;
 using StructureMap;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("version")]
     [Description("version")]

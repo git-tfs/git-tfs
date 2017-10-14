@@ -1,8 +1,8 @@
 using System.ComponentModel;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core;
+using GitTfs.Util;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [PluggableWithAliases("checkintool", "ct")]
     [Description("checkintool [options] [ref-to-checkin]")]

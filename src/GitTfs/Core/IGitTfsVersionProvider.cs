@@ -1,4 +1,4 @@
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public interface IGitTfsVersionProvider
     {

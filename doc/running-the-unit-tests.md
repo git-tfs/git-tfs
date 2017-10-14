@@ -21,16 +21,16 @@ Copyright (C) 2007-11 Microsoft Corporation.
 xunit.dll:     Version 1.9.1.1600
 Test assembly: C:\src\git-tfs\GitTfsTest\bin\Debug\GitTfsTest.dll
 
-Sep.Git.Tfs.Test.Integration.CloneTests.FailOnNoProject [SKIP]
+GitTfs.Test.Integration.CloneTests.FailOnNoProject [SKIP]
    eventually
 
-Sep.Git.Tfs.Test.Integration.CloneTests.ClonesEmptyProject [SKIP]
+GitTfs.Test.Integration.CloneTests.ClonesEmptyProject [SKIP]
    eventually
 
-Sep.Git.Tfs.Test.Commands.HelpTest.ShouldWriteCommandHelp [SKIP]
+GitTfs.Test.Commands.HelpTest.ShouldWriteCommandHelp [SKIP]
    Not sure why this doesn't work.
 
-Sep.Git.Tfs.Test.Commands.HelpTest.ShouldWriteGeneralHelp [SKIP]
+GitTfs.Test.Commands.HelpTest.ShouldWriteGeneralHelp [SKIP]
    Not sure why this doesn't work.
 
 103 total, 0 failed, 4 skipped, took 16.156 seconds

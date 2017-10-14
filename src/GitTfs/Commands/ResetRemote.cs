@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using StructureMap;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("reset-remote")]
     [Description("reset-remote commit-sha1-ref\n ex : git tfs reset-remote 3dcce821d7a20e6b2499cdd6f2f52ffbe8507be7")]

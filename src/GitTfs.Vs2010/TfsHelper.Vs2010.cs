@@ -2,11 +2,11 @@ using System;
 using System.IO;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
-using Sep.Git.Tfs.VsCommon;
+using GitTfs.VsCommon;
 using StructureMap;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Vs2010
+namespace GitTfs.Vs2010
 {
     public class TfsHelper : TfsHelperBase
     {

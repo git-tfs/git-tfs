@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using LibGit2Sharp;
 using Branch = LibGit2Sharp.Branch;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public interface IGitRepository : IGitHelpers
     {

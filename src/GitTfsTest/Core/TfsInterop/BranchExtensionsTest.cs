@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Rhino.Mocks;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Core.TfsInterop
+namespace GitTfs.Test.Core.TfsInterop
 {
     public class BranchExtensionsTest : BaseTest
     {

@@ -1,6 +1,6 @@
-﻿using Sep.Git.Tfs.Core;
+﻿using GitTfs.Core;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     // This isn't intended to ever be a command. The intent is that
     // you create a repository with quick-clone, and then use

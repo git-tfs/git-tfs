@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     public class PathResolver
     {

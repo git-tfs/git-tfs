@@ -1,10 +1,10 @@
 ﻿using System;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core;
+using GitTfs.Util;
 using StructureMap;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Integration
+namespace GitTfs.Test.Integration
 {
     public class ConfigPropertyLoaderTests : BaseTest, IDisposable
     {

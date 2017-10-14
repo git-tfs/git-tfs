@@ -1,5 +1,5 @@
 
-namespace Sep.Git.Tfs.Core.TfsInterop
+namespace GitTfs.Core.TfsInterop
 {
     public class NullIdentity : IIdentity
     {

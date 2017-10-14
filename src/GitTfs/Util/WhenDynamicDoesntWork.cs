@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     public static class WhenDynamicDoesntWork
     {

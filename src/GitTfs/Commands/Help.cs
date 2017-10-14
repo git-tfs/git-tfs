@@ -3,14 +3,14 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core;
+using GitTfs.Util;
 using StructureMap;
 using StructureMap.Query;
 using IContainer = StructureMap.IContainer;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("help")]
     [Description("help [command-name]")]

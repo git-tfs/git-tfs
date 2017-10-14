@@ -1,9 +1,9 @@
-﻿using Sep.Git.Tfs.Commands;
+﻿using GitTfs.Commands;
 using StructureMap.AutoMocking;
 using NDesk.Options;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Commands
+namespace GitTfs.Test.Commands
 {
     public class InitOptionsTest : BaseTest
     {

@@ -3,10 +3,10 @@
 using System;
 using System.IO;
 using System.IO.Compression;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Test.Integration;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Test.Integration;
 
-namespace Sep.Git.Tfs.Test.Fixtures
+namespace GitTfs.Test.Fixtures
 {
     internal static class vtccds
     {
@@ -125,7 +125,7 @@ namespace Sep.Git.Tfs.Test.Fixtures
             if (itemContentHash == null)
                 return new byte[0];
 
-            using (var stream = typeof(vtccds).Assembly.GetManifestResourceStream("Sep.Git.Tfs.Test.Fixtures.vtccds." + itemContentHash))
+            using (var stream = typeof(vtccds).Assembly.GetManifestResourceStream("GitTfs.Test.Fixtures.vtccds." + itemContentHash))
             {
                 if (stream == null)
                     throw new Exception("Fail: Can not find test file:" + itemContentHash);

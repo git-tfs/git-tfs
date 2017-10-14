@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
+using GitTfs.Commands;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Util;
 using StructureMap;
 
-namespace Sep.Git.Tfs.VsFake
+namespace GitTfs.VsFake
 {
     public class MockBranchObject : IBranchObject
     {

@@ -11,17 +11,17 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Microsoft.Win32;
 using SEP.Extensions;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
+using GitTfs.Commands;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Util;
 using StructureMap;
 using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
 using IdentityNotFoundException = Microsoft.TeamFoundation.VersionControl.Client.IdentityNotFoundException;
 using Microsoft.TeamFoundation.Build.Client;
 
-namespace Sep.Git.Tfs.VsCommon
+namespace GitTfs.VsCommon
 {
     public abstract class TfsHelperBase : ITfsHelper
     {

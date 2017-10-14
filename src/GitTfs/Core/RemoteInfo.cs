@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Sep.Git.Tfs.Commands;
+using GitTfs.Commands;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class RemoteInfo
     {

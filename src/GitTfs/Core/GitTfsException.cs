@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class GitTfsException : Exception
     {

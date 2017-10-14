@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     // Manages configurable values.
     [StructureMapSingleton]

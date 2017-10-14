@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Util;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core;
+using GitTfs.Util;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     public class InitBranch : GitTfsCommand
     {

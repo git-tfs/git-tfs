@@ -1,7 +1,7 @@
 ﻿using NDesk.Options;
-using Sep.Git.Tfs.Util;
+using GitTfs.Util;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [StructureMapSingleton]
     public class CleanupOptions

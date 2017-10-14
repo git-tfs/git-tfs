@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Core
+namespace GitTfs.Test.Core
 {
     public class DelimitedReaderTests : BaseTest
     {

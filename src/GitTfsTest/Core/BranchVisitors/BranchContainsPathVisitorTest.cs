@@ -1,9 +1,9 @@
-﻿using Sep.Git.Tfs.Core.BranchVisitors;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.VsFake;
+﻿using GitTfs.Core.BranchVisitors;
+using GitTfs.Core.TfsInterop;
+using GitTfs.VsFake;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Core.BranchVisitors
+namespace GitTfs.Test.Core.BranchVisitors
 {
     public class BranchContainsPathVisitorTest : BaseTest
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     public static class ExceptionFormattingExtensions
     {

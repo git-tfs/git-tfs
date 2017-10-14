@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test
+namespace GitTfs.Test
 {
     public class FactExceptOnUnixAttribute : FactAttribute
     {

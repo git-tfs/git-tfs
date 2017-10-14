@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using StructureMap;
 using System.Text;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class GitHelpers : IGitHelpers
     {
@@ -193,7 +193,7 @@ namespace Sep.Git.Tfs.Core
 
         private void Close(GitProcess process)
         {
-            // if caller doesn't read entire stdout to the EOF - it is possible that 
+            // if caller doesn't read entire stdout to the EOF - it is possible that
             // child process will hang waiting until there will be free space in stdout
             // buffer to write the rest of the output.
             // See https://github.com/git-tfs/git-tfs/issues/121 for details.

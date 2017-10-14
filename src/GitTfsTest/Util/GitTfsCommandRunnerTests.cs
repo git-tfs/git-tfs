@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using Rhino.Mocks;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Util;
+using GitTfs.Commands;
+using GitTfs.Util;
 using StructureMap.AutoMocking;
 using NDesk.Options;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Util
+namespace GitTfs.Test.Util
 {
     public class GitTfsCommandRunnerTests : BaseTest
     {

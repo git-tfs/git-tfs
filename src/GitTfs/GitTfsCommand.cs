@@ -1,7 +1,7 @@
 using NDesk.Options;
 using StructureMap;
 
-namespace Sep.Git.Tfs
+namespace GitTfs
 {
     [PluginFamily]
     public interface GitTfsCommand

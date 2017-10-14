@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core;
+using GitTfs.Util;
 
-namespace Sep.Git.Tfs
+namespace GitTfs
 {
     [StructureMapSingleton]
     public class Globals

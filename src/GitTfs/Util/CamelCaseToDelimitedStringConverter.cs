@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     public static class CamelCaseToDelimitedStringConverter
     {

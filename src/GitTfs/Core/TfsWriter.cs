@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class TfsWriter
     {

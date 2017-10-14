@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class GitCommandException : Exception
     {

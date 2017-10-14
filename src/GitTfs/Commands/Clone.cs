@@ -4,12 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using StructureMap;
-using Sep.Git.Tfs.Util;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Util;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("clone")]
     [Description("clone [options] tfs-url-or-instance-name repository-path <git-repository-path>\n  ex : git tfs clone http://myTfsServer:8080/tfs/TfsRepository $/ProjectName/ProjectBranch\n")]

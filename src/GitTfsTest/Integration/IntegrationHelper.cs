@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using LibGit2Sharp;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.VsFake;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
+using GitTfs.VsFake;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Sep.Git.Tfs.Test.Integration
+namespace GitTfs.Test.Integration
 {
     internal class IntegrationHelper : IDisposable
     {

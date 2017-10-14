@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("shelve-list")]
     [Description("shelve-list -u <shelve-owner-name> [options]")]

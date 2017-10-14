@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Rhino.Mocks;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Commands;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
 using Xunit;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Test.Core
+namespace GitTfs.Test.Core
 {
     public class TfsWorkspaceTests : BaseTest, IDisposable
     {

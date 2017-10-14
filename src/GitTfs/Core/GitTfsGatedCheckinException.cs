@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class GitTfsGatedCheckinException : GitTfsException
     {

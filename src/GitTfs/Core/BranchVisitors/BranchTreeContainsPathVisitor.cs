@@ -1,6 +1,6 @@
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Core.BranchVisitors
+namespace GitTfs.Core.BranchVisitors
 {
     public class BranchTreeContainsPathVisitor : IBranchTreeVisitor
     {
