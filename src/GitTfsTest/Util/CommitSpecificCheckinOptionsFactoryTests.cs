@@ -1,12 +1,12 @@
 ﻿using System;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Util;
+using GitTfs.Commands;
+using GitTfs.Util;
 using Xunit;
 using Rhino.Mocks;
 using StructureMap.AutoMocking;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 
-namespace Sep.Git.Tfs.Test.Util
+namespace GitTfs.Test.Util
 {
     public class CommitSpecificCheckinOptionsFactoryTests : BaseTest
     {

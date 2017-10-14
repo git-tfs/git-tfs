@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace Sep.Git.Tfs.VsCommon
+namespace GitTfs.VsCommon
 {
     public class ParentForm : Form
     {

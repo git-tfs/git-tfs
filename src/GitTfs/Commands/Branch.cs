@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("branch")]
     [Description("branch\n\n" +

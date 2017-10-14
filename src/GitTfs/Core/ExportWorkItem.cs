@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class ExportWorkItem : IExportWorkItem
     {
@@ -14,7 +14,7 @@ namespace Sep.Git.Tfs.Core
         }
         public ExportWorkItem(string id, string title)
         {
-            // id shall be initialized, because it could be used 
+            // id shall be initialized, because it could be used
             // as a key in a dictionary
             Contract.Requires(!string.IsNullOrWhiteSpace(id));
             this.Id = id;

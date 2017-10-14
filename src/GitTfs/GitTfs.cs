@@ -4,12 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using StructureMap;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Util;
+using GitTfs.Commands;
+using GitTfs.Core;
+using GitTfs.Util;
 using NLog;
 
-namespace Sep.Git.Tfs
+namespace GitTfs
 {
     public class GitTfs
     {

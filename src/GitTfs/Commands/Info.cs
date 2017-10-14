@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using NDesk.Options;
 using StructureMap;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("info")]
     [Description("info")]

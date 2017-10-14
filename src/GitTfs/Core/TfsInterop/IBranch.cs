@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Sep.Git.Tfs.Core.BranchVisitors;
+using GitTfs.Core.BranchVisitors;
 
-namespace Sep.Git.Tfs.Core.TfsInterop
+namespace GitTfs.Core.TfsInterop
 {
     public interface IBranchObject
     {

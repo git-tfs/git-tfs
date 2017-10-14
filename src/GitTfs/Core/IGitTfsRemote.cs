@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Commands;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Commands;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public interface IFetchResult : IRenameResult
     {

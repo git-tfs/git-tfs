@@ -4,11 +4,11 @@ using System.Text.RegularExpressions;
 using CommandLine.OptParse;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhino.Mocks;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Test.TestHelpers;
+using GitTfs.Commands;
+using GitTfs.Test.TestHelpers;
 using StructureMap.AutoMocking;
 
-namespace Sep.Git.Tfs.Test.Commands
+namespace GitTfs.Test.Commands
 {
     [TestClass]
     public class InitTest

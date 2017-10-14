@@ -1,15 +1,15 @@
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
+using GitTfs.Commands;
+using GitTfs.Core;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     /// <summary>
-    /// Creates a new <see cref="CheckinOptions"/> that is customized based 
+    /// Creates a new <see cref="CheckinOptions"/> that is customized based
     /// on extracting special git-tfs commands from a git commit message.
     /// </summary>
     /// <remarks>
     /// This class handles the pre-checkin commit message parsing that
-    /// enables special git-tfs commands: 
+    /// enables special git-tfs commands:
     /// https://github.com/git-tfs/git-tfs/blob/master/doc/Special-actions-in-commit-messages.md
     /// </remarks>
     public class CheckinOptionsFactory

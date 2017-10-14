@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Commands;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     /// <summary>
     /// Things needed by code that pends changes to a workspace.

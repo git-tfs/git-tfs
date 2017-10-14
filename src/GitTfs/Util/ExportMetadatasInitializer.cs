@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     /// <summary>
     /// An object that can help initialize a repository or a remote for exporting

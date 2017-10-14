@@ -2,11 +2,11 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Core
+namespace GitTfs.Test.Core
 {
     public class ExtTests : BaseTest
     {

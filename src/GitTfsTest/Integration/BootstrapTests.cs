@@ -1,9 +1,9 @@
 ﻿using System;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 using Xunit;
 using LibGit2Sharp;
 
-namespace Sep.Git.Tfs.Test.Integration
+namespace GitTfs.Test.Integration
 {
     public class BootstrapTests : BaseTest, IDisposable
     {

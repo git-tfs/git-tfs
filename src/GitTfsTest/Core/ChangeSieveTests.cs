@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Util;
 using Xunit;
 using Rhino.Mocks;
 using Rhino.Mocks.Constraints;
 
-namespace Sep.Git.Tfs.Test.Core
+namespace GitTfs.Test.Core
 {
     public class ChangeSieveTests : BaseTest
     {

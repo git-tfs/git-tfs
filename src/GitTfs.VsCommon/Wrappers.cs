@@ -5,12 +5,12 @@ using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Util;
 using Microsoft.TeamFoundation.VersionControl.Common;
 
-namespace Sep.Git.Tfs.VsCommon
+namespace GitTfs.VsCommon
 {
     public class WrapperForVersionControlServer : WrapperFor<VersionControlServer>, IVersionControlServer
     {

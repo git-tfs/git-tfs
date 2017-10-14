@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Text;
 using System.IO;
-using Sep.Git.Tfs.Util;
-using Sep.Git.Tfs.Core;
+using GitTfs.Util;
+using GitTfs.Core;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Util
+namespace GitTfs.Test.Util
 {
     public class AuthorsFileUnitTest : BaseTest
     {

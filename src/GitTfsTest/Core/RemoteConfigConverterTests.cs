@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using LibGit2Sharp;
-using Sep.Git.Tfs.Commands;
+using GitTfs.Commands;
 
-namespace Sep.Git.Tfs.Test.Core
+namespace GitTfs.Test.Core
 {
     public class RemoteConfigConverterTests : BaseTest
     {

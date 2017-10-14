@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     /// <summary>
     /// Determines if an item is included or excluded from a set.

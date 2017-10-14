@@ -1,7 +1,7 @@
 ﻿using System;
 using Xunit.Sdk;
 
-namespace Sep.Git.Tfs.Test.TestHelpers
+namespace GitTfs.Test.TestHelpers
 {
     public static class ExtensionMethods
     {

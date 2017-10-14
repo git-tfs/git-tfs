@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Util;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class TfsChangeset : ITfsChangeset
     {
@@ -187,7 +187,7 @@ namespace Sep.Git.Tfs.Core
             else if (identity != null)
             {
                 //This can be null if the user was deleted from AD.
-                //We want to keep their original history around with as little 
+                //We want to keep their original history around with as little
                 //hassle to the end user as possible
                 if (!string.IsNullOrWhiteSpace(identity.DisplayName))
                     name = identity.DisplayName;

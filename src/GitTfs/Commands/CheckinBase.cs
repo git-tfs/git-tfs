@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     public abstract class CheckinBase : GitTfsCommand
     {

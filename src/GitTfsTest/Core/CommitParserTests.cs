@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Core
+namespace GitTfs.Test.Core
 {
     public class CommitParserTests : BaseTest
     {

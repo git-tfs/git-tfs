@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     public class Author
     {
@@ -43,8 +43,8 @@ namespace Sep.Git.Tfs.Util
             }
         }
 
-        // we only use the trimmed email address as identity 
-        // (dictionary key) to avoid mismatches because of 
+        // we only use the trimmed email address as identity
+        // (dictionary key) to avoid mismatches because of
         // active directory name formatting rules.
         public static string BuildGitUserId(string email)
         {

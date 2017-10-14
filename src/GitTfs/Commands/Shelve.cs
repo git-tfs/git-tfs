@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core;
+using GitTfs.Util;
 using StructureMap;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("shelve")]
     [Description("shelve [options] shelveset-name [ref-to-shelve]")]

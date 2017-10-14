@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using StructureMap;
 using FileMode = LibGit2Sharp.Mode;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class GitChangeInfo
     {

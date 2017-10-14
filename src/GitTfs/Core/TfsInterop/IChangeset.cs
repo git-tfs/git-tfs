@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sep.Git.Tfs.Core.TfsInterop
+namespace GitTfs.Core.TfsInterop
 {
     public interface IChangeset
     {

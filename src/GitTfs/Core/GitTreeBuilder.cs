@@ -1,6 +1,6 @@
 ﻿using LibGit2Sharp;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class GitTreeBuilder : IGitTreeBuilder
     {

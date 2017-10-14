@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
 using Mode = LibGit2Sharp.Mode;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     public enum ChangeType
     {

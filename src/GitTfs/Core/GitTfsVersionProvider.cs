@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reflection;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class GitTfsVersionProvider : IGitTfsVersionProvider
     {

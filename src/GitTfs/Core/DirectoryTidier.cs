@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class DirectoryTidier : ITfsWorkspaceModifier, IDisposable
     {

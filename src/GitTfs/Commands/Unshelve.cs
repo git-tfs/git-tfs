@@ -3,9 +3,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using NDesk.Options;
 using StructureMap;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("unshelve")]
     [Description("unshelve [options] shelve-name destination-branch")]

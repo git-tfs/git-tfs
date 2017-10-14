@@ -1,6 +1,6 @@
-using Sep.Git.Tfs.Util;
+using GitTfs.Util;
 
-namespace Sep.Git.Tfs
+namespace GitTfs
 {
     // Like Globals, but for values that can be set in the git config
     // or overridden by some other means, like from the command line.

@@ -1,7 +1,7 @@
 using Microsoft.TeamFoundation.VersionControl.Client;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 
-namespace Sep.Git.Tfs.VsCommon
+namespace GitTfs.VsCommon
 {
     public class WrapperForBranchObject : WrapperFor<BranchObject>, IBranchObject
     {

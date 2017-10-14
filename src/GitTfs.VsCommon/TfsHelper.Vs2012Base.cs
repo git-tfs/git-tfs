@@ -4,10 +4,10 @@ using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using StructureMap;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 using Microsoft.TeamFoundation.Build.Client;
 
-namespace Sep.Git.Tfs.VsCommon
+namespace GitTfs.VsCommon
 {
     public abstract class TfsHelperVs2012Base : TfsHelperBase
     {

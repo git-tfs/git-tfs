@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public interface IGitHelpers
     {

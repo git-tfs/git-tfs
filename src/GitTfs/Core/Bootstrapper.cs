@@ -1,7 +1,7 @@
-using Sep.Git.Tfs.Commands; // ToGitRefName() and RemoteOptions
+using GitTfs.Commands; // ToGitRefName() and RemoteOptions
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class Bootstrapper
     {

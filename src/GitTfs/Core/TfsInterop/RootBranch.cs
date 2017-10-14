@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Core.TfsInterop
+namespace GitTfs.Core.TfsInterop
 {
     [DebuggerDisplay("{DebuggerDisplay}")]
     public class RootBranch

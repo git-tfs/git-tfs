@@ -5,11 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
+using GitTfs.Commands;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Util;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class GitTfsRemote : IGitTfsRemote
     {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
+using GitTfs.Commands;
+using GitTfs.Core;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     public static class CheckinOptionsExtensions
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class StructureMapSingletonAttribute : Attribute, ConfiguresStructureMap

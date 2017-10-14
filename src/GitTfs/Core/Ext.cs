@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using NDesk.Options;
-using Sep.Git.Tfs.Commands;
+using GitTfs.Commands;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public static class Ext
     {

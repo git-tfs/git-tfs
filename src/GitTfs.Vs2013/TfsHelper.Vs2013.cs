@@ -1,7 +1,7 @@
-using Sep.Git.Tfs.VsCommon;
+using GitTfs.VsCommon;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Vs2013
+namespace GitTfs.Vs2013
 {
     public class TfsHelper : TfsHelperVs2012Base
     {

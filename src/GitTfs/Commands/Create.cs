@@ -2,10 +2,10 @@ using System.ComponentModel;
 using System.IO;
 using NDesk.Options;
 using StructureMap;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("create")]
     [Description(@"create [options] tfs-url-or-instance-name project-name -t=trunk-name <git-repository-path>

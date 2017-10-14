@@ -1,5 +1,5 @@
 
-namespace Sep.Git.Tfs.Core.Changes.Git
+namespace GitTfs.Core.Changes.Git
 {
     public class RenameEdit : IGitChangedFile
     {

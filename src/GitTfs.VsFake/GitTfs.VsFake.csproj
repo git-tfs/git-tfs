@@ -8,7 +8,7 @@
     <ProjectGuid>{20C411E8-49C7-11E1-A776-3FE84824019B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sep.Git.Tfs.VsFake</RootNamespace>
+    <RootNamespace>GitTfs.VsFake</RootNamespace>
     <AssemblyName>GitTfs.VsFake</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <LangVersion>5</LangVersion>

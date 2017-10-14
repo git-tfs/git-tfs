@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     public class TemporaryFile : IDisposable
     {

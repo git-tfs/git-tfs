@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class RequiresValidGitRepositoryAttribute : Attribute

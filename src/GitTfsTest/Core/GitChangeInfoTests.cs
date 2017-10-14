@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.Changes.Git;
+using GitTfs.Core;
+using GitTfs.Core.Changes.Git;
 using StructureMap;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Core
+namespace GitTfs.Test.Core
 {
     public class GitChangeInfoTests : BaseTest
     {

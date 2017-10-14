@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Linq;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 using StructureMap;
 
-namespace Sep.Git.Tfs.VsCommon
+namespace GitTfs.VsCommon
 {
     public class TfsApiBridge
     {

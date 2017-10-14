@@ -2,7 +2,7 @@
 using System.Linq;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     [StructureMapSingleton]
     public class GitTfsCommandFactory

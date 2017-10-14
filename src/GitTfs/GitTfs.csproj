@@ -9,7 +9,7 @@
     <ProjectGuid>{55C169E0-93CC-488C-9885-1D4EAF4EA236}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sep.Git.Tfs</RootNamespace>
+    <RootNamespace>GitTfs</RootNamespace>
     <AssemblyName>git-tfs</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <LangVersion>5</LangVersion>

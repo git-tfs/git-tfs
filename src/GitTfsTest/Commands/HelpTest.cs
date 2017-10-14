@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Sep.Git.Tfs.Commands;
+using GitTfs.Commands;
 using StructureMap.AutoMocking;
 using NDesk.Options;
 using Xunit;
@@ -8,7 +8,7 @@ using System.Diagnostics;
 using NLog.Config;
 using NLog.Targets;
 
-namespace Sep.Git.Tfs.Test.Commands
+namespace GitTfs.Test.Commands
 {
     public class HelpTest : BaseTest
     {

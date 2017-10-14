@@ -1,8 +1,8 @@
 using System.ComponentModel;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("checkin")]
     [Description("checkin [options] [ref-to-shelve]")]

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
 using StructureMap;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Integration
+namespace GitTfs.Test.Integration
 {
     public class GitRepositoryTests : BaseTest, IDisposable
     {

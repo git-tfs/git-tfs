@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Sep.Git.Tfs.Commands;
-using Sep.Git.Tfs.Core;
+using GitTfs.Commands;
+using GitTfs.Core;
 
-namespace Sep.Git.Tfs.Util
+namespace GitTfs.Util
 {
     public class GitTfsCommandRunner
     {

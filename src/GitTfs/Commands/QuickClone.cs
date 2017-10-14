@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("quick-clone")]
     [Description("quick-clone [options] tfs-url-or-instance-name repository-path <git-repository-path>")]

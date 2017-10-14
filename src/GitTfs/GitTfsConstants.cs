@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using System;
 
-namespace Sep.Git.Tfs
+namespace GitTfs
 {
     public static class GitTfsConstants
     {

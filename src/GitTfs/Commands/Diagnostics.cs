@@ -2,7 +2,7 @@
 using StructureMap;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("diagnostics")]
     public class Diagnostics : GitTfsCommand

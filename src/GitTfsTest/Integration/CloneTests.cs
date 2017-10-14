@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using LibGit2Sharp;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Test.Fixtures;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Test.Fixtures;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Integration
+namespace GitTfs.Test.Integration
 {
     //NOTE: All timestamps in these tests must specify a time zone. If they don't, the local time zone will be used in the DateTime,
     //      but the commit timestamp will use the ToUniversalTime() version of the DateTime.

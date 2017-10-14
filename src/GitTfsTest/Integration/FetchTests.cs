@@ -1,8 +1,8 @@
 ﻿using System;
-using Sep.Git.Tfs.Core.TfsInterop;
+using GitTfs.Core.TfsInterop;
 using Xunit;
 
-namespace Sep.Git.Tfs.Test.Integration
+namespace GitTfs.Test.Integration
 {
     public class FetchTests : BaseTest, IDisposable
     {

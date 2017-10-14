@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using NDesk.Options;
-using Sep.Git.Tfs.Core;
+using GitTfs.Core;
 using StructureMap;
 
-namespace Sep.Git.Tfs.Commands
+namespace GitTfs.Commands
 {
     [Pluggable("pull")]
     [Description("pull [options]")]

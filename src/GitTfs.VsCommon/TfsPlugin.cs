@@ -1,5 +1,5 @@
 ﻿
-namespace Sep.Git.Tfs
+namespace GitTfs
 {
     internal class TfsPlugin : Core.TfsInterop.TfsPlugin
     {

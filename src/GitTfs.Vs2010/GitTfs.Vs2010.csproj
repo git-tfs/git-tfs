@@ -8,7 +8,7 @@
     <ProjectGuid>{C5A374D3-A2E1-407C-9D6D-541FDB53BD62}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sep.Git.Tfs.Vs2010</RootNamespace>
+    <RootNamespace>GitTfs.Vs2010</RootNamespace>
     <AssemblyName>GitTfs.Vs2010</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <LangVersion>5</LangVersion>

@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using Sep.Git.Tfs.Core;
-using Sep.Git.Tfs.Core.Changes.Git;
-using Sep.Git.Tfs.Core.TfsInterop;
-using Sep.Git.Tfs.Util;
+using GitTfs.Core;
+using GitTfs.Core.Changes.Git;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Util;
 using StructureMap;
 using StructureMap.Graph;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
 
-namespace Sep.Git.Tfs
+namespace GitTfs
 {
     public class Program
     {
@@ -103,14 +103,14 @@ namespace Sep.Git.Tfs
                 //Step 1.Create configuration object
                 var config = new LoggingConfiguration();
 
-                // Step 2. Create targets and add them to the configuration 
+                // Step 2. Create targets and add them to the configuration
                 var consoleTarget = new ColoredConsoleTarget();
                 config.AddTarget("console", consoleTarget);
 
                 var fileTarget = new FileTarget();
                 config.AddTarget("file", fileTarget);
 
-                // Step 3. Set target properties 
+                // Step 3. Set target properties
                 consoleTarget.Layout = @"${message}";
                 fileTarget.FileName = @"${specialfolder:LocalApplicationData}\git-tfs\" + GitTfsConstants.LogFileName;
                 fileTarget.Layout = "${longdate} [${level}] ${message}";

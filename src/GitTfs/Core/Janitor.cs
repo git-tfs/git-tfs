@@ -1,9 +1,9 @@
 ﻿using System;
-using Sep.Git.Tfs.Util;
+using GitTfs.Util;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     [StructureMapSingleton]
     public class Janitor : IDisposable

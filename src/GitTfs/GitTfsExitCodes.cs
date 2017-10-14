@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sep.Git.Tfs
+namespace GitTfs
 {
     /// <summary>
     ///     Collection of exit codes used by git-tfs.
@@ -10,10 +10,10 @@ namespace Sep.Git.Tfs
     ///     Windows - shells (powershell.exe, cmd.exe) and UNIX - like environments
     ///     such as bash (MinGW), sh or zsh avoid using negative exit status codes
     ///     or codes 255 or higher.
-    /// 
+    ///
     ///     Some running environments might either modulo exit codes with 256 or clamp
     ///     them to interval [0, 255].
-    ///     
+    ///
     ///     For more information:
     ///     http://www.gnu.org/software/libc/manual/html_node/Exit-Status.html
     ///     http://tldp.org/LDP/abs/html/exitcodes.html

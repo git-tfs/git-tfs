@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using StructureMap;
 using LibGit2Sharp;
-using Sep.Git.Tfs.Commands;
+using GitTfs.Commands;
 using Branch = LibGit2Sharp.Branch;
 
-namespace Sep.Git.Tfs.Core
+namespace GitTfs.Core
 {
     public class GitRepository : GitHelpers, IGitRepository
     {
