@@ -258,7 +258,18 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 		Information("Upload coverage to AppVeyor...");
 		BuildSystem.AppVeyor.UploadArtifact(coverageFile);
 	}
-	//ReportGenerator("./build/32+64bit/OpenCover/OpenCover.xml", "./build/32+64bit/OpenCover");
+
+	var coverageResultFolder = System.IO.Path.Combine(buildAssetPath, "coverage");
+	ReportGenerator(coverageFile, coverageResultFolder, new ReportGeneratorSettings(){
+    	ToolPath = @".\packages\build\ReportGenerator\tools\ReportGenerator.exe"
+	});
+	if(BuildSystem.IsRunningOnAppVeyor)
+	{
+		var coverageZip = System.IO.Path.Combine(buildAssetPath,"coverage.zip");
+		Zip(coverageResultFolder, coverageZip);
+		Information("Upload coverage to AppVeyor...");
+		BuildSystem.AppVeyor.UploadArtifact(coverageZip);
+	}
 });
 
 Task("Run-Smoke-Tests").Description("Run the functional/smoke tests")
