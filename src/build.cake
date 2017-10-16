@@ -13,6 +13,7 @@ var IsDryRun = Argument<bool>("isDryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
 readonly var IdGitHubReleaseToDelete = Argument<int>("idGitHubReleaseToDelete", -1);
+readonly var IsMinorRelease = Argument<bool>("isMinorRelease", false);
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
@@ -96,8 +97,11 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 			ReleaseNotesPath = newReleaseNotePath;
 			GitPush(".", githubAccount, githubToken, "master");
 		}
-		GitTag(".", tag);
-		GitPushRef(".", githubAccount, githubToken, "origin", "refs/tags/" + tag);
+		if(!IsMinorRelease)
+		{
+			GitTag(".", tag);
+			GitPushRef(".", githubAccount, githubToken, "origin", "refs/tags/" + tag);
+		}
 	}
 	else
 	{
@@ -437,6 +441,17 @@ Octokit.GitHubClient GetGithubClient()
 Task("TriggerRelease").Description("Trigger a release from the AppVeyor build server")
 	.Does(() =>
 {
+	TriggerRelease(false);
+});
+
+Task("TriggerMinorRelease").Description("Trigger a minor release from the AppVeyor build server")
+	.Does(() =>
+{
+	TriggerRelease(true);
+});
+
+void TriggerRelease(bool isMinorRelease)
+{
 	Information("gitHubUserAccount: "+ GetGithubUserAccount());
 	var httpClient = new System.Net.Http.HttpClient();
 	//AppVeyor build data to trigger the git-tfs build + parameters passed to the release build
@@ -448,7 +463,8 @@ environmentVariables: {
  target: 'AppVeyorRelease',
  chocolateyToken: '"+ GetChocolateyToken() + @"',
  gitHubUserAccount: '"+ GetGithubUserAccount() + @"',
- gitHubToken: '" + GetGithubAuthToken() + @"'
+ gitHubToken: '" + GetGithubAuthToken() + @"',
+ isMinorRelease: '" + isMinorRelease + @"'
  }
 }";
 	var appVeyorToken = ReadToken("AppVeyor");
@@ -467,7 +483,7 @@ environmentVariables: {
 	{
 		Error("Fail to trigger the release build:" + httpResponseMessage.ReasonPhrase);
 	}
-});
+}
 
 Task("CreateGithubRelease").Description("Create a GitHub release")
 	.IsDependentOn("Package")
@@ -640,6 +656,6 @@ Task("DryRunRelease").Description("Do a 'dry-run' release to verify easily most 
 RunTarget(Target);
 
 //TODO:
-// - Being able to do a minor release (without tagging)
+// - Improve Release note generation
 // - Sonar
 // - 'Clean all' Task!
