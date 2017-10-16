@@ -13,6 +13,7 @@ var IsDryRun = Argument<bool>("isDryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
 readonly var IdGitHubReleaseToDelete = Argument<int>("idGitHubReleaseToDelete", -1);
+readonly var IsMinorRelease = Argument<bool>("isMinorRelease", false);
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
@@ -38,6 +39,7 @@ string _zipFilename;
 string _downloadUrl;
 string _releaseVersion;
 string _sha1;
+string _appVeyorBuildVersion;
 bool _buildAllVersion = (Target == "AppVeyorRelease");
 
 //////////////////////////////////////////////////////////////////////
@@ -95,10 +97,14 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 			ReleaseNotesPath = newReleaseNotePath;
 			GitPush(".", githubAccount, githubToken, "master");
 		}
-		GitTag(".", tag);
-		GitPushRef(".", githubAccount, githubToken, "origin", "refs/tags/" + tag);
+		if(!IsMinorRelease)
+		{
+			GitTag(".", tag);
+			GitPushRef(".", githubAccount, githubToken, "origin", "refs/tags/" + tag);
+		}
 	}
-	else{
+	else
+	{
 		Information("[DryRun] Should create the release tag: " + tag);
 	}
 });
@@ -164,15 +170,16 @@ Task("Version").Description("Get the version using GitVersion")
 	_downloadUrl = string.Format(DownloadUrlTemplate, _semanticVersionShort) + _zipFilename;
 	_releaseVersion = "v" + _semanticVersionShort;
 
-	if(BuildSystem.IsRunningOnAppVeyor)
-	{
-		var appVeyorBuildVersion = _semanticVersionShort
-				+ ((version.BranchName == "master") ? string.Empty : "+" + shortSha1 + "." + normalizedBranchName);
-		appVeyorBuildVersion = appVeyorBuildVersion + "." + EnvironmentVariable("APPVEYOR_BUILD_NUMBER");
-		Information("Updating Appveyor version to... " + appVeyorBuildVersion);
-		AppVeyor.UpdateBuildVersion(appVeyorBuildVersion);
-	}
+	_appVeyorBuildVersion = _semanticVersionShort
+			+ ((version.BranchName == "master") ? string.Empty : "+" + shortSha1 + "." + normalizedBranchName)
+			+ "." + EnvironmentVariable("APPVEYOR_BUILD_NUMBER");
 });
+
+void UpdateAppVeyorBuildNumber()
+{
+	Information("Updating Appveyor version to... " + _appVeyorBuildVersion);
+	AppVeyor.UpdateBuildVersion(_appVeyorBuildVersion);
+}
 
 string NormalizeBrancheName(string branchName)
 {
@@ -434,6 +441,17 @@ Octokit.GitHubClient GetGithubClient()
 Task("TriggerRelease").Description("Trigger a release from the AppVeyor build server")
 	.Does(() =>
 {
+	TriggerRelease(false);
+});
+
+Task("TriggerMinorRelease").Description("Trigger a minor release from the AppVeyor build server")
+	.Does(() =>
+{
+	TriggerRelease(true);
+});
+
+void TriggerRelease(bool isMinorRelease)
+{
 	Information("gitHubUserAccount: "+ GetGithubUserAccount());
 	var httpClient = new System.Net.Http.HttpClient();
 	//AppVeyor build data to trigger the git-tfs build + parameters passed to the release build
@@ -445,7 +463,8 @@ environmentVariables: {
  target: 'AppVeyorRelease',
  chocolateyToken: '"+ GetChocolateyToken() + @"',
  gitHubUserAccount: '"+ GetGithubUserAccount() + @"',
- gitHubToken: '" + GetGithubAuthToken() + @"'
+ gitHubToken: '" + GetGithubAuthToken() + @"',
+ isMinorRelease: '" + isMinorRelease + @"'
  }
 }";
 	var appVeyorToken = ReadToken("AppVeyor");
@@ -464,7 +483,7 @@ environmentVariables: {
 	{
 		Error("Fail to trigger the release build:" + httpResponseMessage.ReasonPhrase);
 	}
-});
+}
 
 Task("CreateGithubRelease").Description("Create a GitHub release")
 	.IsDependentOn("Package")
@@ -601,7 +620,13 @@ Task("Default").Description("Run the unit tests")
 
 Task("AppVeyorBuild").Description("Do the continuous integration build with AppVeyor")
 	.IsDependentOn("Run-Smoke-Tests")
-	.IsDependentOn("Package");
+	.IsDependentOn("Package")
+	.Finally(() =>
+	{
+		//Update the AppVeyor build number the latter possible to let the build accessible
+		//through the GitHub link until the build end
+		UpdateAppVeyorBuildNumber();
+	});
 
 Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("TagVersion")
@@ -610,7 +635,13 @@ Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("Package")
 	.IsDependentOn("CreateGithubRelease")
 	.IsDependentOn("Chocolatey")
-	;
+	.Finally(() =>
+	{
+		//Update the AppVeyor build number the latter possible to let the build accessible
+		//through the GitHub link until the build end
+		UpdateAppVeyorBuildNumber();
+	});
+
 
 Task("Release").Description("Build the release and put it on github.com")
 	.IsDependentOn("Chocolatey");
@@ -625,7 +656,6 @@ Task("DryRunRelease").Description("Do a 'dry-run' release to verify easily most 
 RunTarget(Target);
 
 //TODO:
-// - Being able to do a minor release (without tagging)
+// - Improve Release note generation
 // - Sonar
-// - Coverage
 // - 'Clean all' Task!
