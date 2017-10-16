@@ -38,6 +38,7 @@ string _zipFilename;
 string _downloadUrl;
 string _releaseVersion;
 string _sha1;
+string _appVeyorBuildVersion;
 bool _buildAllVersion = (Target == "AppVeyorRelease");
 
 //////////////////////////////////////////////////////////////////////
@@ -98,7 +99,8 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 		GitTag(".", tag);
 		GitPushRef(".", githubAccount, githubToken, "origin", "refs/tags/" + tag);
 	}
-	else{
+	else
+	{
 		Information("[DryRun] Should create the release tag: " + tag);
 	}
 });
@@ -164,15 +166,16 @@ Task("Version").Description("Get the version using GitVersion")
 	_downloadUrl = string.Format(DownloadUrlTemplate, _semanticVersionShort) + _zipFilename;
 	_releaseVersion = "v" + _semanticVersionShort;
 
-	if(BuildSystem.IsRunningOnAppVeyor)
-	{
-		var appVeyorBuildVersion = _semanticVersionShort
-				+ ((version.BranchName == "master") ? string.Empty : "+" + shortSha1 + "." + normalizedBranchName);
-		appVeyorBuildVersion = appVeyorBuildVersion + "." + EnvironmentVariable("APPVEYOR_BUILD_NUMBER");
-		Information("Updating Appveyor version to... " + appVeyorBuildVersion);
-		AppVeyor.UpdateBuildVersion(appVeyorBuildVersion);
-	}
+	_appVeyorBuildVersion = _semanticVersionShort
+			+ ((version.BranchName == "master") ? string.Empty : "+" + shortSha1 + "." + normalizedBranchName)
+			+ "." + EnvironmentVariable("APPVEYOR_BUILD_NUMBER");
 });
+
+void UpdateAppVeyorBuildNumber()
+{
+	Information("Updating Appveyor version to... " + _appVeyorBuildVersion);
+	AppVeyor.UpdateBuildVersion(_appVeyorBuildVersion);
+}
 
 string NormalizeBrancheName(string branchName)
 {
@@ -601,7 +604,13 @@ Task("Default").Description("Run the unit tests")
 
 Task("AppVeyorBuild").Description("Do the continuous integration build with AppVeyor")
 	.IsDependentOn("Run-Smoke-Tests")
-	.IsDependentOn("Package");
+	.IsDependentOn("Package")
+	.Finally(() =>
+	{
+		//Update the AppVeyor build number the latter possible to let the build accessible
+		//through the GitHub link until the build end
+		UpdateAppVeyorBuildNumber();
+	});
 
 Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("TagVersion")
@@ -610,7 +619,13 @@ Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("Package")
 	.IsDependentOn("CreateGithubRelease")
 	.IsDependentOn("Chocolatey")
-	;
+	.Finally(() =>
+	{
+		//Update the AppVeyor build number the latter possible to let the build accessible
+		//through the GitHub link until the build end
+		UpdateAppVeyorBuildNumber();
+	});
+
 
 Task("Release").Description("Build the release and put it on github.com")
 	.IsDependentOn("Chocolatey");
@@ -627,5 +642,4 @@ RunTarget(Target);
 //TODO:
 // - Being able to do a minor release (without tagging)
 // - Sonar
-// - Coverage
 // - 'Clean all' Task!
