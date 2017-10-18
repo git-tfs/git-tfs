@@ -56,7 +56,7 @@ NUGET
       xunit.abstractions (>= 2.0.1)
     xunit.extensibility.execution (2.3)
       xunit.extensibility.core (2.3)
-    xunit.runner.visualstudio (2.3)
+    xunit.runner.visualstudio (2.3.0) - version_in_path: true
 
 GROUP Build
 REDIRECTS: OFF
