@@ -84,7 +84,7 @@ namespace GitTfs.Commands
 
             UpdateRemote(tfsRemote);
             Trace.TraceInformation("Looking for label on " + tfsRemote.TfsRepositoryPath + "...");
-            var labels = tfsRemote.Tfs.GetLabels(tfsRemote.TfsRepositoryPath, NameFilter);
+            var labels = tfsRemote.Tfs.GetLabels(tfsRemote.TfsRepositoryPath, NameFilter).ToList();
             Trace.TraceInformation(labels.Count() + " labels found!");
 
             Regex exludeRegex = null;
