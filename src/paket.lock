@@ -66,6 +66,7 @@ NUGET
     Cake (0.23)
     Cake.Git (0.16.1)
     GitVersion.CommandLine (3.6.5)
+    Octokit (0.28)
     Octokit.CodeFormatter (1.0.0-preview)
     OpenCover (4.6.519)
     ReportGenerator (3.0.2)
