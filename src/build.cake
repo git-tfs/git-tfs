@@ -1,6 +1,6 @@
 //Don't define #tool here. Just add there to 'paket.dependencies' 'build' group
 //Don't use #addin here. Use #r to load the dll found in the nuget package.
-#r "./build/Octokit.dll" //Use our custom version because offical one has a http request timeout of 100s preventing upload of github release asset :( https://github.com/octokit/octokit.net/issues/963
+#r "./packages/build/Octokit/lib/net45/Octokit.dll"
 #r "./packages/build/Cake.Git/lib/net46/Cake.Git.dll"
 #r "System.Net.Http.dll"
 
@@ -531,6 +531,7 @@ void UploadReleaseAsset(Octokit.GitHubClient client, Octokit.Release release)
 		RawData = archiveContents
 	};
 
+	client.SetRequestTimeout(TimeSpan.FromMinutes(30));
 	var uploadTask = client.Repository.Release.UploadAsset(release, assetUpload);
 	uploadTask.Wait();
 	if(uploadTask.Exception != null)
