@@ -8,6 +8,18 @@ It fetches TFS commits into a git repository, and lets you push your updates bac
 If you're having problems, check out the [troubleshooting](doc/TROUBLESHOOTING.md) page.
 And read [how to report an issue](doc/reporting-issues.md), before doing so ;)
 
+## We need your help
+
+This project is no more **actively** maintained because we are no more users of TFS.
+Thus being very useful, git-tfs is not exempt of not supported use cases.
+If you encounter something missing or a problem, please contribute, we will be please to help you.
+
+And remember:
+
+>The fastest way to get an issue fixed is to submit a PR that fixes it.
+
+>The slowest way to get it fixed is to hope someone else will fix it.
+
 ## Get git-tfs
 
 To get a stable version:
