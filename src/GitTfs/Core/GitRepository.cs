@@ -8,6 +8,7 @@ using StructureMap;
 using LibGit2Sharp;
 using GitTfs.Commands;
 using Branch = LibGit2Sharp.Branch;
+using GitTfs.Util;
 
 namespace GitTfs.Core
 {
@@ -258,7 +259,17 @@ namespace GitTfs.Core
         {
             // does this need to ensuretfsauthenticated?
             _repository.Config.Set("tfs.touch", "1"); // reload configuration, because `git tfs init` and `git tfs clone` use Process.Start to update the config, so _repository's copy is out of date.
-            return _remoteConfigReader.Load(_repository.Config).Select(x => BuildRemote(x)).ToDictionary(x => x.Id);
+            var remotes = _remoteConfigReader.Load(_repository.Config).Select(x => BuildRemote(x)).ToDictionary(x => x.Id);
+
+            bool shouldExport = GetConfig(GitTfsConstants.ExportMetadatasConfigKey) == "true";
+
+            foreach(var remote in remotes.Values)
+            {
+                var metadataExportInitializer = new ExportMetadatasInitializer(_globals);
+                metadataExportInitializer.InitializeRemote(remote, shouldExport);
+            }
+
+            return remotes;
         }
 
         private IGitTfsRemote BuildRemote(RemoteInfo remoteInfo)
