@@ -1,0 +1,1 @@
+CorFlags.exe .\git-tfs.exe /32BITPREF+ /nologo
