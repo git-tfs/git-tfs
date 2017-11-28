@@ -316,7 +316,7 @@ Task("Package").Description("Generate the release zip file")
 	CopyDirectory(@"..\doc", OutputDirectory + @"\doc");
 	CopyFiles(@".\packages\**\Microsoft.WITDataStore*.dll", OutputDirectory + @"\GitTfs.Vs2015\");
 	CopyFiles(new[] {@"..\README.md", @"..\LICENSE", @"..\NOTICE"}, OutputDirectory);
-	CopyFiles(new[] {@".\build\CorFlags.exe", @".\build\enable_checkin_policies_support.bat"}, OutputDirectory);
+	CopyFiles(new[] {@".\build\CorFlags.exe", @".\build\enable_checkin_policies_support.bat", @".\build\disable_checkin_policies_support.bat"}, OutputDirectory);
 	DeleteFiles(OutputDirectory + @"\**\*.pdb");
 
 	//Create the zip
