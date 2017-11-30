@@ -313,6 +313,7 @@ Task("Package").Description("Generate the release zip file")
 	{
 		CopyDirectory(@".\packages\LibGit2Sharp.NativeBinaries\runtimes\win7-x86\native", libgit2NativeBinariesFolder);
 	}
+	CopyDirectory(@"..\doc", OutputDirectory + @"\doc");
 	CopyFiles(@".\packages\**\Microsoft.WITDataStore*.dll", OutputDirectory + @"\GitTfs.Vs2015\");
 	CopyFiles(new[] {@"..\README.md", @"..\LICENSE", @"..\NOTICE"}, OutputDirectory);
 	DeleteFiles(OutputDirectory + @"\**\*.pdb");
