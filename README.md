@@ -127,6 +127,8 @@ This is the complete list of commands in the master branch on github.
 
 ### Push to TFS
 
+⚠ Read absolutely [this](doc/using-checkin-policies.md) if your TFVC repository use **Checkin policies** when check-in.
+
 * [rcheckin](doc/commands/rcheckin.md): *replicate your git commits as tfs changesets* - since [0.12][v0.12]
 * [checkin](doc/commands/checkin.md): *checkin your git commits as one tfs changeset* - since 0.10
 * [checkintool](doc/commands/checkintool.md): *checkin in tfs using the tfs checkin dialog* - since 0.10
