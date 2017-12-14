@@ -19,6 +19,7 @@ namespace GitTfs.Core
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private readonly Repository _repository;
         private readonly RemoteConfigConverter _remoteConfigReader;
+        private readonly bool _disableGitignoreSupport;
 
         public GitRepository(string gitDir, IContainer container, Globals globals, RemoteConfigConverter remoteConfigReader)
             : base(container)
@@ -28,6 +29,12 @@ namespace GitTfs.Core
             GitDir = gitDir;
             _repository = new Repository(GitDir);
             _remoteConfigReader = remoteConfigReader;
+
+            var value = GetConfig<string>(GitTfsConstants.DisableGitignoreSupport, null);
+            bool disableGitignoreSupport;
+            if (value != null && bool.TryParse(value, out disableGitignoreSupport))
+                _disableGitignoreSupport = disableGitignoreSupport;
+
         }
 
         ~GitRepository()
@@ -721,7 +728,7 @@ namespace GitTfs.Core
             var parent = to;
             foreach (var gitCommit in commits)
             {
-                if (!gitCommit.Parents.Any(c => c.Sha == parent))
+                if (gitCommit.Parents.All(c => c.Sha != parent))
                     return new List<GitCommit>();
                 parent = gitCommit.Sha;
             }
@@ -730,7 +737,7 @@ namespace GitTfs.Core
 
         public bool IsPathIgnored(string relativePath)
         {
-            return _repository.Ignore.IsPathIgnored(relativePath);
+            return !_disableGitignoreSupport && _repository.Ignore.IsPathIgnored(relativePath);
         }
 
         public string CommitGitIgnore(string pathToGitIgnoreFile)
