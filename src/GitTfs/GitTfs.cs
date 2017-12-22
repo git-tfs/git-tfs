@@ -42,8 +42,14 @@ namespace GitTfs
             UpdateLoggerOnDebugging();
             Trace.WriteLine("Command run:" + _globals.CommandLineRun);
             if (RequiresValidGitRepository(command)) AssertValidGitRepository();
-            ParseAuthors();
-            return Main(command, unparsedArgs);
+            bool willCreateRepository = command.GetType() == typeof(Clone) || command.GetType() == typeof(Init);
+            ParseAuthorsAndSave(!willCreateRepository);
+            var exitCode = Main(command, unparsedArgs);
+            if (willCreateRepository)
+            {
+                SaveAuthorFileInRepository();
+            }
+            return exitCode;
         }
 
         private void UpdateLoggerOnDebugging()
@@ -64,22 +70,19 @@ namespace GitTfs
             {
                 return _help.ShowHelp(command);
             }
-            else if (_globals.ShowVersion)
+            if (_globals.ShowVersion)
             {
                 Trace.TraceInformation(_gitTfsVersionProvider.GetVersionString());
                 Trace.TraceInformation(GitTfsConstants.MessageForceVersion);
                 return GitTfsExitCodes.OK;
             }
-            else
+            try
             {
-                try
-                {
-                    return _runner.Run(command, unparsedArgs);
-                }
-                finally
-                {
-                    _container.GetInstance<Janitor>().Dispose();
-                }
+                return _runner.Run(command, unparsedArgs);
+            }
+            finally
+            {
+                _container.GetInstance<Janitor>().Dispose();
             }
         }
 
@@ -88,11 +91,11 @@ namespace GitTfs
             return !command.GetType().GetCustomAttributes(typeof(RequiresValidGitRepositoryAttribute), false).IsEmpty();
         }
 
-        private void ParseAuthors()
+        private void ParseAuthorsAndSave(bool couldSaveAuthorFile)
         {
             try
             {
-                _container.GetInstance<AuthorsFile>().Parse(_globals.AuthorsFilePath, _globals.GitDir);
+                _container.GetInstance<AuthorsFile>().Parse(_globals.AuthorsFilePath, _globals.GitDir, couldSaveAuthorFile);
             }
             catch (Exception ex)
             {
@@ -102,6 +105,11 @@ namespace GitTfs
                 Trace.TraceWarning("warning: author file ignored due to a problem occuring when reading it :\n\t" + ex.Message);
                 Trace.TraceWarning("         Verify the file :" + Path.Combine(_globals.GitDir, AuthorsFile.GitTfsCachedAuthorsFileName));
             }
+        }
+
+        private void SaveAuthorFileInRepository()
+        {
+            _container.GetInstance<AuthorsFile>().SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
         }
 
         public void InitializeGlobals()

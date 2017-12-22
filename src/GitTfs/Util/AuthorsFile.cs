@@ -146,47 +146,65 @@ namespace GitTfs.Util
             return true;
         }
 
-        public bool Parse(string authorsFilePath, string gitDir)
+        private string GetSavedAuthorFilePath(string gitDir)
         {
-            var savedAuthorFile = Path.Combine(gitDir, GitTfsCachedAuthorsFileName);
-            if (!string.IsNullOrWhiteSpace(authorsFilePath))
+            return Path.Combine(gitDir, GitTfsCachedAuthorsFileName);
+        }
+
+        public bool Parse(string authorsFilePath, string gitDir, bool couldSaveAuthorFile)
+        {
+            if (string.IsNullOrWhiteSpace(authorsFilePath))
             {
-                if (!File.Exists(authorsFilePath))
-                {
-                    throw new GitTfsException("Authors file cannot be found: '" + authorsFilePath + "'");
-                }
-                else
-                {
-                    Trace.WriteLine("Reading authors file : " + authorsFilePath);
-                    bool parseSuccess;
-                    using (StreamReader sr = new StreamReader(authorsFilePath))
-                    {
-                        parseSuccess = Parse(sr);
-                    }
-                    try
-                    {
-                        File.Copy(authorsFilePath, savedAuthorFile, true);
-                        return parseSuccess;
-                    }
-                    catch (Exception)
-                    {
-                        Trace.TraceWarning("Failed to copy authors file from \"" + authorsFilePath + "\" to \"" + savedAuthorFile + "\".");
-                    }
-                }
+                return LoadAuthorsFromSavedFile(gitDir);
             }
-            else if (File.Exists(savedAuthorFile))
+
+            if (!File.Exists(authorsFilePath))
             {
-                if (Authors.Count != 0)
-                    return true;
-                Trace.WriteLine("Reading cached authors file (" + savedAuthorFile + ")...");
-                using (StreamReader sr = new StreamReader(savedAuthorFile))
-                {
-                    return Parse(sr);
-                }
+                throw new GitTfsException("Authors file cannot be found: '" + authorsFilePath + "'");
             }
-            else
+
+            if (couldSaveAuthorFile)
+            {
+                SaveAuthorFileInRepository(authorsFilePath, gitDir);
+            }
+
+            Trace.WriteLine("Reading authors file : " + authorsFilePath);
+            using (StreamReader sr = new StreamReader(authorsFilePath))
+            {
+                return Parse(sr);
+            }
+        }
+
+        public void SaveAuthorFileInRepository(string authorsFilePath, string gitDir)
+        {
+            var savedAuthorFile = GetSavedAuthorFilePath(gitDir);
+            try
+            {
+                File.Copy(authorsFilePath, savedAuthorFile, true);
+            }
+            catch (Exception)
+            {
+                Trace.TraceWarning("Failed to copy authors file from \"" + authorsFilePath + "\" to \"" +
+                                   savedAuthorFile + "\".");
+            }
+        }
+
+        public bool LoadAuthorsFromSavedFile(string gitDir)
+        {
+            var savedAuthorFile = GetSavedAuthorFilePath(gitDir);
+            if (!File.Exists(savedAuthorFile))
+            {
                 Trace.WriteLine("No authors file used.");
-            return false;
+                return false;
+            }
+
+            if (Authors.Count != 0)
+                return true;
+            Trace.WriteLine("Reading cached authors file (" + savedAuthorFile + ")...");
+            using (StreamReader sr = new StreamReader(savedAuthorFile))
+            {
+                return Parse(sr);
+            }
         }
     }
 }
