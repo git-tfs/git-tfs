@@ -20,9 +20,10 @@ namespace GitTfs
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
         private readonly Bootstrapper _bootstrapper;
+        private readonly AuthorsFile _authorsFileHelper;
 
         public GitTfs(GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container,
-            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, Bootstrapper bootstrapper)
+            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, Bootstrapper bootstrapper, AuthorsFile authorsFileHelper)
         {
             _commandFactory = commandFactory;
             _help = help;
@@ -31,6 +32,7 @@ namespace GitTfs
             _runner = runner;
             _globals = globals;
             _bootstrapper = bootstrapper;
+            _authorsFileHelper = authorsFileHelper;
         }
 
         public int Run(IList<string> args)
@@ -47,7 +49,7 @@ namespace GitTfs
             var exitCode = Main(command, unparsedArgs);
             if (willCreateRepository)
             {
-                SaveAuthorFileInRepository();
+                _authorsFileHelper.SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
             }
             return exitCode;
         }
@@ -105,11 +107,6 @@ namespace GitTfs
                 Trace.TraceWarning("warning: author file ignored due to a problem occuring when reading it :\n\t" + ex.Message);
                 Trace.TraceWarning("         Verify the file :" + Path.Combine(_globals.GitDir, AuthorsFile.GitTfsCachedAuthorsFileName));
             }
-        }
-
-        private void SaveAuthorFileInRepository()
-        {
-            _container.GetInstance<AuthorsFile>().SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
         }
 
         public void InitializeGlobals()
