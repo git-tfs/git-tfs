@@ -26,6 +26,7 @@ Tells Cake to use the Mono scripting engine.
 .LINK
 http://cakebuild.net
 
+Example of use: .\build.ps1 -Target "Package"
 #>
 
 [CmdletBinding()]
