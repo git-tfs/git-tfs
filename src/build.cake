@@ -622,7 +622,8 @@ Task("Default").Description("Run the unit tests")
 	.IsDependentOn("Run-Unit-Tests");
 
 Task("AppVeyorBuild").Description("Do the continuous integration build with AppVeyor")
-	.IsDependentOn("Run-Smoke-Tests")
+	.IsDependentOn("Run-Unit-Tests")
+	//.IsDependentOn("Run-Smoke-Tests") //TFS Projects on CodePlex are no more reachable
 	.IsDependentOn("Package")
 	.Finally(() =>
 	{
@@ -634,7 +635,8 @@ Task("AppVeyorBuild").Description("Do the continuous integration build with AppV
 Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("TagVersion")
 	.IsDependentOn("InstallTfsModels")
-	.IsDependentOn("Run-Smoke-Tests")
+	.IsDependentOn("Run-Unit-Tests")
+	//.IsDependentOn("Run-Smoke-Tests") //TFS Projects on CodePlex are no more reachable
 	.IsDependentOn("Package")
 	.IsDependentOn("CreateGithubRelease")
 	.IsDependentOn("Chocolatey")
