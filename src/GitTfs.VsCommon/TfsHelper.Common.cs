@@ -445,7 +445,7 @@ namespace GitTfs.VsCommon
                 _allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full)
                     .ToDictionary(b => b.Properties.RootItem.Item,
                         b => b.Properties.ParentBranch != null ? b.Properties.ParentBranch.Item : null,
-                        (StringComparer.InvariantCultureIgnoreCase));
+                        (StringComparer.OrdinalIgnoreCase));
                 return _allTfsBranches;
             }
         }
