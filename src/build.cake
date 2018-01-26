@@ -225,7 +225,7 @@ Task("Build").Description("Build git-tfs")
 
 void SetGitUserConfig()
 {
-	if(BuildSystem.IsRunningOnAppVeyor)
+	if(!BuildSystem.IsLocalBuild)
 	{
 		Information("Setting git user config to run some integration tests...");
 		//Merge with libgit2sharp now require having user name and email to be set!
