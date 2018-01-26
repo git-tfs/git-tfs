@@ -6,6 +6,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using NDesk.Options;
 using GitTfs.Core;
+using GitTfs.Util;
 using StructureMap;
 
 namespace GitTfs.Commands
@@ -18,11 +19,13 @@ namespace GitTfs.Commands
         private readonly RemoteOptions _remoteOptions;
         private readonly Globals _globals;
         private readonly IGitHelpers _gitHelper;
+        private readonly AuthorsFile _authorsFileHelper;
 
-        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, IGitHelpers gitHelper)
+        public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, IGitHelpers gitHelper, AuthorsFile authorsFileHelper)
         {
             _remoteOptions = remoteOptions;
             _gitHelper = gitHelper;
+            _authorsFileHelper = authorsFileHelper;
             _globals = globals;
             _initOptions = initOptions;
         }
@@ -47,6 +50,7 @@ namespace GitTfs.Commands
             tfsRepositoryPath.AssertValidTfsPathOrRoot();
             DoGitInitDb();
             VerifyGitUserConfig();
+            SaveAuthorFileInRepository();
             CommitTheGitIgnoreFile(_initOptions.GitIgnorePath);
             GitTfsInit(tfsUrl, tfsRepositoryPath);
             return 0;
@@ -65,6 +69,11 @@ namespace GitTfs.Commands
                                           + Environment.NewLine + " * user email: " + (string.IsNullOrWhiteSpace(userEmail) ? "<not set>" : userEmail)
                                           + Environment.NewLine + "For help on how to set user git config, see https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup");
             }
+        }
+
+        private void SaveAuthorFileInRepository()
+        {
+            _authorsFileHelper.SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
         }
 
         private void CommitTheGitIgnoreFile(string pathToGitIgnoreFile)
