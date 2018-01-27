@@ -110,7 +110,7 @@ namespace GitTfs.Commands
                 if (tfsRepositoryPath == GitTfsConstants.TfsRoot)
                     _fetch.BranchStrategy = BranchStrategy.None;
 
-                _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, (_fetch.BranchStrategy == BranchStrategy.None).ToString());
+                _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, _fetch.BranchStrategy == BranchStrategy.None);
 
                 if (retVal == 0)
                 {

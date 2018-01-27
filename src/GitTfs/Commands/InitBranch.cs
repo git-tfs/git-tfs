@@ -207,7 +207,7 @@ namespace GitTfs.Commands
             if (CloneAllBranches && NoFetch)
                 throw new GitTfsException("error: --no-fetch cannot be used with --all");
 
-            _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, false.ToString());
+            _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, false);
 
             var defaultRemote = InitFromDefaultRemote();
 

@@ -25,7 +25,7 @@ namespace GitTfs.Util
         /// <param name="mappingFile"></param>
         public void InitializeConfig(IGitRepository repository, string mappingFile = null)
         {
-            repository.SetConfig(GitTfsConstants.ExportMetadatasConfigKey, "true");
+            repository.SetConfig(GitTfsConstants.ExportMetadatasConfigKey, true);
             if (!string.IsNullOrEmpty(mappingFile))
             {
                 if (File.Exists(mappingFile))
