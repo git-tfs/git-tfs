@@ -107,6 +107,8 @@ namespace GitTfs.Core
                     else
                     {
                         Trace.TraceError("[ERROR] " + message);
+
+                        Trace.TraceInformation("Note: If the checkin policy fails because the assemblies failed to load, please run the file `enable_checkin_policies_support.bat` in the git-tfs directory and try again.");
                     }
                 }
                 if (!options.Force)

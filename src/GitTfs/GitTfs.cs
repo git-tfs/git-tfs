@@ -22,9 +22,10 @@ namespace GitTfs
         private readonly GitTfsCommandRunner _runner;
         private readonly Globals _globals;
         private readonly Bootstrapper _bootstrapper;
+        private readonly AuthorsFile _authorsFileHelper;
 
         public GitTfs(GitTfsCommandFactory commandFactory, IHelpHelper help, IContainer container,
-            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, Bootstrapper bootstrapper)
+            IGitTfsVersionProvider gitTfsVersionProvider, GitTfsCommandRunner runner, Globals globals, Bootstrapper bootstrapper, AuthorsFile authorsFileHelper)
         {
             _commandFactory = commandFactory;
             _help = help;
@@ -33,6 +34,7 @@ namespace GitTfs
             _runner = runner;
             _globals = globals;
             _bootstrapper = bootstrapper;
+            _authorsFileHelper = authorsFileHelper;
         }
 
         //public static String getLogFilePath() { return _globals.LogFilePath }
@@ -53,8 +55,14 @@ namespace GitTfs
                 }
             }
             if (RequiresValidGitRepository(command)) AssertValidGitRepository();
-            ParseAuthors();
-            return Main(command, unparsedArgs);
+            bool willCreateRepository = command.GetType() == typeof(Clone) || command.GetType() == typeof(Init);
+            ParseAuthorsAndSave(!willCreateRepository);
+            var exitCode = Main(command, unparsedArgs);
+            if (willCreateRepository)
+            {
+                _authorsFileHelper.SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
+            }
+            return exitCode;
         }
 
         private void UpdateLoggerOnDebugging()
@@ -116,22 +124,19 @@ namespace GitTfs
             {
                 return _help.ShowHelp(command);
             }
-            else if (_globals.ShowVersion)
+            if (_globals.ShowVersion)
             {
                 Trace.TraceInformation(_gitTfsVersionProvider.GetVersionString());
                 Trace.TraceInformation(GitTfsConstants.MessageForceVersion);
                 return GitTfsExitCodes.OK;
             }
-            else
+            try
             {
-                try
-                {
-                    return _runner.Run(command, unparsedArgs);
-                }
-                finally
-                {
-                    _container.GetInstance<Janitor>().Dispose();
-                }
+                return _runner.Run(command, unparsedArgs);
+            }
+            finally
+            {
+                _container.GetInstance<Janitor>().Dispose();
             }
         }
 
@@ -140,11 +145,11 @@ namespace GitTfs
             return !command.GetType().GetCustomAttributes(typeof(RequiresValidGitRepositoryAttribute), false).IsEmpty();
         }
 
-        private void ParseAuthors()
+        private void ParseAuthorsAndSave(bool couldSaveAuthorFile)
         {
             try
             {
-                _container.GetInstance<AuthorsFile>().Parse(_globals.AuthorsFilePath, _globals.GitDir);
+                _container.GetInstance<AuthorsFile>().Parse(_globals.AuthorsFilePath, _globals.GitDir, couldSaveAuthorFile);
             }
             catch (Exception ex)
             {

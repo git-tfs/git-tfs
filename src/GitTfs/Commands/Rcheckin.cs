@@ -62,7 +62,7 @@ namespace GitTfs.Commands
             if (!_globals.Repository.IsBare)
                 throw new GitTfsException("error: This syntax with one parameter is only allowed in bare repository.");
 
-            _authors.Parse(null, _globals.GitDir);
+            _authors.LoadAuthorsFromSavedFile(_globals.GitDir);
 
             return _writer.Write(GitRepository.ShortToLocalName(localBranch), PerformRCheckin);
         }

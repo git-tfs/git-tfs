@@ -8,6 +8,18 @@ It fetches TFS commits into a git repository, and lets you push your updates bac
 If you're having problems, check out the [troubleshooting](doc/TROUBLESHOOTING.md) page.
 And read [how to report an issue](doc/reporting-issues.md), before doing so ;)
 
+## We need your help
+
+This project is no more **actively** maintained because we are no more users of TFS.
+Thus being very useful, git-tfs is not exempt of not supported use cases.
+If you encounter something missing or a problem, please contribute, we will be please to help you.
+
+And remember:
+
+>The fastest way to get an issue fixed is to submit a PR that fixes it.
+
+>The slowest way to get it fixed is to hope someone else will fix it.
+
 ## Get git-tfs
 
 To get a stable version:
@@ -114,6 +126,8 @@ This is the complete list of commands in the master branch on github.
 * [labels](doc/commands/labels.md): *fetch tfs labels* - since [0.17](../../releases/tag/v0.17.0)
 
 ### Push to TFS
+
+⚠ Read absolutely [this](doc/using-checkin-policies.md) if your TFVC repository use **Checkin policies** when check-in.
 
 * [rcheckin](doc/commands/rcheckin.md): *replicate your git commits as tfs changesets* - since [0.12][v0.12]
 * [checkin](doc/commands/checkin.md): *checkin your git commits as one tfs changeset* - since 0.10

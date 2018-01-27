@@ -52,6 +52,14 @@ namespace GitTfs
         /// </summary>
         public const string RemoteSubtreeFormat = "{0}_subtree/{1}";
 
+        public static readonly string MessageForceVersion = Environment.NewLine
+                                                   + "Note: If you want to force git-tfs to use another version of the tfs client library,"
+                                                   + Environment.NewLine
+                                                   + "set the environment variable `GIT_TFS_CLIENT` with the wished version (ie: '2013' for Visual Studio 2013,...)";
+        public const string LogFileName = "git-tfs_log.txt";
+
+
+        //Git-Tfs config keys
         public const string ExportMetadatasConfigKey = GitTfsPrefix + ".export-metadatas";
         public const string WorkspaceConfigKey = GitTfsPrefix + ".workspace-dir";
 
@@ -63,10 +71,7 @@ namespace GitTfs
 
         public const string BatchSize = GitTfsPrefix + ".batch-size";
         public static string InitialChangeset = GitTfsPrefix + ".initial-changeset";
-        public static string MessageForceVersion = Environment.NewLine
-            + "Note: If you want to force git-tfs to use another version of the tfs client library,"
-            + Environment.NewLine
-            + "set the environment variable `GIT_TFS_CLIENT` with the wished version (ie: '2013' for Visual Studio 2013,...)";
-        public const string LogFileName = "git-tfs_log.txt";
+
+        public static string DisableGitignoreSupport = GitTfsPrefix + ".disable-gitignore-support";
     }
 }

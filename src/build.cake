@@ -225,7 +225,7 @@ Task("Build").Description("Build git-tfs")
 
 void SetGitUserConfig()
 {
-	if(BuildSystem.IsRunningOnAppVeyor)
+	if(!BuildSystem.IsLocalBuild)
 	{
 		Information("Setting git user config to run some integration tests...");
 		//Merge with libgit2sharp now require having user name and email to be set!
@@ -265,17 +265,30 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 		Information("Upload coverage to AppVeyor...");
 		BuildSystem.AppVeyor.UploadArtifact(coverageFile);
 	}
+	if(BuildSystem.IsRunningOnVSTS)
+	{
+		Information("Upload coverage to VSTS...");
+		BuildSystem.TFBuild.Commands.UploadArtifact("reports", coverageFile, "coverage.xml");
+	}
 
 	var coverageResultFolder = System.IO.Path.Combine(buildAssetPath, "coverage");
 	ReportGenerator(coverageFile, coverageResultFolder, new ReportGeneratorSettings(){
     	ToolPath = @".\packages\build\ReportGenerator\tools\ReportGenerator.exe"
 	});
-	if(BuildSystem.IsRunningOnAppVeyor)
+	if(!BuildSystem.IsLocalBuild)
 	{
-		var coverageZip = System.IO.Path.Combine(buildAssetPath,"coverage.zip");
+		var coverageZip = System.IO.Path.Combine(buildAssetPath, "coverage.zip");
 		Zip(coverageResultFolder, coverageZip);
-		Information("Upload coverage to AppVeyor...");
-		BuildSystem.AppVeyor.UploadArtifact(coverageZip);
+		if(BuildSystem.IsRunningOnAppVeyor)
+		{
+			Information("Upload coverage zipped to AppVeyor...");
+			BuildSystem.AppVeyor.UploadArtifact(coverageZip);
+		}
+		if(BuildSystem.IsRunningOnVSTS)
+		{
+			Information("Upload coverage zipped to VSTS...");
+			BuildSystem.TFBuild.Commands.UploadArtifact("reports", coverageZip, "coverage.zip");
+		}
 	}
 });
 
@@ -313,22 +326,38 @@ Task("Package").Description("Generate the release zip file")
 	{
 		CopyDirectory(@".\packages\LibGit2Sharp.NativeBinaries\runtimes\win7-x86\native", libgit2NativeBinariesFolder);
 	}
+	CopyDirectory(@"..\doc", OutputDirectory + @"\doc");
 	CopyFiles(@".\packages\**\Microsoft.WITDataStore*.dll", OutputDirectory + @"\GitTfs.Vs2015\");
 	CopyFiles(new[] {@"..\README.md", @"..\LICENSE", @"..\NOTICE"}, OutputDirectory);
+	CopyFiles(new[] {@".\build\CorFlags.exe", @".\build\enable_checkin_policies_support.bat", @".\build\disable_checkin_policies_support.bat"}, OutputDirectory);
 	DeleteFiles(OutputDirectory + @"\**\*.pdb");
 
 	//Create the zip
 	Zip(OutputDirectory, _zipFilePath);
-	if(BuildSystem.IsRunningOnAppVeyor)
+	if(!BuildSystem.IsLocalBuild)
 	{
-		Information("Upload artifact to AppVeyor...");
-		BuildSystem.AppVeyor.UploadArtifact(_zipFilePath);
 		var msiFile = @".\GitTfs.Setup\GitTfs.Setup.msi";
-		if(FileExists(msiFile))
-			BuildSystem.AppVeyor.UploadArtifact(msiFile);
-		else
+		if(BuildSystem.IsRunningOnAppVeyor)
 		{
-			Information("Fail to find msi file to upload...");
+			Information("Upload artifacts to AppVeyor...");
+			BuildSystem.AppVeyor.UploadArtifact(_zipFilePath);
+			if(FileExists(msiFile))
+				BuildSystem.AppVeyor.UploadArtifact(msiFile);
+			else
+			{
+				Information("Fail to find msi file to upload...");
+			}
+		}
+		if(BuildSystem.IsRunningOnVSTS)
+		{
+			Information("Upload artifacts to VSTS...");
+			BuildSystem.TFBuild.Commands.UploadArtifact("install", _zipFilePath, _zipFilename);
+			if(FileExists(msiFile))
+				BuildSystem.TFBuild.Commands.UploadArtifact("install", msiFile, "GitTfs.Setup.msi");
+			else
+			{
+				Information("Fail to find msi file to upload...");
+			}
 		}
 	}
 });
@@ -578,6 +607,11 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 		Information("Uploading chocolatey package as AppVeyor artifact...");
 		BuildSystem.AppVeyor.UploadArtifact(chocolateyPackagePath);
 	}
+	if(BuildSystem.IsRunningOnVSTS)
+	{
+		Information("Uploading chocolatey package as VSTS artifact...");
+		BuildSystem.TFBuild.Commands.UploadArtifact("install", chocolateyPackagePath, chocolateyPackage);
+	}
 
 	if(!IsDryRun)
 	{
@@ -620,7 +654,8 @@ Task("Default").Description("Run the unit tests")
 	.IsDependentOn("Run-Unit-Tests");
 
 Task("AppVeyorBuild").Description("Do the continuous integration build with AppVeyor")
-	.IsDependentOn("Run-Smoke-Tests")
+	.IsDependentOn("Run-Unit-Tests")
+	//.IsDependentOn("Run-Smoke-Tests") //TFS Projects on CodePlex are no more reachable
 	.IsDependentOn("Package")
 	.Finally(() =>
 	{
@@ -632,7 +667,8 @@ Task("AppVeyorBuild").Description("Do the continuous integration build with AppV
 Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("TagVersion")
 	.IsDependentOn("InstallTfsModels")
-	.IsDependentOn("Run-Smoke-Tests")
+	.IsDependentOn("Run-Unit-Tests")
+	//.IsDependentOn("Run-Smoke-Tests") //TFS Projects on CodePlex are no more reachable
 	.IsDependentOn("Package")
 	.IsDependentOn("CreateGithubRelease")
 	.IsDependentOn("Chocolatey")
