@@ -125,6 +125,11 @@ namespace GitTfs.Core
             _repository.Config.Set<string>(key, value, ConfigurationLevel.Local);
         }
 
+        public void SetConfig(string key, bool value)
+        {
+            SetConfig(key, value.ToString().ToLower());
+        }
+
 
         public IEnumerable<IGitTfsRemote> ReadAllTfsRemotes()
         {
