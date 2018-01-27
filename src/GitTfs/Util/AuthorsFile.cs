@@ -177,6 +177,9 @@ namespace GitTfs.Util
 
         public void SaveAuthorFileInRepository(string authorsFilePath, string gitDir)
         {
+            if(string.IsNullOrWhiteSpace(authorsFilePath))
+                return;
+
             var savedAuthorFile = GetSavedAuthorFilePath(gitDir);
             try
             {
