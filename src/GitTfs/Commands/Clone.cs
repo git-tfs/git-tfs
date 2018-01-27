@@ -124,6 +124,7 @@ namespace GitTfs.Commands
 
                     retVal = _initBranch.Run();
                 }
+                _globals.Repository.SetConfig(GitTfsConstants.DisableGitignoreSupport, true);
             }
             catch (GitTfsException)
             {
