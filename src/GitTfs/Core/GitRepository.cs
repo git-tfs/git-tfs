@@ -645,6 +645,21 @@ namespace GitTfs.Core
                         break;
                     }
                 }
+                else
+                {
+                    foreach (var note in c.Notes)
+                    {
+                        if (TryParseChangesetId(note.Message, out id))
+                        {
+                            changesetsCache[id] = c.Sha;
+                            if (id == changesetId)
+                            {
+                                commit = c;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             if (remoteRef == null && commit == null)
                 cacheIsFull = true; // repository fully scanned
