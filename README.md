@@ -40,7 +40,7 @@ Add the git-tfs folder path to your PATH. You could also set it temporary (the t
 
 ## Use git-tfs
 
-You need .NET 4 and either the 2010, 2012 or 2013 version of Team Explorer installed (or Visual Studio).
+You need .NET 4 and either the 2012 or 2013 version of Team Explorer installed (or Visual Studio).
 
 ### Help
 
@@ -165,12 +165,7 @@ This is the complete list of commands in the master branch on github.
 ### Prerequisites
 
 * MSBuild (included in .NET 4)
-
-And depending of the version of TFS you use :
-
-* [Visual Studio 2013 SDK](http://www.microsoft.com/en-us/download/details.aspx?id=40758)
-* [Visual Studio 2012 SDK](http://www.microsoft.com/en-us/download/details.aspx?id=30668)
-* [Visual Studio 2010 SDK](http://www.microsoft.com/downloads/en/details.aspx?FamilyID=21307C23-F0FF-4EF2-A0A4-DCA54DDB1E21&displaylang=en)
+* Visual Studio >= 2012 (preferably >= 2015)
 
 ### Get the source code and build
 
@@ -184,8 +179,8 @@ And depending of the version of TFS you use :
     #help on the different targets
     .\build.ps1 -Target "Help"
 
-**Note:** if the build fails because you don't have all the `Visual Studio SDK`, just unload in Visual Studio all the projects you are not interested in to be able to build and use your own version.
-You could also install, the Team Foundation Server Object Model for [Tfs 2010](https://visualstudiogallery.msdn.microsoft.com/a37e19fb-3052-4fc9-bef7-4a4682069a75) ([chocolatey](https://chocolatey.org/packages/tfs2010objectmodel)), [Tfs 2012](https://visualstudiogallery.msdn.microsoft.com/f30e5cc7-036e-449c-a541-d522299445aa) ([chocolatey](https://chocolatey.org/packages/tfs2012objectmodel)) and [Tfs 2013](https://visualstudiogallery.msdn.microsoft.com/3278bfa7-64a7-4a75-b0da-ec4ccb8d21b6) ([chocolatey](https://chocolatey.org/packages/tfs2013objectmodel)).
+**Note:** if the build fails to build some `GitTfs.Vs201x` projects, just unload in Visual Studio all the projects you are not interested in to be able to build and use your own version.
+You could also install, the Team Foundation Server Object Model for [Tfs 2012](https://visualstudiogallery.msdn.microsoft.com/f30e5cc7-036e-449c-a541-d522299445aa) ([chocolatey](https://chocolatey.org/packages/tfs2012objectmodel)) and [Tfs 2013](https://visualstudiogallery.msdn.microsoft.com/3278bfa7-64a7-4a75-b0da-ec4ccb8d21b6) ([chocolatey](https://chocolatey.org/packages/tfs2013objectmodel)).
 
 ## Contributing
 Contributions are always welcome. Thanks to all our [contributors](https://github.com/git-tfs/git-tfs/graphs/contributors)!
