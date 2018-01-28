@@ -86,7 +86,7 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 		var githubToken = GetGithubAuthToken();
 		if(FileExists(ReleaseNotesPath))
 		{
-			var newReleaseNotePath = @"doc\release-notes\v" + nextVersion + ".md";
+			var newReleaseNotePath = @"..\doc\release-notes\v" + nextVersion + ".md";
 			MoveFile(ReleaseNotesPath, newReleaseNotePath);
 
 			GitAdd(".", newReleaseNotePath);
