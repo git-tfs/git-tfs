@@ -59,6 +59,10 @@ Release process from local machine:
 1. Setup the personal data in `PersonalTokens.config` file
 2. run `.\build.ps1 -Target ""Release"" -Configuration ""Release""`
 
+Example with parameters:
+------------------------
+run `.\build.ps1 -Target ""DryRunRelease"" -isMinorRelease=true`
+
 Available tasks:");
 	StartProcess("cake.exe", "build.cake -showdescription");
 });
@@ -74,9 +78,19 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 	.Does(() =>
 {
 	var version = GitVersion();
-	var tagVersion = version.Major + "." + (version.Minor + 1);
-	var tag =  "v" + tagVersion;
-	var nextVersion = tagVersion + ".0";
+	string nextVersion;
+	string tag;
+	if(!IsMinorRelease)
+	{
+		var tagVersion = version.Major + "." + (version.Minor + 1);
+		tag =  "v" + tagVersion;
+		nextVersion = tagVersion + ".0";
+	}
+	else
+	{
+		nextVersion = version.Major + "." + version.Minor + "." + version.CommitsSinceVersionSource;
+		tag =  "v" + nextVersion;
+	}
 	Information("Next version will be:" + nextVersion);
 
 	if(!IsDryRun)
@@ -91,7 +105,7 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 
 			GitAdd(".", newReleaseNotePath);
 			GitRemove(".", false, ReleaseNotesPath);
-			var releaseNoteCommit = GitCommit(".", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release v" + tag);
+			var releaseNoteCommit = GitCommit(".", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release " + tag);
 			Information("Release note commit created:" + releaseNoteCommit.Sha);
 
 			ReleaseNotesPath = newReleaseNotePath;
@@ -105,7 +119,14 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 	}
 	else
 	{
-		Information("[DryRun] Should create the release tag: " + tag);
+		if(!IsMinorRelease)
+		{
+			Information("[DryRun] Should create the release tag: " + tag);
+		}
+		else
+		{
+			Information("[DryRun] Minor release => Should not create a release tag");
+		}
 	}
 });
 
@@ -570,6 +591,7 @@ void UploadReleaseAsset(Octokit.GitHubClient client, Octokit.Release release)
 }
 
 Task("Chocolatey").Description("Generate the chocolatey package")
+	.IsDependentOn("TagVersion")
 	.IsDependentOn("Package")
 	.Does(() =>
 {
