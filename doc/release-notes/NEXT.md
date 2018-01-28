@@ -5,3 +5,4 @@
 * Verify that git user config is set on clone and init (#1159 & #1119)
 * Fix failing copy of author file when repository still not initialized (#1094 & #1148)
 * Add a git-tfs setting (`git-tfs.disable-gitignore-support`) do disable use of `.gitignore` by git-tfs to ignore files when fetching (#1121 & #1147)
+* Remove support of VS2010/TFS2010 (Checkin policies)  (#1166)
