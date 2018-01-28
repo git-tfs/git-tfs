@@ -103,18 +103,18 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 			var newReleaseNotePath = @"..\doc\release-notes\v" + nextVersion + ".md";
 			MoveFile(ReleaseNotesPath, newReleaseNotePath);
 
-			GitAdd(".", newReleaseNotePath);
-			GitRemove(".", false, ReleaseNotesPath);
-			var releaseNoteCommit = GitCommit(".", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release " + tag);
+			GitAdd("..", newReleaseNotePath);
+			GitRemove("..", false, ReleaseNotesPath);
+			var releaseNoteCommit = GitCommit("..", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release " + tag);
 			Information("Release note commit created:" + releaseNoteCommit.Sha);
 
 			ReleaseNotesPath = newReleaseNotePath;
-			GitPush(".", githubAccount, githubToken, "master");
+			GitPush("..", githubAccount, githubToken, "master");
 		}
 		if(!IsMinorRelease)
 		{
-			GitTag(".", tag);
-			GitPushRef(".", githubAccount, githubToken, "origin", "refs/tags/" + tag);
+			GitTag("..", tag);
+			GitPushRef("..", githubAccount, githubToken, "origin", "refs/tags/" + tag);
 		}
 	}
 	else
