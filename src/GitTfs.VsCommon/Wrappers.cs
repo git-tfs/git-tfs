@@ -40,8 +40,9 @@ namespace GitTfs.VsCommon
                 new ChangesetVersionSpec(changesetNumber),
                 DeletedState.NonDeleted,
                 ItemType.Any,
-                true
-                );
+                // do not load the loading info
+                false);
+
             return _bridge.Wrap<WrapperForItem, Item>(itemSet.Items);
         }
 
