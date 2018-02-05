@@ -59,6 +59,10 @@ Release process from local machine:
 1. Setup the personal data in `PersonalTokens.config` file
 2. run `.\build.ps1 -Target ""Release"" -Configuration ""Release""`
 
+Example with parameters:
+------------------------
+run `.\build.ps1 -Target ""DryRunRelease"" -isMinorRelease=true`
+
 Available tasks:");
 	StartProcess("cake.exe", "build.cake -showdescription");
 });
@@ -74,9 +78,19 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 	.Does(() =>
 {
 	var version = GitVersion();
-	var tagVersion = version.Major + "." + (version.Minor + 1);
-	var tag =  "v" + tagVersion;
-	var nextVersion = tagVersion + ".0";
+	string nextVersion;
+	string tag;
+	if(!IsMinorRelease)
+	{
+		var tagVersion = version.Major + "." + (version.Minor + 1);
+		tag =  "v" + tagVersion;
+		nextVersion = tagVersion + ".0";
+	}
+	else
+	{
+		nextVersion = version.Major + "." + version.Minor + "." + version.CommitsSinceVersionSource;
+		tag =  "v" + nextVersion;
+	}
 	Information("Next version will be:" + nextVersion);
 
 	if(!IsDryRun)
@@ -86,26 +100,33 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 		var githubToken = GetGithubAuthToken();
 		if(FileExists(ReleaseNotesPath))
 		{
-			var newReleaseNotePath = @"doc\release-notes\v" + nextVersion + ".md";
+			var newReleaseNotePath = @"..\doc\release-notes\v" + nextVersion + ".md";
 			MoveFile(ReleaseNotesPath, newReleaseNotePath);
 
-			GitAdd(".", newReleaseNotePath);
-			GitRemove(".", false, ReleaseNotesPath);
-			var releaseNoteCommit = GitCommit(".", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release v" + tag);
+			GitAdd("..", newReleaseNotePath);
+			GitRemove("..", false, ReleaseNotesPath);
+			var releaseNoteCommit = GitCommit("..", @"Git-tfs release bot", "no-reply@git-tfs.com", "Prepare release " + tag);
 			Information("Release note commit created:" + releaseNoteCommit.Sha);
 
 			ReleaseNotesPath = newReleaseNotePath;
-			GitPush(".", githubAccount, githubToken, "master");
+			GitPush("..", githubAccount, githubToken, "master");
 		}
 		if(!IsMinorRelease)
 		{
-			GitTag(".", tag);
-			GitPushRef(".", githubAccount, githubToken, "origin", "refs/tags/" + tag);
+			GitTag("..", tag);
+			GitPushRef("..", githubAccount, githubToken, "origin", "refs/tags/" + tag);
 		}
 	}
 	else
 	{
-		Information("[DryRun] Should create the release tag: " + tag);
+		if(!IsMinorRelease)
+		{
+			Information("[DryRun] Should create the release tag: " + tag);
+		}
+		else
+		{
+			Information("[DryRun] Minor release => Should not create a release tag");
+		}
 	}
 });
 
@@ -123,20 +144,9 @@ Task("Clean").Description("Clean the working directory")
 Task("InstallTfsModels").Description("Install the missing TFS object models to be able to build git-tfs")
 	.Does(() =>
 {
-	if(BuildSystem.IsRunningOnAppVeyor)
-	{
-		//AppVeyor build VM already contains tfs object model >= 2012 ...
-		if(_buildAllVersion)
-		{
-			//...so need to install "tfs2010objectmodel" only when releasing from AppVeyor build (to speed up the build otherwise.)
-			Information("Installing Tfs object model 2010 to be able to release for all versions...");
-			ChocolateyInstall("tfs2010objectmodel");
-		}
-	}
-	else
+	if(!BuildSystem.IsRunningOnAppVeyor)
 	{
 		//Could be call locally and manually to install all the versions needed to release a git-tfs version
-		ChocolateyInstall("tfs2010objectmodel");
 		ChocolateyInstall("tfs2012objectmodel");
 		ChocolateyInstall("tfs2013objectmodel");
 	}
@@ -214,7 +224,7 @@ Task("Build").Description("Build git-tfs")
 			.SetMaxCpuCount(4);
 		if(_buildAllVersion)
 		{
-			settings.WithTarget("GitTfs_Vs2010")
+			settings
 				.WithTarget("GitTfs_Vs2012")
 				.WithTarget("GitTfs_Vs2013");
 		}
@@ -570,6 +580,7 @@ void UploadReleaseAsset(Octokit.GitHubClient client, Octokit.Release release)
 }
 
 Task("Chocolatey").Description("Generate the chocolatey package")
+	.IsDependentOn("TagVersion")
 	.IsDependentOn("Package")
 	.Does(() =>
 {

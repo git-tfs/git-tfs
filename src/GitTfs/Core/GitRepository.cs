@@ -125,6 +125,11 @@ namespace GitTfs.Core
             _repository.Config.Set<string>(key, value, ConfigurationLevel.Local);
         }
 
+        public void SetConfig(string key, bool value)
+        {
+            SetConfig(key, value.ToString().ToLower());
+        }
+
 
         public IEnumerable<IGitTfsRemote> ReadAllTfsRemotes()
         {
@@ -638,6 +643,21 @@ namespace GitTfs.Core
                     {
                         commit = c;
                         break;
+                    }
+                }
+                else
+                {
+                    foreach (var note in c.Notes)
+                    {
+                        if (TryParseChangesetId(note.Message, out id))
+                        {
+                            changesetsCache[id] = c.Sha;
+                            if (id == changesetId)
+                            {
+                                commit = c;
+                                break;
+                            }
+                        }
                     }
                 }
             }

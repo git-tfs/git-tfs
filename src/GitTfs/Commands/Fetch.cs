@@ -123,7 +123,7 @@ namespace GitTfs.Commands
         private int Run(bool stopOnFailMergeCommit, params string[] args)
         {
             if (!FetchAll && BranchStrategy == BranchStrategy.None)
-                _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true.ToString());
+                _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true);
 
             var remotesToFetch = GetRemotesToFetch(args).ToList();
             foreach (var remote in remotesToFetch)
