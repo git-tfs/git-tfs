@@ -258,6 +258,11 @@ namespace GitTfs.VsFake
                 _repositoryRoot = repositoryRoot;
             }
 
+            public void GetSpecificVersion(int changesetId, IEnumerable<IItem> items)
+            {
+                throw new NotImplementedException();
+            }
+
             public void GetSpecificVersion(IChangeset changeset)
             {
                 GetSpecificVersion(changeset.ChangesetId, changeset.Changes);

@@ -469,6 +469,12 @@ namespace GitTfs.VsCommon
             Retry.Do(() => DoUntilNoFailures(() => _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll)));
         }
 
+        public void GetSpecificVersion(int changesetId, IEnumerable<IItem> items)
+        {
+            var version = new ChangesetVersionSpec(changesetId);
+            GetRequests(items.Select(e => new GetRequest(new ItemSpec(e.ServerItem, RecursionType.Full), version)));
+        }
+
         public void GetSpecificVersion(IChangeset changeset)
         {
             GetSpecificVersion(changeset.ChangesetId, changeset.Changes);
@@ -476,15 +482,7 @@ namespace GitTfs.VsCommon
 
         public void GetSpecificVersion(int changesetId, IEnumerable<IChange> changes)
         {
-            Retry.Do(() =>
-            {
-                var requests = from change in changes
-                               select
-                                   new GetRequest(
-                                       new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId),
-                                       changesetId);
-                DoUntilNoFailures(() => _workspace.Get(requests.ToArray(), GetOptions.Overwrite));
-            });
+            GetRequests(changes.Select(change => new GetRequest(new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId), changesetId)));
         }
 
         public string GetLocalItemForServerItem(string serverItem)
@@ -536,6 +534,27 @@ namespace GitTfs.VsCommon
             {
                 throw new GitTfsGatedCheckinException(gatedException.ShelvesetName, gatedException.AffectedBuildDefinitions, gatedException.CheckInTicket);
             }
+        }
+
+        public void GetRequests(IEnumerable<GetRequest> source, int batchSize = 20)
+        {
+            source.ToBatch(batchSize).DoParallel(batch =>
+            {
+                var items = batch;
+                Retry.Do(() =>
+                {
+                    while (items.Length > 0)
+                    {
+                        var status = _workspace.Get(items.ToArray(), GetOptions.Overwrite | GetOptions.GetAll);
+                        if (status.NumFailures == 0)
+                        {
+                            break;
+                        }
+
+                        items = status.GetFailures().Join(items, e => e.ServerItem, e => e.ItemSpec.Item, (failure, request) => request).ToArray();
+                    }
+                });
+            });
         }
     }
 
