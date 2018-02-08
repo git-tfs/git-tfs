@@ -11,6 +11,9 @@ using StructureMap;
 
 namespace GitTfs.Core
 {
+    using System.Collections.Concurrent;
+    using System.Threading;
+
     public static class Ext
     {
         public static T Tap<T>(this T o, Action<T> block)
@@ -157,6 +160,191 @@ namespace GitTfs.Core
                 {
                     handler(e);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Translate the <paramref name="source"/> to the sequence of array's items
+        /// </summary>
+        /// <typeparam name="TSource">The source item type</typeparam>
+        /// <typeparam name="TResult">The output item type</typeparam>
+        /// <param name="source">The source collection</param>
+        /// <param name="selector">The delegate to use to translate</param>
+        /// <param name="batchSize">the of item in the batch array</param>
+        /// <returns>The <see cref="IEnumerable{T}"/> with arrays of items sized by <paramref name="batchSize"/></returns>
+        public static IEnumerable<TResult[]> ToBatch<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector, int batchSize)
+        {
+            var batch = new List<TResult>(batchSize);
+            
+            foreach (var item in source)
+            {
+                if (batch.Count >= batchSize)
+                {
+                    yield return batch.ToArray();
+                    batch.Clear();
+                }
+
+                batch.Add(selector(item));
+            }
+
+            if (batch.Count > 0)
+            {
+                yield return batch.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Translate the <paramref name="source"/> to the sequence of array's items
+        /// </summary>
+        /// <typeparam name="T">The source item type</typeparam>
+        /// <param name="source">The source collection</param>
+        /// <param name="batchSize">the of item in the batch array</param>
+        /// <returns>The <see cref="IEnumerable{T}"/> with arrays of items sized by <paramref name="batchSize"/></returns>
+        [DebuggerStepThrough]
+        public static IEnumerable<T[]> ToBatch<T>(this IEnumerable<T> source, int batchSize)
+        {
+            return ToBatch(source, e => e, batchSize);
+        }
+
+        /// <summary>
+        /// Executes the <paramref name="action"/> for each item in the <paramref name="source"/> simultaneously.
+        /// </summary>
+        /// <param name="source">The source sequence.</param>
+        /// <param name="action">The action to execute.</param>
+        /// <typeparam name="T">The source item type</typeparam>
+        public static void DoParallel<T>(this IEnumerable<T> source, Action<T> action)
+        {
+#if DEBUG && NO_PARALLEL
+            foreach (var item in source)
+            {
+                action(item);
+            }
+#else
+            (source as ParallelQuery<T> ?? source.AsParallel()).ForAll(action);
+#endif
+        }
+
+        /// <summary>
+        /// TRuns the <paramref name="action"/> on each item in the <paramref name="source"/> in parallel
+        /// </summary>
+        /// <param name="source">
+        /// The source collection of items.
+        /// </param>
+        /// <param name="action">
+        /// The action to process of the item.
+        /// </param>
+        /// <param name="retryInterval">
+        /// The delay between retries.
+        /// </param>
+        /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
+        /// <returns>
+        /// Returns <b>true</b> when all items processed successfully.</returns>
+        public static void DoParallelRetry<T>(
+            this IEnumerable<T> source,
+            Action<T> action,
+            TimeSpan retryInterval)
+        {
+            DoParallelRetry(source, action, 10, retryInterval);
+        }
+
+        /// <summary>
+        /// TRuns the <paramref name="action"/> on each item in the <paramref name="source"/> in parallel
+        /// </summary>
+        /// <param name="source">
+        /// The source collection of items.
+        /// </param>
+        /// <param name="action">
+        /// The action to process of the item.
+        /// </param>
+        /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
+        /// <returns>
+        /// Returns <b>true</b> when all items processed successfully.</returns>
+        public static void DoParallelRetry<T>(this IEnumerable<T> source, Action<T> action)
+        {
+            DoParallelRetry(source, action, 10, TimeSpan.FromSeconds(1));
+        }
+
+        /// <summary>
+        /// TRuns the <paramref name="action"/> on each item in the <paramref name="source"/> in parallel
+        /// </summary>
+        /// <param name="source">
+        /// The source collection of items.
+        /// </param>
+        /// <param name="action">
+        /// The action to process of the item.
+        /// </param>
+        /// <param name="retryCount">
+        /// TThe number of retries.
+        /// </param>
+        /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
+        /// <returns>
+        /// Returns <b>true</b> when all items processed successfully.</returns>
+        public static void DoParallelRetry<T>(this IEnumerable<T> source, Action<T> action, int retryCount)
+        {
+            DoParallelRetry(source, action, retryCount, TimeSpan.FromSeconds(1));
+        }
+
+        /// <summary>
+        /// TRuns the <paramref name="action"/> on each item in the <paramref name="source"/> in parallel
+        /// </summary>
+        /// <param name="source">
+        /// The source collection of items.
+        /// </param>
+        /// <param name="action">
+        /// The action to process of the item.
+        /// </param>
+        /// <param name="retryCount">
+        /// TThe number of retries.
+        /// </param>
+        /// <param name="retryInterval">
+        /// The delay between retries.
+        /// </param>
+        /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
+        /// <returns>
+        /// Returns <b>true</b> when all items processed successfully.</returns>
+        public static void DoParallelRetry<T>(this IEnumerable<T> source, Action<T> action, int retryCount, TimeSpan retryInterval)
+        {
+            var fails = new ConcurrentBag<Exception>();
+
+            source.DoParallel(
+                item =>
+                {
+                    List<Exception> exceptions = null;
+
+                    for (var i = 0; i < retryCount; i++)
+                    {
+                        if (i != 0)
+                        {
+                            Thread.Sleep(retryInterval);
+                        }
+
+                        try
+                        {
+                            action(item);
+                            return;
+                        }
+                        catch (Exception e)
+                        {
+                            Trace.TraceError("The action is failing: {0}", e.Message);
+
+                            if (exceptions == null)
+                            {
+                                exceptions = new List<Exception>();
+                            }
+
+                            exceptions.Add(e);
+                        }
+                    }
+
+                    if (exceptions != null)
+                    {
+                        fails.Add(new AggregateException(exceptions));
+                    }
+                });
+
+            if (fails.Count > 0)
+            {
+                throw new AggregateException(fails);
             }
         }
     }
