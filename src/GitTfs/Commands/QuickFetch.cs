@@ -21,9 +21,9 @@ namespace GitTfs.Commands
         protected override void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
             if (InitialChangeset.HasValue)
-                remote.QuickFetch(InitialChangeset.Value);
+                remote.QuickFetch(InitialChangeset.Value, false, false);
             else
-                remote.QuickFetch();
+                remote.QuickFetch(-1, false, false);
             _properties.InitialChangeset = remote.MaxChangesetId;
             _properties.PersistAllOverrides();
         }
