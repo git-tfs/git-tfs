@@ -178,19 +178,11 @@ namespace GitTfs.Core
             {
             }
             var name = changesetToLog.Committer;
-            var key = changesetToLog.Committer.Split('\\');
             var email = changesetToLog.Committer;
-            Trace.WriteLine("changesetToLog.Committer=[" + changesetToLog.Committer + "]");
             if (_authors != null && _authors.Authors.ContainsKey(changesetToLog.Committer))
             {
                 name = _authors.Authors[changesetToLog.Committer].Name;
                 email = _authors.Authors[changesetToLog.Committer].Email;
-            }
-            else if (_authors != null && _authors.Authors.ContainsKey(key.Last()) )
-            {
-                name = _authors.Authors[key.Last()].Name;
-                email = _authors.Authors[key.Last()].Email;
-                Trace.WriteLine("name=[" + name + "]");
             }
             else if (identity != null)
             {
