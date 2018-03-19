@@ -476,7 +476,7 @@ namespace GitTfs.Core
             if (isIgnoringBranchesDetected)
                 Trace.TraceInformation("   if you want to enable branch support, use the command:" + Environment.NewLine
                     + "    git config --local " + GitTfsConstants.IgnoreBranches + " false");
-            _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, isIgnoringBranchesDetected.ToString());
+            _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, isIgnoringBranchesDetected);
             return isIgnoringBranchesDetected;
         }
 

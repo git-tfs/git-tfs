@@ -249,6 +249,7 @@ namespace GitTfs.VsCommon
 
         public IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, int lastChangesetIdToCheck = -1, string tfsPathParentBranch = null)
         {
+            Trace.WriteLine("Looking for root changeset tree on " + tfsPathBranchToCreate);
             var rootBranches = new List<RootBranch>();
             GetRootChangesetForBranch(rootBranches, tfsPathBranchToCreate, lastChangesetIdToCheck, tfsPathParentBranch);
             return rootBranches;
@@ -285,8 +286,8 @@ namespace GitTfs.VsCommon
 
                 if (tfsParentBranch == null)
                 {
-                    throw new GitTfsException("error : the branch you try to initialize '" + tfsPathBranchToCreate + "' is a root branch (e.g. has no parents).",
-                        new List<string> { "Clone this branch from Tfs instead of trying to initialize it!\n   Command: git tfs clone " + Url + " " + tfsPathBranchToCreate });
+                    Trace.WriteLine("There is no parent branch for " + tfsPathBranchToCreate + ". Ignoring.");
+                    return;
                 }
 
                 tfsPathParentBranch = tfsParentBranch;
@@ -363,9 +364,9 @@ namespace GitTfs.VsCommon
                         rootChangesetMergeInfo.TargetChangeset : rootChangesetMergeInfo.SourceChangeset;
 
                     var rootBranch = new RootBranch(rootChangesetInParentBranch, rootChangesetInChildBranch, tfsPathBranchToCreate);
-                    AddNewRootBranch(rootBranches, rootBranch);
+                    var added = AddNewRootBranch(rootBranches, rootBranch);
 
-                    if (renameFromBranch != null)
+                    if (added && renameFromBranch != null)
                     {
                         Trace.WriteLine("Found original branch '" + renameFromBranch + "' (renamed in branch '" + tfsPathBranchToCreate + "')");
                         GetRootChangesetForBranch(rootBranches, renameFromBranch);
@@ -446,7 +447,7 @@ namespace GitTfs.VsCommon
                 _allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full)
                     .ToDictionary(b => b.Properties.RootItem.Item,
                         b => b.Properties.ParentBranch != null ? b.Properties.ParentBranch.Item : null,
-                        (StringComparer.InvariantCultureIgnoreCase));
+                        (StringComparer.OrdinalIgnoreCase));
                 return _allTfsBranches;
             }
         }
@@ -532,11 +533,19 @@ namespace GitTfs.VsCommon
                             });
         }
 
-        private static void AddNewRootBranch(IList<RootBranch> rootBranches, RootBranch rootBranch)
+        private static bool AddNewRootBranch(IList<RootBranch> rootBranches, RootBranch rootBranch)
         {
+            if (rootBranches.Any(x => x.TfsBranchPath == rootBranch.TfsBranchPath))
+            {
+                // already in
+                return false;
+            }
+
             if (rootBranches.Any())
                 rootBranch.IsRenamedBranch = true;
             rootBranches.Insert(0, rootBranch);
+
+            return true;
         }
 
         private int AskForRootChangesetId()
@@ -1204,9 +1213,9 @@ namespace GitTfs.VsCommon
 
         public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
         {
-            foreach (var labelDefinition in VersionControl.QueryLabels(nameFilter, tfsPathBranch, null, false, tfsPathBranch, VersionSpec.Latest))
+            foreach (var labelDefinition in VersionControl.QueryLabels(nameFilter, tfsPathBranch, null, false, null, VersionSpec.Latest))
             {
-                var label = VersionControl.QueryLabels(labelDefinition.Name, tfsPathBranch, null, true, tfsPathBranch, VersionSpec.Latest).FirstOrDefault();
+                var label = VersionControl.QueryLabels(labelDefinition.Name, tfsPathBranch, null, true, null, VersionSpec.Latest).FirstOrDefault();
                 if (label == null)
                 {
                     throw new GitTfsException("error: data for the label '" + labelDefinition.Name + "' can't be loaded!");
@@ -1219,10 +1228,13 @@ namespace GitTfs.VsCommon
                     Owner = label.OwnerName,
                     Date = label.LastModifiedDate,
                 };
+
+                var foundRelevantItems = false;
                 foreach (var item in label.Items)
                 {
-                    if (item.ServerItem.StartsWith(tfsPathBranch))
+                    if (item.ServerItem.StartsWith(tfsPathBranch, StringComparison.OrdinalIgnoreCase))
                     {
+                        foundRelevantItems = true;
                         if (item.ChangesetId > tfsLabel.ChangesetId)
                         {
                             tfsLabel.ChangesetId = item.ChangesetId;
@@ -1233,7 +1245,11 @@ namespace GitTfs.VsCommon
                         tfsLabel.IsTransBranch = true;
                     }
                 }
-                yield return tfsLabel;
+
+                if (foundRelevantItems)
+                {
+                    yield return tfsLabel;
+                }
             }
         }
 

@@ -12,6 +12,7 @@ namespace GitTfs.Core
         T GetConfig<T>(string key);
         T GetConfig<T>(string key, T defaultValue);
         void SetConfig(string key, string value);
+        void SetConfig(string key, bool value);
         IEnumerable<IGitTfsRemote> ReadAllTfsRemotes();
         IGitTfsRemote ReadTfsRemote(string remoteId);
         IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo, string autocrlf = null, string ignorecase = null);
