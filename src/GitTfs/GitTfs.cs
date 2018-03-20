@@ -37,8 +37,6 @@ namespace GitTfs
             _authorsFileHelper = authorsFileHelper;
         }
 
-        //public static String getLogFilePath() { return _globals.LogFilePath }
-
         public int Run(IList<string> args)
         {
             InitializeGlobals();
@@ -81,30 +79,14 @@ namespace GitTfs
 
                 try
                 {
-                    //Step 1.Create configuration object
-//                    var config = LogManager.Configuration;
-
-                    // Step 2. Create targets and add them to the configuration
                     var fileTarget = new FileTarget();
-                    //                    LogManager.Configuration.AddTarget("file", fileTarget);
                     LogManager.Configuration.AddTarget("userfile", fileTarget);
 
-                    // Step 3. Set target properties
                     fileTarget.FileName = _globals.LogFilePath;
                     fileTarget.Layout = "${longdate} [${level}] ${message}";
 
-                    // Step 4. Define rules
                     var fileRule = new LoggingRule("*", LogLevel.Debug, fileTarget);
                     LogManager.Configuration.LoggingRules.Add(fileRule);
-
-                    // Step 5. Activate the configuration
-//                    LogManager.Configuration = config;
-
-//                    var logger = LogManager.GetLogger("git-tfs");
-
-//                    Trace.Listeners.Add(new NLogTraceListener());
-
-//                    var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
                 }
                 catch (Exception ex)
                 {
