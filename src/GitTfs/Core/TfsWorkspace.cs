@@ -235,6 +235,11 @@ namespace GitTfs.Core
             _workspace.GetSpecificVersion(changesetId);
         }
 
+        public void Get(int changesetId, IEnumerable<IItem> items)
+        {
+            _workspace.GetSpecificVersion(changesetId, items);
+        }
+
         public void Get(IChangeset changeset)
         {
             _workspace.GetSpecificVersion(changeset);

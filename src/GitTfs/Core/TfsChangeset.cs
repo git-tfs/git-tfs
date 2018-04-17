@@ -120,7 +120,7 @@ namespace GitTfs.Core
             }
             else
             {
-                workspace.Get(_changeset.ChangesetId);
+                workspace.Get(_changeset.ChangesetId, tfsTreeEntries.Select(e => e.Item));
                 foreach (var entry in tfsTreeEntries)
                 {
                     Add(entry.Item, entry.FullName, treeBuilder, workspace);
