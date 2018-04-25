@@ -7,6 +7,7 @@ using GitTfs.Commands;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Util;
+using Sep.Git.Tfs.Core.TfsInterop;
 using StructureMap;
 
 namespace GitTfs.VsFake
@@ -531,6 +532,11 @@ namespace GitTfs.VsFake
         }
 
         public void DeleteShelveset(IWorkspace workspace, string shelvesetName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPendingSet[] QueryPendingSets(string[] items, TfsRecursionType recursionType, string queryWorkspace, string queryUser) 
         {
             throw new NotImplementedException();
         }

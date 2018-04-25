@@ -153,6 +153,7 @@
     <Compile Include="Core\Changes\Git\Modify.cs" />
     <Compile Include="Core\Changes\Git\RenameEdit.cs" />
     <Compile Include="Core\CheckinPolicyEvaluator.cs" />
+    <Compile Include="Core\TfsInterop\IPendingSet.cs" />
     <Compile Include="Core\TfsInterop\RootBranch.cs" />
     <Compile Include="Core\TfsLabel.cs" />
     <Compile Include="Core\DerivedGitTfsRemote.cs" />

@@ -20,6 +20,7 @@ using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
 using IdentityNotFoundException = Microsoft.TeamFoundation.VersionControl.Client.IdentityNotFoundException;
 using Microsoft.TeamFoundation.Build.Client;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace GitTfs.VsCommon
 {
@@ -1464,6 +1465,28 @@ namespace GitTfs.VsCommon
         {
             return queuedBuild.Build;
         }
+
+        public IPendingSet[] QueryPendingSets(string[] items, TfsRecursionType recursionType, string queryWorkspaceName, string queryUserName) 
+        {
+
+            Trace.WriteLine(String.Format("Getting pending changes for \n\t{0}\n, Workspace: {1}, UserName: {2}", 
+                                            string.Join("\n\t", items), 
+                                            queryWorkspaceName ?? "<null>", 
+                                            queryUserName ?? "<null>"
+                           )
+            );
+
+            var pendingSets = VersionControl.QueryPendingSets(
+                items,
+                _bridge.Convert<RecursionType>(recursionType),
+                queryWorkspaceName,
+                queryUserName
+            );
+
+            return _bridge.Wrap<WrapperForPendingSet, PendingSet>(pendingSets);
+        }
+
+
     }
 
     public class ItemDownloadStrategy : IItemDownloadStrategy

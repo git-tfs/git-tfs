@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Commands;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace GitTfs.Core
 {
@@ -306,6 +307,11 @@ namespace GitTfs.Core
         }
 
         public void Merge(string sourceTfsPath, string targetTfsPath)
+        {
+            throw DerivedRemoteException;
+        }
+
+        public IPendingSet[] QueryPendingSets(TfsChangesetInfo parentChangeset, string[] items, TfsRecursionType recursionType, string queryWorkspace, string queryUser) 
         {
             throw DerivedRemoteException;
         }

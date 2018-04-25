@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Commands;
+using Sep.Git.Tfs.Core.TfsInterop;
 
 namespace GitTfs.Core
 {
@@ -80,6 +81,8 @@ namespace GitTfs.Core
         void EnsureTfsAuthenticated();
         bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath);
         void DeleteShelveset(string shelvesetName);
+
+        IPendingSet[] QueryPendingSets(TfsChangesetInfo parentChangeset, string[] items, TfsRecursionType recursionType, string queryWorkspace, string queryUser);
     }
 
     public static class IGitTfsRemoteExt
