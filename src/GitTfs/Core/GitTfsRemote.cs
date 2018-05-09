@@ -631,7 +631,8 @@ namespace GitTfs.Core
                     }
                 }
 
-                if (mergeChangeset && tfsBranch != null && Repository.GetConfig(GitTfsConstants.IgnoreNotInitBranches) == true.ToString())
+                if (mergeChangeset && tfsBranch != null &&
+                    string.Equals(Repository.GetConfig(GitTfsConstants.IgnoreNotInitBranches), true.ToString(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     Trace.TraceInformation("warning: skip not initialized branch for path " + tfsBranch.Path);
                     tfsRemote = null;
