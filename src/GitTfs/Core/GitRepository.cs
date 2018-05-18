@@ -304,7 +304,8 @@ namespace GitTfs.Core
 
             var teamProjectPath = defaultRepository.TfsRepositoryPath.ToTfsTeamProjectRepositoryPath();
 
-            return tfsRepositoryPath.StartsWith(teamProjectPath);
+            //add ending '/' because there can be overlapping names ($/myproject/ and $/myproject other/)
+            return tfsRepositoryPath.StartsWith(teamProjectPath + "/");
         }
 
         public bool HasRef(string gitRef)

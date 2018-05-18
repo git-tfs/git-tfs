@@ -630,8 +630,15 @@ namespace GitTfs.Core
                         break;
                     }
                 }
-
-                if (mergeChangeset && tfsBranch != null &&
+                var filterRegex = Repository.GetConfig(GitTfsConstants.IgnoreBranchesRegex);
+                if (mergeChangeset && tfsBranch != null && filterRegex != null
+                    && Regex.IsMatch(tfsBranch.Path, filterRegex, RegexOptions.IgnoreCase))
+                {
+                    Trace.TraceInformation("warning: skip filtered branch for path " + tfsBranch.Path + " (regex:" + filterRegex + ")");
+                    tfsRemote = null;
+                    omittedParentBranch = tfsBranch.Path + ";C" + parentChangesetId;
+                }
+                else if (mergeChangeset && tfsBranch != null &&
                     string.Equals(Repository.GetConfig(GitTfsConstants.IgnoreNotInitBranches), true.ToString(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     Trace.TraceInformation("warning: skip not initialized branch for path " + tfsBranch.Path);

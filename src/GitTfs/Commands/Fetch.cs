@@ -38,6 +38,8 @@ namespace GitTfs.Commands
         private bool ExportMetadatas { get; set; }
         private string ExportMetadatasFile { get; set; }
         public BranchStrategy BranchStrategy { get; set; }
+        private string IgnoreBranchesRegex { get; set; }
+        private bool IgnoreNotInitBranches { get; set; }
         public string BatchSizeOption
         {
             set
@@ -100,7 +102,11 @@ namespace GitTfs.Commands
                     { "c|changeset|from=", "The changeset to clone from (must be a number)",
                         v => InitialChangeset = Convert.ToInt32(v) },
                     { "t|up-to|to=", "up-to changeset # (optional, -1 for up to maximum, must be a number, not prefixed with 'C')",
-                        v => UpToChangeSetOption = v }
+                        v => UpToChangeSetOption = v },
+                    { "ignore-branches-regex=", "Don't initialize branches that match given regex",
+                        v => IgnoreBranchesRegex = v  },
+                    { "ignore-not-init-branches", "Ignore not-initialized branches",
+                        v => IgnoreNotInitBranches = v != null },
                 }.Merge(_remoteOptions.OptionSet);
             }
         }
@@ -124,6 +130,9 @@ namespace GitTfs.Commands
         {
             if (!FetchAll && BranchStrategy == BranchStrategy.None)
                 _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true);
+
+            _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranchesRegex, IgnoreBranchesRegex);
+            _globals.Repository.SetConfig(GitTfsConstants.IgnoreNotInitBranches, IgnoreNotInitBranches);
 
             var remotesToFetch = GetRemotesToFetch(args).ToList();
             foreach (var remote in remotesToFetch)
