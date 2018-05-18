@@ -131,7 +131,8 @@ namespace GitTfs.Commands
             if (!FetchAll && BranchStrategy == BranchStrategy.None)
                 _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true);
 
-            _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranchesRegex, IgnoreBranchesRegex);
+            if(!string.IsNullOrEmpty(IgnoreBranchesRegex))
+                _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranchesRegex, IgnoreBranchesRegex);
             _globals.Repository.SetConfig(GitTfsConstants.IgnoreNotInitBranches, IgnoreNotInitBranches);
 
             var remotesToFetch = GetRemotesToFetch(args).ToList();

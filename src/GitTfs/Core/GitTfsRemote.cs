@@ -631,7 +631,7 @@ namespace GitTfs.Core
                     }
                 }
                 var filterRegex = Repository.GetConfig(GitTfsConstants.IgnoreBranchesRegex);
-                if (mergeChangeset && tfsBranch != null && filterRegex != null
+                if (mergeChangeset && tfsBranch != null && !string.IsNullOrEmpty(filterRegex)
                     && Regex.IsMatch(tfsBranch.Path, filterRegex, RegexOptions.IgnoreCase))
                 {
                     Trace.TraceInformation("warning: skip filtered branch for path " + tfsBranch.Path + " (regex:" + filterRegex + ")");
