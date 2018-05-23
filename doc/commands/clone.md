@@ -41,6 +41,10 @@ a TFS source tree and fetch all the changesets
 								 initialize the merged branches
 								 * all: Manage merged changesets and initialize
 								 all the branches during the clone
+		  --ignore-branches-regex=VALUE
+								 Don't initialize branches that match given regex
+		  --ignore-not-init-branches
+								 Don't initialize additional branches (only use what already was initialized)
 		  --batch-size=VALUE     Size of the batch of tfs changesets fetched (-1 for all in one batch)
       -c, --changeset=VALUE      The changeset to clone from (must be a number)
       -t, --up-to=VALUE          up-to changeset # (optional, -1 for up to 

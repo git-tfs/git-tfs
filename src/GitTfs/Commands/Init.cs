@@ -150,6 +150,7 @@ namespace GitTfs.Commands
             }
 
             _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, false);
+            _globals.Repository.SetConfig(GitTfsConstants.IgnoreNotInitBranches, false);
         }
 
         private string[] BuildInitCommand()

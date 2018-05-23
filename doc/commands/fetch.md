@@ -27,6 +27,10 @@ The fetch command fetch all the new changesets from a TFS remote
                                    messages
                                    Use this when you're exporting from TFS and
                                    don't need to put data back into TFS.
+		  --ignore-branches-regex=VALUE 
+								 Don't initialize branches that match given regex
+		  --ignore-not-init-branches
+								 Don't initialize additional branches (only use what already was initialized)
       -u, --username=VALUE       TFS user name
       -p, --password=VALUE       TFS password
 ## Examples
