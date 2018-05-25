@@ -216,9 +216,24 @@ namespace GitTfs.VsCommon
         {
             var targetVersion = new ChangesetVersionSpec(targetChangeset);
             var searchTo = targetVersion;
-            var mergeInfo = VersionControl.QueryMerges(null, null, path, targetVersion, null, searchTo, RecursionType.Full);
-            if (mergeInfo.Length == 0) return -1;
-            return mergeInfo.Max(x => x.SourceVersion);
+
+            var changes = VersionControl.GetChangesForChangeset(targetChangeset, false, Int32.MaxValue, null, null, true).Where(change =>
+            {
+                return change.ChangeType.HasFlag(ChangeType.Merge);
+            });
+            if (changes.Empty())
+                return -1;
+            //retrieve the highest possible 'source' version
+            //this version gets use for
+            //  1. figuring out where the merge came from (only taking one, as git can only handle 1 anyway).
+            //     In theory a single changeset can contain merges from more than 1 source at a time
+            //  2. figuring out up to which changeset the merge source branch needs to be fetched
+            return changes.Max(change =>
+            {
+                if (change.MergeSources.Empty())
+                    return -1;
+                return change.MergeSources.Max(mergeSource => mergeSource.VersionFrom);
+            });
         }
 
         public bool Is2008OrOlder
