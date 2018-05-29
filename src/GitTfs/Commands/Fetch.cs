@@ -33,6 +33,7 @@ namespace GitTfs.Commands
         private bool FetchAll { get; set; }
         private bool FetchLabels { get; set; }
         private bool FetchParents { get; set; }
+        private bool IgnoreRestrictedChangesets { get; set; }
         private string BareBranch { get; set; }
         private bool ForceFetch { get; set; }
         private bool ExportMetadatas { get; set; }
@@ -107,6 +108,8 @@ namespace GitTfs.Commands
                         v => IgnoreBranchesRegex = v  },
                     { "ignore-not-init-branches", "Ignore not-initialized branches",
                         v => IgnoreNotInitBranches = v != null },
+                    { "ignore-restricted-changesets", "Ignore restricted changesets",
+                        v => IgnoreRestrictedChangesets = v != null }
                 }.Merge(_remoteOptions.OptionSet);
             }
         }
@@ -199,7 +202,7 @@ namespace GitTfs.Commands
                 {
                     _properties.InitialChangeset = InitialChangeset.Value;
                     _properties.PersistAllOverrides();
-                    remote.QuickFetch(InitialChangeset.Value);
+                    remote.QuickFetch(InitialChangeset.Value, IgnoreRestrictedChangesets);
                     remote.Fetch(stopOnFailMergeCommit, upToChangeSet);
                 }
                 else

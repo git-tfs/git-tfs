@@ -3,3 +3,4 @@
 * ignore-not-init-branches now configurable via commandline flag
 * ignore-branches-regex to configure a filter regex to exclude branches during cloning or fetching with branches
 * fixed bug in detecting of external repositories from the default repository
+* ignore changesets that the TFS user has no read access to with the `--ignore-restricted-changesets` option

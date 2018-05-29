@@ -702,16 +702,23 @@ namespace GitTfs.Core
             return remote;
         }
 
-        public void QuickFetch()
+        public void QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint)
         {
-            var changeset = GetLatestChangeset();
-            quickFetch(changeset);
-        }
-
-        public void QuickFetch(int changesetId)
-        {
-            var changeset = Tfs.GetChangeset(changesetId, this);
-            quickFetch(changeset);
+            try
+            {
+                ITfsChangeset changeset;
+                if (changesetId < 0)
+                    changeset = GetLatestChangeset();
+                else
+                    changeset = Tfs.GetChangeset(changesetId, this);
+                quickFetch(changeset);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine("Quick fetch failed: " + ex.Message);
+                if (!IgnoreException(ex.Message, ignoreRestricted, printRestrictionHint))
+                    throw;
+            }
         }
 
         private void quickFetch(ITfsChangeset changeset)
@@ -997,7 +1004,21 @@ namespace GitTfs.Core
             return InitTfsBranch(remoteOptions, tfsRepositoryPath, rootChangesetId, fetchParentBranch, gitBranchNameExpected, renameResult);
         }
 
-        private IGitTfsRemote InitTfsBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null)
+        private bool IgnoreException(string message, bool ignoreRestricted, bool printHint = true)
+        {
+            // Detect exception "TF14098: Access Denied: User ??? needs
+            // Read permission(s) for at least one item in changeset ???."
+            if (message.Contains("TF14098"))
+            {
+                if (ignoreRestricted)
+                    return true;
+                else if (printHint)
+                    Console.WriteLine("\nAccess to changeset denied. Try the '--ignore-restricted-changesets' option!\n");
+            }
+            return false;
+        }
+
+        private IGitTfsRemote InitTfsBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null, bool ignoreRestricted = false)
         {
             Trace.WriteLine("Begin process of creating branch for remote :" + tfsRepositoryPath);
             // TFS string representations of repository paths do not end in trailing slashes
@@ -1014,7 +1035,19 @@ namespace GitTfs.Core
             {
                 sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
                 if (fetchParentBranch && string.IsNullOrWhiteSpace(sha1RootCommit))
-                    sha1RootCommit = FindRootRemoteAndFetch(rootChangesetId, renameResult);
+                {
+                    try
+                    {
+                        sha1RootCommit = FindRootRemoteAndFetch(rootChangesetId, renameResult);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine("Getting changeset fetch failed: " + ex.Message);
+                        if (!IgnoreException(ex.Message, ignoreRestricted))
+                            throw;
+                    }
+                }
+
                 if (string.IsNullOrWhiteSpace(sha1RootCommit))
                     return null;
 
