@@ -1012,8 +1012,8 @@ namespace GitTfs.Core
             {
                 if (ignoreRestricted)
                     return true;
-                else if (printHint)
-                    Console.WriteLine("\nAccess to changeset denied. Try the '--ignore-restricted-changesets' option!\n");
+                if (printHint)
+                    Trace.TraceWarning("\nAccess to changeset denied. Try the '--ignore-restricted-changesets' option!\n");
             }
             return false;
         }
