@@ -618,9 +618,15 @@ namespace GitTfs.Core
             {
                 string sha;
                 if (changesetsCache.TryGetValue(changesetId, out sha))
+                {
+                    Trace.WriteLine("Changeset " + changesetId + " found at " + sha);
                     return _repository.Lookup<Commit>(sha);
+                }
                 if (cacheIsFull)
+                {
+                    Trace.WriteLine("Looking for changeset " + changesetId + " in git repository: CacheIsFull, stopped looking.");
                     return null;
+                }
             }
 
             var reachableFromRemoteBranches = new CommitFilter
@@ -630,7 +636,15 @@ namespace GitTfs.Core
             };
 
             if (remoteRef != null)
-                reachableFromRemoteBranches.IncludeReachableFrom = _repository.Branches.Where(p => p.IsRemote && p.CanonicalName.EndsWith(remoteRef));
+            {
+                var query = _repository.Branches.Where(p => p.IsRemote && p.CanonicalName.EndsWith(remoteRef));
+                Trace.WriteLine("Looking for changeset " + changesetId + " in git repository: Adding remotes:");
+                foreach (var reachable in query)
+                {
+                    Trace.WriteLine(reachable.CanonicalName + "reachable from " + remoteRef);
+                }
+                reachableFromRemoteBranches.IncludeReachableFrom = query;
+            }
             var commitsFromRemoteBranches = _repository.Commits.QueryBy(reachableFromRemoteBranches);
 
             Commit commit = null;
@@ -664,7 +678,7 @@ namespace GitTfs.Core
             }
             if (remoteRef == null && commit == null)
                 cacheIsFull = true; // repository fully scanned
-            Trace.WriteLine((commit == null) ? " => Commit not found!" : " => Commit found! hash: " + commit.Sha);
+            Trace.WriteLine((commit == null) ? " => Commit " + changesetId + " not found!" : " => Commit " + changesetId + " found! hash: " + commit.Sha);
             return commit;
         }
 
