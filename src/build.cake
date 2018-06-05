@@ -530,6 +530,8 @@ Task("CreateGithubRelease").Description("Create a GitHub release")
 	.Does(() =>
 {
 	var client = GetGithubClient();
+	// change timeout to be able to upload the package without getting a timeout
+	client.SetRequestTimeout(TimeSpan.FromMinutes(30));
 
 	var releaseNotes = ReadReleaseNotes();
 
@@ -570,7 +572,6 @@ void UploadReleaseAsset(Octokit.GitHubClient client, Octokit.Release release)
 		RawData = archiveContents
 	};
 
-	client.SetRequestTimeout(TimeSpan.FromMinutes(30));
 	var uploadTask = client.Repository.Release.UploadAsset(release, assetUpload);
 	uploadTask.Wait();
 	if(uploadTask.Exception != null)
