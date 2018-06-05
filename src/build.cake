@@ -535,6 +535,8 @@ Task("CreateGithubRelease").Description("Create a GitHub release")
 
 	var releaseNotes = ReadReleaseNotes();
 
+	releaseNotes += Environment.NewLine +  "![Git-Tfs " + _releaseVersion + " download count](https://img.shields.io/github/downloads/git-tfs/git-tfs/" + _releaseVersion + "/total.svg)";
+
 	var newRelease = new Octokit.NewRelease(_releaseVersion);
 	newRelease.Name = _releaseVersion;
 	newRelease.Body = releaseNotes;
