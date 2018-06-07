@@ -41,7 +41,12 @@ namespace GitTfs.Commands
 
         public int Run(string tfsUrl, string tfsRepositoryPath)
         {
-            return Run(tfsUrl, tfsRepositoryPath, Path.GetFileName(tfsRepositoryPath));
+            string gitRepositoryPath;
+            if (tfsRepositoryPath == GitTfsConstants.TfsRoot)
+                gitRepositoryPath = new Uri(tfsUrl).Host;
+            else
+                gitRepositoryPath = Path.GetFileName(tfsRepositoryPath);
+            return Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
         }
 
         public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)
