@@ -96,6 +96,10 @@ clone exes.
 
     git tfs quick-clone --ignore-regex=exe$ http://tfs:8080/tfs/DefaultCollection $/Project1
 
+## Cloning the whole TFS Project Collection
+
+You can clone all projects by specifying ``$/`` as the tfs-repository path. If you do not specify a git repository name, it will clone into ``tfs-collection``.
+
 ## See also
 
 * [init](init.md)
