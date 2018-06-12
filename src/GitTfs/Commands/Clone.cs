@@ -43,7 +43,7 @@ namespace GitTfs.Commands
         {
             string gitRepositoryPath;
             if (tfsRepositoryPath == GitTfsConstants.TfsRoot)
-                gitRepositoryPath = new Uri(tfsUrl).Host;
+                gitRepositoryPath = "tfs-collection";
             else
                 gitRepositoryPath = Path.GetFileName(tfsRepositoryPath);
             return Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
