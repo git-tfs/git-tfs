@@ -227,6 +227,10 @@ You could use this option to specify smaller batch size if git-tfs use too much 
 This option is saved in the git config file (key `git-tfs.batch-size`). See [config file doc](../config.md).
 Note: this option could also be specified during the `fetch`.
 
+## Cloning the whole TFS Project Collection
+
+You can clone all projects by specifying ``$/`` as the tfs-repository path. If you do not specify a git repository name, it will clone into ``tfs-collection``.
+
 ## After cloning a repository
 
 It is recommended, especially if the TFS repository is a big one, to run, after a clone :

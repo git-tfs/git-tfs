@@ -530,8 +530,12 @@ Task("CreateGithubRelease").Description("Create a GitHub release")
 	.Does(() =>
 {
 	var client = GetGithubClient();
+	// change timeout to be able to upload the package without getting a timeout
+	client.SetRequestTimeout(TimeSpan.FromMinutes(30));
 
 	var releaseNotes = ReadReleaseNotes();
+
+	releaseNotes += Environment.NewLine +  "![Git-Tfs " + _releaseVersion + " download count](https://img.shields.io/github/downloads/git-tfs/git-tfs/" + _releaseVersion + "/total.svg)";
 
 	var newRelease = new Octokit.NewRelease(_releaseVersion);
 	newRelease.Name = _releaseVersion;
@@ -570,7 +574,6 @@ void UploadReleaseAsset(Octokit.GitHubClient client, Octokit.Release release)
 		RawData = archiveContents
 	};
 
-	client.SetRequestTimeout(TimeSpan.FromMinutes(30));
 	var uploadTask = client.Repository.Release.UploadAsset(release, assetUpload);
 	uploadTask.Wait();
 	if(uploadTask.Exception != null)
