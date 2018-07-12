@@ -16,7 +16,7 @@ namespace GitTfs.Commands
         "       * Display remote TFS branches:\n       git tfs branch -r\n       git tfs branch -r -all\n\n" +
         "       * Create a TFS branch from current commit:\n       git tfs branch $/Repository/ProjectBranchToCreate <myWishedRemoteName> --comment=\"Creation of my branch\"\n\n" +
         "       * Rename a remote branch:\n       git tfs branch --move oldTfsRemoteName newTfsRemoteName\n\n" +
-        "       * Delete a remote branch:\n       git tfs branch --delete tfsRemoteName\n       git tfs branch --delete --all\n\n" +
+        "       * Delete a remote branch:\n       git tfs branch --delete tfsRemoteName\n\n" +
         "       * Initialise an existing remote TFS branch:\n       git tfs branch --init $/Repository/ProjectBranch\n       git tfs branch --init $/Repository/ProjectBranch myNewBranch\n       git tfs branch --init --all\n       git tfs branch --init --tfs-parent-branch=$/Repository/ProjectParentBranch $/Repository/ProjectBranch\n")]
     [RequiresValidGitRepository]
     public class Branch : GitTfsCommand
@@ -46,9 +46,7 @@ namespace GitTfs.Commands
                 return new OptionSet
                 {
                     { "r|remotes", "Display the TFS branches of the current TFS root branch existing on the TFS server", v => DisplayRemotes = (v != null) },
-                    { "all", "Display (used with option --remotes) the TFS branches of all the root branches existing on the TFS server\n" +
-                    " or Initialize (used with option --init) all existing TFS branches (For TFS 2010 and later)\n" +
-                    " or Delete (used with option --delete) all tfs remotes (for example after lfs migration).", v => ManageAll = (v != null) },
+                    { "all", "Display (used with option --remotes) the TFS branches of all the root branches existing on the TFS server\n or Initialize (used with option --init) all existing TFS branches (For TFS 2010 and later)", v => ManageAll = (v != null) },
                     { "comment=", "Comment used for the creation of the TFS branch ", v => Comment = v },
                     { "m|move", "Rename a TFS remote", v => ShouldRenameRemote = (v != null) },
                     { "delete", "Delete a TFS remote", v => ShouldDeleteRemote = (v != null) },
@@ -99,16 +97,8 @@ namespace GitTfs.Commands
 
             VerifyCloneAllRepository();
 
-            if (ShouldRenameRemote)
+            if (ShouldRenameRemote || ShouldDeleteRemote)
                 return _helper.Run(this);
-
-            if(ShouldDeleteRemote)
-            {
-                if (!ManageAll)
-                    return _helper.Run(this);
-                else
-                    return DeleteAllRemotes();
-            }
 
             if (ShouldInitBranch)
             {
@@ -239,19 +229,6 @@ namespace GitTfs.Commands
             _cleanup.Run();
 
             _globals.Repository.DeleteTfsRemote(remote);
-            return GitTfsExitCodes.OK;
-        }
-
-        private int DeleteAllRemotes()
-        {
-            Trace.TraceInformation("Deleting all remotes!!");
-            Trace.TraceInformation("Cleaning before processing delete...");
-            _cleanup.Run();
-
-            foreach (var remote in _globals.Repository.ReadAllTfsRemotes())
-            {
-                _globals.Repository.DeleteTfsRemote(remote);
-            }
             return GitTfsExitCodes.OK;
         }
 
