@@ -1,4 +1,6 @@
+
 * When cloning a whole TFS Project Collection (``$/``) without specifying a local repository name, clone into "tfs-collection" instead of erroring with "Invalid Path". (#1202 by @0x53A)
 * FindMergeChangesetParent now also takes into account the path of the changes. This should avoid detection of incorrect parent when a changeset has merges in different branches at once. (#1204 by @Laibalion)
 * Provide way to delete all remotes in a single call (#1204 by @Laibalion)
 * Add .net462 and windows10 long path support. See [doc to enable it](../blob/master/doc/Set-custom-workspace.md). (#1221 by @pmiossec)
+* Line endings are now properly normalized when pushing changes to TFS if core.autocrlf is set to true (#1210 by @JeffCyr)
