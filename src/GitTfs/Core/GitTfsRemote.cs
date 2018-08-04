@@ -45,10 +45,22 @@ namespace GitTfs.Core
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
             GitIgnorePath = _remoteOptions.GitIgnorePath ?? info.GitIgnorePath;
 
-            var value = Repository.GetConfig<string>(GitTfsConstants.DisableGitignoreSupport, null);
-            bool disableGitignoreSupport;
-            if (value != null && bool.TryParse(value, out disableGitignoreSupport))
-                _disableGitignoreSupport = disableGitignoreSupport;
+            if (!string.IsNullOrEmpty(_remoteOptions.GitIgnorePath))
+            {
+                // To provide expected single run effect of explicitly provided
+                // `--gitignore` option, even in situation where .gitignore
+                // support would otherwise be disabled through configuration,
+                // allow overriding `disable-gitignore-support` setting,
+                // forcing enabled .gitignore support for the command duration
+                _disableGitignoreSupport = false;
+            }
+            else
+            {
+                var value = Repository.GetConfig<string>(GitTfsConstants.DisableGitignoreSupport, null);
+                bool disableGitignoreSupport;
+                if (value != null && bool.TryParse(value, out disableGitignoreSupport))
+                    _disableGitignoreSupport = disableGitignoreSupport;
+            }
 
             Autotag = info.Autotag;
 
