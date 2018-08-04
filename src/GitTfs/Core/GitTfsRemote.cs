@@ -56,6 +56,8 @@ namespace GitTfs.Core
             }
             else
             {
+                _disableGitignoreSupport = true;
+
                 var value = Repository.GetConfig<string>(GitTfsConstants.DisableGitignoreSupport, null);
                 bool disableGitignoreSupport;
                 if (value != null && bool.TryParse(value, out disableGitignoreSupport))
