@@ -351,7 +351,10 @@ namespace GitTfs.Test.Core
                     ApplicableChange.Delete("5-wasincluded.txt"),
                     ApplicableChange.Delete("6-wasignored.txt"),
                     ApplicableChange.Update("2-included.txt"),
-                    ApplicableChange.Update("6-included.txt"));
+                    ApplicableChange.Update("6-included.txt"),
+                    ApplicableChange.Ignore("0-ignored.txt"),
+                    ApplicableChange.Ignore("4-ignored.txt"),
+                    ApplicableChange.Ignore("5-ignored.txt"));
             }
         }
 

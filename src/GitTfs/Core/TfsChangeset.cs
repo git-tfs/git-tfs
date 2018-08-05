@@ -56,6 +56,9 @@ namespace GitTfs.Core
                 case ChangeType.Delete:
                     Delete(change.GitPath, treeBuilder, initialTree);
                     break;
+                case ChangeType.Ignore:
+                    Ignore(change.GitPath);
+                    break;
                 default:
                     throw new NotImplementedException("Unsupported change type: " + change.Type);
             }
@@ -72,6 +75,11 @@ namespace GitTfs.Core
             {
                 Trace.TraceInformation("Cannot checkout file '{0}' from TFS. Skip it", change.GitPath);
             }
+        }
+
+        private void Ignore(string pathInGitRepo)
+        {
+            Trace.TraceInformation(string.Format("C{0} ! No changes applied to '{1}', file ignored", _changeset.ChangesetId, pathInGitRepo));
         }
 
         public IEnumerable<TfsTreeEntry> GetTree()

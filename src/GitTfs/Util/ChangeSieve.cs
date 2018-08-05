@@ -11,6 +11,7 @@ namespace GitTfs.Util
     {
         Update,
         Delete,
+        Ignore,
     }
 
     public class ApplicableChange
@@ -27,6 +28,11 @@ namespace GitTfs.Util
         public static ApplicableChange Delete(string path)
         {
             return new ApplicableChange { Type = ChangeType.Delete, GitPath = path };
+        }
+
+        public static ApplicableChange Ignore(string path)
+        {
+            return new ApplicableChange { Type = ChangeType.Ignore, GitPath = path };
         }
     }
 
@@ -85,6 +91,7 @@ namespace GitTfs.Util
             {
                 Deleted = new List<ApplicableChange>(),
                 Updated = new List<ApplicableChange>(),
+                Ignored = new List<ApplicableChange>(),
             };
             foreach (var change in NamedChanges)
             {
@@ -116,14 +123,16 @@ namespace GitTfs.Util
                     if (!IsItemDeleted(change)
                         && !IsGitPathMissing(change)
                         && !IsGitPathInDotGit(change)
-                        && !IsGitPathIgnored(change)
                         && !IsIgnorable(change))
                     {
-                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath, mode));
+                        if (IsGitPathIgnored(change))
+                            compartments.Ignored.Add(ApplicableChange.Ignore(change.GitPath));
+                        else
+                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath, mode));
                     }
                 }
             }
-            return compartments.Deleted.Concat(compartments.Updated);
+            return compartments.Deleted.Concat(compartments.Updated).Concat(compartments.Ignored);
         }
 
         private bool? _deletesProject;
