@@ -131,6 +131,8 @@ namespace GitTfs.Commands
 
         private int Run(bool stopOnFailMergeCommit, params string[] args)
         {
+            UseTheGitIgnoreFile(_remoteOptions.GitIgnorePath);
+
             if (!FetchAll && BranchStrategy == BranchStrategy.None)
                 _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true);
 
@@ -144,6 +146,16 @@ namespace GitTfs.Commands
                 FetchRemote(stopOnFailMergeCommit, remote);
             }
             return 0;
+        }
+
+        private void UseTheGitIgnoreFile(string pathToGitIgnoreFile)
+        {
+            if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile))
+            {
+                Trace.WriteLine("No .gitignore file specified to use...");
+                return;
+            }
+            _globals.Repository.UseGitIgnore(pathToGitIgnoreFile);
         }
 
         private void FetchRemote(bool stopOnFailMergeCommit, IGitTfsRemote remote)
