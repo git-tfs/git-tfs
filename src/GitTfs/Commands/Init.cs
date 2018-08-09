@@ -52,6 +52,7 @@ namespace GitTfs.Commands
             VerifyGitUserConfig();
             SaveAuthorFileInRepository();
             CommitTheGitIgnoreFile(_remoteOptions.GitIgnorePath);
+            UseTheGitIgnoreFile(_remoteOptions.GitIgnorePath);
             GitTfsInit(tfsUrl, tfsRepositoryPath);
             return 0;
         }
@@ -80,10 +81,20 @@ namespace GitTfs.Commands
         {
             if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile))
             {
-                Trace.WriteLine("No .gitignore file specified...");
+                Trace.WriteLine("No .gitignore file specified to commit...");
                 return;
             }
             _globals.Repository.CommitGitIgnore(pathToGitIgnoreFile);
+        }
+
+        private void UseTheGitIgnoreFile(string pathToGitIgnoreFile)
+        {
+            if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile))
+            {
+                Trace.WriteLine("No .gitignore file specified to use...");
+                return;
+            }
+            _globals.Repository.UseGitIgnore(pathToGitIgnoreFile);
         }
 
         public int Run(string tfsUrl, string tfsRepositoryPath, string gitRepositoryPath)

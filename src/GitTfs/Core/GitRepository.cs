@@ -789,11 +789,15 @@ namespace GitTfs.Core
 
             _repository.Refs.Add(ShortToTfsRemoteName("default"), new ObjectId(sha));
             _repository.Refs.Add(ShortToLocalName("master"), new ObjectId(sha));
+
+            return sha;
+        }
+
+        public void UseGitIgnore(string pathToGitIgnoreFile)
+        {
             //Should add ourself the rules to the temporary rules because committing directly to the git database
             //prevent libgit2sharp to detect the new .gitignore file
             _repository.Ignore.AddTemporaryRules(File.ReadLines(pathToGitIgnoreFile));
-
-            return sha;
         }
 
         public IDictionary<int, string> GetCommitChangeSetPairs()
