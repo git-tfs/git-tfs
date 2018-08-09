@@ -219,7 +219,7 @@ namespace GitTfs.VsCommon
 
             var changes = VersionControl.GetChangesForChangeset(targetChangeset, false, Int32.MaxValue, null, null, true).Where(change =>
             {
-                return change.ChangeType.HasFlag(ChangeType.Merge);
+                return change.ChangeType.HasFlag(ChangeType.Merge) && change.Item.ServerItem.Contains(path);
             });
             if (changes.Empty())
                 return -1;
