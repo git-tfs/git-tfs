@@ -18,6 +18,7 @@ namespace GitTfs.Core
         private readonly Globals _globals;
         private readonly RemoteOptions _remoteOptions;
         private readonly ConfigProperties _properties;
+        private readonly bool _disableGitignoreSupport;
         private int? firstChangesetId;
         private int? maxChangesetId;
         private string maxCommitHash;
@@ -43,6 +44,11 @@ namespace GitTfs.Core
             IgnoreRegexExpression = info.IgnoreRegex;
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
             GitIgnorePath = _remoteOptions.GitIgnorePath ?? info.GitIgnorePath;
+
+            var value = Repository.GetConfig<string>(GitTfsConstants.DisableGitignoreSupport, null);
+            bool disableGitignoreSupport;
+            if (value != null && bool.TryParse(value, out disableGitignoreSupport))
+                _disableGitignoreSupport = disableGitignoreSupport;
 
             Autotag = info.Autotag;
 
@@ -252,7 +258,12 @@ namespace GitTfs.Core
 
         private bool IsIgnored(string path)
         {
-            return Ignorance.IsIncluded(path) || Repository.IsPathIgnored(path);
+            return Ignorance.IsIncluded(path) || IsPathIgnored(path);
+        }
+
+        private bool IsPathIgnored(string path)
+        {
+            return !_disableGitignoreSupport && Repository.IsPathIgnored(path);
         }
 
         private Bouncer _ignorance;
