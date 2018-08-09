@@ -51,7 +51,7 @@ namespace GitTfs.Commands
             DoGitInitDb();
             VerifyGitUserConfig();
             SaveAuthorFileInRepository();
-            CommitTheGitIgnoreFile(_initOptions.GitIgnorePath);
+            CommitTheGitIgnoreFile(_remoteOptions.GitIgnorePath);
             GitTfsInit(tfsUrl, tfsRepositoryPath);
             return 0;
         }

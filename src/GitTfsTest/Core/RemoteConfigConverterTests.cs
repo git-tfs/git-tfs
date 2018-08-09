@@ -54,6 +54,7 @@ namespace GitTfs.Test.Core
                     Password = "pass",
                     IgnoreRegex = "abc",
                     IgnoreExceptRegex = "def",
+                    GitIgnorePath = ".gitignore",
                     Autotag = true,
                     Aliases = new string[] { "http://abc", "http://def" },
                     NoParallel = true,
@@ -65,6 +66,7 @@ namespace GitTfs.Test.Core
                 AssertContainsConfig("tfs-remote.default.password", "pass", config);
                 AssertContainsConfig("tfs-remote.default.ignore-paths", "abc", config);
                 AssertContainsConfig("tfs-remote.default.ignore-except", "def", config);
+                AssertContainsConfig("tfs-remote.default.gitignore-path", ".gitignore", config);
                 AssertContainsConfig("tfs-remote.default.legacy-urls", "http://abc,http://def", config);
                 AssertContainsConfig("tfs-remote.default.autotag", "true", config);
                 AssertContainsConfig("tfs-remote.default.noparallel", "true", config);
@@ -87,6 +89,7 @@ namespace GitTfs.Test.Core
                         Password = "pass",
                         IgnoreRegex = "abc",
                         ExceptRegex = "def",
+                        GitIgnorePath = ".gitignore",
                         NoParallel = true
                     },
                     Autotag = true,
@@ -99,6 +102,7 @@ namespace GitTfs.Test.Core
                 AssertContainsConfig("tfs-remote.default.password", "pass", config);
                 AssertContainsConfig("tfs-remote.default.ignore-paths", "abc", config);
                 AssertContainsConfig("tfs-remote.default.ignore-except", "def", config);
+                AssertContainsConfig("tfs-remote.default.gitignore-path", ".gitignore", config);
                 AssertContainsConfig("tfs-remote.default.legacy-urls", "http://abc,http://def", config);
                 AssertContainsConfig("tfs-remote.default.autotag", "true", config);
                 AssertContainsConfig("tfs-remote.default.noparallel", "true", config);
@@ -119,6 +123,7 @@ namespace GitTfs.Test.Core
                     Password = "pass",
                     IgnoreRegex = "abc",
                     IgnoreExceptRegex = "def",
+                    GitIgnorePath = ".gitignore",
                     Autotag = true,
                     Aliases = new[] { "http://abc", "http://def" },
                     NoParallel = true
@@ -129,6 +134,7 @@ namespace GitTfs.Test.Core
                 Assert.Equal("pass", remoteOptions.Password);
                 Assert.Equal("abc", remoteOptions.IgnoreRegex);
                 Assert.Equal("def", remoteOptions.ExceptRegex);
+                Assert.Equal(".gitignore", remoteOptions.GitIgnorePath);
                 Assert.True(remoteOptions.NoParallel);
             }
 
@@ -189,6 +195,7 @@ namespace GitTfs.Test.Core
                     c("tfs-remote.default.password", "thepassword"),
                     c("tfs-remote.default.ignore-paths", "ignorethis.zip"),
                     c("tfs-remote.default.ignore-except", "dontignorethis.zip"),
+                    c("tfs-remote.default.gitignore-path", ".gitignore"),
                     c("tfs-remote.default.legacy-urls", "http://old:8080/,http://other/"),
                     c("tfs-remote.default.autotag", "true"),
                     c("tfs-remote.default.noparallel", "true"));
@@ -201,6 +208,7 @@ namespace GitTfs.Test.Core
                 Assert.Equal("thepassword", remote.Password);
                 Assert.Equal("ignorethis.zip", remote.IgnoreRegex);
                 Assert.Equal("dontignorethis.zip", remote.IgnoreExceptRegex);
+                Assert.Equal(".gitignore", remote.GitIgnorePath);
                 Assert.Equal(new string[] { "http://old:8080/", "http://other/" }, remote.Aliases);
                 Assert.True(remote.Autotag);
                 Assert.True(remote.NoParallel);

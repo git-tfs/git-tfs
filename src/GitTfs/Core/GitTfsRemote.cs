@@ -42,6 +42,7 @@ namespace GitTfs.Core
             Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
             IgnoreRegexExpression = info.IgnoreRegex;
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
+            GitIgnorePath = _remoteOptions.GitIgnorePath ?? info.GitIgnorePath;
 
             Autotag = info.Autotag;
 
@@ -139,6 +140,7 @@ namespace GitTfs.Core
 
         public string IgnoreRegexExpression { get; set; }
         public string IgnoreExceptRegexExpression { get; set; }
+        public string GitIgnorePath { get; set; }
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
 
