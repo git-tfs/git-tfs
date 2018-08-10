@@ -44,7 +44,7 @@ namespace GitTfs.Core
             IgnoreRegexExpression = info.IgnoreRegex;
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
             GitIgnorePath = _remoteOptions.GitIgnorePath ?? info.GitIgnorePath;
-            UseGitIgnore = _remoteOptions.UseGitIgnore || IsGitIgnoreSupportEnabled();
+            UseGitIgnore = !_remoteOptions.NoGitIgnore && (_remoteOptions.UseGitIgnore || IsGitIgnoreSupportEnabled());
 
             Autotag = info.Autotag;
 
