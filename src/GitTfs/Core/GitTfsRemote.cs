@@ -45,7 +45,7 @@ namespace GitTfs.Core
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
             GitIgnorePath = _remoteOptions.GitIgnorePath ?? info.GitIgnorePath;
 
-            if (!string.IsNullOrEmpty(_remoteOptions.GitIgnorePath))
+            if (_remoteOptions.UseGitIgnore)
             {
                 // To provide expected single run effect of explicitly provided
                 // `--gitignore` option, even in situation where .gitignore
