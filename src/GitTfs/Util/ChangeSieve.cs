@@ -201,7 +201,17 @@ namespace GitTfs.Util
 
         private bool IncludeInApply(NamedChange change)
         {
-            return IncludeInFetch(change) && change.Change.Item.DeletionId == 0;
+            return !IsItemDeleted(change) && IncludeInFetch(change);
+        }
+
+        private bool IsItemDeleted(NamedChange change)
+        {
+            return IsDeleted(change.Change.Item);
+        }
+
+        private bool IsDeleted(IItem item)
+        {
+            return item.DeletionId != 0;
         }
 
         private string GetPathBeforeRename(IItem item)

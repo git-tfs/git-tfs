@@ -83,7 +83,6 @@ namespace GitTfs.Test.Core
             {
                 BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.AtLeastOnce);
                 BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
-                BaseFixture.RemoteMock.Verify(r => r.IsInDotGit(It.IsAny<string>()), Times.AtLeastOnce);
             }
 
             protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges)
