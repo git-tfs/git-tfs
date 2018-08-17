@@ -156,15 +156,16 @@ namespace GitTfs.Util
 
         private bool IncludeInFetch(NamedChange change)
         {
-            if (IgnorableChangeType(change.Change.ChangeType) && _resolver.Contains(change.GitPath))
-            {
-                return false;
-            }
-
-            return !IsGitPathMissing(change)
+            return !IsIgnorable(change)
+                && !IsGitPathMissing(change)
                 && !IsGitPathInDotGit(change)
                 && !IsGitPathIgnored(change);
         }
+
+        private bool IsIgnorable(NamedChange change)
+        {
+            return IgnorableChangeType(change.Change.ChangeType) && _resolver.Contains(change.GitPath);
+         }
 
         private bool IgnorableChangeType(TfsChangeType changeType)
         {
