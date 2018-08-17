@@ -265,7 +265,7 @@ namespace GitTfs.Core
             return IsInDotGit(path) || IsIgnored(path);
         }
 
-        private bool IsIgnored(string path)
+        public bool IsIgnored(string path)
         {
             return Ignorance.IsIncluded(path) || IsPathIgnored(path);
         }
@@ -292,7 +292,7 @@ namespace GitTfs.Core
             }
         }
 
-        private bool IsInDotGit(string path)
+        public bool IsInDotGit(string path)
         {
             return isInDotGit.IsMatch(path);
         }

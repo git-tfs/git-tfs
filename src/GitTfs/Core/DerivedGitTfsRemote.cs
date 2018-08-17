@@ -211,6 +211,16 @@ namespace GitTfs.Core
             throw DerivedRemoteException;
         }
 
+        public bool IsIgnored(string path)
+        {
+            throw DerivedRemoteException;
+        }
+
+        public bool IsInDotGit(string path)
+        {
+            throw DerivedRemoteException;
+        }
+
         public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int shaRootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null, IRenameResult renameResult = null)
         {
             throw new NotImplementedException();

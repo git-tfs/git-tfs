@@ -171,6 +171,26 @@ namespace GitTfs.Util
             return isBranchOrMerge && !isContentChange;
         }
 
+        private bool IsGitPathInDotGit(NamedChange change)
+        {
+            return IsInDotGit(change.GitPath);
+        }
+
+        private bool IsInDotGit(string path)
+        {
+            return _resolver.IsInDotGit(path);
+        }
+
+        private bool IsGitPathIgnored(NamedChange change)
+        {
+            return IsIgnored(change.GitPath);
+        }
+
+        private bool IsIgnored(string path)
+        {
+            return _resolver.IsIgnored(path);
+        }
+
         private bool IncludeInApply(NamedChange change)
         {
             return IncludeInFetch(change) && change.Change.Item.DeletionId == 0;

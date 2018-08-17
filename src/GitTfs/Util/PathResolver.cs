@@ -38,6 +38,16 @@ namespace GitTfs.Util
             return !string.IsNullOrEmpty(gitPath) && !_remote.ShouldSkip(gitPath);
         }
 
+        public bool IsIgnored(string path)
+        {
+            return _remote.IsIgnored(path);
+        }
+
+        public bool IsInDotGit(string path)
+        {
+            return _remote.IsInDotGit(path);
+        }
+
         public bool Contains(string pathInGitRepo)
         {
             if (pathInGitRepo != null)

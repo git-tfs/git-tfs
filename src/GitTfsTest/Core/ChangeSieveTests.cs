@@ -26,6 +26,10 @@ namespace GitTfs.Test.Core
                 // Make this remote ignore any path that includes "ignored".
                 RemoteMock.Setup(r => r.ShouldSkip(It.IsAny<string>()))
                     .Returns(new Func<string, bool>(s => s.Contains("ignored")));
+                RemoteMock.Setup(r => r.IsIgnored(It.IsAny<string>()))
+                    .Returns(new Func<string, bool>(s => !string.IsNullOrEmpty(s) && s.Contains("ignored")));
+                RemoteMock.Setup(r => r.IsInDotGit(It.IsAny<string>()))
+                    .Returns(new Func<string, bool>(s => !string.IsNullOrEmpty(s) && s.Contains("\\.git\\")));
             }
 
             private ChangeSieve _changeSieve;
@@ -81,6 +85,8 @@ namespace GitTfs.Test.Core
             {
                 BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.AtLeastOnce);
                 BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.AtLeastOnce);
+                BaseFixture.RemoteMock.Verify(r => r.IsIgnored(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsInDotGit(It.IsAny<string>()), Times.Never);
             }
 
             protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges)
@@ -265,6 +271,8 @@ namespace GitTfs.Test.Core
             {
                 BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.Never);
                 BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsIgnored(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsInDotGit(It.IsAny<string>()), Times.Never);
             }
         }
 
@@ -558,6 +566,8 @@ namespace GitTfs.Test.Core
             {
                 BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.Exactly(4));
                 BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsIgnored(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsInDotGit(It.IsAny<string>()), Times.Never);
             }
         }
 
