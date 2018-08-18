@@ -98,22 +98,24 @@ namespace GitTfs.Util
                     if (change.GitPath != null)
                         compartments.Deleted.Add(ApplicableChange.Delete(change.GitPath));
                 }
-                else if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
-                {
-                    var oldInfo = _resolver.GetGitObject(GetPathBeforeRename(change.Change.Item));
-                    if (oldInfo != null)
-                        compartments.Deleted.Add(ApplicableChange.Delete(oldInfo.Path));
-                    if (IncludeInApply(change))
-                    {
-                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath,
-                            oldInfo != null ? oldInfo.Mode : Mode.NonExecutableFile));
-                    }
-                }
                 else
                 {
+                    var mode = change.Info != null ? change.Info.Mode : Mode.NonExecutableFile;
+
+                    if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
+                    {
+                        var oldInfo = _resolver.GetGitObject(GetPathBeforeRename(change.Change.Item));
+                        if (oldInfo != null)
+                        {
+                            compartments.Deleted.Add(ApplicableChange.Delete(oldInfo.Path));
+
+                            mode = oldInfo.Mode;
+                        }
+                    }
+
                     if (IncludeInApply(change))
                     {
-                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath, change.Info.Mode));
+                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath, mode));
                     }
                 }
             }
