@@ -36,8 +36,7 @@ namespace GitTfs.Core
                 IsRenameChangeset = true;
             }
             _changeset.Get(workspace, sieve.GetChangesToFetch(), ignorableErrorHandler);
-            var forceGetChanges = lastCommit == null;
-            foreach (var change in sieve.GetChangesToApply(forceGetChanges))
+            foreach (var change in sieve.GetChangesToApply())
             {
                 ignorableErrorHandler.Catch(() =>
                 {

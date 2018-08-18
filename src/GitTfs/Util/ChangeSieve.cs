@@ -76,8 +76,7 @@ namespace GitTfs.Util
         /// <summary>
         /// Get all the changes of a changeset to apply
         /// </summary>
-        /// <param name="forceGetChanges">true - force get changes ignoring check what should be applied. </param>
-        public IEnumerable<ApplicableChange> GetChangesToApply(bool forceGetChanges = false)
+        public IEnumerable<ApplicableChange> GetChangesToApply()
         {
             if (DeletesProject)
                 return Enumerable.Empty<ApplicableChange>();
@@ -112,11 +111,8 @@ namespace GitTfs.Util
                 }
                 else
                 {
-                    if (forceGetChanges || IncludeInApply(change))
+                    if (IncludeInApply(change))
                     {
-                        // for get changes only on first change set
-                        forceGetChanges = false;
-
                         compartments.Updated.Add(ApplicableChange.Update(change.GitPath, change.Info.Mode));
                     }
                 }
