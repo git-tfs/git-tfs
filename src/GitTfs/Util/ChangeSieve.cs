@@ -113,7 +113,11 @@ namespace GitTfs.Util
                         }
                     }
 
-                    if (IncludeInApply(change))
+                    if (!IsItemDeleted(change)
+                        && !IsGitPathMissing(change)
+                        && !IsGitPathInDotGit(change)
+                        && !IsGitPathIgnored(change)
+                        && !IsIgnorable(change))
                     {
                         compartments.Updated.Add(ApplicableChange.Update(change.GitPath, mode));
                     }
@@ -197,11 +201,6 @@ namespace GitTfs.Util
         private bool IsIgnored(string path)
         {
             return _resolver.IsIgnored(path);
-        }
-
-        private bool IncludeInApply(NamedChange change)
-        {
-            return !IsItemDeleted(change) && IncludeInFetch(change);
         }
 
         private bool IsItemDeleted(NamedChange change)
