@@ -35,7 +35,7 @@ namespace GitTfs.Util
 
         public bool ShouldIncludeGitItem(string gitPath)
         {
-            return !string.IsNullOrEmpty(gitPath) && !_remote.ShouldSkip(gitPath);
+            return !string.IsNullOrEmpty(gitPath) && !IsInDotGit(gitPath) && !IsIgnored(gitPath);
         }
 
         public bool IsIgnored(string path)

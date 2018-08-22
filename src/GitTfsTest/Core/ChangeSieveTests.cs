@@ -24,8 +24,6 @@ namespace GitTfs.Test.Core
                 RemoteMock.Setup(r => r.GetPathInGitRepo(It.IsAny<string>()))
                     .Returns(new Func<string, string>(path => path != null && path.StartsWith("$/Project/") ? path.Replace("$/Project/", "") : null));
                 // Make this remote ignore any path that includes "ignored".
-                RemoteMock.Setup(r => r.ShouldSkip(It.IsAny<string>()))
-                    .Returns(new Func<string, bool>(s => s.Contains("ignored")));
                 RemoteMock.Setup(r => r.IsIgnored(It.IsAny<string>()))
                     .Returns(new Func<string, bool>(s => !string.IsNullOrEmpty(s) && s.Contains("ignored")));
                 RemoteMock.Setup(r => r.IsInDotGit(It.IsAny<string>()))
@@ -84,9 +82,8 @@ namespace GitTfs.Test.Core
             public void Dispose()
             {
                 BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.AtLeastOnce);
-                BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.AtLeastOnce);
-                BaseFixture.RemoteMock.Verify(r => r.IsIgnored(It.IsAny<string>()), Times.Never);
-                BaseFixture.RemoteMock.Verify(r => r.IsInDotGit(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsInDotGit(It.IsAny<string>()), Times.AtLeastOnce);
             }
 
             protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges)
