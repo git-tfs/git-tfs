@@ -95,7 +95,7 @@ namespace GitTfs.Util
 
                 if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
                 {
-                    if (change.GitPath != null)
+                    if (!IsGitPathMissing(change))
                         compartments.Deleted.Add(ApplicableChange.Delete(change.GitPath));
                 }
                 else
@@ -161,7 +161,9 @@ namespace GitTfs.Util
                 return false;
             }
 
-            return _resolver.ShouldIncludeGitItem(change.GitPath);
+            return !IsGitPathMissing(change)
+                && !IsGitPathInDotGit(change)
+                && !IsGitPathIgnored(change);
         }
 
         private bool IgnorableChangeType(TfsChangeType changeType)
@@ -169,6 +171,11 @@ namespace GitTfs.Util
             var isBranchOrMerge = (changeType & (TfsChangeType.Branch | TfsChangeType.Merge)) != 0;
             var isContentChange = (changeType & TfsChangeType.Content) != 0;
             return isBranchOrMerge && !isContentChange;
+        }
+
+        private bool IsGitPathMissing(NamedChange change)
+        {
+            return string.IsNullOrEmpty(change.GitPath);
         }
 
         private bool IsGitPathInDotGit(NamedChange change)
