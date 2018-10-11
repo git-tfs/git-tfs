@@ -63,7 +63,7 @@ namespace GitTfs.Core
         IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes);
         void QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint = true);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force);
-        void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies);
+        void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies, string shelvesetBase = null);
         bool HasShelveset(string shelvesetName);
         int CheckinTool(string head, TfsChangesetInfo parentChangeset);
         int Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null);
