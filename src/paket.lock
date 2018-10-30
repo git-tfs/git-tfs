@@ -63,8 +63,8 @@ REDIRECTS: OFF
 RESTRICTION: == net45
 NUGET
   remote: https://www.nuget.org/api/v2
-    Cake (0.23)
-    Cake.Git (0.16.1)
+    Cake (0.30)
+    Cake.Git (0.19)
     GitVersion.CommandLine (3.6.5)
     Octokit (0.28)
     Octokit.CodeFormatter (1.0.0-preview)

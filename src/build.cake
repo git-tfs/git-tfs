@@ -1,7 +1,7 @@
 //Don't define #tool here. Just add there to 'paket.dependencies' 'build' group
 //Don't use #addin here. Use #r to load the dll found in the nuget package.
 #r "./packages/build/Octokit/lib/net45/Octokit.dll"
-#r "./packages/build/Cake.Git/lib/net46/Cake.Git.dll"
+#r "./packages/build/Cake.Git/lib/net461/Cake.Git.dll"
 #r "System.Net.Http.dll"
 
 //////////////////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 readonly var Target = Argument("target", "Default");
 readonly var Configuration = Argument("configuration", "Debug");
-var IsDryRun = Argument<bool>("isDryRun", true);
+var runInDryRun = Argument<bool>("isDryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
 readonly var IdGitHubReleaseToDelete = Argument<int>("idGitHubReleaseToDelete", -1);
@@ -71,7 +71,7 @@ Task("DryRun").Description("Set the dry-run flag")
 	.Does(() =>
 {
 	Information("Doing a dry run!!!!");
-	IsDryRun = true;
+	runInDryRun = true;
 });
 
 Task("TagVersion").Description("Handle release note and tag the new version")
@@ -93,7 +93,7 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 	}
 	Information("Next version will be:" + nextVersion);
 
-	if(!IsDryRun)
+	if(!runInDryRun)
 	{
 		Information("Creating release tag...");
 		var githubAccount = GetGithubUserAccount();
@@ -530,7 +530,7 @@ environmentVariables: {
 
 Task("CreateGithubRelease").Description("Create a GitHub release")
 	.IsDependentOn("Package")
-	.WithCriteria(!IsDryRun)
+	.WithCriteria(!runInDryRun)
 	.Does(() =>
 {
 	var client = GetGithubClient();
@@ -631,7 +631,7 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 		BuildSystem.TFBuild.Commands.UploadArtifact("install", chocolateyPackagePath, chocolateyPackage);
 	}
 
-	if(!IsDryRun)
+	if(!runInDryRun)
 	{
 		ChocolateyPush(chocolateyPackagePath, new ChocolateyPushSettings {
 			Source				= "https://chocolatey.org/",
