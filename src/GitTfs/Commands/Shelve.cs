@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace GitTfs.Commands
 {
     [Pluggable("shelve")]
-    [Description("shelve [options] shelveset-name [ref-to-shelve]")]
+    [Description("shelve [options] shelveset-name [ref-to-shelve | (shelveset-base ref-to-shelve)]")]
     [RequiresValidGitRepository]
     public class Shelve : GitTfsCommand
     {
@@ -48,6 +48,11 @@ namespace GitTfs.Commands
 
         public int Run(string shelvesetName, string refToShelve)
         {
+            return Run(shelvesetName, null, refToShelve);
+        }
+
+        public int Run(string shelvesetName, string shelvesetBase, string refToShelve)
+        {
             return _writer.Write(refToShelve, (changeset, referenceToShelve) =>
             {
                 if (!_checkinOptions.Force && changeset.Remote.HasShelveset(shelvesetName))
@@ -64,7 +69,7 @@ namespace GitTfs.Commands
 
                 var shelveSpecificCheckinOptions = _checkinOptionsFactory.BuildShelveSetSpecificCheckinOptions(_checkinOptions, message);
 
-                changeset.Remote.Shelve(shelvesetName, referenceToShelve, changeset, shelveSpecificCheckinOptions, EvaluateCheckinPolicies);
+                changeset.Remote.Shelve(shelvesetName, referenceToShelve, changeset, shelveSpecificCheckinOptions, EvaluateCheckinPolicies, shelvesetBase);
                 return GitTfsExitCodes.OK;
             });
         }

@@ -6,7 +6,7 @@ Creates a TFS shelveset from a Git branch.
 
 ## Synopsis
 
-    Usage: git-tfs shelve [options] shelveset-name [ref-to-shelve]
+    Usage: git-tfs shelve [options] shelveset-name [ref-to-shelve | (shelveset-base ref-to-shelve)]
     where options are:
 
         -i, --id, --remote, --tfs-remote
@@ -59,6 +59,10 @@ Creates a TFS shelveset from a Git branch.
 ### Shelve another branch
 
 `git tfs shelve MyShlevesetName MyBranch`
+
+### Shelve a branch with a custom base
+
+`git tfs shelve MyShlevesetName BranchBase MyBranch`
 
 ### Shelve a branch from a different remote
 
