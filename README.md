@@ -1,4 +1,4 @@
-﻿## Introduction
+## Introduction
 
 [git-tfs](http://git-tfs.com/) is a two-way bridge between TFS (Team Foundation Server) and git, similar to git-svn.
 It fetches TFS commits into a git repository, and lets you push your updates back to TFS.
@@ -159,7 +159,7 @@ This is the complete list of commands in the master branch on github.
 
 ### Continuous Integration Status
 
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/git-tfs/git-tfs)](https://ci.appveyor.com/project/pmiossec/git-tfs-v2qcm)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/git-tfs/git-tfs?branch=master)](https://ci.appveyor.com/project/pmiossec/git-tfs-v2qcm)
 ( Great thanks to [<img src="https://www.appveyor.com/assets/img/favicons/favicon.ico" height="20"> AppVeyor](http://www.appveyor.com/)! )
 
 ### Prerequisites
