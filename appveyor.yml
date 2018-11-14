@@ -1,4 +1,5 @@
 ﻿#appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
+image: Visual Studio 2017
 clone_folder: c:\gittfs
 # build cache to preserve files/folders between builds
 cache:
