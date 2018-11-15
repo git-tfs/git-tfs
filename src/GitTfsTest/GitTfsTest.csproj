@@ -71,18 +71,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Rhino.Mocks, Version=3.5.0.1337, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\StructureMap\Rhino.Mocks.dll</HintPath>
-    </Reference>
-    <Reference Include="StructureMap, Version=2.5.3.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\StructureMap\StructureMap.dll</HintPath>
-    </Reference>
-    <Reference Include="StructureMap.AutoMocking, Version=2.5.3.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\StructureMap\StructureMap.AutoMocking.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -256,6 +244,39 @@
         </Reference>
         <Reference Include="NLog">
           <HintPath>..\packages\NLog\lib\net45\NLog.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6.2'">
+      <ItemGroup>
+        <Reference Include="Rhino.Mocks">
+          <HintPath>..\packages\RhinoMocks\lib\net\Rhino.Mocks.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6.2'">
+      <ItemGroup>
+        <Reference Include="StructureMap">
+          <HintPath>..\packages\structuremap\lib\StructureMap.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6.2'">
+      <ItemGroup>
+        <Reference Include="StructureMap.AutoMocking">
+          <HintPath>..\packages\structuremap.automocking\lib\StructureMap.AutoMocking.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

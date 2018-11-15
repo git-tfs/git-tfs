@@ -10,6 +10,9 @@ nuget LibGit2Sharp ~> 0.24.0
 nuget Microsoft.TeamFoundationServer.Client ~> 14.0
 nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
 nuget WixSharp 1.0.22.3 framework: >= net40
+nuget structuremap 2.6.3
+nuget StructureMap.AutoMocking 2.6.3
+nuget RhinoMocks 3.6.1
 nuget xunit
 nuget xunit.assert
 nuget xunit.runner.visualstudio version_in_path: true

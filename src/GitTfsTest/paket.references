@@ -2,3 +2,6 @@ LibGit2Sharp
 xunit
 xunit.runner.visualstudio
 nlog
+RhinoMocks
+structuremap
+StructureMap.AutoMocking
