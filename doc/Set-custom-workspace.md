@@ -16,7 +16,7 @@ This is due to the fact that git-tfs use a temp folder located in the folder `.g
 
 Note: If you look for this folder, you surely couldn't find it because it is created and deleted when a git-tfs command is run!
 
-## Soltutions
+## Solutions
 
 ### Enabling Windows 10 Win32 Long Path Support
 
