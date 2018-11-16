@@ -22,16 +22,17 @@ const string ApplicationName = "GitTfs";
 const string ZipFileTemplate = ApplicationName + "-{0}.zip";
 const string ApplicationPath = "./" + ApplicationName;
 const string PathToSln = ApplicationPath + ".sln";
-const string BuildDirectory = ApplicationPath + "/bin";
+const string TargetFramework = "net462"; //due to new dotnet csproj format
+readonly var OutDir = "bin/" + Configuration + "/" + TargetFramework + "/";
 const string buildAssetPath = @".\.build\";
 const string DownloadUrlTemplate ="https://github.com/git-tfs/git-tfs/releases/download/v{0}/";
 string ReleaseNotesPath = @"..\doc\release-notes\NEXT.md";
 const string ChocolateyBuildDir = buildAssetPath + "choc";
-readonly var OutputDirectory = BuildDirectory + "/" + Configuration;
+readonly var OutputDirectory = ApplicationPath + "/" + OutDir;
 const string TestProjectName = "GitTfsTest";
 
 // Define directories.
-readonly var buildDir = Directory(BuildDirectory) + Directory(Configuration);
+readonly var buildDir = Directory(OutputDirectory);
 string _semanticVersionShort = ""; //0.26.179
 string _semanticVersionLong  = ""; //0.26.179+4890c16f54f1b354aa198773aa9530a04d575932.master
 string _zipFilePath;
@@ -257,7 +258,7 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 	EnsureDirectoryExists(buildAssetPath);
 	var coverageFile = System.IO.Path.Combine(buildAssetPath, "coverage.xml");
 	OpenCover(tool => {
-		tool.XUnit2("./"+ TestProjectName + "/bin/" + Configuration + "/" + TestProjectName +".dll", new XUnit2Settings()
+		tool.XUnit2("./"+ TestProjectName + "/" + OutDir + TestProjectName +".dll", new XUnit2Settings()
 		{
 			XmlReport = true,
 			OutputDirectory = ".",
@@ -267,7 +268,7 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 	new FilePath(coverageFile),
 	new OpenCoverSettings()
 		{
-			WorkingDirectory = MakeAbsolute(Directory("./"+ TestProjectName + "/bin/" + Configuration)),
+			WorkingDirectory = MakeAbsolute(Directory("./"+ TestProjectName + "/" + OutDir)),
 			Register = "user"
 		}
 		 .WithFilter("+[git-tfs*]*")
