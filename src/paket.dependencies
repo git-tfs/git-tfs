@@ -6,7 +6,7 @@ source https://www.nuget.org/api/v2/
 //https://github.com/git-tfs/git-tfs/blob/master/doc/paket.md
 
 nuget nlog
-nuget LibGit2Sharp ~> 0.24.0
+nuget LibGit2Sharp ~> 0.25.0
 nuget Microsoft.TeamFoundationServer.Client ~> 14.0
 nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
 nuget WixSharp 1.0.22.3 framework: >= net40
