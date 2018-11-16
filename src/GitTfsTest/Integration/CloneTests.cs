@@ -4,6 +4,7 @@ using LibGit2Sharp;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Test.Fixtures;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace GitTfs.Test.Integration
 {
@@ -12,11 +13,14 @@ namespace GitTfs.Test.Integration
     //      This will cause the hashes to differ on computers in different time zones.
     public class CloneTests : BaseTest, IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private readonly IntegrationHelper h;
 
-        public CloneTests()
+        public CloneTests(ITestOutputHelper output)
         {
+            _output = output;
             h = new IntegrationHelper();
+            _output.WriteLine("Repository in folder: " + h.Workdir);
         }
 
         public void Dispose()
@@ -242,6 +246,7 @@ namespace GitTfs.Test.Integration
                 commit: "843a915aea98894fef51379d68a0f309e8537dd5",
                 tree: "cf8a497b3a40028bee363a613fe156b9d37350bb");
         }
+
         private readonly string[] RefsInNewClone = new[] { "HEAD", "refs/heads/master", "refs/remotes/tfs/default" };
 
         /// <summary>

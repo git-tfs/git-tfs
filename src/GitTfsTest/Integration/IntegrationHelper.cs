@@ -17,7 +17,8 @@ namespace GitTfs.Test.Integration
         #region manage the work directory
 
         private string _workdir;
-        private string Workdir
+
+        public string Workdir
         {
             get
             {
