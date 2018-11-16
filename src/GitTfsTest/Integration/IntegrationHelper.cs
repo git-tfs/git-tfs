@@ -151,7 +151,7 @@ namespace GitTfs.Test.Integration
                 _script = script;
             }
 
-            public static string FakeCommiter;
+            public string FakeCommiter;
             public FakeChangesetBuilder Changeset(int changesetId, string message, DateTime checkinDate)
             {
                 var changeset = new ScriptedChangeset
