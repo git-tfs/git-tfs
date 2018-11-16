@@ -27,7 +27,7 @@ namespace GitTfs.Test.Core
 
 
         [Theory]
-        [MemberData("Cases")]
+        [MemberData(nameof(Cases))]
         public void Run(string message, bool expectParsed, int expectId)
         {
             int id;
