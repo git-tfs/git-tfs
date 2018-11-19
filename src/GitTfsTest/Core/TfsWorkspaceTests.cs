@@ -1,32 +1,42 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Rhino.Mocks;
 using GitTfs.Commands;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 using Xunit;
 using System.Diagnostics;
+using Moq;
 
 namespace GitTfs.Test.Core
 {
     public class TfsWorkspaceTests : BaseTest, IDisposable
     {
+        private TfsWorkspace tfsWorkspace;
+        private Mock<IWorkspace> workspace;
+        CheckinOptions checkinOptions = new CheckinOptions();
+
+        public TfsWorkspaceTests()
+        {
+            workspace = new Mock<IWorkspace>();
+            string localDirectory = string.Empty;
+            TfsChangesetInfo contextVersion = new Mock<TfsChangesetInfo>().Object;
+            var remoteMock = new Mock<IGitTfsRemote>();
+            remoteMock.SetupAllProperties();
+            IGitTfsRemote remote = remoteMock.Object;
+            remote.Repository = new Mock<IGitRepository>().Object;
+            ITfsHelper tfsHelper = new Mock<ITfsHelper>().Object;
+            CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
+
+            tfsWorkspace = new TfsWorkspace(workspace.Object, localDirectory, contextVersion, remote, checkinOptions,
+                tfsHelper, policyEvaluator);
+        }
+
+
         [Fact]
         public void Nothing_to_checkin()
         {
-            IWorkspace workspace = MockRepository.GenerateStub<IWorkspace>();
-            string localDirectory = string.Empty;
-            TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
-            IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
-            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
-            CheckinOptions checkinOptions = new CheckinOptions();
-            ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
-            CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
-
-            TfsWorkspace tfsWorkspace = new TfsWorkspace(workspace, localDirectory, contextVersion, remote, checkinOptions, tfsHelper, policyEvaluator);
-
-            workspace.Stub(w => w.GetPendingChanges()).Return(null);
+            workspace.Setup(w => w.GetPendingChanges()).Returns((IPendingChange[]) null);
 
             var ex = Assert.Throws<GitTfsException>(() =>
             {
@@ -39,43 +49,32 @@ namespace GitTfs.Test.Core
         [Fact]
         public void Checkin_failed()
         {
-            IWorkspace workspace = MockRepository.GenerateStub<IWorkspace>();
-            string localDirectory = string.Empty;
-            TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
-            IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
-            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
-            CheckinOptions checkinOptions = new CheckinOptions();
-            ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
-            CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
-
-            TfsWorkspace tfsWorkspace = new TfsWorkspace(workspace, localDirectory, contextVersion, remote, checkinOptions, tfsHelper, policyEvaluator);
-
-            IPendingChange pendingChange = MockRepository.GenerateStub<IPendingChange>();
+            IPendingChange pendingChange = new Mock<IPendingChange>().Object;
             IPendingChange[] allPendingChanges = new IPendingChange[] { pendingChange };
-            workspace.Stub(w => w.GetPendingChanges()).Return(allPendingChanges);
+            workspace.Setup(w => w.GetPendingChanges()).Returns(allPendingChanges);
 
             ICheckinEvaluationResult checkinEvaluationResult =
                 new StubbedCheckinEvaluationResult();
 
-            workspace.Stub(w => w.EvaluateCheckin(
-                                    Arg<TfsCheckinEvaluationOptions>.Is.Anything,
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<ICheckinNote>.Is.Anything,
-                                    Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything))
-                    .Return(checkinEvaluationResult);
+            workspace.Setup(w => w.EvaluateCheckin(
+                                    It.IsAny<TfsCheckinEvaluationOptions>(),
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<ICheckinNote>(),
+                                    It.IsAny<IEnumerable<IWorkItemCheckinInfo>>()))
+                    .Returns(checkinEvaluationResult);
 
-            workspace.Expect(w => w.Checkin(
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<ICheckinNote>.Is.Anything,
-                                    Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything,
-                                    Arg<TfsPolicyOverrideInfo>.Is.Anything,
-                                    Arg<bool>.Is.Anything))
-                      .Return(0);
+            workspace.Setup(w => w.Checkin(
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<ICheckinNote>(),
+                                    It.IsAny<IEnumerable<IWorkItemCheckinInfo>>(),
+                                    It.IsAny<TfsPolicyOverrideInfo>(),
+                                    It.IsAny<bool>()))
+                      .Returns(0);
 
             var ex = Assert.Throws<GitTfsException>(() =>
             {
@@ -90,44 +89,34 @@ namespace GitTfs.Test.Core
         {
             var logger = new StringWriter();
             Trace.Listeners.Add(new TextWriterTraceListener(logger));
-            IWorkspace workspace = MockRepository.GenerateStub<IWorkspace>();
-            string localDirectory = string.Empty;
-            TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
-            IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
-            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
-            CheckinOptions checkinOptions = new CheckinOptions();
-            ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
-            CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
 
-            TfsWorkspace tfsWorkspace = new TfsWorkspace(workspace, localDirectory, contextVersion, remote, checkinOptions, tfsHelper, policyEvaluator);
-
-            IPendingChange pendingChange = MockRepository.GenerateStub<IPendingChange>();
+            IPendingChange pendingChange = new Mock<IPendingChange>().Object;
             IPendingChange[] allPendingChanges = new IPendingChange[] { pendingChange };
-            workspace.Stub(w => w.GetPendingChanges()).Return(allPendingChanges);
+            workspace.Setup(w => w.GetPendingChanges()).Returns(allPendingChanges);
 
             ICheckinEvaluationResult checkinEvaluationResult =
                 new StubbedCheckinEvaluationResult()
                         .WithPoilicyFailure("No work items associated.");
 
-            workspace.Stub(w => w.EvaluateCheckin(
-                                    Arg<TfsCheckinEvaluationOptions>.Is.Anything,
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<ICheckinNote>.Is.Anything,
-                                    Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything))
-                    .Return(checkinEvaluationResult);
+            workspace.Setup(w => w.EvaluateCheckin(
+                                    It.IsAny<TfsCheckinEvaluationOptions>(),
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<ICheckinNote>(),
+                                    It.IsAny<IEnumerable<IWorkItemCheckinInfo>>()))
+                    .Returns(checkinEvaluationResult);
 
-            workspace.Expect(w => w.Checkin(
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<ICheckinNote>.Is.Anything,
-                                    Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything,
-                                    Arg<TfsPolicyOverrideInfo>.Is.Anything,
-                                    Arg<bool>.Is.Anything))
-                      .Return(0);
+            workspace.Setup(w => w.Checkin(
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<ICheckinNote>(),
+                                    It.IsAny<IEnumerable<IWorkItemCheckinInfo>>(),
+                                    It.IsAny<TfsPolicyOverrideInfo>(),
+                                    It.IsAny<bool>()))
+                      .Returns(0);
 
             var ex = Assert.Throws<GitTfsException>(() =>
             {
@@ -143,20 +132,10 @@ namespace GitTfs.Test.Core
         {
             var logger = new StringWriter();
             Trace.Listeners.Add(new TextWriterTraceListener(logger));
-            IWorkspace workspace = MockRepository.GenerateStub<IWorkspace>();
-            string localDirectory = string.Empty;
-            TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
-            IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
-            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
-            CheckinOptions checkinOptions = new CheckinOptions();
-            ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
-            CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
 
-            TfsWorkspace tfsWorkspace = new TfsWorkspace(workspace, localDirectory, contextVersion, remote, checkinOptions, tfsHelper, policyEvaluator);
-
-            IPendingChange pendingChange = MockRepository.GenerateStub<IPendingChange>();
+            IPendingChange pendingChange = new Mock<IPendingChange>().Object;
             IPendingChange[] allPendingChanges = new IPendingChange[] { pendingChange };
-            workspace.Stub(w => w.GetPendingChanges()).Return(allPendingChanges);
+            workspace.Setup(w => w.GetPendingChanges()).Returns(allPendingChanges);
 
             ICheckinEvaluationResult checkinEvaluationResult =
                 new StubbedCheckinEvaluationResult()
@@ -164,25 +143,25 @@ namespace GitTfs.Test.Core
 
             checkinOptions.Force = true;
 
-            workspace.Stub(w => w.EvaluateCheckin(
-                                    Arg<TfsCheckinEvaluationOptions>.Is.Anything,
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<ICheckinNote>.Is.Anything,
-                                    Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything))
-                    .Return(checkinEvaluationResult);
+            workspace.Setup(w => w.EvaluateCheckin(
+                                    It.IsAny<TfsCheckinEvaluationOptions>(),
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<ICheckinNote>(),
+                                    It.IsAny<IEnumerable<IWorkItemCheckinInfo>>()))
+                    .Returns(checkinEvaluationResult);
 
-            workspace.Expect(w => w.Checkin(
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<ICheckinNote>.Is.Anything,
-                                    Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything,
-                                    Arg<TfsPolicyOverrideInfo>.Is.Anything,
-                                    Arg<bool>.Is.Anything))
-                      .Return(0);
+            workspace.Setup(w => w.Checkin(
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<ICheckinNote>(),
+                                    It.IsAny<IEnumerable<IWorkItemCheckinInfo>>(),
+                                    It.IsAny<TfsPolicyOverrideInfo>(),
+                                    It.IsAny<bool>()))
+                      .Returns(0);
 
             var ex = Assert.Throws<GitTfsException>(() =>
             {
@@ -198,20 +177,10 @@ namespace GitTfs.Test.Core
         {
             var logger = new StringWriter();
             Trace.Listeners.Add(new TextWriterTraceListener(logger));
-            IWorkspace workspace = MockRepository.GenerateStub<IWorkspace>();
-            string localDirectory = string.Empty;
-            TfsChangesetInfo contextVersion = MockRepository.GenerateStub<TfsChangesetInfo>();
-            IGitTfsRemote remote = MockRepository.GenerateStub<IGitTfsRemote>();
-            remote.Repository = MockRepository.GenerateStub<IGitRepository>();
-            CheckinOptions checkinOptions = new CheckinOptions();
-            ITfsHelper tfsHelper = MockRepository.GenerateStub<ITfsHelper>();
-            CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
 
-            TfsWorkspace tfsWorkspace = new TfsWorkspace(workspace, localDirectory, contextVersion, remote, checkinOptions, tfsHelper, policyEvaluator);
-
-            IPendingChange pendingChange = MockRepository.GenerateStub<IPendingChange>();
+            IPendingChange pendingChange = new Mock<IPendingChange>().Object;
             IPendingChange[] allPendingChanges = new IPendingChange[] { pendingChange };
-            workspace.Stub(w => w.GetPendingChanges()).Return(allPendingChanges);
+            workspace.Setup(w => w.GetPendingChanges()).Returns(allPendingChanges);
 
             ICheckinEvaluationResult checkinEvaluationResult =
                 new StubbedCheckinEvaluationResult()
@@ -220,25 +189,24 @@ namespace GitTfs.Test.Core
             checkinOptions.Force = true;
             checkinOptions.OverrideReason = "no work items";
 
-            workspace.Stub(w => w.EvaluateCheckin(
-                                    Arg<TfsCheckinEvaluationOptions>.Is.Anything,
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<ICheckinNote>.Is.Anything,
-                                    Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything))
-                    .Return(checkinEvaluationResult);
+            workspace.Setup(w => w.EvaluateCheckin(
+                                    It.IsAny<TfsCheckinEvaluationOptions>(),
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<ICheckinNote>(),
+                                    It.IsAny<IEnumerable<IWorkItemCheckinInfo>>()))
+                    .Returns(checkinEvaluationResult);
 
-            workspace.Expect(w => w.Checkin(
-                                    Arg<IPendingChange[]>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<string>.Is.Anything,
-                                    Arg<ICheckinNote>.Is.Anything,
-                                    Arg<IEnumerable<IWorkItemCheckinInfo>>.Is.Anything,
-                                    Arg<TfsPolicyOverrideInfo>.Is.Anything,
-                                    Arg<bool>.Is.Anything))
-                      .Return(1);
+            workspace.Setup(w => w.Checkin(
+                                    It.IsAny<IPendingChange[]>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<string>(),
+                                    It.IsAny<ICheckinNote>(),
+                                    It.IsAny<IEnumerable<IWorkItemCheckinInfo>>(),
+                                    It.IsAny<TfsPolicyOverrideInfo>(),
+                                    It.IsAny<bool>())).Returns(1);
 
             var result = tfsWorkspace.Checkin(checkinOptions);
 

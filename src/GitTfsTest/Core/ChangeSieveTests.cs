@@ -4,9 +4,8 @@ using System.Linq;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Util;
+using Moq;
 using Xunit;
-using Rhino.Mocks;
-using Rhino.Mocks.Constraints;
 
 namespace GitTfs.Test.Core
 {
@@ -17,35 +16,27 @@ namespace GitTfs.Test.Core
         // Sets up a ChangeSieve for testing.
         public abstract class BaseFixture
         {
+            public Mock<IGitTfsRemote> RemoteMock;
             public BaseFixture()
             {
                 // Make this remote act like it's mapped to $/Project
-                Remote.Stub(r => r.GetPathInGitRepo(null))
-                    .Constraints(Is.Anything())
-                    .Do(new Function<string, string>(path => path != null && path.StartsWith("$/Project/") ? path.Replace("$/Project/", "") : null));
+                RemoteMock = Mock.Get(Remote);
+                RemoteMock.Setup(r => r.GetPathInGitRepo(It.IsAny<string>()))
+                    .Returns(new Func<string, string>(path => path != null && path.StartsWith("$/Project/") ? path.Replace("$/Project/", "") : null));
                 // Make this remote ignore any path that includes "ignored".
-                Remote.Stub(r => r.ShouldSkip(null))
-                    .Constraints(Is.Anything())
-                    .Do(new Function<string, bool>(s => s.Contains("ignored")));
+                RemoteMock.Setup(r => r.ShouldSkip(It.IsAny<string>()))
+                    .Returns(new Func<string, bool>(s => s.Contains("ignored")));
             }
 
             private ChangeSieve _changeSieve;
-            public ChangeSieve Subject
-            {
-                get { return _changeSieve ?? (_changeSieve = new ChangeSieve(Changeset, new PathResolver(Remote, "", InitialTree))); }
-            }
+            public ChangeSieve Subject => _changeSieve ?? (_changeSieve = new ChangeSieve(Changeset, new PathResolver(Remote, "", InitialTree)));
 
             private Dictionary<string, GitObject> _initialTree;
-            public virtual Dictionary<string, GitObject> InitialTree
-            {
-                get { return _initialTree ?? (_initialTree = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase)); }
-            }
+            public virtual Dictionary<string, GitObject> InitialTree => _initialTree ?? (_initialTree = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase));
 
             private FakeChangeset _changeset;
-            public virtual FakeChangeset Changeset
-            {
-                get { return _changeset ?? (_changeset = new FakeChangeset()); }
-            }
+            public virtual FakeChangeset Changeset => _changeset ?? (_changeset = new FakeChangeset());
+
             public class FakeChangeset : IChangeset
             {
                 public IVersionControlServer VersionControlServer { get; set; }
@@ -62,35 +53,34 @@ namespace GitTfs.Test.Core
             }
 
             private IGitTfsRemote _remote;
-            public virtual IGitTfsRemote Remote
-            {
-                get { return _remote ?? (_remote = BuildRemote()); }
-            }
+            public virtual IGitTfsRemote Remote => _remote ?? (_remote = BuildRemote());
+
             protected virtual IGitTfsRemote BuildRemote()
             {
-                return _mocks.StrictMock<IGitTfsRemote>();
+                return _mocks.OneOf<IGitTfsRemote>();
             }
 
-            protected MockRepository _mocks = new MockRepository();
-            public MockRepository Mocks { get { return _mocks; } }
+            protected MockRepository _mocks = new MockRepository(MockBehavior.Default);
+            public MockRepository Mocks => _mocks;
         }
 
         // A base class for ChangeSieve test classes.
         public class Base<FixtureClass> : IDisposable where FixtureClass : BaseFixture, new()
         {
             protected readonly FixtureClass BaseFixture;
-            protected ChangeSieve Subject { get { return BaseFixture.Subject; } }
-            protected IChange[] Changes { get { return BaseFixture.Changeset.Changes; } }
+            protected ChangeSieve Subject => BaseFixture.Subject;
+            protected IChange[] Changes => BaseFixture.Changeset.Changes;
 
             public Base()
             {
                 BaseFixture = new FixtureClass();
-                BaseFixture.Mocks.ReplayAll();
+                //BaseFixture.Mocks.ReplayAll();
             }
 
             public void Dispose()
             {
-                BaseFixture.Mocks.VerifyAll();
+                BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.AtLeastOnce);
+                BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.AtLeastOnce);
             }
 
             protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges)
@@ -172,50 +162,23 @@ namespace GitTfs.Test.Core
                 _itemId = ++_maxItemId;
             }
 
-            TfsChangeType IChange.ChangeType
-            {
-                get { return _tfsChangeType; }
-            }
+            TfsChangeType IChange.ChangeType => _tfsChangeType;
 
-            IItem IChange.Item
-            {
-                get { return this; }
-            }
+            IItem IChange.Item => this;
 
-            IVersionControlServer IItem.VersionControlServer
-            {
-                get { return this; }
-            }
+            IVersionControlServer IItem.VersionControlServer => this;
 
-            int IItem.ChangesetId
-            {
-                get { return ChangesetId; }
-            }
+            int IItem.ChangesetId => ChangesetId;
 
-            string IItem.ServerItem
-            {
-                get { return _serverItem; }
-            }
+            string IItem.ServerItem => _serverItem;
 
-            int IItem.DeletionId
-            {
-                get { return _deletionId; ; }
-            }
+            int IItem.DeletionId => _deletionId;
 
-            TfsItemType IItem.ItemType
-            {
-                get { return _tfsItemType; }
-            }
+            TfsItemType IItem.ItemType => _tfsItemType;
 
-            int IItem.ItemId
-            {
-                get { return _itemId; }
-            }
+            int IItem.ItemId => _itemId;
 
-            long IItem.ContentLength
-            {
-                get { throw new NotImplementedException(); }
-            }
+            long IItem.ContentLength => throw new NotImplementedException();
 
             TemporaryFile IItem.DownloadFile()
             {
@@ -238,40 +201,19 @@ namespace GitTfs.Test.Core
                     _oldName = oldName;
                 }
 
-                IVersionControlServer IItem.VersionControlServer
-                {
-                    get { throw new NotImplementedException(); }
-                }
+                IVersionControlServer IItem.VersionControlServer => throw new NotImplementedException();
 
-                int IItem.ChangesetId
-                {
-                    get { throw new NotImplementedException(); }
-                }
+                int IItem.ChangesetId => throw new NotImplementedException();
 
-                string IItem.ServerItem
-                {
-                    get { return _oldName; }
-                }
+                string IItem.ServerItem => _oldName;
 
-                int IItem.DeletionId
-                {
-                    get { throw new NotImplementedException(); }
-                }
+                int IItem.DeletionId => throw new NotImplementedException();
 
-                TfsItemType IItem.ItemType
-                {
-                    get { throw new NotImplementedException(); }
-                }
+                TfsItemType IItem.ItemType => throw new NotImplementedException();
 
-                int IItem.ItemId
-                {
-                    get { throw new NotImplementedException(); }
-                }
+                int IItem.ItemId => throw new NotImplementedException();
 
-                long IItem.ContentLength
-                {
-                    get { throw new NotImplementedException(); }
-                }
+                long IItem.ContentLength => throw new NotImplementedException();
 
                 TemporaryFile IItem.DownloadFile()
                 {
@@ -297,7 +239,7 @@ namespace GitTfs.Test.Core
 
         #endregion
 
-        public class WithNoChanges : Base<WithNoChanges.Fixture>
+        public class WithNoChanges : Base<WithNoChanges.Fixture>, IDisposable
         {
             public class Fixture : BaseFixture
             {
@@ -317,6 +259,12 @@ namespace GitTfs.Test.Core
             public void HasEmptyChangesToApply()
             {
                 AssertChanges(Subject.GetChangesToApply() /* expect an empty list */);
+            }
+
+            public new void Dispose()
+            {
+                BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
             }
         }
 
@@ -575,12 +523,13 @@ namespace GitTfs.Test.Core
             }
         }
 
-        public class WithDeleteMainFolderBranchAndSubItems : Base<WithDeleteMainFolderBranchAndSubItems.Fixture>
+        public class WithDeleteMainFolderBranchAndSubItems : Base<WithDeleteMainFolderBranchAndSubItems.Fixture>, IDisposable
         {
             public class Fixture : BaseFixture
             {
                 public Fixture()
                 {
+
                     Changeset.Changes = new IChange[] {
                         FakeChange.Delete("$/Project/file1.txt"),
                         FakeChange.Delete("$/Project/file2.txt"),
@@ -604,9 +553,15 @@ namespace GitTfs.Test.Core
                 // Because we're not going to apply changes, don't waste time fetching any.
                 Assert.Empty(Subject.GetChangesToFetch());
             }
+
+            public new void Dispose()
+            {
+                BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.Exactly(4));
+                BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
+            }
         }
 
-        public class WithDeleteOtherFolder : Base<WithDeleteOtherFolder.Fixture>
+        public class WithDeleteOtherFolder : Base<WithDeleteOtherFolder.Fixture>, IDisposable
         {
             public class Fixture : BaseFixture
             {
@@ -682,50 +637,23 @@ namespace GitTfs.Test.Core
                     _serverItem = serverItem;
                 }
 
-                TfsChangeType IChange.ChangeType
-                {
-                    get { return TfsChangeType.Rename; }
-                }
+                TfsChangeType IChange.ChangeType => TfsChangeType.Rename;
 
-                IItem IChange.Item
-                {
-                    get { return this; }
-                }
+                IItem IChange.Item => this;
 
-                IVersionControlServer IItem.VersionControlServer
-                {
-                    get { return this; }
-                }
+                IVersionControlServer IItem.VersionControlServer => this;
 
-                int IItem.ChangesetId
-                {
-                    get { return 100; }
-                }
+                int IItem.ChangesetId => 100;
 
-                string IItem.ServerItem
-                {
-                    get { return _serverItem; }
-                }
+                string IItem.ServerItem => _serverItem;
 
-                int IItem.DeletionId
-                {
-                    get { return 0; }
-                }
+                int IItem.DeletionId => 0;
 
-                TfsItemType IItem.ItemType
-                {
-                    get { return TfsItemType.File; }
-                }
+                TfsItemType IItem.ItemType => TfsItemType.File;
 
-                int IItem.ItemId
-                {
-                    get { return 200; }
-                }
+                int IItem.ItemId => 200;
 
-                long IItem.ContentLength
-                {
-                    get { return 0; }
-                }
+                long IItem.ContentLength => 0;
 
                 TemporaryFile IItem.DownloadFile()
                 {

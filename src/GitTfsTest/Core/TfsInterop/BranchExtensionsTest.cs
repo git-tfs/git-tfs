@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Rhino.Mocks;
 using GitTfs.Core.TfsInterop;
+using Moq;
 using Xunit;
 
 namespace GitTfs.Test.Core.TfsInterop
@@ -19,10 +19,10 @@ namespace GitTfs.Test.Core.TfsInterop
 
         private BranchTree CreateBranchTree(string tfsPath, BranchTree parent = null)
         {
-            var branchObject = MockRepository.GenerateStub<IBranchObject>();
-            branchObject.Stub(m => m.Path).Return(tfsPath);
+            var branchObject = new Mock<IBranchObject>();
+            branchObject.Setup(m => m.Path).Returns(tfsPath);
 
-            var branchTree = new BranchTree(branchObject);
+            var branchTree = new BranchTree(branchObject.Object);
 
             if (parent != null)
                 parent.ChildBranches.Add(branchTree);
