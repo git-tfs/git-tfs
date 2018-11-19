@@ -202,7 +202,7 @@ Task("UpdateAssemblyInfo").Description("Update AssemblyInfo properties with the 
 	.Does(() =>
 {
 	CreateAssemblyInfo("CommonAssemblyInfo.cs", new AssemblyInfoSettings {
-		Company="SEP",
+		Company="GitTfs",
 		Product = "GitTfs",
 		Copyright = "Copyright © 2009-" + DateTime.Now.Year,
 		Version = _semanticVersionShort,

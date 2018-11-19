@@ -66,7 +66,7 @@ namespace GitTfs.Setup
             TxtToRtf(Path.Combine(project.SourceBaseDir, "LICENSE"), Path.Combine(project.SourceBaseDir, "LICENSE.rtf"));
             project.LicenceFile = @"LICENSE.rtf";
 
-            project.ControlPanelInfo.Manufacturer = "SEP";
+            project.ControlPanelInfo.Manufacturer = "GitTfs";
             //project.ControlPanelInfo.ProductIcon = "GitTfs.ico";
             project.ControlPanelInfo.Comments = "A Git/TFS bridge, similar to git-svn";
             project.ControlPanelInfo.HelpLink = "http://git-tfs.com/";
