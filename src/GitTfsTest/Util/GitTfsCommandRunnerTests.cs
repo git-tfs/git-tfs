@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Rhino.Mocks;
 using GitTfs.Commands;
 using GitTfs.Util;
+using Moq;
 using StructureMap.AutoMocking;
 using NDesk.Options;
 using Xunit;
@@ -35,11 +35,11 @@ namespace GitTfs.Test.Util
         }
         #endregion
 
-        private readonly RhinoAutoMocker<GitTfsCommandRunner> _mocks;
+        private readonly MoqAutoMocker<GitTfsCommandRunner> _mocks;
 
         public GitTfsCommandRunnerTests()
         {
-            _mocks = new RhinoAutoMocker<GitTfsCommandRunner>(MockMode.AAA);
+            _mocks = new MoqAutoMocker<GitTfsCommandRunner>();
         }
 
         private IList<string> Args(params string[] args)
@@ -112,14 +112,14 @@ namespace GitTfs.Test.Util
         [Fact]
         public void ReturnsHelpForTooFewArgs()
         {
-            _mocks.Get<IHelpHelper>().Stub(x => x.ShowHelpForInvalidArguments(null)).IgnoreArguments().Return(33);
+            Mock.Get(_mocks.Get<IHelpHelper>()).Setup(x => x.ShowHelpForInvalidArguments(It.IsAny<GitTfsCommand>())).Returns(33);
             Assert.Equal(33, _mocks.ClassUnderTest.Run(new UsesOverloads(), Args()));
         }
 
         [Fact]
         public void ReturnsHelpForTooManyArgs()
         {
-            _mocks.Get<IHelpHelper>().Stub(x => x.ShowHelpForInvalidArguments(null)).IgnoreArguments().Return(33);
+            Mock.Get(_mocks.Get<IHelpHelper>()).Setup(x => x.ShowHelpForInvalidArguments(It.IsAny<GitTfsCommand>())).Returns(33);
             Assert.Equal(33, _mocks.ClassUnderTest.Run(new UsesOverloads(), Args("a", "b", "c")));
         }
 

@@ -12,11 +12,11 @@ namespace GitTfs.Test.Commands
 {
     public class HelpTest : BaseTest
     {
-        private readonly RhinoAutoMocker<Help> mocks;
+        private readonly MoqAutoMocker<Help> mocks;
 
         public HelpTest()
         {
-            mocks = new RhinoAutoMocker<Help>(MockMode.AAA);
+            mocks = new MoqAutoMocker<Help>();
         }
 
         public MemoryTarget GetTestLogger()
@@ -38,7 +38,7 @@ namespace GitTfs.Test.Commands
         public void ShouldWriteGeneralHelp()
         {
             var memoryTarget = GetTestLogger();
-            mocks.Container.PluginGraph.CreateFamily(typeof(GitTfsCommand));
+
             mocks.Container.PluginGraph.FindFamily(typeof(GitTfsCommand)).AddType(typeof(TestCommand), "test");
             mocks.Container.Inject<GitTfsCommand>("test", new TestCommand());
             mocks.ClassUnderTest.Run();
