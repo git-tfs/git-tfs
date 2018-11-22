@@ -24,6 +24,7 @@ namespace GitTfs
         public const int Help = 1;
         public const int InvalidArguments = 2;
         public const int ForceRequired = 3;
+        public const int SomeDataCouldNotHaveBeenRetrieved = 4;
         public const int ExceptionThrown = Byte.MaxValue - 1;
 
         //Verify
