@@ -6,7 +6,9 @@ using System.Reflection;
 using StructureMap;
 using StructureMap.Graph;
 using System.IO;
+#if NETFRAMEWORK
 using Microsoft.Win32;
+#endif
 
 namespace GitTfs.Core.TfsInterop
 {
@@ -45,10 +47,13 @@ namespace GitTfs.Core.TfsInterop
             public TfsPlugin TryLoadVsPluginVersion(string version, bool isVisualStudioRequired = false)
             {
                 var assembly = "GitTfs.Vs" + version;
+#if NETFRAMEWORK
                 if (isVisualStudioRequired && !IsVisualStudioInstalled(version))
                 {
                     return null;
                 }
+#endif
+
                 return Try(assembly, "GitTfs.TfsPlugin");
             }
 
@@ -73,6 +78,7 @@ namespace GitTfs.Core.TfsInterop
                 return null;
             }
 
+#if NETFRAMEWORK
             private static bool IsVisualStudioInstalled(string version)
             {
                 if (!VisualStudioVersions.ContainsKey(version))
@@ -115,6 +121,7 @@ namespace GitTfs.Core.TfsInterop
                 }
                 return false;
             }
+#endif
 
             private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
             {

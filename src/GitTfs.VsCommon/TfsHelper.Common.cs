@@ -771,6 +771,7 @@ namespace GitTfs.VsCommon
         private int ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges,
             WorkItemCheckedInfo[] checkedInfos, string checkinComment)
         {
+#if NETFRAMEWORK
             using (var parentForm = new ParentForm())
             {
                 parentForm.Show();
@@ -780,6 +781,9 @@ namespace GitTfs.VsCommon
                 return dialog.Call<int>("Show", parentForm.Handle, workspace, pendingChanges, pendingChanges,
                                         checkinComment, null, null, checkedInfos);
             }
+#else
+            return -1;
+#endif
         }
 
         protected const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
@@ -963,7 +967,7 @@ namespace GitTfs.VsCommon
             }
         }
 
-        #region Fake classes for unshelve
+#region Fake classes for unshelve
 
         private class Unshelveable : IChangeset
         {
@@ -1131,7 +1135,7 @@ namespace GitTfs.VsCommon
             }
         }
 
-        #endregion
+#endregion
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
