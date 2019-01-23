@@ -207,6 +207,46 @@ namespace GitTfs.Test.Core
         }
 
         [Fact]
+        public void DeletingAFileAndAddingAnotherInANewSubdirectoryLeavesParents()
+        {
+            Tidy.Delete("top/file.txt");
+            Tidy.Add("top/sub/file.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("top/file.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Add("top/sub/file.txt"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void DeletingAFileAndAddingAnotherInANewSiblingDirectoryLeavesParent()
+        {
+            Tidy.Delete("top/sub1/file.txt");
+            Tidy.Add("top/sub2/file.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("top/sub1/file.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Add("top/sub2/file.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("top/sub1")); // but NOT "top"
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void DeletingAFileAndMovingAnotherInLeavesTheDirectory()
+        {
+            Tidy.Delete("dir/file1.txt");
+            Tidy.Rename("file2.txt", "dir/file2.txt", ScoreIsIrrelevant);
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("dir/file1.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Rename("file2.txt", "dir/file2.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
+        }
+
+        [Fact]
         public void RemovingAllFilesRemovesAllParents()
         {
             Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
