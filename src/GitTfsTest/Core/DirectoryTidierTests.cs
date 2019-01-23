@@ -71,6 +71,7 @@ namespace GitTfs.Test.Core
         public void NoChangesMeansNoChanges()
         {
             // nothing!
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -81,6 +82,7 @@ namespace GitTfs.Test.Core
             TidyDisposeToProcess();
 
             Mock.Get(mockWorkspace).Verify(x => x.Add("topDir/midDir/bottomDir/newFile.txt"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -91,6 +93,7 @@ namespace GitTfs.Test.Core
             TidyDisposeToProcess();
 
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -104,6 +107,7 @@ namespace GitTfs.Test.Core
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -117,6 +121,7 @@ namespace GitTfs.Test.Core
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -128,6 +133,7 @@ namespace GitTfs.Test.Core
 
             Mock.Get(mockWorkspace).Verify(x => x.Delete("dir1/dir2/dir3/lonelyFile.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("dir1"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
 
@@ -145,6 +151,7 @@ namespace GitTfs.Test.Core
 
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
             // "topDir/midDir/bottomDir/" becomes empty but is not deleted
         }
 
@@ -156,6 +163,7 @@ namespace GitTfs.Test.Core
             TidyDisposeToProcess();
 
             Mock.Get(mockWorkspace).Verify(x => x.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -169,6 +177,7 @@ namespace GitTfs.Test.Core
             Mock.Get(mockWorkspace).Verify(x => x.Delete("dirA/file.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("dirA/dirB/file.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("dirA"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -181,6 +190,7 @@ namespace GitTfs.Test.Core
 
             Mock.Get(mockWorkspace).Verify(x => x.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant));
             Mock.Get(mockWorkspace).Verify(x => x.Rename("topDir/topFile.txt", "dir1/dir2/dir3/replacement.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -193,6 +203,7 @@ namespace GitTfs.Test.Core
 
             Mock.Get(mockWorkspace).Verify(x => x.Delete("dir1/dir2/dir3/lonelyFile.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Add("dir1/dir2/dir3/newFile.txt"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -212,6 +223,7 @@ namespace GitTfs.Test.Core
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/topFile.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("rootFile.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -229,6 +241,7 @@ namespace GitTfs.Test.Core
             Mock.Get(mockWorkspace).Verify(x => x.Delete("TOPDIR/MIDDIR/MIDFILE.TXT"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("TOPDIR/TOPFILE.TXT"));
             Mock.Get(mockWorkspace).Verify(x => x.Delete("TOPDIR"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -241,6 +254,7 @@ namespace GitTfs.Test.Core
 
             Mock.Get(mockWorkspace).Verify(x => x.Edit("topDir/midDir/bottomDir/file1.txt"));
             Mock.Get(mockWorkspace).Verify(x => x.Rename("topDir/midDir/bottomDir/file1.txt", "topDir/midDir/bottomDir/file1renamed.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
