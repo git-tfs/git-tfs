@@ -253,7 +253,13 @@ namespace GitTfs.Core
 
         private bool IsIgnored(string path)
         {
-            return Ignorance.IsIncluded(path) || Repository.IsPathIgnored(path);
+            var isIgnored = Ignorance.IsIncluded(path) || Repository.IsPathIgnored(path);
+            if (isIgnored)
+            {
+                Trace.TraceWarning("The file '{0}' is ignored due to `.gitignore` or ignore regex defined.", path);
+            }
+
+            return isIgnored;
         }
 
         private Bouncer _ignorance;
