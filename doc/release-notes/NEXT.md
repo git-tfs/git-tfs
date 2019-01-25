@@ -2,3 +2,4 @@
 * FindMergeChangesetParent now also takes into account the path of the changes. This should avoid detection of incorrect parent when a changeset has merges in different branches at once. (#1204 by @Laibalion)
 * Provide way to delete all remotes in a single call (#1204 by @Laibalion)
 * Add .net462 and windows10 long path support. See [doc to enable it](../blob/master/doc/Set-custom-workspace.md). (#1221 by @pmiossec)
+* Fix bug where checkin attempts to remove a non-empty directory. (#1249 by @m-akinc)

@@ -46,6 +46,8 @@ namespace GitTfs.Core
             {
                 if (fileAndOperation.Value == FileOperation.Remove)
                     _filesInTfs.Remove(fileAndOperation.Key.ToLowerInvariant());
+                else if (fileAndOperation.Value == FileOperation.Add || fileAndOperation.Value == FileOperation.RenameTo)
+                    _filesInTfs.Add(fileAndOperation.Key.ToLowerInvariant());
             }
 
             var deletedDirs = new List<string>();
@@ -133,24 +135,16 @@ namespace GitTfs.Core
         private IEnumerable<string> CalculateCandidateDirectories()
         {
             var directoriesWithRemovedFiles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            var directoriesBlockedForRemoval = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
-            foreach (var fileAndOperation in _fileOperations)
+            foreach (var removedFilePath in _fileOperations.Where(x => x.Value == FileOperation.Remove).Select(x => x.Key))
             {
-                var directory = GetDirectoryName(fileAndOperation.Key);
-                switch (fileAndOperation.Value)
+                var directory = GetDirectoryName(removedFilePath);
+                if (directory != null)
                 {
-                    case FileOperation.Remove:
-                        directoriesWithRemovedFiles.Add(directory);
-                        break;
-                    default:
-                        directoriesBlockedForRemoval.Add(directory);
-                        break;
+                    directoriesWithRemovedFiles.Add(directory);
                 }
             }
 
-            directoriesBlockedForRemoval.Add(null);
-            directoriesWithRemovedFiles.ExceptWith(directoriesBlockedForRemoval);
             return directoriesWithRemovedFiles;
         }
     }
