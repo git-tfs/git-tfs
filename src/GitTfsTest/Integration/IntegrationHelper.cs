@@ -367,6 +367,15 @@ namespace GitTfs.Test.Integration
             AssertEqual(contents, actual, "Contents of " + path);
         }
 
+        public void AssertFileInIndex(string repodir, string file, string contents)
+        {
+            var repo = Repository(repodir);
+            var indexEntry = repo.Index.FirstOrDefault(x => x.Path == file);
+            var blob = repo.Lookup<Blob>(indexEntry.Id);
+            var actual = blob.GetContentText();
+            Assert.Equal(contents, actual);
+        }
+
         public void AssertNoFileInWorkspace(string repodir, string file)
         {
             var path = Path.Combine(Workdir, repodir, file);
