@@ -8,11 +8,11 @@ namespace GitTfs.Test.Util
 {
     public class ShelveSpecificCheckinOptionsFactoryTests
     {
-        private readonly RhinoAutoMocker<CheckinOptionsFactory> mocks;
+        private readonly MoqAutoMocker<CheckinOptionsFactory> mocks;
 
         public ShelveSpecificCheckinOptionsFactoryTests()
         {
-            mocks = new RhinoAutoMocker<CheckinOptionsFactory>();
+            mocks = new MoqAutoMocker<CheckinOptionsFactory>();
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
         }
 

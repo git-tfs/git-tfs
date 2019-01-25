@@ -2,19 +2,19 @@
 using GitTfs.Commands;
 using GitTfs.Util;
 using Xunit;
-using Rhino.Mocks;
 using StructureMap.AutoMocking;
 using GitTfs.Core;
+using Moq;
 
 namespace GitTfs.Test.Util
 {
     public class CommitSpecificCheckinOptionsFactoryTests : BaseTest
     {
-        private readonly RhinoAutoMocker<CheckinOptionsFactory> mocks;
+        private readonly MoqAutoMocker<CheckinOptionsFactory> mocks;
 
         public CommitSpecificCheckinOptionsFactoryTests()
         {
-            mocks = new RhinoAutoMocker<CheckinOptionsFactory>();
+            mocks = new MoqAutoMocker<CheckinOptionsFactory>();
             mocks.Get<Globals>().Repository = mocks.Get<IGitRepository>();
         }
 
@@ -23,8 +23,10 @@ namespace GitTfs.Test.Util
             IGitRepository gitRepository = mocks.Get<IGitRepository>();
             mocks.Get<Globals>().Repository = gitRepository;
             mocks.Get<Globals>().GitDir = ".git";
-            gitRepository.Stub(r => r.GitDir).Return(".");
-            gitRepository.Stub(r => r.GetConfig(GitTfsConstants.WorkItemAssociateRegexConfigKey)).Return(workItemRegex);
+
+            var gitRepositoryMock = Mock.Get(gitRepository);
+            gitRepositoryMock.Setup(r => r.GitDir).Returns(".");
+            gitRepositoryMock.Setup(r => r.GetConfig(GitTfsConstants.WorkItemAssociateRegexConfigKey)).Returns(workItemRegex);
 
             return new CheckinOptionsFactory(mocks.Get<Globals>());
         }

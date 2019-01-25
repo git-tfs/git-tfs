@@ -1,3 +1,6 @@
+# Path too long problem
+
+## What is the problem?
 Sometimes, depending on where is located your repository folder on your drive and what is the file tree of your project,
 you could face errors because you exceed the 259 characters limit of NTFS file system.
 
@@ -13,9 +16,27 @@ This is due to the fact that git-tfs use a temp folder located in the folder `.g
 
 Note: If you look for this folder, you surely couldn't find it because it is created and deleted when a git-tfs command is run!
 
+## Solutions
+
+### Enabling Windows 10 Win32 Long Path Support
+
+The last version of git-tfs support this windows 10 long path support feature but you have to enable it in Windows 10.
+
+To do this you want to "Edit group policy" in the Start search bar or run "gpedit.msc" from the Run command (Windows-R).
+
+In the Local Group Policy Editor navigate to `Local Computer Policy` -> `Computer Configuration` -> `Administrative Templates` -> `All Settings`. In this location you can find `Enable Win32 long paths`. Set it to `Enabled`.
+
+Now, you should not have the error anymore.
+
+See [here for more informations](https://blogs.msdn.microsoft.com/jeremykuhne/2016/07/30/net-4-6-2-and-long-paths-on-windows-10/)
+
+### Move clone directory closer to the root drive
+
 A first simple solution could be to move your folder from a very long path to a shorter one.
 For example, move your repository folder from :
 `C:\A\Very\Very\Long\Path\To\My\GitTfs\Repository` to `C:\repo`.
+
+### Use git-tfs feature for custom workspace path
 
 Another better solution if you faced this problem is to use a custom workspace directory!
 

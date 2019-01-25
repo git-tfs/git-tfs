@@ -1,7 +1,7 @@
 //Don't define #tool here. Just add there to 'paket.dependencies' 'build' group
 //Don't use #addin here. Use #r to load the dll found in the nuget package.
 #r "./packages/build/Octokit/lib/net45/Octokit.dll"
-#r "./packages/build/Cake.Git/lib/net46/Cake.Git.dll"
+#r "./packages/build/Cake.Git/lib/net461/Cake.Git.dll"
 #r "System.Net.Http.dll"
 
 //////////////////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 readonly var Target = Argument("target", "Default");
 readonly var Configuration = Argument("configuration", "Debug");
-var IsDryRun = Argument<bool>("isDryRun", true);
+var runInDryRun = Argument<bool>("isDryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
 readonly var IdGitHubReleaseToDelete = Argument<int>("idGitHubReleaseToDelete", -1);
@@ -22,16 +22,17 @@ const string ApplicationName = "GitTfs";
 const string ZipFileTemplate = ApplicationName + "-{0}.zip";
 const string ApplicationPath = "./" + ApplicationName;
 const string PathToSln = ApplicationPath + ".sln";
-const string BuildDirectory = ApplicationPath + "/bin";
+const string TargetFramework = "net462"; //due to new dotnet csproj format
+readonly var OutDir = "bin/" + Configuration + "/" + TargetFramework + "/";
 const string buildAssetPath = @".\.build\";
 const string DownloadUrlTemplate ="https://github.com/git-tfs/git-tfs/releases/download/v{0}/";
 string ReleaseNotesPath = @"..\doc\release-notes\NEXT.md";
 const string ChocolateyBuildDir = buildAssetPath + "choc";
-readonly var OutputDirectory = BuildDirectory + "/" + Configuration;
+readonly var OutputDirectory = ApplicationPath + "/" + OutDir;
 const string TestProjectName = "GitTfsTest";
 
 // Define directories.
-readonly var buildDir = Directory(BuildDirectory) + Directory(Configuration);
+readonly var buildDir = Directory(OutputDirectory);
 string _semanticVersionShort = ""; //0.26.179
 string _semanticVersionLong  = ""; //0.26.179+4890c16f54f1b354aa198773aa9530a04d575932.master
 string _zipFilePath;
@@ -71,7 +72,7 @@ Task("DryRun").Description("Set the dry-run flag")
 	.Does(() =>
 {
 	Information("Doing a dry run!!!!");
-	IsDryRun = true;
+	runInDryRun = true;
 });
 
 Task("TagVersion").Description("Handle release note and tag the new version")
@@ -93,7 +94,7 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 	}
 	Information("Next version will be:" + nextVersion);
 
-	if(!IsDryRun)
+	if(!runInDryRun)
 	{
 		Information("Creating release tag...");
 		var githubAccount = GetGithubUserAccount();
@@ -201,7 +202,7 @@ Task("UpdateAssemblyInfo").Description("Update AssemblyInfo properties with the 
 	.Does(() =>
 {
 	CreateAssemblyInfo("CommonAssemblyInfo.cs", new AssemblyInfoSettings {
-		Company="SEP",
+		Company="GitTfs",
 		Product = "GitTfs",
 		Copyright = "Copyright © 2009-" + DateTime.Now.Year,
 		Version = _semanticVersionShort,
@@ -215,6 +216,10 @@ Task("Build").Description("Build git-tfs")
 	.IsDependentOn("UpdateAssemblyInfo")
 	.Does(() =>
 {
+		MSBuild(PathToSln, settings => {
+		settings.WithTarget("restore");
+	});
+
 	// Use MSBuild
 	// /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
 	MSBuild(PathToSln, settings => {
@@ -253,7 +258,7 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 	EnsureDirectoryExists(buildAssetPath);
 	var coverageFile = System.IO.Path.Combine(buildAssetPath, "coverage.xml");
 	OpenCover(tool => {
-		tool.XUnit2("./"+ TestProjectName + "/bin/" + Configuration + "/" + TestProjectName +".dll", new XUnit2Settings()
+		tool.XUnit2("./"+ TestProjectName + "/" + OutDir + TestProjectName +".dll", new XUnit2Settings()
 		{
 			XmlReport = true,
 			OutputDirectory = ".",
@@ -263,7 +268,7 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 	new FilePath(coverageFile),
 	new OpenCoverSettings()
 		{
-			WorkingDirectory = MakeAbsolute(Directory("./"+ TestProjectName + "/bin/" + Configuration)),
+			WorkingDirectory = MakeAbsolute(Directory("./"+ TestProjectName + "/" + OutDir)),
 			Register = "user"
 		}
 		 .WithFilter("+[git-tfs*]*")
@@ -332,10 +337,10 @@ Task("Package").Description("Generate the release zip file")
 
 	//Prepare the zip
 	var libgit2NativeBinariesFolder = OutputDirectory + @"\NativeBinaries";
-	if(!DirectoryExists(libgit2NativeBinariesFolder))
-	{
-		CopyDirectory(@".\packages\LibGit2Sharp.NativeBinaries\runtimes\win7-x86\native", libgit2NativeBinariesFolder);
-	}
+	
+
+
+
 	CopyDirectory(@"..\doc", OutputDirectory + @"\doc");
 	CopyFiles(@".\packages\**\Microsoft.WITDataStore*.dll", OutputDirectory + @"\GitTfs.Vs2015\");
 	CopyFiles(new[] {@"..\README.md", @"..\LICENSE", @"..\NOTICE"}, OutputDirectory);
@@ -526,7 +531,7 @@ environmentVariables: {
 
 Task("CreateGithubRelease").Description("Create a GitHub release")
 	.IsDependentOn("Package")
-	.WithCriteria(!IsDryRun)
+	.WithCriteria(!runInDryRun)
 	.Does(() =>
 {
 	var client = GetGithubClient();
@@ -627,7 +632,7 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 		BuildSystem.TFBuild.Commands.UploadArtifact("install", chocolateyPackagePath, chocolateyPackage);
 	}
 
-	if(!IsDryRun)
+	if(!runInDryRun)
 	{
 		ChocolateyPush(chocolateyPackagePath, new ChocolateyPushSettings {
 			Source				= "https://chocolatey.org/",

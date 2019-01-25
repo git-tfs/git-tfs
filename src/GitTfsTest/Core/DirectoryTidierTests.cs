@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using Xunit;
-using Rhino.Mocks;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
+using Moq;
 
 namespace GitTfs.Test.Core
 {
@@ -16,8 +16,8 @@ namespace GitTfs.Test.Core
 
         public DirectoryTidierTests()
         {
-            mocks = new MockRepository();
-            mockWorkspace = mocks.StrictMock<ITfsWorkspaceModifier>();
+            mocks = new MockRepository(MockBehavior.Default);
+            mockWorkspace = mocks.OneOf<ITfsWorkspaceModifier>();
             initialTfsTree = new TfsTreeEntry[] {
                 item(TfsItemType.Folder, "topDir"),
                 item(TfsItemType.File,   "topDir/topFile.txt"),
@@ -40,8 +40,7 @@ namespace GitTfs.Test.Core
 
         public void Dispose()
         {
-            TidyDispose();
-            mockWorkspace.VerifyAllExpectations();
+            TidyDisposeToProcess();
         }
 
         private ITfsWorkspaceModifier Tidy
@@ -50,14 +49,13 @@ namespace GitTfs.Test.Core
             {
                 if (_tidy == null)
                 {
-                    mocks.ReplayAll();
                     _tidy = new DirectoryTidier(mockWorkspace, () => initialTfsTree);
                 }
                 return _tidy;
             }
         }
 
-        private void TidyDispose()
+        private void TidyDisposeToProcess()
         {
             ((IDisposable)Tidy).Dispose();
         }
@@ -65,7 +63,7 @@ namespace GitTfs.Test.Core
         [Fact]
         public void PassesThroughGetLocalPath()
         {
-            mockWorkspace.Expect(x => x.GetLocalPath("git-path")).Return("tfs-path");
+            Mock.Get(mockWorkspace).Setup(x => x.GetLocalPath("git-path")).Returns("tfs-path");
             Assert.Equal("tfs-path", Tidy.GetLocalPath("git-path"));
         }
 
@@ -73,50 +71,69 @@ namespace GitTfs.Test.Core
         public void NoChangesMeansNoChanges()
         {
             // nothing!
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void AddingAFilePassesThroughAndDoesNotRemoveOtherItems()
         {
-            mockWorkspace.Expect(x => x.Add("topDir/midDir/bottomDir/newFile.txt"));
             Tidy.Add("topDir/midDir/bottomDir/newFile.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Add("topDir/midDir/bottomDir/newFile.txt"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void RemovingAFileWithSiblingsDoesNotRemoveTheDir()
         {
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
             Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void RemovingBothSiblingFilesRemovesTheDir()
         {
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir"));
             Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
             Tidy.Delete("topDir/midDir/bottomDir/file2.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void NoDoubleDelete()
         {
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir"));
             Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
             Tidy.Delete("topDir/midDir/bottomDir/file2.txt");
-            TidyDispose();
-            TidyDispose();
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void RemovingAFileRemovesAllEmptyParents()
         {
-            mockWorkspace.Expect(x => x.Delete("dir1/dir2/dir3/lonelyFile.txt"));
-            mockWorkspace.Expect(x => x.Delete("dir1"));
             Tidy.Delete("dir1/dir2/dir3/lonelyFile.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("dir1/dir2/dir3/lonelyFile.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("dir1"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
 
@@ -127,91 +144,163 @@ namespace GitTfs.Test.Core
             // TFS does not allow deleting that empty directory.
             // See https://github.com/git-tfs/git-tfs/issues/313
 
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
-            mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant));
             Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
             Tidy.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant);
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Rename("topDir/midDir/bottomDir/file2.txt", "file2.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
             // "topDir/midDir/bottomDir/" becomes empty but is not deleted
         }
 
         [Fact]
         public void MovingAFileOutLeavesAllEmptyParents()
         {
-            mockWorkspace.Expect(x => x.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant));
             Tidy.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant);
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void DeleteOnlyTheTopOfEmptyDirTree()
         {
-            mockWorkspace.Expect(x => x.Delete("dirA/file.txt"));
-            mockWorkspace.Expect(x => x.Delete("dirA/dirB/file.txt"));
-            mockWorkspace.Expect(x => x.Delete("dirA"));
             Tidy.Delete("dirA/file.txt");
             Tidy.Delete("dirA/dirB/file.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("dirA/file.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("dirA/dirB/file.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("dirA"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void MovingAFileOutAndInLeavesParents()
         {
-            mockWorkspace.Expect(x => x.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant));
-            mockWorkspace.Expect(x => x.Rename("topDir/topFile.txt", "dir1/dir2/dir3/replacement.txt", ScoreIsIrrelevant));
             Tidy.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant);
             Tidy.Rename("topDir/topFile.txt", "dir1/dir2/dir3/replacement.txt", ScoreIsIrrelevant);
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Rename("dir1/dir2/dir3/lonelyFile.txt", "otherdir/otherdir2/newName.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).Verify(x => x.Rename("topDir/topFile.txt", "dir1/dir2/dir3/replacement.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void DeletingAFileAndAddingAnotherLeavesParents()
         {
-            mockWorkspace.Expect(x => x.Delete("dir1/dir2/dir3/lonelyFile.txt"));
-            mockWorkspace.Expect(x => x.Add("dir1/dir2/dir3/newFile.txt"));
             Tidy.Delete("dir1/dir2/dir3/lonelyFile.txt");
             Tidy.Add("dir1/dir2/dir3/newFile.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("dir1/dir2/dir3/lonelyFile.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Add("dir1/dir2/dir3/newFile.txt"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void DeletingAFileAndAddingAnotherInANewSubdirectoryLeavesParents()
+        {
+            Tidy.Delete("top/file.txt");
+            Tidy.Add("top/sub/file.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("top/file.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Add("top/sub/file.txt"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void DeletingAFileAndAddingAnotherInANewSiblingDirectoryLeavesParent()
+        {
+            Tidy.Delete("top/sub1/file.txt");
+            Tidy.Add("top/sub2/file.txt");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("top/sub1/file.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Add("top/sub2/file.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("top/sub1")); // but NOT "top"
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void DeletingAFileAndMovingAnotherInLeavesTheDirectory()
+        {
+            Tidy.Delete("dir/file1.txt");
+            Tidy.Rename("file2.txt", "dir/file2.txt", ScoreIsIrrelevant);
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("dir/file1.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Rename("file2.txt", "dir/file2.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void RemovingAllFilesRemovesAllParents()
         {
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
-            mockWorkspace.Expect(x => x.Delete("topDir/midDir/midFile.txt"));
-            mockWorkspace.Expect(x => x.Delete("topDir/topFile.txt"));
-            mockWorkspace.Expect(x => x.Delete("rootFile.txt"));
-            mockWorkspace.Expect(x => x.Delete("topDir"));
             Tidy.Delete("topDir/midDir/bottomDir/file1.txt");
             Tidy.Delete("topDir/midDir/bottomDir/file2.txt");
             Tidy.Delete("topDir/midDir/midFile.txt");
             Tidy.Delete("topDir/topFile.txt");
             Tidy.Delete("rootFile.txt"); // This is to check that the root folder doesn't get changed.
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file1.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/bottomDir/file2.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/midDir/midFile.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir/topFile.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("rootFile.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("topDir"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void TidyDoesNotCareWhatCaseYouUse()
         {
-            mockWorkspace.Expect(x => x.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE1.TXT"));
-            mockWorkspace.Expect(x => x.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE2.TXT"));
-            mockWorkspace.Expect(x => x.Delete("TOPDIR/MIDDIR/MIDFILE.TXT"));
-            mockWorkspace.Expect(x => x.Delete("TOPDIR/TOPFILE.TXT"));
-            mockWorkspace.Expect(x => x.Delete("TOPDIR"));
             Tidy.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE1.TXT");
             Tidy.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE2.TXT");
             Tidy.Delete("TOPDIR/MIDDIR/MIDFILE.TXT");
             Tidy.Delete("TOPDIR/TOPFILE.TXT");
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE1.TXT"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("TOPDIR/MIDDIR/BOTTOMDIR/FILE2.TXT"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("TOPDIR/MIDDIR/MIDFILE.TXT"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("TOPDIR/TOPFILE.TXT"));
+            Mock.Get(mockWorkspace).Verify(x => x.Delete("TOPDIR"));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void HandlesEditAndRenameOnSameFile()
         {
-            mockWorkspace.Expect(x => x.Edit("topDir/midDir/bottomDir/file1.txt"));
-            mockWorkspace.Expect(x => x.Rename("topDir/midDir/bottomDir/file1.txt", "topDir/midDir/bottomDir/file1renamed.txt", ScoreIsIrrelevant));
             Tidy.Edit("topDir/midDir/bottomDir/file1.txt");
             Tidy.Rename("topDir/midDir/bottomDir/file1.txt", "topDir/midDir/bottomDir/file1renamed.txt", ScoreIsIrrelevant);
+
+            TidyDisposeToProcess();
+
+            Mock.Get(mockWorkspace).Verify(x => x.Edit("topDir/midDir/bottomDir/file1.txt"));
+            Mock.Get(mockWorkspace).Verify(x => x.Rename("topDir/midDir/bottomDir/file1.txt", "topDir/midDir/bottomDir/file1renamed.txt", ScoreIsIrrelevant));
+            Mock.Get(mockWorkspace).VerifyNoOtherCalls();
         }
 
         [Fact]
         public void TidyThrowsWhenMultipleOperationsOnTheSameFileOccur()
         {
-            var workspace = mocks.StrictMock<ITfsWorkspaceModifier>();
+            var workspace = mocks.OneOf<ITfsWorkspaceModifier>();
             ITfsWorkspaceModifier tidy = new DirectoryTidier(workspace, Enumerable.Empty<TfsTreeEntry>);
 
             tidy.Delete("file.txt");
@@ -229,7 +318,7 @@ namespace GitTfs.Test.Core
 
         private TfsTreeEntry item(TfsItemType itemType, string gitPath)
         {
-            return new TfsTreeEntry(gitPath, mocks.StrictMock<IItem>().Tap(mockItem => mockItem.Stub(x => x.ItemType).Return(itemType)));
+            return new TfsTreeEntry(gitPath, mocks.OneOf<IItem>().Tap(mockItem => Mock.Get(mockItem).Setup(x => x.ItemType).Returns(itemType)));
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿## Introduction
+## Introduction
 
 [git-tfs](http://git-tfs.com/) is a two-way bridge between TFS (Team Foundation Server) and git, similar to git-svn.
 It fetches TFS commits into a git repository, and lets you push your updates back to TFS.
@@ -12,7 +12,7 @@ And read [how to report an issue](doc/reporting-issues.md), before doing so ;)
 
 This project is no more **actively** maintained because we are no more users of TFS.
 Thus being very useful, git-tfs is not exempt of not supported use cases.
-If you encounter something missing or a problem, please contribute, we will be please to help you.
+If you encounter something missing or a problem, please contribute, we will be pleased to help you.
 
 And remember:
 
@@ -40,7 +40,7 @@ Add the git-tfs folder path to your PATH. You could also set it temporary (the t
 
 ## Use git-tfs
 
-You need .NET 4 and either the 2012 or 2013 version of Team Explorer installed (or Visual Studio).
+You need .NET 4.5.2 and maybe the 2012 or 2013 version of Team Explorer installed (or Visual Studio) depending on the version of TFS you want to target.
 
 ### Help
 
@@ -159,7 +159,7 @@ This is the complete list of commands in the master branch on github.
 
 ### Continuous Integration Status
 
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/git-tfs/git-tfs)](https://ci.appveyor.com/project/pmiossec/git-tfs-v2qcm)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/git-tfs/git-tfs?branch=master&svg=true&passingText=build%20%27master%27%20OK)](https://ci.appveyor.com/project/pmiossec/git-tfs-v2qcm)
 ( Great thanks to [<img src="https://www.appveyor.com/assets/img/favicons/favicon.ico" height="20"> AppVeyor](http://www.appveyor.com/)! )
 
 ### Prerequisites

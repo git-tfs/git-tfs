@@ -1,16 +1,20 @@
 ﻿using System;
 using GitTfs.Core.TfsInterop;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace GitTfs.Test.Integration
 {
     public class FetchTests : BaseTest, IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private readonly IntegrationHelper integrationHelper;
 
-        public FetchTests()
+        public FetchTests(ITestOutputHelper output)
         {
+            _output = output;
             integrationHelper = new IntegrationHelper();
+            _output.WriteLine("Repository in folder: " + integrationHelper.Workdir);
         }
 
         public void Dispose()

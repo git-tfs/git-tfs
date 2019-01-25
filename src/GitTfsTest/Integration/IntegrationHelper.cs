@@ -17,7 +17,8 @@ namespace GitTfs.Test.Integration
         #region manage the work directory
 
         private string _workdir;
-        private string Workdir
+
+        public string Workdir
         {
             get
             {
@@ -151,7 +152,7 @@ namespace GitTfs.Test.Integration
                 _script = script;
             }
 
-            public static string FakeCommiter;
+            public string FakeCommiter;
             public FakeChangesetBuilder Changeset(int changesetId, string message, DateTime checkinDate)
             {
                 var changeset = new ScriptedChangeset
@@ -364,6 +365,15 @@ namespace GitTfs.Test.Integration
             var path = Path.Combine(Workdir, repodir, file);
             var actual = File.ReadAllText(path, Encoding.UTF8);
             AssertEqual(contents, actual, "Contents of " + path);
+        }
+
+        public void AssertFileInIndex(string repodir, string file, string contents)
+        {
+            var repo = Repository(repodir);
+            var indexEntry = repo.Index.FirstOrDefault(x => x.Path == file);
+            var blob = repo.Lookup<Blob>(indexEntry.Id);
+            var actual = blob.GetContentText();
+            Assert.Equal(contents, actual);
         }
 
         public void AssertNoFileInWorkspace(string repodir, string file)

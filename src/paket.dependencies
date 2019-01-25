@@ -1,4 +1,4 @@
-framework: net452
+framework: net462
 source https://www.nuget.org/api/v2/
 
 //If you plan to update this file, you must first absolutly read our documentation on the subject
@@ -6,10 +6,13 @@ source https://www.nuget.org/api/v2/
 //https://github.com/git-tfs/git-tfs/blob/master/doc/paket.md
 
 nuget nlog
-nuget LibGit2Sharp
+nuget LibGit2Sharp ~> 0.25.0
 nuget Microsoft.TeamFoundationServer.Client ~> 14.0
 nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
+nuget Moq
 nuget WixSharp 1.0.22.3 framework: >= net40
+nuget structuremap 2.6.3
+nuget StructureMap.AutoMocking 2.6.3
 nuget xunit
 nuget xunit.assert
 nuget xunit.runner.visualstudio version_in_path: true

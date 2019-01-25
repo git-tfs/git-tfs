@@ -18,7 +18,7 @@ namespace GitTfs
     {
         private static string _logFilePath;
 
-        [STAThreadAttribute]
+        [STAThread]
         public static void Main(string[] args)
         {
             try

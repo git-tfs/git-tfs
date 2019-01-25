@@ -7,7 +7,7 @@ Git-tfs could be easily used to migrate source history from TFSVC to a git repos
 Depending on the TFVC changesets history, git-tfs could have more or less difficulties to retrieve the history
 (Especially in case of renamed branches).
 Here are described, in order, the different options that could be tried to retrieve as much history as possible. 
-If you are not insterested by all the history (because it could be very long), you could just choose the option that suits you the best...
+If you are not interested by all the history (because it could be very long), you could just choose the option that suits you the best...
 
 #### Fetch all the history, for all branches
 First fetch all the source history (with all branches) in a local git repository:
@@ -51,7 +51,7 @@ To do that, use the option `--changeset=3245`, and run:
 #### Fetch only the last changeset
 
 In the last resort, when none of the solution before has worked, your only solution remains to clone only the last Changeset.
-Even if it's the way that Microsoft recommend to migrate to git (surely because they doesn't provide a better way!?!), that's 
+Even if it's the way that Microsoft recommend to migrate to git (surely because they don't provide a better way!?!), that's 
 for us the last solution to try (or if you don't care about your history...).
 You could do it by running:
 
@@ -126,7 +126,7 @@ Clean all the git-tfs metadatas from the commit messages:
 Then verify that all is ok and delete the folder `.git/refs/original` ( to delete old branches)
 
 Note: if you do that, you won't be able to fetch tfs changesets any more.
-You should do that if you want to migrate definitively away of TFS(VC)!
+You should do that if you want to migrate definitively away from TFS(VC)!
 
 ### Add a remote toward TFS(Git) repository
 
