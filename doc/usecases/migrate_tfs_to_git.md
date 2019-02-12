@@ -80,7 +80,7 @@ to verify the content with the one in the git repository.
 ### Clean commits (optional)
 
 This step is optional. It could be done if you really don't want to keep these metadata.
-But most of the time, it really don't worth the effort.
+But most of the time, it really doesn't worth the effort.
 It could be interesting to keep it to be able to match the git commit to the changeset in TFVC for later verification.
 
 Clean all the git-tfs metadatas from the commit messages:
@@ -93,8 +93,8 @@ If you want to keep the old changesets ids in a more human format, you could use
 
     git filter-branch -f --msg-filter "sed 's/^git-tfs-id:.*;C\([0-9]*\)$/Changeset:\1/g'" -- --all
 
-Note: if you do that, you won't be able to fetch tfs changesets any more.
-You should do that if you want to migrate definitively away of TFS(VC)!
+Note: __if you do that, you won't be able to fetch tfs changesets any more.__
+You should do that **ONLY** if you want to migrate definitively away of TFS(VC)!
 
 ### Add a remote toward git central repository
 
