@@ -63,7 +63,25 @@ For every way to clone, you could provide to git-tfs a `.gitignore` file.
 That way, all the files that will be ignored won't be downloaded, speeding the process.
 That could be particulary usefull to ignore dependencies packages that has been commited but that should not...
 
+### Verify that all the cloning went well
+
+For the current git-tfs remote:
+
+   git tfs verify
+
+For all the git-tfs remotes:
+
+   git tfs verify --all
+
+
+Note: This operation could be long because git-tfs download again all the files of the last changeset(s)
+to verify the content with the one in the git repository.
+
 ### Clean commits (optional)
+
+This step is optional. It could be done if you really don't want to keep these metadata.
+But most of the time, it really don't worth the effort.
+It could be interesting to keep it to be able to match the git commit to the changeset in TFVC for later verification.
 
 Clean all the git-tfs metadatas from the commit messages:
 
@@ -76,7 +94,7 @@ If you want to keep the old changesets ids in a more human format, you could use
     git filter-branch -f --msg-filter "sed 's/^git-tfs-id:.*;C\([0-9]*\)$/Changeset:\1/g'" -- --all
 
 Note: if you do that, you won't be able to fetch tfs changesets any more.
-You should do that if you want to migrate definitively away of TFS!
+You should do that if you want to migrate definitively away of TFS(VC)!
 
 ### Add a remote toward git central repository
 
@@ -117,16 +135,13 @@ See [clone](../commands/clone.md) command if you should use a password or an aut
 
 Wait quite some time, fetching changesets from TFS is a slow process :(
 
+### Verify that all the cloning went well
+
+See same section above.
+
 ### Clean commits (optional)
 
-Clean all the git-tfs metadatas from the commit messages:
-
-    git filter-branch -f --msg-filter "sed 's/^git-tfs-id:.*$//g'" -- --all
-
-Then verify that all is ok and delete the folder `.git/refs/original` ( to delete old branches)
-
-Note: if you do that, you won't be able to fetch tfs changesets any more.
-You should do that if you want to migrate definitively away from TFS(VC)!
+See same section above.
 
 ### Add a remote toward TFS(Git) repository
 
