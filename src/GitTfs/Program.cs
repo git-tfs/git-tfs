@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using GitTfs.Core;
 using GitTfs.Core.Changes.Git;
@@ -9,6 +10,7 @@ using GitTfs.Util;
 using StructureMap;
 using StructureMap.Graph;
 using NLog;
+using NLog.Conditions;
 using NLog.Config;
 using NLog.Targets;
 
@@ -110,6 +112,12 @@ namespace GitTfs
                 var fileTarget = new FileTarget();
                 config.AddTarget("file", fileTarget);
 
+                if (Console.BackgroundColor == ConsoleColor.White)
+                {
+                    ChangeConsoleColorForLevel(consoleTarget, nameof(LogLevel.Info), ConsoleOutputColor.Black);
+                    ChangeConsoleColorForLevel(consoleTarget, nameof(LogLevel.Error), ConsoleOutputColor.Red);
+                }
+
                 // Step 3. Set target properties
                 consoleTarget.Layout = @"${message}";
                 fileTarget.FileName = @"${specialfolder:LocalApplicationData}\git-tfs\" + GitTfsConstants.LogFileName;
@@ -137,6 +145,15 @@ namespace GitTfs
                 Trace.Listeners.Add(new ConsoleTraceListener());
                 Trace.TraceWarning("Fail to enable logging in file due to error:" + ex.Message);
             }
+        }
+
+        private static void ChangeConsoleColorForLevel(ColoredConsoleTarget consoleTarget, string level, ConsoleOutputColor foregroundColor)
+        {
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule
+            {
+                Condition = ConditionParser.ParseExpression("level == LogLevel." + level),
+                ForegroundColor = foregroundColor
+            });
         }
 
         public static void AddGitChangeTypes(ConfigurationExpression initializer)
