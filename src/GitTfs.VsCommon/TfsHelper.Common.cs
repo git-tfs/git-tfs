@@ -230,9 +230,10 @@ namespace GitTfs.VsCommon
             //  2. figuring out up to which changeset the merge source branch needs to be fetched
             return changes.Max(change =>
             {
-                if (change.MergeSources.Empty())
+                var mergeSources = change.MergeSources.Where(mergeSource => mergeSource.VersionTo < targetChangeset);
+                if (mergeSources.Empty())
                     return -1;
-                return change.MergeSources.Max(mergeSource => mergeSource.VersionFrom);
+                return mergeSources.Max(mergeSource => mergeSource.VersionTo);
             });
         }
 
