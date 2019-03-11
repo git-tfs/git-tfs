@@ -4,3 +4,4 @@
 * Add .net462 and windows10 long path support. See [doc to enable it](../blob/master/doc/Set-custom-workspace.md). (#1221 by @pmiossec)
 * Fix bug where checkin attempts to remove a non-empty directory. (#1249 by @m-akinc)
 * Line endings are now properly normalized when pushing changes to TFS if core.autocrlf is set to true (#1210 by @JeffCyr)
+* Fix merge commits connecting to wrong parent
