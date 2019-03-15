@@ -334,28 +334,15 @@ Task("Package").Description("Generate the release zip file")
 	Zip(OutputDirectory, _zipFilePath);
 	if(!BuildSystem.IsLocalBuild)
 	{
-		var msiFile = @".\GitTfs.Setup\GitTfs.Setup.msi";
 		if(BuildSystem.IsRunningOnAppVeyor)
 		{
 			Information("Upload artifacts to AppVeyor...");
 			BuildSystem.AppVeyor.UploadArtifact(_zipFilePath);
-			if(FileExists(msiFile))
-				BuildSystem.AppVeyor.UploadArtifact(msiFile);
-			else
-			{
-				Information("Fail to find msi file to upload...");
-			}
 		}
 		if(BuildSystem.IsRunningOnVSTS)
 		{
 			Information("Upload artifacts to VSTS...");
 			BuildSystem.TFBuild.Commands.UploadArtifact("install", _zipFilePath, _zipFilename);
-			if(FileExists(msiFile))
-				BuildSystem.TFBuild.Commands.UploadArtifact("install", msiFile, "GitTfs.Setup.msi");
-			else
-			{
-				Information("Fail to find msi file to upload...");
-			}
 		}
 	}
 });

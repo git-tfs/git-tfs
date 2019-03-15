@@ -53,7 +53,6 @@ NUGET
       System.Runtime.CompilerServices.Unsafe (>= 4.5)
     System.ValueTuple (4.5)
     WindowsAzure.ServiceBus (4.0)
-    WixSharp (1.0.22.3)
     xunit (2.4.1)
       xunit.analyzers (>= 0.10)
       xunit.assert (2.4.1)
