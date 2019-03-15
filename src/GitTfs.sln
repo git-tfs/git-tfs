@@ -32,11 +32,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChocolateyTemplates", "Choc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.Vs2015", "GitTfs.Vs2015\GitTfs.Vs2015.csproj", "{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Setup", "GitTfs.Setup\GitTfs.Setup.csproj", "{0A4AED21-360F-40CC-8870-B4D106B34CC1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{55C169E0-93CC-488C-9885-1D4EAF4EA236} = {55C169E0-93CC-488C-9885-1D4EAF4EA236}
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7E25ACEF-468A-4E93-9549-8BBFC72294DF}"
 	ProjectSection(SolutionItems) = preProject
 		..\appveyor.yml = ..\appveyor.yml
@@ -68,10 +63,6 @@ Global
 		{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}.Release|AnyCPU.ActiveCfg = Release|Any CPU
 		{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}.Release|AnyCPU.Build.0 = Release|Any CPU
-		{0A4AED21-360F-40CC-8870-B4D106B34CC1}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
-		{0A4AED21-360F-40CC-8870-B4D106B34CC1}.Debug|AnyCPU.Build.0 = Debug|Any CPU
-		{0A4AED21-360F-40CC-8870-B4D106B34CC1}.Release|AnyCPU.ActiveCfg = Release|Any CPU
-		{0A4AED21-360F-40CC-8870-B4D106B34CC1}.Release|AnyCPU.Build.0 = Release|Any CPU
 		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
 		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Release|AnyCPU.ActiveCfg = Release|Any CPU
