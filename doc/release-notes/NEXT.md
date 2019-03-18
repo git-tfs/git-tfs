@@ -13,3 +13,4 @@
 * Update OpenCover from 4.6.519 to 4.7.922
 * Update GitVersion.CommandLine from 3.6.5 to 5.5
 * Update Octokit from 0.28 to 0.48
+* Upgrade project files to .NET Framework 4.7.2 and use net472 in all paket groups

@@ -1,4 +1,4 @@
-RESTRICTION: == net462
+RESTRICTION: == net472
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Castle.Core (4.4)
@@ -69,7 +69,6 @@ NUGET
 
 GROUP Build
 REDIRECTS: OFF
-RESTRICTION: == net45
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Cake (0.38.5)

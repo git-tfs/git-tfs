@@ -1,7 +1,7 @@
 # pin paket to a specific version so the build is really reproducable
 version 5.251.0
 
-framework: net462
+framework: net472
 source https://api.nuget.org/v3/index.json
 
 //If you plan to update this file, you must first absolutly read our documentation on the subject
@@ -20,7 +20,6 @@ nuget xunit.assert
 nuget xunit.runner.visualstudio version_in_path: true
 
 group Build
-    framework: 4.5
     redirects: off
     source https://api.nuget.org/v3/index.json
 
