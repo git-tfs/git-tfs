@@ -149,7 +149,7 @@ namespace GitTfs.Commands
                 // If this branch's branch point is past the first commit, indicate this so Fetch can start from that point
                 if (rootBranch.TargetBranchChangesetId > -1)
                 {
-                    branchTfsRemote.SetInitialChangeset(rootBranch.TargetBranchChangesetId);
+                    branchTfsRemote.SetFirstChangeset(rootBranch.TargetBranchChangesetId);
                 }
 
                 if (rootBranch.IsRenamedBranch || !NoFetch)

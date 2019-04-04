@@ -18,6 +18,7 @@ namespace GitTfs.Core
         private readonly Globals _globals;
         private readonly RemoteOptions _remoteOptions;
         private readonly ConfigProperties _properties;
+        private int? firstChangesetId;
         private int? maxChangesetId;
         private string maxCommitHash;
         private bool isTfsAuthenticated;
@@ -73,14 +74,15 @@ namespace GitTfs.Core
             get { return false; }
         }
 
-        public int? GetInitialChangeset()
+        public int? GetFirstChangeset()
         {
-            return _properties.InitialChangeset;
+            return firstChangesetId;
         }
 
-        public void SetInitialChangeset(int? changesetId)
+        public void SetFirstChangeset(int? changesetId)
         {
-            _properties.InitialChangeset = changesetId;
+            Trace.WriteLine($"Set first changeset in branch to C{changesetId}");
+            firstChangesetId = changesetId;
         }
 
         public bool IsSubtree { get; private set; }
@@ -745,8 +747,11 @@ namespace GitTfs.Core
             // only the folder creation and deletion operations due to the lowerBound being
             // detected as the root-side of the commit +1 (C1+1=C2) instead of referencing
             // the branch-side of the branching operation [C4].
-            if (_properties.InitialChangeset.HasValue)
-                lowerBoundChangesetId = Math.Max(MaxChangesetId + 1, _properties.InitialChangeset.Value);
+            if (_properties.InitialChangeset.HasValue || firstChangesetId.HasValue)
+            {
+                var firstChangesetInBranch = Math.Max(_properties.InitialChangeset ?? int.MinValue, firstChangesetId ?? int.MinValue);
+                lowerBoundChangesetId = Math.Max(MaxChangesetId + 1, firstChangesetInBranch);
+            }
             else
                 lowerBoundChangesetId = MaxChangesetId + 1;
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + lowerBoundChangesetId +

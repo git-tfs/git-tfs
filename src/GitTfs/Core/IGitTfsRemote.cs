@@ -54,8 +54,8 @@ namespace GitTfs.Core
         string Prefix { get; }
         bool ExportMetadatas { get; set; }
         Dictionary<string, IExportWorkItem> ExportWorkitemsMapping { get; set; }
-        int? GetInitialChangeset();
-        void SetInitialChangeset(int? changesetId);
+        int? GetFirstChangeset();
+        void SetFirstChangeset(int? changesetId);
         bool ShouldSkip(string path);
         IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null);
         string GetPathInGitRepo(string tfsPath);

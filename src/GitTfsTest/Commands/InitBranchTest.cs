@@ -237,7 +237,7 @@ namespace GitTfs.Test.Commands
             mocks.ClassUnderTest.CloneAllBranches = true;
             var tfsPathBranch1 = "$/MyProject/MyBranch1";
             var tfsPathBranch2 = "$/MyProject/MyBranch2";
-            tfsHelperMock.Setup(t => t.GetBranches(false)).Returns(new IBranchObject[] {
+            tfsHelperMock.Setup(t => t.GetBranches(true)).Returns(new IBranchObject[] {
                 new MockBranchObject() { IsRoot = true, Path = trunkGitTfsRemote.Object.TfsRepositoryPath },
                 new MockBranchObject() { ParentPath = trunkGitTfsRemote.Object.TfsRepositoryPath, Path = tfsPathBranch1 },
                 new MockBranchObject() { ParentPath = trunkGitTfsRemote.Object.TfsRepositoryPath, Path = tfsPathBranch2 },
@@ -296,7 +296,7 @@ namespace GitTfs.Test.Commands
             var tfsPathBranch1 = "$/MyProject/MyBranch1";
             var tfsPathBranch2 = "$/MyProject/MyBranch2";
             var tfsPathBranch3 = "$/MyProject/MyBranch3";
-            tfsHelperMock.Setup(t => t.GetBranches(false)).Returns(new IBranchObject[] {
+            tfsHelperMock.Setup(t => t.GetBranches(true)).Returns(new IBranchObject[] {
                 new MockBranchObject() { IsRoot = true, Path = "$/MyProject/ParentOfTrunk" },
                 new MockBranchObject() { ParentPath = "$/MyProject/ParentOfTrunk", Path = trunkGitTfsRemote.Object.TfsRepositoryPath },
                 new MockBranchObject() { ParentPath = trunkGitTfsRemote.Object.TfsRepositoryPath, Path = tfsPathBranch1 },
