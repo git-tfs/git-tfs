@@ -7,3 +7,4 @@
 * Fix merge commits connecting to wrong parent (#1264 by DotNetSparky)
 * Now possible to clone a deleted branch (#1263 by magol)
 * Fix a issue that commits in a branch are lost if they are older then the first commit in a branch that are merging from this branch. (#1263 by magol)
+* added new parameter `--no-parallel` to fix #1242
