@@ -1,11 +1,11 @@
+using GitTfs.Commands;
+using GitTfs.Core.TfsInterop;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using GitTfs.Commands;
-using GitTfs.Core.TfsInterop;
-using System.Diagnostics;
 
 namespace GitTfs.Core
 {
@@ -237,19 +237,19 @@ namespace GitTfs.Core
 
         public void Get(int changesetId, IEnumerable<IItem> items)
         {
-            _workspace.GetSpecificVersion(changesetId, items);
+            _workspace.GetSpecificVersion(changesetId, items, Remote.RemoteInfo.NoParallel);
         }
 
         public void Get(IChangeset changeset)
         {
-            _workspace.GetSpecificVersion(changeset);
+            _workspace.GetSpecificVersion(changeset, Remote.RemoteInfo.NoParallel);
         }
 
         public void Get(int changesetId, IEnumerable<IChange> changes)
         {
             if (changes.Any())
             {
-                _workspace.GetSpecificVersion(changesetId, changes);
+                _workspace.GetSpecificVersion(changesetId, changes, Remote.RemoteInfo.NoParallel);
             }
         }
 

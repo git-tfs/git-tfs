@@ -1,3 +1,6 @@
+using GitTfs.Commands;
+using NDesk.Options;
+using StructureMap;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5,9 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using NDesk.Options;
-using GitTfs.Commands;
-using StructureMap;
 
 namespace GitTfs.Core
 {
@@ -175,7 +175,7 @@ namespace GitTfs.Core
         public static IEnumerable<TResult[]> ToBatch<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector, int batchSize)
         {
             var batch = new List<TResult>(batchSize);
-            
+
             foreach (var item in source)
             {
                 if (batch.Count >= batchSize)
@@ -211,17 +211,24 @@ namespace GitTfs.Core
         /// </summary>
         /// <param name="source">The source sequence.</param>
         /// <param name="action">The action to execute.</param>
+        /// <param name="noParallel">set to true> to disable parallel processing</param>
         /// <typeparam name="T">The source item type</typeparam>
-        public static void DoParallel<T>(this IEnumerable<T> source, Action<T> action)
+        public static void DoParallel<T>(this IEnumerable<T> source, Action<T> action, bool noParallel)
         {
 #if DEBUG && NO_PARALLEL
-            foreach (var item in source)
-            {
-                action(item);
-            }
-#else
-            (source as ParallelQuery<T> ?? source.AsParallel()).ForAll(action);
+            noParallel = true;
 #endif
+            if (noParallel)
+            {
+                foreach (var item in source)
+                {
+                    action(item);
+                }
+            }
+            else
+            {
+                (source as ParallelQuery<T> ?? source.AsParallel()).ForAll(action);
+            }
         }
 
         /// <summary>
@@ -236,15 +243,17 @@ namespace GitTfs.Core
         /// <param name="retryInterval">
         /// The delay between retries.
         /// </param>
+        /// <param name="parallel">set to true to disable parallel processing</param>
         /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
         /// <returns>
         /// Returns <b>true</b> when all items processed successfully.</returns>
         public static void DoParallelRetry<T>(
             this IEnumerable<T> source,
             Action<T> action,
-            TimeSpan retryInterval)
+            TimeSpan retryInterval,
+            bool noParallel)
         {
-            DoParallelRetry(source, action, 10, retryInterval);
+            DoParallelRetry(source, action, 10, retryInterval, noParallel);
         }
 
         /// <summary>
@@ -256,12 +265,13 @@ namespace GitTfs.Core
         /// <param name="action">
         /// The action to process of the item.
         /// </param>
+        /// <param name="noParallel">set to true to disable parallel processing</param>
         /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
         /// <returns>
         /// Returns <b>true</b> when all items processed successfully.</returns>
-        public static void DoParallelRetry<T>(this IEnumerable<T> source, Action<T> action)
+        public static void DoParallelRetry<T>(this IEnumerable<T> source, Action<T> action, bool noParallel)
         {
-            DoParallelRetry(source, action, 10, TimeSpan.FromSeconds(1));
+            DoParallelRetry(source, action, 10, TimeSpan.FromSeconds(1), noParallel);
         }
 
         /// <summary>
@@ -276,12 +286,13 @@ namespace GitTfs.Core
         /// <param name="retryCount">
         /// TThe number of retries.
         /// </param>
+        /// <param name="noParallel">set to true to disable parallel processing</param>
         /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
         /// <returns>
         /// Returns <b>true</b> when all items processed successfully.</returns>
-        public static void DoParallelRetry<T>(this IEnumerable<T> source, Action<T> action, int retryCount)
+        public static void DoParallelRetry<T>(this IEnumerable<T> source, Action<T> action, int retryCount, bool noParallel)
         {
-            DoParallelRetry(source, action, retryCount, TimeSpan.FromSeconds(1));
+            DoParallelRetry(source, action, retryCount, TimeSpan.FromSeconds(1), noParallel);
         }
 
         /// <summary>
@@ -299,10 +310,11 @@ namespace GitTfs.Core
         /// <param name="retryInterval">
         /// The delay between retries.
         /// </param>
+        /// <param name="noParallel">set to true to disable parallel processing</param>
         /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
         /// <returns>
         /// Returns <b>true</b> when all items processed successfully.</returns>
-        public static void DoParallelRetry<T>(this IEnumerable<T> source, Action<T> action, int retryCount, TimeSpan retryInterval)
+        public static void DoParallelRetry<T>(this IEnumerable<T> source, Action<T> action, int retryCount, TimeSpan retryInterval, bool noParallel)
         {
             var fails = new ConcurrentBag<Exception>();
 
@@ -340,7 +352,7 @@ namespace GitTfs.Core
                     {
                         fails.Add(new AggregateException(exceptions));
                     }
-                });
+                }, noParallel);
 
             if (fails.Count > 0)
             {

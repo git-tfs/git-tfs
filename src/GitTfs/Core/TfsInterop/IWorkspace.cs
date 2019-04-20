@@ -14,9 +14,9 @@ namespace GitTfs.Core.TfsInterop
         int PendRename(string pathFrom, string pathTo);
         void ForceGetFile(string path, int changeset);
         void GetSpecificVersion(int changeset);
-        void GetSpecificVersion(int changeset, IEnumerable<IItem> items);
-        void GetSpecificVersion(IChangeset changeset);
-        void GetSpecificVersion(int changeset, IEnumerable<IChange> changes);
+        void GetSpecificVersion(int changeset, IEnumerable<IItem> items, bool noParallel);
+        void GetSpecificVersion(IChangeset changeset, bool noParallel);
+        void GetSpecificVersion(int changeset, IEnumerable<IChange> changes, bool noParallel);
         string GetLocalItemForServerItem(string serverItem);
         string GetServerItemForLocalItem(string localItem);
         string OwnerName { get; }

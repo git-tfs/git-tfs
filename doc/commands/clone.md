@@ -26,6 +26,7 @@ a TFS source tree and fetch all the changesets
 		  --except-regex=VALUE   a regex of exceptions to ignore-regex
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
+		  --no-parallel          disable parallel access of the TFS server
 		  --all, --fetch-all
 		  --parents
 		  --authors=VALUE        Path to an Authors file to map TFS users to Git users

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using GitTfs.Commands;
+﻿using GitTfs.Commands;
+using System.Collections.Generic;
 
 namespace GitTfs.Core
 {
@@ -14,11 +14,12 @@ namespace GitTfs.Core
         public string IgnoreExceptRegex { get; set; }
         public IEnumerable<string> Aliases { get; set; }
         public bool Autotag { get; set; }
+        public bool NoParallel { get; set; }
 
         public RemoteOptions RemoteOptions
         {
-            get { return new RemoteOptions { IgnoreRegex = IgnoreRegex, ExceptRegex = IgnoreExceptRegex, Username = Username, Password = Password }; }
-            set { IgnoreRegex = value.IgnoreRegex; IgnoreExceptRegex = value.ExceptRegex; Username = value.Username; Password = value.Password; }
+            get { return new RemoteOptions { IgnoreRegex = IgnoreRegex, ExceptRegex = IgnoreExceptRegex, Username = Username, Password = Password, NoParallel = NoParallel }; }
+            set { IgnoreRegex = value.IgnoreRegex; IgnoreExceptRegex = value.ExceptRegex; Username = value.Username; Password = value.Password; NoParallel = value.NoParallel; }
         }
     }
 }

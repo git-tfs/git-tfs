@@ -1,5 +1,5 @@
-using NDesk.Options;
 using GitTfs.Util;
+using NDesk.Options;
 
 namespace GitTfs.Commands
 {
@@ -20,6 +20,8 @@ namespace GitTfs.Commands
                         v => Username = v },
                     { "p|password=", "TFS password",
                         v => Password = v },
+                    { "no-parallel", "Do not access tfs in parallel",
+                        v => NoParallel = (v != null) },
                 };
             }
         }
@@ -28,5 +30,6 @@ namespace GitTfs.Commands
         public string ExceptRegex { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public bool NoParallel { get; set; }
     }
 }
