@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: empear/codescene-gitlab
+      - image: empear/codescene-gitlab2
     environment:
       CODESCENE_GITLAB_PATH: codescene-gitlab-standalone.jar
       CODESCENE_USER: bot
