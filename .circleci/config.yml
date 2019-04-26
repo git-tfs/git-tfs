@@ -32,4 +32,4 @@ jobs:
               --analyze-individual-commits
               --current-commit $CIRCLE_SHA1
               --previous-commit $PREVIOUS_COMMIT
-              --timeout 10000
+              --http-timeout 10000
