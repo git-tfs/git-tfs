@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: empear/codescene-gitlab2
+      - image: empear/codescene-gitlab
     environment:
       CODESCENE_GITLAB_PATH: codescene-gitlab-standalone.jar
       CODESCENE_USER: bot
@@ -19,6 +19,7 @@ jobs:
       - run: 
           name: Run CodeScene Delta Analysis
           command:
+            cd /codescene-gitlab
             java -jar $CODESCENE_GITLAB_PATH
               --delta-analysis-url $DELTA_ANALYSIS_URL
               --user $CODESCENE_USER
