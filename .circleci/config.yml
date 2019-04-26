@@ -17,16 +17,18 @@ jobs:
     steps:
       - checkout
       - run: 
-          java -jar $CODESCENE_GITLAB_PATH
-            --delta-analysis-url $DELTA_ANALYSIS_URL
-            --user $CODESCENE_USER
-            --password $CODESCENE_PASSWORD
-            --repository $CODESCENE_REPOSITORY
-            --pass-on-failed-analysis
-            --fail-on-high-risk
-            --fail-on-failed-goal
-            --fail-on-declining-code-health
-            --analyze-individual-commits
-            --current-commit $CIRCLE_SHA1
-            --previous-commit $PREVIOUS_COMMIT
-            --timeout 10000
+          name: Run CodeScene Delta Analysis
+          command:
+            java -jar $CODESCENE_GITLAB_PATH
+              --delta-analysis-url $DELTA_ANALYSIS_URL
+              --user $CODESCENE_USER
+              --password $CODESCENE_PASSWORD
+              --repository $CODESCENE_REPOSITORY
+              --pass-on-failed-analysis
+              --fail-on-high-risk
+              --fail-on-failed-goal
+              --fail-on-declining-code-health
+              --analyze-individual-commits
+              --current-commit $CIRCLE_SHA1
+              --previous-commit $PREVIOUS_COMMIT
+              --timeout 10000
