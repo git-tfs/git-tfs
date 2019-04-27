@@ -20,7 +20,7 @@ namespace GitTfs.Commands
                         v => Username = v },
                     { "p|password=", "TFS password",
                         v => Password = v },
-                    { "no-parallel", "Do not access tfs in parallel",
+                    { "no-parallel", "Do not do parallel requests to TFS",
                         v => NoParallel = (v != null) },
                 };
             }
