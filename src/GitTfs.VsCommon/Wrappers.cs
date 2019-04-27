@@ -539,7 +539,7 @@ namespace GitTfs.VsCommon
         public void GetRequests(IEnumerable<GetRequest> source, bool noParallel, int batchSize = 20)
         {
 
-            source.ToBatch(batchSize).DoParallel(batch =>
+            source.ToBatch(batchSize).ForEach(batch =>
             {
                 var items = batch;
                 Retry.Do(() =>
@@ -555,7 +555,7 @@ namespace GitTfs.VsCommon
                         items = status.GetFailures().Join(items, e => e.ServerItem, e => e.ItemSpec.Item, (failure, request) => request).ToArray();
                     }
                 });
-            }, noParallel);
+            }, !noParallel);
         }
     }
 
