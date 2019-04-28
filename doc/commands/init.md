@@ -26,10 +26,9 @@ Prefer the [clone](clone.md) command to initialize and fetch changesets from a T
                                    messages
                                    Use this when you're exporting from TFS and
                                    don't need to put data back into TFS.
-          --no-parallel          disable parallel access of the TFS server
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
-          --no-parallel          disable parallel access of the TFS server
+          --no-parallel          Do not do parallel requests to TFS
 
 ## Examples
 

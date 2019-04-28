@@ -30,7 +30,7 @@ Prefer the [clone](clone.md) or [init](init.md) command if the project folder al
 		  --except-regex=VALUE   a regex of exceptions to ingore-regex
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
-          --no-parallel          disable parallel access of the TFS server
+		  --no-parallel          Do not do parallel requests to TFS
 		  --all, --fetch-all
 		  --parents
 		  --authors=VALUE        Path to an Authors file to map TFS users to Git
