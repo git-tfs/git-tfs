@@ -12,14 +12,13 @@ jobs:
       CODESCENE_RISK_THRESHOLD: 7
       CODESCENE_COUPLING_THRESHOLD_PERCENT: 45
       DELTA_ANALYSIS_URL: http://81.26.245.150/projects/5/delta-analysis
-      PREVIOUS_COMMIT: $(echo $CIRCLE_COMPARE_URL | sed -n 's|.*compare/\([^.]*\)\..*$|\1|p')
-
 
     steps:
       - checkout
       - run: 
           name: Run CodeScene Delta Analysis
           command:
+            export PREVIOUS_COMMIT=$(git rev-parse HEAD^);
             java -jar $CODESCENE_GITLAB_PATH
               --delta-analysis-url $DELTA_ANALYSIS_URL
               --user $CODESCENE_USER
