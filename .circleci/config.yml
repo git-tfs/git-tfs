@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: empear/codescene-gitlab
+      - image: empear/codescene-ci-cd
     environment:
       CODESCENE_GITLAB_PATH: codescene-gitlab-standalone.jar
       CODESCENE_USER: bot
@@ -11,7 +11,7 @@ jobs:
       CODESCENE_BASE_REVISION: origin/master
       CODESCENE_RISK_THRESHOLD: 7
       CODESCENE_COUPLING_THRESHOLD_PERCENT: 45
-      DELTA_ANALYSIS_URL: http://81.26.245.150:3003/projects/64/delta-analysis
+      DELTA_ANALYSIS_URL: http://81.26.245.150/projects/5/delta-analysis
       PREVIOUS_COMMIT: git rev-parse $CIRCLE_SHA1^1
 
     steps:
@@ -19,7 +19,6 @@ jobs:
       - run: 
           name: Run CodeScene Delta Analysis
           command:
-            cd /codescene-gitlab;
             java -jar $CODESCENE_GITLAB_PATH
               --delta-analysis-url $DELTA_ANALYSIS_URL
               --user $CODESCENE_USER
@@ -33,3 +32,4 @@ jobs:
               --current-commit $CIRCLE_SHA1
               --previous-commit $PREVIOUS_COMMIT
               --http-timeout 10000
+              --log-result
