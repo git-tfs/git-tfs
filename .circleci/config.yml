@@ -12,7 +12,6 @@ jobs:
       CODESCENE_RISK_THRESHOLD: 7
       CODESCENE_COUPLING_THRESHOLD_PERCENT: 45
       DELTA_ANALYSIS_URL: http://81.26.245.150/projects/5/delta-analysis
-      PREVIOUS_COMMIT: git rev-parse $CIRCLE_SHA1^1
 
     steps:
       - checkout
@@ -30,6 +29,6 @@ jobs:
               --fail-on-declining-code-health
               --analyze-individual-commits
               --current-commit $CIRCLE_SHA1
-              --previous-commit $PREVIOUS_COMMIT
+              --previous-commit $(echo $CIRCLE_COMPARE_URL | sed -n 's|.*compare/\([^.]*\)\..*$|\1|p')
               --http-timeout 10000
               --log-result
