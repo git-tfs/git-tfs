@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: empear/codescene-ci-cd
     environment:
-      CODESCENE_GITLAB_PATH: codescene-gitlab-standalone.jar
+      CODESCENE_GITLAB_PATH: /codescene-ci-cd/codescene-ci-cd-standalone.jar
       CODESCENE_USER: bot
       CODESCENE_PASSWORD: 0bca8fd9-c137-47c7-9c2b-98f6fbc2cd1c
       CODESCENE_REPOSITORY: git-tfs
