@@ -18,6 +18,9 @@ jobs:
       - run: 
           name: Run CodeScene Delta Analysis
           command:
+            echo $CI_PULL_REQUEST;
+            echo $CIRCLE_PULL_REQUEST;
+            echo $CIRCLE_PR_NUMBER;
             export PREVIOUS_COMMIT=$(git rev-parse HEAD^);
             java -jar $CODESCENE_GITLAB_PATH
               --delta-analysis-url $DELTA_ANALYSIS_URL
