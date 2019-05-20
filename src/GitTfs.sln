@@ -17,7 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.VsFake", "GitTfs.VsF
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{4A46FEEE-B8A2-4445-B9D1-8160520C7301}"
 	ProjectSection(SolutionItems) = preProject
-		..\doc\develop-on-mono.md = ..\doc\develop-on-mono.md
 		..\doc\release-notes\NEXT.md = ..\doc\release-notes\NEXT.md
 		..\README.md = ..\README.md
 		..\doc\running-the-unit-tests.md = ..\doc\running-the-unit-tests.md
