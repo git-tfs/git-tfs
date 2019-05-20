@@ -142,17 +142,6 @@ Task("Clean").Description("Clean the working directory")
 	});
 });
 
-Task("InstallTfsModels").Description("Install the missing TFS object models to be able to build git-tfs")
-	.Does(() =>
-{
-	//if(!BuildSystem.IsRunningOnAppVeyor)
-	{
-		//Could be call locally and manually to install all the versions needed to release a git-tfs version
-		ChocolateyInstall("tfs2012objectmodel");
-		ChocolateyInstall("tfs2013objectmodel");
-	}
-});
-
 Task("Restore-NuGet-Packages").Description("Restore nuget dependencies (with paket)")
 	.Does(() =>
 {
@@ -227,12 +216,6 @@ Task("Build").Description("Build git-tfs")
 		settings.SetConfiguration(Configuration)
 			.SetVerbosity(Verbosity.Minimal)
 			.SetMaxCpuCount(4);
-		if(_buildAllVersion)
-		{
-			settings
-				.WithTarget("GitTfs_Vs2012")
-				.WithTarget("GitTfs_Vs2013");
-		}
 		settings.WithTarget("GitTfs_Vs2015")
 			.WithTarget(TestProjectName);
 	});
@@ -685,7 +668,6 @@ Task("AppVeyorBuild").Description("Do the continuous integration build with AppV
 
 Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("TagVersion")
-	.IsDependentOn("InstallTfsModels")
 	.IsDependentOn("Run-Unit-Tests")
 	//.IsDependentOn("Run-Smoke-Tests") //TFS Projects on CodePlex are no more reachable
 	.IsDependentOn("Package")
