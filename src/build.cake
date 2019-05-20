@@ -145,7 +145,7 @@ Task("Clean").Description("Clean the working directory")
 Task("InstallTfsModels").Description("Install the missing TFS object models to be able to build git-tfs")
 	.Does(() =>
 {
-	if(!BuildSystem.IsRunningOnAppVeyor)
+	//if(!BuildSystem.IsRunningOnAppVeyor)
 	{
 		//Could be call locally and manually to install all the versions needed to release a git-tfs version
 		ChocolateyInstall("tfs2012objectmodel");
@@ -337,7 +337,7 @@ Task("Package").Description("Generate the release zip file")
 
 	//Prepare the zip
 	var libgit2NativeBinariesFolder = OutputDirectory + @"\NativeBinaries";
-	
+
 
 
 
