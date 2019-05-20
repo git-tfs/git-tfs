@@ -45,5 +45,14 @@ namespace GitTfs.Test.Integration
             h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
             h.AssertRef("MyProject", "refs/tags/tfs/default/C1", expectedSha);
         }
+
+        [FactExceptOnUnix]
+        public void InitializesConfigUsingNoParallel()
+        {
+            h.SetupFake(r => { });
+            h.Run("init", "http://my-tfs.local/tfs", "$/MyProject", "MyProject", "--no-parallel");
+            h.AssertConfig("MyProject", "tfs-remote.default.noparallel", "true");
+        }
+
     }
 }
