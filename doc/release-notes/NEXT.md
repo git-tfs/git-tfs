@@ -10,3 +10,4 @@
 * Update LibGit2Sharp from 0.26.1 to 0.26.2
 * Update NLog from 4.5.10 to 4.7.5
 * Update Cake from 0.30 to 0.38.5 and Cake.Git from 0.19 to 0.22
+* Update OpenCover from 4.6.519 to 4.7.922
