@@ -1,7 +1,7 @@
 RESTRICTION: == net462
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    Castle.Core (4.3.1)
+    Castle.Core (4.4)
     LibGit2Sharp (0.26.1)
       LibGit2Sharp.NativeBinaries (2.0.289)
     LibGit2Sharp.NativeBinaries (2.0.289)
@@ -37,10 +37,9 @@ NUGET
       Newtonsoft.Json (>= 6.0.8)
       System.IdentityModel.Tokens.Jwt (>= 4.0)
       WindowsAzure.ServiceBus (>= 2.5.1)
-    Moq (4.10)
-      Castle.Core (>= 4.3.1)
-      System.Threading.Tasks.Extensions (>= 4.3)
-      System.ValueTuple (>= 4.4)
+    Moq (4.14.7)
+      Castle.Core (>= 4.4)
+      System.Threading.Tasks.Extensions (>= 4.5.1)
     Newtonsoft.Json (10.0.2)
     NLog (4.5.10)
     structuremap (2.6.3)
@@ -51,7 +50,6 @@ NUGET
     System.Runtime.CompilerServices.Unsafe (4.5.2)
     System.Threading.Tasks.Extensions (4.5.1)
       System.Runtime.CompilerServices.Unsafe (>= 4.5)
-    System.ValueTuple (4.5)
     WindowsAzure.ServiceBus (4.0)
     xunit (2.4.1)
       xunit.analyzers (>= 0.10)
