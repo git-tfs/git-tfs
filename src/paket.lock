@@ -80,5 +80,5 @@ NUGET
     Octokit (0.28)
     Octokit.CodeFormatter (1.0.0-preview)
     OpenCover (4.6.519)
-    ReportGenerator (3.0.2)
+    ReportGenerator (4.7.1)
     xunit.runner.console (2.4.1)

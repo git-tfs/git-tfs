@@ -5,3 +5,4 @@
   This is independent on the used commandline switch. (#1342)
 * Improve performance by caching branch objects instead of looking them up over and over (#1286)
 * Pin paket version to 5.251.0 to avoid spurious changes during build in paket generated files
+* Update ReportGenerator from 3.0.2 to 4.7.1

@@ -271,7 +271,7 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 
 	var coverageResultFolder = System.IO.Path.Combine(buildAssetPath, "coverage");
 	ReportGenerator(coverageFile, coverageResultFolder, new ReportGeneratorSettings(){
-    	ToolPath = @".\packages\build\ReportGenerator\tools\ReportGenerator.exe"
+		ToolPath = @".\packages\build\ReportGenerator\tools\net47\ReportGenerator.exe"
 	});
 	if(!BuildSystem.IsLocalBuild)
 	{
