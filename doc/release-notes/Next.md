@@ -1,0 +1,1 @@
+* Improve performance by caching branch objects instead of looking them up over and over
