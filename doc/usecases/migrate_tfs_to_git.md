@@ -67,11 +67,11 @@ That could be particulary usefull to ignore dependencies packages that has been 
 
 For the current git-tfs remote:
 
-   git tfs verify
+    git tfs verify
 
 For all the git-tfs remotes:
 
-   git tfs verify --all
+    git tfs verify --all
 
 
 Note: This operation could be long because git-tfs download again all the files of the last changeset(s)
