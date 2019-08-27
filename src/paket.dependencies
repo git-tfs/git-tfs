@@ -1,3 +1,6 @@
+# pin paket to a specific version so the build is really reproducable
+version 5.251.0
+
 framework: net462
 source https://api.nuget.org/v3/index.json
 
