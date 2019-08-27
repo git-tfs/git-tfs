@@ -40,7 +40,7 @@ Add the git-tfs folder path to your PATH. You could also set it temporary (the t
 
 ## Use git-tfs
 
-You need .NET 4.5.2 and maybe the 2012 or 2013 version of Team Explorer installed (or Visual Studio) depending on the version of TFS you want to target.
+You need .NET 4.6.2 and the 2012 or 2013 version of Team Explorer installed (or Visual Studio) depending on the version of TFS you want to target.
 
 ### Help
 
