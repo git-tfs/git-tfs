@@ -8,3 +8,4 @@
 * Update ReportGenerator from 3.0.2 to 4.7.1
 * Update Moq from 4.3.1 to 4.14.7
 * Update LibGit2Sharp from 0.26.1 to 0.26.2
+* Update NLog from 4.5.10 to 4.7.5
