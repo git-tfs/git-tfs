@@ -10,8 +10,6 @@ source https://api.nuget.org/v3/index.json
 
 nuget nlog
 nuget LibGit2Sharp ~> 0.26.1
-nuget Microsoft.TeamFoundationServer.Client ~> 14.0
-nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
 nuget Moq
 nuget structuremap 2.6.3
 nuget StructureMap.AutoMocking 2.6.3
@@ -31,3 +29,10 @@ nuget opencover
 nuget reportgenerator
 nuget Octokit
 nuget xunit.runner.console
+
+
+group VS2015
+	framework: net472
+	source https://api.nuget.org/v3/index.json
+	nuget Microsoft.TeamFoundationServer.Client ~> 14.0
+	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
