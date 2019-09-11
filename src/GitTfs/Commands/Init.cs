@@ -112,9 +112,9 @@ namespace GitTfs.Commands
 
         public static string HideUserCredentials(string commandLineRun)
         {
-            Regex rgx = new Regex("(--username|-u)[= ][^ ]+");
+            Regex rgx = new Regex("((--|/)username|[/-]u)(=| +)[^ ]+");
             commandLineRun = rgx.Replace(commandLineRun, "--username=xxx");
-            rgx = new Regex("(--password|-p)[= ][^ ]+");
+            rgx = new Regex("((--|/)password|[/-]p)(=| +)[^ ]+");
             return rgx.Replace(commandLineRun, "--password=xxx");
         }
 
