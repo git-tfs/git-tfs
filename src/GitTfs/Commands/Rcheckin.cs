@@ -85,7 +85,7 @@ namespace GitTfs.Commands
             {
                 if (AutoRebase)
                 {
-                    _globals.Repository.CommandNoisy("rebase", "--preserve-merges", parentChangeset.Remote.RemoteRef);
+                    _globals.Repository.CommandNoisy("rebase", "--rebase-merges", parentChangeset.Remote.RemoteRef);
                     parentChangeset = _globals.Repository.GetTfsCommit(parentChangeset.Remote.MaxCommitHash);
                 }
                 else
@@ -142,7 +142,7 @@ namespace GitTfs.Commands
                         var lastCommit = _globals.Repository.FindCommitHashByChangesetId(newChangesetId);
                         RebaseOnto(lastCommit, target);
                         if (AutoRebase)
-                            tfsRemote.Repository.CommandNoisy("rebase", "--preserve-merges", tfsRemote.RemoteRef);
+                            tfsRemote.Repository.CommandNoisy("rebase", "--rebase-merges", tfsRemote.RemoteRef);
                         else
                             throw new GitTfsException("error: New TFS changesets were found. Rcheckin was not finished.");
                     }
@@ -214,7 +214,7 @@ namespace GitTfs.Commands
 
         public void RebaseOnto(string newBaseCommit, string oldBaseCommit)
         {
-            _globals.Repository.CommandNoisy("rebase", "--preserve-merges", "--onto", newBaseCommit, oldBaseCommit);
+            _globals.Repository.CommandNoisy("rebase", "--rebase-merges", "--onto", newBaseCommit, oldBaseCommit);
         }
     }
 }
