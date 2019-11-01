@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using NDesk.Options;
-using Newtonsoft.Json;
 using StructureMap;
 
 namespace GitTfs.Commands
@@ -47,10 +46,13 @@ namespace GitTfs.Commands
 
             _globals.Repository = _init.GitHelper.MakeRepository(RepositoryPath);
             var commits = _globals.Repository.GetCommitChangeSetPairs();
-            var dic = JsonConvert.SerializeObject(commits);
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(FilePath))
             {
-                file.WriteLine(dic);
+                foreach (var map in commits)
+                {
+                    file.WriteLine($"{map.Key}-{map.Value}");
+                }
+                
                 file.Flush();
             }
 
