@@ -7,11 +7,14 @@ The exportmap command creates a mapping file of Tfs ChangeSet Id and Commit Id f
     Usage: git-tfs exportmap [options]
     where options are:
     
-        -f=VALUE 	The path to the mapping file			
-		-r=VALUE 	The path to the git repository
+        -f=VALUE 	The path to the mapping file
 								
 ## Examples
 
 ### Create a mapping file from current working directory / git repository
 
-		git tfs exportmap -f mapping.txt -r .
+		git tfs exportmap -f mapping.txt
+		
+## Use Cases
+
+Supports migration of Work Items with changesets to the new Git repository. 
