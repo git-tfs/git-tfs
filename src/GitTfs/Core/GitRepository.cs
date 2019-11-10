@@ -796,5 +796,31 @@ namespace GitTfs.Core
 
             return sha;
         }
+
+        public IDictionary<int, string> GetCommitChangeSetPairs()
+        {
+            var allCommits = _repository.Commits.QueryBy(new CommitFilter());
+            var pairs = new Dictionary<int, string>() ;
+            foreach (var c in allCommits)
+            {
+                int changesetId;
+                if (TryParseChangesetId(c.Message, out changesetId))
+                {
+                    pairs.Add(changesetId, c.Sha);
+                }
+                else
+                {
+                    foreach (var note in c.Notes)
+                    {
+                        if (TryParseChangesetId(note.Message, out changesetId))
+                        {
+                            pairs.Add(changesetId, c.Sha);
+                        }
+                    }
+                }
+            }
+
+            return pairs;
+        }
     }
 }
