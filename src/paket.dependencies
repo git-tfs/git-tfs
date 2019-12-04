@@ -1,5 +1,5 @@
 framework: net462
-source https://www.nuget.org/api/v2/
+source https://api.nuget.org/v3/index.json
 
 //If you plan to update this file, you must first absolutly read our documentation on the subject
 //because there is some subtleties on how we use it in our project:
@@ -19,7 +19,7 @@ nuget xunit.runner.visualstudio version_in_path: true
 group Build
     framework: 4.5
     redirects: off
-    source https://nuget.org/api/v2
+    source https://api.nuget.org/v3/index.json
 
 nuget Cake
 nuget Cake.Git
