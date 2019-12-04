@@ -6,6 +6,7 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 using StructureMap;
 using GitTfs.Core.TfsInterop;
 using Microsoft.TeamFoundation.Build.Client;
+using Microsoft.VisualStudio.Services.Client;
 
 namespace GitTfs.VsCommon
 {
@@ -41,10 +42,7 @@ namespace GitTfs.VsCommon
         }
 
 #pragma warning disable 618
-        private IGroupSecurityService GroupSecurityService
-        {
-            get { return GetService<IGroupSecurityService>(); }
-        }
+        private IGroupSecurityService GroupSecurityService => GetService<IGroupSecurityService>();
 
         public override IIdentity GetIdentity(string username)
         {
@@ -53,9 +51,7 @@ namespace GitTfs.VsCommon
 
         protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
         {
-            return HasCredentials ?
-                new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
-                new TfsTeamProjectCollection(uri, new UICredentialsProvider());
+            return new TfsTeamProjectCollection(uri, new VssClientCredentials());
 #pragma warning restore 618
         }
     }
