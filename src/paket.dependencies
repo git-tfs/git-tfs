@@ -6,7 +6,7 @@ source https://api.nuget.org/v3/index.json
 //https://github.com/git-tfs/git-tfs/blob/master/doc/paket.md
 
 nuget nlog
-nuget LibGit2Sharp ~> 0.26.0
+nuget LibGit2Sharp ~> 0.26.1
 nuget Microsoft.TeamFoundationServer.Client ~> 14.0
 nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
 nuget Moq

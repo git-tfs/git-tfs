@@ -2,9 +2,9 @@ RESTRICTION: == net462
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Castle.Core (4.3.1)
-    LibGit2Sharp (0.26)
-      LibGit2Sharp.NativeBinaries (2.0.267)
-    LibGit2Sharp.NativeBinaries (2.0.267)
+    LibGit2Sharp (0.26.1)
+      LibGit2Sharp.NativeBinaries (2.0.289)
+    LibGit2Sharp.NativeBinaries (2.0.289)
     Microsoft.AspNet.WebApi.Client (5.2.3)
       Newtonsoft.Json (>= 6.0.4)
     Microsoft.AspNet.WebApi.Core (5.2.3)
