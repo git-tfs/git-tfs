@@ -2,3 +2,5 @@
   and the official distribution channel for binaries is a ZIP file or a chocolatey package.
 
 * Added a new command to create a mapping file of changet ids and commit ids. 
+
+* Fixed authors file not being found for the copy to .git/git-tfs_authors due to git-tfs changing the current directory before initiating the copy.
