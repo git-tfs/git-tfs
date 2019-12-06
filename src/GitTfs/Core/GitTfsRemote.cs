@@ -180,16 +180,10 @@ namespace GitTfs.Core
                     MaxChangesetId = 0;
 
                     // Manage the special case where a .gitignore has been committed
-                    try
+                    var gitCommit = Repository.GetCommit(RemoteRef);
+                    if (gitCommit != null)
                     {
-                        var gitCommit = Repository.GetCommit(RemoteRef);
-                        if (gitCommit != null)
-                        {
-                            MaxCommitHash = gitCommit.Sha;
-                        }
-                    }
-                    catch (Exception)
-                    {
+                        MaxCommitHash = gitCommit.Sha;
                     }
                 }
             }
