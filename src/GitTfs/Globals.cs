@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.IO;
 using NDesk.Options;
 using GitTfs.Core;
 using GitTfs.Util;
@@ -26,7 +27,7 @@ namespace GitTfs
                     { "i|tfs-remote|remote|id=", "The remote ID of the TFS to interact with\ndefault: default",
                         v => UserSpecifiedRemoteId = v },
                     { "A|authors=", "Path to an Authors file to map TFS users to Git users (will be kept in cache and used for all the following commands)",
-                        v => AuthorsFilePath = v },
+                        v => AuthorsFilePath = Path.GetFullPath(v) },
                 };
             }
         }
