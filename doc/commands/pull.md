@@ -25,6 +25,45 @@ The `pull` command fetches TFS changesets (like the `fetch` command) and merges
                                    messages
                                    Use this when you're exporting from TFS and
                                    don't need to put data back into TFS.
+      -A, --authors=VALUE        Path to an Authors file to map TFS users to Git
+                                  users (will be kept in cache and used for all
+                                  the following commands)
+          --all, --fetch-all     Fetch TFS changesets of all the initialized tfs
+                                  remotes
+          --parents              Fetch TFS changesets of the parent(s)
+                                  initialized tfs remotes
+      -l, --with-labels, --fetch-labels
+                                  Fetch the labels also when fetching TFS
+                                  changesets
+      -b, --bare-branch=VALUE    The name of the branch on which the fetch will
+                                  be done for a bare repository
+          --force                Force fetch of tfs changesets when there is
+                                  ahead commits (ahead commits will be lost!)
+      -x, --export               Export metadata
+          --export-work-item-mapping=VALUE
+                                  Path to Work-items mapping export file
+          --branches=VALUE       Strategy to manage branches:
+                                  * auto:(default) Manage the encountered merged
+                                  changesets and initialize only the merged
+                                  branches
+                                  * none: Ignore branches and merge changesets,
+                                  fetching only the cloned tfs path
+                                  * all: Manage merged changesets and initialize
+                                  all the branches during the clone
+          --batch-size=VALUE     Size of the batch of tfs changesets fetched (-1
+                                  for all in one batch)
+      -c, --changeset, --from=VALUE
+                                  The changeset to clone from (must be a number)
+      -t, --up-to, --to=VALUE    up-to changeset # (optional, -1 for up to
+                                  maximum, must be a number, not prefixed with 'C')
+          --ignore-branches-regex=VALUE
+                                  Don't initialize branches that match given regex
+          --ignore-not-init-branches
+                                  Ignore not-initialized branches
+          --ignore-restricted-changesets
+                                  Ignore restricted changesets
+          --ignore-regex=VALUE   A regex of files to ignore
+          --except-regex=VALUE   A regex of exceptions to '--ignore-regex'
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
       -r, --rebase               rebase your modifications on tfs changes
