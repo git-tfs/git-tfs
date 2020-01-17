@@ -12,7 +12,7 @@ namespace GitTfs.Core
 
         public GitCommit(Commit commit)
         {
-            _commit = commit;
+            _commit = commit ?? throw new ArgumentNullException(nameof(commit));
         }
 
         public IEnumerable<GitTreeEntry> GetTree()

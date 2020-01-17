@@ -334,7 +334,9 @@ namespace GitTfs.Core
 
         public GitCommit GetCommit(string commitish)
         {
-            return new GitCommit(_repository.Lookup<Commit>(commitish));
+            var commit = _repository.Lookup<Commit>(commitish);
+
+            return commit is null ? null : new GitCommit(commit);
         }
 
         public MergeResult Merge(string commitish)
@@ -403,12 +405,16 @@ namespace GitTfs.Core
 
         public TfsChangesetInfo GetTfsCommit(GitCommit commit)
         {
+            if (commit is null) throw new ArgumentNullException(nameof(commit));
+
             return TryParseChangesetInfo(commit.Message, commit.Sha);
         }
 
         public TfsChangesetInfo GetTfsCommit(string sha)
         {
-            return GetTfsCommit(GetCommit(sha));
+            var gitCommit = GetCommit(sha);
+
+            return gitCommit is null ? null : GetTfsCommit(gitCommit);
         }
 
         private TfsChangesetInfo TryParseChangesetInfo(string gitTfsMetaInfo, string commit)

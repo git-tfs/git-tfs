@@ -26,6 +26,32 @@ namespace GitTfs.Test.Integration
         }
 
         [Fact]
+        public void GetCommit_WhenNoCommitIsFound_ThenReturnsNull()
+        {
+            h.SetupGitRepo("repo", g => { });
+
+            using (var repo = h.Repository("repo"))
+            {
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+
+                Assert.Null(gitRepository.GetCommit("b1accc619681b0348aaec303f0fce6f463890c74"));
+            }
+        }
+
+        [Fact]
+        public void GetTfsCommit_WhenNoCommitIsFound_ThenReturnsNull()
+        {
+            h.SetupGitRepo("repo", g => { });
+
+            using (var repo = h.Repository("repo"))
+            {
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+
+                Assert.Null(gitRepository.GetTfsCommit("b1accc619681b0348aaec303f0fce6f463890c74"));
+            }
+        }
+
+        [Fact]
         public void GetLastParentTfsCommits_WhenThereIsMoreThanTfsChangeset_ThenReturnTheLast()
         {
             h.SetupFake(r =>
