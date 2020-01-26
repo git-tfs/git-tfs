@@ -12,7 +12,7 @@ If you are not interested by all the history (because it could be very long), yo
 #### Fetch all the history, for all branches
 First fetch all the source history (with all branches) in a local git repository:
 
-    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --branches=all
+    git tfs clone --branches=all https://tfs.codeplex.com:443/tfs/Collection $/project/trunk .
 
 See [clone](../commands/clone.md) command if you should use a password or an author file
  (recommended if you want an email address instead of a windows login in commit messages), ...
@@ -26,7 +26,7 @@ of the main branch and only the branches merged into it.
 
 To do that, do not specify the `--branches` or use the default value of the option `--branches=auto`, like that:
 
-    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --branches=auto
+    git tfs clone --branches=auto https://tfs.codeplex.com:443/tfs/Collection $/project/trunk .
 
 #### Fetch all the history, for just the main branch (ignoring all the other branches)
 
@@ -37,7 +37,7 @@ all the other branches and the merge changesets.
 
 To do that, use the option `--branches=none`, like that:
 
-    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --branches=none
+    git tfs clone --branches=none https://tfs.codeplex.com:443/tfs/Collection $/project/trunk .
 
 #### Ignoring history before a specific changeset
 
@@ -46,7 +46,7 @@ In this case, you could try to retrieve less history by passing to git-tfs, the 
 
 To do that, use the option `--changeset=3245`, and run:
 
-    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --changeset=3245
+    git tfs clone --changeset=3245 https://tfs.codeplex.com:443/tfs/Collection $/project/trunk .
 
 #### Fetch only the last changeset
 
@@ -128,7 +128,7 @@ Extract the data to create a file with each line formatted following: OldWorkIte
 
 First fetch all the source history (with all branches) in a local git repository exporting work-items metadatas (using the mapping file obtained in the previous step):
 
-    git tfs clone https://tfs.codeplex.com:443/tfs/Collection $/project/trunk . --branches=all --export --export-work-item-mapping="c:\workitems\mapping\file.txt"
+    git tfs clone --branches=all --export --export-work-item-mapping="c:\workitems\mapping\file.txt" https://tfs.codeplex.com:443/tfs/Collection $/project/trunk .
 
 See [clone](../commands/clone.md) command if you should use a password or an author file
  (recommended if you want an mail address instead of a windows login in commit messages), ...
