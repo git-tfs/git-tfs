@@ -4,21 +4,51 @@ using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 using StructureMap;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace GitTfs.Test.Integration
 {
     public class GitRepositoryTests : BaseTest, IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private readonly IntegrationHelper h = new IntegrationHelper();
 
-        public GitRepositoryTests()
+        public GitRepositoryTests(ITestOutputHelper output)
         {
+            _output = output;
             h.SetupFake(_ => { });
+            _output.WriteLine("Repository in folder: " + h.Workdir);
         }
 
         public void Dispose()
         {
             h.Dispose();
+        }
+
+        [Fact]
+        public void GetCommit_WhenNoCommitIsFound_ThenReturnsNull()
+        {
+            h.SetupGitRepo("repo", g => { });
+
+            using (var repo = h.Repository("repo"))
+            {
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+
+                Assert.Null(gitRepository.GetCommit("b1accc619681b0348aaec303f0fce6f463890c74"));
+            }
+        }
+
+        [Fact]
+        public void GetTfsCommit_WhenNoCommitIsFound_ThenReturnsNull()
+        {
+            h.SetupGitRepo("repo", g => { });
+
+            using (var repo = h.Repository("repo"))
+            {
+                var gitRepository = new GitRepository(repo.Info.WorkingDirectory, new Container(), null, new RemoteConfigConverter());
+
+                Assert.Null(gitRepository.GetTfsCommit("b1accc619681b0348aaec303f0fce6f463890c74"));
+            }
         }
 
         [Fact]

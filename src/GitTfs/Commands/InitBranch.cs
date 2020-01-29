@@ -149,7 +149,7 @@ namespace GitTfs.Commands
                 // If this branch's branch point is past the first commit, indicate this so Fetch can start from that point
                 if (rootBranch.TargetBranchChangesetId > -1)
                 {
-                    branchTfsRemote.SetInitialChangeset(rootBranch.TargetBranchChangesetId);
+                    branchTfsRemote.SetFirstChangeset(rootBranch.TargetBranchChangesetId);
                 }
 
                 if (rootBranch.IsRenamedBranch || !NoFetch)
@@ -245,7 +245,7 @@ namespace GitTfs.Commands
             }
             else
             {
-                InitializeBranches(defaultRemote, childBranchesToInit);
+                return InitializeBranches(defaultRemote, childBranchesToInit) ? GitTfsExitCodes.OK : GitTfsExitCodes.SomeDataCouldNotHaveBeenRetrieved;
             }
 
             return GitTfsExitCodes.OK;
@@ -261,7 +261,7 @@ namespace GitTfs.Commands
             return rootBranch.GetAllChildrenOfBranch(defaultRemote.TfsRepositoryPath).Select(b => new BranchDatas { TfsRepositoryPath = b.Path }).ToList();
         }
 
-        private void InitializeBranches(IGitTfsRemote defaultRemote, List<BranchDatas> childBranchPaths)
+        private bool InitializeBranches(IGitTfsRemote defaultRemote, List<BranchDatas> childBranchPaths)
         {
             Trace.TraceInformation("Tfs branches found:");
             var branchesToProcess = new List<BranchDatas>();
@@ -335,8 +335,10 @@ namespace GitTfs.Commands
 
             _globals.Repository.GarbageCollect();
 
+            bool success = true;
             if (branchesToProcess.Any(b => !b.IsEntirelyFetched))
             {
+                success = false;
                 Trace.TraceWarning("warning: Some Tfs branches could not have been initialized:");
                 foreach (var branchNotInited in branchesToProcess.Where(b => !b.IsEntirelyFetched))
                 {
@@ -346,6 +348,7 @@ namespace GitTfs.Commands
             }
             if (branchesToProcess.Any(b => b.Error != null))
             {
+                success = false;
                 Trace.TraceWarning("warning: Some Tfs branches could not have been initialized or entirely fetched due to errors:");
                 foreach (var branchWithErrors in branchesToProcess.Where(b => b.Error != null))
                 {
@@ -356,7 +359,10 @@ namespace GitTfs.Commands
                         Trace.TraceInformation("   =>error:" + branchWithErrors.Error.Message);
                 }
                 Trace.TraceInformation("\nPlease report this case to the git-tfs developers! (report here : https://github.com/git-tfs/git-tfs/issues )");
+                return false;
             }
+
+            return success;
         }
 
         private IGitTfsRemote InitFromDefaultRemote()

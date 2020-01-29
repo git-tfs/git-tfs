@@ -10,10 +10,10 @@ using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using Microsoft.Win32;
-using SEP.Extensions;
 using GitTfs.Commands;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
+using GitTfs.Extensions;
 using GitTfs.Util;
 using StructureMap;
 using StructureMap.Attributes;
@@ -216,9 +216,25 @@ namespace GitTfs.VsCommon
         {
             var targetVersion = new ChangesetVersionSpec(targetChangeset);
             var searchTo = targetVersion;
-            var mergeInfo = VersionControl.QueryMerges(null, null, path, targetVersion, null, searchTo, RecursionType.Full);
-            if (mergeInfo.Length == 0) return -1;
-            return mergeInfo.Max(x => x.SourceVersion);
+
+            var changes = VersionControl.GetChangesForChangeset(targetChangeset, false, Int32.MaxValue, null, null, true).Where(change =>
+            {
+                return change.ChangeType.HasFlag(ChangeType.Merge) && change.Item.ServerItem.Contains(path);
+            });
+            if (changes.Empty())
+                return -1;
+            //retrieve the highest possible 'source' version
+            //this version gets use for
+            //  1. figuring out where the merge came from (only taking one, as git can only handle 1 anyway).
+            //     In theory a single changeset can contain merges from more than 1 source at a time
+            //  2. figuring out up to which changeset the merge source branch needs to be fetched
+            return changes.Max(change =>
+            {
+                var mergeSources = change.MergeSources.Where(mergeSource => mergeSource.VersionTo < targetChangeset);
+                if (mergeSources.Empty())
+                    return -1;
+                return mergeSources.Max(mergeSource => mergeSource.VersionTo);
+            });
         }
 
         public bool Is2008OrOlder
@@ -756,6 +772,7 @@ namespace GitTfs.VsCommon
         private int ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges,
             WorkItemCheckedInfo[] checkedInfos, string checkinComment)
         {
+#if NETFRAMEWORK
             using (var parentForm = new ParentForm())
             {
                 parentForm.Show();
@@ -765,6 +782,9 @@ namespace GitTfs.VsCommon
                 return dialog.Call<int>("Show", parentForm.Handle, workspace, pendingChanges, pendingChanges,
                                         checkinComment, null, null, checkedInfos);
             }
+#else
+            return -1;
+#endif
         }
 
         protected const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
@@ -948,7 +968,7 @@ namespace GitTfs.VsCommon
             }
         }
 
-        #region Fake classes for unshelve
+#region Fake classes for unshelve
 
         private class Unshelveable : IChangeset
         {
@@ -1116,7 +1136,7 @@ namespace GitTfs.VsCommon
             }
         }
 
-        #endregion
+#endregion
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
@@ -1315,7 +1335,7 @@ namespace GitTfs.VsCommon
 
         public bool IsExistingInTfs(string path)
         {
-            return VersionControl.ServerItemExists(path, ItemType.Any);
+            return VersionControl.ServerItemExists(path, VersionSpec.Latest, DeletedState.Any, ItemType.Any);
         }
 
         protected void ConvertFolderIntoBranch(string tfsRepositoryPath)

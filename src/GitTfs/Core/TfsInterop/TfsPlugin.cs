@@ -6,7 +6,9 @@ using System.Reflection;
 using StructureMap;
 using StructureMap.Graph;
 using System.IO;
+#if NETFRAMEWORK
 using Microsoft.Win32;
+#endif
 
 namespace GitTfs.Core.TfsInterop
 {
@@ -16,16 +18,12 @@ namespace GitTfs.Core.TfsInterop
         {
             var pluginLoader = new PluginLoader();
             var explicitVersion = Environment.GetEnvironmentVariable("GIT_TFS_CLIENT");
-            if (explicitVersion == "11") explicitVersion = "2012"; // GitTfs.Vs2012 was formerly called GitTfs.Vs11
             if (!string.IsNullOrEmpty(explicitVersion))
             {
                 return pluginLoader.TryLoadVsPluginVersion(explicitVersion) ??
                        pluginLoader.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");
             }
             return pluginLoader.TryLoadVsPluginVersion("2015", true) ??
-                   pluginLoader.TryLoadVsPluginVersion("2013") ??
-                   pluginLoader.TryLoadVsPluginVersion("2012") ??
-                   pluginLoader.TryLoadVsPluginVersion("2010") ??
                    pluginLoader.TryLoadVsPluginVersion("2015") ??
                    pluginLoader.Fail();
         }
@@ -37,18 +35,18 @@ namespace GitTfs.Core.TfsInterop
             private static readonly Dictionary<string, string> VisualStudioVersions = new Dictionary<string, string>()
             {
                 {"2015", "14.0" },
-                {"2013", "12.0" },
-                {"2012", "11.0" },
-                {"2010", "10.0" },
             };
 
             public TfsPlugin TryLoadVsPluginVersion(string version, bool isVisualStudioRequired = false)
             {
                 var assembly = "GitTfs.Vs" + version;
+#if NETFRAMEWORK
                 if (isVisualStudioRequired && !IsVisualStudioInstalled(version))
                 {
                     return null;
                 }
+#endif
+
                 return Try(assembly, "GitTfs.TfsPlugin");
             }
 
@@ -73,6 +71,7 @@ namespace GitTfs.Core.TfsInterop
                 return null;
             }
 
+#if NETFRAMEWORK
             private static bool IsVisualStudioInstalled(string version)
             {
                 if (!VisualStudioVersions.ContainsKey(version))
@@ -115,6 +114,7 @@ namespace GitTfs.Core.TfsInterop
                 }
                 return false;
             }
+#endif
 
             private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
             {

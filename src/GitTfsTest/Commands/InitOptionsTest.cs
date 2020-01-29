@@ -7,11 +7,11 @@ namespace GitTfs.Test.Commands
 {
     public class InitOptionsTest : BaseTest
     {
-        private readonly RhinoAutoMocker<InitOptions> mocks;
+        private readonly MoqAutoMocker<InitOptions> mocks;
 
         public InitOptionsTest()
         {
-            mocks = new RhinoAutoMocker<InitOptions>();
+            mocks = new MoqAutoMocker<InitOptions>();
         }
 
         #region autocrlf option tests

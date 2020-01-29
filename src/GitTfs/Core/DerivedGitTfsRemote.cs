@@ -190,12 +190,12 @@ namespace GitTfs.Core
         public bool ExportMetadatas { get; set; }
         public Dictionary<string, IExportWorkItem> ExportWorkitemsMapping { get; set; }
 
-        public int? GetInitialChangeset()
+        public int? GetFirstChangeset()
         {
             throw DerivedRemoteException;
         }
 
-        public void SetInitialChangeset(int? changesetId)
+        public void SetFirstChangeset(int? changesetId)
         {
             throw DerivedRemoteException;
         }
@@ -225,12 +225,7 @@ namespace GitTfs.Core
             throw DerivedRemoteException;
         }
 
-        public void QuickFetch()
-        {
-            throw DerivedRemoteException;
-        }
-
-        public void QuickFetch(int changesetId)
+        public void QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint)
         {
             throw DerivedRemoteException;
         }

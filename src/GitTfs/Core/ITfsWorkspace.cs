@@ -34,6 +34,12 @@ namespace GitTfs.Core
         /// Populates the workspace with a snapshot, as of the given changeset.
         /// </summary>
         void Get(int changesetId);
+
+		/// <summary>
+        /// Populates the workspace with specified items, as of the given changeset.
+        /// </summary>
+        void Get(int changesetId, IEnumerable<IItem> items);
+
         /// <summary>
         /// Gets the files changed in a given changeset.
         /// </summary>

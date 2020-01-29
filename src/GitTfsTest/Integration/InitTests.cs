@@ -1,15 +1,19 @@
 ﻿using System;
 using GitTfs.Core.TfsInterop;
+using Xunit.Abstractions;
 
 namespace GitTfs.Test.Integration
 {
     public class InitTests : BaseTest, IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private readonly IntegrationHelper h;
 
-        public InitTests()
+        public InitTests(ITestOutputHelper output)
         {
+            _output = output;
             h = new IntegrationHelper();
+            _output.WriteLine("Repository in folder: " + h.Workdir);
         }
 
         public void Dispose()
@@ -41,5 +45,14 @@ namespace GitTfs.Test.Integration
             h.AssertRef("MyProject", "refs/remotes/tfs/default", expectedSha);
             h.AssertRef("MyProject", "refs/tags/tfs/default/C1", expectedSha);
         }
+
+        [FactExceptOnUnix]
+        public void InitializesConfigUsingNoParallel()
+        {
+            h.SetupFake(r => { });
+            h.Run("init", "http://my-tfs.local/tfs", "$/MyProject", "MyProject", "--no-parallel");
+            h.AssertConfig("MyProject", "tfs-remote.default.noparallel", "true");
+        }
+
     }
 }

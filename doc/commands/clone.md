@@ -26,6 +26,7 @@ a TFS source tree and fetch all the changesets
 		  --except-regex=VALUE   a regex of exceptions to ignore-regex
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
+		  --no-parallel          Do not do parallel requests to TFS
 		  --all, --fetch-all
 		  --parents
 		  --authors=VALUE        Path to an Authors file to map TFS users to Git users
@@ -41,6 +42,10 @@ a TFS source tree and fetch all the changesets
 								 initialize the merged branches
 								 * all: Manage merged changesets and initialize
 								 all the branches during the clone
+		  --ignore-branches-regex=VALUE
+								 Don't initialize branches that match given regex
+		  --ignore-not-init-branches
+								 Don't initialize additional branches (only use what already was initialized)
 		  --batch-size=VALUE     Size of the batch of tfs changesets fetched (-1 for all in one batch)
       -c, --changeset=VALUE      The changeset to clone from (must be a number)
       -t, --up-to=VALUE          up-to changeset # (optional, -1 for up to 
@@ -222,6 +227,10 @@ The option `--batch-size` permit to specify the number of changesets fetched fro
 You could use this option to specify smaller batch size if git-tfs use too much memory because some changesets are huge.
 This option is saved in the git config file (key `git-tfs.batch-size`). See [config file doc](../config.md).
 Note: this option could also be specified during the `fetch`.
+
+## Cloning the whole TFS Project Collection
+
+You can clone all projects by specifying ``$/`` as the tfs-repository path. If you do not specify a git repository name, it will clone into ``tfs-collection``.
 
 ## After cloning a repository
 

@@ -54,15 +54,14 @@ namespace GitTfs.Core
         string Prefix { get; }
         bool ExportMetadatas { get; set; }
         Dictionary<string, IExportWorkItem> ExportWorkitemsMapping { get; set; }
-        int? GetInitialChangeset();
-        void SetInitialChangeset(int? changesetId);
+        int? GetFirstChangeset();
+        void SetFirstChangeset(int? changesetId);
         bool ShouldSkip(string path);
         IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null);
         string GetPathInGitRepo(string tfsPath);
         IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null);
         IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes);
-        void QuickFetch();
-        void QuickFetch(int changesetId);
+        void QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint = true);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force);
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies);
         bool HasShelveset(string shelvesetName);

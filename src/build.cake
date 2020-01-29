@@ -1,7 +1,7 @@
 //Don't define #tool here. Just add there to 'paket.dependencies' 'build' group
 //Don't use #addin here. Use #r to load the dll found in the nuget package.
 #r "./packages/build/Octokit/lib/net45/Octokit.dll"
-#r "./packages/build/Cake.Git/lib/net46/Cake.Git.dll"
+#r "./packages/build/Cake.Git/lib/net461/Cake.Git.dll"
 #r "System.Net.Http.dll"
 
 //////////////////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 readonly var Target = Argument("target", "Default");
 readonly var Configuration = Argument("configuration", "Debug");
-var IsDryRun = Argument<bool>("isDryRun", true);
+var runInDryRun = Argument<bool>("isDryRun", true);
 readonly var GitHubOwner = Argument("gitHubOwner", "git-tfs");
 readonly var GitHubRepository = Argument("gitHubRepository", "git-tfs");
 readonly var IdGitHubReleaseToDelete = Argument<int>("idGitHubReleaseToDelete", -1);
@@ -22,16 +22,17 @@ const string ApplicationName = "GitTfs";
 const string ZipFileTemplate = ApplicationName + "-{0}.zip";
 const string ApplicationPath = "./" + ApplicationName;
 const string PathToSln = ApplicationPath + ".sln";
-const string BuildDirectory = ApplicationPath + "/bin";
+const string TargetFramework = "net462"; //due to new dotnet csproj format
+readonly var OutDir = "bin/" + Configuration + "/" + TargetFramework + "/";
 const string buildAssetPath = @".\.build\";
 const string DownloadUrlTemplate ="https://github.com/git-tfs/git-tfs/releases/download/v{0}/";
 string ReleaseNotesPath = @"..\doc\release-notes\NEXT.md";
 const string ChocolateyBuildDir = buildAssetPath + "choc";
-readonly var OutputDirectory = BuildDirectory + "/" + Configuration;
+readonly var OutputDirectory = ApplicationPath + "/" + OutDir;
 const string TestProjectName = "GitTfsTest";
 
 // Define directories.
-readonly var buildDir = Directory(BuildDirectory) + Directory(Configuration);
+readonly var buildDir = Directory(OutputDirectory);
 string _semanticVersionShort = ""; //0.26.179
 string _semanticVersionLong  = ""; //0.26.179+4890c16f54f1b354aa198773aa9530a04d575932.master
 string _zipFilePath;
@@ -71,7 +72,7 @@ Task("DryRun").Description("Set the dry-run flag")
 	.Does(() =>
 {
 	Information("Doing a dry run!!!!");
-	IsDryRun = true;
+	runInDryRun = true;
 });
 
 Task("TagVersion").Description("Handle release note and tag the new version")
@@ -93,7 +94,7 @@ Task("TagVersion").Description("Handle release note and tag the new version")
 	}
 	Information("Next version will be:" + nextVersion);
 
-	if(!IsDryRun)
+	if(!runInDryRun)
 	{
 		Information("Creating release tag...");
 		var githubAccount = GetGithubUserAccount();
@@ -139,17 +140,6 @@ Task("Clean").Description("Clean the working directory")
 			.SetVerbosity(Verbosity.Minimal)
 			.WithTarget("Clean");
 	});
-});
-
-Task("InstallTfsModels").Description("Install the missing TFS object models to be able to build git-tfs")
-	.Does(() =>
-{
-	if(!BuildSystem.IsRunningOnAppVeyor)
-	{
-		//Could be call locally and manually to install all the versions needed to release a git-tfs version
-		ChocolateyInstall("tfs2012objectmodel");
-		ChocolateyInstall("tfs2013objectmodel");
-	}
 });
 
 Task("Restore-NuGet-Packages").Description("Restore nuget dependencies (with paket)")
@@ -201,7 +191,7 @@ Task("UpdateAssemblyInfo").Description("Update AssemblyInfo properties with the 
 	.Does(() =>
 {
 	CreateAssemblyInfo("CommonAssemblyInfo.cs", new AssemblyInfoSettings {
-		Company="SEP",
+		Company="GitTfs",
 		Product = "GitTfs",
 		Copyright = "Copyright © 2009-" + DateTime.Now.Year,
 		Version = _semanticVersionShort,
@@ -215,6 +205,10 @@ Task("Build").Description("Build git-tfs")
 	.IsDependentOn("UpdateAssemblyInfo")
 	.Does(() =>
 {
+		MSBuild(PathToSln, settings => {
+		settings.WithTarget("restore");
+	});
+
 	// Use MSBuild
 	// /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
 	MSBuild(PathToSln, settings => {
@@ -222,12 +216,6 @@ Task("Build").Description("Build git-tfs")
 		settings.SetConfiguration(Configuration)
 			.SetVerbosity(Verbosity.Minimal)
 			.SetMaxCpuCount(4);
-		if(_buildAllVersion)
-		{
-			settings
-				.WithTarget("GitTfs_Vs2012")
-				.WithTarget("GitTfs_Vs2013");
-		}
 		settings.WithTarget("GitTfs_Vs2015")
 			.WithTarget(TestProjectName);
 	});
@@ -253,7 +241,7 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 	EnsureDirectoryExists(buildAssetPath);
 	var coverageFile = System.IO.Path.Combine(buildAssetPath, "coverage.xml");
 	OpenCover(tool => {
-		tool.XUnit2("./"+ TestProjectName + "/bin/" + Configuration + "/" + TestProjectName +".dll", new XUnit2Settings()
+		tool.XUnit2("./"+ TestProjectName + "/" + OutDir + TestProjectName +".dll", new XUnit2Settings()
 		{
 			XmlReport = true,
 			OutputDirectory = ".",
@@ -263,7 +251,7 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 	new FilePath(coverageFile),
 	new OpenCoverSettings()
 		{
-			WorkingDirectory = MakeAbsolute(Directory("./"+ TestProjectName + "/bin/" + Configuration)),
+			WorkingDirectory = MakeAbsolute(Directory("./"+ TestProjectName + "/" + OutDir)),
 			Register = "user"
 		}
 		 .WithFilter("+[git-tfs*]*")
@@ -332,10 +320,10 @@ Task("Package").Description("Generate the release zip file")
 
 	//Prepare the zip
 	var libgit2NativeBinariesFolder = OutputDirectory + @"\NativeBinaries";
-	if(!DirectoryExists(libgit2NativeBinariesFolder))
-	{
-		CopyDirectory(@".\packages\LibGit2Sharp.NativeBinaries\runtimes\win7-x86\native", libgit2NativeBinariesFolder);
-	}
+
+
+
+
 	CopyDirectory(@"..\doc", OutputDirectory + @"\doc");
 	CopyFiles(@".\packages\**\Microsoft.WITDataStore*.dll", OutputDirectory + @"\GitTfs.Vs2015\");
 	CopyFiles(new[] {@"..\README.md", @"..\LICENSE", @"..\NOTICE"}, OutputDirectory);
@@ -346,28 +334,15 @@ Task("Package").Description("Generate the release zip file")
 	Zip(OutputDirectory, _zipFilePath);
 	if(!BuildSystem.IsLocalBuild)
 	{
-		var msiFile = @".\GitTfs.Setup\GitTfs.Setup.msi";
 		if(BuildSystem.IsRunningOnAppVeyor)
 		{
 			Information("Upload artifacts to AppVeyor...");
 			BuildSystem.AppVeyor.UploadArtifact(_zipFilePath);
-			if(FileExists(msiFile))
-				BuildSystem.AppVeyor.UploadArtifact(msiFile);
-			else
-			{
-				Information("Fail to find msi file to upload...");
-			}
 		}
 		if(BuildSystem.IsRunningOnVSTS)
 		{
 			Information("Upload artifacts to VSTS...");
 			BuildSystem.TFBuild.Commands.UploadArtifact("install", _zipFilePath, _zipFilename);
-			if(FileExists(msiFile))
-				BuildSystem.TFBuild.Commands.UploadArtifact("install", msiFile, "GitTfs.Setup.msi");
-			else
-			{
-				Information("Fail to find msi file to upload...");
-			}
 		}
 	}
 });
@@ -526,12 +501,16 @@ environmentVariables: {
 
 Task("CreateGithubRelease").Description("Create a GitHub release")
 	.IsDependentOn("Package")
-	.WithCriteria(!IsDryRun)
+	.WithCriteria(!runInDryRun)
 	.Does(() =>
 {
 	var client = GetGithubClient();
+	// change timeout to be able to upload the package without getting a timeout
+	client.SetRequestTimeout(TimeSpan.FromMinutes(30));
 
 	var releaseNotes = ReadReleaseNotes();
+
+	releaseNotes += Environment.NewLine +  "![Git-Tfs " + _releaseVersion + " download count](https://img.shields.io/github/downloads/git-tfs/git-tfs/" + _releaseVersion + "/total.svg)";
 
 	var newRelease = new Octokit.NewRelease(_releaseVersion);
 	newRelease.Name = _releaseVersion;
@@ -570,7 +549,6 @@ void UploadReleaseAsset(Octokit.GitHubClient client, Octokit.Release release)
 		RawData = archiveContents
 	};
 
-	client.SetRequestTimeout(TimeSpan.FromMinutes(30));
 	var uploadTask = client.Repository.Release.UploadAsset(release, assetUpload);
 	uploadTask.Wait();
 	if(uploadTask.Exception != null)
@@ -624,7 +602,7 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 		BuildSystem.TFBuild.Commands.UploadArtifact("install", chocolateyPackagePath, chocolateyPackage);
 	}
 
-	if(!IsDryRun)
+	if(!runInDryRun)
 	{
 		ChocolateyPush(chocolateyPackagePath, new ChocolateyPushSettings {
 			Source				= "https://chocolatey.org/",
@@ -677,7 +655,6 @@ Task("AppVeyorBuild").Description("Do the continuous integration build with AppV
 
 Task("AppVeyorRelease").Description("Do the release build with AppVeyor")
 	.IsDependentOn("TagVersion")
-	.IsDependentOn("InstallTfsModels")
 	.IsDependentOn("Run-Unit-Tests")
 	//.IsDependentOn("Run-Smoke-Tests") //TFS Projects on CodePlex are no more reachable
 	.IsDependentOn("Package")

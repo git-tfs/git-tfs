@@ -1,23 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{15A283E3-44EA-47DE-B1BD-B93CC8C08900}"
 	ProjectSection(SolutionItems) = preProject
 		paket.dependencies = paket.dependencies
 		paket.lock = paket.lock
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs", "GitTfs\GitTfs.csproj", "{55C169E0-93CC-488C-9885-1D4EAF4EA236}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs", "GitTfs\GitTfs.csproj", "{55C169E0-93CC-488C-9885-1D4EAF4EA236}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfsTest", "GitTfsTest\GitTfsTest.csproj", "{DDFB4746-2BCE-4B34-8E45-056324CF140D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfsTest", "GitTfsTest\GitTfsTest.csproj", "{DDFB4746-2BCE-4B34-8E45-056324CF140D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.VsFake", "GitTfs.VsFake\GitTfs.VsFake.csproj", "{20C411E8-49C7-11E1-A776-3FE84824019B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2012", "GitTfs.Vs2012\GitTfs.Vs2012.csproj", "{699CE23D-8BBD-4C15-82E9-7A628ACCA4C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.VsFake", "GitTfs.VsFake\GitTfs.VsFake.csproj", "{20C411E8-49C7-11E1-A776-3FE84824019B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{4A46FEEE-B8A2-4445-B9D1-8160520C7301}"
 	ProjectSection(SolutionItems) = preProject
-		..\doc\develop-on-mono.md = ..\doc\develop-on-mono.md
 		..\doc\release-notes\NEXT.md = ..\doc\release-notes\NEXT.md
 		..\README.md = ..\README.md
 		..\doc\running-the-unit-tests.md = ..\doc\running-the-unit-tests.md
@@ -31,14 +30,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChocolateyTemplates", "Choc
 		build\ChocolateyTemplates\gittfs.nuspec = build\ChocolateyTemplates\gittfs.nuspec
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2013", "GitTfs.Vs2013\GitTfs.Vs2013.csproj", "{101D3C78-27CC-446A-98EC-E2DE88BF0641}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Vs2015", "GitTfs.Vs2015\GitTfs.Vs2015.csproj", "{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTfs.Setup", "GitTfs.Setup\GitTfs.Setup.csproj", "{0A4AED21-360F-40CC-8870-B4D106B34CC1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{55C169E0-93CC-488C-9885-1D4EAF4EA236} = {55C169E0-93CC-488C-9885-1D4EAF4EA236}
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.Vs2015", "GitTfs.Vs2015\GitTfs.Vs2015.csproj", "{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7E25ACEF-468A-4E93-9549-8BBFC72294DF}"
 	ProjectSection(SolutionItems) = preProject
@@ -46,6 +38,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7E25ACEF
 		build.cake = build.cake
 		build.ps1 = build.ps1
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NDesk.Options", "NDesk.Options\NDesk.Options.csproj", "{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,23 +59,19 @@ Global
 		{20C411E8-49C7-11E1-A776-3FE84824019B}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{20C411E8-49C7-11E1-A776-3FE84824019B}.Release|AnyCPU.ActiveCfg = Release|Any CPU
 		{20C411E8-49C7-11E1-A776-3FE84824019B}.Release|AnyCPU.Build.0 = Release|Any CPU
-		{699CE23D-8BBD-4C15-82E9-7A628ACCA4C6}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
-		{699CE23D-8BBD-4C15-82E9-7A628ACCA4C6}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-		{699CE23D-8BBD-4C15-82E9-7A628ACCA4C6}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
-		{699CE23D-8BBD-4C15-82E9-7A628ACCA4C6}.Release|AnyCPU.Build.0 = Release|AnyCPU
-		{101D3C78-27CC-446A-98EC-E2DE88BF0641}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
-		{101D3C78-27CC-446A-98EC-E2DE88BF0641}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-		{101D3C78-27CC-446A-98EC-E2DE88BF0641}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
-		{101D3C78-27CC-446A-98EC-E2DE88BF0641}.Release|AnyCPU.Build.0 = Release|AnyCPU
 		{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
 		{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}.Release|AnyCPU.ActiveCfg = Release|Any CPU
 		{A7032F30-2C86-4BAF-8F62-33EB7BA917AF}.Release|AnyCPU.Build.0 = Release|Any CPU
-		{0A4AED21-360F-40CC-8870-B4D106B34CC1}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
-		{0A4AED21-360F-40CC-8870-B4D106B34CC1}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-		{0A4AED21-360F-40CC-8870-B4D106B34CC1}.Release|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
+		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Debug|AnyCPU.Build.0 = Debug|Any CPU
+		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Release|AnyCPU.ActiveCfg = Release|Any CPU
+		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Release|AnyCPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D260574D-8D88-442D-A97F-7CF7F02738BC}
 	EndGlobalSection
 EndGlobal

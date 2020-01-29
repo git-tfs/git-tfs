@@ -1,14 +1,14 @@
+using GitTfs.Core;
+using GitTfs.Core.TfsInterop;
+using GitTfs.Util;
+using Microsoft.TeamFoundation.Server;
+using Microsoft.TeamFoundation.VersionControl.Client;
+using Microsoft.TeamFoundation.VersionControl.Common;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.TeamFoundation.Server;
-using Microsoft.TeamFoundation.VersionControl.Client;
-using GitTfs.Core;
-using GitTfs.Core.TfsInterop;
-using GitTfs.Util;
-using Microsoft.TeamFoundation.VersionControl.Common;
 
 namespace GitTfs.VsCommon
 {
@@ -40,8 +40,9 @@ namespace GitTfs.VsCommon
                 new ChangesetVersionSpec(changesetNumber),
                 DeletedState.NonDeleted,
                 ItemType.Any,
-                true
-                );
+                // do not load the loading info
+                false);
+
             return _bridge.Wrap<WrapperForItem, Item>(itemSet.Items);
         }
 
@@ -468,22 +469,20 @@ namespace GitTfs.VsCommon
             Retry.Do(() => DoUntilNoFailures(() => _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll)));
         }
 
-        public void GetSpecificVersion(IChangeset changeset)
+        public void GetSpecificVersion(int changesetId, IEnumerable<IItem> items, bool noParallel)
         {
-            GetSpecificVersion(changeset.ChangesetId, changeset.Changes);
+            var version = new ChangesetVersionSpec(changesetId);
+            GetRequests(items.Select(e => new GetRequest(new ItemSpec(e.ServerItem, RecursionType.Full), version)), noParallel);
         }
 
-        public void GetSpecificVersion(int changesetId, IEnumerable<IChange> changes)
+        public void GetSpecificVersion(IChangeset changeset, bool noParallel)
         {
-            Retry.Do(() =>
-            {
-                var requests = from change in changes
-                               select
-                                   new GetRequest(
-                                       new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId),
-                                       changesetId);
-                DoUntilNoFailures(() => _workspace.Get(requests.ToArray(), GetOptions.Overwrite));
-            });
+            GetSpecificVersion(changeset.ChangesetId, changeset.Changes, noParallel);
+        }
+
+        public void GetSpecificVersion(int changesetId, IEnumerable<IChange> changes, bool noParallel)
+        {
+            GetRequests(changes.Select(change => new GetRequest(new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId), changesetId)), noParallel);
         }
 
         public string GetLocalItemForServerItem(string serverItem)
@@ -535,6 +534,28 @@ namespace GitTfs.VsCommon
             {
                 throw new GitTfsGatedCheckinException(gatedException.ShelvesetName, gatedException.AffectedBuildDefinitions, gatedException.CheckInTicket);
             }
+        }
+
+        public void GetRequests(IEnumerable<GetRequest> source, bool noParallel, int batchSize = 20)
+        {
+
+            source.ToBatch(batchSize).ForEach(batch =>
+            {
+                var items = batch;
+                Retry.Do(() =>
+                {
+                    while (items.Length > 0)
+                    {
+                        var status = _workspace.Get(items.ToArray(), GetOptions.Overwrite | GetOptions.GetAll);
+                        if (status.NumFailures == 0)
+                        {
+                            break;
+                        }
+
+                        items = status.GetFailures().Join(items, e => e.ServerItem, e => e.ItemSpec.Item, (failure, request) => request).ToArray();
+                    }
+                });
+            }, !noParallel);
         }
     }
 

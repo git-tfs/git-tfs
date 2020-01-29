@@ -1,4 +1,4 @@
-Since v0.28.0, git-tfs doesn't support checkin out of the box anymore on 64bits version of Windows (no problem for 32bits version).
+Since v0.28.0, git-tfs doesn't support checkin policies out of the box anymore on 64bits version of Windows (no problem for 32bits version).
 
 Checkin policies assemblies are distributed by Microsoft only in x86 mode.
 Since v0.28.0, Git-tfs is distributed as "AnyCPU".

@@ -1,4 +1,4 @@
-﻿using GitTfs.Commands;
+using GitTfs.Commands;
 using Xunit;
 
 namespace GitTfs.Test.Commands
@@ -8,13 +8,29 @@ namespace GitTfs.Test.Commands
         [Theory]
         [InlineData("-u=login", "--username=xxx")]
         [InlineData("-u login", "--username=xxx")]
+        [InlineData("-u  login", "--username=xxx")]
         [InlineData("--username=login", "--username=xxx")]
         [InlineData("--username login", "--username=xxx")]
+        [InlineData("--username  login", "--username=xxx")]
+        [InlineData("/u=login", "--username=xxx")]
+        [InlineData("/u login", "--username=xxx")]
+        [InlineData("/u  login", "--username=xxx")]
+        [InlineData("/username=login", "--username=xxx")]
+        [InlineData("/username login", "--username=xxx")]
+        [InlineData("/username  login", "--username=xxx")]
 
         [InlineData("-p=mypassword", "--password=xxx")]
         [InlineData("-p mypassword", "--password=xxx")]
+        [InlineData("-p  mypassword", "--password=xxx")]
         [InlineData("--password=mypassword", "--password=xxx")]
         [InlineData("--password mypassword", "--password=xxx")]
+        [InlineData("--password  mypassword", "--password=xxx")]
+        [InlineData("/p=mypassword", "--password=xxx")]
+        [InlineData("/p mypassword", "--password=xxx")]
+        [InlineData("/p  mypassword", "--password=xxx")]
+        [InlineData("/password=mypassword", "--password=xxx")]
+        [InlineData("/password mypassword", "--password=xxx")]
+        [InlineData("/password  mypassword", "--password=xxx")]
 
         [InlineData("git tfs clone https://tfs/tfs $/repo/branch . --branches=all --username=me --password=ExtraHardPassword",
             "git tfs clone https://tfs/tfs $/repo/branch . --branches=all --username=xxx --password=xxx")]

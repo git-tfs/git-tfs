@@ -8,11 +8,11 @@ namespace GitTfsTest.Core
 {
     public class TfsApiBridgeTest : BaseTest
     {
-        private readonly RhinoAutoMocker<TfsApiBridge> _mocks;
+        private readonly MoqAutoMocker<TfsApiBridge> _mocks;
 
         public TfsApiBridgeTest()
         {
-            _mocks = new RhinoAutoMocker<TfsApiBridge>();
+            _mocks = new MoqAutoMocker<TfsApiBridge>();
             _mocks.MockObjectFactory();
         }
 

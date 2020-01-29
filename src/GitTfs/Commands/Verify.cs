@@ -95,7 +95,7 @@ namespace GitTfs.Commands
         public int Verify(TfsChangesetInfo changeset, bool ignorePathCaseMismatch)
         {
             Trace.TraceInformation("Comparing TFS changeset " + changeset.ChangesetId + " to git commit " + changeset.GitCommit);
-            var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant().Replace("/", @"\"));
+            var tfsTree = changeset.Remote.GetChangeset(changeset.ChangesetId).GetTree().ToDictionary(entry => entry.FullName.ToLowerInvariant());
             var gitTree = changeset.Remote.Repository.GetCommit(changeset.GitCommit).GetTree().ToDictionary(entry => entry.Entry.Path.ToLowerInvariant());
 
             var all = tfsTree.Keys.Union(gitTree.Keys);
@@ -133,7 +133,7 @@ namespace GitTfs.Commands
         private bool Compare(TfsTreeEntry tfsTreeEntry, GitTreeEntry gitTreeEntry, bool ignorePathCaseMismatch)
         {
             var different = false;
-            if (!ignorePathCaseMismatch && tfsTreeEntry.FullName.Replace("/", @"\") != gitTreeEntry.FullName)
+            if (!ignorePathCaseMismatch && tfsTreeEntry.FullName != gitTreeEntry.FullName)
             {
                 Trace.TraceInformation("Name case mismatch:");
                 Trace.TraceInformation("  TFS: " + tfsTreeEntry.FullName);

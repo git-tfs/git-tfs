@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using System.IO;
 using GitTfs.VsCommon;
 using StructureMap;
@@ -14,8 +16,13 @@ namespace GitTfs.Vs2015
 
         protected override string GetDialogAssemblyPath()
         {
+#if NETFRAMEWORK
             var tfsExtensionsFolder = TryGetUserRegStringStartingWithName(@"Software\Microsoft\VisualStudio\14.0\ExtensionManager\EnabledExtensions", "Microsoft.VisualStudio.TeamFoundation.TeamExplorer.Extensions");
             return Path.Combine(tfsExtensionsFolder, DialogAssemblyName + ".dll");
+#else
+            Trace.TraceWarning("Checkin dialog is not supported with dotnet core version of git-tfs");
+            return string.Empty;
+#endif
         }
     }
 }

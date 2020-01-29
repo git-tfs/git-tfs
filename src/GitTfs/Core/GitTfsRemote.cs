@@ -18,6 +18,7 @@ namespace GitTfs.Core
         private readonly Globals _globals;
         private readonly RemoteOptions _remoteOptions;
         private readonly ConfigProperties _properties;
+        private int? firstChangesetId;
         private int? maxChangesetId;
         private string maxCommitHash;
         private bool isTfsAuthenticated;
@@ -73,14 +74,15 @@ namespace GitTfs.Core
             get { return false; }
         }
 
-        public int? GetInitialChangeset()
+        public int? GetFirstChangeset()
         {
-            return _properties.InitialChangeset;
+            return firstChangesetId;
         }
 
-        public void SetInitialChangeset(int? changesetId)
+        public void SetFirstChangeset(int? changesetId)
         {
-            _properties.InitialChangeset = changesetId;
+            Trace.WriteLine($"Set first changeset in branch to C{changesetId}");
+            firstChangesetId = changesetId;
         }
 
         public bool IsSubtree { get; private set; }
@@ -176,17 +178,12 @@ namespace GitTfs.Core
                 else
                 {
                     MaxChangesetId = 0;
-                    //Manage the special case where a .gitignore has been commited
-                    try
+
+                    // Manage the special case where a .gitignore has been committed
+                    var gitCommit = Repository.GetCommit(RemoteRef);
+                    if (gitCommit != null)
                     {
-                        var gitCommit = Repository.GetCommit(RemoteRef);
-                        if (gitCommit != null)
-                        {
-                            MaxCommitHash = gitCommit.Sha;
-                        }
-                    }
-                    catch (Exception)
-                    {
+                        MaxCommitHash = gitCommit.Sha;
                     }
                 }
             }
@@ -253,7 +250,13 @@ namespace GitTfs.Core
 
         private bool IsIgnored(string path)
         {
-            return Ignorance.IsIncluded(path) || Repository.IsPathIgnored(path);
+            var isIgnored = Ignorance.IsIncluded(path) || Repository.IsPathIgnored(path);
+            if (isIgnored)
+            {
+                Trace.TraceWarning("The file '{0}' is ignored due to `.gitignore` or ignore regex defined.", path);
+            }
+
+            return isIgnored;
         }
 
         private Bouncer _ignorance;
@@ -630,8 +633,16 @@ namespace GitTfs.Core
                         break;
                     }
                 }
-
-                if (mergeChangeset && tfsBranch != null && Repository.GetConfig(GitTfsConstants.IgnoreNotInitBranches) == true.ToString())
+                var filterRegex = Repository.GetConfig(GitTfsConstants.IgnoreBranchesRegex);
+                if (mergeChangeset && tfsBranch != null && !string.IsNullOrEmpty(filterRegex)
+                    && Regex.IsMatch(tfsBranch.Path, filterRegex, RegexOptions.IgnoreCase))
+                {
+                    Trace.TraceInformation("warning: skip filtered branch for path " + tfsBranch.Path + " (regex:" + filterRegex + ")");
+                    tfsRemote = null;
+                    omittedParentBranch = tfsBranch.Path + ";C" + parentChangesetId;
+                }
+                else if (mergeChangeset && tfsBranch != null &&
+                    string.Equals(Repository.GetConfig(GitTfsConstants.IgnoreNotInitBranches), true.ToString(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     Trace.TraceInformation("warning: skip not initialized branch for path " + tfsBranch.Path);
                     tfsRemote = null;
@@ -694,16 +705,23 @@ namespace GitTfs.Core
             return remote;
         }
 
-        public void QuickFetch()
+        public void QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint)
         {
-            var changeset = GetLatestChangeset();
-            quickFetch(changeset);
-        }
-
-        public void QuickFetch(int changesetId)
-        {
-            var changeset = Tfs.GetChangeset(changesetId, this);
-            quickFetch(changeset);
+            try
+            {
+                ITfsChangeset changeset;
+                if (changesetId < 0)
+                    changeset = GetLatestChangeset();
+                else
+                    changeset = Tfs.GetChangeset(changesetId, this);
+                quickFetch(changeset);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine("Quick fetch failed: " + ex.Message);
+                if (!IgnoreException(ex.Message, ignoreRestricted, printRestrictionHint))
+                    throw;
+            }
         }
 
         private void quickFetch(ITfsChangeset changeset)
@@ -724,8 +742,11 @@ namespace GitTfs.Core
             // only the folder creation and deletion operations due to the lowerBound being
             // detected as the root-side of the commit +1 (C1+1=C2) instead of referencing
             // the branch-side of the branching operation [C4].
-            if (_properties.InitialChangeset.HasValue)
-                lowerBoundChangesetId = Math.Max(MaxChangesetId + 1, _properties.InitialChangeset.Value);
+            if (_properties.InitialChangeset.HasValue || firstChangesetId.HasValue)
+            {
+                var firstChangesetInBranch = Math.Max(_properties.InitialChangeset ?? int.MinValue, firstChangesetId ?? int.MinValue);
+                lowerBoundChangesetId = Math.Max(MaxChangesetId + 1, firstChangesetInBranch);
+            }
             else
                 lowerBoundChangesetId = MaxChangesetId + 1;
             Trace.WriteLine(RemoteRef + ": Getting changesets from " + lowerBoundChangesetId +
@@ -989,7 +1010,21 @@ namespace GitTfs.Core
             return InitTfsBranch(remoteOptions, tfsRepositoryPath, rootChangesetId, fetchParentBranch, gitBranchNameExpected, renameResult);
         }
 
-        private IGitTfsRemote InitTfsBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null)
+        private bool IgnoreException(string message, bool ignoreRestricted, bool printHint = true)
+        {
+            // Detect exception "TF14098: Access Denied: User ??? needs
+            // Read permission(s) for at least one item in changeset ???."
+            if (message.Contains("TF14098"))
+            {
+                if (ignoreRestricted)
+                    return true;
+                if (printHint)
+                    Trace.TraceWarning("\nAccess to changeset denied. Try the '--ignore-restricted-changesets' option!\n");
+            }
+            return false;
+        }
+
+        private IGitTfsRemote InitTfsBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null, bool ignoreRestricted = false)
         {
             Trace.WriteLine("Begin process of creating branch for remote :" + tfsRepositoryPath);
             // TFS string representations of repository paths do not end in trailing slashes
@@ -1006,7 +1041,19 @@ namespace GitTfs.Core
             {
                 sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
                 if (fetchParentBranch && string.IsNullOrWhiteSpace(sha1RootCommit))
-                    sha1RootCommit = FindRootRemoteAndFetch(rootChangesetId, renameResult);
+                {
+                    try
+                    {
+                        sha1RootCommit = FindRootRemoteAndFetch(rootChangesetId, renameResult);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine("Getting changeset fetch failed: " + ex.Message);
+                        if (!IgnoreException(ex.Message, ignoreRestricted))
+                            throw;
+                    }
+                }
+
                 if (string.IsNullOrWhiteSpace(sha1RootCommit))
                     return null;
 

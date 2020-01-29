@@ -2,16 +2,20 @@
 using GitTfs.Core.TfsInterop;
 using Xunit;
 using LibGit2Sharp;
+using Xunit.Abstractions;
 
 namespace GitTfs.Test.Integration
 {
     public class BootstrapTests : BaseTest, IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private readonly IntegrationHelper h = new IntegrationHelper();
 
-        public BootstrapTests()
+        public BootstrapTests(ITestOutputHelper output)
         {
+            _output = output;
             h.SetupFake(_ => { });
+            _output.WriteLine("Repository in folder: " + h.Workdir);
         }
 
         public void Dispose()

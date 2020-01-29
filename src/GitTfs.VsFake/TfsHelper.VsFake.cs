@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using GitTfs.Commands;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Util;
 using StructureMap;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace GitTfs.VsFake
 {
@@ -258,12 +258,17 @@ namespace GitTfs.VsFake
                 _repositoryRoot = repositoryRoot;
             }
 
-            public void GetSpecificVersion(IChangeset changeset)
+            public void GetSpecificVersion(int changesetId, IEnumerable<IItem> items, bool noParallel)
             {
-                GetSpecificVersion(changeset.ChangesetId, changeset.Changes);
+                throw new NotImplementedException();
             }
 
-            public void GetSpecificVersion(int changeset, IEnumerable<IChange> changes)
+            public void GetSpecificVersion(IChangeset changeset, bool noParallel)
+            {
+                GetSpecificVersion(changeset.ChangesetId, changeset.Changes, noParallel);
+            }
+
+            public void GetSpecificVersion(int changeset, IEnumerable<IChange> changes, bool noParallel)
             {
                 var repositoryRoot = _repositoryRoot.ToLower();
                 if (!repositoryRoot.EndsWith("/")) repositoryRoot += "/";

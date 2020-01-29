@@ -3,7 +3,7 @@ using System.Collections;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace SEP.Extensions
+namespace GitTfs.Extensions
 {
     public static class InspectExtensions
     {

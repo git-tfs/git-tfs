@@ -8,7 +8,7 @@ The `checkin` command differs from [rcheckin](rcheckin.md) in that the latter mi
 
 ## Synopsis
 
-    Usage: git-tfs checkin [options] [ref-to-shelve]
+    Usage: git-tfs checkin [options] [ref-to-checkin]
     where options are:
         -d, --debug
             Show debug output about everything git-tfs does

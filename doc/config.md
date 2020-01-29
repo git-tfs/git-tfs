@@ -65,3 +65,7 @@ key for the remote `default` is `tfs-remote.default.url`.
   can be set to `true` to make git-tfs create a tag for each
   TFS commit. This is disabled by default, because creating
   a lot of tags will slow down your git operations.
+* `noparallel`
+   can be set to `true` to make disable parallel access to the TFS.
+   This can be useful in cases where the TFS has problems with 
+   parallel access and reports `TF400030`. (See issue #1242)

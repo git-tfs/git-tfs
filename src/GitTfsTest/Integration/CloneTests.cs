@@ -4,6 +4,7 @@ using LibGit2Sharp;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Test.Fixtures;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace GitTfs.Test.Integration
 {
@@ -12,11 +13,14 @@ namespace GitTfs.Test.Integration
     //      This will cause the hashes to differ on computers in different time zones.
     public class CloneTests : BaseTest, IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private readonly IntegrationHelper h;
 
-        public CloneTests()
+        public CloneTests(ITestOutputHelper output)
         {
+            _output = output;
             h = new IntegrationHelper();
+            _output.WriteLine("Repository in folder: " + h.Workdir);
         }
 
         public void Dispose()
@@ -242,6 +246,7 @@ namespace GitTfs.Test.Integration
                 commit: "843a915aea98894fef51379d68a0f309e8537dd5",
                 tree: "cf8a497b3a40028bee363a613fe156b9d37350bb");
         }
+
         private readonly string[] RefsInNewClone = new[] { "HEAD", "refs/heads/master", "refs/remotes/tfs/default" };
 
         /// <summary>
@@ -299,6 +304,37 @@ namespace GitTfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--ignore-regex=.exe$");
             h.AssertFileInWorkspace("MyProject", "README", "tldr\nanother line\n");
             h.AssertNoFileInWorkspace("MyProject", "app.exe");
+        }
+
+        [FactExceptOnUnix]
+        public void LineEndingsNormalizedWhenAutocrlf()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Add some files", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tld \r\n another line \r\n");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject","--autocrlf=true");
+            
+            h.AssertFileInWorkspace("MyProject", "README", "tld \r\n another line \r\n");
+            h.AssertFileInIndex("MyProject", "README", "tld \n another line \n");
+        }
+        
+        [FactExceptOnUnix]
+        public void LineNotNormalizedWhenAutocrlfFalse()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Add some files", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                 .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tld \r\n another line \r\n");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--autocrlf=false");
+            h.AssertFileInWorkspace("MyProject", "README", "tld \r\n another line \r\n");
+            h.AssertFileInIndex("MyProject", "README", "tld \r\n another line \r\n");
         }
 
         [FactExceptOnUnix]
