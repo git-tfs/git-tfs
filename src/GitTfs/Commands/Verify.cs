@@ -15,15 +15,17 @@ namespace GitTfs.Commands
     [Description("verify [options] [commitish]\n   ex: git-tfs verify\n       git-tfs verify 889ad74c162\n       git-tfs verify tfs/mybranch\n       git-tfs verify --all")]
     public class Verify : GitTfsCommand
     {
+        private readonly RemoteOptions _remoteOptions;
         private readonly Help _helper;
         private readonly Globals _globals;
         private readonly TreeVerifier _verifier;
 
-        public Verify(Globals globals, TreeVerifier verifier, Help helper)
+        public Verify(Globals globals, TreeVerifier verifier, Help helper, RemoteOptions remoteOptions)
         {
             _globals = globals;
             _verifier = verifier;
             _helper = helper;
+            _remoteOptions = remoteOptions;
         }
 
         public OptionSet OptionSet
@@ -31,12 +33,12 @@ namespace GitTfs.Commands
             get
             {
                 return new OptionSet()
-            {
+                {
                     { "ignore-path-case-mismatch", "Ignore the case mismatch in the path when comparing the files.",
                         v => IgnorePathCaseMismatch = v != null },
                     { "all", "Verify all the tfs remotes",
                         v => VerifyAllRemotes = v != null },
-            };
+                }.Merge(_remoteOptions.OptionSet);
             }
         }
 

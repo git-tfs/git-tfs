@@ -19,7 +19,6 @@ namespace GitTfs.Core
         private IDictionary<string, IGitTfsRemote> _cachedRemotes;
         private readonly Repository _repository;
         private readonly RemoteConfigConverter _remoteConfigReader;
-        private readonly bool _disableGitignoreSupport;
 
         public GitRepository(string gitDir, IContainer container, Globals globals, RemoteConfigConverter remoteConfigReader)
             : base(container)
@@ -29,12 +28,6 @@ namespace GitTfs.Core
             GitDir = gitDir;
             _repository = new Repository(GitDir);
             _remoteConfigReader = remoteConfigReader;
-
-            var value = GetConfig<string>(GitTfsConstants.DisableGitignoreSupport, null);
-            bool disableGitignoreSupport;
-            if (value != null && bool.TryParse(value, out disableGitignoreSupport))
-                _disableGitignoreSupport = disableGitignoreSupport;
-
         }
 
         ~GitRepository()
@@ -778,7 +771,7 @@ namespace GitTfs.Core
 
         public bool IsPathIgnored(string relativePath)
         {
-            return !_disableGitignoreSupport && _repository.Ignore.IsPathIgnored(relativePath);
+            return _repository.Ignore.IsPathIgnored(relativePath);
         }
 
         public string CommitGitIgnore(string pathToGitIgnoreFile)
@@ -796,11 +789,15 @@ namespace GitTfs.Core
 
             _repository.Refs.Add(ShortToTfsRemoteName("default"), new ObjectId(sha));
             _repository.Refs.Add(ShortToLocalName("master"), new ObjectId(sha));
+
+            return sha;
+        }
+
+        public void UseGitIgnore(string pathToGitIgnoreFile)
+        {
             //Should add ourself the rules to the temporary rules because committing directly to the git database
             //prevent libgit2sharp to detect the new .gitignore file
             _repository.Ignore.AddTemporaryRules(File.ReadLines(pathToGitIgnoreFile));
-
-            return sha;
         }
 
         public IDictionary<int, string> GetCommitChangeSetPairs()

@@ -40,6 +40,7 @@ namespace GitTfs.Core
         string[] TfsSubtreePaths { get; }
         string IgnoreRegexExpression { get; set; }
         string IgnoreExceptRegexExpression { get; set; }
+        string GitIgnorePath { get; set; }
         bool Autotag { get; set; }
         string TfsUsername { get; set; }
         string TfsPassword { get; set; }
@@ -57,6 +58,8 @@ namespace GitTfs.Core
         int? GetFirstChangeset();
         void SetFirstChangeset(int? changesetId);
         bool ShouldSkip(string path);
+        bool IsIgnored(string path);
+        bool IsInDotGit(string path);
         IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int rootChangesetId = -1, bool fetchParentBranch = false, string gitBranchNameExpected = null, IRenameResult renameResult = null);
         string GetPathInGitRepo(string tfsPath);
         IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null);

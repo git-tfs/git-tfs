@@ -24,8 +24,10 @@ namespace GitTfs.Test.Core
                 RemoteMock.Setup(r => r.GetPathInGitRepo(It.IsAny<string>()))
                     .Returns(new Func<string, string>(path => path != null && path.StartsWith("$/Project/") ? path.Replace("$/Project/", "") : null));
                 // Make this remote ignore any path that includes "ignored".
-                RemoteMock.Setup(r => r.ShouldSkip(It.IsAny<string>()))
-                    .Returns(new Func<string, bool>(s => s.Contains("ignored")));
+                RemoteMock.Setup(r => r.IsIgnored(It.IsAny<string>()))
+                    .Returns(new Func<string, bool>(s => !string.IsNullOrEmpty(s) && s.Contains("ignored")));
+                RemoteMock.Setup(r => r.IsInDotGit(It.IsAny<string>()))
+                    .Returns(new Func<string, bool>(s => !string.IsNullOrEmpty(s) && s.Contains("\\.git\\")));
             }
 
             private ChangeSieve _changeSieve;
@@ -80,7 +82,7 @@ namespace GitTfs.Test.Core
             public void Dispose()
             {
                 BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.AtLeastOnce);
-                BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.AtLeastOnce);
+                BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
             }
 
             protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges)
@@ -265,6 +267,8 @@ namespace GitTfs.Test.Core
             {
                 BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.Never);
                 BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsIgnored(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsInDotGit(It.IsAny<string>()), Times.Never);
             }
         }
 
@@ -347,7 +351,10 @@ namespace GitTfs.Test.Core
                     ApplicableChange.Delete("5-wasincluded.txt"),
                     ApplicableChange.Delete("6-wasignored.txt"),
                     ApplicableChange.Update("2-included.txt"),
-                    ApplicableChange.Update("6-included.txt"));
+                    ApplicableChange.Update("6-included.txt"),
+                    ApplicableChange.Ignore("0-ignored.txt"),
+                    ApplicableChange.Ignore("4-ignored.txt"),
+                    ApplicableChange.Ignore("5-ignored.txt"));
             }
         }
 
@@ -558,6 +565,8 @@ namespace GitTfs.Test.Core
             {
                 BaseFixture.RemoteMock.Verify(r => r.GetPathInGitRepo(It.IsAny<string>()), Times.Exactly(4));
                 BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsIgnored(It.IsAny<string>()), Times.Never);
+                BaseFixture.RemoteMock.Verify(r => r.IsInDotGit(It.IsAny<string>()), Times.Never);
             }
         }
 

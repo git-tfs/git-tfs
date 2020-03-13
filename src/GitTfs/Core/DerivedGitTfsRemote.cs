@@ -138,6 +138,12 @@ namespace GitTfs.Core
             set { throw DerivedRemoteException; }
         }
 
+        public string GitIgnorePath
+        {
+            get { throw DerivedRemoteException; }
+            set { throw DerivedRemoteException; }
+        }
+
         public IGitRepository Repository
         {
             get { throw DerivedRemoteException; }
@@ -201,6 +207,16 @@ namespace GitTfs.Core
         }
 
         public bool ShouldSkip(string path)
+        {
+            throw DerivedRemoteException;
+        }
+
+        public bool IsIgnored(string path)
+        {
+            throw DerivedRemoteException;
+        }
+
+        public bool IsInDotGit(string path)
         {
             throw DerivedRemoteException;
         }

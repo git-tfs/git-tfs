@@ -18,6 +18,7 @@ namespace GitTfs.Core
         private readonly Globals _globals;
         private readonly RemoteOptions _remoteOptions;
         private readonly ConfigProperties _properties;
+        private readonly bool _disableGitignoreSupport;
         private int? firstChangesetId;
         private int? maxChangesetId;
         private string maxCommitHash;
@@ -42,10 +43,24 @@ namespace GitTfs.Core
             Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
             IgnoreRegexExpression = info.IgnoreRegex;
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
+            GitIgnorePath = _remoteOptions.GitIgnorePath ?? info.GitIgnorePath;
+            UseGitIgnore = !_remoteOptions.NoGitIgnore && (_remoteOptions.UseGitIgnore || IsGitIgnoreSupportEnabled());
 
             Autotag = info.Autotag;
 
             IsSubtree = CheckSubtree();
+        }
+
+        private bool IsGitIgnoreSupportEnabled()
+        {
+            var isGitIgnoreSupportDisabled = true;
+
+            var value = Repository.GetConfig<string>(GitTfsConstants.DisableGitignoreSupport, null);
+            bool disableGitignoreSupport;
+            if (value != null && bool.TryParse(value, out disableGitignoreSupport))
+                isGitIgnoreSupportDisabled = disableGitignoreSupport;
+
+            return !isGitIgnoreSupportDisabled;
         }
 
         private bool CheckSubtree()
@@ -139,6 +154,8 @@ namespace GitTfs.Core
 
         public string IgnoreRegexExpression { get; set; }
         public string IgnoreExceptRegexExpression { get; set; }
+        public string GitIgnorePath { get; set; }
+        public bool UseGitIgnore { get; set; }
         public IGitRepository Repository { get; set; }
         public ITfsHelper Tfs { get; set; }
 
@@ -248,15 +265,14 @@ namespace GitTfs.Core
             return IsInDotGit(path) || IsIgnored(path);
         }
 
-        private bool IsIgnored(string path)
+        public bool IsIgnored(string path)
         {
-            var isIgnored = Ignorance.IsIncluded(path) || Repository.IsPathIgnored(path);
-            if (isIgnored)
-            {
-                Trace.TraceWarning("The file '{0}' is ignored due to `.gitignore` or ignore regex defined.", path);
-            }
+            return Ignorance.IsIncluded(path) || IsPathIgnored(path);
+        }
 
-            return isIgnored;
+        private bool IsPathIgnored(string path)
+        {
+            return UseGitIgnore && Repository.IsPathIgnored(path);
         }
 
         private Bouncer _ignorance;
@@ -276,7 +292,7 @@ namespace GitTfs.Core
             }
         }
 
-        private bool IsInDotGit(string path)
+        public bool IsInDotGit(string path)
         {
             return isInDotGit.IsMatch(path);
         }

@@ -31,6 +31,8 @@ namespace GitTfs.Core
                         remote.IgnoreRegex = entry.Value;
                     else if (key == "ignore-except")
                         remote.IgnoreExceptRegex = entry.Value;
+                    else if (key == "gitignore-path")
+                        remote.GitIgnorePath = entry.Value;
                     else if (key == "legacy-urls")
                         remote.Aliases = entry.Value.Split(',');
                     else if (key == "autotag")
@@ -53,6 +55,7 @@ namespace GitTfs.Core
                 yield return c(prefix + "password", remote.Password);
                 yield return c(prefix + "ignore-paths", remote.IgnoreRegex);
                 yield return c(prefix + "ignore-except", remote.IgnoreExceptRegex);
+                yield return c(prefix + "gitignore-path", remote.GitIgnorePath);
                 yield return c(prefix + "legacy-urls", remote.Aliases == null ? null : string.Join(",", remote.Aliases));
                 yield return c(prefix + "autotag", remote.Autotag ? "true" : null);
                 yield return c(prefix + "noparallel", remote.NoParallel ? "true" : null);

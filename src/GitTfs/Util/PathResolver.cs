@@ -33,9 +33,14 @@ namespace GitTfs.Util
             return Lookup(pathInGitRepo);
         }
 
-        public bool ShouldIncludeGitItem(string gitPath)
+        public bool IsIgnored(string path)
         {
-            return !string.IsNullOrEmpty(gitPath) && !_remote.ShouldSkip(gitPath);
+            return _remote.IsIgnored(path);
+        }
+
+        public bool IsInDotGit(string path)
+        {
+            return _remote.IsInDotGit(path);
         }
 
         public bool Contains(string pathInGitRepo)

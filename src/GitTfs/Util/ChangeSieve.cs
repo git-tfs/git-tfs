@@ -11,6 +11,7 @@ namespace GitTfs.Util
     {
         Update,
         Delete,
+        Ignore,
     }
 
     public class ApplicableChange
@@ -27,6 +28,11 @@ namespace GitTfs.Util
         public static ApplicableChange Delete(string path)
         {
             return new ApplicableChange { Type = ChangeType.Delete, GitPath = path };
+        }
+
+        public static ApplicableChange Ignore(string path)
+        {
+            return new ApplicableChange { Type = ChangeType.Ignore, GitPath = path };
         }
     }
 
@@ -76,8 +82,7 @@ namespace GitTfs.Util
         /// <summary>
         /// Get all the changes of a changeset to apply
         /// </summary>
-        /// <param name="forceGetChanges">true - force get changes ignoring check what should be applied. </param>
-        public IEnumerable<ApplicableChange> GetChangesToApply(bool forceGetChanges = false)
+        public IEnumerable<ApplicableChange> GetChangesToApply()
         {
             if (DeletesProject)
                 return Enumerable.Empty<ApplicableChange>();
@@ -86,6 +91,7 @@ namespace GitTfs.Util
             {
                 Deleted = new List<ApplicableChange>(),
                 Updated = new List<ApplicableChange>(),
+                Ignored = new List<ApplicableChange>(),
             };
             foreach (var change in NamedChanges)
             {
@@ -96,32 +102,37 @@ namespace GitTfs.Util
 
                 if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete))
                 {
-                    if (change.GitPath != null)
+                    if (!IsGitPathMissing(change))
                         compartments.Deleted.Add(ApplicableChange.Delete(change.GitPath));
-                }
-                else if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
-                {
-                    var oldInfo = _resolver.GetGitObject(GetPathBeforeRename(change.Change.Item));
-                    if (oldInfo != null)
-                        compartments.Deleted.Add(ApplicableChange.Delete(oldInfo.Path));
-                    if (IncludeInApply(change))
-                    {
-                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath,
-                            oldInfo != null ? oldInfo.Mode : Mode.NonExecutableFile));
-                    }
                 }
                 else
                 {
-                    if (forceGetChanges || IncludeInApply(change))
-                    {
-                        // for get changes only on first change set
-                        forceGetChanges = false;
+                    var mode = change.Info != null ? change.Info.Mode : Mode.NonExecutableFile;
 
-                        compartments.Updated.Add(ApplicableChange.Update(change.GitPath, change.Info.Mode));
+                    if (change.Change.ChangeType.IncludesOneOf(TfsChangeType.Rename))
+                    {
+                        var oldInfo = _resolver.GetGitObject(GetPathBeforeRename(change.Change.Item));
+                        if (oldInfo != null)
+                        {
+                            compartments.Deleted.Add(ApplicableChange.Delete(oldInfo.Path));
+
+                            mode = oldInfo.Mode;
+                        }
+                    }
+
+                    if (!IsItemDeleted(change)
+                        && !IsGitPathMissing(change)
+                        && !IsGitPathInDotGit(change)
+                        && !IsIgnorable(change))
+                    {
+                        if (IsGitPathIgnored(change))
+                            compartments.Ignored.Add(ApplicableChange.Ignore(change.GitPath));
+                        else
+                            compartments.Updated.Add(ApplicableChange.Update(change.GitPath, mode));
                     }
                 }
             }
-            return compartments.Deleted.Concat(compartments.Updated);
+            return compartments.Deleted.Concat(compartments.Updated).Concat(compartments.Ignored);
         }
 
         private bool? _deletesProject;
@@ -158,13 +169,16 @@ namespace GitTfs.Util
 
         private bool IncludeInFetch(NamedChange change)
         {
-            if (IgnorableChangeType(change.Change.ChangeType) && _resolver.Contains(change.GitPath))
-            {
-                return false;
-            }
-
-            return _resolver.ShouldIncludeGitItem(change.GitPath);
+            return !IsIgnorable(change)
+                && !IsGitPathMissing(change)
+                && !IsGitPathInDotGit(change)
+                && !IsGitPathIgnored(change);
         }
+
+        private bool IsIgnorable(NamedChange change)
+        {
+            return IgnorableChangeType(change.Change.ChangeType) && _resolver.Contains(change.GitPath);
+         }
 
         private bool IgnorableChangeType(TfsChangeType changeType)
         {
@@ -173,9 +187,39 @@ namespace GitTfs.Util
             return isBranchOrMerge && !isContentChange;
         }
 
-        private bool IncludeInApply(NamedChange change)
+        private bool IsGitPathMissing(NamedChange change)
         {
-            return IncludeInFetch(change) && change.Change.Item.DeletionId == 0;
+            return string.IsNullOrEmpty(change.GitPath);
+        }
+
+        private bool IsGitPathInDotGit(NamedChange change)
+        {
+            return IsInDotGit(change.GitPath);
+        }
+
+        private bool IsInDotGit(string path)
+        {
+            return _resolver.IsInDotGit(path);
+        }
+
+        private bool IsGitPathIgnored(NamedChange change)
+        {
+            return IsIgnored(change.GitPath);
+        }
+
+        private bool IsIgnored(string path)
+        {
+            return _resolver.IsIgnored(path);
+        }
+
+        private bool IsItemDeleted(NamedChange change)
+        {
+            return IsDeleted(change.Change.Item);
+        }
+
+        private bool IsDeleted(IItem item)
+        {
+            return item.DeletionId != 0;
         }
 
         private string GetPathBeforeRename(IItem item)
