@@ -98,6 +98,7 @@ namespace GitTfs.Core
             var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, checkinComment, checkinNote, workItemInfos);
             if (checkinProblems.HasErrors)
             {
+                bool showCheckinPolicyHint = false;
                 foreach (var message in checkinProblems.Messages)
                 {
                     if (options.Force && string.IsNullOrWhiteSpace(options.OverrideReason) == false)
@@ -107,10 +108,12 @@ namespace GitTfs.Core
                     else
                     {
                         Trace.TraceError("[ERROR] " + message);
-
-                        Trace.TraceInformation("Note: If the checkin policy fails because the assemblies failed to load, please run the file `enable_checkin_policies_support.bat` in the git-tfs directory and try again.");
+                        showCheckinPolicyHint = true;
                     }
                 }
+                if (showCheckinPolicyHint)
+                    Trace.TraceInformation("Note: If the checkin policy fails because the assemblies failed to load, please run the file `enable_checkin_policies_support.bat` in the git-tfs directory and try again.");
+
                 if (!options.Force)
                 {
                     throw new GitTfsException("No changes checked in.");
