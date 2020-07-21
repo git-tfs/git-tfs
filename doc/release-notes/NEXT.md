@@ -7,3 +7,4 @@
 * Pin paket version to 5.251.0 to avoid spurious changes during build in paket generated files
 * Update ReportGenerator from 3.0.2 to 4.7.1
 * Update Moq from 4.3.1 to 4.14.7
+* Update LibGit2Sharp from 0.26.1 to 0.26.2
