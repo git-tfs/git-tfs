@@ -57,6 +57,7 @@ namespace GitTfs.Core.TfsInterop
             /// </summary>
             public static IReadOnlyList<string> SupportedVersions => new List<string>
             {
+                "2019",
                 "2017",
                 "2015",
                 "Fake"
