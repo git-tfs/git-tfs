@@ -76,7 +76,6 @@ namespace GitTfs.Test.Commands
             tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, null)).Returns(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
 
             trunkGitTfsRemoteMock.Name = nameof(trunkGitTfsRemoteMock);
-            trunkGitTfsRemoteMock.Setup(r => r.Fetch(It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<IRenameResult>())).Returns(new GitTfsRemote.FetchResult() { IsSuccess = true }).Verifiable();
             trunkGitTfsRemoteMock.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranchRemoteMock.Object).Verifiable();
             trunkGitTfsRemoteMock.Object.Tfs = tfsHelperMock.Object;
 
@@ -94,7 +93,7 @@ namespace GitTfs.Test.Commands
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("$/MyProject/MyBranch", expectedGitBranchName));
 
             gitRepositoryMock.Verify();
-            //trunkGitTfsRemoteMock.Verify();
+            trunkGitTfsRemoteMock.Verify();
             newBranchRemoteMock.Verify();
         }
 
