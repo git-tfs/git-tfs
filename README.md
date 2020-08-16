@@ -100,8 +100,8 @@ Have a look to more detailed git-tfs use cases:
 * [Manage TFS branches with git-tfs](doc/usecases/manage_tfs_branches.md)
 * [Migrate your history from TFSVC to a git repository](doc/usecases/migrate_tfs_to_git.md)
 * [Working with shelvesets](doc/usecases/working_with_shelvesets.md)
-* [Git and Tfs (ProGit v2 Book)](https://git-scm.com/book/en/v2/Git-and-Other-Systems-Git-as-a-Client#_git_and_tfs)
-* [Migrate from Tfs to Git (ProGit v2 Book)](https://git-scm.com/book/en/v2/Git-and-Other-Systems-Migrating-to-Git#_git_tfs)
+* [Git (ProGit v2 book)](https://git-scm.com/book/en/v2)
+* [Last ProGit2 release to cover Git Tfs and migration](https://github.com/progit/progit2/releases/tag/2.1.245)
 
 ## Available commands / options
 
