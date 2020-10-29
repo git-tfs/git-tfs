@@ -1,6 +1,6 @@
 //Don't define #tool here. Just add there to 'paket.dependencies' 'build' group
 //Don't use #addin here. Use #r to load the dll found in the nuget package.
-#r "./packages/build/Octokit/lib/net45/Octokit.dll"
+#r "./packages/build/Octokit/lib/net46/Octokit.dll"
 #r "./packages/build/Cake.Git/lib/net461/Cake.Git.dll"
 #r "System.Net.Http.dll"
 
