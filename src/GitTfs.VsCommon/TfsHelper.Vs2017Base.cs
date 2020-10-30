@@ -1,9 +1,13 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
+
 using StructureMap;
 using GitTfs.Core.TfsInterop;
 using Microsoft.TeamFoundation.Build.Client;
@@ -35,7 +39,7 @@ namespace GitTfs.VsCommon
         /// Path to the top level directory of the Visual studio installation directory,
         /// e.g. <c>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise</c>
         /// </returns>
-        protected override string GetVsInstallDir()
+        protected string GetVsInstallDir()
         {
             return @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise";
         }
@@ -71,6 +75,17 @@ namespace GitTfs.VsCommon
         protected override string GetDialogAssemblyPath()
         {
             return Path.Combine(GetVsInstallDir(), myTeamExplorerFolder, DialogAssemblyName + ".dll");
+        }
+        protected override Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
+        {
+            Trace.WriteLine("Looking for assembly " + args.Name + " ...");
+            string folderPath = Path.Combine(GetVsInstallDir(), "PrivateAssemblies");
+            string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
+            if (File.Exists(assemblyPath) == false)
+                return null;
+            Trace.WriteLine("... loading " + args.Name + " from " + assemblyPath);
+            Assembly assembly = Assembly.LoadFrom(assemblyPath);
+            return assembly;
         }
     }
 }

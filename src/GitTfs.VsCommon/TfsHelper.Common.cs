@@ -1351,22 +1351,10 @@ namespace GitTfs.VsCommon
             VersionControl.CreateBranchObject(new BranchProperties(new ItemIdentifier(tfsRepositoryPath)));
         }
 
-        protected abstract string GetVsInstallDir();
-
         /// <summary>
         /// Help the TFS client find checkin policy assemblies.
         /// </summary>
-        private Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
-        {
-            Trace.WriteLine("Looking for assembly " + args.Name + " ...");
-            string folderPath = Path.Combine(GetVsInstallDir(), "PrivateAssemblies");
-            string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
-            if (File.Exists(assemblyPath) == false)
-                return null;
-            Trace.WriteLine("... loading " + args.Name + " from " + assemblyPath);
-            Assembly assembly = Assembly.LoadFrom(assemblyPath);
-            return assembly;
-        }
+        protected abstract Assembly LoadFromVsFolder(object sender, ResolveEventArgs args);
 
         protected string TryGetUserRegString(string path, string name)
         {
