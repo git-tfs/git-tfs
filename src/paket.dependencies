@@ -36,3 +36,12 @@ group VS2015
 	source https://api.nuget.org/v3/index.json
 	nuget Microsoft.TeamFoundationServer.Client ~> 14.0
 	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
+
+
+group VS2017
+	framework: net472
+	source https://api.nuget.org/v3/index.json
+	nuget Microsoft.TeamFoundationServer.Client ~> 15.0
+	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 15.0
+	nuget Microsoft.VisualStudio.Setup.Configuration.Interop
+	nuget Microsoft.VisualStudio.Settings.15.0 ~> 15.0

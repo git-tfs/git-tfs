@@ -6,6 +6,7 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 using StructureMap;
 using GitTfs.Core.TfsInterop;
 using Microsoft.TeamFoundation.Build.Client;
+using Microsoft.VisualStudio.Services.Client;
 
 namespace GitTfs.VsCommon
 {
