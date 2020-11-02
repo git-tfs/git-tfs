@@ -11,9 +11,11 @@ using GitTfs.Core.TfsInterop;
 
 using Microsoft.TeamFoundation.Build.Client;
 using Microsoft.TeamFoundation.Client;
+using Microsoft.TeamFoundation.Common;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.VisualStudio.Services.Client;
+using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Setup.Configuration;
 
 using StructureMap;
@@ -42,6 +44,17 @@ namespace GitTfs.VsCommon
 
         private readonly int myMajorVersion;
 
+        /// <summary>
+        /// Loading the ExternalSettingsManager and then GetReadOnlySettingsStore ensures
+        /// that also the private Visual Studio registry hive which is usually found
+        /// in a path looking similar to
+        ///    C:\Users\USER\AppData\Local\Microsoft\VisualStudio\15.0_xxxxxx\privateregistry.bin
+        /// is loaded.
+        /// Without loading that private VS registry hive, private CheckinPolicies will not work,
+        /// as the assemblies are simply not found.
+        /// </summary>
+        private ExternalSettingsManager myExternalSettingsManager;
+
         public TfsHelperVS2017Base(TfsApiBridge bridge, IContainer container, int majorVersion)
             : base(bridge, container)
         {
@@ -51,8 +64,50 @@ namespace GitTfs.VsCommon
             myAssemblySearchPaths = new List<string>();
             if (!string.IsNullOrEmpty(myVisualStudioInstallationPath))
             {
+                // Calling LoadAssemblySearchPathFromVisualStudioPrivateRegistry would immediately
+                // crash with BadImageException in a 64Bit process therefore put it behind a check
+                if (!Environment.Is64BitProcess)
+                {
+                    var devenvPath = Path.Combine(myVisualStudioInstallationPath, @"Common7\IDE\devenv.exe");
+                    LoadAssemblySearchPathFromVisualStudioPrivateRegistry(devenvPath);
+                }
+
                 myAssemblySearchPaths.Add(Path.Combine(myVisualStudioInstallationPath, myPrivateAssembliesFolder));
             }
+        }
+
+        /// <summary>
+        /// Loads the Visual Studio private registry, which is implicitly done when creating
+        /// a new ExternalSettingsManager. The private registry contains the search paths to the
+        /// extensions which is required for the Check-In Policies to work.
+        ///
+        /// Calling this method on a 64bit process will not work, as a BadImageException is thrown.
+        /// </summary>
+        /// <param name="devenvPath">Path to the Visual Studio installation for which the private registry shall be loaded</param>
+        private void LoadAssemblySearchPathFromVisualStudioPrivateRegistry(string devenvPath)
+        {
+            Trace.WriteLine($"Loading VS private registry for '{devenvPath}");
+            myExternalSettingsManager = ExternalSettingsManager.CreateForApplication(devenvPath);
+
+            Trace.WriteLine("ApplicationExtensions:" + myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.ApplicationExtensions));
+            Trace.WriteLine(myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.Configuration));
+            Trace.WriteLine(myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.Documents));
+            Trace.WriteLine(myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.LocalSettings));
+            Trace.WriteLine(myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.RoamingSettings));
+            Trace.WriteLine("UserExtensions       :" + myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.UserExtensions));
+            foreach (string searchPath in myExternalSettingsManager.GetCommonExtensionsSearchPaths()) {
+                Trace.WriteLine("CommonExtensionsPath :" + searchPath);
+            }
+            SettingsStore store = myExternalSettingsManager.GetReadOnlySettingsStore(SettingsScope.UserSettings);
+            var propNames = store.GetPropertyNames(@"ExtensionManager\EnabledExtensions");
+
+            myAssemblySearchPaths.AddRange(myExternalSettingsManager.GetCommonExtensionsSearchPaths());
+            string userExtensions = myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.UserExtensions);
+            if (!userExtensions.IsNullOrEmpty())
+            {
+                myAssemblySearchPaths.Add(Path.Combine(myVisualStudioInstallationPath, userExtensions));
+            }
+            myAssemblySearchPaths.Add(Path.Combine(myVisualStudioInstallationPath, myTeamExplorerFolder));
         }
 
         protected override bool HasWorkItems(Changeset changeset)
