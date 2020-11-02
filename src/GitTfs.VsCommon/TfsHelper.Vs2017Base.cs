@@ -9,10 +9,10 @@ using Microsoft.TeamFoundation.Build.Client;
 
 namespace GitTfs.VsCommon
 {
-    public abstract class TfsHelperVs2012Base : TfsHelperBase
+    public abstract class TfsHelperVS2017Base : TfsHelperBase
     {
         protected abstract string TfsVersionString { get; }
-        protected TfsHelperVs2012Base(TfsApiBridge bridge, IContainer container)
+        public TfsHelperVS2017Base(TfsApiBridge bridge, IContainer container)
             : base(bridge, container)
         { }
 
