@@ -53,9 +53,12 @@ namespace GitTfs.VsCommon
 
         protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
         {
-            return HasCredentials ?
-                new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
-                new TfsTeamProjectCollection(uri, new UICredentialsProvider());
+            var winCred = HasCredentials ?
+                              new Microsoft.VisualStudio.Services.Common.WindowsCredential(GetCredential()) :
+                              new Microsoft.VisualStudio.Services.Common.WindowsCredential(true);
+            var vssCred = new VssClientCredentials(winCred);
+
+            return new TfsTeamProjectCollection(uri, vssCred);
 #pragma warning restore 618
         }
     }
