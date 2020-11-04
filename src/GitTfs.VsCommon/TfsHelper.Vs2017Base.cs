@@ -5,18 +5,24 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
+using GitTfs.Core.TfsInterop;
+
+using Microsoft.TeamFoundation.Build.Client;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Microsoft.VisualStudio.Services.Client;
+using Microsoft.VisualStudio.Setup.Configuration;
 
 using StructureMap;
-using GitTfs.Core.TfsInterop;
-using Microsoft.TeamFoundation.Build.Client;
-using Microsoft.VisualStudio.Services.Client;
 
 namespace GitTfs.VsCommon
 {
+    /// <summary>
+    /// Base class for TfsHelper targeting VS versions greater or equal to VS2017.
+    /// </summary>
     public abstract class TfsHelperVS2017Base : TfsHelperBase
     {
         private const string myPrivateAssembliesFolder =
@@ -32,9 +38,14 @@ namespace GitTfs.VsCommon
         /// </summary>
         private string myVisualStudioInstallationPath;
 
-        public TfsHelperVS2017Base(TfsApiBridge bridge, IContainer container)
+        private const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
+
+        private readonly int myMajorVersion;
+
+        public TfsHelperVS2017Base(TfsApiBridge bridge, IContainer container, int majorVersion)
             : base(bridge, container)
         {
+            myMajorVersion = majorVersion;
             myVisualStudioInstallationPath = GetVsInstallDir();
 
             myAssemblySearchPaths = new List<string>();
@@ -61,7 +72,51 @@ namespace GitTfs.VsCommon
         /// </returns>
         protected string GetVsInstallDir()
         {
-            return @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise";
+            if (myVisualStudioInstallationPath != null)
+                return myVisualStudioInstallationPath;
+
+            var setupConfiguration = (ISetupConfiguration2)GetSetupConfiguration();
+            IEnumSetupInstances instancesEnumerator = setupConfiguration.EnumAllInstances();
+
+            int fetched;
+            var instances = new ISetupInstance[1];
+            while (true)
+            {
+                instancesEnumerator.Next(1, instances, out fetched);
+                if (fetched <= 0)
+                    break;
+
+                var instance = (ISetupInstance2)instances[0];
+                if (!Version.TryParse(instance.GetInstallationVersion(), out Version version))
+                {
+                    Trace.TraceError("Failed to retrieve version. Skipping VS instance.");
+                    continue;
+                }
+
+                if (version.Major != myMajorVersion)
+                {
+                    continue;
+                }
+
+                if (myVisualStudioInstallationPath != null)
+                {
+                    Trace.TraceWarning("Already found a Visual Studio version. Ignoring version at {0}", instance.GetInstallationPath());
+                    continue;
+                }
+
+                var state = instance.GetState();
+                if (state.HasFlag(InstanceState.Local) && state.HasFlag(InstanceState.Registered))
+                {
+                    myVisualStudioInstallationPath = instance.GetInstallationPath();
+                    Trace.TraceInformation("Found matching Visual Studio version at {0}", myVisualStudioInstallationPath);
+                }
+                else
+                {
+                    Trace.TraceWarning("Ingoring incomplete Visual Studio version at {0}", instance.GetInstallationPath());
+                }
+            }
+
+            return myVisualStudioInstallationPath;
         }
 
         protected override IBuildDetail GetSpecificBuildFromQueuedBuild(IQueuedBuild queuedBuild, string shelvesetName)
@@ -112,5 +167,35 @@ namespace GitTfs.VsCommon
 
             return null;
         }
+
+        private static ISetupConfiguration GetSetupConfiguration()
+        {
+            try
+            {
+                // Try to CoCreate the class object.
+                return new SetupConfiguration();
+            }
+            catch (COMException ex)
+            {
+                if (ex.HResult == REGDB_E_CLASSNOTREG)
+                {
+                    // Attempt to get the class object using an app-local call.
+                    ISetupConfiguration setupConfiguration;
+
+                    var result = GetSetupConfiguration(out setupConfiguration, IntPtr.Zero);
+                    if (result < 0)
+                    {
+                        throw new COMException("Failed to get setup configuration query.", result);
+                    }
+
+                    return setupConfiguration;
+                }
+
+                throw ex;
+            }
+        }
+
+        [DllImport("Microsoft.VisualStudio.Setup.Configuration.Native.dll", ExactSpelling = true, PreserveSig = true)]
+        static extern int GetSetupConfiguration([MarshalAs(UnmanagedType.Interface), Out] out ISetupConfiguration configuration, IntPtr reserved);
     }
 }
