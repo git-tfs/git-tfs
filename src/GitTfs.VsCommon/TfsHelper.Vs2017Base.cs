@@ -96,6 +96,7 @@ namespace GitTfs.VsCommon
         {
             return Path.Combine(GetVsInstallDir(), myTeamExplorerFolder, DialogAssemblyName + ".dll");
         }
+
         protected override Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
         {
             Trace.WriteLine("Looking for assembly " + args.Name + " ...");
