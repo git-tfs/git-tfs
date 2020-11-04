@@ -16,7 +16,6 @@ namespace GitTfs.VsCommon
         private const string myTeamExplorerFolder =
             @"Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer";
 
-        protected abstract string TfsVersionString { get; }
         public TfsHelperVS2017Base(TfsApiBridge bridge, IContainer container)
             : base(bridge, container)
         { }
@@ -26,17 +25,19 @@ namespace GitTfs.VsCommon
             return Retry.Do(() => changeset.AssociatedWorkItems.Length > 0);
         }
 
-        private string vsInstallDir;
+        /// <summary>
+        /// Enumerates the list of installed VS instances and returns the first one
+        /// matching <see cref="MajorVersion"/>. Right now there is no way for the user to influence
+        /// which version to choose if multiple installed version have the same major,
+        /// e.g. VS2017 installed as Enterprise and Professional.
+        /// </summary>
+        /// <returns>
+        /// Path to the top level directory of the Visual studio installation directory,
+        /// e.g. <c>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise</c>
+        /// </returns>
         protected override string GetVsInstallDir()
         {
-            if (vsInstallDir == null)
-            {
-                vsInstallDir = TryGetRegString(@"Software\WOW6432Node\Microsoft\VisualStudio\" + TfsVersionString, "InstallDir")
-                    ?? TryGetRegString(@"Software\Microsoft\VisualStudio\" + TfsVersionString, "InstallDir")
-                    ?? TryGetUserRegString(@"Software\WOW6432Node\Microsoft\WDExpress\" + TfsVersionString + "_Config", "InstallDir")
-                    ?? TryGetUserRegString(@"Software\Microsoft\WDExpress\" + TfsVersionString + "_Config", "InstallDir");
-            }
-            return vsInstallDir;
+            return @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise";
         }
 
         protected override IBuildDetail GetSpecificBuildFromQueuedBuild(IQueuedBuild queuedBuild, string shelvesetName)
