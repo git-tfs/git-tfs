@@ -810,10 +810,7 @@ namespace GitTfs.VsCommon
             return Assembly.LoadFrom(GetDialogAssemblyPath());
         }
 
-        protected virtual string GetDialogAssemblyPath()
-        {
-            return Path.Combine(GetVsInstallDir(), "PrivateAssemblies", DialogAssemblyName + ".dll");
-        }
+        protected abstract string GetDialogAssemblyPath();
 
         public void CleanupWorkspaces(string workingDirectory)
         {

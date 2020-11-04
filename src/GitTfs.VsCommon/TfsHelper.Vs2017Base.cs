@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
@@ -12,6 +13,9 @@ namespace GitTfs.VsCommon
 {
     public abstract class TfsHelperVS2017Base : TfsHelperBase
     {
+        private const string myTeamExplorerFolder =
+            @"Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer";
+
         protected abstract string TfsVersionString { get; }
         public TfsHelperVS2017Base(TfsApiBridge bridge, IContainer container)
             : base(bridge, container)
@@ -61,6 +65,11 @@ namespace GitTfs.VsCommon
 
             return new TfsTeamProjectCollection(uri, vssCred);
 #pragma warning restore 618
+        }
+
+        protected override string GetDialogAssemblyPath()
+        {
+            return Path.Combine(GetVsInstallDir(), myTeamExplorerFolder, DialogAssemblyName + ".dll");
         }
     }
 }
