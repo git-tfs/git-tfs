@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,12 +19,30 @@ namespace GitTfs.VsCommon
 {
     public abstract class TfsHelperVS2017Base : TfsHelperBase
     {
+        private const string myPrivateAssembliesFolder =
+            @"Common7\IDE\PrivateAssemblies";
+
         private const string myTeamExplorerFolder =
             @"Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer";
 
+        private readonly List<string> myAssemblySearchPaths;
+
+        /// <summary>
+        /// Caches the found VS installation path.
+        /// </summary>
+        private string myVisualStudioInstallationPath;
+
         public TfsHelperVS2017Base(TfsApiBridge bridge, IContainer container)
             : base(bridge, container)
-        { }
+        {
+            myVisualStudioInstallationPath = GetVsInstallDir();
+
+            myAssemblySearchPaths = new List<string>();
+            if (!string.IsNullOrEmpty(myVisualStudioInstallationPath))
+            {
+                myAssemblySearchPaths.Add(Path.Combine(myVisualStudioInstallationPath, myPrivateAssembliesFolder));
+            }
+        }
 
         protected override bool HasWorkItems(Changeset changeset)
         {
@@ -79,13 +99,17 @@ namespace GitTfs.VsCommon
         protected override Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
         {
             Trace.WriteLine("Looking for assembly " + args.Name + " ...");
-            string folderPath = Path.Combine(GetVsInstallDir(), "PrivateAssemblies");
-            string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
-            if (File.Exists(assemblyPath) == false)
-                return null;
-            Trace.WriteLine("... loading " + args.Name + " from " + assemblyPath);
-            Assembly assembly = Assembly.LoadFrom(assemblyPath);
-            return assembly;
+            foreach (var dir in myAssemblySearchPaths)
+            {
+                string assemblyPath = Path.Combine(dir, new AssemblyName(args.Name).Name + ".dll");
+                if (File.Exists(assemblyPath))
+                {
+                    Trace.WriteLine("... loading " + args.Name + " from " + assemblyPath);
+                    return Assembly.LoadFrom(assemblyPath);
+                }
+            }
+
+            return null;
         }
     }
 }
