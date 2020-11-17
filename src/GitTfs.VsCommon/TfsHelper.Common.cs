@@ -249,14 +249,14 @@ namespace GitTfs.VsCommon
 
         public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
-            return VersionControl.QueryRootBranchObjects(RecursionType.Full)
+            return AllTfsBranchObjects
                 .Where(b => b.Properties.ParentBranch == null)
                 .Select(b => b.Properties.RootItem.Item);
         }
 
         public IEnumerable<IBranchObject> GetBranches(bool getAlsoDeletedBranches = false)
         {
-            var branches = VersionControl.QueryRootBranchObjects(RecursionType.Full);
+            var branches = AllTfsBranchObjects;
             if (getAlsoDeletedBranches)
                 return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches);
             return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches.Where(b => !b.Properties.RootItem.IsDeleted));
@@ -451,6 +451,18 @@ namespace GitTfs.VsCommon
             }
         }
 
+        private BranchObject[] _allTfsBranchObjects;
+        private BranchObject[] AllTfsBranchObjects
+        {
+            get
+            {
+                if (_allTfsBranchObjects != null)
+                    return _allTfsBranchObjects;
+                Trace.WriteLine("Looking for all branches...");
+                _allTfsBranchObjects = VersionControl.QueryRootBranchObjects(RecursionType.Full);
+                return _allTfsBranchObjects;
+            }
+        }
         private IDictionary<string, string> _allTfsBranches;
         private IDictionary<string, string> AllTfsBranches
         {
@@ -458,8 +470,7 @@ namespace GitTfs.VsCommon
             {
                 if (_allTfsBranches != null)
                     return _allTfsBranches;
-                Trace.WriteLine("Looking for all branches...");
-                _allTfsBranches = VersionControl.QueryRootBranchObjects(RecursionType.Full)
+                _allTfsBranches = AllTfsBranchObjects
                     .ToDictionary(b => b.Properties.RootItem.Item,
                         b => b.Properties.ParentBranch != null ? b.Properties.ParentBranch.Item : null,
                         (StringComparer.OrdinalIgnoreCase));
