@@ -699,7 +699,7 @@ namespace GitTfs.VsCommon
                 _workspaces.Add(remote.Id, workspace = Retry.Do(() =>
                 {
                     var workingFolders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2)));
-                    return GetWorkspace(workingFolders.ToArray());
+                    return GetWorkspace("", workingFolders.ToArray());
                 }));
                 Janitor.CleanThisUpWhenWeClose(() => TryToDeleteWorkspace(workspace));
             }
@@ -712,10 +712,10 @@ namespace GitTfs.VsCommon
             action(tfsWorkspace);
         }
 
-        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
+        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action, string workspaceOwner = "")
         {
             Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
+            var workspace = Retry.Do(() => GetWorkspace(workspaceOwner, new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
             try
             {
                 var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
@@ -732,9 +732,23 @@ namespace GitTfs.VsCommon
             }
         }
 
-        private Workspace GetWorkspace(params WorkingFolder[] folders)
+        private Workspace GetWorkspace(string workspaceOwner, params WorkingFolder[] folders)
         {
-            var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
+            if (workspaceOwner == "")
+            {
+                workspaceOwner = ".";
+            }
+
+            var workspace = VersionControl.CreateWorkspace(
+                GenerateWorkspaceName(), 
+                workspaceOwner,
+                "",
+                new List<WorkingFolder>().ToArray(),
+                Workstation.Current.Name,
+                WorkspacePermissionProfile.BuiltInProfiles[(int)WorkspacePermissionProfile.BuiltInIndexes.Public],
+                false
+                );
+          
             try
             {
                 SetWorkspaceMappingFolders(workspace, folders);
@@ -1317,7 +1331,7 @@ namespace GitTfs.VsCommon
                                 });
                 }
 
-                workspace = GetWorkspace(new WorkingFolder(projectPath, gitRepositoryPath));
+                workspace = GetWorkspace("", new WorkingFolder(projectPath, gitRepositoryPath));
                 if (!Directory.Exists(directoryForBranch))
                     Directory.CreateDirectory(directoryForBranch);
                 workspace.PendAdd(directoryForBranch);
