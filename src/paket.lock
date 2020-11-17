@@ -1,10 +1,10 @@
-RESTRICTION: == net462
+RESTRICTION: == net472
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    Castle.Core (4.3.1)
-    LibGit2Sharp (0.26.1)
-      LibGit2Sharp.NativeBinaries (2.0.289)
-    LibGit2Sharp.NativeBinaries (2.0.289)
+    Castle.Core (4.4)
+    LibGit2Sharp (0.26.2)
+      LibGit2Sharp.NativeBinaries (2.0.306)
+    LibGit2Sharp.NativeBinaries (2.0.306)
     Microsoft.AspNet.WebApi.Client (5.2.3)
       Newtonsoft.Json (>= 6.0.4)
     Microsoft.AspNet.WebApi.Core (5.2.3)
@@ -37,12 +37,11 @@ NUGET
       Newtonsoft.Json (>= 6.0.8)
       System.IdentityModel.Tokens.Jwt (>= 4.0)
       WindowsAzure.ServiceBus (>= 2.5.1)
-    Moq (4.10)
-      Castle.Core (>= 4.3.1)
-      System.Threading.Tasks.Extensions (>= 4.3)
-      System.ValueTuple (>= 4.4)
+    Moq (4.14.7)
+      Castle.Core (>= 4.4)
+      System.Threading.Tasks.Extensions (>= 4.5.1)
     Newtonsoft.Json (10.0.2)
-    NLog (4.5.10)
+    NLog (4.7.5)
     structuremap (2.6.3)
     structuremap.automocking (2.6.3)
       structuremap (>= 2.6.2)
@@ -51,7 +50,6 @@ NUGET
     System.Runtime.CompilerServices.Unsafe (4.5.2)
     System.Threading.Tasks.Extensions (4.5.1)
       System.Runtime.CompilerServices.Unsafe (>= 4.5)
-    System.ValueTuple (4.5)
     WindowsAzure.ServiceBus (4.0)
     xunit (2.4.1)
       xunit.analyzers (>= 0.10)
@@ -71,14 +69,13 @@ NUGET
 
 GROUP Build
 REDIRECTS: OFF
-RESTRICTION: == net45
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    Cake (0.30)
-    Cake.Git (0.19)
-    GitVersion.CommandLine (3.6.5)
-    Octokit (0.28)
+    Cake (0.38.5)
+    Cake.Git (0.22)
+    GitVersion.CommandLine (5.5)
+    Octokit (0.48)
     Octokit.CodeFormatter (1.0.0-preview)
-    OpenCover (4.6.519)
-    ReportGenerator (3.0.2)
+    OpenCover (4.7.922)
+    ReportGenerator (4.7.1)
     xunit.runner.console (2.4.1)

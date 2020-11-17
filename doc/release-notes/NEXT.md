@@ -4,3 +4,4 @@
   as it will lose any conflict resolution of the merge commit when it is rebased. 
   This is independent on the used commandline switch. (#1342)
 * Improve performance by caching branch objects instead of looking them up over and over (#1286)
+* Upgrade to .NET Framework 4.7.2 and upgrade NuGet dependencies (#1344 by @siprbaum)

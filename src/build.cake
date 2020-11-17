@@ -1,6 +1,6 @@
 //Don't define #tool here. Just add there to 'paket.dependencies' 'build' group
 //Don't use #addin here. Use #r to load the dll found in the nuget package.
-#r "./packages/build/Octokit/lib/net45/Octokit.dll"
+#r "./packages/build/Octokit/lib/net46/Octokit.dll"
 #r "./packages/build/Cake.Git/lib/net461/Cake.Git.dll"
 #r "System.Net.Http.dll"
 
@@ -22,7 +22,7 @@ const string ApplicationName = "GitTfs";
 const string ZipFileTemplate = ApplicationName + "-{0}.zip";
 const string ApplicationPath = "./" + ApplicationName;
 const string PathToSln = ApplicationPath + ".sln";
-const string TargetFramework = "net462"; //due to new dotnet csproj format
+const string TargetFramework = "net472"; //due to new dotnet csproj format
 readonly var OutDir = "bin/" + Configuration + "/" + TargetFramework + "/";
 const string buildAssetPath = @".\.build\";
 const string DownloadUrlTemplate ="https://github.com/git-tfs/git-tfs/releases/download/v{0}/";
@@ -271,7 +271,7 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 
 	var coverageResultFolder = System.IO.Path.Combine(buildAssetPath, "coverage");
 	ReportGenerator(coverageFile, coverageResultFolder, new ReportGeneratorSettings(){
-    	ToolPath = @".\packages\build\ReportGenerator\tools\ReportGenerator.exe"
+		ToolPath = @".\packages\build\ReportGenerator\tools\net47\ReportGenerator.exe"
 	});
 	if(!BuildSystem.IsLocalBuild)
 	{
