@@ -6,3 +6,4 @@
 * Improve performance by caching branch objects instead of looking them up over and over (#1286)
 * Upgrade to .NET Framework 4.7.2 and upgrade NuGet dependencies (#1344 by @siprbaum)
 * Correct error message shown when `git tfs clone` has an error (#1347 by @siprbaum)
+* Added a `workspace-owner` option for `checkin` command
