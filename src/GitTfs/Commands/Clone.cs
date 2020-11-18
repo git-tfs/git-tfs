@@ -139,7 +139,7 @@ namespace GitTfs.Commands
             {
                 errorOccurs = true;
                 throw new GitTfsException("error: a problem occurred when trying to clone the repository. Try to solve the problem described below.\nIn any case, after, try to continue using command `git tfs "
-                    + (_fetch.BranchStrategy == BranchStrategy.All ? "branch init --all" : "fetch") + "`\n", ex);
+                    + (_fetch.BranchStrategy == BranchStrategy.All ? "branch --init --all" : "fetch") + "`\n", ex);
             }
             finally
             {
