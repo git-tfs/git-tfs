@@ -880,8 +880,20 @@ namespace GitTfs.VsCommon
             return VersionControl.AuthorizedUser;
         }
 
-        public bool CanShowCheckinDialog { get { return true; } }
-
+        public bool CanShowCheckinDialog
+        {
+            get
+            {
+                try
+                {
+                    return GetCheckinDialogType() != null;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+        }
         public ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName)
         {
             shelvesetOwner = shelvesetOwner == "all" ? null : (shelvesetOwner ?? GetAuthenticatedUser());
