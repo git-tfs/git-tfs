@@ -18,7 +18,10 @@ namespace GitTfs.Commands
             if (!changeset.Remote.Tfs.CanShowCheckinDialog)
                 throw new GitTfsException(
                     "checkintool does not work with this TFS version (" + changeset.Remote.Tfs.TfsClientLibraryVersion + ").",
-                    new[] { "Try installing the VS2010 edition of Team Explorer." });
+                    new[] {
+                        "Try installing the Team Explorer matching the TFS client libraries",
+                        "Alternatively, set the GIT_TFS_CLIENT environment variable to a supported/installed Visual Studio version",
+                        });
 
             return changeset.Remote.CheckinTool(refToCheckin, changeset);
         }
