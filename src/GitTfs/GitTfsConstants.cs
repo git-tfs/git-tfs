@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
 using System;
+using System.Linq;
+using GitTfs.Core.TfsInterop;
 
 namespace GitTfs
 {
@@ -55,7 +57,9 @@ namespace GitTfs
         public static readonly string MessageForceVersion = Environment.NewLine
                                                    + "Note: If you want to force git-tfs to use another version of the tfs client library,"
                                                    + Environment.NewLine
-                                                   + "set the environment variable `GIT_TFS_CLIENT` with the wished version (ie: '2013' for Visual Studio 2013,...)";
+                                                   + "set the environment variable `GIT_TFS_CLIENT` with the wished version (ie: '2015' for Visual Studio 2015,...)"
+                                                   + Environment.NewLine
+                                                   + "Supported version: " + string.Join(", ", TfsPlugin.SupportedVersion);
         public const string LogFileName = "git-tfs_log.txt";
 
 

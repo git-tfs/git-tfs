@@ -29,10 +29,13 @@ namespace GitTfs.Core.TfsInterop
                    pluginLoader.Fail();
         }
 
+        public static IReadOnlyList<string> SupportedVersion => PluginLoader.SupportedVersion;
+
         private class PluginLoader
         {
             private readonly List<Exception> _failures = new List<Exception>();
             private static string VsPluginAssemblyFolder { get; set; }
+            public static IReadOnlyList<string> SupportedVersion => VisualStudioVersions.Keys.OrderBy(k => k).ToList();
             private static readonly Dictionary<string, string> VisualStudioVersions = new Dictionary<string, string>()
             {
                 {"2017", "15.0" },
