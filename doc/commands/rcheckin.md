@@ -60,8 +60,6 @@ rcheckin differs from [checkin](checkin.md) in that the latter squashes the comm
                                    synchronization at some point. Use this option
                                    with care. This option is ignored if ignore-
                                    missing-files option is used.
-      -wo, --workspace-owner=VALUE1
-                                 Set the owner of workspace created to commit
 
 
 ## Examples

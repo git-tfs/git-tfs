@@ -35,3 +35,6 @@ The `checkin` command differs from [rcheckin](rcheckin.md) in that the latter mi
 
         --no-gate
             Disables gated checkin.
+        
+        --workspace-owner=VALUE
+            Set the owner of workspace created to commit
