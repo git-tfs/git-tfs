@@ -732,9 +732,63 @@ namespace GitTfs.VsCommon
             }
         }
 
+        public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action, string workspaceOwner)
+        {
+            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
+            var workspace = Retry.Do(() => GetWorkspace(workspaceOwner, new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
+            try
+            {
+                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
+                    .With("remote").EqualTo(remote)
+                    .With("contextVersion").EqualTo(versionToFetch)
+                    .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                    .With("tfsHelper").EqualTo(this)
+                    .GetInstance<TfsWorkspace>();
+                action(tfsWorkspace);
+            }
+            finally
+            {
+                TryToDeleteWorkspace(workspace);
+            }
+        }
+
         private Workspace GetWorkspace(params WorkingFolder[] folders)
         {
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
+            try
+            {
+                SetWorkspaceMappingFolders(workspace, folders);
+            }
+            catch (MappingConflictException e)
+            {
+                try
+                {
+                    foreach (WorkingFolder folder in folders)
+                        CleanupWorkspaces(folder.LocalItem);
+                    SetWorkspaceMappingFolders(workspace, folders);
+                }
+                catch
+                {
+                    TryToDeleteWorkspace(workspace);
+                    throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
+                }
+            }
+            catch
+            {
+                TryToDeleteWorkspace(workspace);
+                throw;
+            }
+            return workspace;
+        }
+
+        private Workspace GetWorkspace(string workspaceOwner, params WorkingFolder[] folders)
+        {
+            var workspaceParams = new CreateWorkspaceParameters(GenerateWorkspaceName());
+
+            workspaceParams.OwnerName = workspaceOwner;
+
+            var workspace = VersionControl.CreateWorkspace(workspaceParams);
+
             try
             {
                 SetWorkspaceMappingFolders(workspace, folders);
@@ -991,7 +1045,7 @@ namespace GitTfs.VsCommon
             }
         }
 
-#region Fake classes for unshelve
+        #region Fake classes for unshelve
 
         private class Unshelveable : IChangeset
         {
@@ -1159,7 +1213,7 @@ namespace GitTfs.VsCommon
             }
         }
 
-#endregion
+        #endregion
 
         public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
         {
@@ -1507,6 +1561,8 @@ namespace GitTfs.VsCommon
         {
             return queuedBuild.Build;
         }
+
+ 
     }
 
     public class ItemDownloadStrategy : IItemDownloadStrategy

@@ -958,14 +958,14 @@ namespace GitTfs.Core
         public int Checkin(string head, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             var changeset = 0;
-            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options, sourceTfsPath));
+            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parentChangeset.GitCommit, workspace, options, sourceTfsPath), options.WorkspaceOwner);
             return changeset;
         }
 
         public int Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
         {
             var changeset = 0;
-            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parent, workspace, options, sourceTfsPath));
+            WithWorkspace(parentChangeset, workspace => changeset = Checkin(head, parent, workspace, options, sourceTfsPath), options.WorkspaceOwner);
             return changeset;
         }
 
@@ -982,6 +982,11 @@ namespace GitTfs.Core
                 Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
             }
         }
+
+        private void WithWorkspace(TfsChangesetInfo parentChangeset, Action<ITfsWorkspace> action, string workspaceOwner)
+        {
+            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action, workspaceOwner);         
+        }        
 
         private int Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options, string sourceTfsPath)
         {

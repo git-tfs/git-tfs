@@ -535,6 +535,11 @@ namespace GitTfs.VsFake
             throw new NotImplementedException();
         }
 
+        public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action, string workspaceOwner)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         private class FakeVersionControlServer : IVersionControlServer

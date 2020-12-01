@@ -49,5 +49,6 @@ namespace GitTfs.Core.TfsInterop
         void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
         int QueueGatedCheckinBuild(Uri value, string buildDefinitionName, string shelvesetName, string checkInTicket);
         void DeleteShelveset(IWorkspace workspace, string shelvesetName);
+        void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action, string workspaceOwner);
     }
 }
