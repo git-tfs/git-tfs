@@ -969,7 +969,7 @@ namespace GitTfs.Core
             return changeset;
         }
 
-        private void WithWorkspace(TfsChangesetInfo parentChangeset, Action<ITfsWorkspace> action, string workspaceOwner = "")
+        private void WithWorkspace(TfsChangesetInfo parentChangeset, Action<ITfsWorkspace> action)
         {
             //are there any subtrees?
             var subtrees = _globals.Repository.GetSubtrees(this);
@@ -979,9 +979,14 @@ namespace GitTfs.Core
             }
             else
             {
-                Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action, workspaceOwner);
+                Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action);
             }
         }
+
+        private void WithWorkspace(TfsChangesetInfo parentChangeset, Action<ITfsWorkspace> action, string workspaceOwner)
+        {
+            Tfs.WithWorkspace(WorkingDirectory, this, parentChangeset, action, workspaceOwner);         
+        }        
 
         private int Checkin(string head, string parent, ITfsWorkspace workspace, CheckinOptions options, string sourceTfsPath)
         {

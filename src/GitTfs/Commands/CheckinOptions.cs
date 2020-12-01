@@ -40,8 +40,8 @@ namespace GitTfs.Commands
                         v => IgnoreMissingItems = v != null },
                     { "add-missing-files", "When applying an edit operation, add items that were expected to already be in TFS but were not found. Missing files indicates bad synchronization at some point. Use this option with care. This option is ignored if ignore-missing-files option is used.",
                         v => AddMissingItems = v != null },
-                    { "wo|workspace-owner=", "Set the owner of workspace created to commit",
-                        v => WorkspaceOwner = v }
+                    { "workspace-owner=", "Set the owner of workspace created to commit",
+                        v => { WorkspaceOwner = v; } },
                 };
             }
         }
@@ -65,7 +65,6 @@ namespace GitTfs.Commands
         public Regex WorkItemAssociateRegex { get; set; }
         public bool IgnoreMissingItems { get; set; }
         public bool AddMissingItems { get; set; }
-
-        public string WorkspaceOwner { get; set; }
+        public string WorkspaceOwner { get; set; } = ".";
     }
 }

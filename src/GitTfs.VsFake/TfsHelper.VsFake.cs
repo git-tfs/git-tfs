@@ -234,7 +234,7 @@ namespace GitTfs.VsFake
             action(workspace);
         }
 
-        public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action, string workspaceOwner = "")
+        public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Trace.WriteLine("Setting up a TFS workspace at " + directory);
             var fakeWorkspace = new FakeWorkspace(directory, remote.TfsRepositoryPath);
@@ -531,6 +531,11 @@ namespace GitTfs.VsFake
         }
 
         public void DeleteShelveset(IWorkspace workspace, string shelvesetName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action, string workspaceOwner)
         {
             throw new NotImplementedException();
         }
