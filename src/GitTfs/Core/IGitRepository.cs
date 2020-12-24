@@ -61,7 +61,7 @@ namespace GitTfs.Core
         bool Checkout(string commitish);
         IEnumerable<GitCommit> FindParentCommits(string fromCommit, string toCommit);
         bool IsPathIgnored(string relativePath);
-        string CommitGitIgnore(string pathToGitIgnoreFile);
+        string CommitGitFiles(string pathToGitIgnoreFile, string pathToGitAttributesFile);
         void UseGitIgnore(string pathToGitIgnoreFile);
         IDictionary<int, string> GetCommitChangeSetPairs();
     }

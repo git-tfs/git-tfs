@@ -9,6 +9,7 @@ using LibGit2Sharp;
 using GitTfs.Commands;
 using Branch = LibGit2Sharp.Branch;
 using GitTfs.Util;
+using NLog;
 
 namespace GitTfs.Core
 {
@@ -774,18 +775,52 @@ namespace GitTfs.Core
             return _repository.Ignore.IsPathIgnored(relativePath);
         }
 
-        public string CommitGitIgnore(string pathToGitIgnoreFile)
+        public string CommitGitFiles(string pathToGitIgnoreFile, string pathToGitAttributesFile)
         {
-            if (!File.Exists(pathToGitIgnoreFile))
+            var ignoreFileExists = File.Exists(pathToGitIgnoreFile);
+            var attributesFileExists = File.Exists(pathToGitAttributesFile);
+
+            if (!ignoreFileExists && !string.IsNullOrWhiteSpace(pathToGitIgnoreFile))
             {
                 Trace.TraceWarning("warning: the .gitignore file specified '{0}' does not exist!", pathToGitIgnoreFile);
             }
+
+            if (!attributesFileExists && !string.IsNullOrWhiteSpace(pathToGitAttributesFile))
+            {
+                Trace.TraceWarning("warning: the .gitattributes file specified '{0}' does not exist!", pathToGitAttributesFile);
+            }
+
             var gitTreeBuilder = new GitTreeBuilder(_repository.ObjectDatabase);
-            gitTreeBuilder.Add(".gitignore", pathToGitIgnoreFile, LibGit2Sharp.Mode.NonExecutableFile);
+            var message = "Initializing clone";
+
+            if (ignoreFileExists || attributesFileExists)
+            {
+                message += " with ";
+
+                if (ignoreFileExists)
+                {
+                    gitTreeBuilder.Add(".gitignore", pathToGitIgnoreFile, LibGit2Sharp.Mode.NonExecutableFile);
+                    message += ".gitignore";
+
+                    if (attributesFileExists)
+                    {
+                        message += " and ";
+                    }
+                }
+
+                if (attributesFileExists)
+                {
+                    gitTreeBuilder.Add(".gitattributes", pathToGitAttributesFile, LibGit2Sharp.Mode.NonExecutableFile);
+                    message += ".gitattributes";
+                }
+
+                message += (ignoreFileExists && attributesFileExists) ? " files" : " file";
+            }
+
             var tree = gitTreeBuilder.GetTree();
             var signature = new Signature("git-tfs", "git-tfs@noreply.com", new DateTimeOffset(2000, 1, 1, 0, 0, 0, new TimeSpan(0)));
-            var sha = _repository.ObjectDatabase.CreateCommit(signature, signature, ".gitignore", tree, new Commit[0], false).Sha;
-            Trace.WriteLine(".gitignore commit created: " + sha);
+            var sha = _repository.ObjectDatabase.CreateCommit(signature, signature, message, tree, new Commit[0], false).Sha;
+            Trace.WriteLine("Init clone commit created: " + sha);
 
             _repository.Refs.Add(ShortToTfsRemoteName("default"), new ObjectId(sha));
             _repository.Refs.Add(ShortToLocalName("master"), new ObjectId(sha));
