@@ -112,7 +112,7 @@ namespace GitTfs.VsCommon
                 }
                 else
                 {
-                    Trace.TraceWarning("Ingoring incomplete Visual Studio version at {0}", instance.GetInstallationPath());
+                    Trace.TraceWarning("Ignoring incomplete Visual Studio version at {0}", instance.GetInstallationPath());
                 }
             }
 
