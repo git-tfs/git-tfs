@@ -11,6 +11,7 @@ namespace GitTfs
 
         public override void Initialize(StructureMap.ConfigurationExpression config)
         {
+            base.Initialize(config);
         }
 
         public override bool IsViable()

@@ -161,6 +161,9 @@ namespace GitTfs.Core.TfsInterop
 
         public virtual void Initialize(ConfigurationExpression config)
         {
+            // Mark the ITfsHelper as a singleton to ensure that we create it only once.
+            // Otherwise, it is created e.g. for every remote which is wasteful.
+            config.For<ITfsHelper>().Singleton();
         }
 
         public abstract bool IsViable();
