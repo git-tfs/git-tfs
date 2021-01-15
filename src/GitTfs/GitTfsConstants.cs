@@ -59,7 +59,7 @@ namespace GitTfs
                                                    + Environment.NewLine
                                                    + "set the environment variable `GIT_TFS_CLIENT` with the wished version (ie: '2015' for Visual Studio 2015,...)"
                                                    + Environment.NewLine
-                                                   + "Supported version: " + string.Join(", ", TfsPlugin.SupportedVersion);
+                                                   + "Supported version: " + string.Join(", ", TfsPlugin.SupportedVersions);
         public const string LogFileName = "git-tfs_log.txt";
 
 

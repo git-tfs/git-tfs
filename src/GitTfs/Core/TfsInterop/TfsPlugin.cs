@@ -23,35 +23,53 @@ namespace GitTfs.Core.TfsInterop
                 return pluginLoader.TryLoadVsPluginVersion(explicitVersion) ??
                        pluginLoader.Fail("Unable to load TFS version specified in GIT_TFS_CLIENT (" + explicitVersion + ")!");
             }
-            return pluginLoader.TryLoadVsPluginVersion("2017", true) ??
-                   pluginLoader.TryLoadVsPluginVersion("2017") ??
-                   pluginLoader.TryLoadVsPluginVersion("2015") ??
-                   pluginLoader.Fail();
+
+            // The loop will return the first first entry, as in practice loading
+            // the GitTFS.VSxxxx assembly only fails if it isn't build or can't be found.
+            foreach (string version in SupportedVersions)
+            {
+                TfsPlugin plugin = pluginLoader.TryLoadVsPluginVersion(version);
+                if (plugin != null)
+                    return plugin;
+            }
+
+            return pluginLoader.Fail();
         }
 
-        public static IReadOnlyList<string> SupportedVersion => PluginLoader.SupportedVersion;
+        public static IReadOnlyList<string> SupportedVersions
+        {
+            get
+            {
+                // Filter out the Fake version, as this is only internal for testing
+                // and we don't it to show up in user facing output/help messages.
+                return PluginLoader.SupportedVersions.Except(new[] {"Fake"}).ToList();
+            }
+        }
 
         private class PluginLoader
         {
             private readonly List<Exception> _failures = new List<Exception>();
             private static string VsPluginAssemblyFolder { get; set; }
-            public static IReadOnlyList<string> SupportedVersion => VisualStudioVersions.Keys.OrderBy(k => k).ToList();
-            private static readonly Dictionary<string, string> VisualStudioVersions = new Dictionary<string, string>()
+
+            /// <summary>
+            /// List of supported Visual Studio versions. The order matters, as it influences
+            /// the priority in which we try to load the corresponding <see cref="TfsPlugin"/>.
+            /// </summary>
+            public static IReadOnlyList<string> SupportedVersions => new List<string>
             {
-                {"2017", "15.0" },
-                {"2015", "14.0" },
+                "2017",
+                "2015",
+                "Fake"
             };
 
-            public TfsPlugin TryLoadVsPluginVersion(string version, bool isVisualStudioRequired = false)
+            public TfsPlugin TryLoadVsPluginVersion(string version)
             {
-                var assembly = "GitTfs.Vs" + version;
-#if NETFRAMEWORK
-                if (isVisualStudioRequired && !IsVisualStudioInstalled(version))
+                if (!SupportedVersions.Contains(version, StringComparison.OrdinalIgnoreCase))
                 {
+                    Trace.WriteLine("Visual Studio " + version + " not supported...");
                     return null;
                 }
-#endif
-
+                var assembly = "GitTfs.Vs" + version;
                 return Try(assembly, "GitTfs.TfsPlugin");
             }
 
@@ -75,51 +93,6 @@ namespace GitTfs.Core.TfsInterop
                 currentDomain.AssemblyResolve -= LoadFromSameFolder;
                 return null;
             }
-
-#if NETFRAMEWORK
-            private static bool IsVisualStudioInstalled(string version)
-            {
-                if (!VisualStudioVersions.ContainsKey(version))
-                {
-                    Trace.WriteLine("Visual Studio " + version + " not supported...");
-                    return false;
-                }
-
-                var versionCode = VisualStudioVersions[version];
-                //doc: http://blogs.msdn.com/b/heaths/archive/2015/04/13/detection-keys-for-visual-studio-2015.aspx
-                var isInstalled = TryGetRegString(@"SOFTWARE\Wow6432Node\Microsoft\DevDiv\vs\Servicing\" + versionCode)
-                    || TryGetRegString(@"SOFTWARE\Microsoft\DevDiv\vs\Servicing\" + versionCode);
-
-                if (!isInstalled)
-                {
-                    Trace.WriteLine("Visual Studio " + version + " not found...");
-                }
-                else
-                {
-                    Trace.WriteLine("Visual Studio " + version + " detected...");
-                }
-                return isInstalled;
-            }
-
-            private static bool TryGetRegString(string path)
-            {
-                RegistryKey registryKey = Registry.LocalMachine;
-                try
-                {
-                    Trace.WriteLine("Trying to get " + registryKey.Name + "\\" + path);
-                    var key = registryKey.OpenSubKey(path);
-                    if (key != null)
-                    {
-                        return true;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Trace.WriteLine("Unable to get registry value " + registryKey.Name + "\\" + path + ": " + e);
-                }
-                return false;
-            }
-#endif
 
             private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
             {
