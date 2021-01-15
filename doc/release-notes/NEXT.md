@@ -6,3 +6,7 @@
 * Improve performance by caching branch objects instead of looking them up over and over (#1286)
 * Upgrade to .NET Framework 4.7.2 and upgrade NuGet dependencies (#1344 by @siprbaum)
 * Correct error message shown when `git tfs clone` has an error (#1347 by @siprbaum)
+* Add support for Visual Studio 2017 (no checkin pocicies yet). To use it set the
+  environment variable `GIT_TFS_CLIENT` to `2017`.  Multiple versions of VS2017 installed side by side,
+  either as different editions like VS2017 Enterprise  and Premium or different VS2017 minor versions are
+  not offically supported yet. The current implementation  will simply use the first version found.

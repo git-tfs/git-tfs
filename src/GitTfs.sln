@@ -41,6 +41,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7E25ACEF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NDesk.Options", "NDesk.Options\NDesk.Options.csproj", "{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.Vs2017", "GitTfs.Vs2017\GitTfs.Vs2017.csproj", "{7BEA3EC2-7111-4A5A-831F-2920C95EA356}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AnyCPU = Debug|AnyCPU
@@ -67,6 +69,10 @@ Global
 		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Release|AnyCPU.ActiveCfg = Release|Any CPU
 		{4B6F5E5C-188D-4EA7-B1D0-EC185546F66F}.Release|AnyCPU.Build.0 = Release|Any CPU
+		{7BEA3EC2-7111-4A5A-831F-2920C95EA356}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
+		{7BEA3EC2-7111-4A5A-831F-2920C95EA356}.Debug|AnyCPU.Build.0 = Debug|Any CPU
+		{7BEA3EC2-7111-4A5A-831F-2920C95EA356}.Release|AnyCPU.ActiveCfg = Release|Any CPU
+		{7BEA3EC2-7111-4A5A-831F-2920C95EA356}.Release|AnyCPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
