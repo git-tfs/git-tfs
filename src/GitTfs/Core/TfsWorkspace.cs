@@ -79,6 +79,18 @@ namespace GitTfs.Core
             _workspace.Merge(sourceTfsPath, tfsRepositoryPath);
         }
 
+        private static void TraceCheckinPolicyErrors(CheckinPolicyEvaluator.CheckinPolicyEvaluationResult checkinProblems, bool overridePolicyErrors)
+        {
+            string prefix = overridePolicyErrors ? "[OVERRIDDEN] " : "[ERROR] ";
+            foreach (var message in checkinProblems.Messages)
+            {
+                Trace.TraceWarning(prefix + message);
+            }
+
+            if (checkinProblems.HasErrors && !overridePolicyErrors)
+                Trace.TraceInformation("Note: If the checkin policy fails because the assemblies failed to load, please run the file `enable_checkin_policies_support.bat` in the git-tfs directory and try again.");
+        }
+
         public int Checkin(CheckinOptions options, Func<string> generateCheckinComment = null)
         {
             if (options == null) options = _checkinOptions;
@@ -98,21 +110,8 @@ namespace GitTfs.Core
             var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, checkinComment, checkinNote, workItemInfos);
             if (checkinProblems.HasErrors)
             {
-                bool showCheckinPolicyHint = false;
-                foreach (var message in checkinProblems.Messages)
-                {
-                    if (options.Force && string.IsNullOrWhiteSpace(options.OverrideReason) == false)
-                    {
-                        Trace.TraceWarning("[OVERRIDDEN] " + message);
-                    }
-                    else
-                    {
-                        Trace.TraceError("[ERROR] " + message);
-                        showCheckinPolicyHint = true;
-                    }
-                }
-                if (showCheckinPolicyHint)
-                    Trace.TraceInformation("Note: If the checkin policy fails because the assemblies failed to load, please run the file `enable_checkin_policies_support.bat` in the git-tfs directory and try again.");
+                bool overridePolicyErrors = options.Force && !string.IsNullOrWhiteSpace(options.OverrideReason);
+                TraceCheckinPolicyErrors(checkinProblems, overridePolicyErrors);
 
                 if (!options.Force)
                 {
