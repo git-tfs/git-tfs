@@ -18,6 +18,9 @@ namespace GitTfs.Core
         private readonly ITfsHelper _tfsHelper;
         private readonly CheckinPolicyEvaluator _policyEvaluator;
 
+        private const string CheckinPolicyNoteMessage =
+            "Note: If the checkin policy fails because the assemblies failed to load, please run the file `enable_checkin_policies_support.bat` in the git-tfs directory and try again.";
+
         public IGitTfsRemote Remote { get; private set; }
 
         public TfsWorkspace(IWorkspace workspace, string localDirectory, TfsChangesetInfo contextVersion, IGitTfsRemote remote, CheckinOptions checkinOptions, ITfsHelper tfsHelper, CheckinPolicyEvaluator policyEvaluator)
@@ -44,10 +47,8 @@ namespace GitTfs.Core
             shelveset.WorkItemInfo = GetWorkItemInfos(checkinOptions).ToArray();
             if (evaluateCheckinPolicies)
             {
-                foreach (var message in _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, null, shelveset.WorkItemInfo).Messages)
-                {
-                    Trace.TraceWarning("[Checkin Policy] " + message);
-                }
+                var checkinProblems = _policyEvaluator.EvaluateCheckin(_workspace, pendingChanges, shelveset.Comment, null, shelveset.WorkItemInfo);
+                TraceCheckinPolicyErrors(checkinProblems, false);
             }
             _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
         }
