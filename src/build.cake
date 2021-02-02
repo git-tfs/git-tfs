@@ -218,6 +218,7 @@ Task("Build").Description("Build git-tfs")
 			.SetMaxCpuCount(4);
 		settings.WithTarget("GitTfs_Vs2015")
 			.WithTarget("GitTfs_Vs2017")
+			.WithTarget("GitTfs_Vs2019")
 			.WithTarget(TestProjectName);
 	});
 });
