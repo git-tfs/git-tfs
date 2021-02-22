@@ -107,26 +107,21 @@ namespace GitTfs.Util
             checkinOptions.CheckinComment = GitTfsConstants.TfsReviewerRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
         }
 
-
-
         public static void ProcessForceCommand(this CheckinOptions checkinOptions)
         {
-            MatchCollection workitemMatches;
-            if ((workitemMatches = GitTfsConstants.TfsForceRegex.Matches(checkinOptions.CheckinComment)).Count == 1)
+            MatchCollection workitemMatches = GitTfsConstants.TfsForceRegex.Matches(checkinOptions.CheckinComment);
+            if (workitemMatches.Count != 1)
+                return;
+
+            string overrideReason = workitemMatches[0].Groups["reason"].Value;
+            if (!string.IsNullOrWhiteSpace(overrideReason))
             {
-                string overrideReason = workitemMatches[0].Groups["reason"].Value;
-
-                if (!string.IsNullOrWhiteSpace(overrideReason))
-                {
-                    Trace.TraceInformation("Forcing the checkin: {0}", overrideReason);
-                    checkinOptions.Force = true;
-                    checkinOptions.OverrideReason = overrideReason;
-                }
-                checkinOptions.CheckinComment = GitTfsConstants.TfsForceRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
+                Trace.TraceInformation("Forcing the checkin: {0}", overrideReason);
+                checkinOptions.Force = true;
+                checkinOptions.OverrideReason = overrideReason;
             }
+            checkinOptions.CheckinComment = GitTfsConstants.TfsForceRegex.Replace(checkinOptions.CheckinComment, "").Trim(' ', '\r', '\n');
         }
-
-
 
         public static void ProcessAuthor(this CheckinOptions checkinOptions, GitCommit commit, AuthorsFile authors)
         {
