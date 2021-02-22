@@ -82,7 +82,11 @@ namespace GitTfs.Util
 
         public static void ProcessCheckinNoteCommands(this CheckinOptions checkinOptions)
         {
-            foreach (Match match in GitTfsConstants.TfsReviewerRegex.Matches(checkinOptions.CheckinComment))
+            MatchCollection matches = GitTfsConstants.TfsReviewerRegex.Matches(checkinOptions.CheckinComment);
+            if (matches.Count == 0)
+                return;
+
+            foreach (Match match in matches)
             {
                 string reviewer = match.Groups["reviewer"].Value;
                 if (!string.IsNullOrWhiteSpace(reviewer))
