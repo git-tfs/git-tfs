@@ -43,8 +43,8 @@ namespace GitTfs.Util
 
         public static void ProcessWorkItemCommands(this CheckinOptions checkinOptions, bool isResolvable = true)
         {
-            MatchCollection workitemMatches;
-            if ((workitemMatches = GitTfsConstants.TfsWorkItemRegex.Matches(checkinOptions.CheckinComment)).Count > 0)
+            MatchCollection workitemMatches = GitTfsConstants.TfsWorkItemRegex.Matches(checkinOptions.CheckinComment);
+            if (workitemMatches.Count > 0)
             {
                 foreach (Match match in workitemMatches)
                 {
