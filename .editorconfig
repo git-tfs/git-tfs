@@ -18,6 +18,7 @@ root = true
 [*.cs]
 indent_style = space
 indent_size = 4
+dotnet_sort_system_directives_first = true
 
 [*.cake]
 indent_style = tab
