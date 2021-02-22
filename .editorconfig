@@ -19,6 +19,7 @@ root = true
 indent_style = space
 indent_size = 4
 dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = true
 
 [*.cake]
 indent_style = tab
