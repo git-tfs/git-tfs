@@ -8,14 +8,12 @@ namespace GitTfs
     public static class GitTfsConstants
     {
         public static readonly Regex Sha1 = new Regex("[a-f\\d]{40}", RegexOptions.IgnoreCase);
-        public static readonly Regex Sha1Short = new Regex("[a-f\\d]{4,40}", RegexOptions.IgnoreCase);
         public static readonly Regex CommitRegex = new Regex("^commit (" + Sha1 + ")\\s*$");
 
         public const string DefaultRepositoryId = "default";
 
         public const string TfsRoot = "$/";
         public const string GitTfsPrefix = "git-tfs";
-        public const string GitTfsWorkItemPrefix = GitTfsPrefix + "-work-item:";
         public const string GitTfsPolicyOverrideCommentPrefix = GitTfsPrefix + "-force:";
         // e.g. git-tfs-id: [http://team:8080/]$/sandbox;C123
         public const string TfsCommitInfoFormat = "git-tfs-id: [{0}]{1};C{2}";
@@ -29,7 +27,7 @@ namespace GitTfs
                           "\\s*$", RegexOptions.Multiline | RegexOptions.Compiled);
         // e.g. git-tfs-work-item: 24 associate
         public static readonly Regex TfsWorkItemRegex =
-                new Regex(GitTfsWorkItemPrefix + @"\s*(?<item_id>\d+)(\s*(?<action>associate|resolve))?");
+                new Regex(GitTfsPrefix + "-work-item:" + @"\s*(?<item_id>\d+)(\s*(?<action>associate|resolve))?");
 
         // e.g. #24
         public static readonly Regex TfsWorkItemAssociateRegex = new Regex(@"#(?<item_id>\d+)");
