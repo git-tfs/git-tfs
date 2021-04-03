@@ -18,7 +18,6 @@ namespace GitTfs.Core
         private readonly Globals _globals;
         private readonly RemoteOptions _remoteOptions;
         private readonly ConfigProperties _properties;
-        private readonly bool _disableGitignoreSupport;
         private int? firstChangesetId;
         private int? maxChangesetId;
         private string maxCommitHash;
