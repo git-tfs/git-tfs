@@ -18,7 +18,7 @@ But to easy the use of paket, we use it in [magic mode](https://fsprojects.githu
 The `paket.bootstrapper.exe` has been renamed to `paket.exe` and will download `paket.exe` automatically if needed (to stay up to date!) and 'forward' the command to it.
 
 The others files used by paket are (all must be committed):
-* the `paket.dependencies` file, situated along the sln file, which contains all the nuget packages used in the project with the wished version.
+* the `paket.dependencies` file, situated along the sln file, which contains all the nuget packages used in the project with the desired version.
 * multiple `paket.references`s (one for each project), situated along each csproj, which contains just the names of the nuget packages used by this project.
 * the `paket.lock` file, situated along the `paket.dependencies` file, that is the result of the dependency graph calculated by paket. It shows the version used and 
 permit to understand which packages introduce a dependency, 2 very interesting information.

@@ -17,11 +17,14 @@
     <Compile Include="..\GitTfs.VsCommon\Retry.cs">
       <Link>Retry.cs</Link>
     </Compile>
-    <Compile Include="..\GitTfs.VsCommon\TfsPlugin.cs">
-      <Link>TfsPlugin.cs</Link>
-    </Compile>
     <Compile Include="..\GitTfs.VsCommon\TfsHelper.Common.cs">
       <Link>TfsHelper.Common.cs</Link>
+    </Compile>
+    <Compile Include="..\GitTfs.VsCommon\TfsHelper.VS2017Base.cs">
+      <Link>TfsHelper.VS2017Base.cs</Link>
+    </Compile>
+    <Compile Include="..\GitTfs.VsCommon\TfsPlugin.cs">
+      <Link>TfsPlugin.cs</Link>
     </Compile>
     <Compile Include="..\GitTfs.VsCommon\Wrappers.cs">
       <Link>Wrappers.cs</Link>
@@ -31,14 +34,14 @@
     <ProjectReference Include="..\GitTfs\GitTfs.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="paket.references" />
   </ItemGroup>
-      <ItemGroup>
+  <ItemGroup>
     <Reference Include="System.Windows.Forms" />
-      </ItemGroup>
+  </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy /y /I &quot;$(TargetDir)*.dll&quot; &quot;$(SolutionDir)GitTfs\$(OutDir)$(ProjectName)&quot; /EXCLUDE:$(SolutionDir)build\files_to_ignore_during_post_build_copy.txt" />
+    <Exec Command="xcopy /y /I &quot;$(TargetDir)*.pdb&quot; &quot;$(SolutionDir)GitTfs\$(OutDir)$(ProjectName)&quot; /EXCLUDE:$(SolutionDir)build\files_to_ignore_during_post_build_copy.txt" />
   </Target>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
