@@ -53,6 +53,13 @@ a TFS source tree and fetch all the changesets
 		  --resumable            if an error occurred, try to continue when you restart clone
 								 with same parameters
 
+## Remark
+
+Make sure that you use a local drive (and not a network share) where the clone is stored.
+`git-tfs` didn't receive any explicit testing for cloning on a network share and there are known reports
+like [Issue 1373](https://github.com/git-tfs/git-tfs/issues/1373) where cloning/fetching a shelveset
+didn't work when the clone was done on a network share.
+
 ## Examples
 ### Simple
 To clone all of `$/Project1` from your TFS server `tfs`

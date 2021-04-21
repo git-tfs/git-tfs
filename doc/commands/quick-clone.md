@@ -67,6 +67,13 @@ Useful for making code changes or additions where past history isn't relevant.
 			(Type: Flag, Value Type:[Boolean])
 			parents
 
+## Remark
+
+Make sure that you use a local drive (and not a network share) where the clone is stored.
+`git-tfs` didn't receive any explicit testing for cloning on a network share and there are known reports
+like [Issue 1373](https://github.com/git-tfs/git-tfs/issues/1373) where cloning/fetching a shelveset
+didn't work when the clone was done on a network share.
+
 ## Examples
 
 ### Simple
