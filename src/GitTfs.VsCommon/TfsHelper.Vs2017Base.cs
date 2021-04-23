@@ -15,10 +15,12 @@ using Microsoft.TeamFoundation.Common;
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.VisualStudio.Services.Client;
+using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Setup.Configuration;
 
 using StructureMap;
+using WindowsCredential = Microsoft.VisualStudio.Services.Common.WindowsCredential;
 
 namespace GitTfs.VsCommon
 {
@@ -193,10 +195,9 @@ namespace GitTfs.VsCommon
 
         protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
         {
-            var winCred = HasCredentials ?
-                              new Microsoft.VisualStudio.Services.Common.WindowsCredential(GetCredential()) :
-                              new Microsoft.VisualStudio.Services.Common.WindowsCredential(true);
-            var vssCred = new VssClientCredentials(winCred);
+            var vssCred = HasCredentials
+                ? new VssClientCredentials(new WindowsCredential(GetCredential()))
+                : VssClientCredentials.LoadCachedCredentials(uri, false, CredentialPromptType.PromptIfNeeded);
 
             return new TfsTeamProjectCollection(uri, vssCred);
 #pragma warning restore 618
