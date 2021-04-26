@@ -17,6 +17,7 @@ a TFS source tree and fetch all the changesets
 		  --template=VALUE       Passed to git-init
 		  --shared[=VALUE]       Passed to git-init
 		  --autocrlf=VALUE       Normalize line endings (default: false)
+		  --gitattributes=VALUE  Path to the .gitattributes file to use during initialization
 		  --ignorecase=VALUE     Ignore case in file paths (default: system default)
 		  --bare                 clone the TFS repository in a bare git repository
 		  --workspace=VALUE      set tfs workspace to a specific folder (a shorter path is better!)

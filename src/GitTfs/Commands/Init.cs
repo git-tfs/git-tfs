@@ -20,6 +20,7 @@ namespace GitTfs.Commands
         private readonly Globals _globals;
         private readonly IGitHelpers _gitHelper;
         private readonly AuthorsFile _authorsFileHelper;
+        private string _gitAttributesFilePath;
 
         public Init(RemoteOptions remoteOptions, InitOptions initOptions, Globals globals, IGitHelpers gitHelper, AuthorsFile authorsFileHelper)
         {
@@ -32,7 +33,11 @@ namespace GitTfs.Commands
 
         public OptionSet OptionSet
         {
-            get { return _initOptions.OptionSet.Merge(_remoteOptions.OptionSet); }
+            get
+            {
+                return _initOptions.OptionSet.Merge(_remoteOptions.OptionSet)
+                    .Add("gitattributes=", "Path to the .gitattributes file to include", v => _gitAttributesFilePath = v);
+            }
         }
 
         public bool IsBare
@@ -51,7 +56,7 @@ namespace GitTfs.Commands
             DoGitInitDb();
             VerifyGitUserConfig();
             SaveAuthorFileInRepository();
-            CommitTheGitIgnoreFile(_remoteOptions.GitIgnorePath);
+            CommitTheGitFiles(_remoteOptions.GitIgnorePath, _gitAttributesFilePath);
             UseTheGitIgnoreFile(_remoteOptions.GitIgnorePath);
             GitTfsInit(tfsUrl, tfsRepositoryPath);
             return 0;
@@ -77,14 +82,15 @@ namespace GitTfs.Commands
             _authorsFileHelper.SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
         }
 
-        private void CommitTheGitIgnoreFile(string pathToGitIgnoreFile)
+        private void CommitTheGitFiles(string pathToGitIgnoreFile, string pathToGitAttributesFile)
         {
-            if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile))
+            if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile) && string.IsNullOrWhiteSpace(pathToGitAttributesFile))
             {
-                Trace.WriteLine("No .gitignore file specified to commit...");
+                Trace.WriteLine("No .gitignore and/or .gitattributes files specified to commit...");
                 return;
             }
-            _globals.Repository.CommitGitIgnore(pathToGitIgnoreFile);
+
+            _globals.Repository.CommitGitFiles(pathToGitIgnoreFile, pathToGitAttributesFile);
         }
 
         private void UseTheGitIgnoreFile(string pathToGitIgnoreFile)
