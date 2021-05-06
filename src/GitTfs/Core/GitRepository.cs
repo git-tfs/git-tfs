@@ -123,12 +123,17 @@ namespace GitTfs.Core
             SetConfig(key, value.ToString().ToLower());
         }
 
-
         public IEnumerable<IGitTfsRemote> ReadAllTfsRemotes()
         {
             var remotes = GetTfsRemotes().Values;
-            foreach (var remote in remotes)
-                remote.EnsureTfsAuthenticated();
+            
+            var paths = remotes.Select(r => r.TfsRepositoryPath.Replace("$/", "").ToLower()).ToList();
+            var commonPrefix = paths.Count > 0 ? string.Join("", paths.Min().TakeWhile((c, i) => paths.All(s => s[i] == c))) : null;
+            if (!string.IsNullOrEmpty(commonPrefix))
+                remotes.First().EnsureTfsAuthenticated();
+            else
+                foreach (var remote in remotes)
+                    remote.EnsureTfsAuthenticated();
 
             return remotes;
         }
