@@ -857,7 +857,7 @@ namespace GitTfs.Core
             LogEntry result = null;
             WithWorkspace(changeset.Summary, workspace =>
             {
-                var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(null);
+                var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(lastCommit);
                 result = changeset.CopyTree(treeBuilder, workspace);
                 result.Tree = treeBuilder.GetTree();
             });
