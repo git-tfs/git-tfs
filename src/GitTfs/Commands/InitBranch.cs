@@ -19,7 +19,6 @@ namespace GitTfs.Commands
         public string TfsPassword { get; set; }
         public string IgnoreRegex { get; set; }
         public string ExceptRegex { get; set; }
-        public string ParentBranch { get; set; }
         public bool CloneAllBranches { get; set; }
         public bool NoFetch { get; set; }
         public bool DontCreateGitBranch { get; set; }
@@ -39,7 +38,6 @@ namespace GitTfs.Commands
                 return new OptionSet
                 {
                     { "all", "Clone all the TFS branches (For TFS 2010 and later)", v => CloneAllBranches = (v.ToLower() == "all") },
-                    { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                     { "ignore-regex=", "A regex of files to ignore", v => IgnoreRegex = v },
@@ -103,17 +101,7 @@ namespace GitTfs.Commands
                 return GitTfsExitCodes.InvalidArguments;
             }
 
-            IList<RootBranch> creationBranchData;
-            if (ParentBranch == null)
-                creationBranchData = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath);
-            else
-            {
-                var tfsRepositoryPathParentBranchFound = allRemotes.FirstOrDefault(r => r.TfsRepositoryPath.ToLower() == ParentBranch.ToLower());
-                if (tfsRepositoryPathParentBranchFound == null)
-                    throw new GitTfsException("error: The Tfs parent branch '" + ParentBranch + "' can not be found in the Git repository\nPlease init it first and try again...\n");
-
-                creationBranchData = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath, -1, tfsRepositoryPathParentBranchFound.TfsRepositoryPath);
-            }
+            IList<RootBranch> creationBranchData = defaultRemote.Tfs.GetRootChangesetForBranch(tfsBranchPath);
 
             IFetchResult fetchResult;
             InitBranchSupportingRename(tfsBranchPath, gitBranchNameExpected, creationBranchData, defaultRemote, out fetchResult);

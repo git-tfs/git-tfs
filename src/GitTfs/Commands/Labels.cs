@@ -19,7 +19,6 @@ namespace GitTfs.Commands
 
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
-        public string ParentBranch { get; set; }
         public bool LabelAllBranches { get; set; }
         public string NameFilter { get; set; }
         public string ExcludeNameFilter { get; set; }

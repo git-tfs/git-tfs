@@ -85,7 +85,6 @@ namespace GitTfs.VsCommon
                 }
 
                 _server = GetTfsCredential(uri);
-
                 _server.EnsureAuthenticated();
             }
         }
@@ -168,13 +167,6 @@ namespace GitTfs.VsCommon
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false)
         {
-            if (Is2008OrOlder)
-            {
-                foreach (var changeset in GetChangesetsForTfs2008(path, startVersion, remote))
-                    yield return changeset;
-                yield break;
-            }
-
             var start = startVersion;
             Changeset[] changesets;
             var lastChangeset = lastVersion == -1 ? VersionSpec.Latest : new ChangesetVersionSpec(lastVersion);
@@ -195,21 +187,6 @@ namespace GitTfs.VsCommon
                     changesets[i] = null;
                 }
             } while (!byLots && changesets.Length == BatchCount);
-        }
-
-        public IEnumerable<ITfsChangeset> GetChangesetsForTfs2008(string path, int startVersion, IGitTfsRemote remote)
-        {
-            var changesets = VersionControl.QueryHistory(path, VersionSpec.Latest, 0, RecursionType.Full,
-                                                                        null, new ChangesetVersionSpec(startVersion), VersionSpec.Latest, int.MaxValue,
-                                                                        true, true, true)
-                                                          .Cast<Changeset>().OrderBy(changeset => changeset.ChangesetId).ToArray();
-            // don't take the enumerator produced by a foreach statement or a yield statement, as there are references
-            // to the old (iterated) elements and thus the referenced changesets won't be disposed until all elements were iterated.
-            for (int i = 0; i < changesets.Length; i++)
-            {
-                yield return BuildTfsChangeset(changesets[i], remote);
-                changesets[i] = null;
-            }
         }
 
         public virtual int FindMergeChangesetParent(string path, int targetChangeset, GitTfsRemote remote)
@@ -235,16 +212,6 @@ namespace GitTfs.VsCommon
                     return -1;
                 return mergeSources.Max(mergeSource => mergeSource.VersionTo);
             });
-        }
-
-        public bool Is2008OrOlder
-        {
-            get { return _server.ConfigurationServer == null; }
-        }
-
-        public bool CanGetBranchInformation
-        {
-            get { return !Is2008OrOlder; }
         }
 
         public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
@@ -279,16 +246,6 @@ namespace GitTfs.VsCommon
 
             try
             {
-                if (!CanGetBranchInformation)
-                {
-                    Trace.WriteLine("Try TFS2008 compatibility mode...");
-                    foreach (var rootBranch in GetRootChangesetForBranchForTfs2008(tfsPathBranchToCreate, lastChangesetIdToCheck, tfsPathParentBranch))
-                    {
-                        AddNewRootBranch(rootBranches, rootBranch);
-                    }
-                    return;
-                }
-
                 if (!string.IsNullOrWhiteSpace(tfsPathParentBranch))
                     Trace.WriteLine("Parameter about parent branch will be ignored because this version of TFS is able to find the parent!");
 

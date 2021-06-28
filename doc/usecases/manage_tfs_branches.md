@@ -119,13 +119,6 @@ You will have the list of the already initialized Tfs branches and also the last
 
     git tfs branch --init $/Repository/ProjectBranch
 
-## Initialize one tfs branch (with TFS2008)
-
-With TFS2008, git-tfs is unable to find the parent branch of the branch we want to initialize.
-It's a needed informations to find the root changeset. To tell git-tfs, we must use the `--tfs-parent-branch` option:
-
-    git tfs branch --init --tfs-parent-branch=$/Repository/ProjectParentBranch $/Repository/ProjectBranch
-
 ## Initialize one tfs branch, setting its name
 
     git tfs branch --init $/Repository/ProjectBranch myNewBranch

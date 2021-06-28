@@ -23,7 +23,6 @@ The `branch` command allows you to manage TFS branches. With this command, you c
 		   git tfs branch --init $/Repository/ProjectBranch
 		   git tfs branch --init $/Repository/ProjectBranch myNewBranch
 		   git tfs branch --init --all
-		   git tfs branch --init --tfs-parent-branch=$/Repository/ProjectParentBranch $/Repository/ProjectBranch
 
 	  -h, -H, --help
 	  -V, --version
@@ -47,10 +46,6 @@ The `branch` command allows you to manage TFS branches. With this command, you c
           --ignore-regex=VALUE   a regex of files to ignore
           --except-regex=VALUE   a regex of exceptions to ignore-regex
 		  --no-fetch              Don't fetch changeset for inited branch(es)
-	  -b, --tfs-parent-branch=VALUE
-								 TFS Parent branch of the TFS branch to clone
-								   (TFS 2008 only! And required!!) ex:
-								   $/Repository/ProjectParentBranch
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
 	  -a, --authors=VALUE        Path to an Authors file to map TFS users to Git
@@ -122,12 +117,6 @@ Note: To successfully process the merge changeset (and come from an older versio
     git tfs branch --init --all
 
 This command will initialize all the branches that haven't yet been initialized.
-
-### Initialize a branch with TFS2008
-
-TFS2008 doesn't provide the ability for git-tfs to programmatically determine the parent of a branch. You must find it yourself within the TFS UI. You can check the checkin message or ask whomever originally made the branch. Once you determine the parent branch, provide it using the parameter `--tfs-parent-branch`. 
-
-    git tfs branch --init --tfs-parent-branch=$/Repository/ProjectParentBranch $/Repository/ProjectBranch
 
 ### Ignore files when fetching changesets
 
