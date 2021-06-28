@@ -172,57 +172,6 @@ namespace GitTfs.Test.Commands
 
         #endregion
 
-        #region Init a branch (2008 compatibility mode)
-        [Fact]
-        public void ShouldInitBranchInTfs2008CompatibilityMode()
-        {
-            const string GIT_BRANCH_TO_INIT = "MyBranch";
-
-            InitMocks4Tests(GIT_BRANCH_TO_INIT, out var gitRepository, out var remoteMock, out var newBranchRemoteMock, out var tfsHelperMock);
-
-            remoteMock.Name = nameof(remoteMock);
-            remoteMock.Setup(r => r.Fetch(It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<IRenameResult>())).Returns(new GitTfsRemote.FetchResult() { IsSuccess = true });
-            remoteMock.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranchRemoteMock.Object);
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, remoteMock.Object.TfsRepositoryPath)).Returns(new List<RootBranch>() { new RootBranch(2008, "$/MyProject/MyBranch") });
-
-            mocks.ClassUnderTest.ParentBranch = remoteMock.Object.TfsRepositoryPath;
-
-            gitRepository.Name = nameof(gitRepository);
-            gitRepository.Setup(x => x.ReadTfsRemote("default")).Returns(remoteMock.Object).Verifiable();
-            gitRepository.Setup(x => x.ReadAllTfsRemotes()).Returns(new List<IGitTfsRemote> { remoteMock.Object }).Verifiable();
-
-            newBranchRemoteMock.Name = nameof(newBranchRemoteMock);
-            newBranchRemoteMock.Setup(r => r.RemoteRef).Returns("refs/remote/tfs/" + GIT_BRANCH_TO_INIT);//.Verifiable();
-            newBranchRemoteMock.Setup(r => r.Fetch(It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<IRenameResult>())).Returns(new GitTfsRemote.FetchResult() { IsSuccess = true }).Verifiable();
-            newBranchRemoteMock.Object.MaxCommitHash = "sha1AfterFetch";
-
-            Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
-
-            gitRepository.Verify();
-            newBranchRemoteMock.Verify();
-        }
-
-        [Fact]
-        public void ShouldFailedInitBranchInTfs2008CompatibilityModeBecauseParentBranchNotAlreadyCloned()
-        {
-            const string GIT_BRANCH_TO_INIT = "MyBranch";
-
-            InitMocks4Tests(GIT_BRANCH_TO_INIT, out var gitRepository, out var remote, out var newBranchRemote, out var tfsHelperMock);
-
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, null)).Returns(new List<RootBranch>() { new RootBranch(2008, "$/MyProject/MyBranch") });
-
-            mocks.ClassUnderTest.ParentBranch = "$/MyProject/MyParentBranchNotAlreadyCloned";
-
-            gitRepository.Setup(x => x.ReadTfsRemote("default")).Returns(remote.Object).Verifiable();
-            gitRepository.Setup(x => x.ReadAllTfsRemotes()).Returns(new List<IGitTfsRemote> { remote.Object }).Verifiable();
-
-            Assert.Throws<GitTfsException>(() => mocks.ClassUnderTest.Run("$/MyProject/MyBranch"));
-
-            gitRepository.Verify(x => x.AssertValidBranchName(GIT_BRANCH_TO_INIT), Times.Never);
-            gitRepository.Verify();
-        }
-        #endregion
-
         #region Init All branches
 
         [Fact]

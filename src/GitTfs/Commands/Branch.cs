@@ -274,10 +274,6 @@ namespace GitTfs.Commands
                 else
                 {
                     var remote = tfsRemotes.First(r => r.Id == remoteId);
-                    if (!remote.Tfs.CanGetBranchInformation)
-                    {
-                        throw new GitTfsException("error: this version of TFS doesn't support this functionality");
-                    }
                     foreach (var branch in remote.Tfs.GetBranches().Where(b => b.IsRoot))
                     {
                         var root = remote.Tfs.GetRootTfsBranchForRemotePath(branch.Path);
@@ -295,11 +291,6 @@ namespace GitTfs.Commands
         public static void WriteRemoteTfsBranchStructure(ITfsHelper tfsHelper, string tfsRepositoryPath, IEnumerable<IGitTfsRemote> tfsRemotes = null)
         {
             var root = tfsHelper.GetRootTfsBranchForRemotePath(tfsRepositoryPath);
-
-            if (!tfsHelper.CanGetBranchInformation)
-            {
-                throw new GitTfsException("error: this version of TFS doesn't support this functionality");
-            }
             var visitor = new WriteBranchStructureTreeVisitor(tfsRepositoryPath, tfsRemotes);
             root.AcceptVisitor(visitor);
         }

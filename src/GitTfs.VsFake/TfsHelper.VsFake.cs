@@ -385,8 +385,6 @@ namespace GitTfs.VsFake
             return exists;
         }
 
-        public bool CanGetBranchInformation { get { return true; } }
-
         public IChangeset GetChangeset(int changesetId)
         {
             return new Changeset(_versionControlServer, _script.Changesets.First(c => c.Id == changesetId));
