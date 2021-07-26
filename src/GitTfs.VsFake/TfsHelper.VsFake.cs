@@ -40,6 +40,7 @@ namespace GitTfs.VsFake
         public string Url { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string PAT { get; set; }
 
         public void EnsureAuthenticated() { }
 
@@ -531,6 +532,21 @@ namespace GitTfs.VsFake
         }
 
         public void DeleteShelveset(IWorkspace workspace, string shelvesetName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ValidateTfsFolder(string remoteTfsPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ClearBranches()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<IBranchObject> GetBranches(string remoteTfsPath, bool getAlsoDeletedBranches = false, bool searchAllBranches = true)
         {
             throw new NotImplementedException();
         }

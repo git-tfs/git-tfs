@@ -34,6 +34,11 @@
     <None Include="app.config" />
     <None Include="paket.references" />
   </ItemGroup>
+  <!-- <ItemGroup> -->
+    <!-- <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="14.0.0" /> -->
+    <!-- <PackageReference Include="Microsoft.TeamFoundationServer.ExtendedClient" Version="14.0.0" /> -->
+    <!-- <PackageReference Include="Newtonsoft.Json" Version="10.0.3" /> -->
+  <!-- </ItemGroup> -->
       <ItemGroup>
     <Reference Include="System.Windows.Forms" />
       </ItemGroup>

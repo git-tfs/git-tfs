@@ -37,8 +37,12 @@ namespace GitTfs.Core
             Id = info.Id;
             TfsUrl = info.Url;
             TfsRepositoryPath = info.Repository;
-            TfsUsername = info.Username;
-            TfsPassword = info.Password;
+            //TIM C: I found this to be very confusing. The tfs user name /password appears to come the
+            //remoteoptions object, and not the info object, so I coalesced them, to just cover both bases
+            TfsUsername = info.Username ?? _remoteOptions.Username;
+            TfsPassword = info.Password ?? _remoteOptions.Password;
+            TfsPAT = info.PAT ?? _remoteOptions.PAT;
+
             Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
             IgnoreRegexExpression = info.IgnoreRegex;
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
@@ -132,6 +136,13 @@ namespace GitTfs.Core
             get { return Tfs.Password; }
             set { Tfs.Password = value; }
         }
+
+        public string TfsPAT
+        {
+            get { return Tfs.PAT; }
+            set { Tfs.PAT = value; }
+        }
+
 
         public string TfsRepositoryPath { get; set; }
 
@@ -875,8 +886,13 @@ namespace GitTfs.Core
         {
             var builder = new StringWriter();
             builder.WriteLine(tfsCheckinComment);
-            builder.WriteLine(GitTfsConstants.TfsCommitInfoFormat,
-                TfsUrl, TfsRepositoryPath, changesetId);
+            builder.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl, TfsRepositoryPath, changesetId);
+
+            var match = Regex.Match(TfsRepositoryPath, @"\$/(?<TeamProject>[^/]*?)/");
+            if (match.Success)
+                builder.WriteLine(GitTfsConstants.TfsCommitUrlFormat, TfsUrl, match.Groups["TeamProject"].Value, changesetId);
+
+
             return builder.ToString();
         }
 

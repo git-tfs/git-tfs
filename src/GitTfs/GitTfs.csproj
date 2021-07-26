@@ -29,6 +29,12 @@
     <None Include="Core\TfsInterop\README.txt" />
     <None Include="paket.references" />
   </ItemGroup>
+  <!-- <ItemGroup> -->
+    <!-- <PackageReference Include="LibGit2Sharp" Version="0.26.1" /> -->
+    <!-- <PackageReference Include="nlog" Version="4.7.10" /> -->
+    <!-- <PackageReference Include="StructureMap" Version="2.6.3" /> -->
+    <!-- <PackageReference Include="StructureMap.AutoMocking" Version="2.6.3" /> -->
+  <!-- </ItemGroup> -->
   <ItemGroup>
     <ProjectReference Include="..\NDesk.Options\NDesk.Options.csproj" />
   </ItemGroup>

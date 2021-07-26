@@ -52,5 +52,15 @@
     <EmbeddedResource Include="Fixtures\vtccds\fd30d6210bb40fd2c9b689f0bf8b2833" />
     <None Include="paket.references" />
   </ItemGroup>
+  <!-- <ItemGroup> -->
+    <!-- <PackageReference Include="LibGit2Sharp" Version="0.26.1" /> -->
+    <!-- <PackageReference Include="Moq" Version="4.16.1" /> -->
+    <!-- <PackageReference Include="nlog" Version="4.7.10" /> -->
+    <!-- <PackageReference Include="StructureMap" Version="2.6.3" /> -->
+    <!-- <PackageReference Include="StructureMap.AutoMocking" Version="2.6.3" /> -->
+    <!-- <PackageReference Include="xunit" Version="2.4.1" /> -->
+    <!-- <PackageReference Include="xunit.assert" Version="2.4.1" /> -->
+    <!-- <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" /> -->
+  <!-- </ItemGroup> -->
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

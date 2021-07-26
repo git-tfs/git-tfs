@@ -25,13 +25,33 @@ namespace GitTfs
         {
             try
             {
+                var sw = Stopwatch.StartNew();
+
                 Environment.ExitCode = MainCore(args);
+
+                sw.Stop();
+                // could write it out like this: mm\\:ss\\.ff, using readable format instead
+                Console.WriteLine("\r\nCompleted in {0}{1}{2}{3}",
+                    FormatTime(sw.Elapsed.Days, "day"), //hopefully this should never happen??? :)
+                    FormatTime(sw.Elapsed.Hours, "hour"), 
+                    FormatTime(sw.Elapsed.Minutes, "minute"), 
+                    FormatTime(sw.Elapsed.Seconds, "second"));
             }
             catch (Exception e)
             {
                 ReportException(e);
                 Environment.ExitCode = GitTfsExitCodes.ExceptionThrown;
             }
+        }
+
+        private static string FormatTime(int unit, string unitOfTime)
+        {
+            if (unit == 0)
+                return string.Empty;
+            else if (unit == 1)
+                return $"{unit} {unitOfTime} ";
+            else
+                return $"{unit} {unitOfTime}s ";
         }
 
         public static int MainCore(string[] args)

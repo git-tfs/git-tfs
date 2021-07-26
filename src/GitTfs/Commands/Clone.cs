@@ -159,6 +159,8 @@ namespace GitTfs.Commands
 
         private void VerifyTfsPathToClone(string tfsRepositoryPath)
         {
+            //TIM C: Really unsure as to why the clone needs to work off a branch in TFS. I altered the code to be faster AND to allow
+            //  folders. TBH, just validating the folder is valid seems like it would be enough to me, as all of this does not get stored anywhere.  
             if (_initBranch == null)
                 return;
             try
@@ -171,9 +173,25 @@ namespace GitTfs.Commands
 
                 if (!remote.Tfs.CanGetBranchInformation)
                     return;
-                var tfsTrunkRepository = remote.Tfs.GetRootTfsBranchForRemotePath(tfsRepositoryPath, false);
+
+                //TIM C: added this so it would still continue on for even folders. As we have a desire to clone those as well, but only if the strategy is None.
+                if (_fetch.BranchStrategy == BranchStrategy.None)
+                {
+                    if (remote.Tfs.ValidateTfsFolder(tfsRepositoryPath))
+                        return;
+                    else
+                        throw new GitTfsException($"The TFS path ({tfsRepositoryPath}) does not appear to be a valid folder.");
+                }
+
+                var searchAllbranches = tfsRepositoryPath == GitTfsConstants.TfsRoot;
+                var tfsTrunkRepository = remote.Tfs.GetRootTfsBranchForRemotePath(tfsRepositoryPath, false, searchAllbranches);
                 if (tfsTrunkRepository == null)
                 {
+                    if (!searchAllbranches)
+                    {
+                        //clear the cached branches so we can enumerate them all to write out
+                        remote.Tfs.ClearBranches();
+                    }
                     var tfsRootBranches = remote.Tfs.GetAllTfsRootBranchesOrderedByCreation();
                     if (!tfsRootBranches.Any())
                     {

@@ -11,6 +11,9 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
+  <!-- <ItemGroup> -->
+    <!-- <PackageReference Include="StructureMap" Version="2.6.3" /> -->
+  <!-- </ItemGroup> -->
   <ItemGroup>
     <ProjectReference Include="..\GitTfs\GitTfs.csproj" />
   </ItemGroup>

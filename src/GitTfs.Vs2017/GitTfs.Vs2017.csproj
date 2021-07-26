@@ -36,6 +36,14 @@
   <ItemGroup>
     <None Include="paket.references" />
   </ItemGroup>
+  <!-- <ItemGroup> -->
+    <!-- <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="15.112.1" /> -->
+    <!-- <PackageReference Include="Microsoft.TeamFoundationServer.ExtendedClient" Version="15.112.1" /> -->
+    <!-- <PackageReference Include="Microsoft.VisualStudio.RegDetour" Version="16.10.31320.204" /> -->
+    <!-- <PackageReference Include="Microsoft.VisualStudio.Settings.15.0" Version="15.0.26606" /> -->
+    <!-- <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.15.103"/> -->
+    <!-- <PackageReference Include="Newtonsoft.Json" Version="10.0.3" /> -->
+  <!-- </ItemGroup> -->
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>

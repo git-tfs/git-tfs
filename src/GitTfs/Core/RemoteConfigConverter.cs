@@ -27,6 +27,8 @@ namespace GitTfs.Core
                         remote.Username = entry.Value;
                     else if (key == "password")
                         remote.Password = entry.Value;
+                    else if (key == "pat")
+                        remote.PAT = entry.Value;
                     else if (key == "ignore-paths")
                         remote.IgnoreRegex = entry.Value;
                     else if (key == "ignore-except")
@@ -53,6 +55,7 @@ namespace GitTfs.Core
                 yield return c(prefix + "repository", remote.Repository);
                 yield return c(prefix + "username", remote.Username);
                 yield return c(prefix + "password", remote.Password);
+                yield return c(prefix + "pat", remote.PAT);
                 yield return c(prefix + "ignore-paths", remote.IgnoreRegex);
                 yield return c(prefix + "ignore-except", remote.IgnoreExceptRegex);
                 yield return c(prefix + "gitignore-path", remote.GitIgnorePath);

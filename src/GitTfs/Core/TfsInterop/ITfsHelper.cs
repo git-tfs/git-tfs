@@ -10,6 +10,7 @@ namespace GitTfs.Core.TfsInterop
         string Url { get; set; }
         string Username { get; set; }
         string Password { get; set; }
+        string PAT { get; set; }
         IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false);
         void WithWorkspace(string directory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action);
         IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName);
@@ -30,8 +31,11 @@ namespace GitTfs.Core.TfsInterop
         IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, int lastChangesetIdToCheck = -1, string tfsPathParentBranch = null);
         IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null);
         bool CanGetBranchInformation { get; }
+        bool ValidateTfsFolder(string remoteTfsPath);
+        void ClearBranches();
         IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation();
         IEnumerable<IBranchObject> GetBranches(bool getDeletedBranches = false);
+        IEnumerable<IBranchObject> GetBranches(string remoteTfsPath, bool getAlsoDeletedBranches = false, bool searchAllBranches = true);
         void EnsureAuthenticated();
         void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null);
         void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder);

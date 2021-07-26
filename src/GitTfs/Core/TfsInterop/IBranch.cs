@@ -58,13 +58,13 @@ namespace GitTfs.Core.TfsInterop
         ///     If the root branch matching the search criteria was not found, it try to search by all deleted branches to.
         ///     This can usable if the user want to clone a deleted branch.
         /// </remarks>
-        public static BranchTree GetRootTfsBranchForRemotePath(this ITfsHelper tfs, string remoteTfsPath, bool searchExactPath = true)
-            => GetRootTfsBranchForRemotePath(tfs, remoteTfsPath, searchExactPath, false) ??
-               GetRootTfsBranchForRemotePath(tfs, remoteTfsPath, searchExactPath, true);
+        public static BranchTree GetRootTfsBranchForRemotePath(this ITfsHelper tfs, string remoteTfsPath, bool searchExactPath = true, bool searchAllBranches = true)
+            => GetRootTfsBranchForRemotePath(tfs, remoteTfsPath, searchExactPath, false, searchAllBranches) ??
+               GetRootTfsBranchForRemotePath(tfs, remoteTfsPath, searchExactPath, true, searchAllBranches);
 
-        private static BranchTree GetRootTfsBranchForRemotePath(this ITfsHelper tfs, string remoteTfsPath, bool searchExactPath, bool searchDeletedBranches)
+        private static BranchTree GetRootTfsBranchForRemotePath(this ITfsHelper tfs, string remoteTfsPath, bool searchExactPath, bool searchDeletedBranches, bool searchAllBranches = true)
         {
-            var branches = tfs.GetBranches(searchDeletedBranches);
+            var branches = tfs.GetBranches(remoteTfsPath, searchDeletedBranches, searchAllBranches);
             var branchTrees = branches.Aggregate(new Dictionary<string, BranchTree>(StringComparer.OrdinalIgnoreCase), (dict, branch) => dict.Tap(d => d.Add(branch.Path, new BranchTree(branch))));
             foreach (var branch in branchTrees.Values)
             {

@@ -20,6 +20,7 @@ using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
 using IdentityNotFoundException = Microsoft.TeamFoundation.VersionControl.Client.IdentityNotFoundException;
 using Microsoft.TeamFoundation.Build.Client;
+using Microsoft.VisualStudio.Services.Common;
 
 namespace GitTfs.VsCommon
 {
@@ -55,9 +56,21 @@ namespace GitTfs.VsCommon
 
         public string Password { get; set; }
 
-        public bool HasCredentials
+        public string PAT { get; set; }
+
+        public bool HasUserName
         {
-            get { return !string.IsNullOrEmpty(Username); }
+            get { return !string.IsNullOrEmpty(Username);  }
+        }
+
+        public bool HasPassword
+        {
+            get { return !string.IsNullOrEmpty(Password); }
+        }
+
+        public bool HasPAT
+        {
+            get { return !string.IsNullOrEmpty(PAT); }
         }
 
         public void EnsureAuthenticated()
@@ -96,8 +109,9 @@ namespace GitTfs.VsCommon
 
         protected NetworkCredential GetCredential()
         {
-            if (!HasCredentials)
-                return new NetworkCredential();
+            if (!HasUserName)
+                return CredentialCache.DefaultNetworkCredentials; 
+
             var idx = Username.IndexOf('\\');
             if (idx >= 0)
             {
@@ -247,6 +261,11 @@ namespace GitTfs.VsCommon
             get { return !Is2008OrOlder; }
         }
 
+        public void ClearBranches()
+        {
+            _allTfsBranchObjects = null;
+        }
+
         public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
         {
             return AllTfsBranchObjects
@@ -256,7 +275,15 @@ namespace GitTfs.VsCommon
 
         public IEnumerable<IBranchObject> GetBranches(bool getAlsoDeletedBranches = false)
         {
-            var branches = AllTfsBranchObjects;
+            var branches = GetAllTfsBranchObjects(true, null);
+            if (getAlsoDeletedBranches)
+                return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches);
+            return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches.Where(b => !b.Properties.RootItem.IsDeleted));
+        }
+
+        public IEnumerable<IBranchObject> GetBranches(string remoteTfsPath, bool getAlsoDeletedBranches = false, bool searchAllBranches = true)
+        {
+            var branches = GetAllTfsBranchObjects(searchAllBranches, remoteTfsPath);
             if (getAlsoDeletedBranches)
                 return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches);
             return _bridge.Wrap<WrapperForBranchObject, BranchObject>(branches.Where(b => !b.Properties.RootItem.IsDeleted));
@@ -452,16 +479,27 @@ namespace GitTfs.VsCommon
         }
 
         private BranchObject[] _allTfsBranchObjects;
-        private BranchObject[] AllTfsBranchObjects
+        private BranchObject[] GetAllTfsBranchObjects(bool searchAllBranches = true, string remoteTfsPath = null)
         {
-            get
+            if (_allTfsBranchObjects != null)
+                return _allTfsBranchObjects;
+            if (searchAllBranches)
             {
-                if (_allTfsBranchObjects != null)
-                    return _allTfsBranchObjects;
                 Trace.WriteLine("Looking for all branches...");
                 _allTfsBranchObjects = VersionControl.QueryRootBranchObjects(RecursionType.Full);
-                return _allTfsBranchObjects;
             }
+            else
+            {
+                Trace.WriteLine($"Looking for branches in path: {remoteTfsPath}...");
+                _allTfsBranchObjects = VersionControl.QueryBranchObjects(new ItemIdentifier(remoteTfsPath), RecursionType.Full);
+            }
+            Trace.WriteLine($"Found {_allTfsBranchObjects.Length} branches...");
+            return _allTfsBranchObjects;
+        }
+
+        private BranchObject[] AllTfsBranchObjects
+        {
+            get { return GetAllTfsBranchObjects(); }
         }
         private IDictionary<string, string> _allTfsBranches;
         private IDictionary<string, string> AllTfsBranches
@@ -1356,6 +1394,11 @@ namespace GitTfs.VsCommon
         public bool IsExistingInTfs(string path)
         {
             return VersionControl.ServerItemExists(path, VersionSpec.Latest, DeletedState.Any, ItemType.Any);
+        }
+
+        public bool ValidateTfsFolder(string remoteTfsPath)
+        {
+            return VersionControl.ServerItemExists(remoteTfsPath, VersionSpec.Latest, DeletedState.NonDeleted, ItemType.Folder);
         }
 
         protected void ConvertFolderIntoBranch(string tfsRepositoryPath)

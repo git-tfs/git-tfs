@@ -8,6 +8,9 @@ source https://api.nuget.org/v3/index.json
 //because there is some subtleties on how we use it in our project:
 //https://github.com/git-tfs/git-tfs/blob/master/doc/paket.md
 
+// Refer to the docs as to which TeamFoundationServer package version goes to which group: 
+//		https://docs.microsoft.com/en-us/azure/devops/integrate/concepts/dotnet-client-libraries?view=azure-devops#package-and-azure-devops-server-version-mapping-table
+
 nuget nlog
 nuget LibGit2Sharp ~> 0.26.1
 nuget Moq
