@@ -7,6 +7,7 @@ using System.Linq;
 using NDesk.Options;
 using GitTfs.Core;
 using StructureMap;
+using System.Text.RegularExpressions;
 
 namespace GitTfs.Commands
 {
@@ -148,6 +149,10 @@ namespace GitTfs.Commands
 
                 int latest = Math.Max(owner.MaxChangesetId, remote.MaxChangesetId);
                 string msg = string.Format(GitTfsConstants.TfsCommitInfoFormat, owner.TfsUrl, owner.TfsRepositoryPath, latest);
+                var match = Regex.Match(owner.TfsRepositoryPath, @"\$/(?<TeamProject>[^/]*?)/?");
+                if (match.Success)
+                    msg = String.Concat(msg, Environment.NewLine, String.Format(GitTfsConstants.TfsCommitUrlFormat, owner.TfsUrl, match.Groups["TeamProject"].Value, latest));
+
                 msg = string.Format(@"Add '{0}/' from commit '{1}'
 
 {2}", Prefix, remote.MaxCommitHash, msg);

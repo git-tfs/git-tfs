@@ -875,8 +875,11 @@ namespace GitTfs.Core
         {
             var builder = new StringWriter();
             builder.WriteLine(tfsCheckinComment);
-            builder.WriteLine(GitTfsConstants.TfsCommitInfoFormat,
-                TfsUrl, TfsRepositoryPath, changesetId);
+            builder.WriteLine(GitTfsConstants.TfsCommitInfoFormat, TfsUrl, TfsRepositoryPath, changesetId);
+            var match = Regex.Match(TfsRepositoryPath, @"\$/(?<TeamProject>[^/]*?)/?");
+            if (match.Success)
+                builder.WriteLine(GitTfsConstants.TfsCommitUrlFormat, TfsUrl, match.Groups["TeamProject"].Value, changesetId);
+
             return builder.ToString();
         }
 
