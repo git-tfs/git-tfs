@@ -30,6 +30,7 @@ namespace GitTfs.Core.TfsInterop
         IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, int lastChangesetIdToCheck = -1, string tfsPathParentBranch = null);
         IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null);
         bool CanGetBranchInformation { get; }
+        bool ValidateTfsFolder(string remoteTfsPath);
         IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation();
         IEnumerable<IBranchObject> GetBranches(bool getDeletedBranches = false);
         void EnsureAuthenticated();

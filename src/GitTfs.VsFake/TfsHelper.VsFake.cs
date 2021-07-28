@@ -535,6 +535,10 @@ namespace GitTfs.VsFake
             throw new NotImplementedException();
         }
 
+        public bool ValidateTfsFolder(string remoteTfsPath)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
 
         private class FakeVersionControlServer : IVersionControlServer

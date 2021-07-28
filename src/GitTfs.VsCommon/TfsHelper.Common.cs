@@ -1358,6 +1358,11 @@ namespace GitTfs.VsCommon
             return VersionControl.ServerItemExists(path, VersionSpec.Latest, DeletedState.Any, ItemType.Any);
         }
 
+        public bool ValidateTfsFolder(string remoteTfsPath)
+        {
+            return VersionControl.ServerItemExists(remoteTfsPath, VersionSpec.Latest, DeletedState.NonDeleted, ItemType.Folder);
+        }
+
         protected void ConvertFolderIntoBranch(string tfsRepositoryPath)
         {
             VersionControl.CreateBranchObject(new BranchProperties(new ItemIdentifier(tfsRepositoryPath)));

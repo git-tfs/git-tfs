@@ -171,6 +171,16 @@ namespace GitTfs.Commands
 
                 if (!remote.Tfs.CanGetBranchInformation)
                     return;
+
+                //TIM C: added this so it would still continue on for even folders. As we have a desire to clone those as well, but only if the strategy is None.
+                if (_fetch.BranchStrategy == BranchStrategy.None)
+                {
+                    if (remote.Tfs.ValidateTfsFolder(tfsRepositoryPath))
+                        return;
+                    else
+                        throw new GitTfsException($"The TFS path ({tfsRepositoryPath}) does not appear to be a valid folder.");
+                }
+
                 var tfsTrunkRepository = remote.Tfs.GetRootTfsBranchForRemotePath(tfsRepositoryPath, false);
                 if (tfsTrunkRepository == null)
                 {
