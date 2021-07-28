@@ -73,6 +73,18 @@ namespace GitTfs.Core
             }
         }
 
+        public string TfsPAT
+        {
+            get
+            {
+                throw DerivedRemoteException;
+            }
+            set
+            {
+                throw DerivedRemoteException;
+            }
+        }
+
         public string TfsRepositoryPath
         {
             get { return _tfsRepositoryPath; }

@@ -24,6 +24,8 @@ namespace GitTfs.Commands
                         v => Username = v },
                     { "p|password=", "TFS password",
                         v => Password = v },
+                    { "pat=", "TFS Personal Access Token",
+                        v => PAT = v },
                     { "no-parallel", "Do not do parallel requests to TFS",
                         v => NoParallel = (v != null) },
                 };
@@ -37,6 +39,7 @@ namespace GitTfs.Commands
         public bool NoGitIgnore { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string PAT { get; set; }
         public bool NoParallel { get; set; }
     }
 }

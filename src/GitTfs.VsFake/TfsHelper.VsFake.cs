@@ -40,6 +40,7 @@ namespace GitTfs.VsFake
         public string Url { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string PAT { get; set; }
 
         public void EnsureAuthenticated() { }
 

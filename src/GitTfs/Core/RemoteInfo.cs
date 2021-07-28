@@ -10,6 +10,7 @@ namespace GitTfs.Core
         public string Repository { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string PAT { get; set; }
         public string IgnoreRegex { get; set; }
         public string IgnoreExceptRegex { get; set; }
         public string GitIgnorePath { get; set; }

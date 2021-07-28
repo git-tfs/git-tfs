@@ -37,8 +37,10 @@ namespace GitTfs.Core
             Id = info.Id;
             TfsUrl = info.Url;
             TfsRepositoryPath = info.Repository;
-            TfsUsername = info.Username;
-            TfsPassword = info.Password;
+            TfsUsername = info.Username ?? _remoteOptions.Username;
+            TfsPassword = info.Password ?? _remoteOptions.Password;
+            TfsPAT = info.PAT ?? _remoteOptions.PAT;
+
             Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
             IgnoreRegexExpression = info.IgnoreRegex;
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
@@ -131,6 +133,12 @@ namespace GitTfs.Core
         {
             get { return Tfs.Password; }
             set { Tfs.Password = value; }
+        }
+
+        public string TfsPAT
+        {
+            get { return Tfs.PAT; }
+            set { Tfs.PAT = value; }
         }
 
         public string TfsRepositoryPath { get; set; }
