@@ -200,12 +200,10 @@ namespace GitTfs.VsCommon
 
             if (HasPAT)
                 vssCred = new VssBasicCredential(string.Empty, PAT);
-            else if (HasUserName && !HasPassword)
-                vssCred = new VssClientCredentials(new WindowsCredential(GetCredential()), CredentialPromptType.PromptIfNeeded);
-            else if(!HasUserName && !HasPassword)
-                vssCred = new VssClientCredentials(new WindowsCredential(CredentialCache.DefaultNetworkCredentials));
-            else
+            else if (HasUserName && HasPassword)
                 vssCred = new VssClientCredentials(new WindowsCredential(GetCredential()));
+            else
+                vssCred = new VssClientCredentials(new WindowsCredential(GetCredential()), CredentialPromptType.PromptIfNeeded);
 
             return new TfsTeamProjectCollection(uri, vssCred);
 #pragma warning restore 618

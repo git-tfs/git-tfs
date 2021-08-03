@@ -66,6 +66,7 @@ The `pull` command fetches TFS changesets (like the `fetch` command) and merges
           --except-regex=VALUE   A regex of exceptions to '--ignore-regex'
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
+		  --pat          		 TFS Personal Access Token 
       -r, --rebase               rebase your modifications on tfs changes
 
 ## Examples

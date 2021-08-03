@@ -12,6 +12,7 @@ The `list-remote-branches` command helps you find the branches to clone of a TFS
 	  -d, --debug                Show debug output about everything git-tfs does
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
+		  --pat          		 TFS Personal Access Token 
 
 ## Prerequisite
 

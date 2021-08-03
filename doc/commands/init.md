@@ -28,6 +28,7 @@ Prefer the [clone](clone.md) command to initialize and fetch changesets from a T
                                    don't need to put data back into TFS.
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
+		  --pat          		 TFS Personal Access Token 
           --no-parallel          Do not do parallel requests to TFS
 
 ## Examples

@@ -35,6 +35,8 @@ The fetch command fetch all the new changesets from a TFS remote
                  Ignore changesets that the TFS user has no read access to
       -u, --username=VALUE       TFS user name
       -p, --password=VALUE       TFS password
+		  --pat          		 TFS Personal Access Token 
+
 ## Examples
 
 ### Simple

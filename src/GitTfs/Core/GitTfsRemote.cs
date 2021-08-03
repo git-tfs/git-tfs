@@ -37,9 +37,10 @@ namespace GitTfs.Core
             Id = info.Id;
             TfsUrl = info.Url;
             TfsRepositoryPath = info.Repository;
-            TfsUsername = info.Username ?? _remoteOptions.Username;
-            TfsPassword = info.Password ?? _remoteOptions.Password;
-            TfsPAT = info.PAT ?? _remoteOptions.PAT;
+            // if the command line parameters are passed in, use those. else default to the values in the cofig
+            TfsUsername = _remoteOptions.Username ?? info.Username;
+            TfsPassword = _remoteOptions.Password ?? info.Password;
+            TfsPAT = _remoteOptions.PAT ?? info.PAT;
 
             Aliases = (info.Aliases ?? Enumerable.Empty<string>()).ToArray();
             IgnoreRegexExpression = info.IgnoreRegex;

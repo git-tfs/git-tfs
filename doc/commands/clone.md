@@ -26,6 +26,7 @@ a TFS source tree and fetch all the changesets
 		  --except-regex=VALUE   a regex of exceptions to ignore-regex
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
+		  --pat          		 TFS Personal Access Token 
 		  --no-parallel          Do not do parallel requests to TFS
 		  --all, --fetch-all
 		  --parents
