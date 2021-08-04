@@ -57,12 +57,21 @@ a TFS source tree and fetch all the changesets
 ## Authentication
 
 - If `--pat` is passed as an argument, then all other options are ignored.
-- If all authentication arguments are missing, then the user will be prompted for a username and password.
-- If just the `--username` is passed, then the user will be prompted for password only.
+- Authentication scenarios
+	- `--username` and `--password` missing
+		- Azure DevOps 
+			- The user will be prompted to select a Microsoft account and will need to provide a password.
+		- On Premise TFS Server 
+			- User will be prompted for both user name and password.
+	- `--username` passed and `--password` missing
+		- Azure DevOps 
+			- Same effect as if both were not passed and `--username` is ignored. 
+		- On Premise TFS Server 
+			- User will be prompted for just password.
 
 ### Notes
 
-- If you use the `--pat`, `--username` or `--password` parameters, git-tfs will store these values (in the .git/config file --in clear--) and never prompt you again. If you don't want these parameters to be saved, don't use these options.
+- If you use the `--pat`, `--username` or `--password` parameters, git-tfs will store these values (in the .git/config file **--in plain text--**) and never prompt you again. If you don't want these parameters to be saved, don't use these options.
 - See [Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page)
 
 ### Authentication Examples
@@ -75,13 +84,13 @@ The PAT will be used to authenticate to the TFS server, and stored into the .git
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --pat=VALUE
 
-Username will be used to authenticate to the TFS server, and stored into the .git/config file. The password will be prompted and not stored into the .git/config file.
+Username will be used to authenticate to the TFS server, and stored into the .git/config file. The password will be prompted and not stored into the .git/config file. For Azure DevOps the user will be required to select a Microsoft account.
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 -u=DISSRVTFS03\peter.pan 
 
-Both username and password will be prompted for authentication to the TFS server. Neither will be stored into the .git/config file.
+Both username and password will be prompted for authentication to the on-premise TFS server. For Azure DevOps the user will be required to select a Microsoft account. Neither will be stored into the .git/config file.
 
-    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 -u=DISSRVTFS03\peter.pan 
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1  
 
 ## Remark
 

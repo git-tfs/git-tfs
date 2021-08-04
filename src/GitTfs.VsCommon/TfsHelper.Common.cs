@@ -109,6 +109,9 @@ namespace GitTfs.VsCommon
 
         protected NetworkCredential GetCredential()
         {
+            if (!HasUserName)
+                return new NetworkCredential();
+
             var idx = Username.IndexOf('\\');
             if (idx >= 0)
             {
