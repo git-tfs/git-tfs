@@ -56,11 +56,32 @@ a TFS source tree and fetch all the changesets
 
 ## Authentication
 
-- If a PAT is passed as an argument, then all other options are ignored.
+- If `--pat` is passed as an argument, then all other options are ignored.
 - If all authentication arguments are missing, then the user will be prompted for a username and password.
-- If just the username is passed, then the user will be prompted for password only.
+- If just the `--username` is passed, then the user will be prompted for password only.
 
-See [Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page)
+### Notes
+
+- If you use the `--pat`, `--username` or `--password` parameters, git-tfs will store these values (in the .git/config file --in clear--) and never prompt you again. If you don't want these parameters to be saved, don't use these options.
+- See [Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page)
+
+### Authentication Examples
+
+Username and password will be used to authenticate to the TFS server, and stored into the .git/config file.
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 -u=DISSRVTFS03\peter.pan -p=wendy
+
+The PAT will be used to authenticate to the TFS server, and stored into the .git/config file.
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --pat=VALUE
+
+Username will be used to authenticate to the TFS server, and stored into the .git/config file. The password will be prompted and not stored into the .git/config file.
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 -u=DISSRVTFS03\peter.pan 
+
+Both username and password will be prompted for authentication to the TFS server. Neither will be stored into the .git/config file.
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 -u=DISSRVTFS03\peter.pan 
 
 ## Remark
 
@@ -191,13 +212,6 @@ matching one of the regex in the file. You need to give the path toward of an ex
 
 You could download a `.gitignore` file for your language or project from the [github repository](https://github.com/github/gitignore)
  or generate one for multiple languages using [gitignore.io](https://www.gitignore.io/)
-
-### Authentication
-
-If the TFS server need an authentication, you could use the _--username_ and _--password_ parameters. If you don't specify theses informations, you will be prompted to enter them. If you use these parameters, the informations, git-tfs will store these informations (in the .git/config file --in clear--) and never prompt you again. If you don't want your password to be saved, don't use these options.
-
-    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 -u=DISSRVTFS03\peter.pan -p=wendy
-
 
 ### Map TFS users to git users
 

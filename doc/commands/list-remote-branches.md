@@ -14,14 +14,6 @@ The `list-remote-branches` command helps you find the branches to clone of a TFS
 	  -p, --password=VALUE       TFS password
 		  --pat=VALUE          	 TFS Personal Access Token 
 
-## Authentication
-
-- If a PAT is passed as an argument, then all other options are ignored.
-- If all authentication arguments are missing, then the user will be prompted for a username and password.
-- If just the username is passed, then the user will be prompted for password only.
-
-See [Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page)
-
 ## Prerequisite
 
 To be able to return the list of the existing branches, all your source code folders corresponding to branches
@@ -62,9 +54,7 @@ However, it is recommended to clone the root branch and then use the [`branch`](
 
 ### Authentication
 
-If the TFS server needs an authentication, you could use the _--username_ and _--password_ parameters. If you don't specify this information, you will be prompted to enter them. This information is not stored by git-tfs.
-
-    git tfs list-remote-branches http://tfs:8080/tfs/DefaultCollection -u=DISSRVTFS03\peter.pan -p=wendy
+For the use of the parameters `--pat`, `--username` and `--password`, see the [clone](clone.md) command.
 
 ## See also
 

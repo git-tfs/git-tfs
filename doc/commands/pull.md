@@ -69,14 +69,6 @@ The `pull` command fetches TFS changesets (like the `fetch` command) and merges
 		  --pat=VALUE          	 TFS Personal Access Token
       -r, --rebase               rebase your modifications on tfs changes
 
-## Authentication
-
-- If a PAT is passed as an argument, then all other options are ignored.
-- If all authentication arguments are missing, then the user will be prompted for a username and password.
-- If just the username is passed, then the user will be prompted for password only.
-
-See [Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page)
-
 ## Examples
 
 ### Simple
@@ -110,7 +102,7 @@ to find the appropriate branch to pull.
 
 ### Authentication
 
-For the use of parameters `--username` and `--password`, see the [clone](clone.md) command.
+For the use of the parameters `--pat`, `--username` and `--password`, see the [clone](clone.md) command.
 
 ### Map TFS users to git users
 
