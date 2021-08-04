@@ -26,7 +26,7 @@ a TFS source tree and fetch all the changesets
 		  --except-regex=VALUE   a regex of exceptions to ignore-regex
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
-		  --pat          		 TFS Personal Access Token 
+		  --pat=VALUE            TFS Personal Access Token
 		  --no-parallel          Do not do parallel requests to TFS
 		  --all, --fetch-all
 		  --parents
@@ -53,6 +53,14 @@ a TFS source tree and fetch all the changesets
                                    maximum, must be a number, not prefixed with C)
 		  --resumable            if an error occurred, try to continue when you restart clone
 								 with same parameters
+
+## Authentication
+
+- If a PAT is passed as an argument, then all other options are ignored.
+- If all authentication arguments are missing, then the user will be prompted for a username and password.
+- If just the username is passed, then the user will be prompted for password only.
+
+See [Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page)
 
 ## Remark
 

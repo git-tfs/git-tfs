@@ -37,7 +37,7 @@ namespace GitTfs.Core
             Id = info.Id;
             TfsUrl = info.Url;
             TfsRepositoryPath = info.Repository;
-            // if the command line parameters are passed in, use those. else default to the values in the cofig
+            // if the command line parameters are passed in, use those. else default to the values in the config
             TfsUsername = _remoteOptions.Username ?? info.Username;
             TfsPassword = _remoteOptions.Password ?? info.Password;
             TfsPAT = _remoteOptions.PAT ?? info.PAT;

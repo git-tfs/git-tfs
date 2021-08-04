@@ -66,8 +66,16 @@ The `pull` command fetches TFS changesets (like the `fetch` command) and merges
           --except-regex=VALUE   A regex of exceptions to '--ignore-regex'
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
-		  --pat          		 TFS Personal Access Token 
+		  --pat=VALUE          	 TFS Personal Access Token
       -r, --rebase               rebase your modifications on tfs changes
+
+## Authentication
+
+- If a PAT is passed as an argument, then all other options are ignored.
+- If all authentication arguments are missing, then the user will be prompted for a username and password.
+- If just the username is passed, then the user will be prompted for password only.
+
+See [Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page)
 
 ## Examples
 

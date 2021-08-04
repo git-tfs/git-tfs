@@ -35,7 +35,15 @@ The fetch command fetch all the new changesets from a TFS remote
                  Ignore changesets that the TFS user has no read access to
       -u, --username=VALUE       TFS user name
       -p, --password=VALUE       TFS password
-		  --pat          		 TFS Personal Access Token 
+		  --pat=VALUE            TFS Personal Access Token
+
+## Authentication
+
+- If a PAT is passed as an argument, then all other options are ignored.
+- If all authentication arguments are missing, then the user will be prompted for a username and password.
+- If just the username is passed, then the user will be prompted for password only.
+
+See [Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page)
 
 ## Examples
 
