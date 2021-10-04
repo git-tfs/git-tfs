@@ -5,7 +5,6 @@ namespace GitTfs.Core
     {
         int Id { get; set; }
         string Title { get; set; }
-        string Description { get; set; }
         string Url { get; set; }
     }
 }
