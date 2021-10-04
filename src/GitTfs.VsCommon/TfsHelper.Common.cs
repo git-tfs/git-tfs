@@ -653,7 +653,6 @@ namespace GitTfs.VsCommon
                 {
                     Id = wi.Id,
                     Title = wi.Title,
-                    Description = wi.Description,
                     Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
                 });
             }
