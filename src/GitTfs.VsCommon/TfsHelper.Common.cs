@@ -152,10 +152,11 @@ namespace GitTfs.VsCommon
             Trace.WriteLine("get [C" + e.Version + "]" + e.ServerItem);
         }
 
-        private ILinking _linking;
-        private ILinking Linking
+        private TswaClientHyperlinkService _hyperLinkService;
+
+        private TswaClientHyperlinkService HyperlinkService
         {
-            get { return _linking ?? (_linking = GetService<ILinking>()); }
+            get { return _hyperLinkService ?? (_hyperLinkService = GetService<TswaClientHyperlinkService>()); }
         }
 
         public int BatchCount
@@ -653,7 +654,7 @@ namespace GitTfs.VsCommon
                 {
                     Id = wi.Id,
                     Title = wi.Title,
-                    Url = Linking.GetArtifactUrl(wi.Uri.AbsoluteUri)
+                    Url = HyperlinkService.GetWorkItemEditorUrl(wi.Id).ToString()
                 });
             }
             tfsChangeset.Summary.CheckinNotes = changeset.CheckinNote.Values.Select(note => new TfsCheckinNote
