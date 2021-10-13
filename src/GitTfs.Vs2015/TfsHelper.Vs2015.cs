@@ -36,10 +36,6 @@ namespace GitTfs.Vs2015
             return string.Empty;
 #endif
         }
-        protected override bool HasWorkItems(Changeset changeset)
-        {
-            return Retry.Do(() => changeset.AssociatedWorkItems.Length > 0);
-        }
 
         private string GetVsInstallDir()
         {

@@ -112,11 +112,6 @@ namespace GitTfs.VsCommon
             myAssemblySearchPaths.Add(Path.Combine(myVisualStudioInstallationPath, myTeamExplorerFolder));
         }
 
-        protected override bool HasWorkItems(Changeset changeset)
-        {
-            return Retry.Do(() => changeset.AssociatedWorkItems.Length > 0);
-        }
-
         /// <summary>
         /// Enumerates the list of installed VS instances and returns the first one
         /// matching <see cref="MajorVersion"/>. Right now there is no way for the user to influence
