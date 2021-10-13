@@ -648,15 +648,12 @@ namespace GitTfs.VsCommon
             var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
             tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };
 
-            if (HasWorkItems(changeset))
+            tfsChangeset.Summary.Workitems = changeset.AssociatedWorkItems.Select(wi => new TfsWorkitem
             {
-                tfsChangeset.Summary.Workitems = changeset.WorkItems.Select(wi => new TfsWorkitem
-                {
-                    Id = wi.Id,
-                    Title = wi.Title,
-                    Url = HyperlinkService.GetWorkItemEditorUrl(wi.Id).ToString()
-                });
-            }
+                Id = wi.Id,
+                Title = wi.Title,
+                Url = HyperlinkService.GetWorkItemEditorUrl(wi.Id).ToString()
+            });
             tfsChangeset.Summary.CheckinNotes = changeset.CheckinNote.Values.Select(note => new TfsCheckinNote
             {
                 Name = note.Name,
@@ -665,26 +662,6 @@ namespace GitTfs.VsCommon
             tfsChangeset.Summary.PolicyOverrideComment = changeset.PolicyOverride.Comment;
 
             return tfsChangeset;
-        }
-
-        protected virtual bool HasWorkItems(Changeset changeset)
-        {
-            // This method wraps changeset.WorkItems, because
-            // changeset.WorkItems might result to ConnectionException: TF26175: Team Foundation Core Services attribute 'AttachmentServerUrl' not found.
-            // in this case assume that it is initialized to null
-            // NB: in VS2011 a new property appeared (AssociatedWorkItems), which works correctly
-            WorkItem[] result = null;
-            try
-            {
-                result = Retry.Do(() => changeset.WorkItems);
-            }
-            catch (ConnectionException exception)
-            {
-                if (!exception.Message.StartsWith("TF26175:"))
-                    throw;
-            }
-
-            return result != null && result.Length > 0;
         }
 
         private readonly Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
