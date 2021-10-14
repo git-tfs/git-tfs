@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using GitTfs.Commands;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Util;
@@ -23,6 +24,13 @@ namespace GitTfs.Core
         private string maxCommitHash;
         private bool isTfsAuthenticated;
         public RemoteInfo RemoteInfo { get; private set; }
+
+        private static int remoteCounter = 0;
+
+        /// <summary>
+        ///    Holds the subdirectory path for this remote so that each remote doesn't conflict with each other and doesn't cause the worskspaces to get created and destroyed over and over
+        /// </summary>
+        private readonly string _workingSubDirectory;
 
         public GitTfsRemote(RemoteInfo info, IGitRepository repository, RemoteOptions remoteOptions, Globals globals,
             ITfsHelper tfsHelper, ConfigProperties properties)
@@ -48,6 +56,9 @@ namespace GitTfs.Core
             Autotag = info.Autotag;
 
             IsSubtree = CheckSubtree();
+
+            var value = Interlocked.Increment(ref remoteCounter);
+            _workingSubDirectory =  value.ToString("X4");
         }
 
         private bool IsGitIgnoreSupportEnabled()
@@ -231,7 +242,7 @@ namespace GitTfs.Core
         {
             get
             {
-                return Path.Combine(_globals.GitDir, WorkspaceDirectory);
+                return Path.Combine(_globals.GitDir, WorkspaceDirectory, _workingSubDirectory);
             }
         }
 

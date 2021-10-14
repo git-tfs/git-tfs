@@ -687,7 +687,7 @@ namespace GitTfs.VsCommon
             return result != null && result.Length > 0;
         }
 
-        private readonly Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
+        private static readonly Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
@@ -714,22 +714,21 @@ namespace GitTfs.VsCommon
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
-            try
+            Workspace workspace;
+            if (!_workspaces.TryGetValue(remote.Id, out workspace))
             {
-                var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
-                    .With("remote").EqualTo(remote)
-                    .With("contextVersion").EqualTo(versionToFetch)
-                    .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
-                    .With("tfsHelper").EqualTo(this)
-                    .GetInstance<TfsWorkspace>();
-                action(tfsWorkspace);
+                Trace.WriteLine("Setting up a TFS workspace with subtrees at " + localDirectory);
+                _workspaces.Add(remote.Id, workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory))));
+                Janitor.CleanThisUpWhenWeClose(() => TryToDeleteWorkspace(workspace));
             }
-            finally
-            {
-                TryToDeleteWorkspace(workspace);
-            }
+
+            var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
+                .With("remote").EqualTo(remote)
+                .With("contextVersion").EqualTo(versionToFetch)
+                .With("workspace").EqualTo(_bridge.Wrap<WrapperForWorkspace, Workspace>(workspace))
+                .With("tfsHelper").EqualTo(this)
+                .GetInstance<TfsWorkspace>();
+            action(tfsWorkspace);
         }
 
         private Workspace GetWorkspace(params WorkingFolder[] folders)
@@ -828,7 +827,15 @@ namespace GitTfs.VsCommon
                     // Normally, the workspace will have one mapping, mapped to the git-tfs
                     // workspace folder. In that case, we just delete the workspace.
                     Trace.TraceInformation("Removing workspace \"" + workspace.DisplayName + "\".");
+
+                    foreach (var keyValuePair in _workspaces.ToList())
+                    {
+                        if (string.Equals(keyValuePair.Value.DisambiguatedDisplayName,
+                            workspace.DisambiguatedDisplayName))
+                            _workspaces.Remove(keyValuePair.Key);
+                    }
                     workspace.Delete();
+
                 }
                 else
                 {
