@@ -169,8 +169,9 @@ namespace GitTfs.Commands
                     throw new GitTfsException("error: the path " + tfsRepositoryPath + " you want to clone doesn't exist!")
                         .WithRecommendation("To discover which branch to clone, you could use the command :\ngit tfs list-remote-branches " + remote.TfsUrl);
 
-                if (!remote.Tfs.CanGetBranchInformation || _fetch.BranchStrategy == BranchStrategy.None)
+                if (_fetch.BranchStrategy == BranchStrategy.None)
                     return;
+
                 var tfsTrunkRepository = remote.Tfs.GetRootTfsBranchForRemotePath(tfsRepositoryPath, false);
                 if (tfsTrunkRepository == null)
                 {

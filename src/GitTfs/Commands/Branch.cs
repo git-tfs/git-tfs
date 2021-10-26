@@ -37,7 +37,6 @@ namespace GitTfs.Commands
         public string Comment { get; set; }
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
-        public string ParentBranch { get; set; }
 
         public OptionSet OptionSet
         {
@@ -56,7 +55,6 @@ namespace GitTfs.Commands
                     { "ignore-regex=", "A regex of files to ignore", v => IgnoreRegex = v },
                     { "except-regex=", "A regex of exceptions to ignore-regex", v => ExceptRegex = v},
                     { "no-fetch", "Don't fetch changeset for newly initialized branch(es)", v => NoFetch = (v != null) },
-                    { "b|tfs-parent-branch=", "TFS Parent branch of the TFS branch to clone (TFS 2008 only! And required!!) ex: $/Repository/ProjectParentBranch", v => ParentBranch = v },
                     { "u|username=", "TFS username", v => TfsUsername = v },
                     { "p|password=", "TFS password", v => TfsPassword = v },
                 }
@@ -78,7 +76,6 @@ namespace GitTfs.Commands
             _initBranch.TfsUsername = TfsUsername;
             _initBranch.TfsPassword = TfsPassword;
             _initBranch.CloneAllBranches = ManageAll;
-            _initBranch.ParentBranch = ParentBranch;
             _initBranch.IgnoreRegex = IgnoreRegex;
             _initBranch.ExceptRegex = ExceptRegex;
             _initBranch.NoFetch = NoFetch;
@@ -274,10 +271,6 @@ namespace GitTfs.Commands
                 else
                 {
                     var remote = tfsRemotes.First(r => r.Id == remoteId);
-                    if (!remote.Tfs.CanGetBranchInformation)
-                    {
-                        throw new GitTfsException("error: this version of TFS doesn't support this functionality");
-                    }
                     foreach (var branch in remote.Tfs.GetBranches().Where(b => b.IsRoot))
                     {
                         var root = remote.Tfs.GetRootTfsBranchForRemotePath(branch.Path);
@@ -295,11 +288,6 @@ namespace GitTfs.Commands
         public static void WriteRemoteTfsBranchStructure(ITfsHelper tfsHelper, string tfsRepositoryPath, IEnumerable<IGitTfsRemote> tfsRemotes = null)
         {
             var root = tfsHelper.GetRootTfsBranchForRemotePath(tfsRepositoryPath);
-
-            if (!tfsHelper.CanGetBranchInformation)
-            {
-                throw new GitTfsException("error: this version of TFS doesn't support this functionality");
-            }
             var visitor = new WriteBranchStructureTreeVisitor(tfsRepositoryPath, tfsRemotes);
             root.AcceptVisitor(visitor);
         }
