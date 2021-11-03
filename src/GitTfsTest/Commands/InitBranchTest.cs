@@ -44,7 +44,7 @@ namespace GitTfs.Test.Commands
             var trunkGitTfsRemote = trunkGitTfsRemoteMock.Object;
             trunkGitTfsRemote.TfsUsername = "user";
             trunkGitTfsRemote.TfsPassword = "pwd";
-            trunkGitTfsRemote.TfsRepositoryPath = "$/MyProject/Trunk";
+            trunkGitTfsRemoteMock.SetupGet(x => x.TfsRepositoryPath).Returns("$/MyProject/Trunk");
             trunkGitTfsRemote.TfsUrl = "http://myTfsServer:8080/tfs";
 
             newBranchRemoteMock = Mock.Get(mocks.Get<IGitTfsRemote>()).SetupAllProperties();
@@ -115,7 +115,7 @@ namespace GitTfs.Test.Commands
             IGitTfsRemote existingBranchRemote = gitTfsRemoteMock.Object;
             existingBranchRemote.TfsUsername = "user";
             existingBranchRemote.TfsPassword = "pwd";
-            existingBranchRemote.TfsRepositoryPath = "$/MyProject/MyBranch";
+            gitTfsRemoteMock.SetupGet(x => x.TfsRepositoryPath).Returns("$/MyProject/MyBranch");
             existingBranchRemote.TfsUrl = "http://myTfsServer:8080/tfs";
 
             gitRepository.Name = nameof(gitRepository);
@@ -366,7 +366,7 @@ namespace GitTfs.Test.Commands
             var remote = remoteMock.Object;
             remote.TfsUsername = "user";
             remote.TfsPassword = "pwd";
-            remote.TfsRepositoryPath = "$/MyProject/Trunk";
+            remoteMock.SetupGet(x => x.TfsRepositoryPath).Returns("$/MyProject/Trunk");
             remote.TfsUrl = "http://myTfsServer:8080/tfs";
             remoteMock.SetupGet(x => x.Tfs).Returns(new TfsHelper(mocks.Container, null));
 

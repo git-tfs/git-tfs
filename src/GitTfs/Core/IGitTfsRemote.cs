@@ -32,7 +32,7 @@ namespace GitTfs.Core
         RemoteInfo RemoteInfo { get; }
         string Id { get; }
         string TfsUrl { get; set; }
-        string TfsRepositoryPath { get; set; }
+        string TfsRepositoryPath { get; }
         /// <summary>
         /// Gets the TFS server-side paths of all subtrees of this remote.
         /// Valid if the remote has subtrees, which occurs when <see cref="TfsRepositoryPath"/> is null.

@@ -74,7 +74,6 @@ namespace GitTfs.Core
         public string TfsRepositoryPath
         {
             get { return _tfsRepositoryPath; }
-            set { throw DerivedRemoteException; }
         }
 
         public string[] TfsSubtreePaths
