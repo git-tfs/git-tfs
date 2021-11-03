@@ -133,7 +133,7 @@ namespace GitTfs.Core
             set { Tfs.Password = value; }
         }
 
-        public string TfsRepositoryPath { get; set; }
+        public string TfsRepositoryPath { get; }
 
         /// <summary>
         /// Gets the TFS server-side paths of all subtrees of this remote.
