@@ -174,7 +174,7 @@ namespace GitTfs.Core
             return _cachedRemotes ?? (_cachedRemotes = ReadTfsRemotes());
         }
 
-        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote, string autocrlf = null, string ignorecase = null)
+        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote, string autocrlf, string ignorecase)
         {
             if (HasRemote(remote.Id))
                 throw new GitTfsException("A remote with id \"" + remote.Id + "\" already exists.");
@@ -189,6 +189,11 @@ namespace GitTfs.Core
             if (ignorecase != null)
                 _repository.Config.Set("core.ignorecase", ignorecase);
 
+            return CreateTfsRemote(remote);
+        }
+
+        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote)
+        {
             foreach (var entry in _remoteConfigReader.Dump(remote))
             {
                 if (entry.Value != null)
@@ -206,6 +211,7 @@ namespace GitTfs.Core
 
             return _cachedRemotes[remote.Id] = gitTfsRemote;
         }
+
 
         public void DeleteTfsRemote(IGitTfsRemote remote)
         {

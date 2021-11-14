@@ -15,7 +15,8 @@ namespace GitTfs.Core
         void SetConfig(string key, bool value);
         IEnumerable<IGitTfsRemote> ReadAllTfsRemotes();
         IGitTfsRemote ReadTfsRemote(string remoteId);
-        IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo, string autocrlf = null, string ignorecase = null);
+        IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo);
+        IGitTfsRemote CreateTfsRemote(RemoteInfo remoteInfo, string autocrlf, string ignorecase);
         void DeleteTfsRemote(IGitTfsRemote remoteId);
         IEnumerable<string> GetGitRemoteBranches(string gitRemote);
         bool HasRemote(string remoteId);
