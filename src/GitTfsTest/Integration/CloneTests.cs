@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using LibGit2Sharp;
 using GitTfs.Core.TfsInterop;
@@ -335,6 +336,33 @@ namespace GitTfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--autocrlf=false");
             h.AssertFileInWorkspace("MyProject", "README", "tld \r\n another line \r\n");
             h.AssertFileInIndex("MyProject", "README", "tld \r\n another line \r\n");
+        }
+
+        [FactExceptOnUnix]
+        public void LineNotNormalizedWhenGitIgnoreGivenAndAutocrlfFalse_Issue1398()
+        {
+            string readmeContent = "tld \r\n another line \r\n";
+            string gitignoreFile = Path.Combine(h.Workdir, "gitignore");
+            string gitignoreContent = "*.exe\r\n*.com\r\n";
+            File.WriteAllText(gitignoreFile, gitignoreContent);
+
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Add some files", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", readmeContent);
+            });
+
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--autocrlf=false", $"--gitignore={gitignoreFile}");
+
+            // The file given in --gitignore parameter is imported as .gitignore, no line ending conversion
+            h.AssertFileInWorkspace("MyProject", ".gitignore", gitignoreContent);
+            h.AssertFileInIndex("MyProject", ".gitignore", gitignoreContent);
+
+            // README is imported as is, no line ending conversion
+            h.AssertFileInWorkspace("MyProject", "README", readmeContent);
+            h.AssertFileInIndex("MyProject", "README", readmeContent);
         }
 
         [FactExceptOnUnix]
