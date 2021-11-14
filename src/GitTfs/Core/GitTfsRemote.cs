@@ -1089,7 +1089,7 @@ namespace GitTfs.Core
                     Url = TfsUrl,
                     Repository = tfsRepositoryPath,
                     RemoteOptions = remoteOptions
-                }, string.Empty);
+                });
                 tfsRemote.ExportMetadatas = ExportMetadatas;
                 tfsRemote.ExportWorkitemsMapping = ExportWorkitemsMapping;
             }

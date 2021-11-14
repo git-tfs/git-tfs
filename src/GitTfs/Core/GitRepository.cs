@@ -174,21 +174,8 @@ namespace GitTfs.Core
             return _cachedRemotes ?? (_cachedRemotes = ReadTfsRemotes());
         }
 
-        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote, string autocrlf = null, string ignorecase = null)
+        public IGitTfsRemote CreateTfsRemote(RemoteInfo remote)
         {
-            if (HasRemote(remote.Id))
-                throw new GitTfsException("A remote with id \"" + remote.Id + "\" already exists.");
-
-            // The autocrlf default (as indicated by a null) is false and is set to override the system-wide setting.
-            // When creating branches we use the empty string to indicate that we do not want to set the value at all.
-            if (autocrlf == null)
-                autocrlf = "false";
-            if (autocrlf != string.Empty)
-                _repository.Config.Set("core.autocrlf", autocrlf);
-
-            if (ignorecase != null)
-                _repository.Config.Set("core.ignorecase", ignorecase);
-
             foreach (var entry in _remoteConfigReader.Dump(remote))
             {
                 if (entry.Value != null)
@@ -206,6 +193,7 @@ namespace GitTfs.Core
 
             return _cachedRemotes[remote.Id] = gitTfsRemote;
         }
+
 
         public void DeleteTfsRemote(IGitTfsRemote remote)
         {

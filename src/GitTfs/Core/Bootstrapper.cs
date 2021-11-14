@@ -26,7 +26,7 @@ namespace GitTfs.Core
                     Url = changeset.Remote.TfsUrl,
                     Repository = changeset.Remote.TfsRepositoryPath,
                     RemoteOptions = _remoteOptions,
-                }, string.Empty);
+                });
                 remote.UpdateTfsHead(changeset.GitCommit, changeset.ChangesetId);
                 Trace.TraceInformation("-> new remote '" + remote.Id + "'");
             }
