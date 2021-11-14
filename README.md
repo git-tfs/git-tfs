@@ -190,7 +190,6 @@ Please, read our short and simple [guidelines](CONTRIBUTING.md) and our doc on h
 Especially, don't forget:
 
 * to run the build task `.\build.ps1 -Target "FormatCode"` before committing (to keep code formatting consistent, and pull request easier to review)
-* to set `core.autocrlf` to `true` (`git config core.autocrlf true`)
 * to indent your code using 4 spaces (even if `.editorconfig` should take care of that).
 
 ## Migrations
