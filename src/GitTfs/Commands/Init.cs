@@ -162,6 +162,10 @@ namespace GitTfs.Commands
 
             _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, false);
             _globals.Repository.SetConfig(GitTfsConstants.IgnoreNotInitBranches, false);
+            _globals.Repository.SetConfig("core.autocrlf", _initOptions.GitInitAutoCrlf);
+
+            if (_initOptions.GitInitIgnoreCase != null)
+                _globals.Repository.SetConfig("core.ignorecase", _initOptions.GitInitIgnoreCase);
         }
 
         private string[] BuildInitCommand()
@@ -186,7 +190,7 @@ namespace GitTfs.Commands
                 Url = tfsUrl,
                 Repository = tfsRepositoryPath,
                 RemoteOptions = _remoteOptions,
-            }, _initOptions.GitInitAutoCrlf, _initOptions.GitInitIgnoreCase);
+            });
         }
     }
 
