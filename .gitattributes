@@ -9,3 +9,6 @@
 
 # Declare files that will always have CRLF line endings on checkout.
 *.sln text eol=crlf
+
+# paket.exe will always create this file with CRLF line ending
+src/.paket/Paket.Restore.targets text eol=crlf
