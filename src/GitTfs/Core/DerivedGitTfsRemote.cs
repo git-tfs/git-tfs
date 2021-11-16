@@ -39,7 +39,6 @@ namespace GitTfs.Core
         public string TfsUrl
         {
             get { return _tfsUrl; }
-            set { throw DerivedRemoteException; }
         }
 
         public bool Autotag
