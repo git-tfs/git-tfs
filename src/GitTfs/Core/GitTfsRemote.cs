@@ -36,7 +36,7 @@ namespace GitTfs.Core
 
             RemoteInfo = info;
             Id = info.Id;
-            TfsUrl = info.Url;
+            Tfs.Url = info.Url;
             TfsRepositoryPath = info.Repository;
             TfsUsername = info.Username;
             TfsPassword = info.Password;
@@ -114,7 +114,6 @@ namespace GitTfs.Core
         public string TfsUrl
         {
             get { return Tfs.Url; }
-            set { Tfs.Url = value; }
         }
 
         private string[] Aliases { get; set; }

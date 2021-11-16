@@ -31,7 +31,7 @@ namespace GitTfs.Core
         bool IsDerived { get; }
         RemoteInfo RemoteInfo { get; }
         string Id { get; }
-        string TfsUrl { get; set; }
+        string TfsUrl { get; }
         string TfsRepositoryPath { get; }
         /// <summary>
         /// Gets the TFS server-side paths of all subtrees of this remote.
