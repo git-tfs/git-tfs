@@ -68,7 +68,7 @@ namespace GitTfs.Vs2015
 
         protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
         {
-            return HasCredentials ?
+            return HasUserName ?
                 new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
                 new TfsTeamProjectCollection(uri, new UICredentialsProvider());
 #pragma warning restore 618

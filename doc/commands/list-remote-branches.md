@@ -12,6 +12,7 @@ The `list-remote-branches` command helps you find the branches to clone of a TFS
 	  -d, --debug                Show debug output about everything git-tfs does
 	  -u, --username=VALUE       TFS username
 	  -p, --password=VALUE       TFS password
+		  --pat=VALUE          	 TFS Personal Access Token 
 
 ## Prerequisite
 
@@ -53,9 +54,7 @@ However, it is recommended to clone the root branch and then use the [`branch`](
 
 ### Authentication
 
-If the TFS server needs an authentication, you could use the _--username_ and _--password_ parameters. If you don't specify this information, you will be prompted to enter them. This information is not stored by git-tfs.
-
-    git tfs list-remote-branches http://tfs:8080/tfs/DefaultCollection -u=DISSRVTFS03\peter.pan -p=wendy
+For the use of the parameters `--pat`, `--username` and `--password`, see the [clone](clone.md) command.
 
 ## See also
 

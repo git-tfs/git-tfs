@@ -34,6 +34,7 @@ namespace GitTfs.Commands
             _tfsHelper.Url = tfsUrl;
             _tfsHelper.Username = _remoteOptions.Username;
             _tfsHelper.Password = _remoteOptions.Password;
+            _tfsHelper.PAT = _remoteOptions.PAT;
             _tfsHelper.EnsureAuthenticated();
 
             string convertBranchMessage = "  -> Open 'Source Control Explorer' and for each folder corresponding to a branch, right click on the folder and select 'Branching and Merging' > 'Convert to branch'.";

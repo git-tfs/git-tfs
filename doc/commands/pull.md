@@ -66,6 +66,7 @@ The `pull` command fetches TFS changesets (like the `fetch` command) and merges
           --except-regex=VALUE   A regex of exceptions to '--ignore-regex'
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
+		  --pat=VALUE          	 TFS Personal Access Token
       -r, --rebase               rebase your modifications on tfs changes
 
 ## Examples
@@ -101,7 +102,7 @@ to find the appropriate branch to pull.
 
 ### Authentication
 
-For the use of parameters `--username` and `--password`, see the [clone](clone.md) command.
+For the use of the parameters `--pat`, `--username` and `--password`, see the [clone](clone.md) command.
 
 ### Map TFS users to git users
 

@@ -28,7 +28,9 @@ Prefer the [clone](clone.md) command to initialize and fetch changesets from a T
                                    don't need to put data back into TFS.
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password
+		  --pat=VALUE        	 TFS Personal Access Token
           --no-parallel          Do not do parallel requests to TFS
+
 
 ## Examples
 
@@ -44,6 +46,10 @@ then, to retrieve tfs changesets do this :
     git tfs pull
 
 Note: [pull] is here preferred to [fetch], otherwise the git branch `master` won't be created :(	
+
+### Authentication
+
+For the use of the parameters `--pat`, `--username` and `--password`, see the [clone](clone.md) command.
 
 ## See also
 

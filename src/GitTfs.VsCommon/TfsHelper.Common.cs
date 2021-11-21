@@ -20,6 +20,7 @@ using StructureMap.Attributes;
 using ChangeType = Microsoft.TeamFoundation.VersionControl.Client.ChangeType;
 using IdentityNotFoundException = Microsoft.TeamFoundation.VersionControl.Client.IdentityNotFoundException;
 using Microsoft.TeamFoundation.Build.Client;
+using Microsoft.VisualStudio.Services.Common;
 
 namespace GitTfs.VsCommon
 {
@@ -55,9 +56,21 @@ namespace GitTfs.VsCommon
 
         public string Password { get; set; }
 
-        public bool HasCredentials
+        public string PAT { get; set; }
+
+        public bool HasUserName
         {
-            get { return !string.IsNullOrEmpty(Username); }
+            get { return !string.IsNullOrEmpty(Username);  }
+        }
+
+        public bool HasPassword
+        {
+            get { return !string.IsNullOrEmpty(Password); }
+        }
+
+        public bool HasPAT
+        {
+            get { return !string.IsNullOrEmpty(PAT); }
         }
 
         public void EnsureAuthenticated()
@@ -95,8 +108,9 @@ namespace GitTfs.VsCommon
 
         protected NetworkCredential GetCredential()
         {
-            if (!HasCredentials)
+            if (!HasUserName)
                 return new NetworkCredential();
+
             var idx = Username.IndexOf('\\');
             if (idx >= 0)
             {

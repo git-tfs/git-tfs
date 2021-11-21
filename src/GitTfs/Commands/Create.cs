@@ -49,6 +49,7 @@ ex : git tfs create http://myTfsServer:8080/tfs/TfsRepository myProjectName
             _tfsHelper.Url = tfsUrl;
             _tfsHelper.Username = _remoteOptions.Username;
             _tfsHelper.Password = _remoteOptions.Password;
+            _tfsHelper.PAT = _remoteOptions.PAT;
 
             var absoluteGitRepositoryPath = Path.GetFullPath(gitRepositoryPath);
             Trace.TraceInformation("Creating project folder...");

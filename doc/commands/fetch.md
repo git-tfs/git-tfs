@@ -35,6 +35,8 @@ The fetch command fetch all the new changesets from a TFS remote
                  Ignore changesets that the TFS user has no read access to
       -u, --username=VALUE       TFS user name
       -p, --password=VALUE       TFS password
+		  --pat=VALUE            TFS Personal Access Token
+
 ## Examples
 
 ### Simple
@@ -69,7 +71,7 @@ all that exists on the tfs server using command `git tfs branch -r`
 
 ### Authentication
 
-For the use of parameters `--username` and `--password`, see the [clone](clone.md) command.
+For the use of the parameters `--pat`, `--username` and `--password`, see the [clone](clone.md) command.
 
 ### Map TFS users to git users
 
