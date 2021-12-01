@@ -7,7 +7,7 @@ namespace GitTfs.Core
 {
     public interface IGitRepository : IGitHelpers
     {
-        string GitDir { get; set; }
+        string GitDir { get; }
         string GetConfig(string key);
         T GetConfig<T>(string key);
         T GetConfig<T>(string key, T defaultValue);

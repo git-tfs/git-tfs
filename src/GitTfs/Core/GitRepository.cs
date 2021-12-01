@@ -68,7 +68,7 @@ namespace GitTfs.Core
             return "refs/remotes/tfs/" + branchName;
         }
 
-        public string GitDir { get; set; }
+        public string GitDir { get; }
         public string WorkingCopyPath { get; set; }
         public string WorkingCopySubdir { get; set; }
 
