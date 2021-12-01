@@ -119,7 +119,7 @@ namespace GitTfs.Core
 
         private string[] Aliases { get; set; }
 
-        public bool Autotag { get; set; }
+        public bool Autotag { get; }
 
         public string TfsUsername
         {

@@ -45,7 +45,6 @@ namespace GitTfs.Core
         public bool Autotag
         {
             get { throw DerivedRemoteException; }
-            set { throw DerivedRemoteException; }
         }
 
         public string TfsUsername
