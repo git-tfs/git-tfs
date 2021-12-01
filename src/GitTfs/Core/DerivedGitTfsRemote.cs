@@ -135,12 +135,6 @@ namespace GitTfs.Core
             get { throw DerivedRemoteException; }
         }
 
-        public string GitIgnorePath
-        {
-            get { throw DerivedRemoteException; }
-            set { throw DerivedRemoteException; }
-        }
-
         public IGitRepository Repository
         {
             get { throw DerivedRemoteException; }
