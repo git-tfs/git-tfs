@@ -96,8 +96,6 @@ namespace GitTfs
 
         public bool GitDirSetByUser { get; set; }
 
-        public string StartingRepositorySubDir { get; set; }
-
         public IGitRepository Repository { get; set; }
 
         public int GcCountdown { get; set; }
