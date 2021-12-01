@@ -4,3 +4,5 @@
 * Remove support for TFS 2008 (#1397 @siprbaum)
 * Fix #1398: no automatic line ending conversion when git tfs clone was called with a 
   `--gitignore` parameter (#1399 by siprbaum)
+* Speed up git-tfs startup time by removing a useless `git rev-parse --show-prefix` invocation.
+  In addition, make a lot of small internal cleanups eliminating dead code (#1400 by siprbaum)
