@@ -38,7 +38,7 @@ namespace GitTfs.Core
         /// Valid if the remote has subtrees, which occurs when <see cref="TfsRepositoryPath"/> is null.
         /// </summary>
         string[] TfsSubtreePaths { get; }
-        string IgnoreRegexExpression { get; set; }
+        string IgnoreRegexExpression { get; }
         string IgnoreExceptRegexExpression { get; set; }
         string GitIgnorePath { get; set; }
         bool Autotag { get; set; }

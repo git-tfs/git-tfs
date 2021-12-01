@@ -151,7 +151,7 @@ namespace GitTfs.Core
         }
         private string[] tfsSubtreePaths = null;
 
-        public string IgnoreRegexExpression { get; set; }
+        public string IgnoreRegexExpression { get; }
         public string IgnoreExceptRegexExpression { get; set; }
         public string GitIgnorePath { get; set; }
         public bool UseGitIgnore { get; set; }
