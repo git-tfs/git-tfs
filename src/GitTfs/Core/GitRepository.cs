@@ -69,8 +69,6 @@ namespace GitTfs.Core
         }
 
         public string GitDir { get; }
-        public string WorkingCopyPath { get; set; }
-        public string WorkingCopySubdir { get; set; }
 
         protected override GitProcess Start(string[] command, Action<ProcessStartInfo> initialize)
         {
@@ -81,10 +79,6 @@ namespace GitTfs.Core
         {
             if (GitDir != null)
                 gitCommand.EnvironmentVariables["GIT_DIR"] = GitDir;
-            if (WorkingCopyPath != null)
-                gitCommand.WorkingDirectory = WorkingCopyPath;
-            if (WorkingCopySubdir != null)
-                gitCommand.WorkingDirectory = Path.Combine(gitCommand.WorkingDirectory, WorkingCopySubdir);
         }
 
         public string GetConfig(string key)
