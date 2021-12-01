@@ -6,9 +6,9 @@ namespace GitTfs.Core
 {
     public class GitTfsGatedCheckinException : GitTfsException
     {
-        public string ShelvesetName { get; set; }
+        public string ShelvesetName { get; }
         public ReadOnlyCollection<KeyValuePair<string, Uri>> AffectedBuildDefinitions { get; set; }
-        public string CheckInTicket { get; set; }
+        public string CheckInTicket { get; }
 
         public GitTfsGatedCheckinException(string shelvesetName, ReadOnlyCollection<KeyValuePair<string, Uri>> affectedBuildDefinitions, string checkInTicket)
             : base("Gated checkin detected!")
