@@ -44,7 +44,7 @@ namespace GitTfs.Core
         bool Autotag { get; set; }
         string TfsUsername { get; set; }
         string TfsPassword { get; set; }
-        IGitRepository Repository { get; set; }
+        IGitRepository Repository { get; }
         ITfsHelper Tfs { get; }
         int MaxChangesetId { get; set; }
         string MaxCommitHash { get; set; }

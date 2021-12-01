@@ -23,8 +23,8 @@ namespace GitTfs.Test.Core
             TfsChangesetInfo contextVersion = new Mock<TfsChangesetInfo>().Object;
             var remoteMock = new Mock<IGitTfsRemote>();
             remoteMock.SetupAllProperties();
+            remoteMock.SetupGet(x => x.Repository).Returns(new Mock<IGitRepository>().Object);
             IGitTfsRemote remote = remoteMock.Object;
-            remote.Repository = new Mock<IGitRepository>().Object;
             ITfsHelper tfsHelper = new Mock<ITfsHelper>().Object;
             CheckinPolicyEvaluator policyEvaluator = new CheckinPolicyEvaluator();
 
