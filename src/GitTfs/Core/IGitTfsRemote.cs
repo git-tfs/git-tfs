@@ -40,7 +40,7 @@ namespace GitTfs.Core
         string[] TfsSubtreePaths { get; }
         string IgnoreRegexExpression { get; }
         string IgnoreExceptRegexExpression { get; }
-        bool Autotag { get; set; }
+        bool Autotag { get; }
         string TfsUsername { get; set; }
         string TfsPassword { get; set; }
         IGitRepository Repository { get; }
