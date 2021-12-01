@@ -14,7 +14,7 @@ namespace GitTfs.Core
         private readonly IChangeset _changeset;
         private readonly AuthorsFile _authors;
         public TfsChangesetInfo Summary { get; set; }
-        public int BaseChangesetId { get; set; }
+        public int BaseChangesetId { get; }
 
         public TfsChangeset(ITfsHelper tfs, IChangeset changeset, AuthorsFile authors)
         {
