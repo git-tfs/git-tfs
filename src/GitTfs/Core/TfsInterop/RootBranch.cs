@@ -17,9 +17,9 @@ namespace GitTfs.Core.TfsInterop
             TfsBranchPath = tfsBranchPath;
         }
 
-        public int SourceBranchChangesetId { get; private set; }
-        public int TargetBranchChangesetId { get; private set; }
-        public string TfsBranchPath { get; private set; }
+        public int SourceBranchChangesetId { get; }
+        public int TargetBranchChangesetId { get; }
+        public string TfsBranchPath { get; }
         public bool IsRenamedBranch { get; set; }
 
         private string DebuggerDisplay
