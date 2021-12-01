@@ -34,7 +34,6 @@ namespace GitTfs.Core
         public string Id
         {
             get { return "(derived)"; }
-            set { throw DerivedRemoteException; }
         }
 
         public string TfsUrl

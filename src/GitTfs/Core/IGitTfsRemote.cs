@@ -30,7 +30,7 @@ namespace GitTfs.Core
     {
         bool IsDerived { get; }
         RemoteInfo RemoteInfo { get; }
-        string Id { get; set; }
+        string Id { get; }
         string TfsUrl { get; set; }
         string TfsRepositoryPath { get; set; }
         /// <summary>
