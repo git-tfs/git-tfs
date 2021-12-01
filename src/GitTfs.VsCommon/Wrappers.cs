@@ -139,13 +139,11 @@ namespace GitTfs.VsCommon
 
     public class WrapperForItem : WrapperFor<Item>, IItem
     {
-        private readonly IItemDownloadStrategy _downloadStrategy;
         private readonly TfsApiBridge _bridge;
         private readonly Item _item;
 
-        public WrapperForItem(IItemDownloadStrategy downloadStrategy, TfsApiBridge bridge, Item item) : base(item)
+        public WrapperForItem(TfsApiBridge bridge, Item item) : base(item)
         {
-            _downloadStrategy = downloadStrategy;
             _bridge = bridge;
             _item = item;
         }
@@ -187,7 +185,18 @@ namespace GitTfs.VsCommon
 
         public TemporaryFile DownloadFile()
         {
-            return _downloadStrategy.DownloadFile(this);
+            var temp = new TemporaryFile();
+            try
+            {
+                _bridge.Unwrap<Item>(_item).DownloadFile(temp);
+                return temp;
+            }
+            catch (Exception)
+            {
+                Trace.WriteLine(string.Format("Something went wrong downloading \"{0}\" in changeset {1}", _item.ServerItem, _item.ChangesetId));
+                temp.Dispose();
+                throw;
+            }
         }
     }
 
