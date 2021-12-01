@@ -155,7 +155,7 @@ namespace GitTfs.Core
         public string IgnoreExceptRegexExpression { get; set; }
         public string GitIgnorePath { get; set; }
         public bool UseGitIgnore { get; set; }
-        public IGitRepository Repository { get; set; }
+        public IGitRepository Repository { get; }
         public ITfsHelper Tfs { get; }
 
         public string OwningRemoteId { get; private set; }

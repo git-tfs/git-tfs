@@ -147,7 +147,6 @@ namespace GitTfs.Core
         public IGitRepository Repository
         {
             get { throw DerivedRemoteException; }
-            set { throw DerivedRemoteException; }
         }
 
         public ITfsHelper Tfs
