@@ -49,7 +49,7 @@ namespace GitTfs.Test.Commands
 
             newBranchRemoteMock = Mock.Get(mocks.Get<IGitTfsRemote>()).SetupAllProperties();
             newBranchRemoteMock.Name = nameof(newBranchRemoteMock);
-            newBranchRemoteMock.Object.Id = gitBranchToInit;
+            newBranchRemoteMock.SetupGet(r => r.Id).Returns(gitBranchToInit);
         }
         #endregion
 
@@ -210,7 +210,7 @@ namespace GitTfs.Test.Commands
             #region Branch2
             var newBranch2RemoteMock = new Mock<IGitTfsRemote>();
             newBranch2RemoteMock.Name = nameof(newBranch2RemoteMock);
-            newBranch2RemoteMock.Object.Id = GIT_BRANCH_TO_INIT2;
+            newBranch2RemoteMock.SetupGet(r => r.Id).Returns(GIT_BRANCH_TO_INIT2);
 
             var rootChangeSetB2 = 2000;
             tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch2, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB2, tfsPathBranch2) });
@@ -269,7 +269,7 @@ namespace GitTfs.Test.Commands
 
             #region Branch2
             var newBranch2RemoteMock = new Mock<IGitTfsRemote>();
-            newBranch2RemoteMock.Object.Id = GIT_BRANCH_TO_INIT2;
+            newBranch2RemoteMock.SetupGet(r => r.Id).Returns(GIT_BRANCH_TO_INIT2);
 
             var rootChangeSetB2 = 2000;
             tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch2, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB2, tfsPathBranch2) });
@@ -332,7 +332,7 @@ namespace GitTfs.Test.Commands
 
             #region Branch2
             var newBranch2RemoteMock = new Mock<IGitTfsRemote>();
-            newBranch2RemoteMock.Object.Id = GIT_BRANCH_TO_INIT2;
+            newBranch2RemoteMock.SetupGet(r => r.Id).Returns(GIT_BRANCH_TO_INIT2);
 
             var rootChangeSetB2 = 2000;
             tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch2, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB2, tfsPathBranch2) });
