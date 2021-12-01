@@ -128,7 +128,6 @@ namespace GitTfs.Core
         public string IgnoreRegexExpression
         {
             get { throw DerivedRemoteException; }
-            set { throw DerivedRemoteException; }
         }
 
         public string IgnoreExceptRegexExpression
