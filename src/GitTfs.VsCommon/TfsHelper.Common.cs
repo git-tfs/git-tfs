@@ -1367,30 +1367,4 @@ namespace GitTfs.VsCommon
             return queuedBuild.Build;
         }
     }
-
-    public class ItemDownloadStrategy : IItemDownloadStrategy
-    {
-        private readonly TfsApiBridge _bridge;
-
-        public ItemDownloadStrategy(TfsApiBridge bridge)
-        {
-            _bridge = bridge;
-        }
-
-        public TemporaryFile DownloadFile(IItem item)
-        {
-            var temp = new TemporaryFile();
-            try
-            {
-                _bridge.Unwrap<Item>(item).DownloadFile(temp);
-                return temp;
-            }
-            catch (Exception)
-            {
-                Trace.WriteLine(string.Format("Something went wrong downloading \"{0}\" in changeset {1}", item.ServerItem, item.ChangesetId));
-                temp.Dispose();
-                throw;
-            }
-        }
-    }
 }

@@ -13,9 +13,4 @@ namespace GitTfs.Core.TfsInterop
         long ContentLength { get; }
         TemporaryFile DownloadFile();
     }
-
-    public interface IItemDownloadStrategy
-    {
-        TemporaryFile DownloadFile(IItem item);
-    }
 }
