@@ -39,14 +39,13 @@ namespace GitTfs.Test.Commands
             globals.GitDir = ".git";
 
             trunkGitTfsRemoteMock = new Mock<IGitTfsRemote>().SetupAllProperties();
+            trunkGitTfsRemoteMock.SetupGet(p => p.Tfs).Returns(tfsHelper);
             trunkGitTfsRemoteMock.Name = nameof(trunkGitTfsRemoteMock);
             var trunkGitTfsRemote = trunkGitTfsRemoteMock.Object;
             trunkGitTfsRemote.TfsUsername = "user";
             trunkGitTfsRemote.TfsPassword = "pwd";
             trunkGitTfsRemote.TfsRepositoryPath = "$/MyProject/Trunk";
             trunkGitTfsRemote.TfsUrl = "http://myTfsServer:8080/tfs";
-            trunkGitTfsRemote.Tfs = tfsHelper;
-            //trunkGitTfsRemote.Tfs = new TfsHelper(mocks.Container, null);
 
             newBranchRemoteMock = Mock.Get(mocks.Get<IGitTfsRemote>()).SetupAllProperties();
             newBranchRemoteMock.Name = nameof(newBranchRemoteMock);
@@ -77,7 +76,7 @@ namespace GitTfs.Test.Commands
 
             trunkGitTfsRemoteMock.Name = nameof(trunkGitTfsRemoteMock);
             trunkGitTfsRemoteMock.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranchRemoteMock.Object).Verifiable();
-            trunkGitTfsRemoteMock.Object.Tfs = tfsHelperMock.Object;
+            trunkGitTfsRemoteMock.SetupGet(x => x.Tfs).Returns(tfsHelperMock.Object);
 
             gitRepositoryMock.Name = nameof(gitRepositoryMock);
             gitRepositoryMock.Setup(x => x.ReadTfsRemote("default")).Returns(trunkGitTfsRemoteMock.Object).Verifiable();
@@ -110,12 +109,14 @@ namespace GitTfs.Test.Commands
 
             tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, null)).Returns(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
 
-            IGitTfsRemote existingBranchRemote = new Mock<IGitTfsRemote>().SetupAllProperties().Object;
+            TfsHelper tfsHelper = new TfsHelper(mocks.Container, null);
+            Mock<IGitTfsRemote> gitTfsRemoteMock = new Mock<IGitTfsRemote>().SetupAllProperties();
+            gitTfsRemoteMock.SetupGet(x => x.Tfs).Returns(tfsHelper);
+            IGitTfsRemote existingBranchRemote = gitTfsRemoteMock.Object;
             existingBranchRemote.TfsUsername = "user";
             existingBranchRemote.TfsPassword = "pwd";
             existingBranchRemote.TfsRepositoryPath = "$/MyProject/MyBranch";
             existingBranchRemote.TfsUrl = "http://myTfsServer:8080/tfs";
-            existingBranchRemote.Tfs = new TfsHelper(mocks.Container, null);
 
             gitRepository.Name = nameof(gitRepository);
             gitRepository.Setup(x => x.ReadTfsRemote("default")).Returns(trunkGitTfsRemoteMock.Object).Verifiable();
@@ -367,7 +368,7 @@ namespace GitTfs.Test.Commands
             remote.TfsPassword = "pwd";
             remote.TfsRepositoryPath = "$/MyProject/Trunk";
             remote.TfsUrl = "http://myTfsServer:8080/tfs";
-            remote.Tfs = new TfsHelper(mocks.Container, null);
+            remoteMock.SetupGet(x => x.Tfs).Returns(new TfsHelper(mocks.Container, null));
 
             //Not Very Clean!!! Don't know how to test that :(
             //If the InvalidOperationException is thrown, it's that the Helper.Run() is Called => That's what is expected!
