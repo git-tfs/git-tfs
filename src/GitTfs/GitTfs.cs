@@ -111,15 +111,6 @@ namespace GitTfs
 
         public void InitializeGlobals()
         {
-            var git = _container.GetInstance<IGitHelpers>();
-            try
-            {
-                _globals.StartingRepositorySubDir = git.CommandOneline("rev-parse", "--show-prefix");
-            }
-            catch (Exception)
-            {
-                _globals.StartingRepositorySubDir = "";
-            }
             if (_globals.GitDir != null)
             {
                 _globals.GitDirSetByUser = true;
