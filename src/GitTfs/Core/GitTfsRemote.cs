@@ -99,7 +99,7 @@ namespace GitTfs.Core
             firstChangesetId = changesetId;
         }
 
-        public bool IsSubtree { get; private set; }
+        public bool IsSubtree { get; }
 
         public bool IsSubtreeOwner
         {
