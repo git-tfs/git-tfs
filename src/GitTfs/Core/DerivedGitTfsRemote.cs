@@ -133,7 +133,6 @@ namespace GitTfs.Core
         public string IgnoreExceptRegexExpression
         {
             get { throw DerivedRemoteException; }
-            set { throw DerivedRemoteException; }
         }
 
         public string GitIgnorePath
