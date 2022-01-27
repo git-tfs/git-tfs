@@ -54,5 +54,12 @@ namespace GitTfs.Test.Integration
             h.AssertConfig("MyProject", "tfs-remote.default.noparallel", "true");
         }
 
+        [FactExceptOnUnix]
+        public void InitializesWithNonDefaultInitialBranch()
+        {
+            h.SetupFake(r => { });
+            h.Run("init", "http://my-tfs.local/tfs", "$/MyProject", "MyProject", "--initial-branch=customInitialBranch");
+            h.AssertHead("MyProject", "refs/heads/customInitialBranch");
+        }
     }
 }

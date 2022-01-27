@@ -417,6 +417,11 @@ namespace GitTfs.Test.Integration
             Assert.Equal(expectedValue, config.Value);
         }
 
+        public void AssertHead(string repodir, string headRef)
+        {
+            Assert.Equal(headRef, Repository(repodir).Head.CanonicalName);
+        }
+
         private void AssertEqual<T>(T expected, T actual, string message)
         {
             try

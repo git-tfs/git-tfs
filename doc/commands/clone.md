@@ -16,6 +16,7 @@ a TFS source tree and fetch all the changesets
 								   default: default
 		  --template=VALUE       Passed to git-init
 		  --shared[=VALUE]       Passed to git-init
+		  --initial-branch=VALUE Passed to git-init
 		  --autocrlf=VALUE       Normalize line endings (default: false)
 		  --ignorecase=VALUE     Ignore case in file paths (default: system default)
 		  --bare                 clone the TFS repository in a bare git repository

@@ -179,6 +179,8 @@ namespace GitTfs.Commands
                 initCommand.Add("--shared=" + _initOptions.GitInitShared);
             else if (_initOptions.GitInitShared != null)
                 initCommand.Add("--shared");
+            if (_initOptions.GitInitDefaultBranch != null)
+                initCommand.Add("--initial-branch=" + _initOptions.GitInitDefaultBranch);
             return initCommand.ToArray();
         }
 
