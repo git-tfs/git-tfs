@@ -45,6 +45,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.Vs2017", "GitTfs.Vs2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.Vs2019", "GitTfs.Vs2019\GitTfs.Vs2019.csproj", "{54B4B8B8-F06C-4D2E-B7A3-C17C3850C88B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.Vs2022", "GitTfs.Vs2022\GitTfs.Vs2022.csproj", "{7853F7AB-87E8-4282-8FDE-6A138B73F9B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AnyCPU = Debug|AnyCPU
@@ -79,6 +81,10 @@ Global
 		{54B4B8B8-F06C-4D2E-B7A3-C17C3850C88B}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{54B4B8B8-F06C-4D2E-B7A3-C17C3850C88B}.Release|AnyCPU.ActiveCfg = Release|Any CPU
 		{54B4B8B8-F06C-4D2E-B7A3-C17C3850C88B}.Release|AnyCPU.Build.0 = Release|Any CPU
+		{7853F7AB-87E8-4282-8FDE-6A138B73F9B5}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
+		{7853F7AB-87E8-4282-8FDE-6A138B73F9B5}.Debug|AnyCPU.Build.0 = Debug|Any CPU
+		{7853F7AB-87E8-4282-8FDE-6A138B73F9B5}.Release|AnyCPU.ActiveCfg = Release|Any CPU
+		{7853F7AB-87E8-4282-8FDE-6A138B73F9B5}.Release|AnyCPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
