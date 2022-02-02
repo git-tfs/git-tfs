@@ -99,8 +99,6 @@ namespace GitTfs.VsCommon
             foreach (string searchPath in myExternalSettingsManager.GetCommonExtensionsSearchPaths()) {
                 Trace.WriteLine("CommonExtensionsPath :" + searchPath);
             }
-            SettingsStore store = myExternalSettingsManager.GetReadOnlySettingsStore(SettingsScope.UserSettings);
-            var propNames = store.GetPropertyNames(@"ExtensionManager\EnabledExtensions");
 
             myAssemblySearchPaths.AddRange(myExternalSettingsManager.GetCommonExtensionsSearchPaths());
             string userExtensions = myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.UserExtensions);
