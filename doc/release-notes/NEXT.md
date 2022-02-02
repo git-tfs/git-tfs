@@ -7,3 +7,4 @@
 * Speed up git-tfs startup time by removing a useless `git rev-parse --show-prefix` invocation.
   In addition, make a lot of small internal cleanups eliminating dead code (#1400 by siprbaum)
 * Added support for TFS 2022 (#1406)
+* Fix rare crash when checkin policy support as enabled (#1408 by siprbaum)
