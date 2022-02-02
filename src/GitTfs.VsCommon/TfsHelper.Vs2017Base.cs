@@ -92,16 +92,13 @@ namespace GitTfs.VsCommon
             myExternalSettingsManager = ExternalSettingsManager.CreateForApplication(devenvPath);
 
             Trace.WriteLine("ApplicationExtensions:" + myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.ApplicationExtensions));
-            Trace.WriteLine(myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.Configuration));
-            Trace.WriteLine(myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.Documents));
-            Trace.WriteLine(myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.LocalSettings));
-            Trace.WriteLine(myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.RoamingSettings));
+            Trace.WriteLine("Configuration        :" + myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.Configuration));
+            Trace.WriteLine("LocalSettings        :" + myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.LocalSettings));
+            Trace.WriteLine("RoamingSettings      :" + myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.RoamingSettings));
             Trace.WriteLine("UserExtensions       :" + myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.UserExtensions));
             foreach (string searchPath in myExternalSettingsManager.GetCommonExtensionsSearchPaths()) {
                 Trace.WriteLine("CommonExtensionsPath :" + searchPath);
             }
-            SettingsStore store = myExternalSettingsManager.GetReadOnlySettingsStore(SettingsScope.UserSettings);
-            var propNames = store.GetPropertyNames(@"ExtensionManager\EnabledExtensions");
 
             myAssemblySearchPaths.AddRange(myExternalSettingsManager.GetCommonExtensionsSearchPaths());
             string userExtensions = myExternalSettingsManager.GetApplicationDataFolder(ApplicationDataFolder.UserExtensions);
