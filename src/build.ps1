@@ -75,6 +75,7 @@ if($WhatIf.IsPresent) {
 # Restore tools with Paket?
 if(-Not $SkipToolPackageRestore.IsPresent)
 {
+    Invoke-Expression "&`"$PAKET_EXE`" --version"
     Write-Verbose -Message "Restoring tools with Paket..."
     $PaketOutput = Invoke-Expression "&`"$PAKET_EXE`" restore"
     Write-Verbose -Message ($PaketOutput | out-string)
