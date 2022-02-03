@@ -770,7 +770,7 @@ namespace GitTfs.Core
             Trace.WriteLine(".gitignore commit created: " + sha);
 
             _repository.Refs.Add(ShortToTfsRemoteName("default"), new ObjectId(sha));
-            _repository.Refs.Add(ShortToLocalName("master"), new ObjectId(sha));
+            _repository.Refs.Add(_repository.Head.CanonicalName, new ObjectId(sha));
 
             return sha;
         }

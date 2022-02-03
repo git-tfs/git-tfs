@@ -1,0 +1,8 @@
+# This global .gitconfig file differs from the standard
+# file used for git-tfs integration tests in that it
+# specifies "main" as the default branch. It is used to
+# test for code that incorrectly assumes "master" will
+# always be the default initial branch name.
+
+[init]
+	defaultBranch = main
