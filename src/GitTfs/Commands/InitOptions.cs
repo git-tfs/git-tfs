@@ -21,7 +21,7 @@ namespace GitTfs.Commands
                         v => GitInitTemplate = v },
                     { "shared:", "Passed to git-init",
                         v => GitInitShared = v == null ? (object)true : (object)v },
-                    { "initial-branch=", "Passed to git-init",
+                    { "initial-branch=", "Passed to git-init (requires Git >= 2.28.0)",
                         v => GitInitDefaultBranch = v },
                     { "autocrlf=", "Normalize line endings (default: " + DefaultAutocrlf + ")",
                         v => GitInitAutoCrlf = ValidateCrlfValue(v) },
