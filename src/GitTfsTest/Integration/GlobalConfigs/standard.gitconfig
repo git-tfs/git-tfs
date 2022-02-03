@@ -1,0 +1,10 @@
+# This global .gitconfig file contains settings to be
+# applied for standard integration tests. If you need
+# to modify settings for a special integration test,
+# make a copy this file under a new name, make your
+# changes in the copy, add the copy to the solution
+# as an embedded resource, and pass the resource name
+# to the IntegrationHelper.RunInWithConfig method.
+
+[init]
+	defaultBranch = master
