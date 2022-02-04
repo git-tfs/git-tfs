@@ -50,6 +50,8 @@
     <EmbeddedResource Include="Fixtures\vtccds\fb5dcd187b5ab3729973b310f3c55596" />
     <EmbeddedResource Include="Fixtures\vtccds\fba9507f41916830d82be84924dded7b" />
     <EmbeddedResource Include="Fixtures\vtccds\fd30d6210bb40fd2c9b689f0bf8b2833" />
+    <EmbeddedResource Include="Integration\GlobalConfigs\mainDefaultBranch.gitconfig" />
+    <EmbeddedResource Include="Integration\GlobalConfigs\standard.gitconfig" />
     <None Include="paket.references" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

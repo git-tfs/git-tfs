@@ -769,8 +769,14 @@ namespace GitTfs.Core
             var sha = _repository.ObjectDatabase.CreateCommit(signature, signature, ".gitignore", tree, new Commit[0], false).Sha;
             Trace.WriteLine(".gitignore commit created: " + sha);
 
-            _repository.Refs.Add(ShortToTfsRemoteName("default"), new ObjectId(sha));
-            _repository.Refs.Add(ShortToLocalName("master"), new ObjectId(sha));
+            // Point our tfs remote branch to the .gitignore commit
+            var defaultRef = ShortToTfsRemoteName("default");
+            _repository.Refs.Add(defaultRef, new ObjectId(sha));
+
+            // Also point HEAD to the .gitignore commit, if it isn't already. This
+            // ensures a common initial commit for the git-tfs init --gitignore case.
+            if (_repository.Head.CanonicalName != defaultRef)
+                _repository.Refs.Add(_repository.Head.CanonicalName, new ObjectId(sha));
 
             return sha;
         }

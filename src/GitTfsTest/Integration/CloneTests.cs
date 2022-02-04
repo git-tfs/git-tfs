@@ -451,5 +451,55 @@ namespace GitTfs.Test.Integration
             };
             AssertNewClone("MyTeamProject", refs);
         }
+
+        [FactExceptOnUnix]
+        public void CloneUsingInitialBranchOption()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Folder")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "File contents")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject", "--initial-branch=customInitialBranch");
+            h.AssertCommitMessage("MyProject", "HEAD", "First commit", "", "git-tfs-id: [" + h.TfsUrl + "]$/MyProject;C2");
+            h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
+            h.AssertFileInWorkspace("MyProject", "README", "tldr");
+            AssertNewClone("MyProject", new[] { "HEAD", "refs/heads/customInitialBranch", "refs/remotes/tfs/default" },
+                commit: "d64d883266eca65bede947c79529318718a0d8eb",
+                tree: "41ab05d8f2a0f7f7f3a39c623e94fee68f64797e");
+        }
+
+        [FactExceptOnUnix]
+        public void CloneWithMainAndGitignore()
+        {
+            // Verifies that no extraneous "master" branch is introduced when git is configured to use
+            // a default initial branch that is not "master"
+
+            string gitignoreFile = Path.Combine(h.Workdir, "gitignore");
+            string gitignoreContent = "*.exe\r\n*.com\r\n";
+            File.WriteAllText(gitignoreFile, gitignoreContent);
+
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Folder")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "File contents")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr");
+            });
+            h.RunInWithConfig(".", "GitTfs.Test.Integration.GlobalConfigs.mainDefaultBranch.gitconfig", "clone", h.TfsUrl, "$/MyProject", "MyProject", $"--gitignore={gitignoreFile}");
+            h.AssertCommitMessage("MyProject", "HEAD", "First commit", "", "git-tfs-id: [" + h.TfsUrl + "]$/MyProject;C2");
+            h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
+            h.AssertFileInWorkspace("MyProject", "README", "tldr");
+            AssertNewClone("MyProject", new[] { "HEAD", "refs/heads/main", "refs/remotes/tfs/default" },
+                commit: "1e9f1c2dfc1a0b5e4e6f135525a60d7c33a2d0aa",
+                tree: "2ef92a065910b3cc3a1379e41a034e90f2e610ec");
+            h.AssertNoRef("MyProject", "master");
+        }
     }
 }

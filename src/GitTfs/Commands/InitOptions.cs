@@ -21,6 +21,8 @@ namespace GitTfs.Commands
                         v => GitInitTemplate = v },
                     { "shared:", "Passed to git-init",
                         v => GitInitShared = v == null ? (object)true : (object)v },
+                    { "initial-branch=", "Passed to git-init (requires Git >= 2.28.0)",
+                        v => GitInitDefaultBranch = v },
                     { "autocrlf=", "Normalize line endings (default: " + DefaultAutocrlf + ")",
                         v => GitInitAutoCrlf = ValidateCrlfValue(v) },
                     { "ignorecase=", "Ignore case in file paths (default: system default)",
@@ -52,6 +54,7 @@ namespace GitTfs.Commands
         public string WorkspacePath { get; set; }
         public string GitInitTemplate { get; set; }
         public object GitInitShared { get; set; }
+        public string GitInitDefaultBranch { get; set; }
         public string GitInitAutoCrlf { get; set; }
         public string GitInitIgnoreCase { get; set; }
     }

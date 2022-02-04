@@ -258,14 +258,29 @@ namespace GitTfs.Test.Integration
 
         public int RunIn(string workPath, params string[] args)
         {
+            return RunInWithConfig(workPath, "GitTfs.Test.Integration.GlobalConfigs.standard.gitconfig", args);
+        }
+
+        public int RunInWithConfig(string workPath, string configResource, params string[] args)
+        {
             var origPwd = Environment.CurrentDirectory;
             var origClient = Environment.GetEnvironmentVariable("GIT_TFS_CLIENT");
             var origScript = Environment.GetEnvironmentVariable(Script.EnvVar);
+            var origNoSystem = Environment.GetEnvironmentVariable("GIT_CONFIG_NOSYSTEM");
+            var origGlobalConfig = Environment.GetEnvironmentVariable("GIT_CONFIG_GLOBAL");
+
             try
             {
-                Environment.CurrentDirectory = Path.Combine(Workdir, workPath);
+                string testDirectory = Path.Combine(Workdir, workPath);
+                string globalConfigPath = Path.Combine(testDirectory, "global.gitconfig");
+                WriteResourceToFile(configResource, globalConfigPath);
+
+                Environment.CurrentDirectory = testDirectory;
                 Environment.SetEnvironmentVariable("GIT_TFS_CLIENT", "Fake");
                 Environment.SetEnvironmentVariable(Script.EnvVar, FakeScript);
+                Environment.SetEnvironmentVariable("GIT_CONFIG_NOSYSTEM", "true");
+                Environment.SetEnvironmentVariable("GIT_CONFIG_GLOBAL", globalConfigPath);
+
                 Console.WriteLine(">> git tfs " + QuoteArgs(args));
                 var argsWithDebug = new List<string>();
                 if (BaseTest.DisplayTrace)
@@ -279,6 +294,8 @@ namespace GitTfs.Test.Integration
             {
                 Environment.SetEnvironmentVariable("GIT_TFS_CLIENT", origClient);
                 Environment.SetEnvironmentVariable(Script.EnvVar, origScript);
+                Environment.SetEnvironmentVariable("GIT_CONFIG_NOSYSTEM", origNoSystem);
+                Environment.SetEnvironmentVariable("GIT_CONFIG_GLOBAL", origGlobalConfig);
                 Environment.CurrentDirectory = origPwd;
             }
         }
@@ -417,6 +434,11 @@ namespace GitTfs.Test.Integration
             Assert.Equal(expectedValue, config.Value);
         }
 
+        public void AssertHead(string repodir, string headRef)
+        {
+            Assert.Equal(headRef, Repository(repodir).Head.CanonicalName);
+        }
+
         private void AssertEqual<T>(T expected, T actual, string message)
         {
             try
@@ -426,6 +448,17 @@ namespace GitTfs.Test.Integration
             catch (AssertActualExpectedException)
             {
                 throw new AssertActualExpectedException(expected, actual, message);
+            }
+        }
+
+        private void WriteResourceToFile(string resourceName, string fileName)
+        {
+            using (var resource = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            {
+                using (var file = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                {
+                    resource.CopyTo(file);
+                }
             }
         }
 

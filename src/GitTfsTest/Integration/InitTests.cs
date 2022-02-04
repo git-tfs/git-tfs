@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using GitTfs.Core.TfsInterop;
 using Xunit.Abstractions;
 
@@ -54,5 +55,30 @@ namespace GitTfs.Test.Integration
             h.AssertConfig("MyProject", "tfs-remote.default.noparallel", "true");
         }
 
+        [FactExceptOnUnix]
+        public void InitializesWithInitialBranchArg()
+        {
+            h.SetupFake(r => { });
+            h.Run("init", "http://my-tfs.local/tfs", "$/MyProject", "MyProject", "--initial-branch=customInitialBranch");
+            h.AssertHead("MyProject", "refs/heads/customInitialBranch");
+        }
+
+        [FactExceptOnUnix]
+        public void InitializesWithGitignore()
+        {
+            // Tests both:
+            //   1. No extraneous "master" branch is introduced when gitconfig calls for "main" as the initial branch
+            //   2. The initial .gitignore commit is on both the main branch and the tfs remote so they have common history
+
+            string gitignoreFile = Path.Combine(h.Workdir, "gitignore");
+            string gitignoreContent = "*.exe\r\n*.com\r\n";
+            File.WriteAllText(gitignoreFile, gitignoreContent);
+
+            h.SetupFake(r => { });
+            h.RunInWithConfig(".", "GitTfs.Test.Integration.GlobalConfigs.mainDefaultBranch.gitconfig", "init", "http://my-tfs.local/tfs", "$/MyProject", "MyProject", $"--gitignore={gitignoreFile}");
+            h.AssertNoRef("MyProject", "refs/heads/master");
+            h.AssertRef("MyProject", "refs/heads/main", "077fd68c084ef718a505f0a7375330c68d699f40");
+            h.AssertRef("MyProject", "refs/remotes/tfs/default", "077fd68c084ef718a505f0a7375330c68d699f40");
+        }
     }
 }

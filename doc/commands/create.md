@@ -24,6 +24,7 @@ Prefer the [clone](clone.md) or [init](init.md) command if the project folder al
 								   TFS (default: "trunk")
 		  --template=VALUE       Passed to git-init
 		  --shared[=VALUE]       Passed to git-init
+		  --initial-branch=VALUE Passed to git-init (requires Git >= 2.28.0)
 		  --autocrlf=VALUE       Normalize line endings (default: false)
 		  --bare                 clone the TFS repository in a bare git repository
 		  --ignore-regex=VALUE   a regex of files to ignore

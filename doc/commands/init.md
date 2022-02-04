@@ -15,6 +15,7 @@ Prefer the [clone](clone.md) command to initialize and fetch changesets from a T
                                    default: default
           --template=VALUE       Passed to git-init
           --shared[=VALUE]       Passed to git-init
+          --initial-branch=VALUE Passed to git-init (requires Git >= 2.28.0)
           --autocrlf=VALUE       Normalize line endings (default: false)
           --ignorecase=VALUE     Ignore case in file paths (default: system
                                      default)
