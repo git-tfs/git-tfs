@@ -66,7 +66,7 @@ namespace GitTfs.Test.Integration
         [FactExceptOnUnix]
         public void InitializesWithGitignore()
         {
-            // Tests both:'
+            // Tests both:
             //   1. No extraneous "master" branch is introduced when gitconfig calls for "main" as the initial branch
             //   2. The initial .gitignore commit is on both the main branch and the tfs remote so they have common history
 

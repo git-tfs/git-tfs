@@ -35,7 +35,7 @@ Useful for making code changes or additions where past history isn't relevant.
 
 		--initial-branch
 			(Type: Value required, Value Type:[String])
-			The --initial-branch option to pass to git-init.
+			The --initial-branch option to pass to git-init (requires Git >= 2.28.0).
 
 		--no-metadata
 			(Type: Flag, Value Type:[Boolean])
