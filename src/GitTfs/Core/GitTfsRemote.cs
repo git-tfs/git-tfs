@@ -161,12 +161,20 @@ namespace GitTfs.Core
         public bool ExportMetadatas { get; set; }
         public Dictionary<string, IExportWorkItem> ExportWorkitemsMapping { get; set; }
 
+        // MaxChangesetId is the ID of the TFS changeset most recently commited to the
+        // TFS remote reference branch of the git repository. A value of 0 means that
+        // no TFS changesets have been committed yet.
         public int MaxChangesetId
         {
             get { InitHistory(); return maxChangesetId.Value; }
             set { maxChangesetId = value; }
         }
 
+        // MaxCommitHash is the hash of the most recent commit of any type on the remote
+        // reference branch of the git repository. It is typically the hash of the commit
+        // corresponding to the MaxChangesetId property, but isn't guaranteed to be. When
+        // MaxChangesetId is zero, MaxCommitHash could be the hash of the last commit made
+        // during repository initialization (e.g. the commit of a .gitignore file).
         public string MaxCommitHash
         {
             get { InitHistory(); return maxCommitHash; }
@@ -190,9 +198,11 @@ namespace GitTfs.Core
                 }
                 else
                 {
+                    // Use 0 as the flag to indicate that no TFS changesets have yet been committed
                     MaxChangesetId = 0;
 
-                    // Manage the special case where a .gitignore has been committed
+                    // Manage the special case where commits were made to the repository before the
+                    // first commit from TFS (e.g. .gitignore was committed during initialization)
                     var gitCommit = Repository.GetCommit(RemoteRef);
                     if (gitCommit != null)
                     {
@@ -386,9 +396,9 @@ namespace GitTfs.Core
                         return fetchResult;
                     }
                     var parentSha = (renameResult != null && renameResult.IsProcessingRenameChangeset) ? renameResult.LastParentCommitBeforeRename : MaxCommitHash;
-                    var isFirstCommitInRepository = (parentSha == null);
+                    var isFirstTFSCommitInRepository = (MaxChangesetId == 0);
                     var log = Apply(parentSha, changeset, objects);
-                    if (changeset.IsRenameChangeset && !isFirstCommitInRepository)
+                    if (changeset.IsRenameChangeset && !isFirstTFSCommitInRepository)
                     {
                         if (renameResult == null || !renameResult.IsProcessingRenameChangeset)
                         {

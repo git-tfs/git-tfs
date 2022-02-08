@@ -10,3 +10,5 @@
 * Fix rare crash when checkin policy support as enabled (#1408 by siprbaum)
 * Add support for git-init's --initial-branch option and make git-tfs agnostic with
   respect to initial branch names (#1405 by fineol)
+* Fix issue #1409: cloning a TFS project whose first changeset is a rename quietly
+  fails if you specify the `--gitignore` option (#1412 by fineol)

@@ -218,16 +218,51 @@ namespace GitTfs.Test.Integration
             h.Run("clone", h.TfsUrl, "$/vtccds/trunk", "Vtccds", "--branches=all");
 
             AssertNewClone("Vtccds", new[] { "refs/heads/master", "refs/remotes/tfs/default" }, commit: "e7d54b14fbdcbbc184d58e82931b7c1ac4a2be70");
-
             AssertNewClone("Vtccds", new[] { "refs/heads/b1", "refs/remotes/tfs/b1" }, commit: "3cdb2a311ac7cbda1e892a9b3371a76c871a696a");
-
             AssertNewClone("Vtccds", new[] { "refs/heads/b1.1", "refs/remotes/tfs/b1.1" }, commit: "e6e79221fd35b2002367a41535de9c43b626150a");
-
             AssertNewClone("Vtccds", new[] { "refs/heads/renameFile", "refs/remotes/tfs/renameFile" }, commit: "003ca02adfd9561418f05a61c7a999386957a146");
-
             AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/branch_from_nowhere" }, commit: "9cb91c60d76d00af182ae9f16da6e6aa77b88a5e");
-
             AssertNewClone("Vtccds", new[] { "refs/heads/renamed3", "refs/remotes/tfs/renamed3" }, commit: "615ac5588d3cb6282c2c7d514f2828ad3aeaf5c7");
+
+            //No refs for renamed branches
+            h.AssertNoRef("Vtccds", "refs/remotes/tfs/renamedTwice");
+            h.AssertNoRef("Vtccds", "refs/remotes/tfs/afterRename");
+            h.AssertNoRef("Vtccds", "refs/remotes/tfs/testRename");
+        }
+
+        [FactExceptOnUnix]
+        public void WhenCloningFunctionalTestVtccdsWithBranchesRenamingAndGitignore_ThenAllRenamesShouldBeWellHandled()
+        {
+            // This test duplicates WhenCloningFunctionalTestVtccdsWithBranchesRenaming_ThenAllRenamesShouldBeWellHandled, but with
+            // a .gitignore file included via the --gitignore option. It was added so that we have coverage of the complex renaming
+            // scenarios in Vtccds both with and without use of the --gitignore option.
+            //
+            // The .gitignore included in this variant of the Vtccds test is the first commit of the repository and is the ancestral
+            // parent of all the branches in this repository except for the refs/remotes/tfs/branch_from_nowhere. It is not expected
+            // to be in the refs/remotes/tfs/branch_from_nowhere branch, because that branch came from a TFS changeset that is not
+            // rooted at the base of the $/vtccds/trunk TFS project.
+
+            string gitignoreFile = Path.Combine(h.Workdir, "gitignore");
+            string gitignoreContent = "*.exe\r\n*.com\r\n";
+            File.WriteAllText(gitignoreFile, gitignoreContent);
+
+            h.SetupFake(r =>
+            {
+                r.SetRootBranch("$/vtccds/trunk");
+                vtccds.Prepare(r);
+            });
+            h.TfsUrl = "https://tfs.codeplex.com:443/tfs/TFS16";
+            h.Run("clone", h.TfsUrl, "$/vtccds/trunk", "Vtccds", "--branches=all", $"--gitignore={gitignoreFile}");
+
+            // The commit hashes for all of the refs below (except for refs/remotes/tfs/branch_from_nowhere - see above) reflect the fact
+            // that the first commit to the repository is the .gitignore specified with the --gitignore option. As a result, these hashes
+            // differ from those of the WhenCloningFunctionalTestVtccdsWithBranchesRenaming_ThenAllRenamesShouldBeWellHandled test.
+            AssertNewClone("Vtccds", new[] { "refs/heads/master", "refs/remotes/tfs/default" }, commit: "2c047e8c26998bd261ec50716e8574e691efc990");
+            AssertNewClone("Vtccds", new[] { "refs/heads/b1", "refs/remotes/tfs/b1" }, commit: "5afc5abed88f15087796e8419aee6c133b8f1786");
+            AssertNewClone("Vtccds", new[] { "refs/heads/b1.1", "refs/remotes/tfs/b1.1" }, commit: "cc1cbc9fd62fa7e4ee55a3619858b27c62eb9c00");
+            AssertNewClone("Vtccds", new[] { "refs/heads/renameFile", "refs/remotes/tfs/renameFile" }, commit: "cd9aafa3bae84c2b55def73c6dc1cad0dc83dd76");
+            AssertNewClone("Vtccds", new[] { "refs/remotes/tfs/branch_from_nowhere" }, commit: "9cb91c60d76d00af182ae9f16da6e6aa77b88a5e");
+            AssertNewClone("Vtccds", new[] { "refs/heads/renamed3", "refs/remotes/tfs/renamed3" }, commit: "891e14ba4977835cb1ca06f1ceaa5c7948ea5785");
 
             //No refs for renamed branches
             h.AssertNoRef("Vtccds", "refs/remotes/tfs/renamedTwice");
@@ -500,6 +535,57 @@ namespace GitTfs.Test.Integration
                 commit: "1e9f1c2dfc1a0b5e4e6f135525a60d7c33a2d0aa",
                 tree: "2ef92a065910b3cc3a1379e41a034e90f2e610ec");
             h.AssertNoRef("MyProject", "master");
+        }
+
+        [FactExceptOnUnix]
+        public void CloneWithFirstTFSChangesetIsRename()
+        {
+            // Tests for the special case where the first TFS changeset is a rename changeset and --gitignore is not used (see issue #1409)
+
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "First TFS changeset: rename the top-level folder", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Rename, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Second TFS changeset: one folder and two files added", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Folder")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "File contents")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject");
+            h.AssertCommitMessage("MyProject", "HEAD", "Second TFS changeset: one folder and two files added", "", "git-tfs-id: [" + h.TfsUrl + "]$/MyProject;C2");
+            h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
+            h.AssertFileInWorkspace("MyProject", "README", "tldr");
+            AssertNewClone("MyProject", new[] { "HEAD", "refs/heads/master", "refs/remotes/tfs/default" },
+                commit: "726e937beab54f17fae545744497d68aa7c36507",
+                tree: "41ab05d8f2a0f7f7f3a39c623e94fee68f64797e");
+        }
+
+        [FactExceptOnUnix]
+        public void CloneWithFirstTFSChangesetIsRenameAndGitignoreGiven()
+        {
+            // Tests for the special case where the first TFS changeset is a rename changeset and --gitignore is used (see issue #1409)
+
+            string gitignoreFile = Path.Combine(h.Workdir, "gitignore");
+            string gitignoreContent = "*.exe\r\n*.com\r\n";
+            File.WriteAllText(gitignoreFile, gitignoreContent);
+
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "First TFS changeset: rename the top-level folder", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Rename, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "Second TFS changeset: one folder and two files added", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Folder")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Folder/File.txt", "File contents")
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr");
+            });
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", $"--gitignore={gitignoreFile}");
+            h.AssertCommitMessage("MyProject", "HEAD", "Second TFS changeset: one folder and two files added", "", "git-tfs-id: [" + h.TfsUrl + "]$/MyProject;C2");
+            h.AssertFileInWorkspace("MyProject", "Folder/File.txt", "File contents");
+            h.AssertFileInWorkspace("MyProject", "README", "tldr");
+            h.AssertFileInWorkspace("MyProject", ".gitignore", gitignoreContent);
+            AssertNewClone("MyProject", new[] { "HEAD", "refs/heads/master", "refs/remotes/tfs/default" },
+                commit: "d1802bd0cee53f20ed69f182d1835e93697762a1",
+                tree: "2ef92a065910b3cc3a1379e41a034e90f2e610ec");
         }
     }
 }
