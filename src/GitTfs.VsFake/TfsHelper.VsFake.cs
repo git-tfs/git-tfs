@@ -93,8 +93,8 @@ namespace GitTfs.VsFake
 
         private ITfsChangeset BuildTfsChangeset(ScriptedChangeset changeset, IGitTfsRemote remote)
         {
-            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(_versionControlServer, changeset)).GetInstance<TfsChangeset>();
-            tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.Id, Remote = remote };
+            TfsChangesetInfo tfsChangesetInfo = new TfsChangesetInfo { ChangesetId = changeset.Id, Remote = remote };
+            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(new Changeset(_versionControlServer, changeset)).With(tfsChangesetInfo).GetInstance<TfsChangeset>();
             return tfsChangeset;
         }
 

@@ -542,8 +542,8 @@ namespace GitTfs.VsCommon
 
         protected ITfsChangeset BuildTfsChangeset(Changeset changeset, IGitTfsRemote remote)
         {
-            var tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).GetInstance<TfsChangeset>();
-            tfsChangeset.Summary = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };
+            var tfsChangesetInfo = new TfsChangesetInfo { ChangesetId = changeset.ChangesetId, Remote = remote };
+            ITfsChangeset tfsChangeset = _container.With<ITfsHelper>(this).With<IChangeset>(_bridge.Wrap<WrapperForChangeset, Changeset>(changeset)).With(tfsChangesetInfo).GetInstance<TfsChangeset>();
 
             tfsChangeset.Summary.Workitems = changeset.AssociatedWorkItems.Select(wi => new TfsWorkitem
             {
@@ -787,7 +787,7 @@ namespace GitTfs.VsCommon
                 _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(VersionControl);
             // TODO - containerify this (no `new`)!
             var fakeChangeset = new Unshelveable(shelveset, change, wrapperForVersionControlServer, _bridge);
-            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, null) { Summary = new TfsChangesetInfo { Remote = remote } };
+            var tfsChangeset = new TfsChangeset(remote.Tfs, fakeChangeset, new TfsChangesetInfo { Remote = remote }, null);
             return tfsChangeset;
         }
 
