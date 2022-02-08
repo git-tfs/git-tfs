@@ -191,6 +191,13 @@ namespace GitTfs.VsCommon
                 ? new VssClientCredentials(new WindowsCredential(GetCredential()))
                 : VssClientCredentials.LoadCachedCredentials(uri, false, CredentialPromptType.PromptIfNeeded);
 
+            string pat = Environment.GetEnvironmentVariable("GITTFS_PAT");
+            if (pat != null)
+            {
+                vssCred = new VssBasicCredential(string.Empty, pat);
+            }
+
+
             return new TfsTeamProjectCollection(uri, vssCred);
 #pragma warning restore 618
         }
