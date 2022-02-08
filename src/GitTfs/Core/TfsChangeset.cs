@@ -13,14 +13,15 @@ namespace GitTfs.Core
         private readonly ITfsHelper _tfs;
         private readonly IChangeset _changeset;
         private readonly AuthorsFile _authors;
-        public TfsChangesetInfo Summary { get; set; }
+        public TfsChangesetInfo Summary { get; }
         public int BaseChangesetId { get; }
 
-        public TfsChangeset(ITfsHelper tfs, IChangeset changeset, AuthorsFile authors)
+        public TfsChangeset(ITfsHelper tfs, IChangeset changeset, TfsChangesetInfo tfsChangesetInfo, AuthorsFile authors)
         {
             _tfs = tfs;
             _changeset = changeset;
             _authors = authors;
+            Summary = tfsChangesetInfo;
             BaseChangesetId = _changeset.Changes.Max(c => c.Item.ChangesetId) - 1;
         }
 
