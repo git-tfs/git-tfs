@@ -64,9 +64,18 @@ didn't work when the clone was done on a network share.
 ## Examples
 ### Simple
 To clone all of `$/Project1` from your TFS server `tfs`
-into a new directory `Project1`, do this:
+into a new directory `Project1`, do this in cmd or powershell:
 
     git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1
+
+In a git bash, run this command instead
+
+    MSYS_NO_PATHCONV=1 git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1
+
+Setting the environment `MSYS_NO_PATHCONV=1` prevents that the POSIX-to-Windows path conversion
+will kick in, trying to convert `$/Project1` to a file system path. For further information
+see the [Known Issues](https://github.com/git-for-windows/build-extra/blob/49063144d88bf3fdd35e53eceb8cb973ecb3163c/ReleaseNotes.md#known-issues)
+in the release notes of Git.
 
 Note: Equivalent to cloning with dependency branches (with option `--branches=auto`) if you are cloning the trunk branch.
 
