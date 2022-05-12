@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -187,7 +187,8 @@ namespace GitTfs.Core
             }
             var name = changesetToLog.Committer;
             var email = changesetToLog.Committer;
-            if (_authors != null && _authors.Authors.ContainsKey(changesetToLog.Committer))
+            bool foundInAuthorFile = _authors?.Authors?.ContainsKey(changesetToLog.Committer) ?? false;
+            if (foundInAuthorFile)
             {
                 name = _authors.Authors[changesetToLog.Committer].Name;
                 email = _authors.Authors[changesetToLog.Committer].Email;
@@ -212,7 +213,6 @@ namespace GitTfs.Core
                     email = string.Format("{0}@{1}.tfs.local", name, split[0].ToLower());
                 }
             }
-
             // committer's & author's name and email MUST NOT be empty as otherwise they would be picked
             // by git from user.name and user.email config settings which is bad thing because commit could
             // be different depending on whose machine it fetched
@@ -223,6 +223,16 @@ namespace GitTfs.Core
             if (string.IsNullOrWhiteSpace(email))
             {
                 email = "unknown@tfs.local";
+            }
+            if (!foundInAuthorFile)
+            {
+                string lookup = $"{name} <{email}>";
+                foundInAuthorFile = _authors?.Authors?.ContainsKey(lookup) ?? false;
+                if (foundInAuthorFile)
+                {
+                    name = _authors.Authors[lookup].Name;
+                    email = _authors.Authors[lookup].Email;
+                }
             }
             if (remote == null)
                 remote = Summary.Remote;
