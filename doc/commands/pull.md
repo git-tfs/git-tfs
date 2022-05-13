@@ -56,6 +56,8 @@ The `pull` command fetches TFS changesets (like the `fetch` command) and merges
                                   The changeset to clone from (must be a number)
       -t, --up-to, --to=VALUE    up-to changeset # (optional, -1 for up to
                                   maximum, must be a number, not prefixed with 'C')
+                                 Additionally you can place a file "git-tfs-fetch-abort" in your
+                                   TEMP directory to abort the fetch at any time.
           --ignore-branches-regex=VALUE
                                   Don't initialize branches that match given regex
           --ignore-not-init-branches

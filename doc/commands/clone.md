@@ -51,6 +51,8 @@ a TFS source tree and fetch all the changesets
       -c, --changeset=VALUE      The changeset to clone from (must be a number)
       -t, --up-to=VALUE          up-to changeset # (optional, -1 for up to 
                                    maximum, must be a number, not prefixed with C)
+                                 Additionally you can place a file "git-tfs-fetch-abort" in your
+                                   TEMP directory to abort the fetch at any time.
 		  --resumable            if an error occurred, try to continue when you restart clone
 								 with same parameters
 

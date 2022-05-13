@@ -352,6 +352,7 @@ namespace GitTfs.Core
             public string ParentBranchTfsPath { get; set; }
             public bool IsProcessingRenameChangeset { get; set; }
             public string LastParentCommitBeforeRename { get; set; }
+            public bool Aborted { get; set; }
         }
 
         public IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null)
@@ -373,6 +374,7 @@ namespace GitTfs.Core
             // TFS 2010 doesn't like when we ask for history past its last changeset.
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
+            string abortFile = Path.Combine(Path.GetTempPath(), "git-tfs-fetch-abort");
 
             bool fetchRetrievedChangesets;
             do
@@ -387,7 +389,16 @@ namespace GitTfs.Core
 
                     fetchResult.NewChangesetCount++;
                     if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
+                    {
+                        fetchResult.Aborted = true;
                         return fetchResult;
+                    }
+                    if (File.Exists(abortFile))
+                    {
+                        Trace.TraceInformation($"Abort fetch because of abort file: {abortFile}");
+                        fetchResult.Aborted = true;
+                        return fetchResult;
+                    }
                     string parentCommitSha = null;
                     if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
                     {
@@ -452,10 +463,11 @@ namespace GitTfs.Core
                     return true;
                 }
                 var shaParent = Repository.FindCommitHashByChangesetId(parentChangesetId);
+                bool abortedFetch = false;
                 if (shaParent == null)
                 {
                     string omittedParentBranch;
-                    shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, out omittedParentBranch);
+                    shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, out omittedParentBranch, out abortedFetch);
                     changeset.OmittedParentBranch = omittedParentBranch;
                 }
                 if (shaParent != null)
@@ -464,7 +476,7 @@ namespace GitTfs.Core
                 }
                 else
                 {
-                    if (stopOnFailMergeCommit)
+                    if ((stopOnFailMergeCommit) || (abortedFetch))
                         return false;
 
                     Trace.TraceInformation("warning: this changeset " + changeset.Summary.ChangesetId +
@@ -588,17 +600,24 @@ namespace GitTfs.Core
         private string FindRootRemoteAndFetch(int parentChangesetId, IRenameResult renameResult = null)
         {
             string omittedParentBranch;
-            return FindRemoteAndFetch(parentChangesetId, false, false, renameResult, out omittedParentBranch);
+            return FindRemoteAndFetch(parentChangesetId, false, false, renameResult, out omittedParentBranch, out _);
         }
 
         private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, out string omittedParentBranch)
         {
-            return FindRemoteAndFetch(parentChangesetId, false, true, null, out omittedParentBranch);
+            return FindRemoteAndFetch(parentChangesetId, false, true, null, out omittedParentBranch, out _);
+        }
+        
+        private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, out string omittedParentBranch, out bool abortedFetch)
+        {
+            return FindRemoteAndFetch(parentChangesetId, false, true, null, out omittedParentBranch, out abortedFetch);
         }
 
-        private string FindRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, bool mergeChangeset, IRenameResult renameResult, out string omittedParentBranch)
+        private string FindRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, bool mergeChangeset, IRenameResult renameResult,
+            out string omittedParentBranch, out bool abortedFetch)
         {
             var tfsRemote = FindOrInitTfsRemoteOfChangeset(parentChangesetId, mergeChangeset, renameResult, out omittedParentBranch);
+            abortedFetch = false;
 
             if (tfsRemote != null && string.Compare(tfsRemote.TfsRepositoryPath, TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase) != 0)
             {
@@ -606,6 +625,7 @@ namespace GitTfs.Core
                 try
                 {
                     var fetchResult = ((GitTfsRemote)tfsRemote).FetchWithMerge(-1, stopOnFailMergeCommit, parentChangesetId, renameResult);
+                    abortedFetch = fetchResult?.Aborted ?? false;
                 }
                 finally
                 {
