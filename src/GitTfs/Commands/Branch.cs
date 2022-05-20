@@ -7,6 +7,7 @@ using NDesk.Options;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 using StructureMap;
+using System.Text;
 
 namespace GitTfs.Commands
 {
@@ -16,7 +17,7 @@ namespace GitTfs.Commands
         "       * Display remote TFS branches:\n       git tfs branch -r\n       git tfs branch -r -all\n\n" +
         "       * Create a TFS branch from current commit:\n       git tfs branch $/Repository/ProjectBranchToCreate <myWishedRemoteName> --comment=\"Creation of my branch\"\n\n" +
         "       * Rename a remote branch:\n       git tfs branch --move oldTfsRemoteName newTfsRemoteName\n\n" +
-        "       * Delete a remote branch:\n       git tfs branch --delete tfsRemoteName\n       git tfs branch --delete --all\n\n" +
+        "       * Delete a remote branch:\n       git tfs branch --delete tfsRemoteName\n       git tfs branch --delete --all\n       git tfs branch --delete --delete-remotes-file=remotes.txt\n\n" +
         "       * Initialise an existing remote TFS branch:\n       git tfs branch --init $/Repository/ProjectBranch\n       git tfs branch --init $/Repository/ProjectBranch myNewBranch\n       git tfs branch --init --all\n       git tfs branch --init --tfs-parent-branch=$/Repository/ProjectParentBranch $/Repository/ProjectBranch\n")]
     [RequiresValidGitRepository]
     public class Branch : GitTfsCommand
@@ -30,6 +31,7 @@ namespace GitTfs.Commands
         public bool ManageAll { get; set; }
         public bool ShouldRenameRemote { get; set; }
         public bool ShouldDeleteRemote { get; set; }
+        public string DeleteRemotesFilePath { get; set; }
         public bool ShouldInitBranch { get; set; }
         public string IgnoreRegex { get; set; }
         public string ExceptRegex { get; set; }
@@ -51,6 +53,7 @@ namespace GitTfs.Commands
                     { "comment=", "Comment used for the creation of the TFS branch ", v => Comment = v },
                     { "m|move", "Rename a TFS remote", v => ShouldRenameRemote = (v != null) },
                     { "delete", "Delete a TFS remote", v => ShouldDeleteRemote = (v != null) },
+                    { "delete-remotes-file=", "File with a list of remotes to delete", v => DeleteRemotesFilePath = v },
                     { "init", "Initialize an existing TFS branch", v => ShouldInitBranch = (v != null) },
                     { "ignore-regex=", "A regex of files to ignore", v => IgnoreRegex = v },
                     { "except-regex=", "A regex of exceptions to ignore-regex", v => ExceptRegex = v},
@@ -101,7 +104,9 @@ namespace GitTfs.Commands
 
             if(ShouldDeleteRemote)
             {
-                if (!ManageAll)
+                if (!string.IsNullOrWhiteSpace(DeleteRemotesFilePath))
+                    return DeleteRemotesFromFile();
+                else if (!ManageAll)
                     return _helper.Run(this);
                 else
                     return DeleteAllRemotes();
@@ -135,7 +140,12 @@ namespace GitTfs.Commands
             }
 
             if (ShouldDeleteRemote)
-                return DeleteRemote(param);
+            {
+                if (string.IsNullOrWhiteSpace(DeleteRemotesFilePath))
+                    return DeleteRemote(param);
+                else
+                    return _helper.Run(this);
+            }
 
             return CreateRemote(param);
         }
@@ -236,6 +246,41 @@ namespace GitTfs.Commands
             _cleanup.Run();
 
             _globals.Repository.DeleteTfsRemote(remote);
+            return GitTfsExitCodes.OK;
+        }
+
+        private int DeleteRemotesFromFile() 
+        {
+            if (string.IsNullOrWhiteSpace(DeleteRemotesFilePath))
+            {
+                throw new GitTfsException($"{nameof(DeleteRemotesFilePath)} is empty.");
+            }
+            if (!File.Exists(DeleteRemotesFilePath))
+            {
+                throw new GitTfsException($"{DeleteRemotesFilePath} does not exist.");
+            }
+            bool clean = true;
+            List<string> remotesToDelete = File.ReadLines(DeleteRemotesFilePath, Encoding.Default)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim()).ToList();
+            Trace.TraceInformation($"Deleting {remotesToDelete.Count} remotes!!");
+            foreach (string remoteName in remotesToDelete)
+            {
+                var remote = _globals.Repository.ReadTfsRemote(remoteName);
+                if (remote == null)
+                {
+                    throw new GitTfsException(string.Format("Error: Remote \"{0}\" not found!", remoteName));
+                }
+
+                if (clean)
+                {
+                    Trace.TraceInformation("Cleaning before processing delete...");
+                    _cleanup.Run();
+                    clean = false;
+                }
+
+                _globals.Repository.DeleteTfsRemote(remote);
+            }
             return GitTfsExitCodes.OK;
         }
 
