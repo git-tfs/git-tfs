@@ -142,7 +142,7 @@ namespace GitTfs.Commands
             if (ShouldDeleteRemote)
             {
                 if (string.IsNullOrWhiteSpace(DeleteRemotesFilePath))
-                    return DeleteRemote(param);
+                    return DeleteRemotes(new List<string>() { param });
                 else
                     return _helper.Run(this);
             }
@@ -234,18 +234,35 @@ namespace GitTfs.Commands
             return _rcheckin.Run();
         }
 
-        private int DeleteRemote(string remoteName)
+        private int DeleteRemotes(IEnumerable<string> remoteNames)
         {
-            var remote = _globals.Repository.ReadTfsRemote(remoteName);
-            if (remote == null)
+            List<IGitTfsRemote> validRemotes = new List<IGitTfsRemote>();
+            List<string> inValidRemoteNames = new List<string>();
+            foreach (string remoteName in remoteNames)
             {
-                throw new GitTfsException(string.Format("Error: Remote \"{0}\" not found!", remoteName));
+                IGitTfsRemote remote = _globals.Repository.ReadTfsRemote(remoteName);
+                if (remote != null)
+                {
+                    validRemotes.Add(remote);
+                }
+                else
+                {
+                    inValidRemoteNames.Add(remoteName);
+                }
+            }
+            if (inValidRemoteNames.Count > 0)
+            {
+                throw new GitTfsException($"Error: Remotes not found: {string.Join(" ", inValidRemoteNames)}");
             }
 
             Trace.TraceInformation("Cleaning before processing delete...");
             _cleanup.Run();
 
-            _globals.Repository.DeleteTfsRemote(remote);
+            foreach (IGitTfsRemote validRemote in validRemotes)
+            {
+                _globals.Repository.DeleteTfsRemote(validRemote);
+            }
+
             return GitTfsExitCodes.OK;
         }
 
@@ -259,29 +276,11 @@ namespace GitTfs.Commands
             {
                 throw new GitTfsException($"{DeleteRemotesFilePath} does not exist.");
             }
-            bool clean = true;
             List<string> remotesToDelete = File.ReadLines(DeleteRemotesFilePath, Encoding.Default)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(x => x.Trim()).ToList();
             Trace.TraceInformation($"Deleting {remotesToDelete.Count} remotes!!");
-            foreach (string remoteName in remotesToDelete)
-            {
-                var remote = _globals.Repository.ReadTfsRemote(remoteName);
-                if (remote == null)
-                {
-                    throw new GitTfsException(string.Format("Error: Remote \"{0}\" not found!", remoteName));
-                }
-
-                if (clean)
-                {
-                    Trace.TraceInformation("Cleaning before processing delete...");
-                    _cleanup.Run();
-                    clean = false;
-                }
-
-                _globals.Repository.DeleteTfsRemote(remote);
-            }
-            return GitTfsExitCodes.OK;
+            return DeleteRemotes(remotesToDelete);
         }
 
         private int DeleteAllRemotes()
