@@ -18,6 +18,7 @@ The `branch` command allows you to manage TFS branches. With this command, you c
 		   * Delete a remote branch:
 		   git tfs branch --delete tfsRemoteName
 		   git tfs branch --delete --all
+		   git tfs branch --delete --delete-remotes-file=remotes.txt
 
 		   * Initialise an existing remote TFS branch:
 		   git tfs branch --init $/Repository/ProjectBranch
@@ -42,6 +43,7 @@ The `branch` command allows you to manage TFS branches. With this command, you c
 		  --comment=VALUE        Comment used for the creation of the TFS branch
 	  -m, --move                 Rename a TFS remote
 		  --delete               Delete a TFS remote
+		  --delete-remotes-file=VALUE File with a list of remotes to delete
 		  --init                 Initialize an existing TFS branch
           --ignore-regex=VALUE   a regex of files to ignore
           --except-regex=VALUE   a regex of exceptions to ignore-regex
@@ -152,6 +154,10 @@ Note : This will not rename the TFS branch, just the local git remote.
 Note : This will not delete the TFS branch, just the local git remote.
 
     git tfs branch --delete tfsRemoteName
+
+Or delete all remotes listed in a file (one remote per line).
+
+	git tfs branch --delete --delete-remotes-file=remotes.txt
 
 ## See also
 
