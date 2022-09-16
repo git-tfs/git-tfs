@@ -18,7 +18,15 @@ root = true
 [*.cs]
 indent_style = space
 indent_size = 4
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = true
 
 [*.cake]
 indent_style = tab
 indent_size = 4
+
+[*.md]
+# Ensure that the markdown files always end with a newline, which is e.g. especially
+# helpful for the docs/release/NEXT.md to ensure that adding a new entry/line
+# doesn't touch the previous one to reduce the diff & merge conflicts.
+insert_final_newline = true
