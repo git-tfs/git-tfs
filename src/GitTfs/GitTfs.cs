@@ -44,7 +44,7 @@ namespace GitTfs
             UpdateLoggerOnDebugging();
             Trace.WriteLine("Command run:" + _globals.CommandLineRun);
             if (RequiresValidGitRepository(command)) AssertValidGitRepository();
-            bool willCreateRepository = command.GetType() == typeof(Clone) || command.GetType() == typeof(Init);
+            bool willCreateRepository = command.GetType() == typeof(Clone) || command.GetType() == typeof(QuickClone) || command.GetType() == typeof(Init);
             ParseAuthorsAndSave(!willCreateRepository);
             var exitCode = Main(command, unparsedArgs);
             if (willCreateRepository)
