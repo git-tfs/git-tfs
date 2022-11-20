@@ -877,8 +877,11 @@ namespace GitTfs.Core
         {
             var builder = new StringWriter();
             builder.WriteLine(tfsCheckinComment);
-            builder.WriteLine(GitTfsConstants.TfsCommitInfoFormat,
-                TfsUrl, TfsRepositoryPath, changesetId);
+            if (!_globals.NoGitTfsId)
+            {
+                builder.WriteLine(GitTfsConstants.TfsCommitInfoFormat,
+                    TfsUrl, TfsRepositoryPath, changesetId);
+            }
             return builder.ToString();
         }
 

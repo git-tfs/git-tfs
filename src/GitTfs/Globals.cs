@@ -28,6 +28,8 @@ namespace GitTfs
                         v => UserSpecifiedRemoteId = v },
                     { "A|authors=", "Path to an Authors file to map TFS users to Git users (will be kept in cache and used for all the following commands)",
                         v => AuthorsFilePath = Path.GetFullPath(v) },
+                    { "no-metadata", "If specified, git-tfs will leave out the git-tfs-id: lines at the end of every commit",
+                        v => NoGitTfsId = v != null },
                 };
             }
         }
@@ -37,6 +39,8 @@ namespace GitTfs
         public bool ShowVersion { get; set; }
 
         public bool DebugOutput { get; set; }
+
+        public bool NoGitTfsId { get; set; }
 
         public string UserSpecifiedRemoteId { get; set; }
 
