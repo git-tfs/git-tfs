@@ -14,3 +14,4 @@
   fails if you specify the `--gitignore` option (#1412 by @fineol)
 * Don't authenticate again if the TFS server hasn't changed between the TFS remotes (#1424 by @ckorn)
 * Add support for reading the remotes to delete in `git-tfs branch` from a file (#1425 by @ckorn)
+* Made `--no-metadata` working (by @patrickbussmann)
