@@ -23,10 +23,6 @@ The fetch command fetch all the new changesets from a TFS remote
                                    users
           --batch-size=VALUE     Size of the batch of tfs changesets fetched (-1 for all in one batch)
           --ignore-regex=VALUE   a regex of files to ignore
-          --no-metadata          leave out the 'git-tfs-id:' tag in commit
-                                   messages
-                                   Use this when you're exporting from TFS and
-                                   don't need to put data back into TFS.
 		  --ignore-branches-regex=VALUE 
 								 Don't initialize branches that match given regex
 		  --ignore-not-init-branches

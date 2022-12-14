@@ -37,11 +37,6 @@ Useful for making code changes or additions where past history isn't relevant.
 			(Type: Value required, Value Type:[String])
 			The --initial-branch option to pass to git-init (requires Git >= 2.28.0).
 
-		--no-metadata
-			(Type: Flag, Value Type:[Boolean])
-			If specified, git-tfs will leave out the git-tfs-id: lines at the end of every
-				commit.
-
 		--ignore-regex
 			(Type: Value required, Value Type:[String])
 			If specified, git-tfs will not sync any paths that match this regular expression.
