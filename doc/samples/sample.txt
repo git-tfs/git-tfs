@@ -23,10 +23,6 @@ where options are:
         (Type: Value required, Value Type:[Object])
         The --shared option to pass to git-init.
 
-    --no-metadata
-        (Type: Flag, Value Type:[Boolean])
-        If specified, git-tfs will leave out the git-tfs-id: lines at the end of every commit.
-
     --template
         (Type: Value required, Value Type:[String])
         The --template option to pass to git-init.
