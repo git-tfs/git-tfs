@@ -15,3 +15,4 @@
 * Don't authenticate again if the TFS server hasn't changed between the TFS remotes (#1424 by @ckorn)
 * Add support for reading the remotes to delete in `git-tfs branch` from a file (#1425 by @ckorn)
 * Remove leftover `--no-metadata` argument from documentation, as feature is gone since v0.17.0 (#1447 by @siprbaum)
+* Add logging of conflicts for merge operation (#1448 by @idealist1508)
