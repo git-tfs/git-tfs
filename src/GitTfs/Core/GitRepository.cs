@@ -319,7 +319,18 @@ namespace GitTfs.Core
             var commit = _repository.Lookup<Commit>(commitish);
             if (commit == null)
                 throw new GitTfsException("error: commit '" + commitish + "' can't be found and merged into!");
-            return _repository.Merge(commit, _repository.Config.BuildSignature(new DateTimeOffset(DateTime.Now)));
+
+            var options = new MergeOptions
+            {
+                OnCheckoutNotify = (file, reason) =>
+                {
+                    if (reason == CheckoutNotifyFlags.Conflict)
+                        Trace.TraceError("conflict found: " + file);
+                    return true;
+                },
+                CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict
+            };
+            return _repository.Merge(commit, _repository.Config.BuildSignature(new DateTimeOffset(DateTime.Now)), options);
         }
 
         public String GetCurrentCommit()
