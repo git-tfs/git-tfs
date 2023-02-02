@@ -57,10 +57,25 @@ namespace GitTfs.VsCommon
         public string Username { get; set; }
 
         public string Password { get; set; }
-
+        /// <summary>
+        /// using PAT is more convenient than get credentials from user,
+        /// therefore, PAT is preferred if token is exported in the environmental variable.
+        /// To make commandline parsing easier, no need to provide additional switch.
+        /// Username    Password     PAT    Authentication
+        /// -           -            -      Default
+        /// -           -            +      PAT
+        /// +           ?            -      Default
+        /// +           +            +      PAT      
+        /// </summary>
         public bool HasCredentials
         {
-            get { return !string.IsNullOrEmpty(Username); }
+            get {
+                var token = System.Environment.GetEnvironmentVariable("GIT_TFS_PAT");
+                return !string.IsNullOrEmpty(Username)
+                    //support PAT, real PAT exported in Environmental variable "GIT_TFS_PAT"
+                    || (string.IsNullOrEmpty(Username) && Password == "pat")
+                    || !string.IsNullOrEmpty(token); 
+            }
         }
 
         public void EnsureAuthenticated()
@@ -106,6 +121,8 @@ namespace GitTfs.VsCommon
         {
             if (!HasCredentials)
                 return new NetworkCredential();
+
+
             var idx = Username.IndexOf('\\');
             if (idx >= 0)
             {
