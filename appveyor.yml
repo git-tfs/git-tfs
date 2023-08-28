@@ -13,7 +13,7 @@ build_script:
     {
       $target = "AppVeyorBuild"
       echo "target: $target"
-      .\build.ps1 -Target "$target" -Configuration $env:configuration -ScriptArgs '-isDryRun=true -gitHubUserAccount="$env:gitHubUserAccount" -gitHubToken="$env:gitHubToken" -chocolateyToken="$env:chocolateyToken"'
+      .\build.ps1 -Target "$target" -Configuration $env:configuration -ScriptArgs '-isDryRun=true'
     }
     else
     {
