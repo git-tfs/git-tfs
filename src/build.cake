@@ -145,10 +145,8 @@ Task("Clean").Description("Clean the working directory")
 Task("Restore-NuGet-Packages").Description("Restore nuget dependencies (with paket)")
 	.Does(() =>
 {
-	if(FileExists("paket.exe"))
-		StartProcess("paket.exe", "restore");
-	else
-		StartProcess(@".paket\paket.exe", "restore");
+	StartProcess(FileExists("paket.exe") ? "paket.exe" : @".paket\paket.exe", "restore");
+	StartProcess("dotnet", $"restore {PathToSln}");
 });
 
 Task("Version").Description("Get the version using GitVersion")
@@ -206,10 +204,6 @@ Task("Build").Description("Build git-tfs")
 	.IsDependentOn("UpdateAssemblyInfo")
 	.Does(() =>
 {
-	// MSBuild(PathToSln, settings => {
-	// 	settings.WithTarget("restore");
-	// });
-
 	// Use MSBuild
 	// /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
 	MSBuild(PathToSln, settings => {
