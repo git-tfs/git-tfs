@@ -267,14 +267,14 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 		Information("Upload coverage to AppVeyor...");
 		BuildSystem.AppVeyor.UploadArtifact(coverageFile);
 	}
-	if(BuildSystem.IsRunningOnVSTS)
+	if(BuildSystem.IsRunningOnAzurePipelinesHosted)
 	{
 		Information("Upload coverage to VSTS...");
-		BuildSystem.TFBuild.Commands.UploadArtifact("reports", coverageFile, "coverage.xml");
+		BuildSystem.AzurePipelines.Commands.UploadArtifact("reports", coverageFile, "coverage.xml");
 	}
 
 	var coverageResultFolder = System.IO.Path.Combine(buildAssetPath, "coverage");
-	ReportGenerator(coverageFile, coverageResultFolder, new ReportGeneratorSettings(){
+	ReportGenerator(new FilePath(coverageFile), coverageResultFolder, new ReportGeneratorSettings(){
 		ToolPath = @".\packages\build\ReportGenerator\tools\net47\ReportGenerator.exe"
 	});
 	if(!BuildSystem.IsLocalBuild)
@@ -286,10 +286,10 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 			Information("Upload coverage zipped to AppVeyor...");
 			BuildSystem.AppVeyor.UploadArtifact(coverageZip);
 		}
-		if(BuildSystem.IsRunningOnVSTS)
+		if(BuildSystem.IsRunningOnAzurePipelinesHosted)
 		{
 			Information("Upload coverage zipped to VSTS...");
-			BuildSystem.TFBuild.Commands.UploadArtifact("reports", coverageZip, "coverage.zip");
+			BuildSystem.AzurePipelines.Commands.UploadArtifact("reports", coverageZip, "coverage.zip");
 		}
 	}
 });
@@ -343,10 +343,10 @@ Task("Package").Description("Generate the release zip file")
 			Information("Upload artifacts to AppVeyor...");
 			BuildSystem.AppVeyor.UploadArtifact(_zipFilePath);
 		}
-		if(BuildSystem.IsRunningOnVSTS)
+		if(BuildSystem.IsRunningOnAzurePipelinesHosted)
 		{
 			Information("Upload artifacts to VSTS...");
-			BuildSystem.TFBuild.Commands.UploadArtifact("install", _zipFilePath, _zipFilename);
+			BuildSystem.AzurePipelines.Commands.UploadArtifact("install", _zipFilePath, _zipFilename);
 		}
 	}
 });
@@ -608,10 +608,10 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 		Information("Uploading chocolatey package as AppVeyor artifact...");
 		BuildSystem.AppVeyor.UploadArtifact(chocolateyPackagePath);
 	}
-	if(BuildSystem.IsRunningOnVSTS)
+	if(BuildSystem.IsRunningOnAzurePipelinesHosted)
 	{
 		Information("Uploading chocolatey package as VSTS artifact...");
-		BuildSystem.TFBuild.Commands.UploadArtifact("install", chocolateyPackagePath, chocolateyPackage);
+		BuildSystem.AzurePipelines.Commands.UploadArtifact("install", chocolateyPackagePath, chocolateyPackage);
 	}
 
 	if(!runInDryRun)
