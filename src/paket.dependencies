@@ -1,7 +1,7 @@
 # pin paket to a specific version so the build is really reproducable
 version 8.0.3
 
-framework: net472
+framework: net48
 source https://api.nuget.org/v3/index.json
 
 //If you plan to update this file, you must first absolutly read our documentation on the subject
@@ -32,14 +32,14 @@ nuget xunit.runner.console
 
 
 group VS2015
-	framework: net472
+	framework: net48
 	source https://api.nuget.org/v3/index.json
 	nuget Microsoft.TeamFoundationServer.Client ~> 14.0
 	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 14.0
 
 
 group VS2017
-	framework: net472
+	framework: net48
 	source https://api.nuget.org/v3/index.json
 	nuget Microsoft.TeamFoundationServer.Client ~> 15.0
 	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 15.0
@@ -48,7 +48,7 @@ group VS2017
 
 
 group VS2019
-	framework: net472
+	framework: net48
 	source https://api.nuget.org/v3/index.json
 	nuget Microsoft.TeamFoundationServer.Client ~> 16.0
 	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 16.0
@@ -56,7 +56,7 @@ group VS2019
 	nuget Microsoft.VisualStudio.Settings.15.0 ~> 16.0
 
 group VS2022
-	framework: net472
+	framework: net48
 	source https://api.nuget.org/v3/index.json
 	nuget Microsoft.TeamFoundationServer.Client ~> 16.0
 	nuget Microsoft.TeamFoundationServer.ExtendedClient ~> 16.0
