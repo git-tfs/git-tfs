@@ -206,9 +206,9 @@ Task("Build").Description("Build git-tfs")
 	.IsDependentOn("UpdateAssemblyInfo")
 	.Does(() =>
 {
-		MSBuild(PathToSln, settings => {
-		settings.WithTarget("restore");
-	});
+	// MSBuild(PathToSln, settings => {
+	// 	settings.WithTarget("restore");
+	// });
 
 	// Use MSBuild
 	// /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
@@ -216,7 +216,9 @@ Task("Build").Description("Build git-tfs")
 
 		settings.SetConfiguration(Configuration)
 			.SetVerbosity(Verbosity.Minimal)
-			.SetMaxCpuCount(4);
+			.SetMaxCpuCount(4)
+			.UseToolVersion(MSBuildToolVersion.VS2022)
+			;
 		settings.WithTarget("GitTfs_Vs2015")
 			.WithTarget("GitTfs_Vs2017")
 			.WithTarget("GitTfs_Vs2019")
