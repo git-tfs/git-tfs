@@ -1,4 +1,4 @@
-RESTRICTION: == net472
+RESTRICTION: == net48
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Castle.Core (4.4)
@@ -45,7 +45,7 @@ NUGET
     xunit.runner.console (2.4.1)
 
 GROUP VS2015
-RESTRICTION: == net472
+RESTRICTION: == net48
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Microsoft.AspNet.WebApi.Client (5.2.3)
@@ -86,7 +86,7 @@ NUGET
     WindowsAzure.ServiceBus (4.0)
 
 GROUP VS2017
-RESTRICTION: == net472
+RESTRICTION: == net48
 NUGET
   remote: https://api.nuget.org/v3/index.json
     MessagePack (2.2.60)
@@ -321,7 +321,7 @@ NUGET
       System.IdentityModel.Tokens.Jwt (>= 4.0.4.403061554)
 
 GROUP VS2019
-RESTRICTION: == net472
+RESTRICTION: == net48
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Ben.Demystifier (0.3)
@@ -561,7 +561,7 @@ NUGET
       System.Runtime.CompilerServices.Unsafe (>= 4.5.3)
 
 GROUP VS2022
-RESTRICTION: == net472
+RESTRICTION: == net48
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Ben.Demystifier (0.4.1)
