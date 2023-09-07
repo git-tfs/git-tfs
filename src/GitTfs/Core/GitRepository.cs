@@ -808,7 +808,9 @@ namespace GitTfs.Core
                 int changesetId;
                 if (TryParseChangesetId(c.Message, out changesetId))
                 {
-                    pairs.Add(changesetId, c.Sha);
+                    if (pairs.TryGetValue(changesetId, out var commitSha))
+                        Trace.TraceWarning("warning: Git commit {0} couldn't be assigned to TFS changeset '{1}' as git commit '{2}' was assigned already. Please correct the export file accordingly if needed", c.Sha, changesetId, commitSha);
+                    else pairs.Add(changesetId, c.Sha);
                 }
                 else
                 {
