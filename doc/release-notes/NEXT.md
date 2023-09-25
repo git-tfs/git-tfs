@@ -16,3 +16,4 @@
 * Add support for reading the remotes to delete in `git-tfs branch` from a file (#1425 by @ckorn)
 * Remove leftover `--no-metadata` argument from documentation, as feature is gone since v0.17.0 (#1447 by @siprbaum)
 * Add logging of conflicts for merge operation (#1448 by @idealist1508)
+* Fix rare issue when a TFS changeset shall be assigned to multiple commits (#1469 @cdrfun)
