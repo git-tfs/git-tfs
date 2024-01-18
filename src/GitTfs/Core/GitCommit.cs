@@ -6,7 +6,7 @@ using LibGit2Sharp;
 
 namespace GitTfs.Core
 {
-    public class GitCommit
+    public class GitCommit : IGitCommit
     {
         private readonly Commit _commit;
 

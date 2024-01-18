@@ -36,7 +36,7 @@ namespace GitTfs.Core
                 _repository.Dispose();
         }
 
-        public GitCommit Commit(LogEntry logEntry)
+        public IGitCommit Commit(LogEntry logEntry)
         {
             var parents = logEntry.CommitParents.Select(sha => _repository.Lookup<Commit>(sha));
             var commit = _repository.ObjectDatabase.CreateCommit(

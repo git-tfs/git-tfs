@@ -404,10 +404,12 @@ namespace GitTfs.Core
                         {
                             fetchResult.IsProcessingRenameChangeset = true;
                             fetchResult.LastParentCommitBeforeRename = MaxCommitHash;
-                            return fetchResult;
                         }
-                        renameResult.IsProcessingRenameChangeset = false;
-                        renameResult.LastParentCommitBeforeRename = null;
+                        else
+                        {
+                            renameResult.IsProcessingRenameChangeset = false;
+                            renameResult.LastParentCommitBeforeRename = null;
+                        }
                     }
                     if (parentCommitSha != null)
                         log.CommitParents.Add(parentCommitSha);

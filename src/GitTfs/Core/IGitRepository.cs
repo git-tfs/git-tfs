@@ -21,7 +21,7 @@ namespace GitTfs.Core
         bool HasRemote(string remoteId);
         bool IsInSameTeamProjectAsDefaultRepository(string tfsRepositoryPath);
         bool HasRef(string gitRef);
-        GitCommit Commit(LogEntry logEntry);
+        IGitCommit Commit(LogEntry logEntry);
         void UpdateRef(string gitRefName, string commitSha, string message = null);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote);
         void MoveTfsRefForwardIfNeeded(IGitTfsRemote remote, string @ref);
