@@ -40,7 +40,7 @@ For example, move your repository folder from :
 
 Another better solution if you faced this problem is to use a custom workspace directory!
 
-You could set the workspace directory when cloning the tfs repository using the `--parameter` option :
+You could set the workspace directory when cloning the tfs repository using the `--workspace` option :
 
     git tfs clone http://server/tfs $/Project/trunk project --workspace="c:\ws"
 
@@ -49,6 +49,6 @@ To set a custom workspace directory, you could also run the command (in a alread
 
 Note:
 - if you set this setting after having faced an error perhaps you should run a cleanup before fetching again ( `git tfs cleanup` )
-- the `--parameter` option is also available with the `init`command
+- the `--workspace` option is also available with the `init`command
 
 More informations : See [here](https://github.com/git-tfs/git-tfs/issues/314) or [there](https://github.com/git-tfs/git-tfs/issues/430) or [there](https://github.com/git-tfs/git-tfs/pull/266)

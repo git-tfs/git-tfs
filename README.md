@@ -56,10 +56,10 @@ You need .NET 4.6.2 and the 2012 or 2013 version of Team Explorer installed (or 
     git tfs list-remote-branches http://tfs:8080/tfs/DefaultCollection
 
     # clone the whole repository (wait for a while...) :
-    git tfs clone http://tfs:8080/tfs/DefaultCollection $/some_project
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/some_project <dist_folder_where_to_clone>
 
     # or, if you're impatient (and want to work from the last changeset) :
-    git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/some_project
+    git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/some_project <dist_folder_where_to_clone>
 
     # or, if you're impatient (and want a specific changeset) :
     git tfs quick-clone http://tfs:8080/tfs/DefaultCollection $/some_project -c=145

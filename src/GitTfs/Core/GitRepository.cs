@@ -319,7 +319,18 @@ namespace GitTfs.Core
             var commit = _repository.Lookup<Commit>(commitish);
             if (commit == null)
                 throw new GitTfsException("error: commit '" + commitish + "' can't be found and merged into!");
-            return _repository.Merge(commit, _repository.Config.BuildSignature(new DateTimeOffset(DateTime.Now)));
+
+            var options = new MergeOptions
+            {
+                OnCheckoutNotify = (file, reason) =>
+                {
+                    if (reason == CheckoutNotifyFlags.Conflict)
+                        Trace.TraceError("conflict found: " + file);
+                    return true;
+                },
+                CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict
+            };
+            return _repository.Merge(commit, _repository.Config.BuildSignature(new DateTimeOffset(DateTime.Now)), options);
         }
 
         public String GetCurrentCommit()
@@ -797,7 +808,10 @@ namespace GitTfs.Core
                 int changesetId;
                 if (TryParseChangesetId(c.Message, out changesetId))
                 {
-                    pairs.Add(changesetId, c.Sha);
+                    if (pairs.TryGetValue(changesetId, out var commitSha))
+                        Trace.TraceWarning("warning: Git commit {0} couldn't be assigned to TFS changeset '{1}' as git commit '{2}' was assigned already. Please correct the export file accordingly if needed", c.Sha, changesetId, commitSha);
+                    else
+                        pairs.Add(changesetId, c.Sha);
                 }
                 else
                 {
