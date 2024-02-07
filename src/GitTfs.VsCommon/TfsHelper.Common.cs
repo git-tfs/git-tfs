@@ -521,6 +521,7 @@ namespace GitTfs.VsCommon
                     new ItemIdentifier(tfsPathBranchToCreate),
                     new ItemIdentifier[] { new ItemIdentifier(tfsPathParentBranch), },
                     null)
+                .Where(x => x.SourceChangeset?.ChangesetId != null)
                 .OrderByDescending(x => x.SourceChangeset.ChangesetId);
             MergeInfo lastMerge = null;
             foreach (var extendedMerge in merges)
