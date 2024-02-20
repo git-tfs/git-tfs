@@ -35,7 +35,7 @@ namespace GitTfs.VsCommon
         private const string myTeamExplorerFolder =
             @"Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer";
 
-        private const string gitTfsPatEnvironmentVariableName = "GITTFS_PAT";
+        private const string gitTfsPatEnvironmentVariableName = "GIT_TFS_PAT";
 
         private readonly List<string> myAssemblySearchPaths;
 
@@ -197,7 +197,7 @@ namespace GitTfs.VsCommon
 
             if (!String.IsNullOrWhiteSpace(pat))
             {
-                Console.WriteLine("A GITTFS_PAT personal access token was detected. Establishing TFS credentials using PAT...");
+                Console.WriteLine($"A {gitTfsPatEnvironmentVariableName} environment variable was detected. Establishing TFS credentials using PAT...");
 
                 vssCred = new VssBasicCredential(string.Empty, pat);
 
