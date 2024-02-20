@@ -106,9 +106,9 @@ Have a look to more detailed git-tfs use cases:
 ## Authentication
 By default, git-tfs will attempt to use current user Windows credentials, or cached user credentials in the case of connecting to Azure DevOps or remote TFS server. Connecting to an Azure DevOps organization may prompt you to login to your organization, which may also include additional multi-factor/2FA authentication steps.
 
-In some scenarios, such as bulk operations or automated scripting scenarios (like in a pipeline task), you may wish to bypass this user interactive dialog. To do so, you may leverage a Personal Access Token (PAT) from Azure DevOps stored in your local machines environment variables, named as `GITTFS_PAT`. You can easily set this environment variable via command-line:
+In some scenarios, such as bulk operations or automated scripting scenarios (like in a pipeline task), you may wish to bypass this user interactive dialog. To do so, you may leverage a Personal Access Token (PAT) from Azure DevOps stored in your local machines environment variables, named as `GIT_TFS_PAT`. You can easily set this environment variable via command-line:
 ```
-setx GITTFS_PAT insert_pat_here
+setx GIT_TFS_PAT insert_pat_here
 ```
 After setting this environment variable, all interactions to a TFS server/Azure DevOps will use this PAT for authentication. No user credentials will be used, nor offered. In order to return to normal user interactive logins, delete this environment variable.
 
