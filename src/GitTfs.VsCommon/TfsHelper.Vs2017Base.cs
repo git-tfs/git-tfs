@@ -35,6 +35,8 @@ namespace GitTfs.VsCommon
         private const string myTeamExplorerFolder =
             @"Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer";
 
+        private const string gitTfsPatEnvironmentVariableName = "GITTFS_PAT";
+
         private readonly List<string> myAssemblySearchPaths;
 
         /// <summary>
@@ -187,9 +189,31 @@ namespace GitTfs.VsCommon
 
         protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
         {
-            var vssCred = HasCredentials
-                ? new VssClientCredentials(new WindowsCredential(GetCredential()))
-                : VssClientCredentials.LoadCachedCredentials(uri, false, CredentialPromptType.PromptIfNeeded);
+            VssCredentials vssCred = null;
+
+            string pat = Environment.GetEnvironmentVariable(gitTfsPatEnvironmentVariableName, EnvironmentVariableTarget.User)
+                ?? Environment.GetEnvironmentVariable(gitTfsPatEnvironmentVariableName, EnvironmentVariableTarget.Machine)
+                ?? Environment.GetEnvironmentVariable(gitTfsPatEnvironmentVariableName, EnvironmentVariableTarget.Process);
+
+            if (!String.IsNullOrWhiteSpace(pat))
+            {
+                Console.WriteLine("A GITTFS_PAT personal access token was detected. Establishing TFS credentials using PAT...");
+
+                vssCred = new VssBasicCredential(string.Empty, pat);
+
+                Console.WriteLine("PAT-based VSS Credentials created.");
+            }
+
+            if (vssCred == null)
+            {
+                Console.WriteLine("Establishing TFS credentials using user identity...");
+
+                vssCred = HasCredentials
+                    ? new VssClientCredentials(new WindowsCredential(GetCredential()))
+                    : VssClientCredentials.LoadCachedCredentials(uri, false, CredentialPromptType.PromptIfNeeded);
+
+                Console.WriteLine("Identity-based VSS credentials created.");
+            }
 
             return new TfsTeamProjectCollection(uri, vssCred);
 #pragma warning restore 618
