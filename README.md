@@ -154,6 +154,7 @@ This is the complete list of commands in the master branch on github.
 * diagnostics (for git-tfs developers only) - since 0.9
 
 * [config file](doc/config.md)
+* For authentification with user credentials or using a PAT, [clone](doc/commands/clone.md#Authentication) command.
 
 ## Building
 
