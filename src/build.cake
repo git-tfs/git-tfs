@@ -52,13 +52,13 @@ Task("Help").Description("This help...")
 	Information(
 @"Trigger the release process to AppVeyor:
 ----------------------------------------
-1. Setup the personal data in `PersonalTokens.config` file
-2. run `.\build.ps1 -Target ""TriggerRelease""`
+1. Setup the personal data in `PersonalTokens.config` file in the repo root folder.
+2. From `src` folder, run `.\build.ps1 -Target ""TriggerRelease""`
 
 Release process from local machine:
 -----------------------------------
-1. Setup the personal data in `PersonalTokens.config` file
-2. run `.\build.ps1 -Target ""Release"" -Configuration ""Release""`
+1. Setup the personal data in `PersonalTokens.config` file in the repo root folder.
+2. From `src` folder, run `.\build.ps1 -Target ""Release"" -Configuration ""Release""`
 
 Example with parameters:
 ------------------------
