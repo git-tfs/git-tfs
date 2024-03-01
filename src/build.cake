@@ -349,10 +349,11 @@ Task("Package").Description("Generate the release zip file")
 	}
 });
 
-void DisplayAuthTokenErrorMessage()
+void DisplayAuthTokenErrorMessage(string error)
 {
 	var errorMessage = @"Please create a file 'PersonalTokens.config' containing your authentication tokens
-See the file 'PersonalTokens.config.example' for the format and content.";
+See the file 'PersonalTokens.config.example' for the format and content.
+Error: " + error;
 
 	throw new Exception(errorMessage);
 }
@@ -361,23 +362,26 @@ string ReadToken(string tokenKey, string tokenRegexFormat = null)
 {
 	var authTargetsFile = @"..\PersonalTokens.config";
 
-	Information("Reading token..." + tokenKey);
+	Information($"Reading token '{tokenKey}'...");
 
 	if(!FileExists(authTargetsFile))
-		DisplayAuthTokenErrorMessage();
+		DisplayAuthTokenErrorMessage("File not found");
 
 	var personalToken = System.IO.File.ReadAllLines(authTargetsFile).FirstOrDefault(l => l.StartsWith(tokenKey + "="));
 	if(personalToken == null)
-		DisplayAuthTokenErrorMessage();
+		DisplayAuthTokenErrorMessage("Key not found in file");
 
 	personalToken = personalToken.Trim();
-	personalToken = personalToken.Substring(tokenKey.Length+1,personalToken.Length-tokenKey.Length-1);
+	personalToken = personalToken.Substring(tokenKey.Length+1, personalToken.Length-tokenKey.Length-1);
 	if(tokenRegexFormat == null)
+	{
+		Information($"Value found!");
 		return personalToken;
+	}
 
 	var regexToken = new System.Text.RegularExpressions.Regex(tokenRegexFormat);
 	if(!regexToken.IsMatch(personalToken))
-		DisplayAuthTokenErrorMessage();
+		DisplayAuthTokenErrorMessage($"Format of value found not valid: {tokenRegexFormat}" + (BuildSystem.IsLocalBuild ? $" / {personalToken}" : ""));
 	return personalToken;
 }
 
@@ -435,7 +439,7 @@ string GetGithubAuthToken()
 		return token;
 	}
 
-	return ReadToken("GitHub", "^[0-9a-f]{40}$");
+	return ReadToken("GitHub", @"^ghp_[\d\w]{36}$");
 }
 
 string ReadReleaseNotes()
