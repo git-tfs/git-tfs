@@ -136,7 +136,7 @@ You can use the parameter `--no-fetch`, to initialize the branch by creating its
 
 ### Authentication
 
-For the use of parameters `--username` and `--password`, see the [clone](clone.md) command.
+For the use of parameters `--username` and `--password` or authenticate using a PAT, see the [clone](clone.md) command.
 
 ### Map TFS users to git users
 

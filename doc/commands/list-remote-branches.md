@@ -53,7 +53,7 @@ However, it is recommended to clone the root branch and then use the [`branch`](
 
 ### Authentication
 
-If the TFS server needs an authentication, you could use the _--username_ and _--password_ parameters. If you don't specify this information, you will be prompted to enter them. This information is not stored by git-tfs.
+If the TFS server needs an authentication, you could use the _--username_ and _--password_ parameters or authenticate with a PAT (See the [clone](clone.md) command for details). If you don't specify this information, you will be prompted to enter them. This information is not stored by git-tfs.
 
     git tfs list-remote-branches http://tfs:8080/tfs/DefaultCollection -u=DISSRVTFS03\peter.pan -p=wendy
 
