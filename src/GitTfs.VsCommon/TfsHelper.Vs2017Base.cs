@@ -195,24 +195,24 @@ namespace GitTfs.VsCommon
                 ?? Environment.GetEnvironmentVariable(gitTfsPatEnvironmentVariableName, EnvironmentVariableTarget.Machine)
                 ?? Environment.GetEnvironmentVariable(gitTfsPatEnvironmentVariableName, EnvironmentVariableTarget.Process);
 
-            if (!String.IsNullOrWhiteSpace(pat))
+            if (!string.IsNullOrWhiteSpace(pat))
             {
-                Console.WriteLine($"A {gitTfsPatEnvironmentVariableName} environment variable was detected. Establishing TFS credentials using PAT...");
+                Trace.WriteLine($"A {gitTfsPatEnvironmentVariableName} environment variable was detected. Establishing TFS credentials using PAT...");
 
                 vssCred = new VssBasicCredential(string.Empty, pat);
 
-                Console.WriteLine("PAT-based VSS Credentials created.");
+                Trace.WriteLine("PAT-based VSS Credentials created.");
             }
 
             if (vssCred == null)
             {
-                Console.WriteLine("Establishing TFS credentials using user identity...");
+                Trace.WriteLine("Establishing TFS credentials using user identity...");
 
                 vssCred = HasCredentials
                     ? new VssClientCredentials(new WindowsCredential(GetCredential()))
                     : VssClientCredentials.LoadCachedCredentials(uri, false, CredentialPromptType.PromptIfNeeded);
 
-                Console.WriteLine("Identity-based VSS credentials created.");
+                Trace.WriteLine("Identity-based VSS credentials created.");
             }
 
             return new TfsTeamProjectCollection(uri, vssCred);
