@@ -613,7 +613,6 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 		ChocolateyPush(chocolateyPackagePath, new ChocolateyPushSettings {
 			Source				= "https://chocolatey.org/",
 			ApiKey				= GetChocolateyToken(),
-			Timeout				= TimeSpan.FromSeconds(300),
 			Debug				= false,
 			Verbose				= false,
 			Force				= false,
