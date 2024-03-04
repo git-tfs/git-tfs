@@ -59,7 +59,7 @@ More informations : See [here](https://github.com/git-tfs/git-tfs/issues/314) or
 
 You applied the solutions above [Enable Win32 long paths](#enabling-windows-10-win32-long-path-support) and [Short Workspace](#move-clone-directory-closer-to-the-root-drive), yet you still get a TF400889/TF205022, what else can you do ?  Leverage the multi working folder of TFVC workspaces.
 
-Add the argument `--MultipleWorkingFoldersConfigFilePath={path to json file}`
+Add the argument `--MultipleWorkingFoldersConfigFilePath={C:\path\to\config_file.json}`
 
 The JSON file should follow this schema.
 
