@@ -8,6 +8,7 @@ NUGET
     Moq (4.14.7)
       Castle.Core (>= 4.4)
       System.Threading.Tasks.Extensions (>= 4.5.1)
+    Newtonsoft.Json (10.0.2)
     NLog (4.7.5)
     structuremap (2.6.3)
     structuremap.automocking (2.6.3)

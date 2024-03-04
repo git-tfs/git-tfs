@@ -598,8 +598,25 @@ namespace GitTfs.VsCommon
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
-            Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
+            Trace.WriteLine("Setting up a TFS workspace at:");
+
+            IList<WorkingFolder> workingFolders = new List<WorkingFolder>();
+
+            Trace.WriteLine($"  - TFS path [{remote.TfsRepositoryPath}] maps to '{localDirectory}'");
+
+            workingFolders.Add(new WorkingFolder(remote.TfsRepositoryPath, localDirectory));
+
+            if (remote.FolderMappings != null)
+            {
+                foreach (var t in remote.FolderMappings)
+                {
+                    Trace.WriteLine($"  - TFS path '{t.Item1}' maps to '{t.Item2}'");
+                    workingFolders.Add(new WorkingFolder(t.Item1, t.Item2));
+                }
+            }
+
+            var workspace = Retry.Do(() => GetWorkspace(workingFolders.ToArray()));
+
             try
             {
                 var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
@@ -619,6 +636,7 @@ namespace GitTfs.VsCommon
         private Workspace GetWorkspace(params WorkingFolder[] folders)
         {
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
+            Trace.TraceInformation("Workspace name '{0}'", workspace.Name);
             try
             {
                 SetWorkspaceMappingFolders(workspace, folders);
@@ -741,9 +759,11 @@ namespace GitTfs.VsCommon
         private void TryToDeleteWorkspace(Workspace workspace)
         {
             //  Try and ensure the client and TFS Server are synchronized.
+            Trace.TraceInformation("Ensuring the client and TFS Server are synchronized...");
             workspace.Refresh();
 
             //  When deleting a workspace we may need to allow the TFS server some time to complete existing processing or re-try the workspace delete.
+            Trace.TraceInformation("Try to delete workspace...");
             var deleteWsCompleted = Retry.Do(() => workspace.Delete(), TimeSpan.FromSeconds(5), 25);
 
             // Include trace information about the success of the TFS API that deletes the workspace.

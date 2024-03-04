@@ -177,7 +177,14 @@ namespace GitTfs.Core
 
         public string GetLocalPath(string path)
         {
-            return Path.Combine(_localDirectory, path);
+            var localPath = Path.Combine(_localDirectory, path);
+
+            if (System.IO.File.Exists(localPath))
+            {
+                return localPath;
+            }
+
+            return this._workspace.GetLocalItemForServerItem($"{Remote.TfsRepositoryPath}/{path}");
         }
 
         public void Add(string path)
