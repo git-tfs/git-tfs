@@ -21,7 +21,7 @@ ${ReleaseNotesContents}
     <licenseUrl>https://github.com/git-tfs/git-tfs/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
-      <dependency id="git" version="2.5.0" />
+      <dependency id="git" version="2.44.0" />
     </dependencies>
   </metadata>
 </package>

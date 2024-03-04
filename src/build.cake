@@ -168,6 +168,7 @@ Task("Version").Description("Get the version using GitVersion")
 	_zipFilename = string.Format(ZipFileTemplate, _semanticVersionShort + postFix);
 	_zipFilePath = System.IO.Path.Combine(buildAssetPath, _zipFilename);
 	_downloadUrl = string.Format(DownloadUrlTemplate, _semanticVersionShort) + _zipFilename;
+
 	_releaseVersion = "v" + _semanticVersionShort;
 
 	_appVeyorBuildVersion = _semanticVersionShort
@@ -574,10 +575,14 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 	CopyFiles(@".\build\ChocolateyTemplates\*.*", ChocolateyBuildDir);
 	var nuspecPathInBuildDir = System.IO.Path.Combine(ChocolateyBuildDir, "gittfs.nuspec");
 
+	var sha256 = CalculateFileHash(_zipFilePath);
+	Information($"Hash ({sha256.Algorithm:G}):" + sha256.ToHex());
+
 	//Template 'chocolateyInstall.ps1'
 	var installScriptPathInBuildDir = System.IO.Path.Combine(ChocolateyBuildDir, "chocolateyInstall.ps1");
 	string text = TransformTextFile(installScriptPathInBuildDir, "${", "}")
 		.WithToken("DownloadUrl", _downloadUrl)
+		.WithToken("Checksum", sha256.ToHex())
 		.ToString();
 	System.IO.File.WriteAllText(installScriptPathInBuildDir, text);
 
@@ -625,7 +630,7 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 	}
 	else
 	{
-		Information("[DryRun] Should upload chocolatey package...");
+		Information($"[DryRun] Would have uploaded chocolatey package '{chocolateyPackagePath}'...");
 	}
 });
 
