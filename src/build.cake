@@ -220,6 +220,7 @@ Task("Build").Description("Build git-tfs")
 		settings.WithTarget("GitTfs_Vs2015")
 			.WithTarget("GitTfs_Vs2017")
 			.WithTarget("GitTfs_Vs2019")
+			.WithTarget("GitTfs_Vs2022")
 			.WithTarget(TestProjectName);
 	});
 });
