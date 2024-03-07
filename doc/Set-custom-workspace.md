@@ -42,7 +42,9 @@ Another better solution if you faced this problem is to use a custom workspace d
 
 You could set the workspace directory when cloning the tfs repository using the `--workspace` option :
 
-    git tfs clone http://server/tfs $/Project/trunk project --workspace="c:\ws"
+```DOS
+git tfs clone http://server/tfs $/Project/trunk project --workspace="c:\ws"
+```
 
 To set a custom workspace directory, you could also run the command (in a already existing repository):
 `git config git-tfs.workspace-dir c:\ws`
@@ -52,3 +54,78 @@ Note:
 - the `--workspace` option is also available with the `init`command
 
 More informations : See [here](https://github.com/git-tfs/git-tfs/issues/314) or [there](https://github.com/git-tfs/git-tfs/issues/430) or [there](https://github.com/git-tfs/git-tfs/pull/266)
+
+### Leverage TFVC workspace's Working Folders
+
+You applied the solutions above [Enable Win32 long paths](#enabling-windows-10-win32-long-path-support) and [Short Workspace](#move-clone-directory-closer-to-the-root-drive), yet you still get a TF400889/TF205022, what else can you do ?  Leverage the multi working folder of TFVC workspaces.
+
+Add the argument `--MultipleWorkingFoldersConfigFilePath={C:\path\to\config_file.json}`
+
+The JSON file should follow this schema.
+
+```JSON
+[
+  { 
+    "SourceControlFolder" : "$/{enter the TFVC path that is failing}",
+    "LocalFolder" : "{enter a local path (shorter the better) where files under the TFVC path above will end up}"
+  }
+]
+```
+
+This approach leverages the multiple Working Folders of a TFVC Workspace.  For more info on this, check Microsoft's article [Create and work with workspaces](https://learn.microsoft.com/en-us/azure/devops/repos/tfvc/create-work-workspaces?view=azure-devops).
+
+#### Example scenario
+
+Scenario:
+
+- TFS Url: `http://tfs:8080/tfs/DefaultCollection`
+- TFVC Path: `$/MyProject`
+- Workspace: `W:\`
+- Item too long: `$/MyProject/thisFolderIsIntentionalyLong/ReproduceThePathTooLongErrorWithTFVC/main/src/Foo/SomeClassThatIsSuperLongOrWhatever.cs`
+
+The git command would be:
+
+```DOS
+git tfs clone --workspace=W:\ http://tfs:8080/tfs/DefaultCollection $/MyProject
+```
+
+You get the TFS Path Too long error on the `$/MyProject/thisFolderIsIntentionalyLong/ReproduceThePathTooLongErrorWithTFVC/main/src/Foo/SomeClassThatIsSuperLongOrWhatever.cs`
+
+Apply the multiple Working Folders solution:
+
+- Create a file `C:\mapping.json` (the filename or placement does not matter)
+- Enter a TFVC Path and a short working folder.
+
+Note that the TFVC path entered is a sub-path of the failing item.
+
+```JSON
+[
+  { 
+    "SourceControlFolder" : "$/MyProject/thisFolderIsIntentionalyLong/ReproduceThePathTooLongErrorWithTFVC/main",
+    "LocalFolder" : "x:\\1"
+  }
+]
+```
+
+Rerun the git command with the argument `--MultipleWorkingFoldersConfigFilePath="c:\mapping.json"`
+
+```DOS
+git tfs clone --workspace=W:\ --MultipleWorkingFoldersConfigFilePath="c:\mapping.json" http://tfs:8080/tfs/DefaultCollection $/MyProject
+```
+
+The TFVC Workspace will contain the following Working Folders:
+
+| Source Control Folder | Local Folder |
+| --------------------- | ------------ |
+| $/MyProject           | W:\          |
+| $/MyProject/thisFolderIsIntentionalyLong/ReproduceThePathTooLongErrorWithTFVC/main | X:\1 |
+
+Without this approach, the file `src/Foo/SomeClassThatIsSuperLongOrWhatever.cs` would end up under:
+
+`W:\MyProject\thisFolderIsIntentionalyLong\ReproduceThePathTooLongErrorWithTFVC\main\src\Foo\SomeClassThatIsSuperLongOrWhatever.cs`
+
+Triggering the Path too long exception.
+
+With the multiple Working Folders, that file will be under:
+
+`X:\1\src\Foo\SomeClassThatIsSuperLongOrWhatever.cs`

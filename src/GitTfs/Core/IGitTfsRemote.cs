@@ -38,6 +38,11 @@ namespace GitTfs.Core
         /// Valid if the remote has subtrees, which occurs when <see cref="TfsRepositoryPath"/> is null.
         /// </summary>
         string[] TfsSubtreePaths { get; }
+
+        /// <summary>
+        /// Part of the solution for Path Too Long
+        /// </summary>
+        IReadOnlyList<Tuple<string, string>> FolderMappings { get; }
         string IgnoreRegexExpression { get; }
         string IgnoreExceptRegexExpression { get; }
         bool Autotag { get; }

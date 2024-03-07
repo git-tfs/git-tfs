@@ -303,6 +303,8 @@ namespace GitTfs.Core
             get { throw DerivedRemoteException; }
         }
 
+        public IReadOnlyList<Tuple<string, string>> FolderMappings => throw new NotImplementedException();
+
         public void Merge(string sourceTfsPath, string targetTfsPath)
         {
             throw DerivedRemoteException;
