@@ -11,6 +11,7 @@ namespace GitTfs.Core
         int LastFetchedChangesetId { get; set; }
         int NewChangesetCount { get; set; }
         string ParentBranchTfsPath { get; set; }
+        bool Aborted { get; set; }
     }
 
     public interface IRenameResult
