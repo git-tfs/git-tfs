@@ -52,20 +52,6 @@ $PAKET_EXE = Join-Path $PSScriptRoot "paket.exe"
 $TOOLS_DIR = Join-Path $PSScriptRoot "packages/build"
 $CAKE_EXE = Join-Path $TOOLS_DIR "Cake/Cake.exe"
 
-# Should we use mono?
-$UseMono = "";
-if($Mono.IsPresent) {
-    Write-Verbose -Message "Using the Mono based scripting engine."
-    $UseMono = "-mono"
-}
-
-# Should we use the new Roslyn?
-$UseExperimental = "";
-if($Experimental.IsPresent -and !($Mono.IsPresent)) {
-    Write-Verbose -Message "Using experimental version of Roslyn."
-    $UseExperimental = "-experimental"
-}
-
 # Is this a dry run?
 $UseDryRun = "";
 if($WhatIf.IsPresent) {
@@ -92,5 +78,5 @@ if (!(Test-Path $CAKE_EXE)) {
 
 # Start Cake
 Write-Host "Running build script..."
-Invoke-Expression "& `"$CAKE_EXE`" `"$Script`" --paths_tools=`"$TOOLS_DIR`" -target=`"$Target`" -configuration=`"$Configuration`" -verbosity=`"$Verbosity`" $UseMono $UseDryRun $UseExperimental $ScriptArgs"
+Invoke-Expression "& `"$CAKE_EXE`" `"$Script`" --paths_tools=`"$TOOLS_DIR`" --target=`"$Target`" --configuration=`"$Configuration`" --verbosity=`"$Verbosity`" $UseDryRun $UseExperimental $ScriptArgs"
 exit $LASTEXITCODE

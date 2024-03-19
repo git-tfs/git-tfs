@@ -1,5 +1,5 @@
 ﻿#appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
-image: Visual Studio 2019
+image: Visual Studio 2022
 clone_folder: c:\gittfs
 # build cache to preserve files/folders between builds
 cache:
@@ -13,13 +13,13 @@ build_script:
     {
       $target = "AppVeyorBuild"
       echo "target: $target"
-      .\build.ps1 -Target "$target" -Configuration $env:configuration -ScriptArgs '-isDryRun=true -gitHubUserAccount"$env:gitHubUserAccount" -gitHubToken="$env:gitHubToken" -chocolateyToken="$env:chocolateyToken"'
+      .\build.ps1 -Target "$target" -Configuration $env:configuration -ScriptArgs '--isDryRun=true'
     }
     else
     {
       $target = $env:target
       echo "target: $target"
-      .\build.ps1 -Target "$target" -Configuration $env:configuration -ScriptArgs '-isDryRun=false -gitHubUserAccount"$env:gitHubUserAccount" -gitHubToken="$env:gitHubToken" -chocolateyToken="$env:chocolateyToken"'
+      .\build.ps1 -Target "$target" -Configuration $env:configuration -ScriptArgs '--isDryRun=false --gitHubUserAccount="$env:gitHubUserAccount" --gitHubToken="$env:gitHubToken" --chocolateyToken="$env:chocolateyToken"'
     }
 
 test: off
