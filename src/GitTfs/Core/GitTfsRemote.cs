@@ -756,9 +756,9 @@ namespace GitTfs.Core
 
         private string TagPrefix => "refs/tags/tfs/" + Id + "/";
 
-public string RemoteRef => "refs/remotes/tfs/" + Id;
+        public string RemoteRef => "refs/remotes/tfs/" + Id;
 
-private void DoGcIfNeeded()
+        private void DoGcIfNeeded()
         {
             Trace.WriteLine("GC Countdown: " + _globals.GcCountdown);
             if (--_globals.GcCountdown < 0)
