@@ -701,7 +701,7 @@ namespace GitTfs.Core
         {
             int lowerBoundChangesetId;
 
-            // If we're starting at the Root side of a branch commit (e.g. C1), but there ar
+            // If we're starting at the Root side of a branch commit (e.g. C1), but there are
             // invalid commits between C1 and the actual branch side of the commit operation
             // (e.g. a Folder with the branch name was created [C2] and then deleted [C3],
             // then the root-side was branched [C4; C1 --branch--> C4]), this will detecte
@@ -756,9 +756,9 @@ namespace GitTfs.Core
 
         private string TagPrefix => "refs/tags/tfs/" + Id + "/";
 
-public string RemoteRef => "refs/remotes/tfs/" + Id;
+        public string RemoteRef => "refs/remotes/tfs/" + Id;
 
-private void DoGcIfNeeded()
+        private void DoGcIfNeeded()
         {
             Trace.WriteLine("GC Countdown: " + _globals.GcCountdown);
             if (--_globals.GcCountdown < 0)
@@ -967,7 +967,7 @@ private void DoGcIfNeeded()
                 string.IsNullOrWhiteSpace(gitBranchNameExpected) ? tfsRepositoryPath : gitBranchNameExpected);
             if (string.IsNullOrWhiteSpace(gitBranchName))
                 throw new GitTfsException("error: The Git branch name '" + gitBranchName + "' is not valid...\n");
-            Trace.WriteLine("Git local branch will be :" + gitBranchName);
+            Trace.WriteLine("Git local branch will be : " + gitBranchName);
 
             string sha1RootCommit = null;
             if (rootChangesetId != -1)
