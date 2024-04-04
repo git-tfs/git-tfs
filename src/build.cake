@@ -145,10 +145,8 @@ Task("Clean").Description("Clean the working directory")
 Task("Restore-NuGet-Packages").Description("Restore nuget dependencies (with paket)")
 	.Does(() =>
 {
-	if(FileExists("paket.exe"))
-		StartProcess("paket.exe", "restore");
-	else
-		StartProcess(@".paket\paket.exe", "restore");
+	StartProcess(FileExists("paket.exe") ? "paket.exe" : @".paket\paket.exe", "restore");
+	StartProcess("dotnet", $"restore {PathToSln}");
 });
 
 Task("Version").Description("Get the version using GitVersion")
@@ -206,17 +204,15 @@ Task("Build").Description("Build git-tfs")
 	.IsDependentOn("UpdateAssemblyInfo")
 	.Does(() =>
 {
-		MSBuild(PathToSln, settings => {
-		settings.WithTarget("restore");
-	});
-
 	// Use MSBuild
 	// /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /nologo /p:BuildInParallel=true /m:4
 	MSBuild(PathToSln, settings => {
 
 		settings.SetConfiguration(Configuration)
 			.SetVerbosity(Verbosity.Minimal)
-			.SetMaxCpuCount(4);
+			.SetMaxCpuCount(4)
+			.UseToolVersion(MSBuildToolVersion.VS2022)
+			;
 		settings.WithTarget("GitTfs_Vs2015")
 			.WithTarget("GitTfs_Vs2017")
 			.WithTarget("GitTfs_Vs2019")
@@ -267,14 +263,14 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 		Information("Upload coverage to AppVeyor...");
 		BuildSystem.AppVeyor.UploadArtifact(coverageFile);
 	}
-	if(BuildSystem.IsRunningOnVSTS)
+	if(BuildSystem.IsRunningOnAzurePipelinesHosted)
 	{
 		Information("Upload coverage to VSTS...");
-		BuildSystem.TFBuild.Commands.UploadArtifact("reports", coverageFile, "coverage.xml");
+		BuildSystem.AzurePipelines.Commands.UploadArtifact("reports", coverageFile, "coverage.xml");
 	}
 
 	var coverageResultFolder = System.IO.Path.Combine(buildAssetPath, "coverage");
-	ReportGenerator(coverageFile, coverageResultFolder, new ReportGeneratorSettings(){
+	ReportGenerator(new FilePath(coverageFile), coverageResultFolder, new ReportGeneratorSettings(){
 		ToolPath = @".\packages\build\ReportGenerator\tools\net47\ReportGenerator.exe"
 	});
 	if(!BuildSystem.IsLocalBuild)
@@ -286,10 +282,10 @@ Task("Run-Unit-Tests").Description("Run the unit tests")
 			Information("Upload coverage zipped to AppVeyor...");
 			BuildSystem.AppVeyor.UploadArtifact(coverageZip);
 		}
-		if(BuildSystem.IsRunningOnVSTS)
+		if(BuildSystem.IsRunningOnAzurePipelinesHosted)
 		{
 			Information("Upload coverage zipped to VSTS...");
-			BuildSystem.TFBuild.Commands.UploadArtifact("reports", coverageZip, "coverage.zip");
+			BuildSystem.AzurePipelines.Commands.UploadArtifact("reports", coverageZip, "coverage.zip");
 		}
 	}
 });
@@ -343,10 +339,10 @@ Task("Package").Description("Generate the release zip file")
 			Information("Upload artifacts to AppVeyor...");
 			BuildSystem.AppVeyor.UploadArtifact(_zipFilePath);
 		}
-		if(BuildSystem.IsRunningOnVSTS)
+		if(BuildSystem.IsRunningOnAzurePipelinesHosted)
 		{
 			Information("Upload artifacts to VSTS...");
-			BuildSystem.TFBuild.Commands.UploadArtifact("install", _zipFilePath, _zipFilename);
+			BuildSystem.AzurePipelines.Commands.UploadArtifact("install", _zipFilePath, _zipFilename);
 		}
 	}
 });
@@ -608,10 +604,10 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 		Information("Uploading chocolatey package as AppVeyor artifact...");
 		BuildSystem.AppVeyor.UploadArtifact(chocolateyPackagePath);
 	}
-	if(BuildSystem.IsRunningOnVSTS)
+	if(BuildSystem.IsRunningOnAzurePipelinesHosted)
 	{
 		Information("Uploading chocolatey package as VSTS artifact...");
-		BuildSystem.TFBuild.Commands.UploadArtifact("install", chocolateyPackagePath, chocolateyPackage);
+		BuildSystem.AzurePipelines.Commands.UploadArtifact("install", chocolateyPackagePath, chocolateyPackage);
 	}
 
 	if(!runInDryRun)

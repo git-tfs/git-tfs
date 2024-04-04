@@ -1,5 +1,5 @@
 # pin paket to a specific version so the build is really reproducable
-version 6.2.1
+version 8.0.3
 
 framework: net472
 source https://api.nuget.org/v3/index.json
@@ -21,13 +21,13 @@ group Build
     redirects: off
     source https://api.nuget.org/v3/index.json
 
-nuget Cake
-nuget Cake.Git
+nuget Cake ~> 1.3.0
+nuget Cake.Git ~> 1.1.0
 nuget GitVersion.CommandLine
 nuget Octokit.CodeFormatter 1.0.0-preview preview
 nuget opencover
 nuget reportgenerator
-nuget Octokit
+nuget Octokit ~> 0.52
 nuget xunit.runner.console
 
 
