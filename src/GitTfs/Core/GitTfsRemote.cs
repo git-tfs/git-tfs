@@ -354,6 +354,33 @@ namespace GitTfs.Core
                     {
                         if (renameResult == null || !renameResult.IsProcessingRenameChangeset)
                         {
+                            // This might get hit in case a branch was deleted and reintroduced later.
+                            // Take the following example:
+                            //   C1: Added    $/Project/Branch
+                            //   C2: Deleted  $/Project/Branch
+                            //   C3: Added    $/Project/Branch
+                            //   C4: Added    $/Project/Branch/Some.File
+                            //   C5: Branched $/Project/AnotherBranch from $/Project/Branch
+                            // Fetching from C1 to newer will stop on C2 as there the history of the branch
+                            // seemingly ends. This is not entirely true as the branch gets reintroduced in C3.
+                            // This leads to not everything getting imported to Git or completely fails cloning
+                            // a repo with branches in e.g. a case where the second branch introduced in C5 depends
+                            // on C4. C4 is, however, not present in the Git repo as the fetching stopped on C2.
+                            // What to do? Projecting such a scenario to Git would likely require bigger changes
+                            // to git-tfs, if possible at all, so let's just warn the user and point them at the
+                            // relevant issue for now - https://github.com/git-tfs/git-tfs/issues/835.
+                            // The `fetchedChangesets` variable contains all the changesets - from C1 to C5.
+                            // We can check if the current changeset is the last one in the collection,
+                            // i.e., if there are some later changesets touching the current branch path.
+                            if (changeset.Summary.ChangesetId != fetchedChangesets.Last().Summary.ChangesetId)
+                            {
+                                var nextChangeset = fetchedChangesets.SkipWhile(c => c.Summary.ChangesetId != changeset.Summary.ChangesetId).Skip(1).First();
+
+                                Trace.TraceWarning("warning: Fetching a branch ended possibly without getting its whole history." +
+                                    $" The TFS branch is renamed/moved/deleted in C{changeset.Summary.ChangesetId} but has history in its original path later in C{nextChangeset.Summary.ChangesetId} and possibly other changesets." +
+                                    " After its original rename/move/deletion its original path likely got reused later. See https://github.com/git-tfs/git-tfs/issues/835#issuecomment-334802862");
+                            }
+
                             fetchResult.IsProcessingRenameChangeset = true;
                             fetchResult.LastParentCommitBeforeRename = MaxCommitHash;
                             return fetchResult;
