@@ -1,7 +1,8 @@
 ﻿using System;
+
 using GitTfs.Core.TfsInterop;
+
 using Xunit;
-using LibGit2Sharp;
 using Xunit.Abstractions;
 
 namespace GitTfs.Test.Integration

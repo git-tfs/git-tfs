@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using System;
-using System.Linq;
 using GitTfs.Core.TfsInterop;
 
 namespace GitTfs

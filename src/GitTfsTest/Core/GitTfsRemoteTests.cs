@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
-using GitTfs.Commands;
+
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
-using GitTfs.Util;
+
 using Moq;
+
 using StructureMap.AutoMocking;
+
 using Xunit;
 
 namespace GitTfs.Test.Core

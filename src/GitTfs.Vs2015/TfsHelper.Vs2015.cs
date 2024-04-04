@@ -10,7 +10,6 @@ using GitTfs.VsCommon;
 using Microsoft.TeamFoundation.Build.Client;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Server;
-using Microsoft.TeamFoundation.VersionControl.Client;
 
 using StructureMap;
 
