@@ -61,7 +61,7 @@ namespace GitTfs.Commands
         {
             try
             {
-                var repoDescription = File.ReadAllLines(@".git\description");
+                var repoDescription = File.ReadAllLines(Path.Combine(_globals.GitDir, "description"));
                 if (repoDescription.Length == 0 || !repoDescription[0].StartsWith("$/"))
                     return;
 

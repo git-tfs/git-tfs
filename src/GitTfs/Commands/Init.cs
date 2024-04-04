@@ -100,11 +100,11 @@ namespace GitTfs.Commands
             var runResult = Run(tfsUrl, tfsRepositoryPath);
             try
             {
-                File.WriteAllText(@".git\description", tfsRepositoryPath + "\n" + HideUserCredentials(_globals.CommandLineRun));
+                File.WriteAllText(Path.Combine(_globals.GitDir, "description"), tfsRepositoryPath + "\n" + HideUserCredentials(_globals.CommandLineRun));
             }
             catch (Exception)
             {
-                Trace.WriteLine("warning: Unable to update de repository description!");
+                Trace.WriteLine("warning: Unable to update the repository description!");
             }
             return runResult;
         }
