@@ -36,7 +36,7 @@ REDIRECTS: OFF
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Cake (1.3)
-    Cake.Git (1.1)
+    Cake.Git (1.0.1)
     GitVersion.CommandLine (5.5)
     Octokit (0.52)
     Octokit.CodeFormatter (1.0.0-preview)
