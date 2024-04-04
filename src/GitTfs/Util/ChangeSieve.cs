@@ -20,20 +20,11 @@ namespace GitTfs.Util
         public string GitPath { get; set; }
         public Mode Mode { get; set; }
 
-        public static ApplicableChange Update(string path, Mode mode = Mode.NonExecutableFile)
-        {
-            return new ApplicableChange { Type = ChangeType.Update, GitPath = path, Mode = mode };
-        }
+        public static ApplicableChange Update(string path, Mode mode = Mode.NonExecutableFile) => new ApplicableChange { Type = ChangeType.Update, GitPath = path, Mode = mode };
 
-        public static ApplicableChange Delete(string path)
-        {
-            return new ApplicableChange { Type = ChangeType.Delete, GitPath = path };
-        }
+        public static ApplicableChange Delete(string path) => new ApplicableChange { Type = ChangeType.Delete, GitPath = path };
 
-        public static ApplicableChange Ignore(string path)
-        {
-            return new ApplicableChange { Type = ChangeType.Ignore, GitPath = path };
-        }
+        public static ApplicableChange Ignore(string path) => new ApplicableChange { Type = ChangeType.Ignore, GitPath = path };
     }
 
     public class ChangeSieve
@@ -156,29 +147,17 @@ namespace GitTfs.Util
         {
             public GitObject Info { get; set; }
             public IChange Change { get; set; }
-            public string GitPath { get { return Info.Try(x => x.Path); } }
+            public string GitPath => Info.Try(x => x.Path);
         }
 
-        private IEnumerable<NamedChange> NamedChanges
-        {
-            get
-            {
-                return _namedChanges;
-            }
-        }
+        private IEnumerable<NamedChange> NamedChanges => _namedChanges;
 
-        private bool IncludeInFetch(NamedChange change)
-        {
-            return !IsIgnorable(change)
+        private bool IncludeInFetch(NamedChange change) => !IsIgnorable(change)
                 && !IsGitPathMissing(change)
                 && !IsGitPathInDotGit(change)
                 && !IsGitPathIgnored(change);
-        }
 
-        private bool IsIgnorable(NamedChange change)
-        {
-            return IgnorableChangeType(change.Change.ChangeType) && _resolver.Contains(change.GitPath);
-         }
+        private bool IsIgnorable(NamedChange change) => IgnorableChangeType(change.Change.ChangeType) && _resolver.Contains(change.GitPath);
 
         private bool IgnorableChangeType(TfsChangeType changeType)
         {
@@ -187,40 +166,19 @@ namespace GitTfs.Util
             return isBranchOrMerge && !isContentChange;
         }
 
-        private bool IsGitPathMissing(NamedChange change)
-        {
-            return string.IsNullOrEmpty(change.GitPath);
-        }
+        private bool IsGitPathMissing(NamedChange change) => string.IsNullOrEmpty(change.GitPath);
 
-        private bool IsGitPathInDotGit(NamedChange change)
-        {
-            return IsInDotGit(change.GitPath);
-        }
+        private bool IsGitPathInDotGit(NamedChange change) => IsInDotGit(change.GitPath);
 
-        private bool IsInDotGit(string path)
-        {
-            return _resolver.IsInDotGit(path);
-        }
+        private bool IsInDotGit(string path) => _resolver.IsInDotGit(path);
 
-        private bool IsGitPathIgnored(NamedChange change)
-        {
-            return IsIgnored(change.GitPath);
-        }
+        private bool IsGitPathIgnored(NamedChange change) => IsIgnored(change.GitPath);
 
-        private bool IsIgnored(string path)
-        {
-            return _resolver.IsIgnored(path);
-        }
+        private bool IsIgnored(string path) => _resolver.IsIgnored(path);
 
-        private bool IsItemDeleted(NamedChange change)
-        {
-            return IsDeleted(change.Change.Item);
-        }
+        private bool IsItemDeleted(NamedChange change) => IsDeleted(change.Change.Item);
 
-        private bool IsDeleted(IItem item)
-        {
-            return item.DeletionId != 0;
-        }
+        private bool IsDeleted(IItem item) => item.DeletionId != 0;
 
         private string GetPathBeforeRename(IItem item)
         {

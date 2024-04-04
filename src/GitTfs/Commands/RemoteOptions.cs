@@ -6,11 +6,7 @@ namespace GitTfs.Commands
     [StructureMapSingleton]
     public class RemoteOptions
     {
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "ignore-regex=", "A regex of files to ignore",
                         v => IgnoreRegex = v },
@@ -27,8 +23,6 @@ namespace GitTfs.Commands
                     { "no-parallel", "Do not do parallel requests to TFS",
                         v => NoParallel = (v != null) },
                 };
-            }
-        }
 
         public string IgnoreRegex { get; set; }
         public string ExceptRegex { get; set; }

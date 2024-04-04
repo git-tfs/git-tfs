@@ -20,14 +20,8 @@ namespace GitTfs.Test.Util
                 public Form Form { get; private set; }
                 public IList<string> Args { get; private set; }
                 private Invocation() { }
-                public static Invocation List(IList<string> args)
-                {
-                    return new Invocation { Form = Form.List, Args = args };
-                }
-                public static Invocation Split(params string[] args)
-                {
-                    return new Invocation { Form = Form.Split, Args = args };
-                }
+                public static Invocation List(IList<string> args) => new Invocation { Form = Form.List, Args = args };
+                public static Invocation Split(params string[] args) => new Invocation { Form = Form.Split, Args = args };
             }
             internal List<Invocation> Calls = new List<Invocation>();
 
@@ -42,10 +36,7 @@ namespace GitTfs.Test.Util
             _mocks = new MoqAutoMocker<GitTfsCommandRunner>();
         }
 
-        private IList<string> Args(params string[] args)
-        {
-            return args;
-        }
+        private IList<string> Args(params string[] args) => args;
 
         public class UsesList : TestCommandBase
         {
@@ -57,10 +48,7 @@ namespace GitTfs.Test.Util
         }
 
         [Fact]
-        public void ReturnsCommandReturnValue()
-        {
-            Assert.Equal(99, _mocks.ClassUnderTest.Run(new UsesList(), Args()));
-        }
+        public void ReturnsCommandReturnValue() => Assert.Equal(99, _mocks.ClassUnderTest.Run(new UsesList(), Args()));
 
         [Fact]
         public void CallsListWithZeroArgs()

@@ -25,10 +25,7 @@ namespace GitTfs.Commands
             _container = container;
         }
 
-        public OptionSet OptionSet
-        {
-            get { return new OptionSet(); }
-        }
+        public OptionSet OptionSet => new OptionSet();
 
         /// <summary>
         /// Figures out whether it should show help for git-tfs or for
@@ -90,30 +87,21 @@ namespace GitTfs.Commands
             return GitTfsExitCodes.Help;
         }
 
-        private Dictionary<string, IEnumerable<string>> GetCommandMap()
-        {
-            return (from instance in GetCommandInstances()
-                    where instance.Name != null
-                    orderby instance.Name
-                    select instance.Name)
+        private Dictionary<string, IEnumerable<string>> GetCommandMap() => (from instance in GetCommandInstances()
+                                                                            where instance.Name != null
+                                                                            orderby instance.Name
+                                                                            select instance.Name)
                 .ToDictionary(s => s, s => _commandFactory.GetAliasesForCommandName(s));
-        }
 
-        private string GetCommandName(GitTfsCommand command)
-        {
-            return (from instance in GetCommandInstances()
-                    where instance.ConcreteType == command.GetType()
-                    select instance.Name).Single();
-        }
+        private string GetCommandName(GitTfsCommand command) => (from instance in GetCommandInstances()
+                                                                 where instance.ConcreteType == command.GetType()
+                                                                 select instance.Name).Single();
 
-        private IEnumerable<InstanceRef> GetCommandInstances()
-        {
-            return _container.Model
+        private IEnumerable<InstanceRef> GetCommandInstances() => _container.Model
                 .PluginTypes
                 .Single(p => p.PluginType == typeof(GitTfsCommand))
                 .Instances
                 .Where(i => i != null);
-        }
 
         private string GetCommandUsage(GitTfsCommand command)
         {
@@ -142,10 +130,7 @@ namespace GitTfs.Commands
             _container = container;
         }
 
-        public int ShowHelp(GitTfsCommand command)
-        {
-            return _container.GetInstance<Help>().Run(command);
-        }
+        public int ShowHelp(GitTfsCommand command) => _container.GetInstance<Help>().Run(command);
 
         public int ShowHelpForInvalidArguments(GitTfsCommand command)
         {

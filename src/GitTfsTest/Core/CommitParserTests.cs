@@ -6,11 +6,7 @@ namespace GitTfs.Test.Core
 {
     public class CommitParserTests : BaseTest
     {
-        public static IEnumerable<object[]> Cases
-        {
-            get
-            {
-                return new[] {
+        public static IEnumerable<object[]> Cases => new[] {
                     new object[] { "git-tfs-id: foo;C123", true, 123 },
                     new object[] { "git-tfs-id: handle more than Int32;C" + int.MaxValue, true, int.MaxValue },
                     new object[] { "foo-tfs-id: bar;C123", false, 0 },
@@ -22,8 +18,6 @@ namespace GitTfs.Test.Core
                     new object[] { "commit message\r\ngit-tfs-id: foo;C1\r\ngit-tfs-id: foo;C2\r\nee\r\n4567", true, 2 }, //if 2 are possible, choose last (but should never happen!)
                     new object[] { "commit message\r\ngit-tfs-id: foo;\r\n foo;C2\r\nee\r\n4567", false, 0 }, //RegEx must not begin on one line and finish on a second one
                 };
-            }
-        }
 
 
         [Theory]

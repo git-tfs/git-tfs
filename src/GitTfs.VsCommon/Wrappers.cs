@@ -89,10 +89,7 @@ namespace GitTfs.VsCommon
         public IVersionControlServer VersionControlServer
             => _bridge.Wrap<WrapperForVersionControlServer, VersionControlServer>(_changeset.VersionControlServer);
 
-        public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
-        {
-            workspace.Get(ChangesetId, changes);
-        }
+        public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler) => workspace.Get(ChangesetId, changes);
     }
 
     public class WrapperForChange : WrapperFor<Change>, IChange
@@ -308,10 +305,7 @@ namespace GitTfs.VsCommon
 
         public IPendingChange[] GetPendingChanges() => _bridge.Wrap<WrapperForPendingChange, PendingChange>(_workspace.GetPendingChanges());
 
-        public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
-        {
-            _workspace.Shelve(_bridge.Unwrap<Shelveset>(shelveset), _bridge.Unwrap<PendingChange>(changes), _bridge.Convert<ShelvingOptions>(options));
-        }
+        public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options) => _workspace.Shelve(_bridge.Unwrap<Shelveset>(shelveset), _bridge.Unwrap<PendingChange>(changes), _bridge.Convert<ShelvingOptions>(options));
 
         private PolicyOverrideInfo ToTfs(TfsPolicyOverrideInfo policyOverrideInfo)
         {
@@ -322,16 +316,13 @@ namespace GitTfs.VsCommon
         }
 
         public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes,
-                                                        string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
-        {
-            return _bridge.Wrap<WrapperForCheckinEvaluationResult, CheckinEvaluationResult>(_workspace.EvaluateCheckin(
+                                                        string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges) => _bridge.Wrap<WrapperForCheckinEvaluationResult, CheckinEvaluationResult>(_workspace.EvaluateCheckin(
                 _bridge.Convert<CheckinEvaluationOptions>(options),
                 _bridge.Unwrap<PendingChange>(allChanges),
                 _bridge.Unwrap<PendingChange>(changes),
                 comment,
                 _bridge.Unwrap<CheckinNote>(checkinNote),
                 _bridge.Unwrap<WorkItemCheckinInfo>(workItemChanges)));
-        }
 
         public int PendAdd(string path) => _workspace.PendAdd(path);
 
@@ -348,10 +339,7 @@ namespace GitTfs.VsCommon
             return _workspace.PendRename(pathFrom, pathTo);
         }
 
-        private void DoUntilNoFailures(Func<GetStatus> get)
-        {
-            Retry.DoWhile(() => get().NumFailures != 0);
-        }
+        private void DoUntilNoFailures(Func<GetStatus> get) => Retry.DoWhile(() => get().NumFailures != 0);
 
         public void ForceGetFile(string path, int changeset)
         {
@@ -359,10 +347,7 @@ namespace GitTfs.VsCommon
             DoUntilNoFailures(() => _workspace.Get(new GetRequest(item, changeset), GetOptions.Overwrite | GetOptions.GetAll));
         }
 
-        public void GetSpecificVersion(int changeset)
-        {
-            Retry.Do(() => DoUntilNoFailures(() => _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll)));
-        }
+        public void GetSpecificVersion(int changeset) => Retry.Do(() => DoUntilNoFailures(() => _workspace.Get(new ChangesetVersionSpec(changeset), GetOptions.Overwrite | GetOptions.GetAll)));
 
         public void GetSpecificVersion(int changesetId, IEnumerable<IItem> items, bool noParallel)
         {
@@ -370,15 +355,9 @@ namespace GitTfs.VsCommon
             GetRequests(items.Select(e => new GetRequest(new ItemSpec(e.ServerItem, RecursionType.Full), version)), noParallel);
         }
 
-        public void GetSpecificVersion(IChangeset changeset, bool noParallel)
-        {
-            GetSpecificVersion(changeset.ChangesetId, changeset.Changes, noParallel);
-        }
+        public void GetSpecificVersion(IChangeset changeset, bool noParallel) => GetSpecificVersion(changeset.ChangesetId, changeset.Changes, noParallel);
 
-        public void GetSpecificVersion(int changesetId, IEnumerable<IChange> changes, bool noParallel)
-        {
-            GetRequests(changes.Select(change => new GetRequest(new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId), changesetId)), noParallel);
-        }
+        public void GetSpecificVersion(int changesetId, IEnumerable<IChange> changes, bool noParallel) => GetRequests(changes.Select(change => new GetRequest(new ItemSpec(change.Item.ServerItem, RecursionType.None, change.Item.DeletionId), changesetId)), noParallel);
 
         public string GetLocalItemForServerItem(string serverItem) => _workspace.GetLocalItemForServerItem(serverItem);
 
@@ -422,26 +401,23 @@ namespace GitTfs.VsCommon
             }
         }
 
-        public void GetRequests(IEnumerable<GetRequest> source, bool noParallel, int batchSize = 20)
-        {
-            source.ToBatch(batchSize).ForEach(batch =>
-            {
-                var items = batch;
-                Retry.Do(() =>
-                {
-                    while (items.Length > 0)
-                    {
-                        var status = _workspace.Get(items.ToArray(), GetOptions.Overwrite | GetOptions.GetAll);
-                        if (status.NumFailures == 0)
-                        {
-                            break;
-                        }
+        public void GetRequests(IEnumerable<GetRequest> source, bool noParallel, int batchSize = 20) => source.ToBatch(batchSize).ForEach(batch =>
+                                                                                                                 {
+                                                                                                                     var items = batch;
+                                                                                                                     Retry.Do(() =>
+                                                                                                                     {
+                                                                                                                         while (items.Length > 0)
+                                                                                                                         {
+                                                                                                                             var status = _workspace.Get(items.ToArray(), GetOptions.Overwrite | GetOptions.GetAll);
+                                                                                                                             if (status.NumFailures == 0)
+                                                                                                                             {
+                                                                                                                                 break;
+                                                                                                                             }
 
-                        items = status.GetFailures().Join(items, e => e.ServerItem, e => e.ItemSpec.Item, (failure, request) => request).ToArray();
-                    }
-                });
-            }, !noParallel);
-        }
+                                                                                                                             items = status.GetFailures().Join(items, e => e.ServerItem, e => e.ItemSpec.Item, (failure, request) => request).ToArray();
+                                                                                                                         }
+                                                                                                                     });
+                                                                                                                 }, !noParallel);
     }
 
     public class WrapperForBranchObject : WrapperFor<BranchObject>, IBranchObject

@@ -30,22 +30,12 @@ namespace GitTfs.Commands
             globals.GcCountdown = globals.GcPeriod;
         }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return _init.OptionSet.Merge(_fetch.OptionSet)
+        public OptionSet OptionSet => _init.OptionSet.Merge(_fetch.OptionSet)
                            .Add("resumable", "if an error occurred, try to continue when you restart clone with same parameters", v => _resumable = v != null);
-            }
-        }
 
         public int Run(string tfsUrl, string tfsRepositoryPath)
         {
-            string gitRepositoryPath;
-            if (tfsRepositoryPath == GitTfsConstants.TfsRoot)
-                gitRepositoryPath = "tfs-collection";
-            else
-                gitRepositoryPath = Path.GetFileName(tfsRepositoryPath);
+            string gitRepositoryPath = tfsRepositoryPath == GitTfsConstants.TfsRoot ? "tfs-collection" : Path.GetFileName(tfsRepositoryPath);
             return Run(tfsUrl, tfsRepositoryPath, gitRepositoryPath);
         }
 

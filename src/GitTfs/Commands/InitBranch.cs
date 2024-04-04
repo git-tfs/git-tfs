@@ -31,11 +31,7 @@ namespace GitTfs.Commands
             _helper = helper;
         }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "all", "Clone all the TFS branches (For TFS 2010 and later)", v => CloneAllBranches = (v.ToLower() == "all") },
                     { "u|username=", "TFS username", v => TfsUsername = v },
@@ -44,18 +40,10 @@ namespace GitTfs.Commands
                     { "except-regex=", "A regex of exceptions to ignore-regex", v => ExceptRegex = v},
                     { "no-fetch", "Create the new TFS remote but don't fetch any changesets", v => NoFetch = (v != null) }
                 };
-            }
-        }
 
-        public int Run()
-        {
-            return Run(null, null);
-        }
+        public int Run() => Run(null, null);
 
-        public int Run(string tfsBranchPath)
-        {
-            return Run(tfsBranchPath, null);
-        }
+        public int Run(string tfsBranchPath) => Run(tfsBranchPath, null);
 
         public int Run(string tfsBranchPath, string gitBranchNameExpected)
         {

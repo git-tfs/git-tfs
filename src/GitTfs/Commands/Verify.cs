@@ -28,19 +28,13 @@ namespace GitTfs.Commands
             _remoteOptions = remoteOptions;
         }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet()
+        public OptionSet OptionSet => new OptionSet()
                 {
                     { "ignore-path-case-mismatch", "Ignore the case mismatch in the path when comparing the files.",
                         v => IgnorePathCaseMismatch = v != null },
                     { "all", "Verify all the tfs remotes",
                         v => VerifyAllRemotes = v != null },
                 }.Merge(_remoteOptions.OptionSet);
-            }
-        }
 
         public bool VerifyAllRemotes { get; set; }
 

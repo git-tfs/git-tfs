@@ -7,15 +7,9 @@ namespace GitTfs.Extensions
 {
     public static class InspectExtensions
     {
-        public static string Inspect(this object obj)
-        {
-            return Inspect(obj, d => d.Inspect(), e => e.Inspect(), o => InspectWithProperties(o));
-        }
+        public static string Inspect(this object obj) => Inspect(obj, d => d.Inspect(), e => e.Inspect(), o => InspectWithProperties(o));
 
-        public static string Inspect(this char o)
-        {
-            return "'" + o + "'";
-        }
+        public static string Inspect(this char o) => "'" + o + "'";
 
         public static string Inspect(this string o)
         {
@@ -47,11 +41,8 @@ namespace GitTfs.Extensions
             return inspected;
         }
 
-        private static string InspectSimple(object obj)
-        {
-            return Inspect(obj, d => "{...}", e => "[...]",
+        private static string InspectSimple(object obj) => Inspect(obj, d => "{...}", e => "[...]",
                            o => "#<" + InspectType(o.GetType()) + ":0x" + o.GetHashCode().ToString("x") + ">");
-        }
 
         private static string Inspect(object o,
             Func<IDictionary, string> inspectDictionary,
@@ -69,16 +60,13 @@ namespace GitTfs.Extensions
             return inspectObject(o);
         }
 
-        private static bool ShouldUseToString(object o)
-        {
-            return o is int ||
+        private static bool ShouldUseToString(object o) => o is int ||
                    o is long ||
                    o is float ||
                    o is double ||
                    o is decimal ||
                    o is byte ||
                    o is DateTime;
-        }
 
         private static bool CanInspect(object o)
         {
@@ -92,20 +80,11 @@ namespace GitTfs.Extensions
             return (string)inspectMethod.Invoke(o, null);
         }
 
-        private static string InspectType(Type type)
-        {
-            return IsAnonymousType(type) ? InspectAnonymousType(type) : type.IsGenericType ? InspectGenericType(type) : type.FullName;
-        }
+        private static string InspectType(Type type) => IsAnonymousType(type) ? InspectAnonymousType(type) : type.IsGenericType ? InspectGenericType(type) : type.FullName;
 
-        private static bool IsAnonymousType(Type type)
-        {
-            return new Regex("^<>f__AnonymousType").IsMatch(type.FullName);
-        }
+        private static bool IsAnonymousType(Type type) => new Regex("^<>f__AnonymousType").IsMatch(type.FullName);
 
-        private static string InspectAnonymousType(Type type)
-        {
-            return "anon";
-        }
+        private static string InspectAnonymousType(Type type) => "anon";
 
         private static string InspectGenericType(Type type)
         {

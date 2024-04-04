@@ -14,22 +14,10 @@ namespace GitTfs
         }
         */
 
-        public override void Initialize(StructureMap.ConfigurationExpression config)
-        {
-            config.For<Script>().Use(() => Script.Load(ScriptPath));
-        }
+        public override void Initialize(StructureMap.ConfigurationExpression config) => config.For<Script>().Use(() => Script.Load(ScriptPath));
 
-        public override bool IsViable()
-        {
-            return ScriptPath.Try(File.Exists);
-        }
+        public override bool IsViable() => ScriptPath.Try(File.Exists);
 
-        internal static string ScriptPath
-        {
-            get
-            {
-                return Environment.GetEnvironmentVariable(Script.EnvVar);
-            }
-        }
+        internal static string ScriptPath => Environment.GetEnvironmentVariable(Script.EnvVar);
     }
 }

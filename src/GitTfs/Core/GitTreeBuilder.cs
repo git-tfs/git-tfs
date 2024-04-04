@@ -20,18 +20,10 @@ namespace GitTfs.Core
         }
 
         public void Add(string path, string file, LibGit2Sharp.Mode mode)
-        {
-            _treeDefinition.Add(path, file, mode);
-        }
+            => _treeDefinition.Add(path, file, mode);
 
-        public void Remove(string path)
-        {
-            _treeDefinition.Remove(path);
-        }
+        public void Remove(string path) => _treeDefinition.Remove(path);
 
-        public Tree GetTree()
-        {
-            return _objectDatabase.CreateTree(_treeDefinition);
-        }
+        public Tree GetTree() => _objectDatabase.CreateTree(_treeDefinition);
     }
 }

@@ -7,24 +7,15 @@ namespace GitTfs.VsCommon
 {
     public static class Retry
     {
-        public static void Do(Action action)
-        {
-            Do(action, TimeSpan.FromSeconds(1));
-        }
+        public static void Do(Action action) => Do(action, TimeSpan.FromSeconds(1));
 
-        public static void Do(Action action, TimeSpan retryInterval, int retryCount = 10)
-        {
-            Do<object>(() =>
-            {
-                action();
-                return null;
-            }, retryInterval, retryCount);
-        }
+        public static void Do(Action action, TimeSpan retryInterval, int retryCount = 10) => Do<object>(() =>
+                                                                                                      {
+                                                                                                          action();
+                                                                                                          return null;
+                                                                                                      }, retryInterval, retryCount);
 
-        public static T Do<T>(Func<T> action)
-        {
-            return Do(action, TimeSpan.FromSeconds(1));
-        }
+        public static T Do<T>(Func<T> action) => Do(action, TimeSpan.FromSeconds(1));
 
         public static T Do<T>(Func<T> action, TimeSpan retryInterval, int retryCount = 10)
         {
@@ -56,10 +47,7 @@ namespace GitTfs.VsCommon
             throw new AggregateException(exceptions);
         }
 
-        public static void DoWhile(Func<bool> action, int retryCount = 10)
-        {
-            DoWhile(action, TimeSpan.FromSeconds(0), retryCount);
-        }
+        public static void DoWhile(Func<bool> action, int retryCount = 10) => DoWhile(action, TimeSpan.FromSeconds(0), retryCount);
 
         public static void DoWhile(Func<bool> action, TimeSpan retryInterval, int retryCount = 10)
         {

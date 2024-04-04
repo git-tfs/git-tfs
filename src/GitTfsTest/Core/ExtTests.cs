@@ -65,22 +65,13 @@ namespace GitTfs.Test.Core
         #region CombinePaths()
 
         [Fact]
-        public void ShouldReturnSingleArgumentWhenProvided()
-        {
-            Assert.Equal("a", Ext.CombinePaths("a"));
-        }
+        public void ShouldReturnSingleArgumentWhenProvided() => Assert.Equal("a", Ext.CombinePaths("a"));
 
         [Fact]
-        public void ShouldCombineSeveralPaths()
-        {
-            Assert.Equal(Path.Combine(Path.Combine("a", "b"), "c"), Ext.CombinePaths("a", "b", "c"));
-        }
+        public void ShouldCombineSeveralPaths() => Assert.Equal(Path.Combine(Path.Combine("a", "b"), "c"), Ext.CombinePaths("a", "b", "c"));
 
         [FactExceptOnUnix]
-        public void ShouldIgnorePathPartsBeforeAbsolute()
-        {
-            Assert.Equal("c:\\x\\y", Ext.CombinePaths("a", "b", "c:\\x", "y"));
-        }
+        public void ShouldIgnorePathPartsBeforeAbsolute() => Assert.Equal("c:\\x\\y", Ext.CombinePaths("a", "b", "c:\\x", "y"));
 
         #endregion
 
@@ -98,10 +89,7 @@ namespace GitTfs.Test.Core
         #region ChangeType.IncludesOneOf()
 
         [Fact]
-        public void ShouldNotDetectUnincludedChangeTypes()
-        {
-            Assert.False(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Branch, TfsChangeType.Delete, TfsChangeType.Edit, TfsChangeType.Encoding, TfsChangeType.Lock, TfsChangeType.Merge, TfsChangeType.None, TfsChangeType.Rename, TfsChangeType.Undelete));
-        }
+        public void ShouldNotDetectUnincludedChangeTypes() => Assert.False(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Branch, TfsChangeType.Delete, TfsChangeType.Edit, TfsChangeType.Encoding, TfsChangeType.Lock, TfsChangeType.Merge, TfsChangeType.None, TfsChangeType.Rename, TfsChangeType.Undelete));
 
         [Fact]
         public void ShouldNotDetectUnincludedChangeType()
@@ -113,34 +101,19 @@ namespace GitTfs.Test.Core
         }
 
         [Fact]
-        public void ShouldDetectIncludedChangeTypeForExactMatch()
-        {
-            Assert.True(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Add));
-        }
+        public void ShouldDetectIncludedChangeTypeForExactMatch() => Assert.True(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Add));
 
         [Fact]
-        public void ShouldDetectIncludedChangeTypeForOneOfSeveral()
-        {
-            Assert.True(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Branch, TfsChangeType.Add));
-        }
+        public void ShouldDetectIncludedChangeTypeForOneOfSeveral() => Assert.True(TfsChangeType.Add.IncludesOneOf(TfsChangeType.Branch, TfsChangeType.Add));
 
         [Fact]
-        public void ShouldDetectIncludedChangeTypeForMultivalue()
-        {
-            Assert.True((TfsChangeType.Add | TfsChangeType.Branch).IncludesOneOf(TfsChangeType.Branch));
-        }
+        public void ShouldDetectIncludedChangeTypeForMultivalue() => Assert.True((TfsChangeType.Add | TfsChangeType.Branch).IncludesOneOf(TfsChangeType.Branch));
 
         [Fact]
-        public void ShouldNotDetectMultivaluesThatIntersectWithoutBeingSubset()
-        {
-            Assert.False((TfsChangeType.Add | TfsChangeType.Branch).IncludesOneOf(TfsChangeType.Branch | TfsChangeType.Edit));
-        }
+        public void ShouldNotDetectMultivaluesThatIntersectWithoutBeingSubset() => Assert.False((TfsChangeType.Add | TfsChangeType.Branch).IncludesOneOf(TfsChangeType.Branch | TfsChangeType.Edit));
 
         [Fact]
-        public void ShouldDetectMultivaluesThatIntersectAndAreASubset()
-        {
-            Assert.True((TfsChangeType.Add | TfsChangeType.Branch | TfsChangeType.Edit).IncludesOneOf(TfsChangeType.Branch | TfsChangeType.Edit));
-        }
+        public void ShouldDetectMultivaluesThatIntersectAndAreASubset() => Assert.True((TfsChangeType.Add | TfsChangeType.Branch | TfsChangeType.Edit).IncludesOneOf(TfsChangeType.Branch | TfsChangeType.Edit));
 
         #endregion
     }

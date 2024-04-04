@@ -9,14 +9,8 @@ namespace GitTfs
             scan.AssemblyContainingType(typeof(Microsoft.TeamFoundation.Client.TfsTeamProjectCollection));
         }
 
-        public override void Initialize(StructureMap.ConfigurationExpression config)
-        {
-            base.Initialize(config);
-        }
+        public override void Initialize(StructureMap.ConfigurationExpression config) => base.Initialize(config);
 
-        public override bool IsViable()
-        {
-            return null != typeof(Microsoft.TeamFoundation.Client.TfsTeamProjectCollection).Assembly;
-        }
+        public override bool IsViable() => null != typeof(Microsoft.TeamFoundation.Client.TfsTeamProjectCollection).Assembly;
     }
 }

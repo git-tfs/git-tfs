@@ -36,15 +36,10 @@ namespace GitTfs.Core.TfsInterop
             return pluginLoader.Fail();
         }
 
-        public static IReadOnlyList<string> SupportedVersions
-        {
-            get
-            {
+        public static IReadOnlyList<string> SupportedVersions =>
                 // Filter out the Fake version, as this is only internal for testing
                 // and we don't it to show up in user facing output/help messages.
-                return PluginLoader.SupportedVersions.Except(new[] {"Fake"}).ToList();
-            }
-        }
+                PluginLoader.SupportedVersions.Except(new[] { "Fake" }).ToList();
 
         private class PluginLoader
         {
@@ -105,15 +100,9 @@ namespace GitTfs.Core.TfsInterop
                 return assembly;
             }
 
-            public TfsPlugin Fail()
-            {
-                throw new PluginLoaderException(_failures);
-            }
+            public TfsPlugin Fail() => throw new PluginLoaderException(_failures);
 
-            public TfsPlugin Fail(string message)
-            {
-                throw new PluginLoaderException(message, _failures);
-            }
+            public TfsPlugin Fail(string message) => throw new PluginLoaderException(message, _failures);
 
             private class PluginLoaderException : Exception
             {
@@ -129,17 +118,12 @@ namespace GitTfs.Core.TfsInterop
             }
         }
 
-        public virtual void Initialize(IAssemblyScanner scan)
-        {
-            scan.AssemblyContainingType(GetType());
-        }
+        public virtual void Initialize(IAssemblyScanner scan) => scan.AssemblyContainingType(GetType());
 
-        public virtual void Initialize(ConfigurationExpression config)
-        {
+        public virtual void Initialize(ConfigurationExpression config) =>
             // Mark the ITfsHelper as a singleton to ensure that we create it only once.
             // Otherwise, it is created e.g. for every remote which is wasteful.
             config.For<ITfsHelper>().Singleton();
-        }
 
         public abstract bool IsViable();
     }

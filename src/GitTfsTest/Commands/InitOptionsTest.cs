@@ -17,10 +17,7 @@ namespace GitTfs.Test.Commands
         #region autocrlf option tests
 
         [Fact]
-        public void AutoCrlfDefault()
-        {
-            Assert.Equal("false", mocks.ClassUnderTest.GitInitAutoCrlf);
-        }
+        public void AutoCrlfDefault() => Assert.Equal("false", mocks.ClassUnderTest.GitInitAutoCrlf);
 
         [Fact]
         public void AutoCrlfProvideTrue()
@@ -67,11 +64,9 @@ namespace GitTfs.Test.Commands
         #region ignorecase option tests
 
         [Fact]
-        public void IgnorecaseDefault()
-        {
+        public void IgnorecaseDefault() =>
             // depends on global setting..
             Assert.Null(mocks.ClassUnderTest.GitInitIgnoreCase);
-        }
 
         [Fact]
         public void IgnoreCaseProvideTrue()

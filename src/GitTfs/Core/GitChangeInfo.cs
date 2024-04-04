@@ -175,19 +175,16 @@ namespace GitTfs.Core
             Status = _match.Groups["status"].Value;
         }
 
-        public LibGit2Sharp.Mode NewMode { get { return _match.Groups["dstmode"].Value.ToFileMode(); } }
+        public LibGit2Sharp.Mode NewMode => _match.Groups["dstmode"].Value.ToFileMode();
 
-        public string oldMode { get { return _match.Groups["srcmode"].Value; } }
-        public string newMode { get { return _match.Groups["dstmode"].Value; } }
-        public string oldSha { get { return _match.Groups["srcsha1"].Value; } }
-        public string newSha { get { return _match.Groups["dstsha1"].Value; } }
-        public string path { get { return _match.Groups["srcpath"].Value; } }
-        public string pathTo { get { return _match.Groups["dstpath"].Value; } }
-        public string score { get { return _match.Groups["score"].Value; } }
+        public string oldMode => _match.Groups["srcmode"].Value;
+        public string newMode => _match.Groups["dstmode"].Value;
+        public string oldSha => _match.Groups["srcsha1"].Value;
+        public string newSha => _match.Groups["dstsha1"].Value;
+        public string path => _match.Groups["srcpath"].Value;
+        public string pathTo => _match.Groups["dstpath"].Value;
+        public string score => _match.Groups["score"].Value;
 
-        public IGitChangedFile ToGitChangedFile(ExplicitArgsExpression builder)
-        {
-            return builder.With(this).GetInstance<IGitChangedFile>(Status);
-        }
+        public IGitChangedFile ToGitChangedFile(ExplicitArgsExpression builder) => builder.With(this).GetInstance<IGitChangedFile>(Status);
     }
 }

@@ -155,47 +155,47 @@ namespace NDesk.Options {
 			this.c = c;
 		}
 
-		#region ICollection
-		void ICollection.CopyTo (Array array, int index)  {(values as ICollection).CopyTo (array, index);}
-		bool ICollection.IsSynchronized                   {get {return (values as ICollection).IsSynchronized;}}
-		object ICollection.SyncRoot                       {get {return (values as ICollection).SyncRoot;}}
-		#endregion
+        #region ICollection
+        void ICollection.CopyTo(Array array, int index) => (values as ICollection).CopyTo(array, index);
+        bool ICollection.IsSynchronized => (values as ICollection).IsSynchronized;
+        object ICollection.SyncRoot => (values as ICollection).SyncRoot;
+        #endregion
 
-		#region ICollection<T>
-		public void Add (string item)                       {values.Add (item);}
-		public void Clear ()                                {values.Clear ();}
-		public bool Contains (string item)                  {return values.Contains (item);}
-		public void CopyTo (string[] array, int arrayIndex) {values.CopyTo (array, arrayIndex);}
-		public bool Remove (string item)                    {return values.Remove (item);}
-		public int Count                                    {get {return values.Count;}}
-		public bool IsReadOnly                              {get {return false;}}
-		#endregion
+        #region ICollection<T>
+        public void Add(string item) => values.Add(item);
+        public void Clear() => values.Clear();
+        public bool Contains(string item) => values.Contains(item);
+        public void CopyTo(string[] array, int arrayIndex) => values.CopyTo(array, arrayIndex);
+        public bool Remove(string item) => values.Remove(item);
+        public int Count => values.Count;
+        public bool IsReadOnly => false;
+        #endregion
 
-		#region IEnumerable
-		IEnumerator IEnumerable.GetEnumerator () {return values.GetEnumerator ();}
-		#endregion
+        #region IEnumerable
+        IEnumerator IEnumerable.GetEnumerator() => values.GetEnumerator();
+        #endregion
 
-		#region IEnumerable<T>
-		public IEnumerator<string> GetEnumerator () {return values.GetEnumerator ();}
-		#endregion
+        #region IEnumerable<T>
+        public IEnumerator<string> GetEnumerator() => values.GetEnumerator();
+        #endregion
 
-		#region IList
-		int IList.Add (object value)                {return (values as IList).Add (value);}
-		bool IList.Contains (object value)          {return (values as IList).Contains (value);}
-		int IList.IndexOf (object value)            {return (values as IList).IndexOf (value);}
-		void IList.Insert (int index, object value) {(values as IList).Insert (index, value);}
-		void IList.Remove (object value)            {(values as IList).Remove (value);}
-		void IList.RemoveAt (int index)             {(values as IList).RemoveAt (index);}
-		bool IList.IsFixedSize                      {get {return false;}}
-		object IList.this [int index]               {get {return this [index];} set {(values as IList)[index] = value;}}
-		#endregion
+        #region IList
+        int IList.Add(object value) => (values as IList).Add(value);
+        bool IList.Contains(object value) => (values as IList).Contains(value);
+        int IList.IndexOf(object value) => (values as IList).IndexOf(value);
+        void IList.Insert(int index, object value) => (values as IList).Insert(index, value);
+        void IList.Remove(object value) => (values as IList).Remove(value);
+        void IList.RemoveAt(int index) => (values as IList).RemoveAt(index);
+        bool IList.IsFixedSize => false;
+        object IList.this [int index] { get => this[index]; set => (values as IList)[index] = value; }
+        #endregion
 
-		#region IList<T>
-		public int IndexOf (string item)            {return values.IndexOf (item);}
-		public void Insert (int index, string item) {values.Insert (index, item);}
-		public void RemoveAt (int index)            {values.RemoveAt (index);}
+        #region IList<T>
+        public int IndexOf(string item) => values.IndexOf(item);
+        public void Insert(int index, string item) => values.Insert(index, item);
+        public void RemoveAt(int index) => values.RemoveAt(index);
 
-		private void AssertValid (int index)
+        private void AssertValid (int index)
 		{
 			if (c.Option == null)
 				throw new InvalidOperationException ("OptionContext.Option is null.");
@@ -208,32 +208,23 @@ namespace NDesk.Options {
 						c.OptionName);
 		}
 
-		public string this [int index] {
-			get {
-				AssertValid (index);
-				return index >= values.Count ? null : values [index];
-			}
-			set {
-				values [index] = value;
-			}
-		}
-		#endregion
+		public string this [int index]
+        {
+            get
+            {
+                AssertValid(index);
+                return index >= values.Count ? null : values[index];
+            }
+            set => values[index] = value;
+        }
+        #endregion
 
-		public List<string> ToList ()
-		{
-			return new List<string> (values);
-		}
+        public List<string> ToList() => new List<string>(values);
 
-		public string[] ToArray ()
-		{
-			return values.ToArray ();
-		}
+        public string[] ToArray() => values.ToArray();
 
-		public override string ToString ()
-		{
-			return string.Join (", ", values.ToArray ());
-		}
-	}
+        public override string ToString() => string.Join(", ", values.ToArray());
+    }
 
 	public class OptionContext {
 		private Option                option;
@@ -249,28 +240,24 @@ namespace NDesk.Options {
 		}
 
 		public Option Option {
-			get {return option;}
-			set {option = value;}
-		}
+            get => option;
+            set => option = value;
+        }
 
-		public string OptionName { 
-			get {return name;}
-			set {name = value;}
-		}
+        public string OptionName {
+            get => name;
+            set => name = value;
+        }
 
-		public int OptionIndex {
-			get {return index;}
-			set {index = value;}
-		}
+        public int OptionIndex {
+            get => index;
+            set => index = value;
+        }
 
-		public OptionSet OptionSet {
-			get {return set;}
-		}
+        public OptionSet OptionSet => set;
 
-		public OptionValueCollection OptionValues {
-			get {return c;}
-		}
-	}
+        public OptionValueCollection OptionValues => c;
+    }
 
 	public enum OptionValueType {
 		None, 
@@ -322,17 +309,14 @@ namespace NDesk.Options {
 						"prototype");
 		}
 
-		public string           Prototype       {get {return prototype;}}
-		public string           Description     {get {return description;}}
-		public OptionValueType  OptionValueType {get {return type;}}
-		public int              MaxValueCount   {get {return count;}}
+        public string Prototype => prototype;
+        public string Description => description;
+        public OptionValueType OptionValueType => type;
+        public int MaxValueCount => count;
 
-		public string[] GetNames ()
-		{
-			return (string[]) names.Clone ();
-		}
+        public string[] GetNames() => (string[])names.Clone();
 
-		public string[] GetValueSeparators ()
+        public string[] GetValueSeparators ()
 		{
 			if (separators == null)
 				return new string [0];
@@ -357,10 +341,10 @@ namespace NDesk.Options {
 			return t;
 		}
 
-		internal string[] Names           {get {return names;}}
-		internal string[] ValueSeparators {get {return separators;}}
+        internal string[] Names => names;
+        internal string[] ValueSeparators => separators;
 
-		static readonly char[] NameTerminator = new char[]{'=', ':'};
+        static readonly char[] NameTerminator = new char[]{'=', ':'};
 
 		private OptionValueType ParsePrototype ()
 		{
@@ -445,11 +429,8 @@ namespace NDesk.Options {
 
 		protected abstract void OnParseComplete (OptionContext c);
 
-		public override string ToString ()
-		{
-			return Prototype;
-		}
-	}
+        public override string ToString() => Prototype;
+    }
 
 	[Serializable]
 	public class OptionException : Exception {
@@ -477,11 +458,9 @@ namespace NDesk.Options {
 			this.option = info.GetString ("OptionName");
 		}
 
-		public string OptionName {
-			get {return this.option;}
-		}
+        public string OptionName => this.option;
 
-		[SecurityPermission (SecurityAction.LinkDemand, SerializationFormatter = true)]
+        [SecurityPermission (SecurityAction.LinkDemand, SerializationFormatter = true)]
 		public override void GetObjectData (SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData (info, context);
@@ -505,11 +484,9 @@ namespace NDesk.Options {
 
 		Converter<string, string> localizer;
 
-		public Converter<string, string> MessageLocalizer {
-			get {return localizer;}
-		}
+        public Converter<string, string> MessageLocalizer => localizer;
 
-		protected override string GetKeyForItem (Option item)
+        protected override string GetKeyForItem (Option item)
 		{
 			if (item == null)
 				throw new ArgumentNullException ("option");
@@ -592,18 +569,12 @@ namespace NDesk.Options {
 				this.action = action;
 			}
 
-			protected override void OnParseComplete (OptionContext c)
-			{
-				action (c.OptionValues);
-			}
-		}
+            protected override void OnParseComplete(OptionContext c) => action(c.OptionValues);
+        }
 
-		public OptionSet Add (string prototype, Action<string> action)
-		{
-			return Add (prototype, null, action);
-		}
+        public OptionSet Add(string prototype, Action<string> action) => Add(prototype, null, action);
 
-		public OptionSet Add (string prototype, string description, Action<string> action)
+        public OptionSet Add (string prototype, string description, Action<string> action)
 		{
 			if (action == null)
 				throw new ArgumentNullException ("action");
@@ -613,12 +584,9 @@ namespace NDesk.Options {
 			return this;
 		}
 
-		public OptionSet Add (string prototype, OptionAction<string, string> action)
-		{
-			return Add (prototype, null, action);
-		}
+        public OptionSet Add(string prototype, OptionAction<string, string> action) => Add(prototype, null, action);
 
-		public OptionSet Add (string prototype, string description, OptionAction<string, string> action)
+        public OptionSet Add (string prototype, string description, OptionAction<string, string> action)
 		{
 			if (action == null)
 				throw new ArgumentNullException ("action");
@@ -639,11 +607,8 @@ namespace NDesk.Options {
 				this.action = action;
 			}
 
-			protected override void OnParseComplete (OptionContext c)
-			{
-				action (Parse<T> (c.OptionValues [0], c));
-			}
-		}
+            protected override void OnParseComplete(OptionContext c) => action(Parse<T>(c.OptionValues[0], c));
+        }
 
 		sealed class ActionOption<TKey, TValue> : Option {
 			OptionAction<TKey, TValue> action;
@@ -656,38 +621,20 @@ namespace NDesk.Options {
 				this.action = action;
 			}
 
-			protected override void OnParseComplete (OptionContext c)
-			{
-				action (
-						Parse<TKey> (c.OptionValues [0], c),
-						Parse<TValue> (c.OptionValues [1], c));
-			}
-		}
+            protected override void OnParseComplete(OptionContext c) => action(
+                        Parse<TKey>(c.OptionValues[0], c),
+                        Parse<TValue>(c.OptionValues[1], c));
+        }
 
-		public OptionSet Add<T> (string prototype, Action<T> action)
-		{
-			return Add (prototype, null, action);
-		}
+        public OptionSet Add<T>(string prototype, Action<T> action) => Add(prototype, null, action);
 
-		public OptionSet Add<T> (string prototype, string description, Action<T> action)
-		{
-			return Add (new ActionOption<T> (prototype, description, action));
-		}
+        public OptionSet Add<T>(string prototype, string description, Action<T> action) => Add(new ActionOption<T>(prototype, description, action));
 
-		public OptionSet Add<TKey, TValue> (string prototype, OptionAction<TKey, TValue> action)
-		{
-			return Add (prototype, null, action);
-		}
+        public OptionSet Add<TKey, TValue>(string prototype, OptionAction<TKey, TValue> action) => Add(prototype, null, action);
 
-		public OptionSet Add<TKey, TValue> (string prototype, string description, OptionAction<TKey, TValue> action)
-		{
-			return Add (new ActionOption<TKey, TValue> (prototype, description, action));
-		}
+        public OptionSet Add<TKey, TValue>(string prototype, string description, OptionAction<TKey, TValue> action) => Add(new ActionOption<TKey, TValue>(prototype, description, action));
 
-		protected virtual OptionContext CreateOptionContext ()
-		{
-			return new OptionContext (this);
-		}
+        protected virtual OptionContext CreateOptionContext() => new OptionContext(this);
 
 #if LINQ
 		public List<string> Parse (IEnumerable<string> arguments)
@@ -718,7 +665,7 @@ namespace NDesk.Options {
 			return r;
 		}
 #else
-		public List<string> Parse (IEnumerable<string> arguments)
+        public List<string> Parse (IEnumerable<string> arguments)
 		{
 			OptionContext c = CreateOptionContext ();
 			c.OptionIndex = -1;

@@ -10,10 +10,7 @@ namespace GitTfs.Core
     {
         private readonly Queue<Action> _actions = new Queue<Action>();
 
-        public void CleanThisUpWhenWeClose(Action action)
-        {
-            _actions.Enqueue(action);
-        }
+        public void CleanThisUpWhenWeClose(Action action) => _actions.Enqueue(action);
 
         public void Dispose()
         {

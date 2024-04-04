@@ -10,7 +10,7 @@ namespace GitTfs.Test
         /// </summary>
         public const bool DebugTests = false;
 
-        public static bool DisplayTrace { get { return System.Diagnostics.Debugger.IsAttached || DebugTests; } }
+        public static bool DisplayTrace => System.Diagnostics.Debugger.IsAttached || DebugTests;
         public BaseTest()
         {
             Globals.DisableGarbageCollect = true;

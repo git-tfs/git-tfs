@@ -18,15 +18,9 @@ namespace GitTfs.Commands
             _cleanupWorkspaceLocal = cleanupWorkspaceLocal;
         }
 
-        public OptionSet OptionSet
-        {
-            get { return _cleanupWorkspaces.OptionSet; }
-        }
+        public OptionSet OptionSet => _cleanupWorkspaces.OptionSet;
 
-        public int Run()
-        {
-            return RunAll(_cleanupWorkspaces.Run, _cleanupWorkspaceLocal.Run);
-        }
+        public int Run() => RunAll(_cleanupWorkspaces.Run, _cleanupWorkspaceLocal.Run);
 
         private int RunAll(params Func<int>[] cleaners)
         {

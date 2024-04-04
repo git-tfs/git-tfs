@@ -14,9 +14,6 @@ namespace GitTfs.Commands
         {
         }
 
-        protected override int DoCheckin(TfsChangesetInfo changeset, string refToCheckin)
-        {
-            return changeset.Remote.Checkin(refToCheckin, changeset, _checkinOptions);
-        }
+        protected override int DoCheckin(TfsChangesetInfo changeset, string refToCheckin) => changeset.Remote.Checkin(refToCheckin, changeset, _checkinOptions);
     }
 }

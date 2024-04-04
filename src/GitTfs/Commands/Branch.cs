@@ -40,11 +40,7 @@ namespace GitTfs.Commands
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "r|remotes", "Display the TFS branches of the current TFS root branch existing on the TFS server", v => DisplayRemotes = (v != null) },
                     { "all", "Display (used with option --remotes) the TFS branches of all the root branches existing on the TFS server\n" +
@@ -62,8 +58,6 @@ namespace GitTfs.Commands
                     { "p|password=", "TFS password", v => TfsPassword = v },
                 }
                 .Merge(_globals.OptionSet);
-            }
-        }
 
         public Branch(Globals globals, Help helper, Cleanup cleanup, InitBranch initBranch, Rcheckin rcheckin)
         {
@@ -84,11 +78,9 @@ namespace GitTfs.Commands
             _initBranch.NoFetch = NoFetch;
         }
 
-        public bool IsCommandWellUsed()
-        {
+        public bool IsCommandWellUsed() =>
             //Verify that some mutual exclusive options are not used together
-            return new[] { ShouldDeleteRemote, ShouldInitBranch, ShouldRenameRemote }.Count(b => b) <= 1;
-        }
+            new[] { ShouldDeleteRemote, ShouldInitBranch, ShouldRenameRemote }.Count(b => b) <= 1;
 
         public int Run()
         {

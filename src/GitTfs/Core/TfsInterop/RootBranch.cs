@@ -22,17 +22,11 @@ namespace GitTfs.Core.TfsInterop
         public string TfsBranchPath { get; }
         public bool IsRenamedBranch { get; set; }
 
-        private string DebuggerDisplay
-        {
-            get
-            {
-                return string.Format("{0} C{1}{2}{3}",
+        private string DebuggerDisplay => string.Format("{0} C{1}{2}{3}",
                     /* {0} */ TfsBranchPath,
                     /* {1} */ SourceBranchChangesetId,
                     /* {2} */ TargetBranchChangesetId > -1 ? string.Format(" (target C{0})", TargetBranchChangesetId) : string.Empty,
                     /* {3} */ IsRenamedBranch ? " renamed" : ""
                 );
-            }
-        }
     }
 }

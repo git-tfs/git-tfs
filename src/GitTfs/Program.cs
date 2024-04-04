@@ -82,10 +82,7 @@ namespace GitTfs
             }
         }
 
-        private static IContainer Initialize()
-        {
-            return new Container(Initialize);
-        }
+        private static IContainer Initialize() => new Container(Initialize);
 
         private static void Initialize(ConfigurationExpression initializer)
         {
@@ -147,14 +144,11 @@ namespace GitTfs
             }
         }
 
-        private static void ChangeConsoleColorForLevel(ColoredConsoleTarget consoleTarget, string level, ConsoleOutputColor foregroundColor)
+        private static void ChangeConsoleColorForLevel(ColoredConsoleTarget consoleTarget, string level, ConsoleOutputColor foregroundColor) => consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule
         {
-            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule
-            {
-                Condition = ConditionParser.ParseExpression("level == LogLevel." + level),
-                ForegroundColor = foregroundColor
-            });
-        }
+            Condition = ConditionParser.ParseExpression("level == LogLevel." + level),
+            ForegroundColor = foregroundColor
+        });
 
         public static void AddGitChangeTypes(ConfigurationExpression initializer)
         {

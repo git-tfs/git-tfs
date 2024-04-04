@@ -16,72 +16,33 @@ namespace GitTfs.Core
             _tfsRepositoryPath = tfsRepositoryPath;
         }
 
-        private GitTfsException DerivedRemoteException
-        {
-            get
-            {
-                return new GitTfsException("Unable to locate a remote for <" + _tfsUrl + ">" + _tfsRepositoryPath)
+        private GitTfsException DerivedRemoteException => new GitTfsException("Unable to locate a remote for <" + _tfsUrl + ">" + _tfsRepositoryPath)
                     .WithRecommendation("Try using `git tfs bootstrap` to auto-init TFS remotes.")
                     .WithRecommendation("Try setting a legacy-url for an existing remote.");
-            }
-        }
 
-        public bool IsDerived
-        {
-            get { return true; }
-        }
+        public bool IsDerived => true;
 
-        public string Id
-        {
-            get { return "(derived)"; }
-        }
+        public string Id => "(derived)";
 
-        public string TfsUrl
-        {
-            get { return _tfsUrl; }
-        }
+        public string TfsUrl => _tfsUrl;
 
-        public bool Autotag
-        {
-            get { throw DerivedRemoteException; }
-        }
+        public bool Autotag => throw DerivedRemoteException;
 
         public string TfsUsername
         {
-            get
-            {
-                throw DerivedRemoteException;
-            }
-            set
-            {
-                throw DerivedRemoteException;
-            }
+            get => throw DerivedRemoteException;
+            set => throw DerivedRemoteException;
         }
 
         public string TfsPassword
         {
-            get
-            {
-                throw DerivedRemoteException;
-            }
-            set
-            {
-                throw DerivedRemoteException;
-            }
+            get => throw DerivedRemoteException;
+            set => throw DerivedRemoteException;
         }
 
-        public string TfsRepositoryPath
-        {
-            get { return _tfsRepositoryPath; }
-        }
+        public string TfsRepositoryPath => _tfsRepositoryPath;
 
-        public string[] TfsSubtreePaths
-        {
-            get
-            {
-                throw DerivedRemoteException;
-            }
-        }
+        public string[] TfsSubtreePaths => throw DerivedRemoteException;
 
         #region Equality
 
@@ -122,191 +83,92 @@ namespace GitTfs.Core
 
         #region All this is not implemented
 
-        public string IgnoreRegexExpression
-        {
-            get { throw DerivedRemoteException; }
-        }
+        public string IgnoreRegexExpression => throw DerivedRemoteException;
 
-        public string IgnoreExceptRegexExpression
-        {
-            get { throw DerivedRemoteException; }
-        }
+        public string IgnoreExceptRegexExpression => throw DerivedRemoteException;
 
-        public IGitRepository Repository
-        {
-            get { throw DerivedRemoteException; }
-        }
+        public IGitRepository Repository => throw DerivedRemoteException;
 
         public ITfsHelper Tfs
         {
-            get { throw DerivedRemoteException; }
-            set { throw DerivedRemoteException; }
+            get => throw DerivedRemoteException;
+            set => throw DerivedRemoteException;
         }
 
         public int MaxChangesetId
         {
-            get { throw DerivedRemoteException; }
-            set { throw DerivedRemoteException; }
+            get => throw DerivedRemoteException;
+            set => throw DerivedRemoteException;
         }
 
         public string MaxCommitHash
         {
-            get { throw DerivedRemoteException; }
-            set { throw DerivedRemoteException; }
+            get => throw DerivedRemoteException;
+            set => throw DerivedRemoteException;
         }
 
-        public string RemoteRef
-        {
-            get { throw DerivedRemoteException; }
-        }
+        public string RemoteRef => throw DerivedRemoteException;
 
-        public bool IsSubtree
-        {
-            get { return false; }
-        }
+        public bool IsSubtree => false;
 
-        public bool IsSubtreeOwner
-        {
-            get { return false; }
-        }
+        public bool IsSubtreeOwner => false;
 
-        public string OwningRemoteId
-        {
-            get { return null; }
-        }
+        public string OwningRemoteId => null;
 
-        public string Prefix
-        {
-            get { return null; }
-        }
+        public string Prefix => null;
 
         public bool ExportMetadatas { get; set; }
         public Dictionary<string, IExportWorkItem> ExportWorkitemsMapping { get; set; }
 
-        public int? GetFirstChangeset()
-        {
-            throw DerivedRemoteException;
-        }
+        public int? GetFirstChangeset() => throw DerivedRemoteException;
 
-        public void SetFirstChangeset(int? changesetId)
-        {
-            throw DerivedRemoteException;
-        }
+        public void SetFirstChangeset(int? changesetId) => throw DerivedRemoteException;
 
-        public bool ShouldSkip(string path)
-        {
-            throw DerivedRemoteException;
-        }
+        public bool ShouldSkip(string path) => throw DerivedRemoteException;
 
-        public bool IsIgnored(string path)
-        {
-            throw DerivedRemoteException;
-        }
+        public bool IsIgnored(string path) => throw DerivedRemoteException;
 
-        public bool IsInDotGit(string path)
-        {
-            throw DerivedRemoteException;
-        }
+        public bool IsInDotGit(string path) => throw DerivedRemoteException;
 
-        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int shaRootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null, IRenameResult renameResult = null)
-        {
-            throw new NotImplementedException();
-        }
+        public IGitTfsRemote InitBranch(RemoteOptions remoteOptions, string tfsRepositoryPath, int shaRootChangesetId, bool fetchParentBranch, string gitBranchNameExpected = null, IRenameResult renameResult = null) => throw new NotImplementedException();
 
-        public string GetPathInGitRepo(string tfsPath)
-        {
-            throw DerivedRemoteException;
-        }
+        public string GetPathInGitRepo(string tfsPath) => throw DerivedRemoteException;
 
-        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null)
-        {
-            throw DerivedRemoteException;
-        }
+        public IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null) => throw DerivedRemoteException;
 
-        public IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes)
-        {
-            throw DerivedRemoteException;
-        }
+        public IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes) => throw DerivedRemoteException;
 
-        public void QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint)
-        {
-            throw DerivedRemoteException;
-        }
+        public void QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint) => throw DerivedRemoteException;
 
-        public void Unshelve(string a, string b, string c, Action<Exception> h, bool force)
-        {
-            throw DerivedRemoteException;
-        }
+        public void Unshelve(string a, string b, string c, Action<Exception> h, bool force) => throw DerivedRemoteException;
 
-        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies)
-        {
-            throw DerivedRemoteException;
-        }
+        public void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies) => throw DerivedRemoteException;
 
-        public bool HasShelveset(string shelvesetName)
-        {
-            throw DerivedRemoteException;
-        }
+        public bool HasShelveset(string shelvesetName) => throw DerivedRemoteException;
 
-        public int CheckinTool(string head, TfsChangesetInfo parentChangeset)
-        {
-            throw DerivedRemoteException;
-        }
+        public int CheckinTool(string head, TfsChangesetInfo parentChangeset) => throw DerivedRemoteException;
 
-        public int Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
-        {
-            throw DerivedRemoteException;
-        }
+        public int Checkin(string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null) => throw DerivedRemoteException;
 
-        public int Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null)
-        {
-            throw DerivedRemoteException;
-        }
+        public int Checkin(string head, string parent, TfsChangesetInfo parentChangeset, CheckinOptions options, string sourceTfsPath = null) => throw DerivedRemoteException;
 
-        public void CleanupWorkspace()
-        {
-            throw DerivedRemoteException;
-        }
+        public void CleanupWorkspace() => throw DerivedRemoteException;
 
-        public void CleanupWorkspaceDirectory()
-        {
-            throw DerivedRemoteException;
-        }
+        public void CleanupWorkspaceDirectory() => throw DerivedRemoteException;
 
-        public ITfsChangeset GetChangeset(int changesetId)
-        {
-            throw DerivedRemoteException;
-        }
+        public ITfsChangeset GetChangeset(int changesetId) => throw DerivedRemoteException;
 
-        public void UpdateTfsHead(string commitHash, int changesetId)
-        {
-            throw DerivedRemoteException;
-        }
+        public void UpdateTfsHead(string commitHash, int changesetId) => throw DerivedRemoteException;
 
-        public void EnsureTfsAuthenticated()
-        {
-            throw DerivedRemoteException;
-        }
+        public void EnsureTfsAuthenticated() => throw DerivedRemoteException;
 
-        public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath)
-        {
-            throw DerivedRemoteException;
-        }
+        public bool MatchesUrlAndRepositoryPath(string tfsUrl, string tfsRepositoryPath) => throw DerivedRemoteException;
 
-        public void DeleteShelveset(string shelvesetName)
-        {
-            throw DerivedRemoteException;
-        }
+        public void DeleteShelveset(string shelvesetName) => throw DerivedRemoteException;
 
-        public RemoteInfo RemoteInfo
-        {
-            get { throw DerivedRemoteException; }
-        }
+        public RemoteInfo RemoteInfo => throw DerivedRemoteException;
 
-        public void Merge(string sourceTfsPath, string targetTfsPath)
-        {
-            throw DerivedRemoteException;
-        }
+        public void Merge(string sourceTfsPath, string targetTfsPath) => throw DerivedRemoteException;
         #endregion
     }
 }

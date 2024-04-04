@@ -53,10 +53,7 @@ namespace GitTfs.Core
             _workspace.Shelve(shelveset, pendingChanges, _checkinOptions.Force ? TfsShelvingOptions.Replace : TfsShelvingOptions.None);
         }
 
-        public void DeleteShelveset(string shelvesetName)
-        {
-            _tfsHelper.DeleteShelveset(_workspace, shelvesetName);
-        }
+        public void DeleteShelveset(string shelvesetName) => _tfsHelper.DeleteShelveset(_workspace, shelvesetName);
 
         public int CheckinTool(Func<string> generateCheckinComment)
         {
@@ -75,10 +72,7 @@ namespace GitTfs.Core
             return newChangesetId;
         }
 
-        public void Merge(string sourceTfsPath, string tfsRepositoryPath)
-        {
-            _workspace.Merge(sourceTfsPath, tfsRepositoryPath);
-        }
+        public void Merge(string sourceTfsPath, string tfsRepositoryPath) => _workspace.Merge(sourceTfsPath, tfsRepositoryPath);
 
         private static void TraceCheckinPolicyErrors(CheckinPolicyEvaluator.CheckinPolicyEvaluationResult checkinProblems, bool overridePolicyErrors)
         {
@@ -175,10 +169,7 @@ namespace GitTfs.Core
             return new TfsPolicyOverrideInfo { Comment = options.OverrideReason, Failures = checkinProblems.PolicyFailures };
         }
 
-        public string GetLocalPath(string path)
-        {
-            return Path.Combine(_localDirectory, path);
-        }
+        public string GetLocalPath(string path) => Path.Combine(_localDirectory, path);
 
         public void Add(string path)
         {
@@ -228,25 +219,13 @@ namespace GitTfs.Core
             if (result != 1) throw new ApplicationException("Unable to rename item from " + pathFrom + " to " + pathTo);
         }
 
-        private void GetFromTfs(string path)
-        {
-            _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), _contextVersion.ChangesetId);
-        }
+        private void GetFromTfs(string path) => _workspace.ForceGetFile(_workspace.GetServerItemForLocalItem(path), _contextVersion.ChangesetId);
 
-        public void Get(int changesetId)
-        {
-            _workspace.GetSpecificVersion(changesetId);
-        }
+        public void Get(int changesetId) => _workspace.GetSpecificVersion(changesetId);
 
-        public void Get(int changesetId, IEnumerable<IItem> items)
-        {
-            _workspace.GetSpecificVersion(changesetId, items, Remote.RemoteInfo.NoParallel);
-        }
+        public void Get(int changesetId, IEnumerable<IItem> items) => _workspace.GetSpecificVersion(changesetId, items, Remote.RemoteInfo.NoParallel);
 
-        public void Get(IChangeset changeset)
-        {
-            _workspace.GetSpecificVersion(changeset, Remote.RemoteInfo.NoParallel);
-        }
+        public void Get(IChangeset changeset) => _workspace.GetSpecificVersion(changeset, Remote.RemoteInfo.NoParallel);
 
         public void Get(int changesetId, IEnumerable<IChange> changes)
         {
@@ -256,20 +235,11 @@ namespace GitTfs.Core
             }
         }
 
-        public string GetLocalItemForServerItem(string serverItem)
-        {
-            return _workspace.GetLocalItemForServerItem(serverItem);
-        }
+        public string GetLocalItemForServerItem(string serverItem) => _workspace.GetLocalItemForServerItem(serverItem);
 
-        private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(CheckinOptions options = null)
-        {
-            return GetWorkItemInfosHelper<IWorkItemCheckinInfo>(_tfsHelper.GetWorkItemInfos, options);
-        }
+        private IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(CheckinOptions options = null) => GetWorkItemInfosHelper<IWorkItemCheckinInfo>(_tfsHelper.GetWorkItemInfos, options);
 
-        private IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos()
-        {
-            return GetWorkItemInfosHelper<IWorkItemCheckedInfo>(_tfsHelper.GetWorkItemCheckedInfos);
-        }
+        private IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos() => GetWorkItemInfosHelper<IWorkItemCheckedInfo>(_tfsHelper.GetWorkItemCheckedInfos);
 
         private IEnumerable<T> GetWorkItemInfosHelper<T>(Func<IEnumerable<string>, TfsWorkItemCheckinAction, IEnumerable<T>> func, CheckinOptions options = null)
         {

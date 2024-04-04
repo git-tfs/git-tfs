@@ -189,9 +189,6 @@ namespace GitTfs.Test.Commands
                 .Returns(new[] { new TfsChangesetInfo { Remote = gitTfsRemoteMock.Object } });
         }
 
-        private void CreateShelveset(string shelvesetName)
-        {
-            gitTfsRemoteMock.Setup(x => x.HasShelveset(shelvesetName)).Returns(true);
-        }
+        private void CreateShelveset(string shelvesetName) => gitTfsRemoteMock.Setup(x => x.HasShelveset(shelvesetName)).Returns(true);
     }
 }

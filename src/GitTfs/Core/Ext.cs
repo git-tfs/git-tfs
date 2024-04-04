@@ -22,10 +22,7 @@ namespace GitTfs.Core
             return o;
         }
 
-        public static U Try<T, U>(this T o, Func<T, U> expr)
-        {
-            return Try(o, expr, () => default(U));
-        }
+        public static U Try<T, U>(this T o, Func<T, U> expr) => Try(o, expr, () => default(U));
 
         public static U Try<T, U>(this T o, Func<T, U> expr, Func<U> makeDefault)
         {
@@ -33,17 +30,14 @@ namespace GitTfs.Core
             return expr(o);
         }
 
-        public static Action<T> And<T>(this Action<T> originalAction, params Action<T>[] additionalActions)
-        {
-            return x =>
-            {
-                originalAction(x);
-                foreach (var action in additionalActions)
-                {
-                    action(x);
-                }
-            };
-        }
+        public static Action<T> And<T>(this Action<T> originalAction, params Action<T>[] additionalActions) => x =>
+                                                                                                                        {
+                                                                                                                            originalAction(x);
+                                                                                                                            foreach (var action in additionalActions)
+                                                                                                                            {
+                                                                                                                                action(x);
+                                                                                                                            }
+                                                                                                                        };
 
         public static IEnumerable<T> Append<T>(this IEnumerable<T> set1, params IEnumerable<T>[] moreSets)
         {
@@ -73,20 +67,11 @@ namespace GitTfs.Core
             return defaultValue;
         }
 
-        public static bool Empty<T>(this IEnumerable<T> e)
-        {
-            return !e.Any();
-        }
+        public static bool Empty<T>(this IEnumerable<T> e) => !e.Any();
 
-        public static void SetArguments(this ProcessStartInfo startInfo, params string[] args)
-        {
-            startInfo.Arguments = string.Join(" ", args.Select(arg => QuoteProcessArgument(arg)).ToArray());
-        }
+        public static void SetArguments(this ProcessStartInfo startInfo, params string[] args) => startInfo.Arguments = string.Join(" ", args.Select(arg => QuoteProcessArgument(arg)).ToArray());
 
-        private static string QuoteProcessArgument(string arg)
-        {
-            return arg.Contains(" ") ? ("\"" + arg + "\"") : arg;
-        }
+        private static string QuoteProcessArgument(string arg) => arg.Contains(" ") ? ("\"" + arg + "\"") : arg;
 
         public static string CombinePaths(string basePath, params string[] pathParts)
         {
@@ -97,20 +82,11 @@ namespace GitTfs.Core
             return basePath;
         }
 
-        public static string FormatForGit(this DateTime date)
-        {
-            return date.ToUniversalTime().ToString("s") + "Z";
-        }
+        public static string FormatForGit(this DateTime date) => date.ToUniversalTime().ToString("s") + "Z";
 
-        public static bool IsEmpty<T>(this IEnumerable<T> c)
-        {
-            return c == null || !c.Any();
-        }
+        public static bool IsEmpty<T>(this IEnumerable<T> c) => c == null || !c.Any();
 
-        public static OptionSet GetAllOptions(this GitTfsCommand command, IContainer container)
-        {
-            return container.GetInstance<Globals>().OptionSet.Merge(command.OptionSet);
-        }
+        public static OptionSet GetAllOptions(this GitTfsCommand command, IContainer container) => container.GetInstance<Globals>().OptionSet.Merge(command.OptionSet);
 
         private static readonly Regex sha1OnlyRegex = new Regex("^" + GitTfsConstants.Sha1 + "$");
         public static void AssertValidSha(this String sha)
@@ -131,15 +107,9 @@ namespace GitTfs.Core
         /// create a new stream based on <paramref name="stream"/> that uses
         /// the given <paramref name="encoding"/> instead.
         /// </summary>
-        public static StreamWriter WithEncoding(this StreamWriter stream, Encoding encoding)
-        {
-            return new StreamWriter(stream.BaseStream, encoding);
-        }
+        public static StreamWriter WithEncoding(this StreamWriter stream, Encoding encoding) => new StreamWriter(stream.BaseStream, encoding);
 
-        public static bool Contains(this IEnumerable<string> list, string toCheck, StringComparison comp)
-        {
-            return list.Any(listMember => listMember.IndexOf(toCheck, comp) >= 0);
-        }
+        public static bool Contains(this IEnumerable<string> list, string toCheck, StringComparison comp) => list.Any(listMember => listMember.IndexOf(toCheck, comp) >= 0);
 
         /// <summary>
         /// Optionally handle exceptions with "this" action. If there isn't a handler, don't catch exceptions.
@@ -201,10 +171,7 @@ namespace GitTfs.Core
         /// <param name="batchSize">the of item in the batch array</param>
         /// <returns>The <see cref="IEnumerable{T}"/> with arrays of items sized by <paramref name="batchSize"/></returns>
         [DebuggerStepThrough]
-        public static IEnumerable<T[]> ToBatch<T>(this IEnumerable<T> source, int batchSize)
-        {
-            return ToBatch(source, e => e, batchSize);
-        }
+        public static IEnumerable<T[]> ToBatch<T>(this IEnumerable<T> source, int batchSize) => ToBatch(source, e => e, batchSize);
 
         /// <summary>
         /// Executes the <paramref name="action"/> for each item in the <paramref name="source"/> simultaneously.
@@ -251,10 +218,7 @@ namespace GitTfs.Core
             this IEnumerable<T> source,
             Action<T> action,
             TimeSpan retryInterval,
-            bool parallelizeActions)
-        {
-            ForEachRetry(source, action, 10, retryInterval, parallelizeActions);
-        }
+            bool parallelizeActions) => ForEachRetry(source, action, 10, retryInterval, parallelizeActions);
 
         /// <summary>
         /// TRuns the <paramref name="action"/> on each item in the <paramref name="source"/> in parallel
@@ -269,10 +233,7 @@ namespace GitTfs.Core
         /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
         /// <returns>
         /// Returns <b>true</b> when all items processed successfully.</returns>
-        public static void ForEachRetry<T>(this IEnumerable<T> source, Action<T> action, bool parallelizeActions)
-        {
-            ForEachRetry(source, action, 10, TimeSpan.FromSeconds(1), parallelizeActions);
-        }
+        public static void ForEachRetry<T>(this IEnumerable<T> source, Action<T> action, bool parallelizeActions) => ForEachRetry(source, action, 10, TimeSpan.FromSeconds(1), parallelizeActions);
 
         /// <summary>
         /// TRuns the <paramref name="action"/> on each item in the <paramref name="source"/> in parallel
@@ -290,10 +251,7 @@ namespace GitTfs.Core
         /// <typeparam name="T">The type of items in the <paramref name="source"/>.</typeparam>
         /// <returns>
         /// Returns <b>true</b> when all items processed successfully.</returns>
-        public static void ForEachRetry<T>(this IEnumerable<T> source, Action<T> action, int retryCount, bool parallelizeActions)
-        {
-            ForEachRetry(source, action, retryCount, TimeSpan.FromSeconds(1), parallelizeActions);
-        }
+        public static void ForEachRetry<T>(this IEnumerable<T> source, Action<T> action, int retryCount, bool parallelizeActions) => ForEachRetry(source, action, retryCount, TimeSpan.FromSeconds(1), parallelizeActions);
 
         /// <summary>
         /// TRuns the <paramref name="action"/> on each item in the <paramref name="source"/> in parallel

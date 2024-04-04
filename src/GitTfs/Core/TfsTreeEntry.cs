@@ -15,11 +15,8 @@ namespace GitTfs.Core
             _item = item;
         }
 
-        public IItem Item { get { return _item; } }
-        public string FullName { get { return _pathInGitRepo; } }
-        public Stream OpenRead()
-        {
-            return new TemporaryFileStream(_item.DownloadFile());
-        }
+        public IItem Item => _item;
+        public string FullName => _pathInGitRepo;
+        public Stream OpenRead() => new TemporaryFileStream(_item.DownloadFile());
     }
 }

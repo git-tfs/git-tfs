@@ -24,10 +24,7 @@ namespace GitTfs.Test.Integration
             _output.WriteLine("Repository in folder: " + h.Workdir);
         }
 
-        public void Dispose()
-        {
-            h.Dispose();
-        }
+        public void Dispose() => h.Dispose();
 
         [FactExceptOnUnix]
         public void ClonesEmptyProject()
@@ -142,8 +139,7 @@ namespace GitTfs.Test.Integration
                 tree: "c962b51eb5397f1b98f662c9d43e6be13b7065f1");
         }
 
-        private void CreateFakeRepositoryWithMergeChangeset()
-        {
+        private void CreateFakeRepositoryWithMergeChangeset() =>
             //History of changesets:
             //6
             //|\
@@ -172,7 +168,6 @@ namespace GitTfs.Test.Integration
                 r.MergeChangeset(6, "merge in main", DateTime.Parse("2012-01-02 12:12:16 -05:00"), fromBranch: "$/MyProject/Branch", intoBranch: "$/MyProject/Main", lastChangesetId: 5)
                     .Change(TfsChangeType.Edit | TfsChangeType.Merge, TfsItemType.File, "$/MyProject/Main/File.txt", "File contents_main_branch=>_merge");
             });
-        }
 
         [FactExceptOnUnix]
         public void WhenCloningTrunkWithMergeChangesetWithAllBranches_ThenThe2BranchesAreAutomaticallyInitialized()

@@ -15,20 +15,11 @@ namespace GitTfs.Commands
             _writer = writer;
         }
 
-        public OptionSet OptionSet
-        {
-            get { return _checkinOptions.OptionSet; }
-        }
+        public OptionSet OptionSet => _checkinOptions.OptionSet;
 
-        public int Run()
-        {
-            return Run("HEAD");
-        }
+        public int Run() => Run("HEAD");
 
-        public int Run(string refToCheckin)
-        {
-            return _writer.Write(refToCheckin, PerformCheckin);
-        }
+        public int Run(string refToCheckin) => _writer.Write(refToCheckin, PerformCheckin);
 
         private int PerformCheckin(TfsChangesetInfo parentChangeset, string refToCheckin)
         {

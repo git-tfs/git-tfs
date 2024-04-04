@@ -15,10 +15,7 @@ namespace GitTfs.Util
         }
 
         private Dictionary<string, string> _aliasMap;
-        public Dictionary<string, string> AliasMap
-        {
-            get { return _aliasMap ?? (_aliasMap = CreateAliasMap()); }
-        }
+        public Dictionary<string, string> AliasMap => _aliasMap ?? (_aliasMap = CreateAliasMap());
 
         private Dictionary<string, string> CreateAliasMap()
         {
@@ -42,10 +39,7 @@ namespace GitTfs.Util
             return aliasMap;
         }
 
-        public GitTfsCommand GetCommand(string name)
-        {
-            return _container.TryGetInstance<GitTfsCommand>(GetCommandName(name));
-        }
+        public GitTfsCommand GetCommand(string name) => _container.TryGetInstance<GitTfsCommand>(GetCommandName(name));
 
         private string GetCommandName(string name)
         {
@@ -53,9 +47,6 @@ namespace GitTfs.Util
             return AliasMap.TryGetValue(name, out commandName) ? commandName : name;
         }
 
-        public IEnumerable<string> GetAliasesForCommandName(string name)
-        {
-            return AliasMap.Where(p => p.Value == name).Select(p => p.Key);
-        }
+        public IEnumerable<string> GetAliasesForCommandName(string name) => AliasMap.Where(p => p.Value == name).Select(p => p.Key);
     }
 }

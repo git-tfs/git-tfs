@@ -13,23 +13,17 @@ namespace GitTfs
             _loader = loader;
         }
 
-        public void PersistAllOverrides()
-        {
-            _loader.PersistAllOverrides();
-        }
+        public void PersistAllOverrides() => _loader.PersistAllOverrides();
 
         public int BatchSize
         {
-            set { _loader.Override(GitTfsConstants.BatchSize, value); }
-            get { return _loader.Get(GitTfsConstants.BatchSize, 100); }
+            set => _loader.Override(GitTfsConstants.BatchSize, value);
+            get => _loader.Get(GitTfsConstants.BatchSize, 100);
         }
 
         public int? InitialChangeset
         {
-            set
-            {
-                _loader.Override(GitTfsConstants.InitialChangeset, value ?? -1);
-            }
+            set => _loader.Override(GitTfsConstants.InitialChangeset, value ?? -1);
             get
             {
                 int? initialChangeset = _loader.Get(GitTfsConstants.InitialChangeset, -1);

@@ -23,11 +23,7 @@ namespace GitTfs.Commands
         private string Prefix;
         private bool Squash;
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "p|prefix=",
                         v => Prefix = v},
@@ -37,8 +33,6 @@ namespace GitTfs.Commands
                     //                        v => RevisionToFetch = Convert.ToInt32(v) },
                 }
                 .Merge(_fetch.OptionSet);
-            }
-        }
 
         public Subtree(Fetch fetch, QuickFetch quickFetch, Globals globals, RemoteOptions remoteOptions)
         {

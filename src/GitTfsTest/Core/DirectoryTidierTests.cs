@@ -38,10 +38,7 @@ namespace GitTfs.Test.Core
             };
         }
 
-        public void Dispose()
-        {
-            TidyDisposeToProcess();
-        }
+        public void Dispose() => TidyDisposeToProcess();
 
         private ITfsWorkspaceModifier Tidy
         {
@@ -55,10 +52,7 @@ namespace GitTfs.Test.Core
             }
         }
 
-        private void TidyDisposeToProcess()
-        {
-            ((IDisposable)Tidy).Dispose();
-        }
+        private void TidyDisposeToProcess() => ((IDisposable)Tidy).Dispose();
 
         [Fact]
         public void PassesThroughGetLocalPath()
@@ -68,11 +62,9 @@ namespace GitTfs.Test.Core
         }
 
         [Fact]
-        public void NoChangesMeansNoChanges()
-        {
+        public void NoChangesMeansNoChanges() =>
             // nothing!
             Mock.Get(mockWorkspace).VerifyNoOtherCalls();
-        }
 
         [Fact]
         public void AddingAFilePassesThroughAndDoesNotRemoveOtherItems()
@@ -316,10 +308,7 @@ namespace GitTfs.Test.Core
                 tidy.Rename("oldFile.txt", "File.txt", ScoreIsIrrelevant));
         }
 
-        private TfsTreeEntry item(TfsItemType itemType, string gitPath)
-        {
-            return new TfsTreeEntry(gitPath, mocks.OneOf<IItem>().Tap(mockItem => Mock.Get(mockItem).Setup(x => x.ItemType).Returns(itemType)));
-        }
+        private TfsTreeEntry item(TfsItemType itemType, string gitPath) => new TfsTreeEntry(gitPath, mocks.OneOf<IItem>().Tap(mockItem => Mock.Get(mockItem).Setup(x => x.ItemType).Returns(itemType)));
 
         /// <summary>
         /// The score argument is passed through by DirectoryTidier, so its value doesn't matter.

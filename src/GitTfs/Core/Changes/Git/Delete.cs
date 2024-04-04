@@ -10,9 +10,6 @@ namespace GitTfs.Core.Changes.Git
             Path = changeInfo.path;
         }
 
-        public void Apply(ITfsWorkspaceModifier workspace)
-        {
-            workspace.Delete(Path);
-        }
+        public void Apply(ITfsWorkspaceModifier workspace) => workspace.Delete(Path);
     }
 }

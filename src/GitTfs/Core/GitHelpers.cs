@@ -45,24 +45,18 @@ namespace GitTfs.Core
         /// <summary>
         /// Runs the given git command, and passes STDOUT through to the current process's STDOUT.
         /// </summary>
-        public void CommandNoisy(params string[] command)
-        {
-            CommandOutputPipe(stdout => Trace.TraceInformation(stdout.ReadToEnd()), command);
-        }
+        public void CommandNoisy(params string[] command) => CommandOutputPipe(stdout => Trace.TraceInformation(stdout.ReadToEnd()), command);
 
         /// <summary>
         /// Runs the given git command, and redirects STDOUT to the provided action.
         /// </summary>
-        public void CommandOutputPipe(Action<TextReader> handleOutput, params string[] command)
-        {
-            Time(command, () =>
-                              {
-                                  AssertValidCommand(command);
-                                  var process = Start(command, RedirectStdout);
-                                  handleOutput(process.StandardOutput);
-                                  Close(process);
-                              });
-        }
+        public void CommandOutputPipe(Action<TextReader> handleOutput, params string[] command) => Time(command, () =>
+                                                                                                                              {
+                                                                                                                                  AssertValidCommand(command);
+                                                                                                                                  var process = Start(command, RedirectStdout);
+                                                                                                                                  handleOutput(process.StandardOutput);
+                                                                                                                                  Close(process);
+                                                                                                                              });
 
         /// <summary>
         /// Runs the given git command, and returns a reader for STDOUT. NOTE: The returned value MUST be disposed!
@@ -85,15 +79,9 @@ namespace GitTfs.Core
                 _process = process;
             }
 
-            public override void Close()
-            {
-                _helper.Close(_process);
-            }
+            public override void Close() => _helper.Close(_process);
 
-            public override System.Runtime.Remoting.ObjRef CreateObjRef(Type requestedType)
-            {
-                return _process.StandardOutput.CreateObjRef(requestedType);
-            }
+            public override System.Runtime.Remoting.ObjRef CreateObjRef(Type requestedType) => _process.StandardOutput.CreateObjRef(requestedType);
 
             protected override void Dispose(bool disposing)
             {
@@ -104,78 +92,42 @@ namespace GitTfs.Core
                 base.Dispose(disposing);
             }
 
-            public override bool Equals(object obj)
-            {
-                return _process.StandardOutput.Equals(obj);
-            }
+            public override bool Equals(object obj) => _process.StandardOutput.Equals(obj);
 
-            public override int GetHashCode()
-            {
-                return _process.StandardOutput.GetHashCode();
-            }
+            public override int GetHashCode() => _process.StandardOutput.GetHashCode();
 
-            public override object InitializeLifetimeService()
-            {
-                return _process.StandardOutput.InitializeLifetimeService();
-            }
+            public override object InitializeLifetimeService() => _process.StandardOutput.InitializeLifetimeService();
 
-            public override int Peek()
-            {
-                return _process.StandardOutput.Peek();
-            }
+            public override int Peek() => _process.StandardOutput.Peek();
 
-            public override int Read()
-            {
-                return _process.StandardOutput.Read();
-            }
+            public override int Read() => _process.StandardOutput.Read();
 
-            public override int Read(char[] buffer, int index, int count)
-            {
-                return _process.StandardOutput.Read(buffer, index, count);
-            }
+            public override int Read(char[] buffer, int index, int count) => _process.StandardOutput.Read(buffer, index, count);
 
-            public override int ReadBlock(char[] buffer, int index, int count)
-            {
-                return _process.StandardOutput.ReadBlock(buffer, index, count);
-            }
+            public override int ReadBlock(char[] buffer, int index, int count) => _process.StandardOutput.ReadBlock(buffer, index, count);
 
-            public override string ReadLine()
-            {
-                return _process.StandardOutput.ReadLine();
-            }
+            public override string ReadLine() => _process.StandardOutput.ReadLine();
 
-            public override string ReadToEnd()
-            {
-                return _process.StandardOutput.ReadToEnd();
-            }
+            public override string ReadToEnd() => _process.StandardOutput.ReadToEnd();
 
-            public override string ToString()
-            {
-                return _process.StandardOutput.ToString();
-            }
+            public override string ToString() => _process.StandardOutput.ToString();
         }
 
-        public void CommandInputPipe(Action<TextWriter> action, params string[] command)
-        {
-            Time(command, () =>
-                              {
-                                  AssertValidCommand(command);
-                                  var process = Start(command, RedirectStdin);
-                                  action(process.StandardInput.WithEncoding(_encoding));
-                                  Close(process);
-                              });
-        }
+        public void CommandInputPipe(Action<TextWriter> action, params string[] command) => Time(command, () =>
+                                                                                                                       {
+                                                                                                                           AssertValidCommand(command);
+                                                                                                                           var process = Start(command, RedirectStdin);
+                                                                                                                           action(process.StandardInput.WithEncoding(_encoding));
+                                                                                                                           Close(process);
+                                                                                                                       });
 
-        public void CommandInputOutputPipe(Action<TextWriter, TextReader> interact, params string[] command)
-        {
-            Time(command, () =>
-                              {
-                                  AssertValidCommand(command);
-                                  var process = Start(command, Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
-                                  interact(process.StandardInput.WithEncoding(_encoding), process.StandardOutput);
-                                  Close(process);
-                              });
-        }
+        public void CommandInputOutputPipe(Action<TextWriter, TextReader> interact, params string[] command) => Time(command, () =>
+                                                                                                                                           {
+                                                                                                                                               AssertValidCommand(command);
+                                                                                                                                               var process = Start(command, Ext.And<ProcessStartInfo>(RedirectStdin, RedirectStdout));
+                                                                                                                                               interact(process.StandardInput.WithEncoding(_encoding), process.StandardOutput);
+                                                                                                                                               Close(process);
+                                                                                                                                           });
 
         private void Time(string[] command, Action action)
         {
@@ -221,16 +173,9 @@ namespace GitTfs.Core
             startInfo.StandardErrorEncoding = _encoding;
         }
 
-        private void RedirectStdin(ProcessStartInfo startInfo)
-        {
-            startInfo.RedirectStandardInput = true;
-            // there is no StandardInputEncoding property, use extension method StreamWriter.WithEncoding instead
-        }
+        private void RedirectStdin(ProcessStartInfo startInfo) => startInfo.RedirectStandardInput = true;// there is no StandardInputEncoding property, use extension method StreamWriter.WithEncoding instead
 
-        private GitProcess Start(string[] command)
-        {
-            return Start(command, x => { });
-        }
+        private GitProcess Start(string[] command) => Start(command, x => { });
 
         protected virtual GitProcess Start(string[] command, Action<ProcessStartInfo> initialize)
         {
@@ -265,12 +210,9 @@ namespace GitTfs.Core
             }
         }
 
-        public IGitRepository MakeRepository(string dir)
-        {
-            return _container
+        public IGitRepository MakeRepository(string dir) => _container
                 .With("gitDir").EqualTo(dir)
                 .GetInstance<IGitRepository>();
-        }
 
         private static readonly Regex ValidCommandName = new Regex("^[a-z0-9A-Z_-]+$");
         private static void AssertValidCommand(string[] command)
@@ -314,16 +256,13 @@ namespace GitTfs.Core
 
             // Delegate a bunch of things to the Process.
 
-            public ProcessStartInfo StartInfo { get { return _process.StartInfo; } }
-            public int ExitCode { get { return _process.ExitCode; } }
+            public ProcessStartInfo StartInfo => _process.StartInfo;
+            public int ExitCode => _process.ExitCode;
 
-            public StreamWriter StandardInput { get { return _process.StandardInput; } }
-            public StreamReader StandardOutput { get { return _process.StandardOutput; } }
+            public StreamWriter StandardInput => _process.StandardInput;
+            public StreamReader StandardOutput => _process.StandardOutput;
 
-            public bool WaitForExit(int milliseconds)
-            {
-                return _process.WaitForExit(milliseconds);
-            }
+            public bool WaitForExit(int milliseconds) => _process.WaitForExit(milliseconds);
         }
     }
 }

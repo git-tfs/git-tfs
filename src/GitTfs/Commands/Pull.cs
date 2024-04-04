@@ -14,14 +14,8 @@ namespace GitTfs.Commands
         private readonly Globals _globals;
         private bool _shouldRebase;
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return _fetch.OptionSet
+        public OptionSet OptionSet => _fetch.OptionSet
                             .Add("r|rebase", "Rebase your modifications on tfs changes", v => _shouldRebase = v != null);
-            }
-        }
 
         public Pull(Globals globals, Fetch fetch)
         {
@@ -29,10 +23,7 @@ namespace GitTfs.Commands
             _globals = globals;
         }
 
-        public int Run()
-        {
-            return Run(_globals.RemoteId);
-        }
+        public int Run() => Run(_globals.RemoteId);
 
         public int Run(string remoteId)
         {

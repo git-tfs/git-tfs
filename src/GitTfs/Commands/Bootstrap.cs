@@ -23,15 +23,9 @@ namespace GitTfs.Commands
             _bootstrapper = bootstrapper;
         }
 
-        public OptionSet OptionSet
-        {
-            get { return _remoteOptions.OptionSet; }
-        }
+        public OptionSet OptionSet => _remoteOptions.OptionSet;
 
-        public int Run()
-        {
-            return Run("HEAD");
-        }
+        public int Run() => Run("HEAD");
 
         public int Run(string commitish)
         {

@@ -19,7 +19,7 @@ namespace GitTfs.Core
 
         public RemoteOptions RemoteOptions
         {
-            get { return new RemoteOptions { IgnoreRegex = IgnoreRegex, ExceptRegex = IgnoreExceptRegex, GitIgnorePath = GitIgnorePath, Username = Username, Password = Password, NoParallel = NoParallel }; }
+            get => new RemoteOptions { IgnoreRegex = IgnoreRegex, ExceptRegex = IgnoreExceptRegex, GitIgnorePath = GitIgnorePath, Username = Username, Password = Password, NoParallel = NoParallel };
             set { IgnoreRegex = value.IgnoreRegex; IgnoreExceptRegex = value.ExceptRegex; GitIgnorePath = value.GitIgnorePath; Username = value.Username; Password = value.Password; NoParallel = value.NoParallel; }
         }
     }

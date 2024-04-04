@@ -138,20 +138,14 @@ namespace GitTfs.Test.Core
                 Assert.True(remoteOptions.NoParallel);
             }
 
-            private void AssertContainsConfig(string key, string value, IEnumerable<KeyValuePair<string, string>> configs)
-            {
-                Assert.Contains(new KeyValuePair<string, string>(key, value), configs);
-            }
+            private void AssertContainsConfig(string key, string value, IEnumerable<KeyValuePair<string, string>> configs) => Assert.Contains(new KeyValuePair<string, string>(key, value), configs);
         }
 
         public class LoadTests : BaseTest
         {
             private readonly RemoteConfigConverter _loader = new RemoteConfigConverter();
 
-            private IEnumerable<RemoteInfo> Load(params ConfigurationEntry<string>[] configs)
-            {
-                return _loader.Load(configs);
-            }
+            private IEnumerable<RemoteInfo> Load(params ConfigurationEntry<string>[] configs) => _loader.Load(configs);
 
             [Fact]
             public void NoConfig()
@@ -253,23 +247,17 @@ namespace GitTfs.Test.Core
             Assert.Equal("has.dots.in.it", remotes.First().Id);
         }
 
-        private static IEnumerable<ConfigurationEntry<string>> magic(IEnumerable<KeyValuePair<string, string>> dumped)
-        {
-            return dumped.Where(e => e.Value != null).Select(e => c(e.Key, e.Value));
-        }
+        private static IEnumerable<ConfigurationEntry<string>> magic(IEnumerable<KeyValuePair<string, string>> dumped) => dumped.Where(e => e.Value != null).Select(e => c(e.Key, e.Value));
 
-        private static ConfigurationEntry<string> c(string key, string value)
-        {
-            return new TestConfigurationEntry(key, value);
-        }
+        private static ConfigurationEntry<string> c(string key, string value) => new TestConfigurationEntry(key, value);
 
         private class TestConfigurationEntry : ConfigurationEntry<string>
         {
             private readonly string _key;
             private readonly string _value;
 
-            public override string Key { get { return _key; } }
-            public override string Value { get { return _value; } }
+            public override string Key => _key;
+            public override string Value => _value;
 
             public TestConfigurationEntry(string key, string value)
             {

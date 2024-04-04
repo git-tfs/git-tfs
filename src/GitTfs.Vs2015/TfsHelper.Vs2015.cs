@@ -20,7 +20,7 @@ namespace GitTfs.Vs2015
     {
         private string vsInstallDir;
 
-        private string TfsVersionString { get { return "14.0"; } }
+        private string TfsVersionString => "14.0";
 
         public TfsHelper(TfsApiBridge bridge, IContainer container)
             : base(bridge, container)
@@ -56,23 +56,15 @@ namespace GitTfs.Vs2015
         }
 
 #pragma warning disable 618
-        private IGroupSecurityService GroupSecurityService
-        {
-            get { return GetService<IGroupSecurityService>(); }
-        }
+        private IGroupSecurityService GroupSecurityService => GetService<IGroupSecurityService>();
 
-        public override IIdentity GetIdentity(string username)
-        {
-            return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
-        }
+        public override IIdentity GetIdentity(string username) => _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
 
-        protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
-        {
-            return HasCredentials ?
+        protected override TfsTeamProjectCollection GetTfsCredential(Uri uri) => HasCredentials ?
                 new TfsTeamProjectCollection(uri, GetCredential(), new UICredentialsProvider()) :
                 new TfsTeamProjectCollection(uri, new UICredentialsProvider());
 #pragma warning restore 618
-        }
+
 
         protected override Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
         {

@@ -16,45 +16,21 @@ namespace GitTfs.Util
             _gitUserId = BuildGitUserId(_gitAuthor);
         }
 
-        public string Name
-        {
-            get
-            {
-                return _gitAuthor.Item1;
-            }
-        }
+        public string Name => _gitAuthor.Item1;
 
 
-        public string Email
-        {
-            get
-            {
-                return _gitAuthor.Item2;
-            }
-        }
+        public string Email => _gitAuthor.Item2;
 
         public string TfsUserId { get; set; }
 
-        public string GitUserId
-        {
-            get
-            {
-                return _gitUserId;
-            }
-        }
+        public string GitUserId => _gitUserId;
 
         // we only use the trimmed email address as identity
         // (dictionary key) to avoid mismatches because of
         // active directory name formatting rules.
-        public static string BuildGitUserId(string email)
-        {
-            return email.Trim();
-        }
+        public static string BuildGitUserId(string email) => email.Trim();
 
-        public static string BuildGitUserId(Tuple<string, string> gitUser)
-        {
-            return BuildGitUserId(gitUser.Item2);
-        }
+        public static string BuildGitUserId(Tuple<string, string> gitUser) => BuildGitUserId(gitUser.Item2);
 
         #region (private)
         private readonly Tuple<string, string> _gitAuthor;
@@ -75,22 +51,10 @@ namespace GitTfs.Util
 
         public static string GitTfsCachedAuthorsFileName = "git-tfs_authors";
 
-        public Dictionary<string, Author> Authors
-        {
-            get
-            {
-                return _authorsByTfsUserId;
-            }
-        }
+        public Dictionary<string, Author> Authors => _authorsByTfsUserId;
 
 
-        public Dictionary<string, Author> AuthorsByGitUserId
-        {
-            get
-            {
-                return _authorsByGitUserId;
-            }
-        }
+        public Dictionary<string, Author> AuthorsByGitUserId => _authorsByGitUserId;
 
 
         public Author FindAuthor(Tuple<string, string> gitUser)
@@ -146,10 +110,7 @@ namespace GitTfs.Util
             return true;
         }
 
-        private string GetSavedAuthorFilePath(string gitDir)
-        {
-            return Path.Combine(gitDir, GitTfsCachedAuthorsFileName);
-        }
+        private string GetSavedAuthorFilePath(string gitDir) => Path.Combine(gitDir, GitTfsCachedAuthorsFileName);
 
         public bool Parse(string authorsFilePath, string gitDir, bool couldSaveAuthorFile)
         {

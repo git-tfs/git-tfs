@@ -68,9 +68,6 @@ namespace GitTfs.Core
             return remoteId;
         }
 
-        private bool IsAvailable(string remoteName)
-        {
-            return !_globals.Repository.HasRemote(remoteName);
-        }
+        private bool IsAvailable(string remoteName) => !_globals.Repository.HasRemote(remoteName);
     }
 }

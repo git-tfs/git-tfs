@@ -73,10 +73,7 @@ namespace GitTfs.Core
             }
         }
 
-        private bool IsDirDeletedAlready(string downcasedDirName, IEnumerable<string> deletedDirs)
-        {
-            return deletedDirs.Any(t => downcasedDirName.StartsWith(t + "/") || t == downcasedDirName);
-        }
+        private bool IsDirDeletedAlready(string downcasedDirName, IEnumerable<string> deletedDirs) => deletedDirs.Any(t => downcasedDirName.StartsWith(t + "/") || t == downcasedDirName);
 
         private string GetDirectoryName(string path)
         {
@@ -92,10 +89,7 @@ namespace GitTfs.Core
             return _filesInTfs.Any(file => file.StartsWith(dirName));
         }
 
-        string ITfsWorkspaceModifier.GetLocalPath(string path)
-        {
-            return _workspace.GetLocalPath(path);
-        }
+        string ITfsWorkspaceModifier.GetLocalPath(string path) => _workspace.GetLocalPath(path);
 
         void ITfsWorkspaceModifier.Add(string path)
         {

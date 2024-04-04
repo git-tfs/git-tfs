@@ -38,9 +38,6 @@ namespace GitTfs.Test.Util
             Assert.Equal(expectedCheckinComment, specificCheckinOptions.CheckinComment);
         }
 
-        private CheckinOptionsFactory GetCheckinOptionsFactory()
-        {
-            return new CheckinOptionsFactory(mocks.Get<Globals>());
-        }
+        private CheckinOptionsFactory GetCheckinOptionsFactory() => new CheckinOptionsFactory(mocks.Get<Globals>());
     }
 }

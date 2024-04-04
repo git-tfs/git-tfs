@@ -15,10 +15,7 @@ namespace GitTfs.Test.Integration
             h.SetupFake(_ => { });
         }
 
-        public void Dispose()
-        {
-            h.Dispose();
-        }
+        public void Dispose() => h.Dispose();
 
         [Fact]
         public void WhenNoValueIsSet_ThenDefaultValueIsReturned()

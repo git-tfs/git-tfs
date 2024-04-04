@@ -32,7 +32,7 @@ namespace GitTfs.Core
             if (RecommendedSolutions == null)
                 RecommendedSolutions = (IEnumerable<string>)recommendations.Clone();
             else
-                RecommendedSolutions = RecommendedSolutions.Append<string>(recommendations);
+                RecommendedSolutions = RecommendedSolutions.Append(recommendations);
             return this;
         }
     }
