@@ -15,13 +15,9 @@ The build script target to run.
 The build configuration to use.
 .PARAMETER Verbosity
 Specifies the amount of information to be displayed.
-.PARAMETER Experimental
-Tells Cake to use the latest Roslyn release.
 .PARAMETER WhatIf
 Performs a dry run of the build script.
 No tasks will be executed.
-.PARAMETER Mono
-Tells Cake to use the Mono scripting engine.
 
 .LINK
 http://cakebuild.net
@@ -36,10 +32,8 @@ Param(
     [string]$Configuration = "Debug",
     [ValidateSet("Quiet", "Minimal", "Normal", "Verbose", "Diagnostic")]
     [string]$Verbosity = "Verbose",
-    [switch]$Experimental,
     [Alias("DryRun","Noop")]
     [switch]$WhatIf,
-    [switch]$Mono,
     [switch]$SkipToolPackageRestore,
     [Parameter(Position=0,Mandatory=$false,ValueFromRemainingArguments=$true)]
     [string[]]$ScriptArgs
@@ -78,5 +72,5 @@ if (!(Test-Path $CAKE_EXE)) {
 
 # Start Cake
 Write-Host "Running build script..."
-Invoke-Expression "& `"$CAKE_EXE`" `"$Script`" --paths_tools=`"$TOOLS_DIR`" --target=`"$Target`" --configuration=`"$Configuration`" --verbosity=`"$Verbosity`" $UseDryRun $UseExperimental $ScriptArgs"
+Invoke-Expression "& `"$CAKE_EXE`" `"$Script`" --paths_tools=`"$TOOLS_DIR`" --target=`"$Target`" --configuration=`"$Configuration`" --verbosity=`"$Verbosity`" $UseDryRun $ScriptArgs"
 exit $LASTEXITCODE
