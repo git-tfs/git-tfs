@@ -12,11 +12,7 @@ namespace GitTfs
     [StructureMapSingleton]
     public class Globals
     {
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "h|H|help",
                         v => ShowHelp = v != null },
@@ -29,8 +25,6 @@ namespace GitTfs
                     { "A|authors=", "Path to an Authors file to map TFS users to Git users (will be kept in cache and used for all the following commands)",
                         v => AuthorsFilePath = Path.GetFullPath(v) },
                 };
-            }
-        }
 
         public string AuthorsFilePath { get; set; }
         public bool ShowHelp { get; set; }
@@ -90,8 +84,8 @@ namespace GitTfs
 
         public string GitDir
         {
-            get { return Environment.GetEnvironmentVariable("GIT_DIR"); }
-            set { Environment.SetEnvironmentVariable("GIT_DIR", value); }
+            get => Environment.GetEnvironmentVariable("GIT_DIR");
+            set => Environment.SetEnvironmentVariable("GIT_DIR", value);
         }
 
         public bool GitDirSetByUser { get; set; }
@@ -121,10 +115,7 @@ If you are experiencing some crashes using git-tfs, perhaps you could get a newe
 For more information, see https://github.com/git-tfs/git-tfs/issues/448 ");
         }
 
-        public int GcPeriod
-        {
-            get { return 200; }
-        }
+        public int GcPeriod => 200;
 
         public Bootstrapper Bootstrapper { get; set; }
         public string CommandLineRun { get; set; }

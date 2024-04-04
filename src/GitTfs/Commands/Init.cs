@@ -30,20 +30,11 @@ namespace GitTfs.Commands
             _initOptions = initOptions;
         }
 
-        public OptionSet OptionSet
-        {
-            get { return _initOptions.OptionSet.Merge(_remoteOptions.OptionSet); }
-        }
+        public OptionSet OptionSet => _initOptions.OptionSet.Merge(_remoteOptions.OptionSet);
 
-        public bool IsBare
-        {
-            get { return _initOptions.IsBare; }
-        }
+        public bool IsBare => _initOptions.IsBare;
 
-        public IGitHelpers GitHelper
-        {
-            get { return _gitHelper; }
-        }
+        public IGitHelpers GitHelper => _gitHelper;
 
         public int Run(string tfsUrl, string tfsRepositoryPath)
         {
@@ -72,10 +63,7 @@ namespace GitTfs.Commands
             }
         }
 
-        private void SaveAuthorFileInRepository()
-        {
-            _authorsFileHelper.SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
-        }
+        private void SaveAuthorFileInRepository() => _authorsFileHelper.SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
 
         private void CommitTheGitIgnoreFile(string pathToGitIgnoreFile)
         {
@@ -184,25 +172,19 @@ namespace GitTfs.Commands
             return initCommand.ToArray();
         }
 
-        private void GitTfsInit(string tfsUrl, string tfsRepositoryPath)
+        private void GitTfsInit(string tfsUrl, string tfsRepositoryPath) => _globals.Repository.CreateTfsRemote(new RemoteInfo
         {
-            _globals.Repository.CreateTfsRemote(new RemoteInfo
-            {
-                Id = _globals.RemoteId,
-                Url = tfsUrl,
-                Repository = tfsRepositoryPath,
-                RemoteOptions = _remoteOptions,
-            });
-        }
+            Id = _globals.RemoteId,
+            Url = tfsUrl,
+            Repository = tfsRepositoryPath,
+            RemoteOptions = _remoteOptions,
+        });
     }
 
     public static class Ext
     {
         private static readonly Regex ValidTfsPath = new Regex("^\\$/.+");
-        public static bool IsValidTfsPath(this string tfsPath)
-        {
-            return ValidTfsPath.IsMatch(tfsPath);
-        }
+        public static bool IsValidTfsPath(this string tfsPath) => ValidTfsPath.IsMatch(tfsPath);
 
         public static void AssertValidTfsPathOrRoot(this string tfsPath)
         {
@@ -265,9 +247,6 @@ namespace GitTfs.Commands
             return index == -1 ? tfsRepositoryPath : tfsRepositoryPath.Remove(index, tfsRepositoryPath.Length - index);
         }
 
-        public static string ToLocalGitRef(this string refName)
-        {
-            return "refs/heads/" + refName;
-        }
+        public static string ToLocalGitRef(this string refName) => "refs/heads/" + refName;
     }
 }

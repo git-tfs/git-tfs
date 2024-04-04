@@ -36,14 +36,11 @@ namespace GitTfs.Core.TfsInterop
 
         public List<BranchTree> ChildBranches { get; private set; }
 
-        public string Path { get { return Branch.Path; } }
-        public string ParentPath { get { return Branch.ParentPath; } }
-        public bool IsRoot { get { return Branch.IsRoot; } }
+        public string Path => Branch.Path;
+        public string ParentPath => Branch.ParentPath;
+        public bool IsRoot => Branch.IsRoot;
 
-        public override string ToString()
-        {
-            return string.Format("{0} [{1} children]", Path, ChildBranches.Count);
-        }
+        public override string ToString() => string.Format("{0} [{1} children]", Path, ChildBranches.Count);
     }
 
     public static class BranchExtensions

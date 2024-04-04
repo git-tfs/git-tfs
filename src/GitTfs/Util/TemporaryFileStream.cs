@@ -21,10 +21,7 @@ namespace GitTfs.Util
             _filename = filename;
         }
 
-        public string Filename
-        {
-            get { return _filename; }
-        }
+        public string Filename => _filename;
 
         protected override void Dispose(bool disposing)
         {

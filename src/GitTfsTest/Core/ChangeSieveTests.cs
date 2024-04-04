@@ -48,19 +48,13 @@ namespace GitTfs.Test.Core
                 public string Committer { get; set; }
                 public IChange[] Changes { get; set; }
 
-                public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
-                {
-                    throw new NotImplementedException();
-                }
+                public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler) => throw new NotImplementedException();
             }
 
             private IGitTfsRemote _remote;
             public virtual IGitTfsRemote Remote => _remote ?? (_remote = BuildRemote());
 
-            protected virtual IGitTfsRemote BuildRemote()
-            {
-                return _mocks.OneOf<IGitTfsRemote>();
-            }
+            protected virtual IGitTfsRemote BuildRemote() => _mocks.OneOf<IGitTfsRemote>();
 
             protected MockRepository _mocks = new MockRepository(MockBehavior.Default);
             public MockRepository Mocks => _mocks;
@@ -85,64 +79,31 @@ namespace GitTfs.Test.Core
                 BaseFixture.RemoteMock.Verify(r => r.ShouldSkip(It.IsAny<string>()), Times.Never);
             }
 
-            protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges)
-            {
-                Assert.Equal(Stringify(expectedChanges), Stringify(actualChanges));
-            }
+            protected void AssertChanges(IEnumerable<ApplicableChange> actualChanges, params ApplicableChange[] expectedChanges) => Assert.Equal(Stringify(expectedChanges), Stringify(actualChanges));
 
-            private string Stringify(IEnumerable<ApplicableChange> changes)
-            {
-                return string.Join("\n", changes.Select(c => "" + c.Type + ":" + c.GitPath));
-            }
+            private string Stringify(IEnumerable<ApplicableChange> changes) => string.Join("\n", changes.Select(c => "" + c.Type + ":" + c.GitPath));
         }
 
         // A stub IChange implementation.
         private class FakeChange : IChange, IItem, IVersionControlServer
         {
-            public static IChange Add(string serverItem, TfsChangeType additionalChange = 0, int deletionId = 0)
-            {
-                return new FakeChange(TfsChangeType.Add | additionalChange, TfsItemType.File, serverItem, deletionId);
-            }
+            public static IChange Add(string serverItem, TfsChangeType additionalChange = 0, int deletionId = 0) => new FakeChange(TfsChangeType.Add | additionalChange, TfsItemType.File, serverItem, deletionId);
 
-            public static IChange Edit(string serverItem, TfsChangeType additionalChange = 0)
-            {
-                return new FakeChange(TfsChangeType.Edit | additionalChange, TfsItemType.File, serverItem);
-            }
+            public static IChange Edit(string serverItem, TfsChangeType additionalChange = 0) => new FakeChange(TfsChangeType.Edit | additionalChange, TfsItemType.File, serverItem);
 
-            public static IChange Delete(string serverItem, TfsChangeType additionalChange = 0)
-            {
-                return new FakeChange(TfsChangeType.Delete | additionalChange, TfsItemType.File, serverItem);
-            }
+            public static IChange Delete(string serverItem, TfsChangeType additionalChange = 0) => new FakeChange(TfsChangeType.Delete | additionalChange, TfsItemType.File, serverItem);
 
-            public static IChange Rename(string serverItem, string from, TfsChangeType additionalChange = 0, int deletionId = 0)
-            {
-                return new FakeChange(TfsChangeType.Rename | additionalChange, TfsItemType.File, serverItem, deletionId, from);
-            }
+            public static IChange Rename(string serverItem, string from, TfsChangeType additionalChange = 0, int deletionId = 0) => new FakeChange(TfsChangeType.Rename | additionalChange, TfsItemType.File, serverItem, deletionId, from);
 
-            public static IChange AddDir(string serverItem, TfsChangeType additionalChange = 0)
-            {
-                return new FakeChange(TfsChangeType.Add | additionalChange, TfsItemType.Folder, serverItem);
-            }
+            public static IChange AddDir(string serverItem, TfsChangeType additionalChange = 0) => new FakeChange(TfsChangeType.Add | additionalChange, TfsItemType.Folder, serverItem);
 
-            public static IChange Branch(string serverItem)
-            {
-                return new FakeChange(TfsChangeType.Branch, TfsItemType.File, serverItem);
-            }
+            public static IChange Branch(string serverItem) => new FakeChange(TfsChangeType.Branch, TfsItemType.File, serverItem);
 
-            public static IChange Merge(string serverItem)
-            {
-                return new FakeChange(TfsChangeType.Merge, TfsItemType.File, serverItem);
-            }
+            public static IChange Merge(string serverItem) => new FakeChange(TfsChangeType.Merge, TfsItemType.File, serverItem);
 
-            public static IChange MergeNewFile(string serverItem)
-            {
-                return new FakeChange(TfsChangeType.Merge | TfsChangeType.Branch, TfsItemType.File, serverItem);
-            }
+            public static IChange MergeNewFile(string serverItem) => new FakeChange(TfsChangeType.Merge | TfsChangeType.Branch, TfsItemType.File, serverItem);
 
-            public static IChange DeleteDir(string serverItem)
-            {
-                return new FakeChange(TfsChangeType.Delete, TfsItemType.Folder, serverItem);
-            }
+            public static IChange DeleteDir(string serverItem) => new FakeChange(TfsChangeType.Delete, TfsItemType.Folder, serverItem);
 
             private const int ChangesetId = 10;
 
@@ -182,10 +143,7 @@ namespace GitTfs.Test.Core
 
             long IItem.ContentLength => throw new NotImplementedException();
 
-            TemporaryFile IItem.DownloadFile()
-            {
-                throw new NotImplementedException();
-            }
+            TemporaryFile IItem.DownloadFile() => throw new NotImplementedException();
 
             IItem IVersionControlServer.GetItem(int itemId, int changesetNumber)
             {
@@ -217,26 +175,14 @@ namespace GitTfs.Test.Core
 
                 long IItem.ContentLength => throw new NotImplementedException();
 
-                TemporaryFile IItem.DownloadFile()
-                {
-                    throw new NotImplementedException();
-                }
+                TemporaryFile IItem.DownloadFile() => throw new NotImplementedException();
             }
 
-            IItem IVersionControlServer.GetItem(string itemPath, int changesetNumber)
-            {
-                throw new NotImplementedException();
-            }
+            IItem IVersionControlServer.GetItem(string itemPath, int changesetNumber) => throw new NotImplementedException();
 
-            IItem[] IVersionControlServer.GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
-            {
-                throw new NotImplementedException();
-            }
+            IItem[] IVersionControlServer.GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType) => throw new NotImplementedException();
 
-            IEnumerable<IChangeset> IVersionControlServer.QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo)
-            {
-                throw new NotImplementedException();
-            }
+            IEnumerable<IChangeset> IVersionControlServer.QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo) => throw new NotImplementedException();
         }
 
         #endregion
@@ -252,16 +198,10 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void HasEmptyChangesToFetch()
-            {
-                Assert.Empty(Subject.GetChangesToFetch());
-            }
+            public void HasEmptyChangesToFetch() => Assert.Empty(Subject.GetChangesToFetch());
 
             [Fact]
-            public void HasEmptyChangesToApply()
-            {
-                AssertChanges(Subject.GetChangesToApply() /* expect an empty list */);
-            }
+            public void HasEmptyChangesToApply() => AssertChanges(Subject.GetChangesToApply() /* expect an empty list */);
 
             public new void Dispose()
             {
@@ -301,16 +241,13 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void SplitsRenamesAndPutsDeletesFirst()
-            {
-                AssertChanges(Subject.GetChangesToApply(),
+            public void SplitsRenamesAndPutsDeletesFirst() => AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("file2.txt"),
                     ApplicableChange.Delete("file4.txt"),
                     ApplicableChange.Delete("oldfile5.txt"),
                     ApplicableChange.Update("file1.txt"),
                     ApplicableChange.Update("file3.txt"),
                     ApplicableChange.Update("file5.txt"));
-            }
         }
 
         public class WithIgnoredThings : Base<WithIgnoredThings.Fixture>
@@ -342,9 +279,7 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void AppliesDeletesFirst()
-            {
-                AssertChanges(Subject.GetChangesToApply(),
+            public void AppliesDeletesFirst() => AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("1-ignored.txt"),
                     ApplicableChange.Delete("3-included.txt"),
                     ApplicableChange.Delete("4-wasignored.txt"),
@@ -355,7 +290,6 @@ namespace GitTfs.Test.Core
                     ApplicableChange.Ignore("0-ignored.txt"),
                     ApplicableChange.Ignore("4-ignored.txt"),
                     ApplicableChange.Ignore("5-ignored.txt"));
-            }
         }
 
         public class SkipDeletedThings : Base<SkipDeletedThings.Fixture>
@@ -372,11 +306,8 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void DoesNotApplyDeletedRenamedFile()
-            {
-                AssertChanges(Subject.GetChangesToApply(),
+            public void DoesNotApplyDeletedRenamedFile() => AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("oldfile1.txt"));
-            }
         }
 
         public class DirsAndPathsOutsideTheProject : Base<DirsAndPathsOutsideTheProject.Fixture>
@@ -395,18 +326,12 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void DoesNotFetchFilesOutside()
-            {
-                Assert.Equal(new string[] { "$/Project/dir1", "$/Project/movedinside.txt" }, Subject.GetChangesToFetch().Select(c => c.Item.ServerItem));
-            }
+            public void DoesNotFetchFilesOutside() => Assert.Equal(new string[] { "$/Project/dir1", "$/Project/movedinside.txt" }, Subject.GetChangesToFetch().Select(c => c.Item.ServerItem));
 
             [Fact]
-            public void OnlyAppliesChangesInsideTheProject()
-            {
-                AssertChanges(Subject.GetChangesToApply(),
+            public void OnlyAppliesChangesInsideTheProject() => AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("startedinside.txt"),
                     ApplicableChange.Update("movedinside.txt"));
-            }
         }
 
         public class WithExistingItems : Base<WithExistingItems.Fixture>
@@ -430,14 +355,11 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void UpdatesPathCasing()
-            {
-                AssertChanges(Subject.GetChangesToApply(),
+            public void UpdatesPathCasing() => AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("dir2/file2.txt"),
                     ApplicableChange.Update("dir2/file3.txt"),
                     ApplicableChange.Update("dir1/file1.exe"),
                     ApplicableChange.Update("dir1/file4.txt"));
-            }
 
             [Fact]
             public void PreservesFileMode()
@@ -478,14 +400,11 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void DoesNotApplyBranchedFile()
-            {
-                AssertChanges(Subject.GetChangesToApply(),
+            public void DoesNotApplyBranchedFile() => AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("oldfile9.txt"),
                     ApplicableChange.Update("file7.txt"),
                     ApplicableChange.Update("file8.txt"),
                     ApplicableChange.Update("file9.txt"));
-            }
         }
 
         public class SkipMergedThings : Base<SkipMergedThings.Fixture>
@@ -520,14 +439,11 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void DoesNotApplyBranchedFile()
-            {
-                AssertChanges(Subject.GetChangesToApply(),
+            public void DoesNotApplyBranchedFile() => AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Delete("oldfile10.txt"),
                     ApplicableChange.Update("file8.txt"),
                     ApplicableChange.Update("file9.txt"),
                     ApplicableChange.Update("file10.txt"));
-            }
         }
 
         public class WithDeleteMainFolderBranchAndSubItems : Base<WithDeleteMainFolderBranchAndSubItems.Fixture>, IDisposable
@@ -549,17 +465,12 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void WhenMainBranchFolderIsDeleted_ThenKeepFileInGitCommitByDoingNothing()
-            {
-                Assert.Empty(Subject.GetChangesToApply());
-            }
+            public void WhenMainBranchFolderIsDeleted_ThenKeepFileInGitCommitByDoingNothing() => Assert.Empty(Subject.GetChangesToApply());
 
             [Fact]
-            public void DoNotFetch()
-            {
+            public void DoNotFetch() =>
                 // Because we're not going to apply changes, don't waste time fetching any.
                 Assert.Empty(Subject.GetChangesToFetch());
-            }
 
             public new void Dispose()
             {
@@ -587,17 +498,11 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void IncludesChangesInThisProject()
-            {
-                AssertChanges(Subject.GetChangesToApply(),
+            public void IncludesChangesInThisProject() => AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Update("file1.txt"));
-            }
 
             [Fact]
-            public void FetchesChangesInThisProject()
-            {
-                Assert.Equal(new string[] { "$/Project/file1.txt" }, Subject.GetChangesToFetch().Select(c => c.Item.ServerItem));
-            }
+            public void FetchesChangesInThisProject() => Assert.Equal(new string[] { "$/Project/file1.txt" }, Subject.GetChangesToFetch().Select(c => c.Item.ServerItem));
         }
 
         public class RenamedFromDeleted : Base<RenamedFromDeleted.Fixture>
@@ -613,11 +518,8 @@ namespace GitTfs.Test.Core
             }
 
             [Fact]
-            public void FetchesItemRenamedAfterDelete()
-            {
-                AssertChanges(Subject.GetChangesToApply(),
+            public void FetchesItemRenamedAfterDelete() => AssertChanges(Subject.GetChangesToApply(),
                     ApplicableChange.Update("file1.txt"));
-            }
 
             // A Change/Item that only throws an exception when you try to query its history.
             public class RenamedFromDeletedChange : IChange, IItem, IVersionControlServer
@@ -626,10 +528,7 @@ namespace GitTfs.Test.Core
                 // The TFS client throws an exception of type Microsoft.TeamFoundation.VersionControl.Client.ItemNotFoundException.
                 // ChangeSieve doesn't have a reference to the TFS client libs, so it can't catch that exact exception.
                 // This class, therefore, throws an exception that is of a type that ChangeSieve can't specifically catch.
-                IEnumerable<IChangeset> IVersionControlServer.QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo)
-                {
-                    throw new AnExceptionTypeThatYouCannotCatch();
-                }
+                IEnumerable<IChangeset> IVersionControlServer.QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo) => throw new AnExceptionTypeThatYouCannotCatch();
 
                 private class AnExceptionTypeThatYouCannotCatch : Exception
                 {
@@ -664,25 +563,13 @@ namespace GitTfs.Test.Core
 
                 long IItem.ContentLength => 0;
 
-                TemporaryFile IItem.DownloadFile()
-                {
-                    return null;
-                }
+                TemporaryFile IItem.DownloadFile() => null;
 
-                IItem IVersionControlServer.GetItem(int itemId, int changesetNumber)
-                {
-                    return null;
-                }
+                IItem IVersionControlServer.GetItem(int itemId, int changesetNumber) => null;
 
-                IItem IVersionControlServer.GetItem(string itemPath, int changesetNumber)
-                {
-                    return null;
-                }
+                IItem IVersionControlServer.GetItem(string itemPath, int changesetNumber) => null;
 
-                IItem[] IVersionControlServer.GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
-                {
-                    return null;
-                }
+                IItem[] IVersionControlServer.GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType) => null;
             }
         }
     }

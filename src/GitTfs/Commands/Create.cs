@@ -27,22 +27,13 @@ ex : git tfs create http://myTfsServer:8080/tfs/TfsRepository myProjectName
             _remoteOptions = remoteOptions;
         }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                     {
                         {"c|create-project-folder", "Create also the team project folder if it doesn't exist!", v => _createTeamProjectFolder = v != null},
                         {"t|trunk-name=", "Name of the main branch that will be created on TFS (default: \"trunk\")", v => _trunkName = v},
                     }.Merge(_clone.OptionSet);
-            }
-        }
 
-        public int Run(string tfsUrl, string projectName)
-        {
-            return Run(tfsUrl, projectName, Path.GetFileName(projectName));
-        }
+        public int Run(string tfsUrl, string projectName) => Run(tfsUrl, projectName, Path.GetFileName(projectName));
 
         public int Run(string tfsUrl, string projectName, string gitRepositoryPath)
         {

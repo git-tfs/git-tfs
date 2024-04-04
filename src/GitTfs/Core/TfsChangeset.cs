@@ -78,15 +78,9 @@ namespace GitTfs.Core
             }
         }
 
-        private void Ignore(string pathInGitRepo)
-        {
-            Trace.TraceInformation(string.Format("C{0} ! No changes applied to '{1}', file ignored", _changeset.ChangesetId, pathInGitRepo));
-        }
+        private void Ignore(string pathInGitRepo) => Trace.TraceInformation(string.Format("C{0} ! No changes applied to '{1}', file ignored", _changeset.ChangesetId, pathInGitRepo));
 
-        public IEnumerable<TfsTreeEntry> GetTree()
-        {
-            return GetFullTree().Where(item => item.Item.ItemType == TfsItemType.File && !Summary.Remote.ShouldSkip(item.FullName));
-        }
+        public IEnumerable<TfsTreeEntry> GetTree() => GetFullTree().Where(item => item.Item.ItemType == TfsItemType.File && !Summary.Remote.ShouldSkip(item.FullName));
 
         public bool IsMergeChangeset
         {
@@ -170,10 +164,7 @@ namespace GitTfs.Core
             return string.IsNullOrEmpty(Summary.Remote.TfsRepositoryPath) ? "" : Summary.Remote.Prefix;
         }
 
-        private LogEntry MakeNewLogEntry()
-        {
-            return MakeNewLogEntry(_changeset, Summary.Remote);
-        }
+        private LogEntry MakeNewLogEntry() => MakeNewLogEntry(_changeset, Summary.Remote);
 
         private LogEntry MakeNewLogEntry(IChangeset changesetToLog, IGitTfsRemote remote = null)
         {

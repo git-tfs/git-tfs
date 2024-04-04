@@ -10,14 +10,8 @@ namespace GitTfs.Core.TfsInterop
             _wrapped = wrapped;
         }
 
-        public TFS_TYPE Unwrap()
-        {
-            return _wrapped;
-        }
+        public TFS_TYPE Unwrap() => _wrapped;
 
-        public static TFS_TYPE Unwrap(object wrapper)
-        {
-            return ((WrapperFor<TFS_TYPE>)wrapper).Unwrap();
-        }
+        public static TFS_TYPE Unwrap(object wrapper) => ((WrapperFor<TFS_TYPE>)wrapper).Unwrap();
     }
 }

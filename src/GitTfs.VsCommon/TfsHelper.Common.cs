@@ -50,7 +50,7 @@ namespace GitTfs.VsCommon
         [SetterProperty]
         public ConfigProperties properties { get; set; }
 
-        public string TfsClientLibraryVersion { get { return typeof(TfsTeamProjectCollection).Assembly.GetName().Version + " (MS)"; } }
+        public string TfsClientLibraryVersion => typeof(TfsTeamProjectCollection).Assembly.GetName().Version + " (MS)";
 
         public string Url { get; set; }
 
@@ -58,10 +58,7 @@ namespace GitTfs.VsCommon
 
         public string Password { get; set; }
 
-        public bool HasCredentials
-        {
-            get { return !string.IsNullOrEmpty(Username); }
-        }
+        public bool HasCredentials => !string.IsNullOrEmpty(Username);
 
         public void EnsureAuthenticated()
         {
@@ -136,10 +133,7 @@ namespace GitTfs.VsCommon
             }
         }
 
-        private WorkItemStore WorkItems
-        {
-            get { return GetService<WorkItemStore>(); }
-        }
+        private WorkItemStore WorkItems => GetService<WorkItemStore>();
 
         private void NonFatalError(object sender, ExceptionEventArgs e)
         {
@@ -155,25 +149,13 @@ namespace GitTfs.VsCommon
             }
         }
 
-        private void Getting(object sender, GettingEventArgs e)
-        {
-            Trace.WriteLine("get [C" + e.Version + "]" + e.ServerItem);
-        }
+        private void Getting(object sender, GettingEventArgs e) => Trace.WriteLine("get [C" + e.Version + "]" + e.ServerItem);
 
         private TswaClientHyperlinkService _hyperLinkService;
 
-        private TswaClientHyperlinkService HyperlinkService
-        {
-            get { return _hyperLinkService ?? (_hyperLinkService = GetService<TswaClientHyperlinkService>()); }
-        }
+        private TswaClientHyperlinkService HyperlinkService => _hyperLinkService ?? (_hyperLinkService = GetService<TswaClientHyperlinkService>());
 
-        public int BatchCount
-        {
-            get
-            {
-                return properties.BatchSize;
-            }
-        }
+        public int BatchCount => properties.BatchSize;
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false)
         {
@@ -224,12 +206,9 @@ namespace GitTfs.VsCommon
             });
         }
 
-        public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
-        {
-            return AllTfsBranchObjects
+        public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation() => AllTfsBranchObjects
                 .Where(b => b.Properties.ParentBranch == null)
                 .Select(b => b.Properties.RootItem.Item);
-        }
 
         public IEnumerable<IBranchObject> GetBranches(bool getAlsoDeletedBranches = false)
         {
@@ -505,11 +484,8 @@ namespace GitTfs.VsCommon
             public int TargetChangeset;
             public string TargetItem;
 
-            public override string ToString()
-            {
-                return string.Format("`{0}` C{1} `{2}` Source `{3}` C{4} `{5}`", TargetChangeType, TargetChangeset, TargetItem,
+            public override string ToString() => string.Format("`{0}` C{1} `{2}` Source `{3}` C{4} `{5}`", TargetChangeType, TargetChangeset, TargetItem,
                     SourceChangeType, SourceChangeset, SourceItem);
-            }
         }
 
         private IEnumerable<MergeInfo> GetMergeInfo(string tfsPathBranchToCreate, string tfsPathParentBranch,
@@ -651,18 +627,12 @@ namespace GitTfs.VsCommon
                 workspace.CreateMapping(folder);
         }
 
-        private string GenerateWorkspaceName()
-        {
-            return "git-tfs-" + Guid.NewGuid();
-        }
+        private string GenerateWorkspaceName() => "git-tfs-" + Guid.NewGuid();
 
-        public int ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
-        {
-            return ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
+        public int ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment) => ShowCheckinDialog(_bridge.Unwrap<Workspace>(workspace),
                                      pendingChanges.Select(p => _bridge.Unwrap<PendingChange>(p)).ToArray(),
                                      checkedInfos.Select(c => _bridge.Unwrap<WorkItemCheckedInfo>(c)).ToArray(),
                                      checkinComment);
-        }
 
         private int ShowCheckinDialog(Workspace workspace, PendingChange[] pendingChanges,
             WorkItemCheckedInfo[] checkedInfos, string checkinComment)
@@ -684,15 +654,9 @@ namespace GitTfs.VsCommon
 
         protected const string DialogAssemblyName = "Microsoft.TeamFoundation.VersionControl.ControlAdapter";
 
-        private Type GetCheckinDialogType()
-        {
-            return GetDialogAssembly().GetType(DialogAssemblyName + ".CheckinDialog");
-        }
+        private Type GetCheckinDialogType() => GetDialogAssembly().GetType(DialogAssemblyName + ".CheckinDialog");
 
-        private Assembly GetDialogAssembly()
-        {
-            return Assembly.LoadFrom(GetDialogAssemblyPath());
-        }
+        private Assembly GetDialogAssembly() => Assembly.LoadFrom(GetDialogAssemblyPath());
 
         protected abstract string GetDialogAssemblyPath();
 
@@ -756,10 +720,7 @@ namespace GitTfs.VsCommon
             return matchingShelvesets != null && matchingShelvesets.Length > 0;
         }
 
-        protected string GetAuthenticatedUser()
-        {
-            return VersionControl.AuthorizedUser;
-        }
+        protected string GetAuthenticatedUser() => VersionControl.AuthorizedUser;
 
         public bool CanShowCheckinDialog
         {
@@ -890,35 +851,17 @@ namespace GitTfs.VsCommon
                 _changes = _pendingSet.PendingChanges.Select(x => new UnshelveChange(x, _bridge, versionControlServer)).Cast<IChange>().ToArray();
             }
 
-            public IChange[] Changes
-            {
-                get { return _changes; }
-            }
+            public IChange[] Changes => _changes;
 
-            public string Committer
-            {
-                get { return _pendingSet.OwnerName; }
-            }
+            public string Committer => _pendingSet.OwnerName;
 
-            public DateTime CreationDate
-            {
-                get { return _shelveset.CreationDate; }
-            }
+            public DateTime CreationDate => _shelveset.CreationDate;
 
-            public string Comment
-            {
-                get { return _shelveset.Comment; }
-            }
+            public string Comment => _shelveset.Comment;
 
-            public int ChangesetId
-            {
-                get { return -1; }
-            }
+            public int ChangesetId => -1;
 
-            public IVersionControlServer VersionControlServer
-            {
-                get { return _versionControlServer; }
-            }
+            public IVersionControlServer VersionControlServer => _versionControlServer;
 
             public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
             {
@@ -946,15 +889,9 @@ namespace GitTfs.VsCommon
                 _fakeItem = new UnshelveItem(_pendingChange, _bridge, versionControlServer);
             }
 
-            public TfsChangeType ChangeType
-            {
-                get { return _bridge.Convert<TfsChangeType>(_pendingChange.ChangeType); }
-            }
+            public TfsChangeType ChangeType => _bridge.Convert<TfsChangeType>(_pendingChange.ChangeType);
 
-            public IItem Item
-            {
-                get { return _fakeItem; }
-            }
+            public IItem Item => _fakeItem;
         }
 
         private class UnshelveItem : IItem
@@ -971,41 +908,21 @@ namespace GitTfs.VsCommon
                 _versionControlServer = versionControlServer;
             }
 
-            public IVersionControlServer VersionControlServer
-            {
-                get { return _versionControlServer; }
-            }
+            public IVersionControlServer VersionControlServer => _versionControlServer;
 
-            public int ChangesetId
-            {
-                get
-                {
+            public int ChangesetId =>
                     // some operations like applying rename gets previous item state
                     // via looking at version of item minus 1. So will try to emulate
                     // that this shelve is real revision.
-                    return _pendingChange.Version + 1;
-                }
-            }
+                    _pendingChange.Version + 1;
 
-            public string ServerItem
-            {
-                get { return _pendingChange.ServerItem; }
-            }
+            public string ServerItem => _pendingChange.ServerItem;
 
-            public int DeletionId
-            {
-                get { return _pendingChange.DeletionId; }
-            }
+            public int DeletionId => _pendingChange.DeletionId;
 
-            public TfsItemType ItemType
-            {
-                get { return _bridge.Convert<TfsItemType>(_pendingChange.ItemType); }
-            }
+            public TfsItemType ItemType => _bridge.Convert<TfsItemType>(_pendingChange.ItemType);
 
-            public int ItemId
-            {
-                get { return _pendingChange.ItemId; }
-            }
+            public int ItemId => _pendingChange.ItemId;
 
             public long ContentLength
             {
@@ -1033,10 +950,7 @@ namespace GitTfs.VsCommon
                 return temp;
             }
 
-            public void Get(ITfsWorkspace workspace)
-            {
-                _pendingChange.DownloadShelvedFile(workspace.GetLocalItemForServerItem(_pendingChange.ServerItem));
-            }
+            public void Get(ITfsWorkspace workspace) => _pendingChange.DownloadShelvedFile(workspace.GetLocalItemForServerItem(_pendingChange.ServerItem));
         }
 
 #endregion
@@ -1059,39 +973,19 @@ namespace GitTfs.VsCommon
             return history.Single();
         }
 
-        public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
-        {
-            return BuildTfsChangeset(GetLatestChangeset(remote, true), remote);
-        }
+        public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote) => BuildTfsChangeset(GetLatestChangeset(remote, true), remote);
 
-        public int GetLatestChangesetId(IGitTfsRemote remote)
-        {
-            return GetLatestChangeset(remote, false).ChangesetId;
-        }
+        public int GetLatestChangesetId(IGitTfsRemote remote) => GetLatestChangeset(remote, false).ChangesetId;
 
-        public IChangeset GetChangeset(int changesetId)
-        {
-            return _bridge.Wrap<WrapperForChangeset, Changeset>(VersionControl.GetChangeset(changesetId));
-        }
+        public IChangeset GetChangeset(int changesetId) => _bridge.Wrap<WrapperForChangeset, Changeset>(VersionControl.GetChangeset(changesetId));
 
-        public ITfsChangeset GetChangeset(int changesetId, IGitTfsRemote remote)
-        {
-            return BuildTfsChangeset(VersionControl.GetChangeset(changesetId), remote);
-        }
+        public ITfsChangeset GetChangeset(int changesetId, IGitTfsRemote remote) => BuildTfsChangeset(VersionControl.GetChangeset(changesetId), remote);
 
-        public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
-        {
-            return
-                GetWorkItemInfosHelper<IWorkItemCheckinInfo, WrapperForWorkItemCheckinInfo, WorkItemCheckinInfo>(
+        public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction) => GetWorkItemInfosHelper<IWorkItemCheckinInfo, WrapperForWorkItemCheckinInfo, WorkItemCheckinInfo>(
                     workItems, checkinAction, GetWorkItemInfo);
-        }
 
-        public IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
-        {
-            return
-                GetWorkItemInfosHelper<IWorkItemCheckedInfo, WrapperForWorkItemCheckedInfo, WorkItemCheckedInfo>(
+        public IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction) => GetWorkItemInfosHelper<IWorkItemCheckedInfo, WrapperForWorkItemCheckedInfo, WorkItemCheckedInfo>(
                     workItems, checkinAction, GetWorkItemCheckedInfo);
-        }
 
         public ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes)
         {
@@ -1115,23 +1009,14 @@ namespace GitTfs.VsCommon
             TfsWorkItemCheckinAction checkinAction,
             Func<string, WorkItemCheckinAction, TInstance> func
             )
-            where TWrapper : class
-        {
-            return (from workItem in workItems
-                    select _bridge.Wrap<TWrapper, TInstance>(
-                        func(workItem, _bridge.Convert<WorkItemCheckinAction>(checkinAction))))
+            where TWrapper : class => (from workItem in workItems
+                                       select _bridge.Wrap<TWrapper, TInstance>(
+                                           func(workItem, _bridge.Convert<WorkItemCheckinAction>(checkinAction))))
                 .Cast<TInterface>();
-        }
 
-        private WorkItemCheckinInfo GetWorkItemInfo(string workItem, WorkItemCheckinAction checkinAction)
-        {
-            return new WorkItemCheckinInfo(WorkItems.GetWorkItem(Convert.ToInt32(workItem)), checkinAction);
-        }
+        private WorkItemCheckinInfo GetWorkItemInfo(string workItem, WorkItemCheckinAction checkinAction) => new WorkItemCheckinInfo(WorkItems.GetWorkItem(Convert.ToInt32(workItem)), checkinAction);
 
-        private static WorkItemCheckedInfo GetWorkItemCheckedInfo(string workitem, WorkItemCheckinAction checkinAction)
-        {
-            return new WorkItemCheckedInfo(Convert.ToInt32(workitem), true, checkinAction);
-        }
+        private static WorkItemCheckedInfo GetWorkItemCheckedInfo(string workitem, WorkItemCheckinAction checkinAction) => new WorkItemCheckedInfo(Convert.ToInt32(workitem), true, checkinAction);
 
         public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
         {
@@ -1236,30 +1121,18 @@ namespace GitTfs.VsCommon
             }
         }
 
-        public bool IsExistingInTfs(string path)
-        {
-            return VersionControl.ServerItemExists(path, VersionSpec.Latest, DeletedState.Any, ItemType.Any);
-        }
+        public bool IsExistingInTfs(string path) => VersionControl.ServerItemExists(path, VersionSpec.Latest, DeletedState.Any, ItemType.Any);
 
-        protected void ConvertFolderIntoBranch(string tfsRepositoryPath)
-        {
-            VersionControl.CreateBranchObject(new BranchProperties(new ItemIdentifier(tfsRepositoryPath)));
-        }
+        protected void ConvertFolderIntoBranch(string tfsRepositoryPath) => VersionControl.CreateBranchObject(new BranchProperties(new ItemIdentifier(tfsRepositoryPath)));
 
         /// <summary>
         /// Help the TFS client find checkin policy assemblies.
         /// </summary>
         protected abstract Assembly LoadFromVsFolder(object sender, ResolveEventArgs args);
 
-        protected string TryGetUserRegString(string path, string name)
-        {
-            return TryGetRegString(Registry.CurrentUser, path, name);
-        }
+        protected string TryGetUserRegString(string path, string name) => TryGetRegString(Registry.CurrentUser, path, name);
 
-        protected string TryGetRegString(string path, string name)
-        {
-            return TryGetRegString(Registry.LocalMachine, path, name);
-        }
+        protected string TryGetRegString(string path, string name) => TryGetRegString(Registry.LocalMachine, path, name);
 
         protected string TryGetRegString(RegistryKey registryKey, string path, string name)
         {
@@ -1292,10 +1165,7 @@ namespace GitTfs.VsCommon
         /// <param name="path">path in the registry tree</param>
         /// <param name="startOfName">start of the name of the key to find</param>
         /// <returns>the value corresponding to the key found</returns>
-        protected string TryGetUserRegStringStartingWithName(string path, string startOfName)
-        {
-            return TryGetRegStringStartingWithName(Registry.CurrentUser, path, startOfName);
-        }
+        protected string TryGetUserRegStringStartingWithName(string path, string startOfName) => TryGetRegStringStartingWithName(Registry.CurrentUser, path, startOfName);
 
         /// <summary>
         /// Try to get the value of a key beginning with the name 'startOfName'
@@ -1308,10 +1178,7 @@ namespace GitTfs.VsCommon
         /// <param name="path">path in the registry tree</param>
         /// <param name="startOfName">start of the name of the key to find</param>
         /// <returns>the value corresponding to the key found</returns>
-        protected string TryGetRegStringStartingWithName(string path, string startOfName)
-        {
-            return TryGetRegStringStartingWithName(Registry.LocalMachine, path, startOfName);
-        }
+        protected string TryGetRegStringStartingWithName(string path, string startOfName) => TryGetRegStringStartingWithName(Registry.LocalMachine, path, startOfName);
 
         protected string TryGetRegStringStartingWithName(RegistryKey registryKey, string path, string startOfName)
         {
@@ -1366,14 +1233,8 @@ namespace GitTfs.VsCommon
             }
         }
 
-        public void DeleteShelveset(IWorkspace workspace, string shelvesetName)
-        {
-            VersionControl.DeleteShelveset(shelvesetName, workspace.OwnerName);
-        }
+        public void DeleteShelveset(IWorkspace workspace, string shelvesetName) => VersionControl.DeleteShelveset(shelvesetName, workspace.OwnerName);
 
-        protected virtual IBuildDetail GetSpecificBuildFromQueuedBuild(IQueuedBuild queuedBuild, string shelvesetName)
-        {
-            return queuedBuild.Build;
-        }
+        protected virtual IBuildDetail GetSpecificBuildFromQueuedBuild(IQueuedBuild queuedBuild, string shelvesetName) => queuedBuild.Build;
     }
 }

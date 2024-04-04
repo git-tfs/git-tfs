@@ -177,15 +177,9 @@ namespace GitTfs.VsCommon
         }
 
 #pragma warning disable 618
-        private IGroupSecurityService GroupSecurityService
-        {
-            get { return GetService<IGroupSecurityService>(); }
-        }
+        private IGroupSecurityService GroupSecurityService => GetService<IGroupSecurityService>();
 
-        public override IIdentity GetIdentity(string username)
-        {
-            return _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
-        }
+        public override IIdentity GetIdentity(string username) => _bridge.Wrap<WrapperForIdentity, Identity>(Retry.Do(() => GroupSecurityService.ReadIdentity(SearchFactor.AccountName, username, QueryMembership.None)));
 
         protected override TfsTeamProjectCollection GetTfsCredential(Uri uri)
         {
@@ -219,10 +213,7 @@ namespace GitTfs.VsCommon
 #pragma warning restore 618
         }
 
-        protected override string GetDialogAssemblyPath()
-        {
-            return Path.Combine(GetVsInstallDir(), myTeamExplorerFolder, DialogAssemblyName + ".dll");
-        }
+        protected override string GetDialogAssemblyPath() => Path.Combine(GetVsInstallDir(), myTeamExplorerFolder, DialogAssemblyName + ".dll");
 
         protected override Assembly LoadFromVsFolder(object sender, ResolveEventArgs args)
         {

@@ -13,16 +13,10 @@ namespace GitTfs.Commands
             _globals = globals;
         }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "v|verbose", v => IsVerbose = v != null },
                 };
-            }
-        }
 
         private bool IsVerbose { get; set; }
 

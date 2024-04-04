@@ -15,10 +15,7 @@ namespace GitTfs.Util
         }
 
         // Sets a value for the duration of this run of git-tfs.
-        public void Override<T>(string key, T value)
-        {
-            _overrides[key] = value;
-        }
+        public void Override<T>(string key, T value) => _overrides[key] = value;
 
         // Gets the value to use. Order of precedence:
         //

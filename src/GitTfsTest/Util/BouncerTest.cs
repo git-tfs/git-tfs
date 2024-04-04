@@ -8,10 +8,7 @@ namespace GitTfs.Test.Util
         private readonly Bouncer bouncer = new Bouncer();
 
         [Fact]
-        public void NoExpressionsMeansNotMatched()
-        {
-            Assert.False(bouncer.IsIncluded("$/Any/Path"));
-        }
+        public void NoExpressionsMeansNotMatched() => Assert.False(bouncer.IsIncluded("$/Any/Path"));
 
         [Fact]
         public void IgnoreNullExpressions()

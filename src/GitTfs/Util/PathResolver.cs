@@ -18,10 +18,7 @@ namespace GitTfs.Util
             _initialTree = initialTree;
         }
 
-        public string GetPathInGitRepo(string tfsPath)
-        {
-            return GetGitObject(tfsPath).Try(x => x.Path);
-        }
+        public string GetPathInGitRepo(string tfsPath) => GetGitObject(tfsPath).Try(x => x.Path);
 
         public GitObject GetGitObject(string tfsPath)
         {
@@ -33,15 +30,9 @@ namespace GitTfs.Util
             return Lookup(pathInGitRepo);
         }
 
-        public bool IsIgnored(string path)
-        {
-            return _remote.IsIgnored(path);
-        }
+        public bool IsIgnored(string path) => _remote.IsIgnored(path);
 
-        public bool IsInDotGit(string path)
-        {
-            return _remote.IsInDotGit(path);
-        }
+        public bool IsInDotGit(string path) => _remote.IsInDotGit(path);
 
         public bool Contains(string pathInGitRepo)
         {

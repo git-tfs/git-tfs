@@ -55,16 +55,10 @@ namespace GitTfs.Test.Commands
 
         #region Init a Branch
         [Fact]
-        public void ShouldInitBranchWhenNoBranchGitNameProposed()
-        {
-            ShouldInitBranch(null);
-        }
+        public void ShouldInitBranchWhenNoBranchGitNameProposed() => ShouldInitBranch(null);
 
         [Fact]
-        public void ShouldInitBranchWhenBranchGitNameProposed()
-        {
-            ShouldInitBranch("MyBranch");
-        }
+        public void ShouldInitBranchWhenBranchGitNameProposed() => ShouldInitBranch("MyBranch");
 
         private void ShouldInitBranch(string expectedGitBranchName)
         {

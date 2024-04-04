@@ -14,10 +14,7 @@ namespace GitTfs.Commands
             _container = container;
         }
 
-        public OptionSet OptionSet
-        {
-            get { return new OptionSet(); }
-        }
+        public OptionSet OptionSet => new OptionSet();
 
         public int Run()
         {

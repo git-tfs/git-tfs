@@ -35,7 +35,7 @@ namespace GitTfs.VsFake
             _versionControlServer = new FakeVersionControlServer(_script);
         }
 
-        public string TfsClientLibraryVersion { get { return "(FAKE)"; } }
+        public string TfsClientLibraryVersion => "(FAKE)";
 
         public string Url { get; set; }
         public string Username { get; set; }
@@ -45,12 +45,9 @@ namespace GitTfs.VsFake
 
         public void SetPathResolver() { }
 
-        public bool CanShowCheckinDialog { get { return false; } }
+        public bool CanShowCheckinDialog => false;
 
-        public int ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment)
-        {
-            throw new NotImplementedException();
-        }
+        public int ShowCheckinDialog(IWorkspace workspace, IPendingChange[] pendingChanges, IEnumerable<IWorkItemCheckedInfo> checkedInfos, string checkinComment) => throw new NotImplementedException();
 
         public IIdentity GetIdentity(string username)
         {
@@ -63,15 +60,9 @@ namespace GitTfs.VsFake
 
         #region read changesets
 
-        public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote)
-        {
-            return _script.Changesets.LastOrDefault().Try(x => BuildTfsChangeset(x, remote));
-        }
+        public ITfsChangeset GetLatestChangeset(IGitTfsRemote remote) => _script.Changesets.LastOrDefault().Try(x => BuildTfsChangeset(x, remote));
 
-        public int GetLatestChangesetId(IGitTfsRemote remote)
-        {
-            return _script.Changesets.LastOrDefault().Id;
-        }
+        public int GetLatestChangesetId(IGitTfsRemote remote) => _script.Changesets.LastOrDefault().Id;
 
         public IEnumerable<ITfsChangeset> GetChangesets(string path, int startVersion, IGitTfsRemote remote, int lastVersion = -1, bool byLots = false)
         {
@@ -109,40 +100,19 @@ namespace GitTfs.VsFake
                 _changeset = changeset;
             }
 
-            public IChange[] Changes
-            {
-                get { return _changeset.Changes.Select(x => new Change(_versionControlServer, _changeset, x)).ToArray(); }
-            }
+            public IChange[] Changes => _changeset.Changes.Select(x => new Change(_versionControlServer, _changeset, x)).ToArray();
 
-            public string Committer
-            {
-                get { return _changeset.Committer ?? "todo"; }
-            }
+            public string Committer => _changeset.Committer ?? "todo";
 
-            public DateTime CreationDate
-            {
-                get { return _changeset.CheckinDate; }
-            }
+            public DateTime CreationDate => _changeset.CheckinDate;
 
-            public string Comment
-            {
-                get { return _changeset.Comment.Replace("\n", "\r\n"); }
-            }
+            public string Comment => _changeset.Comment.Replace("\n", "\r\n");
 
-            public int ChangesetId
-            {
-                get { return _changeset.Id; }
-            }
+            public int ChangesetId => _changeset.Id;
 
-            public IVersionControlServer VersionControlServer
-            {
-                get { throw new NotImplementedException(); }
-            }
+            public IVersionControlServer VersionControlServer => throw new NotImplementedException();
 
-            public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler)
-            {
-                workspace.Get(ChangesetId, changes);
-            }
+            public void Get(ITfsWorkspace workspace, IEnumerable<IChange> changes, Action<Exception> ignorableErrorHandler) => workspace.Get(ChangesetId, changes);
         }
 
         private class Change : IChange, IItem
@@ -158,45 +128,21 @@ namespace GitTfs.VsFake
                 _change = change;
             }
 
-            TfsChangeType IChange.ChangeType
-            {
-                get { return _change.ChangeType; }
-            }
+            TfsChangeType IChange.ChangeType => _change.ChangeType;
 
-            IItem IChange.Item
-            {
-                get { return this; }
-            }
+            IItem IChange.Item => this;
 
-            IVersionControlServer IItem.VersionControlServer
-            {
-                get { return _versionControlServer; }
-            }
+            IVersionControlServer IItem.VersionControlServer => _versionControlServer;
 
-            int IItem.ChangesetId
-            {
-                get { return _changeset.Id; }
-            }
+            int IItem.ChangesetId => _changeset.Id;
 
-            string IItem.ServerItem
-            {
-                get { return _change.RepositoryPath; }
-            }
+            string IItem.ServerItem => _change.RepositoryPath;
 
-            int IItem.DeletionId
-            {
-                get { return 0; }
-            }
+            int IItem.DeletionId => 0;
 
-            TfsItemType IItem.ItemType
-            {
-                get { return _change.ItemType; }
-            }
+            TfsItemType IItem.ItemType => _change.ItemType;
 
-            int IItem.ItemId
-            {
-                get { return _change.ItemId.Value; }
-            }
+            int IItem.ItemId => _change.ItemId.Value;
 
             long IItem.ContentLength
             {
@@ -258,15 +204,9 @@ namespace GitTfs.VsFake
                 _repositoryRoot = repositoryRoot;
             }
 
-            public void GetSpecificVersion(int changesetId, IEnumerable<IItem> items, bool noParallel)
-            {
-                throw new NotImplementedException();
-            }
+            public void GetSpecificVersion(int changesetId, IEnumerable<IItem> items, bool noParallel) => throw new NotImplementedException();
 
-            public void GetSpecificVersion(IChangeset changeset, bool noParallel)
-            {
-                GetSpecificVersion(changeset.ChangesetId, changeset.Changes, noParallel);
-            }
+            public void GetSpecificVersion(IChangeset changeset, bool noParallel) => GetSpecificVersion(changeset.ChangesetId, changeset.Changes, noParallel);
 
             public void GetSpecificVersion(int changeset, IEnumerable<IChange> changes, bool noParallel)
             {
@@ -287,80 +227,35 @@ namespace GitTfs.VsFake
 
             #region unimplemented
 
-            public void Merge(string sourceTfsPath, string tfsRepositoryPath)
-            {
-                throw new NotImplementedException();
-            }
+            public void Merge(string sourceTfsPath, string tfsRepositoryPath) => throw new NotImplementedException();
 
-            public IPendingChange[] GetPendingChanges()
-            {
-                throw new NotImplementedException();
-            }
+            public IPendingChange[] GetPendingChanges() => throw new NotImplementedException();
 
-            public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
-            {
-                throw new NotImplementedException();
-            }
+            public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges) => throw new NotImplementedException();
 
-            public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, string authors, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges)
-            {
-                throw new NotImplementedException();
-            }
+            public ICheckinEvaluationResult EvaluateCheckin(TfsCheckinEvaluationOptions options, IPendingChange[] allChanges, IPendingChange[] changes, string comment, string authors, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges) => throw new NotImplementedException();
 
-            public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options)
-            {
-                throw new NotImplementedException();
-            }
+            public void Shelve(IShelveset shelveset, IPendingChange[] changes, TfsShelvingOptions options) => throw new NotImplementedException();
 
-            public int Checkin(IPendingChange[] changes, string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn)
-            {
-                throw new NotImplementedException();
-            }
+            public int Checkin(IPendingChange[] changes, string comment, string author, ICheckinNote checkinNote, IEnumerable<IWorkItemCheckinInfo> workItemChanges, TfsPolicyOverrideInfo policyOverrideInfo, bool overrideGatedCheckIn) => throw new NotImplementedException();
 
-            public int PendAdd(string path)
-            {
-                throw new NotImplementedException();
-            }
+            public int PendAdd(string path) => throw new NotImplementedException();
 
-            public int PendEdit(string path)
-            {
-                throw new NotImplementedException();
-            }
+            public int PendEdit(string path) => throw new NotImplementedException();
 
-            public int PendDelete(string path)
-            {
-                throw new NotImplementedException();
-            }
+            public int PendDelete(string path) => throw new NotImplementedException();
 
-            public int PendRename(string pathFrom, string pathTo)
-            {
-                throw new NotImplementedException();
-            }
+            public int PendRename(string pathFrom, string pathTo) => throw new NotImplementedException();
 
-            public void ForceGetFile(string path, int changeset)
-            {
-                throw new NotImplementedException();
-            }
+            public void ForceGetFile(string path, int changeset) => throw new NotImplementedException();
 
-            public void GetSpecificVersion(int changeset)
-            {
-                throw new NotImplementedException();
-            }
+            public void GetSpecificVersion(int changeset) => throw new NotImplementedException();
 
-            public string GetLocalItemForServerItem(string serverItem)
-            {
-                throw new NotImplementedException();
-            }
+            public string GetLocalItemForServerItem(string serverItem) => throw new NotImplementedException();
 
-            public string GetServerItemForLocalItem(string localItem)
-            {
-                throw new NotImplementedException();
-            }
+            public string GetServerItemForLocalItem(string localItem) => throw new NotImplementedException();
 
-            public string OwnerName
-            {
-                get { throw new NotImplementedException(); }
-            }
+            public string OwnerName => throw new NotImplementedException();
 
             #endregion
         }
@@ -385,10 +280,7 @@ namespace GitTfs.VsFake
             return exists;
         }
 
-        public IChangeset GetChangeset(int changesetId)
-        {
-            return new Changeset(_versionControlServer, _script.Changesets.First(c => c.Id == changesetId));
-        }
+        public IChangeset GetChangeset(int changesetId) => new Changeset(_versionControlServer, _script.Changesets.First(c => c.Id == changesetId));
 
         public IList<RootBranch> GetRootChangesetForBranch(string tfsPathBranchToCreate, int lastChangesetIdToCheck = -1, string tfsPathParentBranch = null)
         {
@@ -419,15 +311,9 @@ namespace GitTfs.VsFake
         }
 
         private List<string> _deletedBranchesPathes;
-        private List<string> DeletedBranchesPathes
-        {
-            get
-            {
-                return _deletedBranchesPathes ?? (_deletedBranchesPathes = _script.Changesets.Where(c => c.IsBranchChangeset &&
-                      c.Changes.Any(ch => ch.ChangeType == TfsChangeType.Delete && ch.RepositoryPath == c.BranchChangesetDatas.ParentBranch))
+        private List<string> DeletedBranchesPathes => _deletedBranchesPathes ?? (_deletedBranchesPathes = _script.Changesets.Where(c => c.IsBranchChangeset &&
+                                                                         c.Changes.Any(ch => ch.ChangeType == TfsChangeType.Delete && ch.RepositoryPath == c.BranchChangesetDatas.ParentBranch))
                       .Select(b => b.BranchChangesetDatas.ParentBranch).ToList());
-            }
-        }
 
         public IEnumerable<IBranchObject> GetBranches(bool getDeletedBranches = false)
         {
@@ -464,74 +350,32 @@ namespace GitTfs.VsFake
 
         #region unimplemented
 
-        public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName)
-        {
-            throw new NotImplementedException();
-        }
+        public IShelveset CreateShelveset(IWorkspace workspace, string shelvesetName) => throw new NotImplementedException();
 
-        public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
-        {
-            throw new NotImplementedException();
-        }
+        public IEnumerable<IWorkItemCheckinInfo> GetWorkItemInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction) => throw new NotImplementedException();
 
-        public IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction)
-        {
-            throw new NotImplementedException();
-        }
+        public IEnumerable<IWorkItemCheckedInfo> GetWorkItemCheckedInfos(IEnumerable<string> workItems, TfsWorkItemCheckinAction checkinAction) => throw new NotImplementedException();
 
-        public ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes)
-        {
-            throw new NotImplementedException();
-        }
+        public ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes) => throw new NotImplementedException();
 
-        public ITfsChangeset GetChangeset(int changesetId, IGitTfsRemote remote)
-        {
-            throw new NotImplementedException();
-        }
-        public bool HasShelveset(string shelvesetName)
-        {
-            throw new NotImplementedException();
-        }
+        public ITfsChangeset GetChangeset(int changesetId, IGitTfsRemote remote) => throw new NotImplementedException();
+        public bool HasShelveset(string shelvesetName) => throw new NotImplementedException();
 
-        public ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName)
-        {
-            throw new NotImplementedException();
-        }
+        public ITfsChangeset GetShelvesetData(IGitTfsRemote remote, string shelvesetOwner, string shelvesetName) => throw new NotImplementedException();
 
-        public int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote)
-        {
-            throw new NotImplementedException();
-        }
+        public int ListShelvesets(ShelveList shelveList, IGitTfsRemote remote) => throw new NotImplementedException();
 
-        public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation()
-        {
-            return new List<string>();
-        }
+        public IEnumerable<string> GetAllTfsRootBranchesOrderedByCreation() => new List<string>();
 
-        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null)
-        {
-            throw new NotImplementedException();
-        }
+        public IEnumerable<TfsLabel> GetLabels(string tfsPathBranch, string nameFilter = null) => throw new NotImplementedException();
 
-        public void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null)
-        {
-            throw new NotImplementedException();
-        }
+        public void CreateBranch(string sourcePath, string targetPath, int changesetId, string comment = null) => throw new NotImplementedException();
 
-        public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder)
-        {
-            throw new NotImplementedException();
-        }
+        public void CreateTfsRootBranch(string projectName, string mainBranch, string gitRepositoryPath, bool createTeamProjectFolder) => throw new NotImplementedException();
 
-        public int QueueGatedCheckinBuild(Uri value, string buildDefinitionName, string shelvesetName, string checkInTicket)
-        {
-            throw new NotImplementedException();
-        }
+        public int QueueGatedCheckinBuild(Uri value, string buildDefinitionName, string shelvesetName, string checkInTicket) => throw new NotImplementedException();
 
-        public void DeleteShelveset(IWorkspace workspace, string shelvesetName)
-        {
-            throw new NotImplementedException();
-        }
+        public void DeleteShelveset(IWorkspace workspace, string shelvesetName) => throw new NotImplementedException();
 
         #endregion
 
@@ -553,20 +397,11 @@ namespace GitTfs.VsFake
                 return new Change(this, match.Changeset, match.Change);
             }
 
-            public IItem GetItem(string itemPath, int changesetNumber)
-            {
-                throw new NotImplementedException();
-            }
+            public IItem GetItem(string itemPath, int changesetNumber) => throw new NotImplementedException();
 
-            public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType)
-            {
-                throw new NotImplementedException();
-            }
+            public IItem[] GetItems(string itemPath, int changesetNumber, TfsRecursionType recursionType) => throw new NotImplementedException();
 
-            public IEnumerable<IChangeset> QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo)
-            {
-                throw new NotImplementedException();
-            }
+            public IEnumerable<IChangeset> QueryHistory(string path, int version, int deletionId, TfsRecursionType recursion, string user, int versionFrom, int versionTo, int maxCount, bool includeChanges, bool slotMode, bool includeDownloadInfo) => throw new NotImplementedException();
         }
     }
 }

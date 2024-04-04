@@ -66,15 +66,9 @@ namespace GitTfs.Test.Integration
 
         #region set up a git repository
 
-        public void SetConfig<T>(string repodir, string key, T value)
-        {
-            Repository(repodir).Config.Set(key, value);
-        }
+        public void SetConfig<T>(string repodir, string key, T value) => Repository(repodir).Config.Set(key, value);
 
-        public T GetConfig<T>(string repodir, string key)
-        {
-            return Repository(repodir).Config.Get<T>(key, ConfigurationLevel.Local).Value;
-        }
+        public T GetConfig<T>(string repodir, string key) => Repository(repodir).Config.Get<T>(key, ConfigurationLevel.Local).Value;
 
         public void SetupGitRepo(string path, Action<RepoBuilder> buildIt)
         {
@@ -94,10 +88,7 @@ namespace GitTfs.Test.Integration
                 _repo = repo;
             }
 
-            private Signature GetCommitter()
-            {
-                return new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
-            }
+            private Signature GetCommitter() => new Signature("Test User", "test@example.com", new DateTimeOffset(DateTime.Now));
 
             public string Commit(string message, string filename = "README.txt")
             {
@@ -107,15 +98,9 @@ namespace GitTfs.Test.Integration
                 return _repo.Commit(message, committer, committer, new CommitOptions() { AllowEmptyCommit = true }).Id.Sha;
             }
 
-            public void CreateBranch(string branchName)
-            {
-                LibGit2Sharp.Commands.Checkout(_repo, _repo.CreateBranch(branchName));
-            }
+            public void CreateBranch(string branchName) => LibGit2Sharp.Commands.Checkout(_repo, _repo.CreateBranch(branchName));
 
-            public void Checkout(string commitishName)
-            {
-                LibGit2Sharp.Commands.Checkout(_repo, commitishName);
-            }
+            public void Checkout(string commitishName) => LibGit2Sharp.Commands.Checkout(_repo, commitishName);
 
             public string Merge(string branch)
             {
@@ -134,15 +119,9 @@ namespace GitTfs.Test.Integration
 
         #region set up vsfake script
 
-        public string FakeScript
-        {
-            get { return Path.Combine(Workdir, "_fakescript"); }
-        }
+        public string FakeScript => Path.Combine(Workdir, "_fakescript");
 
-        public void SetupFake(Action<FakeHistoryBuilder> scripter)
-        {
-            new Script().Tap(script => scripter(new FakeHistoryBuilder(script))).Save(FakeScript);
-        }
+        public void SetupFake(Action<FakeHistoryBuilder> scripter) => new Script().Tap(script => scripter(new FakeHistoryBuilder(script))).Save(FakeScript);
 
         public class FakeHistoryBuilder
         {
@@ -210,10 +189,7 @@ namespace GitTfs.Test.Integration
                 return new FakeChangesetBuilder(mergeChangeset);
             }
 
-            public void SetRootBranch(string rootBranchPath)
-            {
-                _script.RootBranches.Add(new ScriptedRootBranch() { BranchPath = rootBranchPath });
-            }
+            public void SetRootBranch(string rootBranchPath) => _script.RootBranches.Add(new ScriptedRootBranch() { BranchPath = rootBranchPath });
         }
 
         public class FakeChangesetBuilder
@@ -225,10 +201,7 @@ namespace GitTfs.Test.Integration
                 _changeset = changeset;
             }
 
-            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents, int? itemId = null)
-            {
-                return Change(changeType, itemType, tfsPath, Encoding.UTF8.GetBytes(contents), itemId);
-            }
+            public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string contents, int? itemId = null) => Change(changeType, itemType, tfsPath, Encoding.UTF8.GetBytes(contents), itemId);
 
             public FakeChangesetBuilder Change(TfsChangeType changeType, TfsItemType itemType, string tfsPath, byte[] contents = null, int? itemId = null)
             {
@@ -249,17 +222,11 @@ namespace GitTfs.Test.Integration
         #region run git-tfs
 
         private string _tfsUrl = "http://does/not/matter";
-        public string TfsUrl { get { return _tfsUrl; } set { _tfsUrl = value; } }
+        public string TfsUrl { get => _tfsUrl; set => _tfsUrl = value; }
 
-        public int Run(params string[] args)
-        {
-            return RunIn(".", args);
-        }
+        public int Run(params string[] args) => RunIn(".", args);
 
-        public int RunIn(string workPath, params string[] args)
-        {
-            return RunInWithConfig(workPath, "GitTfs.Test.Integration.GlobalConfigs.standard.gitconfig", args);
-        }
+        public int RunIn(string workPath, params string[] args) => RunInWithConfig(workPath, "GitTfs.Test.Integration.GlobalConfigs.standard.gitconfig", args);
 
         public int RunInWithConfig(string workPath, string configResource, params string[] args)
         {
@@ -300,10 +267,7 @@ namespace GitTfs.Test.Integration
             }
         }
 
-        private string QuoteArgs(string[] args)
-        {
-            return string.Join(" ", args.Select(arg => QuoteArg(arg)).ToArray());
-        }
+        private string QuoteArgs(string[] args) => string.Join(" ", args.Select(arg => QuoteArg(arg)).ToArray());
 
         private string QuoteArg(string arg)
         {
@@ -323,10 +287,7 @@ namespace GitTfs.Test.Integration
 
         #region assertions
 
-        public int GetCommitCount(string repodir)
-        {
-            return Repository(repodir).Commits.Count();
-        }
+        public int GetCommitCount(string repodir) => Repository(repodir).Commits.Count();
 
         public void AssertGitRepo(string repodir)
         {
@@ -335,10 +296,7 @@ namespace GitTfs.Test.Integration
             Assert.True(Directory.Exists(Path.Combine(path, ".git")), path + " should have a .git dir inside of it");
         }
 
-        public void AssertNoRef(string repodir, string gitref)
-        {
-            AssertEqual(null, RevParse(repodir, gitref), "Expected no ref " + gitref);
-        }
+        public void AssertNoRef(string repodir, string gitref) => AssertEqual(null, RevParse(repodir, gitref), "Expected no ref " + gitref);
 
         public void AssertRef(string repodir, string gitref, string expectedSha)
         {
@@ -353,10 +311,7 @@ namespace GitTfs.Test.Integration
             AssertEqual(expectedTreeSha, commit.Tree.Sha, "Expected tree at " + gitref + " to be " + expectedTreeSha);
         }
 
-        public Commit RevParseCommit(string repodir, string gitref)
-        {
-            return Repository(repodir).Lookup<Commit>(gitref);
-        }
+        public Commit RevParseCommit(string repodir, string gitref) => Repository(repodir).Lookup<Commit>(gitref);
 
         private string RevParse(string repodir, string gitref)
         {
@@ -434,10 +389,7 @@ namespace GitTfs.Test.Integration
             Assert.Equal(expectedValue, config.Value);
         }
 
-        public void AssertHead(string repodir, string headRef)
-        {
-            Assert.Equal(headRef, Repository(repodir).Head.CanonicalName);
-        }
+        public void AssertHead(string repodir, string headRef) => Assert.Equal(headRef, Repository(repodir).Head.CanonicalName);
 
         private void AssertEqual<T>(T expected, T actual, string message)
         {

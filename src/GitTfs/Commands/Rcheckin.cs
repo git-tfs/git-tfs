@@ -31,17 +31,11 @@ namespace GitTfs.Commands
             _authors = authors;
         }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                     {
                         {"a|autorebase", "Continue and rebase if new TFS changesets found", v => AutoRebase = v != null},
                         {"ignore-merge", "Force check in ignoring parent tfs branches in merge commits", v => ForceCheckin = v != null},
                     }.Merge(_checkinOptions.OptionSet);
-            }
-        }
 
         // uses rebase and works only with HEAD
         public int Run()
@@ -174,12 +168,9 @@ namespace GitTfs.Commands
             return GitTfsExitCodes.OK;
         }
 
-        public string BuildCommitMessage(GitCommit commit, bool generateCheckinComment, string latest)
-        {
-            return generateCheckinComment
+        public string BuildCommitMessage(GitCommit commit, bool generateCheckinComment, string latest) => generateCheckinComment
                                ? _globals.Repository.GetCommitMessage(commit.Sha, latest)
                                : _globals.Repository.GetCommit(commit.Sha).Message;
-        }
 
         private string FindTfsRepositoryPathOfMergedBranch(IGitTfsRemote remoteToCheckin, GitCommit[] gitParents, string target)
         {
@@ -212,9 +203,6 @@ namespace GitTfs.Commands
             return null;
         }
 
-        public void RebaseOnto(string newBaseCommit, string oldBaseCommit)
-        {
-            _globals.Repository.CommandNoisy("rebase", "--rebase-merges", "--onto", newBaseCommit, oldBaseCommit);
-        }
+        public void RebaseOnto(string newBaseCommit, string oldBaseCommit) => _globals.Repository.CommandNoisy("rebase", "--rebase-merges", "--onto", newBaseCommit, oldBaseCommit);
     }
 }

@@ -20,16 +20,10 @@ namespace GitTfs.Commands
             _globals = globals;
         }
 
-        public virtual OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public virtual OptionSet OptionSet => new OptionSet
                     {
                         { "force", "Force reset remote (when current commit do not belong to the remote to reset)", v => ForceResetRemote = v != null },
                     };
-            }
-        }
 
         public int Run(string commitRef)
         {

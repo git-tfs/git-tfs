@@ -17,10 +17,7 @@ namespace GitTfsTest.Core
         }
 
         [Fact]
-        public void ConvertsEnum()
-        {
-            Assert.Equal(OriginalEnum.Value2, _mocks.ClassUnderTest.Convert<OriginalEnum>(WrappedEnum.Value2));
-        }
+        public void ConvertsEnum() => Assert.Equal(OriginalEnum.Value2, _mocks.ClassUnderTest.Convert<OriginalEnum>(WrappedEnum.Value2));
 
         [Fact]
         public void WrapsAndUnwrapsObject()
@@ -87,18 +84,9 @@ namespace GitTfsTest.Core
                     _id = ++counter;
                 }
             }
-            public override bool Equals(object obj)
-            {
-                return obj is OriginalType && ((OriginalType)obj)._id == _id;
-            }
-            public override int GetHashCode()
-            {
-                return _id;
-            }
-            public override string ToString()
-            {
-                return "OriginalObject:" + _id;
-            }
+            public override bool Equals(object obj) => obj is OriginalType && ((OriginalType)obj)._id == _id;
+            public override int GetHashCode() => _id;
+            public override string ToString() => "OriginalObject:" + _id;
         }
         private interface IOriginalType { }
         public class WrapperForOriginalType : WrapperFor<OriginalType>, IOriginalType

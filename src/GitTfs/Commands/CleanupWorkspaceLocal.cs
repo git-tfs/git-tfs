@@ -21,10 +21,7 @@ namespace GitTfs.Commands
             _cleanupOptions = cleanupOptions;
         }
 
-        public OptionSet OptionSet
-        {
-            get { return _cleanupOptions.OptionSet; }
-        }
+        public OptionSet OptionSet => _cleanupOptions.OptionSet;
 
         public int Run()
         {

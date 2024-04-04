@@ -8,11 +8,7 @@ namespace GitTfs.Commands
     [StructureMapSingleton]
     public class CheckinOptions
     {
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "m|comment=", "A comment for the changeset",
                         v => CheckinComment = v },
@@ -41,8 +37,6 @@ namespace GitTfs.Commands
                     { "add-missing-files", "When applying an edit operation, add items that were expected to already be in TFS but were not found. Missing files indicates bad synchronization at some point. Use this option with care. This option is ignored if ignore-missing-files option is used.",
                         v => AddMissingItems = v != null },
                 };
-            }
-        }
 
         private readonly List<string> _workItemsToAssociate = new List<string>();
         private readonly List<string> _workItemsToResolve = new List<string>();
@@ -55,9 +49,9 @@ namespace GitTfs.Commands
         public string OverrideReason { get; set; }
         public bool Force { get; set; }
         public bool OverrideGatedCheckIn { get; set; }
-        public List<string> WorkItemsToAssociate { get { return _workItemsToAssociate; } }
-        public List<string> WorkItemsToResolve { get { return _workItemsToResolve; } }
-        public Dictionary<string, string> CheckinNotes { get { return _checkinNotes; } }
+        public List<string> WorkItemsToAssociate => _workItemsToAssociate;
+        public List<string> WorkItemsToResolve => _workItemsToResolve;
+        public Dictionary<string, string> CheckinNotes => _checkinNotes;
 
         public string AuthorTfsUserId { get; set; }
         public Regex WorkItemAssociateRegex { get; set; }

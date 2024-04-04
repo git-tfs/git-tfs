@@ -20,10 +20,7 @@ namespace GitTfs.Test.Integration
             _output.WriteLine("Repository in folder: " + h.Workdir);
         }
 
-        public void Dispose()
-        {
-            h.Dispose();
-        }
+        public void Dispose() => h.Dispose();
 
         [Fact]
         public void GetCommit_WhenNoCommitIsFound_ThenReturnsNull()

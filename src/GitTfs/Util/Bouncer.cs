@@ -16,18 +16,12 @@ namespace GitTfs.Util
         /// <summary>
         /// Add a regular expression for inclusion in the set.
         /// </summary>
-        public void Include(string expression)
-        {
-            Append(includes, expression);
-        }
+        public void Include(string expression) => Append(includes, expression);
 
         /// <summary>
         /// Add a regular expression for exclusion from the set.
         /// </summary>
-        public void Exclude(string expression)
-        {
-            Append(excludes, expression);
-        }
+        public void Exclude(string expression) => Append(excludes, expression);
 
         private void Append(List<Regex> set, string expression)
         {
@@ -38,9 +32,6 @@ namespace GitTfs.Util
         /// <summary>
         /// Checks if the string is included in the set.
         /// </summary>
-        public bool IsIncluded(string s)
-        {
-            return includes.Any(r => r.IsMatch(s)) && !excludes.Any(r => r.IsMatch(s));
-        }
+        public bool IsIncluded(string s) => includes.Any(r => r.IsMatch(s)) && !excludes.Any(r => r.IsMatch(s));
     }
 }

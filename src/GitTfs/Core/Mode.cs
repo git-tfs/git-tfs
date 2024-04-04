@@ -12,14 +12,8 @@ namespace GitTfs.Core
         /// </summary>
         public static readonly string NewFile = LibGit2Sharp.Mode.NonExecutableFile.ToModeString();
 
-        public static LibGit2Sharp.Mode ToFileMode(this string mode)
-        {
-            return (LibGit2Sharp.Mode)Convert.ToInt32(mode, 8);
-        }
+        public static LibGit2Sharp.Mode ToFileMode(this string mode) => (LibGit2Sharp.Mode)Convert.ToInt32(mode, 8);
 
-        public static string ToModeString(this LibGit2Sharp.Mode mode)
-        {
-            return Convert.ToString((int)mode, 8).PadLeft(6, '0');
-        }
+        public static string ToModeString(this LibGit2Sharp.Mode mode) => Convert.ToString((int)mode, 8).PadLeft(6, '0');
     }
 }

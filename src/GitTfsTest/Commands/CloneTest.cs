@@ -38,9 +38,6 @@ namespace GitTfs.Test.Commands
             "git tfs clone https://tfs/tfs $/repo/branch . --username=xxx --password=xxx --branches=all")]
         [InlineData("git tfs clone --username spraints --password SECRETOMG https://topsecret.com/tfs $/reallysupersecret",
             "git tfs clone --username=xxx --password=xxx https://topsecret.com/tfs $/reallysupersecret")]
-        public void ShouldEncodeUserCredentialsInTheCommandLine(string cmd, string output)
-        {
-            Assert.Equal(output, Init.HideUserCredentials(cmd));
-        }
+        public void ShouldEncodeUserCredentialsInTheCommandLine(string cmd, string output) => Assert.Equal(output, Init.HideUserCredentials(cmd));
     }
 }

@@ -16,11 +16,7 @@ namespace GitTfs.Commands
         public bool FullFormat { get; set; }
         public string Owner { get; set; }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "s|sort=", "How to sort shelvesets\ndate, owner, name, comment",
                         v => SortBy = v },
@@ -29,8 +25,6 @@ namespace GitTfs.Commands
                     { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to get all shelvesets.",
                         v => Owner = v },
                 };
-            }
-        }
 
         public ShelveList(Globals globals)
         {

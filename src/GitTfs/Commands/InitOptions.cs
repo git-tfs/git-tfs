@@ -11,11 +11,7 @@ namespace GitTfs.Commands
 
         public InitOptions() { GitInitAutoCrlf = DefaultAutocrlf; }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "template=", "Passed to git-init",
                         v => GitInitTemplate = v },
@@ -30,8 +26,6 @@ namespace GitTfs.Commands
                     {"bare", "Clone the TFS repository in a bare git repository", v => IsBare = v != null},
                     {"workspace=", "Set tfs workspace to a specific folder (a shorter path is better!)", v => WorkspacePath = v},
                 };
-            }
-        }
 
         private string ValidateCrlfValue(string v)
         {

@@ -13,12 +13,9 @@ namespace GitTfs.Core
             _entry = entry;
         }
 
-        public TreeEntry Entry { get { return _entry; } }
+        public TreeEntry Entry => _entry;
 
-        public string FullName
-        {
-            get { return _entry.Path; }
-        }
+        public string FullName => _entry.Path;
 
         public Stream OpenRead()
         {

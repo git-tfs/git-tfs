@@ -23,20 +23,11 @@ namespace GitTfs.Core
                 _result = result;
             }
 
-            public bool HasErrors
-            {
-                get { return Messages.Any(); }
-            }
+            public bool HasErrors => Messages.Any();
 
-            public IEnumerable<string> Messages
-            {
-                get { return BuildMessages(); }
-            }
+            public IEnumerable<string> Messages => BuildMessages();
 
-            public ICheckinEvaluationResult Result
-            {
-                get { return _result; }
-            }
+            public ICheckinEvaluationResult Result => _result;
 
             private IEnumerable<string> BuildMessages()
             {

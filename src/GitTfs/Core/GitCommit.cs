@@ -39,42 +39,15 @@ namespace GitTfs.Core
             }
         }
 
-        public Tuple<string, string> AuthorAndEmail
-        {
-            get
-            {
-                return new Tuple<string, string>(_commit.Author.Name, _commit.Author.Email);
-            }
-        }
+        public Tuple<string, string> AuthorAndEmail => new Tuple<string, string>(_commit.Author.Name, _commit.Author.Email);
 
-        public DateTimeOffset When
-        {
-            get
-            {
-                return _commit.Author.When;
-            }
-        }
+        public DateTimeOffset When => _commit.Author.When;
 
-        public string Sha
-        {
-            get
-            {
-                return _commit.Sha;
-            }
-        }
+        public string Sha => _commit.Sha;
 
-        public string Message
-        {
-            get
-            {
-                return _commit.Message;
-            }
-        }
+        public string Message => _commit.Message;
 
-        public IEnumerable<GitCommit> Parents
-        {
-            get { return _commit.Parents.Select(c => new GitCommit(c)); }
-        }
+        public IEnumerable<GitCommit> Parents => _commit.Parents.Select(c => new GitCommit(c));
     }
 }
 

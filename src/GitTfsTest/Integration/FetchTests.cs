@@ -17,10 +17,7 @@ namespace GitTfs.Test.Integration
             _output.WriteLine("Repository in folder: " + integrationHelper.Workdir);
         }
 
-        public void Dispose()
-        {
-            integrationHelper.Dispose();
-        }
+        public void Dispose() => integrationHelper.Dispose();
 
         [FactExceptOnUnix]
         public void CanFetchWithMixedUpCasingForTfsServerUrl()
@@ -77,17 +74,11 @@ namespace GitTfs.Test.Integration
             integrationHelper.AssertGitRepo("MyProject");
         }
 
-        private void AddNewCommitToFakeTfsServer()
-        {
-            integrationHelper.SetupFake(r => CreateAChangeset(r));
-        }
+        private void AddNewCommitToFakeTfsServer() => integrationHelper.SetupFake(r => CreateAChangeset(r));
 
-        private static IntegrationHelper.FakeChangesetBuilder CreateAChangeset(IntegrationHelper.FakeHistoryBuilder r)
-        {
-            return r.Changeset(3, "Add a file", DateTime.Parse("2012-01-03 12:12:12 -05:00"))
+        private static IntegrationHelper.FakeChangesetBuilder CreateAChangeset(IntegrationHelper.FakeHistoryBuilder r) => r.Changeset(3, "Add a file", DateTime.Parse("2012-01-03 12:12:12 -05:00"))
                     .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Foo")
                     .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject/Foo/Bar")
                     .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/Foo/Bar/File.txt", "File contents");
-        }
     }
 }

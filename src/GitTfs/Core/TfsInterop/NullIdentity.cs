@@ -3,15 +3,9 @@ namespace GitTfs.Core.TfsInterop
 {
     public class NullIdentity : IIdentity
     {
-        public string MailAddress
-        {
-            get { return null; }
-        }
+        public string MailAddress => null;
 
-        public string DisplayName
-        {
-            get { return null; }
-        }
+        public string DisplayName => null;
     }
 
     public class FakeIdentity : IIdentity

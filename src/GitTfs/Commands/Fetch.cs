@@ -66,11 +66,7 @@ namespace GitTfs.Commands
 
         protected int? InitialChangeset { get; set; }
 
-        public virtual OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public virtual OptionSet OptionSet => new OptionSet
                 {
                     { "all|fetch-all", "Fetch TFS changesets of all the initialized tfs remotes",
                         v => FetchAll = v != null },
@@ -111,23 +107,12 @@ namespace GitTfs.Commands
                     { "ignore-restricted-changesets", "Ignore restricted changesets",
                         v => IgnoreRestrictedChangesets = v != null }
                 }.Merge(_remoteOptions.OptionSet);
-            }
-        }
 
-        public int Run()
-        {
-            return Run(_globals.RemoteId);
-        }
+        public int Run() => Run(_globals.RemoteId);
 
-        public void Run(bool stopOnFailMergeCommit)
-        {
-            Run(stopOnFailMergeCommit, _globals.RemoteId);
-        }
+        public void Run(bool stopOnFailMergeCommit) => Run(stopOnFailMergeCommit, _globals.RemoteId);
 
-        public int Run(params string[] args)
-        {
-            return Run(false, args);
-        }
+        public int Run(params string[] args) => Run(false, args);
 
         private int Run(bool stopOnFailMergeCommit, params string[] args)
         {

@@ -24,11 +24,7 @@ namespace GitTfs.Commands
         public string TfsBranch { get; set; }
         public bool Force { get; set; }
 
-        public OptionSet OptionSet
-        {
-            get
-            {
-                return new OptionSet
+        public OptionSet OptionSet => new OptionSet
                 {
                     { "u|user=", "Shelveset owner (default: current user)\nUse 'all' to search all shelvesets.",
                         v => Owner = v },
@@ -37,8 +33,6 @@ namespace GitTfs.Commands
                     { "force", "Get as much of the Shelveset as possible, and log any other errors",
                         v => Force = v != null },
                 };
-            }
-        }
 
         public int Run(string shelvesetName, string destinationBranch)
         {
