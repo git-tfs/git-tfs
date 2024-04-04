@@ -26,7 +26,7 @@ namespace GitTfs.VsCommon
 
         public TTfs Unwrap<TTfs>(object wrapper) where TTfs : class
         {
-            return wrapper == null ? null : ((WrapperFor<TTfs>)wrapper).Unwrap();
+            return wrapper == null ? null : (wrapper is TTfs ? (TTfs)wrapper : ((WrapperFor<TTfs>)wrapper).Unwrap());
         }
 
         public TTfs[] Unwrap<TTfs>(IEnumerable wrappers) where TTfs : class

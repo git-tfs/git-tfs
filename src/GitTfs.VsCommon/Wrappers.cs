@@ -188,12 +188,12 @@ namespace GitTfs.VsCommon
             var temp = new TemporaryFile();
             try
             {
-                _bridge.Unwrap<Item>(_item).DownloadFile(temp);
+                _item.DownloadFile(temp);
                 return temp;
             }
             catch (Exception)
             {
-                Trace.WriteLine(string.Format("Something went wrong downloading \"{0}\" in changeset {1}", _item.ServerItem, _item.ChangesetId));
+                Trace.WriteLine($"Something went wrong when downloading \"{_item.ServerItem}\" from changeset {_item.ChangesetId}");
                 temp.Dispose();
                 throw;
             }
