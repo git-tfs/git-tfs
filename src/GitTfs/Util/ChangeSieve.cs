@@ -194,14 +194,14 @@ namespace GitTfs.Util
                     var previousChange = history.FirstOrDefault();
                     if (previousChange == null)
                     {
-                        Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
+                        Trace.WriteLine($"No history found for item {item.ServerItem} changesetId {item.ChangesetId}");
                         return null;
                     }
                     oldItem = previousChange.Changes[0].Item;
                 }
                 catch
                 {
-                    Trace.WriteLine(string.Format("No history found for item {0} changesetId {1}", item.ServerItem, item.ChangesetId));
+                    Trace.WriteLine($"No history found for item {item.ServerItem} changesetId {item.ChangesetId}");
                     return null;
                 }
             }

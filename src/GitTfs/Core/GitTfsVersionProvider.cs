@@ -13,10 +13,7 @@ namespace GitTfs.Core
             _tfsHelper = tfsHelper;
         }
 
-        public string GetVersionString() => string.Format("git-tfs version {0} (TFS client library {1}) ({2}-bit)",
-                       GetType().Assembly.GetName().Version,
-                       _tfsHelper.TfsClientLibraryVersion,
-                       (Environment.Is64BitProcess ? "64" : "32"));
+        public string GetVersionString() => $"git-tfs version {GetType().Assembly.GetName().Version} (TFS client library {_tfsHelper.TfsClientLibraryVersion}) ({(Environment.Is64BitProcess ? "64" : "32")}-bit)";
 
         public string GetPathToGitTfsExecutable() => Assembly.GetExecutingAssembly().Location;
     }

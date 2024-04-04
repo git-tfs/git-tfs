@@ -25,7 +25,7 @@ namespace GitTfs.Core.TfsInterop
         private string DebuggerDisplay => string.Format("{0} C{1}{2}{3}",
                     /* {0} */ TfsBranchPath,
                     /* {1} */ SourceBranchChangesetId,
-                    /* {2} */ TargetBranchChangesetId > -1 ? string.Format(" (target C{0})", TargetBranchChangesetId) : string.Empty,
+                    /* {2} */ TargetBranchChangesetId > -1 ? $" (target C{TargetBranchChangesetId})" : string.Empty,
                     /* {3} */ IsRenamedBranch ? " renamed" : ""
                 );
     }

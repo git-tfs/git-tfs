@@ -139,7 +139,7 @@ namespace GitTfs.Core
             finally
             {
                 var end = DateTime.Now;
-                Trace.WriteLine(string.Format("[{0}] {1}", end - start, string.Join(" ", command)), "git command time");
+                Trace.WriteLine($"[{end - start}] {string.Join(" ", command)}", "git command time");
             }
         }
 
@@ -158,7 +158,7 @@ namespace GitTfs.Core
             if (!process.WaitForExit((int)TimeSpan.FromSeconds(10).TotalMilliseconds))
                 throw new GitCommandException("Command did not terminate.", process);
             if (process.ExitCode != 0)
-                throw new GitCommandException(string.Format("Command exited with error code: {0}\n{1}", process.ExitCode, process.StandardErrorString), process);
+                throw new GitCommandException($"Command exited with error code: {process.ExitCode}\n{process.StandardErrorString}", process);
         }
 
         private void RedirectStdout(ProcessStartInfo startInfo)

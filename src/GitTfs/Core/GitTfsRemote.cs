@@ -497,7 +497,7 @@ namespace GitTfs.Core
                             workitemUrl = workitemUrl.Replace(oldWorkitemId, workitemId);
                         }
                     }
-                    workitemNote += string.Format("[{0}] {1}\n    {2}\n", workitemId, workitem.Title, workitemUrl);
+                    workitemNote += $"[{workitemId}] {workitem.Title}\n    {workitemUrl}\n";
                 }
                 metadatas.Append(workitemNote);
             }
