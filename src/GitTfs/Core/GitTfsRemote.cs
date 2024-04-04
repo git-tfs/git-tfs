@@ -45,6 +45,22 @@ namespace GitTfs.Core
             IgnoreExceptRegexExpression = info.IgnoreExceptRegex;
             _useGitIgnore = !_remoteOptions.NoGitIgnore && (_remoteOptions.UseGitIgnore || IsGitIgnoreSupportEnabled());
 
+            if (!string.IsNullOrWhiteSpace(remoteOptions.MultipleWorkingFoldersConfigFilePath))
+            {
+                if (System.IO.File.Exists((remoteOptions.MultipleWorkingFoldersConfigFilePath)))
+                {
+                    Trace.TraceInformation("MultipleWorkingFoldersConfigFilePath path: [{0}]", remoteOptions.MultipleWorkingFoldersConfigFilePath);
+
+                    IList<WorkingFolderMapping> mappings = Newtonsoft.Json.JsonConvert.DeserializeObject<IList<WorkingFolderMapping>>(System.IO.File.ReadAllText(remoteOptions.MultipleWorkingFoldersConfigFilePath));
+
+                    FolderMappings = (IReadOnlyList<Tuple<string, string>>)mappings.Select(c => new Tuple<string, string>(c.SourceControlFolder, c.LocalFolder));
+                }
+                else
+                {
+                    throw new FileNotFoundException("The file specified with the --MultipleWorkingFoldersConfigFilePath was not found");
+                }
+            }
+
             Autotag = info.Autotag;
 
             IsSubtree = CheckSubtree();
@@ -149,6 +165,8 @@ namespace GitTfs.Core
             }
         }
         private string[] tfsSubtreePaths = null;
+
+        public IReadOnlyList<Tuple<string, string>> FolderMappings { get; }
 
         public string IgnoreRegexExpression { get; }
         public string IgnoreExceptRegexExpression { get; }
