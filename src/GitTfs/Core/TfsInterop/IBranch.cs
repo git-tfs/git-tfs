@@ -40,7 +40,7 @@ namespace GitTfs.Core.TfsInterop
         public string ParentPath => Branch.ParentPath;
         public bool IsRoot => Branch.IsRoot;
 
-        public override string ToString() => string.Format("{0} [{1} children]", Path, ChildBranches.Count);
+        public override string ToString() => $"{Path} [{ChildBranches.Count} children]";
     }
 
     public static class BranchExtensions

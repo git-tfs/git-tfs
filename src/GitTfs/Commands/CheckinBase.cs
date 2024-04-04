@@ -27,12 +27,12 @@ namespace GitTfs.Commands
 
             if (_checkinOptions.NoMerge)
             {
-                Trace.TraceInformation("TFS Changeset #" + newChangesetId + " was created.");
+                Trace.TraceInformation($"TFS Changeset #{newChangesetId} was created.");
                 parentChangeset.Remote.Fetch();
             }
             else
             {
-                Trace.TraceInformation("TFS Changeset #" + newChangesetId + " was created. Marking it as a merge commit...");
+                Trace.TraceInformation($"TFS Changeset #{newChangesetId} was created. Marking it as a merge commit...");
                 parentChangeset.Remote.FetchWithMerge(newChangesetId, false, refToCheckin);
 
                 if (refToCheckin == "HEAD")

@@ -196,11 +196,11 @@ namespace GitTfs.Core
                 throw new GitTfsException("error: the new name of the remote is invalid!");
 
             if (HasRemote(newRemoteName))
-                throw new GitTfsException(string.Format("error: this remote name \"{0}\" is already used!", newRemoteName));
+                throw new GitTfsException($"error: this remote name \"{newRemoteName}\" is already used!");
 
             var oldRemote = ReadTfsRemote(oldRemoteName);
             if (oldRemote == null)
-                throw new GitTfsException(string.Format("error: the remote \"{0}\" doesn't exist!", oldRemoteName));
+                throw new GitTfsException($"error: the remote \"{oldRemoteName}\" doesn't exist!");
 
             var remoteInfo = oldRemote.RemoteInfo;
             remoteInfo.Id = newRemoteName;

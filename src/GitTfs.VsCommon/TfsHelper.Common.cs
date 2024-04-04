@@ -483,8 +483,7 @@ namespace GitTfs.VsCommon
             public int TargetChangeset;
             public string TargetItem;
 
-            public override string ToString() => string.Format("`{0}` C{1} `{2}` Source `{3}` C{4} `{5}`", TargetChangeType, TargetChangeset, TargetItem,
-                    SourceChangeType, SourceChangeset, SourceItem);
+            public override string ToString() => $"`{TargetChangeType}` C{TargetChangeset} `{TargetItem}` Source `{SourceChangeType}` C{SourceChangeset} `{SourceItem}`";
         }
 
         private IEnumerable<MergeInfo> GetMergeInfo(string tfsPathBranchToCreate, string tfsPathParentBranch,
