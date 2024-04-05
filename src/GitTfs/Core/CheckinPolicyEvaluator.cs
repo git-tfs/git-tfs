@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using GitTfs.Core.TfsInterop;
+﻿using GitTfs.Core.TfsInterop;
 
 namespace GitTfs.Core
 {

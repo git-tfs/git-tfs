@@ -1,8 +1,5 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using NDesk.Options;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;

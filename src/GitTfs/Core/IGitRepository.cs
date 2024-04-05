@@ -1,6 +1,5 @@
-using System;
-using System.Collections.Generic;
 using LibGit2Sharp;
+
 using Branch = LibGit2Sharp.Branch;
 
 namespace GitTfs.Core

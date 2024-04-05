@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using LibGit2Sharp;
+﻿using LibGit2Sharp;
 
 namespace GitTfs.Core
 {

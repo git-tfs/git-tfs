@@ -2,12 +2,10 @@ using GitTfs.Commands;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Util;
+
 using StructureMap;
-using System;
-using System.Collections.Generic;
+
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 
 namespace GitTfs.VsFake
 {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using GitTfs.Commands;
 using GitTfs.Core;
 using System.Diagnostics;

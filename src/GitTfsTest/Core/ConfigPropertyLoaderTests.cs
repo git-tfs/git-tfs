@@ -1,7 +1,8 @@
-﻿using System;
-using GitTfs.Core;
+﻿using GitTfs.Core;
 using GitTfs.Util;
+
 using StructureMap;
+
 using Xunit;
 
 namespace GitTfs.Test.Integration

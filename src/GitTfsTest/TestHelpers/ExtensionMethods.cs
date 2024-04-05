@@ -1,5 +1,4 @@
-﻿using System;
-using Xunit.Sdk;
+﻿using Xunit.Sdk;
 
 namespace GitTfs.Test.TestHelpers
 {

@@ -1,6 +1,4 @@
 ﻿using LibGit2Sharp;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace GitTfs.Core
 {

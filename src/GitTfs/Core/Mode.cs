@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GitTfs.Core
+﻿namespace GitTfs.Core
 {
     /// <summary>
     /// Common modes for git tree entries (files).

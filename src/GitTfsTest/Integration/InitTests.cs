@@ -1,6 +1,5 @@
-﻿using System;
-using System.IO;
-using GitTfs.Core.TfsInterop;
+﻿using GitTfs.Core.TfsInterop;
+
 using Xunit.Abstractions;
 
 namespace GitTfs.Test.Integration

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GitTfs
+﻿namespace GitTfs
 {
     /// <summary>
     ///     Collection of exit codes used by git-tfs.

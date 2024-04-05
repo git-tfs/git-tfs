@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using GitTfs.Commands;
 
 namespace GitTfs.Core.TfsInterop

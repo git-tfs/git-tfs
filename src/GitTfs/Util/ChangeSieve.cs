@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
+
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
+
 using Mode = LibGit2Sharp.Mode;
 
 namespace GitTfs.Util

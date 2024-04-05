@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
 using GitTfs.Core.BranchVisitors;
 
 namespace GitTfs.Core.TfsInterop

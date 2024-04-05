@@ -1,5 +1,4 @@
-﻿using System;
-using NDesk.Options;
+﻿using NDesk.Options;
 using GitTfs.Core;
 using StructureMap;
 

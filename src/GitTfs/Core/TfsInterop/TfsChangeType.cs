@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GitTfs.Core.TfsInterop
+﻿namespace GitTfs.Core.TfsInterop
 {
     // Copy of http://msdn.microsoft.com/en-us/library/microsoft.teamfoundation.versioncontrol.client.changetype.aspx
     [Flags]

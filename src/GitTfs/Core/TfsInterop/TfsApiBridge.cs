@@ -1,6 +1,7 @@
 using System.Collections;
-using System.Linq;
+
 using GitTfs.Core.TfsInterop;
+
 using StructureMap;
 
 namespace GitTfs.VsCommon

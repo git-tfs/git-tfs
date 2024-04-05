@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using System.IO;
+﻿using System.Text;
 using GitTfs.Util;
 using GitTfs.Core;
 using Xunit;

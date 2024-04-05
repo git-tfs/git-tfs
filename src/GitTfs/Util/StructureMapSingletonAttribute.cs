@@ -1,5 +1,4 @@
-﻿using System;
-using StructureMap;
+﻿using StructureMap;
 
 namespace GitTfs.Util
 {

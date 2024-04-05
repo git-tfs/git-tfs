@@ -1,6 +1,4 @@
-﻿using System;
-
-using GitTfs.Core.TfsInterop;
+﻿using GitTfs.Core.TfsInterop;
 
 using Xunit;
 using Xunit.Abstractions;

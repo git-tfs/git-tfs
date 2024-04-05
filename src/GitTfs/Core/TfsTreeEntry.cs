@@ -1,5 +1,4 @@
-﻿using System.IO;
-using GitTfs.Core.TfsInterop;
+﻿using GitTfs.Core.TfsInterop;
 using GitTfs.Util;
 
 namespace GitTfs.Core

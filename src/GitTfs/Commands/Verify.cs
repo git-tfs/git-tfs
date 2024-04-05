@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using NDesk.Options;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;

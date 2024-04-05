@@ -1,7 +1,5 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using NDesk.Options;
 using StructureMap;
 using GitTfs.Core;
