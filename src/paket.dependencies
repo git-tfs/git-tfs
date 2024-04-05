@@ -24,7 +24,6 @@ group Build
 nuget Cake ~> 1.3.0
 nuget Cake.Git ~> 1.0.1
 nuget GitVersion.CommandLine
-nuget Octokit.CodeFormatter 1.0.0-preview preview
 nuget opencover
 nuget reportgenerator
 nuget Octokit ~> 0.52

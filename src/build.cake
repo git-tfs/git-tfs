@@ -631,18 +631,6 @@ Task("Chocolatey").Description("Generate the chocolatey package")
 	}
 });
 
-Task("FormatCode").Description("Format c# code source to keep formatting consistent")
-	.Does(() =>
-{
-	var codeFormatter = @"packages\build\Octokit.CodeFormatter\tools\CodeFormatter.exe";
-	var args = "GitTfs.sln /rule-:FieldNames /nounicode /nocopyright";
-	Information("Will run:" + codeFormatter + " " + args);
-	var exitCode = StartProcess(codeFormatter, new ProcessSettings
-	{
-		Arguments = args
-	});
-});
-
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
