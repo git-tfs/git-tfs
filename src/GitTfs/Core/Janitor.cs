@@ -1,6 +1,5 @@
-﻿using System;
-using GitTfs.Util;
-using System.Collections.Generic;
+﻿using GitTfs.Util;
+
 using System.Diagnostics;
 
 namespace GitTfs.Core

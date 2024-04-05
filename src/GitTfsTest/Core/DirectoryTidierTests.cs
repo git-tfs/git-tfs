@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Xunit;
+﻿using Xunit;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 using Moq;

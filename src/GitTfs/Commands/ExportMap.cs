@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
-using System.IO;
+
 using GitTfs.Core;
+
 using NDesk.Options;
+
 using StructureMap;
-using System.Linq;
 
 namespace GitTfs.Commands
 {

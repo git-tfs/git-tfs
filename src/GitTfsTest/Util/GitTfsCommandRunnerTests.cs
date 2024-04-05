@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using GitTfs.Commands;
+﻿using GitTfs.Commands;
 using GitTfs.Util;
 using Moq;
 using StructureMap.AutoMocking;

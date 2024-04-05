@@ -1,5 +1,4 @@
-﻿using System;
-using GitTfs.Commands;
+﻿using GitTfs.Commands;
 using GitTfs.Util;
 using Xunit;
 using StructureMap.AutoMocking;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GitTfs.Core.TfsInterop
+﻿namespace GitTfs.Core.TfsInterop
 {
     [Flags]
     public enum TfsCheckinEvaluationOptions

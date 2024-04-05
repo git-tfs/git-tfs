@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
-using GitTfs.Core;
+﻿using GitTfs.Core;
 using GitTfs.Core.Changes.Git;
+
 using StructureMap;
+
 using Xunit;
 
 namespace GitTfs.Test.Core

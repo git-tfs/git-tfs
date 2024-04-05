@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using GitTfs.Commands;
+﻿using GitTfs.Commands;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
+
 using Moq;
+
 using Xunit;
 
 namespace GitTfs.Test.Core

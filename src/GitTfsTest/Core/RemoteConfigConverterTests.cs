@@ -1,8 +1,8 @@
 ﻿using GitTfs.Commands;
 using GitTfs.Core;
+
 using LibGit2Sharp;
-using System.Collections.Generic;
-using System.Linq;
+
 using Xunit;
 
 namespace GitTfs.Test.Core

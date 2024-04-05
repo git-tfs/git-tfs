@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace GitTfs.Core
+﻿namespace GitTfs.Core
 {
     public interface ITreeEntry
     {

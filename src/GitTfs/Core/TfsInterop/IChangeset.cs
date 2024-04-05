@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace GitTfs.Core.TfsInterop
 {
     public interface IChangeset

@@ -1,9 +1,9 @@
-using System;
 using System.Collections;
 using System.Diagnostics;
-using System.IO;
+
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
+
 using Xunit;
 
 namespace GitTfs.Test.Core

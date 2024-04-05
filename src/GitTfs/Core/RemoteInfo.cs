@@ -1,5 +1,4 @@
 ﻿using GitTfs.Commands;
-using System.Collections.Generic;
 
 namespace GitTfs.Core
 {

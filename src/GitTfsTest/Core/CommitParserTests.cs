@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using GitTfs.Core;
+
 using Xunit;
 
 namespace GitTfs.Test.Core

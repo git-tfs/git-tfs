@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using LibGit2Sharp;
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;

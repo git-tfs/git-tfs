@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using LibGit2Sharp;
+﻿using LibGit2Sharp;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Test.Fixtures;
 using Xunit;

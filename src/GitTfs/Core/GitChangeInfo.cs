@@ -1,11 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+
 using StructureMap;
+
 using FileMode = LibGit2Sharp.Mode;
 
 namespace GitTfs.Core

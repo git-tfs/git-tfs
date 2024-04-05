@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Diagnostics;
 using System.Runtime.Serialization.Formatters.Binary;
+
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 

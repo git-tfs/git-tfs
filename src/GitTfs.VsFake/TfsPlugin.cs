@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using GitTfs.Core;
 using GitTfs.VsFake;
 

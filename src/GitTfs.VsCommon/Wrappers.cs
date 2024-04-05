@@ -1,14 +1,12 @@
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
 using GitTfs.Util;
+
 using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.VersionControl.Common;
-using System;
-using System.Collections.Generic;
+
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 
 namespace GitTfs.VsCommon
 {

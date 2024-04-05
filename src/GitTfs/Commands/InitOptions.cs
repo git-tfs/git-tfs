@@ -1,4 +1,3 @@
-using System;
 using NDesk.Options;
 using GitTfs.Util;
 

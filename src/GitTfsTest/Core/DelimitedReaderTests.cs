@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.Text;
+
 using GitTfs.Core;
+
 using Xunit;
 
 namespace GitTfs.Test.Core

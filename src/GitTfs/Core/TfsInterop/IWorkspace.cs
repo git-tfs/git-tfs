@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace GitTfs.Core.TfsInterop
 {
     public interface IWorkspace

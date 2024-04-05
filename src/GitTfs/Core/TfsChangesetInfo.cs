@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace GitTfs.Core
+﻿namespace GitTfs.Core
 {
     public class TfsChangesetInfo
     {

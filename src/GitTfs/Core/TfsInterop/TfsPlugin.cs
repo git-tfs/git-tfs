@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Reflection;
+
 using StructureMap;
 using StructureMap.Graph;
-using System.IO;
 #if NETFRAMEWORK
-using Microsoft.Win32;
 #endif
 
 namespace GitTfs.Core.TfsInterop

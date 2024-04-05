@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
-using GitTfs.Core;
+﻿using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
+
 using StructureMap;
+
 using Xunit;
 using Xunit.Abstractions;
 

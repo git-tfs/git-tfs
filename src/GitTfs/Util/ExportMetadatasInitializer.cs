@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using GitTfs.Core;
+﻿using GitTfs.Core;
 
 namespace GitTfs.Util
 {
