@@ -387,15 +387,24 @@ namespace GitTfs.Test.Integration
 
         public void AssertHead(string repodir, string headRef) => Assert.Equal(headRef, Repository(repodir).Head.CanonicalName);
 
+        public class NotEqualWithMessageException : XunitException {
+
+            public NotEqualWithMessageException(string message, Exception ex)
+                : base($"{message}: {ex.Message}", ex)
+            {
+
+            }
+        }
+
         private void AssertEqual<T>(T expected, T actual, string message)
         {
             try
             {
                 Assert.Equal(expected, actual);
             }
-            catch (AssertActualExpectedException)
+            catch (XunitException ex)
             {
-                throw new AssertActualExpectedException(expected, actual, message);
+                throw new NotEqualWithMessageException(message, ex);
             }
         }
 
