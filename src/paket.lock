@@ -2,9 +2,9 @@ RESTRICTION: == net48
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Castle.Core (4.4)
-    LibGit2Sharp (0.26.2)
-      LibGit2Sharp.NativeBinaries (2.0.306)
-    LibGit2Sharp.NativeBinaries (2.0.306)
+    LibGit2Sharp (0.30)
+      LibGit2Sharp.NativeBinaries (2.0.322)
+    LibGit2Sharp.NativeBinaries (2.0.322)
     Moq (4.14.7)
       Castle.Core (>= 4.4)
       System.Threading.Tasks.Extensions (>= 4.5.1)
