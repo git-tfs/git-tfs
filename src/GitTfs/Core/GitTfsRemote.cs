@@ -326,6 +326,11 @@ namespace GitTfs.Core
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
 
+            // If a branch is the result of a branch rename operation,
+            // the first commit on the branch will be the rename commit.
+            // In this case, we still want to fetch it, and we use firstOnBranch
+            // to track this state.
+            bool firstOnBranch = true;
             bool fetchRetrievedChangesets;
             do
             {
@@ -335,6 +340,11 @@ namespace GitTfs.Core
                 fetchRetrievedChangesets = false;
                 foreach (var changeset in fetchedChangesets)
                 {
+                    if (firstOnBranch &&
+                        _properties.InitialChangeset.HasValue &&
+                        changeset.Summary.ChangesetId >= _properties.InitialChangeset.Value)
+                        firstOnBranch = false;
+
                     fetchRetrievedChangesets = true;
 
                     fetchResult.NewChangesetCount++;
@@ -350,7 +360,7 @@ namespace GitTfs.Core
                     var parentSha = (renameResult != null && renameResult.IsProcessingRenameChangeset) ? renameResult.LastParentCommitBeforeRename : MaxCommitHash;
                     var isFirstTFSCommitInRepository = (MaxChangesetId == 0);
                     var log = Apply(parentSha, changeset, objects);
-                    if (changeset.IsRenameChangeset && !isFirstTFSCommitInRepository)
+                    if (changeset.IsRenameChangeset && !isFirstTFSCommitInRepository && !firstOnBranch)
                     {
                         if (renameResult == null || !renameResult.IsProcessingRenameChangeset)
                         {
@@ -637,10 +647,12 @@ namespace GitTfs.Core
             var branchesDatas = Tfs.GetRootChangesetForBranch(tfsBranch.Path, parentChangesetId);
 
             IGitTfsRemote remote = null;
+            bool first = true;
             foreach (var branch in branchesDatas)
             {
                 var rootChangesetId = branch.SourceBranchChangesetId;
-                remote = InitBranch(_remoteOptions, tfsBranch.Path, rootChangesetId, true);
+                remote = InitBranch(_remoteOptions, branch.TfsBranchPath, rootChangesetId, first, renameResult: renameResult);
+                first = false;
                 if (remote == null)
                 {
                     Trace.TraceInformation("warning: root commit not found corresponding to changeset " + rootChangesetId);
@@ -652,7 +664,12 @@ namespace GitTfs.Core
                 {
                     try
                     {
-                        remote.Fetch(renameResult: renameResult);
+                        IFetchResult lastFetch = remote.Fetch(renameResult: renameResult);
+                        if (lastFetch != null &&
+                            lastFetch.IsProcessingRenameChangeset)
+                            renameResult = lastFetch;
+                        else
+                            renameResult = null;
                     }
                     finally
                     {
@@ -969,7 +986,11 @@ namespace GitTfs.Core
             string sha1RootCommit = null;
             if (rootChangesetId != -1)
             {
-                sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
+                if (renameResult != null &&
+                    renameResult.IsProcessingRenameChangeset)
+                    sha1RootCommit = renameResult.LastParentCommitBeforeRename;
+                else
+                    sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
                 if (fetchParentBranch && string.IsNullOrWhiteSpace(sha1RootCommit))
                 {
                     try
