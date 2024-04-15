@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 using GitTfs.Core;
 
@@ -44,7 +44,7 @@ namespace GitTfs.Util
             return false;
         }
 
-        private static readonly Regex SplitDirnameFilename = new Regex(@"(?<dir>.*)[/\\](?<file>[^/\\]+)", RegexOptions.Compiled);
+        private static readonly Regex SplitDirnameFilename = new Regex(@"^(?<dir>.*)[/\\](?<file>[^/\\]+)$", RegexOptions.Compiled);
 
         private GitObject Lookup(string pathInGitRepo)
         {
