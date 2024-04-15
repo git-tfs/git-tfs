@@ -247,7 +247,6 @@ namespace GitTfs.VsCommon
             tfsPathParentBranch = tfsParentBranch;
             Trace.WriteLine("Found parent branch : " + tfsPathParentBranch);
 
-
             try
             {
                 // This method now handles the scenario where a valid branch has been detected for migration but its
@@ -265,23 +264,17 @@ namespace GitTfs.VsCommon
                 // Now, the code does not assume any given changeset is the branch root and instead crawls its history in
                 // batches to find the first changeset with merge history and assumes that changeset is the root.
 
-                const int batchSize = 100;
-
                 IEnumerable<MergeInfo> branchChangesetInTargetBranch = null;
                 for (var batchNumber = 1; branchChangesetInTargetBranch == null; batchNumber++)
                 {
-                    var changesetsToRetrieve = batchNumber * batchSize;
+                    var changesetsToRetrieve = batchNumber * BatchCount;
 
-                    var changesetEnumerable = VersionControl.QueryHistory(tfsPathBranchToCreate, VersionSpec.Latest, 0,
-                        RecursionType.Full, null, null, null, changesetsToRetrieve, false, false, false, true).Cast<Changeset>();
-
-                    if (batchNumber > 1)
-                    {
-                        changesetEnumerable = changesetEnumerable.Skip((batchNumber - 1) * batchSize).Take(batchSize);
-                    }
-
-                    // ToList'ed because inspecting the enumerable during debugging was resulting in TFS timeouts
-                    var changesets = changesetEnumerable.ToList();
+                    var changesets = VersionControl.QueryHistory(tfsPathBranchToCreate, VersionSpec.Latest, 0,
+                        RecursionType.Full, null, null, null, changesetsToRetrieve, false, false, false, true).Cast<Changeset>()
+                            .Skip((batchNumber - 1) * BatchCount)
+                            .Take(BatchCount)
+                            // ToList'ed because inspecting the enumerable during debugging was resulting in TFS timeouts
+                            .ToList();
 
                     // If our batch has no results, there's nothing left to check; we're done.
                     if (!changesets.Any())
