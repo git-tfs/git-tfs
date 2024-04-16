@@ -57,7 +57,7 @@ namespace GitTfs.Core.TfsInterop
 
             public TfsPlugin TryLoadVsPluginVersion(string version)
             {
-                if (!SupportedVersions.Contains(version, StringComparison.OrdinalIgnoreCase))
+                if (!SupportedVersions.Contains(version, StringComparer.OrdinalIgnoreCase))
                 {
                     Trace.WriteLine("Visual Studio " + version + " not supported...");
                     return null;

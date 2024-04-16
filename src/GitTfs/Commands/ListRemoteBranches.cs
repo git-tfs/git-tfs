@@ -31,7 +31,7 @@ namespace GitTfs.Commands
 
             string convertBranchMessage = "  -> Open 'Source Control Explorer' and for each folder corresponding to a branch, right click on the folder and select 'Branching and Merging' > 'Convert to branch'.";
             var branches = _tfsHelper.GetBranches().Where(b => b.IsRoot).ToList();
-            if (branches.IsEmpty())
+            if (branches.IsNullOrEmpty())
             {
                 Trace.TraceWarning("No TFS branches were found!");
                 Trace.TraceWarning("\n\nPerhaps you should convert your branch folders into a branch in TFS:");

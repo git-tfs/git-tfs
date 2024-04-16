@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using Microsoft.TeamFoundation.Client;
@@ -983,7 +983,7 @@ namespace GitTfs.VsCommon
 
         public ICheckinNote CreateCheckinNote(Dictionary<string, string> checkinNotes)
         {
-            if (checkinNotes.IsEmpty())
+            if (checkinNotes.IsNullOrEmpty())
             {
                 return null;
             }

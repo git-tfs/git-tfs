@@ -206,7 +206,7 @@ namespace GitTfs.Core
                     }
 
                     //find the relative path to the owning remote
-                    return Ext.CombinePaths(_globals.GitDir, WorkspaceDirectory, OwningRemoteId, Prefix);
+                    return Path.Combine(_globals.GitDir, WorkspaceDirectory, OwningRemoteId, Prefix);
                 }
 
                 return dir ?? DefaultWorkingDirectory;
@@ -942,7 +942,7 @@ namespace GitTfs.Core
 
         public void DeleteShelveset(string shelvesetName) => WithWorkspace(null, workspace => workspace.DeleteShelveset(shelvesetName));
 
-        private bool MatchesTfsUrl(string tfsUrl) => TfsUrl.Equals(tfsUrl, StringComparison.OrdinalIgnoreCase) || Aliases.Contains(tfsUrl, StringComparison.OrdinalIgnoreCase);
+        private bool MatchesTfsUrl(string tfsUrl) => TfsUrl.Equals(tfsUrl, StringComparison.OrdinalIgnoreCase) || Aliases.Contains(tfsUrl, StringComparer.OrdinalIgnoreCase);
 
         private string ExtractGitBranchNameFromTfsRepositoryPath(string tfsRepositoryPath)
         {

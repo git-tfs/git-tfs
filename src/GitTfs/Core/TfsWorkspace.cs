@@ -36,7 +36,7 @@ namespace GitTfs.Core
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
-            if (pendingChanges.IsEmpty())
+            if (pendingChanges.IsNullOrEmpty())
                 throw new GitTfsException("Nothing to shelve!");
 
             var shelveset = _tfsHelper.CreateShelveset(_workspace, shelvesetName);
@@ -56,7 +56,7 @@ namespace GitTfs.Core
         {
             var pendingChanges = _workspace.GetPendingChanges();
 
-            if (pendingChanges.IsEmpty())
+            if (pendingChanges.IsNullOrEmpty())
                 throw new GitTfsException("Nothing to checkin!");
 
             var checkinComment = _checkinOptions.CheckinComment;
@@ -93,7 +93,7 @@ namespace GitTfs.Core
 
             var pendingChanges = _workspace.GetPendingChanges();
 
-            if (pendingChanges.IsEmpty())
+            if (pendingChanges.IsNullOrEmpty())
                 throw new GitTfsException("Nothing to checkin!");
 
             var workItemInfos = GetWorkItemInfos(options);
@@ -243,7 +243,7 @@ namespace GitTfs.Core
             var checkinOptions = options ?? _checkinOptions;
 
             var workItemInfos = func(checkinOptions.WorkItemsToAssociate, TfsWorkItemCheckinAction.Associate);
-            workItemInfos = workItemInfos.Append(
+            workItemInfos = workItemInfos.Concat(
                 func(checkinOptions.WorkItemsToResolve, TfsWorkItemCheckinAction.Resolve));
             return workItemInfos;
         }
