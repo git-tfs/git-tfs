@@ -647,12 +647,12 @@ namespace GitTfs.Core
             var branchesDatas = Tfs.GetRootChangesetForBranch(tfsBranch.Path, parentChangesetId);
 
             IGitTfsRemote remote = null;
-            bool first = true;
+            bool isFirstBranchChangeset = true;
             foreach (var branch in branchesDatas)
             {
                 var rootChangesetId = branch.SourceBranchChangesetId;
-                remote = InitBranch(_remoteOptions, branch.TfsBranchPath, rootChangesetId, first, renameResult: renameResult);
-                first = false;
+                remote = InitBranch(_remoteOptions, branch.TfsBranchPath, rootChangesetId, isFirstBranchChangeset, renameResult: renameResult);
+                isFirstBranchChangeset = false;
                 if (remote == null)
                 {
                     Trace.TraceInformation("warning: root commit not found corresponding to changeset " + rootChangesetId);
@@ -665,11 +665,9 @@ namespace GitTfs.Core
                     try
                     {
                         IFetchResult lastFetch = remote.Fetch(renameResult: renameResult);
-                        if (lastFetch != null &&
-                            lastFetch.IsProcessingRenameChangeset)
-                            renameResult = lastFetch;
-                        else
-                            renameResult = null;
+                        renameResult = lastFetch != null && lastFetch.IsProcessingRenameChangeset
+                            ? lastFetch
+                            : (IRenameResult)null;
                     }
                     finally
                     {
@@ -986,11 +984,9 @@ namespace GitTfs.Core
             string sha1RootCommit = null;
             if (rootChangesetId != -1)
             {
-                if (renameResult != null &&
-                    renameResult.IsProcessingRenameChangeset)
-                    sha1RootCommit = renameResult.LastParentCommitBeforeRename;
-                else
-                    sha1RootCommit = Repository.FindCommitHashByChangesetId(rootChangesetId);
+                sha1RootCommit = renameResult != null && renameResult.IsProcessingRenameChangeset
+                    ? renameResult.LastParentCommitBeforeRename
+                    : Repository.FindCommitHashByChangesetId(rootChangesetId);
                 if (fetchParentBranch && string.IsNullOrWhiteSpace(sha1RootCommit))
                 {
                     try
