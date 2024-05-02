@@ -651,7 +651,7 @@ namespace GitTfs.Core
             foreach (var branch in branchesDatas)
             {
                 var rootChangesetId = branch.SourceBranchChangesetId;
-                remote = InitBranch(_remoteOptions, branch.TfsBranchPath, rootChangesetId, isFirstBranchChangeset, renameResult: renameResult);
+                remote = InitBranch(_remoteOptions, branch.TfsBranchPath, rootChangesetId, fetchParentBranch: isFirstBranchChangeset, renameResult: renameResult);
                 isFirstBranchChangeset = false;
                 if (remote == null)
                 {
