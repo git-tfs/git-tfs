@@ -71,12 +71,14 @@ namespace GitTfs.Core.TfsInterop
                 }
             }
             var roots = branchTrees.Values.Where(b => b.IsRoot);
-            return roots.FirstOrDefault(b =>
+            var branchTreesWithMatchingPath = roots.Where(b =>
             {
                 var visitor = new BranchTreeContainsPathVisitor(remoteTfsPath, searchExactPath);
                 b.AcceptVisitor(visitor);
                 return visitor.Found;
             });
+            
+            return branchTreesWithMatchingPath?.FirstOrDefault(b => string.Equals(b.Path, remoteTfsPath));
         }
 
         public static void AcceptVisitor(this BranchTree branch, IBranchTreeVisitor treeVisitor, int level = 0)
