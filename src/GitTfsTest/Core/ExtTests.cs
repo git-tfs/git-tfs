@@ -62,19 +62,6 @@ namespace GitTfs.Test.Core
 
         #endregion
 
-        #region CombinePaths()
-
-        [Fact]
-        public void ShouldReturnSingleArgumentWhenProvided() => Assert.Equal("a", Ext.CombinePaths("a"));
-
-        [Fact]
-        public void ShouldCombineSeveralPaths() => Assert.Equal(Path.Combine(Path.Combine("a", "b"), "c"), Ext.CombinePaths("a", "b", "c"));
-
-        [FactExceptOnUnix]
-        public void ShouldIgnorePathPartsBeforeAbsolute() => Assert.Equal("c:\\x\\y", Ext.CombinePaths("a", "b", "c:\\x", "y"));
-
-        #endregion
-
         #region FormatForGit()
 
         [Fact]

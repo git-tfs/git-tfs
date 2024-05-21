@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 using GitTfs.Core;
 using GitTfs.Core.TfsInterop;
@@ -30,13 +30,12 @@ namespace GitTfs.Util
     public class ChangeSieve
     {
         private readonly PathResolver _resolver;
-        private readonly IEnumerable<NamedChange> _namedChanges;
 
         public ChangeSieve(IChangeset changeset, PathResolver resolver)
         {
             _resolver = resolver;
 
-            _namedChanges = changeset.Changes.Select(c => new NamedChange
+            NamedChanges = changeset.Changes.Select(c => new NamedChange
             {
                 Info = _resolver.GetGitObject(c.Item.ServerItem),
                 Change = c,
@@ -143,14 +142,14 @@ namespace GitTfs.Util
             }
         }
 
-        private class NamedChange
+        private sealed class NamedChange
         {
             public GitObject Info { get; set; }
             public IChange Change { get; set; }
             public string GitPath => Info.Try(x => x.Path);
         }
 
-        private IEnumerable<NamedChange> NamedChanges => _namedChanges;
+        private IEnumerable<NamedChange> NamedChanges { get; }
 
         private bool IncludeInFetch(NamedChange change) => !IsIgnorable(change)
                 && !IsGitPathMissing(change)

@@ -13,7 +13,7 @@ using NLog.Targets;
 
 namespace GitTfs
 {
-    public class Program
+    public static class Program
     {
         private static string _logFilePath;
 
@@ -37,7 +37,7 @@ namespace GitTfs
             return container.GetInstance<GitTfs>().Run(new List<string>(args));
         }
 
-        private static void ReportException(Exception e)
+        private static void ReportException(Exception e, bool printLogFilePath = true)
         {
             var gitTfsException = e as GitTfsException;
             if (gitTfsException != null)
@@ -45,8 +45,8 @@ namespace GitTfs
                 Trace.WriteLine(gitTfsException);
                 Trace.TraceError(gitTfsException.Message);
                 if (gitTfsException.InnerException != null)
-                    ReportException(gitTfsException.InnerException);
-                if (!gitTfsException.RecommendedSolutions.IsEmpty())
+                    ReportException(gitTfsException.InnerException, false);
+                if (!gitTfsException.RecommendedSolutions.IsNullOrEmpty())
                 {
                     Trace.TraceError("You may be able to resolve this problem.");
                     foreach (var solution in gitTfsException.RecommendedSolutions)
@@ -60,7 +60,8 @@ namespace GitTfs
                 ReportInternalException(e);
             }
 
-            Trace.TraceWarning("All the logs could be found in the log file: " + _logFilePath);
+            if (printLogFilePath)
+                Trace.TraceWarning($"All the logs could be found in the log file: {_logFilePath}");
         }
 
         private static void ReportInternalException(Exception e)

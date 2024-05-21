@@ -84,7 +84,7 @@ namespace GitTfs
             }
         }
 
-        public bool RequiresValidGitRepository(GitTfsCommand command) => !command.GetType().GetCustomAttributes(typeof(RequiresValidGitRepositoryAttribute), false).IsEmpty();
+        public bool RequiresValidGitRepository(GitTfsCommand command) => !command.GetType().GetCustomAttributes(typeof(RequiresValidGitRepositoryAttribute), false).IsNullOrEmpty();
 
         private void ParseAuthorsAndSave(bool couldSaveAuthorFile)
         {
