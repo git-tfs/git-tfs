@@ -61,7 +61,7 @@ namespace GitTfs.Util
                 fullPath = Lookup(dirName).Path + "/" + fileName;
             }
             result = new GitObject { Path = fullPath };
-            _initialTree[fullPath] = result;
+            _initialTree.Add(fullPath, result);
             return result;
         }
     }

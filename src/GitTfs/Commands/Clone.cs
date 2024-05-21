@@ -134,11 +134,9 @@ namespace GitTfs.Commands
                 {
                     if (!_init.IsBare) _globals.Repository.Merge(_globals.Repository.ReadTfsRemote(_globals.RemoteId).RemoteRef);
                 }
-                catch (Exception)
+                catch (Exception) when (errorOccurs)
                 {
-                    //Swallow exception because the previously thrown exception is more important...
-                    if (!errorOccurs)
-                        throw;
+                    // Swallow exception because the previously thrown exception is more important...
                 }
             }
             return retVal;

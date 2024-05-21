@@ -178,9 +178,6 @@ namespace GitTfs.VsCommon
 
         public virtual int FindMergeChangesetParent(string path, int targetChangeset, GitTfsRemote remote)
         {
-            var targetVersion = new ChangesetVersionSpec(targetChangeset);
-            var searchTo = targetVersion;
-
             var changes = VersionControl.GetChangesForChangeset(targetChangeset, false, Int32.MaxValue, null, null, true).Where(change =>
             {
                 return change.ChangeType.HasFlag(ChangeType.Merge) && change.Item.ServerItem.Contains(path);

@@ -13,7 +13,7 @@ using NLog.Targets;
 
 namespace GitTfs
 {
-    public class Program
+    public static class Program
     {
         private static string _logFilePath;
 

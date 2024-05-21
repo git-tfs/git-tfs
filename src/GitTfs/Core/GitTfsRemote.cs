@@ -350,8 +350,8 @@ namespace GitTfs.Core
                     fetchResult.NewChangesetCount++;
                     if (lastChangesetIdToFetch > 0 && changeset.Summary.ChangesetId > lastChangesetIdToFetch)
                         return fetchResult;
-                    string parentCommitSha = null;
-                    if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref parentCommitSha))
+                    string additionalParentSha = null;
+                    if (changeset.IsMergeChangeset && !ProcessMergeChangeset(changeset, stopOnFailMergeCommit, ref additionalParentSha))
                     {
                         fetchResult.NewChangesetCount--; // Merge wasn't successful - so don't count the changeset we found
                         fetchResult.IsSuccess = false;
@@ -371,8 +371,8 @@ namespace GitTfs.Core
                         renameResult.IsProcessingRenameChangeset = false;
                         renameResult.LastParentCommitBeforeRename = null;
                     }
-                    if (parentCommitSha != null)
-                        log.CommitParents.Add(parentCommitSha);
+                    if (additionalParentSha != null)
+                        log.CommitParents.Add(additionalParentSha);
                     if (changeset.Summary.ChangesetId == mergeChangesetId)
                     {
                         foreach (var parent in parentCommitsHashes)
@@ -597,12 +597,12 @@ namespace GitTfs.Core
                 foreach (var change in parentChangeset.Changes)
                 {
                     tfsPath = change.Item.ServerItem;
-                    tfsPath = tfsPath.EndsWith("/") ? tfsPath : tfsPath + "/";
+                        tfsPath = tfsPath.EndsWith("/") ? tfsPath : tfsPath + "/";
 
-                    tfsBranch = allBranches.SingleOrDefault(b => tfsPath.StartsWith(b.Path.EndsWith("/") ? b.Path : b.Path + "/"));
-                    if (tfsBranch != null)
-                    {
-                        // we found a branch, we stop here
+                        tfsBranch = allBranches.SingleOrDefault(b => tfsPath.StartsWith(b.Path.EndsWith("/") ? b.Path : b.Path + "/"));
+                        if (tfsBranch != null)
+                        {
+                            // we found a branch, we stop here
                         break;
                     }
                 }
@@ -692,7 +692,7 @@ namespace GitTfs.Core
                     changeset = GetLatestChangeset();
                 else
                     changeset = Tfs.GetChangeset(changesetId, this);
-                quickFetch(changeset);
+                QuickFetch(changeset);
             }
             catch (Exception ex)
             {
@@ -702,7 +702,7 @@ namespace GitTfs.Core
             }
         }
 
-        private void quickFetch(ITfsChangeset changeset)
+        private void QuickFetch(ITfsChangeset changeset)
         {
             var log = CopyTree(MaxCommitHash, changeset);
             UpdateTfsHead(Commit(log), changeset.Summary.ChangesetId);
