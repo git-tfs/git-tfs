@@ -19,10 +19,17 @@ namespace GitTfs
                     { "i|tfs-remote|remote|id=", "The remote ID of the TFS to interact with\ndefault: default",
                         v => UserSpecifiedRemoteId = v },
                     { "A|authors=", "Path to an Authors file to map TFS users to Git users (will be kept in cache and used for all the following commands)",
+<<<<<<< HEAD
+                        v => AuthorsFilePath = v },
+                    { "l|logfile=", "Path to a logfile to capture logging",
+                        v => LogFilePath = v },
+=======
                         v => AuthorsFilePath = Path.GetFullPath(v) },
+>>>>>>> upstream/master
                 };
 
         public string AuthorsFilePath { get; set; }
+        public string LogFilePath { get; set; }
         public bool ShowHelp { get; set; }
         public bool ShowVersion { get; set; }
 

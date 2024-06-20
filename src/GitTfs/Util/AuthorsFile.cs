@@ -91,9 +91,12 @@ namespace GitTfs.Util
                         string tfsUserId = match.Groups[1].Value; //.Trim();
                         string name = match.Groups[2].Value; //.Trim();
                         string email = match.Groups[3].Value; //.Trim();
+     
+                        Trace.WriteLine("tfsUserId=[" + tfsUserId + "]");
+                        Trace.WriteLine("name=     [" + name + "]");
+                        Trace.WriteLine("email=    [" + email + "]");
 
                         Author a = new Author(tfsUserId, name, email);
-
                         if (!_authorsByTfsUserId.ContainsKey(a.TfsUserId))
                             _authorsByTfsUserId.Add(a.TfsUserId, a);
 

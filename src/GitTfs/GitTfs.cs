@@ -4,6 +4,8 @@ using GitTfs.Commands;
 using GitTfs.Core;
 using GitTfs.Util;
 using NLog;
+using NLog.Targets;
+using NLog.Config;
 
 namespace GitTfs
 {
@@ -38,7 +40,14 @@ namespace GitTfs
             var command = ExtractCommand(args);
             var unparsedArgs = ParseOptions(command, args);
             UpdateLoggerOnDebugging();
-            Trace.WriteLine("Command run:" + _globals.CommandLineRun);
+            Trace.WriteLine("Command run: [" + _globals.CommandLineRun + "]");
+            if (_globals.DebugOutput)
+            {
+                foreach (var arg in args)
+                {
+                    Trace.WriteLine("Arg: [" + arg + "]");
+                }
+            }
             if (RequiresValidGitRepository(command)) AssertValidGitRepository();
             bool willCreateRepository = command.GetType() == typeof(Clone) || command.GetType() == typeof(QuickClone) || command.GetType() == typeof(Init);
             ParseAuthorsAndSave(!willCreateRepository);
@@ -59,6 +68,31 @@ namespace GitTfs
                 //consoleRule.DisableLoggingForLevel(LogLevel.Trace);
                 LogManager.ReconfigExistingLoggers();
             }
+
+            if (!String.IsNullOrEmpty(_globals.LogFilePath))
+            { 
+                Trace.WriteLine("Creating new log file [" + _globals.LogFilePath + "]");
+
+                try
+                {
+                    var fileTarget = new FileTarget();
+                    LogManager.Configuration.AddTarget("userfile", fileTarget);
+
+                    fileTarget.FileName = _globals.LogFilePath;
+                    fileTarget.Layout = "${longdate} [${level}] ${message}";
+
+                    var fileRule = new LoggingRule("*", LogLevel.Debug, fileTarget);
+                    LogManager.Configuration.LoggingRules.Add(fileRule);
+                }
+                catch (Exception ex)
+                {
+                    Trace.Listeners.Add(new ConsoleTraceListener());
+                    Trace.TraceWarning("Fail to enable logging in file due to error:" + ex.Message);
+                }
+                
+                LogManager.ReconfigExistingLoggers();
+            }
+            
         }
 
         public int Main(GitTfsCommand command, IList<string> unparsedArgs)
