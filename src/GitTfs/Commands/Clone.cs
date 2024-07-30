@@ -106,15 +106,19 @@ namespace GitTfs.Commands
 
                 if (retVal == 0)
                 {
-                    _fetch.Run(_fetch.BranchStrategy == BranchStrategy.All);
+                    retVal = _fetch.Run(_fetch.BranchStrategy == BranchStrategy.All);
                     _globals.Repository.GarbageCollect();
                 }
 
-                if (_fetch.BranchStrategy == BranchStrategy.All && _initBranch != null)
+                if (retVal == 0)
                 {
-                    _initBranch.CloneAllBranches = true;
+                    if (_fetch.BranchStrategy == BranchStrategy.All && _initBranch != null)
+                    {
+                        _initBranch.CloneAllBranches = true;
 
-                    retVal = _initBranch.Run();
+                        retVal = _initBranch.Run();
+                        _globals.Repository.GarbageCollect();
+                    }
                 }
             }
             catch (GitTfsException)

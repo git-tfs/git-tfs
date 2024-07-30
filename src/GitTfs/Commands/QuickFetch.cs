@@ -1,4 +1,4 @@
-﻿using GitTfs.Core;
+using GitTfs.Core;
 
 namespace GitTfs.Commands
 {
@@ -18,14 +18,12 @@ namespace GitTfs.Commands
             _properties = properties;
         }
 
-        protected override void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
+        protected override IFetchResult DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
-            if (InitialChangeset.HasValue)
-                remote.QuickFetch(InitialChangeset.Value, false, false);
-            else
-                remote.QuickFetch(-1, false, false);
+            var fetchResult = remote.QuickFetch(InitialChangeset ?? -1, false, false);
             _properties.InitialChangeset = remote.MaxChangesetId;
             _properties.PersistAllOverrides();
+            return fetchResult;
         }
     }
 }

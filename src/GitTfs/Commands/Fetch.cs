@@ -107,7 +107,7 @@ namespace GitTfs.Commands
 
         public int Run() => Run(_globals.RemoteId);
 
-        public void Run(bool stopOnFailMergeCommit) => Run(stopOnFailMergeCommit, _globals.RemoteId);
+        public int Run(bool stopOnFailMergeCommit) => Run(stopOnFailMergeCommit, _globals.RemoteId);
 
         public int Run(params string[] args) => Run(false, args);
 
@@ -125,7 +125,10 @@ namespace GitTfs.Commands
             var remotesToFetch = GetRemotesToFetch(args).ToList();
             foreach (var remote in remotesToFetch)
             {
-                FetchRemote(stopOnFailMergeCommit, remote);
+                var retVal = FetchRemote(stopOnFailMergeCommit, remote);
+
+                if (retVal != 0)
+                    return retVal;
             }
             return 0;
         }
@@ -140,18 +143,23 @@ namespace GitTfs.Commands
             _globals.Repository.UseGitIgnore(pathToGitIgnoreFile);
         }
 
-        private void FetchRemote(bool stopOnFailMergeCommit, IGitTfsRemote remote)
+        private int FetchRemote(bool stopOnFailMergeCommit, IGitTfsRemote remote)
         {
             Trace.TraceInformation("Fetching from TFS remote '{0}'...", remote.Id);
-            DoFetch(remote, stopOnFailMergeCommit);
+            var fetchResult = DoFetch(remote, stopOnFailMergeCommit);
+            if (!fetchResult.IsSuccess)
+                return -1;
+
             if (_labels != null && FetchLabels)
             {
                 Trace.TraceInformation("Fetching labels from TFS remote '{0}'...", remote.Id);
-                _labels.Run(remote);
+                return _labels.Run(remote);
             }
+
+            return 0;
         }
 
-        protected virtual void DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
+        protected virtual IFetchResult DoFetch(IGitTfsRemote remote, bool stopOnFailMergeCommit)
         {
             if (upToChangeSet != -1 && InitialChangeset.HasValue && InitialChangeset.Value > upToChangeSet)
                 throw new GitTfsException("error: up-to changeset # must not be less than the initial one");
@@ -190,26 +198,34 @@ namespace GitTfs.Commands
 
             metadataExportInitializer.InitializeRemote(remote, shouldExport);
 
+            IFetchResult fetchResult = null;
+
             try
             {
                 if (InitialChangeset.HasValue)
                 {
                     _properties.InitialChangeset = InitialChangeset.Value;
                     _properties.PersistAllOverrides();
-                    remote.QuickFetch(InitialChangeset.Value, IgnoreRestrictedChangesets);
-                    remote.Fetch(stopOnFailMergeCommit, upToChangeSet);
+                    fetchResult = remote.QuickFetch(InitialChangeset.Value, IgnoreRestrictedChangesets);
+
+                    if (!fetchResult.IsSuccess)
+                        return fetchResult;
+
+                    fetchResult = remote.Fetch(stopOnFailMergeCommit, upToChangeSet);
                 }
                 else
                 {
-                    remote.Fetch(stopOnFailMergeCommit, upToChangeSet);
+                    fetchResult = remote.Fetch(stopOnFailMergeCommit, upToChangeSet);
                 }
+
+                return fetchResult;
             }
             finally
             {
                 Trace.WriteLine("Cleaning...");
                 remote.CleanupWorkspaceDirectory();
 
-                if (remote.Repository.IsBare)
+                if (fetchResult?.IsSuccess == true && remote.Repository.IsBare)
                     remote.Repository.UpdateRef(GitRepository.ShortToLocalName(bareBranch), remote.MaxCommitHash);
             }
         }

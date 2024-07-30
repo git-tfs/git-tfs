@@ -136,7 +136,7 @@ namespace GitTfs.Core
 
         public IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes) => throw DerivedRemoteException;
 
-        public void QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint) => throw DerivedRemoteException;
+        public IFetchResult QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint) => throw DerivedRemoteException;
 
         public void Unshelve(string a, string b, string c, Action<Exception> h, bool force) => throw DerivedRemoteException;
 

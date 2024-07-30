@@ -61,7 +61,7 @@ namespace GitTfs.Core
         string GetPathInGitRepo(string tfsPath);
         IFetchResult Fetch(bool stopOnFailMergeCommit = false, int lastChangesetIdToFetch = -1, IRenameResult renameResult = null);
         IFetchResult FetchWithMerge(int mergeChangesetId, bool stopOnFailMergeCommit = false, IRenameResult renameResult = null, params string[] parentCommitsHashes);
-        void QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint = true);
+        IFetchResult QuickFetch(int changesetId, bool ignoreRestricted, bool printRestrictionHint = true);
         void Unshelve(string shelvesetOwner, string shelvesetName, string destinationBranch, Action<Exception> ignorableErrorHandler, bool force);
         void Shelve(string shelvesetName, string treeish, TfsChangesetInfo parentChangeset, CheckinOptions options, bool evaluateCheckinPolicies);
         bool HasShelveset(string shelvesetName);
