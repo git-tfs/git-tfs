@@ -29,7 +29,7 @@
             if (RecommendedSolutions == null)
                 RecommendedSolutions = (IEnumerable<string>)recommendations.Clone();
             else
-                RecommendedSolutions = RecommendedSolutions.Append(recommendations);
+                RecommendedSolutions = RecommendedSolutions.Concat(recommendations);
             return this;
         }
     }

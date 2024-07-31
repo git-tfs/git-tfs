@@ -38,21 +38,6 @@ namespace GitTfs.Core
                                                                                                                             }
                                                                                                                         };
 
-        public static IEnumerable<T> Append<T>(this IEnumerable<T> set1, params IEnumerable<T>[] moreSets)
-        {
-            foreach (var item in set1)
-            {
-                yield return item;
-            }
-            foreach (var set in moreSets)
-            {
-                foreach (var item in set)
-                {
-                    yield return item;
-                }
-            }
-        }
-
         public static T GetOrAdd<K, T>(this Dictionary<K, T> dictionary, K key) where T : new()
         {
             if (!dictionary.ContainsKey(key))
@@ -60,30 +45,18 @@ namespace GitTfs.Core
             return dictionary[key];
         }
 
-        public static T FirstOr<T>(this IEnumerable<T> e, T defaultValue)
-        {
-            foreach (var x in e) return x;
-            return defaultValue;
-        }
-
         public static bool Empty<T>(this IEnumerable<T> e) => !e.Any();
+
+        public static bool IncludesOneOf<T>(this T flagged, params T[] flags) where T : Enum
+            => flags.Any(t => flagged.HasFlag(t));
 
         public static void SetArguments(this ProcessStartInfo startInfo, params string[] args) => startInfo.Arguments = string.Join(" ", args.Select(arg => QuoteProcessArgument(arg)).ToArray());
 
         private static string QuoteProcessArgument(string arg) => arg.Contains(" ") ? ("\"" + arg + "\"") : arg;
 
-        public static string CombinePaths(string basePath, params string[] pathParts)
-        {
-            foreach (var part in pathParts)
-            {
-                basePath = Path.Combine(basePath, part);
-            }
-            return basePath;
-        }
-
         public static string FormatForGit(this DateTime date) => date.ToUniversalTime().ToString("s") + "Z";
 
-        public static bool IsEmpty<T>(this IEnumerable<T> c) => c == null || !c.Any();
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> c) => c?.Any() != true;
 
         public static OptionSet GetAllOptions(this GitTfsCommand command, IContainer container) => container.GetInstance<Globals>().OptionSet.Merge(command.OptionSet);
 
@@ -107,8 +80,6 @@ namespace GitTfs.Core
         /// the given <paramref name="encoding"/> instead.
         /// </summary>
         public static StreamWriter WithEncoding(this StreamWriter stream, Encoding encoding) => new StreamWriter(stream.BaseStream, encoding);
-
-        public static bool Contains(this IEnumerable<string> list, string toCheck, StringComparison comp) => list.Any(listMember => listMember.IndexOf(toCheck, comp) >= 0);
 
         /// <summary>
         /// Optionally handle exceptions with "this" action. If there isn't a handler, don't catch exceptions.
@@ -182,7 +153,7 @@ namespace GitTfs.Core
         public static void ForEach<T>(this IEnumerable<T> source, Action<T> action, bool parallelizeActions)
         {
 #if DEBUG && NO_PARALLEL
-            noParallel = true;
+            parallelizeActions = false;
 #endif
             if (!parallelizeActions)
             {

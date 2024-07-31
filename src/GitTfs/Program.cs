@@ -13,7 +13,7 @@ using NLog.Targets;
 
 namespace GitTfs
 {
-    public class Program
+    public static class Program
     {
         private static string _logFilePath;
 
@@ -46,7 +46,7 @@ namespace GitTfs
                 Trace.TraceError(gitTfsException.Message);
                 if (gitTfsException.InnerException != null)
                     ReportException(gitTfsException.InnerException);
-                if (!gitTfsException.RecommendedSolutions.IsEmpty())
+                if (!gitTfsException.RecommendedSolutions.IsNullOrEmpty())
                 {
                     Trace.TraceError("You may be able to resolve this problem.");
                     foreach (var solution in gitTfsException.RecommendedSolutions)
