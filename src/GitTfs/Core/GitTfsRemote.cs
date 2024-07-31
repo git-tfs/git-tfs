@@ -359,6 +359,8 @@ namespace GitTfs.Core
                     }
                     var parentSha = (renameResult != null && renameResult.IsProcessingRenameChangeset) ? renameResult.LastParentCommitBeforeRename : MaxCommitHash;
                     var isFirstTFSCommitInRepository = (MaxChangesetId == 0);
+                    if (!parentCommitsHashes.Any())
+                        parentSha ??= CommitTheGitIgnoreFile();
                     var log = Apply(parentSha, changeset, objects);
                     if (changeset.IsRenameChangeset && !isFirstTFSCommitInRepository && !firstOnBranch)
                     {
@@ -390,6 +392,17 @@ namespace GitTfs.Core
                 }
             } while (fetchRetrievedChangesets && latestChangesetId > fetchResult.LastFetchedChangesetId);
             return fetchResult;
+        }
+
+        private string CommitTheGitIgnoreFile()
+        {
+            var pathToGitIgnoreFile = _remoteOptions.GitIgnorePath;
+            if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile))
+            {
+                Trace.WriteLine("No .gitignore file specified to commit...");
+                return null;
+            }
+            return _globals.Repository.CommitGitIgnore(pathToGitIgnoreFile, Id);
         }
 
 
@@ -704,7 +717,9 @@ namespace GitTfs.Core
 
         private void quickFetch(ITfsChangeset changeset)
         {
-            var log = CopyTree(MaxCommitHash, changeset);
+            var parentSha = MaxCommitHash;
+            parentSha ??= CommitTheGitIgnoreFile();
+            var log = CopyTree(parentSha, changeset);
             UpdateTfsHead(Commit(log), changeset.Summary.ChangesetId);
             DoGcIfNeeded();
         }
