@@ -326,11 +326,6 @@ namespace GitTfs.Core
             if (MaxChangesetId >= latestChangesetId)
                 return fetchResult;
 
-            // If a branch is the result of a branch rename operation,
-            // the first commit on the branch will be the rename commit.
-            // In this case, we still want to fetch it, and we use firstOnBranch
-            // to track this state.
-            bool firstOnBranch = true;
             bool fetchRetrievedChangesets;
             do
             {
@@ -340,10 +335,7 @@ namespace GitTfs.Core
                 fetchRetrievedChangesets = false;
                 foreach (var changeset in fetchedChangesets)
                 {
-                    if (firstOnBranch &&
-                        _properties.InitialChangeset.HasValue &&
-                        changeset.Summary.ChangesetId >= _properties.InitialChangeset.Value)
-                        firstOnBranch = false;
+                    var isFirstTfsCommitOnBranch = MaxChangesetId == 0;
 
                     fetchRetrievedChangesets = true;
 
@@ -357,10 +349,18 @@ namespace GitTfs.Core
                         fetchResult.IsSuccess = false;
                         return fetchResult;
                     }
-                    var parentSha = (renameResult != null && renameResult.IsProcessingRenameChangeset) ? renameResult.LastParentCommitBeforeRename : MaxCommitHash;
-                    var isFirstTFSCommitInRepository = (MaxChangesetId == 0);
+                    string parentSha = null;
+                    if (isFirstTfsCommitOnBranch && changeset.IsBranchRenameChangeset && !ProcessBranchRenameChangeset(changeset, stopOnFailMergeCommit, ref parentSha))
+                    {
+                        fetchResult.NewChangesetCount--; // Fetch wasn't successful - so don't count the changeset we found
+                        fetchResult.IsSuccess = false;
+                        return fetchResult;
+                    }
+                    parentSha ??= (renameResult != null && renameResult.IsProcessingRenameChangeset) ? renameResult.LastParentCommitBeforeRename : MaxCommitHash;
+                    if (!parentCommitsHashes.Any())
+                        parentSha ??= CommitTheGitIgnoreFile();
                     var log = Apply(parentSha, changeset, objects);
-                    if (changeset.IsRenameChangeset && !isFirstTFSCommitInRepository && !firstOnBranch)
+                    if (changeset.IsBranchRenameChangeset && !isFirstTfsCommitOnBranch)
                     {
                         if (renameResult == null || !renameResult.IsProcessingRenameChangeset)
                         {
@@ -392,6 +392,17 @@ namespace GitTfs.Core
             return fetchResult;
         }
 
+        private string CommitTheGitIgnoreFile()
+        {
+            var pathToGitIgnoreFile = _remoteOptions.GitIgnorePath;
+            if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile))
+            {
+                Trace.WriteLine("No .gitignore file specified to commit...");
+                return null;
+            }
+            return _globals.Repository.CommitGitIgnore(pathToGitIgnoreFile, Id);
+        }
+
 
         private Dictionary<string, GitObject> BuildEntryDictionary() => new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -414,7 +425,7 @@ namespace GitTfs.Core
                 if (shaParent == null)
                 {
                     string omittedParentBranch;
-                    shaParent = FindMergedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, out omittedParentBranch);
+                    shaParent = FindMergedOrRenamedRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, out omittedParentBranch);
                     changeset.OmittedParentBranch = omittedParentBranch;
                 }
                 if (shaParent != null)
@@ -436,6 +447,42 @@ namespace GitTfs.Core
                 Trace.TraceInformation("info: this changeset " + changeset.Summary.ChangesetId +
                                  " is a merge changeset. But was not treated as is because of your git setting...");
                 changeset.OmittedParentBranch = ";C" + changeset.Summary.ChangesetId;
+            }
+            return true;
+        }
+
+        private bool ProcessBranchRenameChangeset(ITfsChangeset changeset, bool stopOnFailMergeCommit, ref string parentCommit)
+        {
+            Trace.TraceInformation($"Following to branch original location before C{changeset.Summary.ChangesetId}...");
+
+            if (!Tfs.TryGetBranchNameBeforeRename(TfsRepositoryPath, changeset.Summary.ChangesetId, out var originalBranchName)
+                && stopOnFailMergeCommit)
+            {
+                Trace.TraceWarning($"warning: unable to follow to branch original location before C{changeset.Summary.ChangesetId}.");
+                return false;
+            }
+            var originalBranchLastChangesetId = Tfs.GetChangesets(originalBranchName, 1, this, changeset.Summary.ChangesetId)
+                .Where(c => c.Summary.ChangesetId != changeset.Summary.ChangesetId)
+                .Max(c => c.Summary.ChangesetId);
+
+            var shaParent = Repository.FindCommitHashByChangesetId(originalBranchLastChangesetId);
+            if (shaParent == null)
+            {
+                shaParent = FindMergedOrRenamedRemoteAndFetch(originalBranchLastChangesetId, stopOnFailMergeCommit, out string omittedParentBranch, originalBranchName);
+                changeset.OmittedParentBranch = omittedParentBranch;
+            }
+            if (shaParent != null)
+            {
+                parentCommit = shaParent;
+            }
+            else
+            {
+                if (stopOnFailMergeCommit)
+                    return false;
+
+                Trace.TraceInformation($"warning: this changeset {changeset.Summary.ChangesetId}" +
+                                    " is a branch rename changeset but git-tfs failed to fetch the parent branch "
+                                    + $"{originalBranchName}. Parent branch will be ignored...");
             }
             return true;
         }
@@ -550,11 +597,11 @@ namespace GitTfs.Core
             return FindRemoteAndFetch(parentChangesetId, false, false, renameResult, out omittedParentBranch);
         }
 
-        private string FindMergedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, out string omittedParentBranch) => FindRemoteAndFetch(parentChangesetId, false, true, null, out omittedParentBranch);
+        private string FindMergedOrRenamedRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, out string omittedParentBranch, string tfsBranchName = null) => FindRemoteAndFetch(parentChangesetId, stopOnFailMergeCommit, true, null, out omittedParentBranch, tfsBranchName);
 
-        private string FindRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, bool mergeChangeset, IRenameResult renameResult, out string omittedParentBranch)
+        private string FindRemoteAndFetch(int parentChangesetId, bool stopOnFailMergeCommit, bool ignorableBranch, IRenameResult renameResult, out string omittedParentBranch, string tfsBranchName = null)
         {
-            var tfsRemote = FindOrInitTfsRemoteOfChangeset(parentChangesetId, mergeChangeset, renameResult, out omittedParentBranch);
+            var tfsRemote = FindOrInitTfsRemoteOfChangeset(parentChangesetId, ignorableBranch, renameResult, out omittedParentBranch, tfsBranchName);
 
             if (tfsRemote != null && string.Compare(tfsRemote.TfsRepositoryPath, TfsRepositoryPath, StringComparison.InvariantCultureIgnoreCase) != 0)
             {
@@ -576,7 +623,7 @@ namespace GitTfs.Core
             return null;
         }
 
-        private IGitTfsRemote FindOrInitTfsRemoteOfChangeset(int parentChangesetId, bool mergeChangeset, IRenameResult renameResult, out string omittedParentBranch)
+        private IGitTfsRemote FindOrInitTfsRemoteOfChangeset(int parentChangesetId, bool ignorableBranch, IRenameResult renameResult, out string omittedParentBranch, string tfsBranchName = null)
         {
             omittedParentBranch = null;
             IGitTfsRemote tfsRemote;
@@ -588,51 +635,66 @@ namespace GitTfs.Core
                 tfsRemote = remote;
             else
             {
-                // If the changeset has created multiple folders, the expected branch folder will not always be the first
-                // so we scan all the changes of type folder to try to detect the first one which is a branch.
-                // In most cases it will change nothing: the first folder is the good one
                 IBranchObject tfsBranch = null;
-                string tfsPath = null;
                 var allBranches = Tfs.GetBranches(true);
-                foreach (var change in parentChangeset.Changes)
-                {
-                    tfsPath = change.Item.ServerItem;
-                    tfsPath = tfsPath.EndsWith("/") ? tfsPath : tfsPath + "/";
 
-                    tfsBranch = allBranches.SingleOrDefault(b => tfsPath.StartsWith(b.Path.EndsWith("/") ? b.Path : b.Path + "/"));
-                    if (tfsBranch != null)
+                if (tfsBranchName != null)
+                    tfsBranch = allBranches.SingleOrDefault(b => string.Equals(b.Path, tfsBranchName, StringComparison.OrdinalIgnoreCase));
+
+                string tfsPath = null;
+                if (tfsBranch == null)
+                {
+                    // If the changeset has created multiple folders, the expected branch folder will not always be the first
+                    // so we scan all the changes to try to detect the branch containing them.
+                    // In most cases it will change nothing: the first folder is the good one
+                    foreach (var change in parentChangeset.Changes)
                     {
-                        // we found a branch, we stop here
-                        break;
+                        tfsPath = change.Item.ServerItem;
+                        tfsPath = tfsPath.EndsWith("/") ? tfsPath : tfsPath + "/";
+
+                        tfsBranch = allBranches.SingleOrDefault(b => tfsPath.StartsWith(b.Path.EndsWith("/") ? b.Path : b.Path + "/"));
+                        if (tfsBranch != null)
+                        {
+                            // we found a branch, we stop here
+                            break;
+                        }
                     }
+
+                    // In case we do report an error later and the last change in the loop above
+                    // was a file, remove the trailing slash as it doesn't make sense for files
+                    // Otherwise we might report path such as "$/Project/Branch/File.cs/"
+                    tfsPath = tfsPath.TrimEnd('/');
                 }
+
                 var filterRegex = Repository.GetConfig(GitTfsConstants.IgnoreBranchesRegex);
-                if (mergeChangeset && tfsBranch != null && !string.IsNullOrEmpty(filterRegex)
+                if (ignorableBranch && tfsBranch != null && !string.IsNullOrEmpty(filterRegex)
                     && Regex.IsMatch(tfsBranch.Path, filterRegex, RegexOptions.IgnoreCase))
                 {
                     Trace.TraceInformation("warning: skip filtered branch for path " + tfsBranch.Path + " (regex:" + filterRegex + ")");
                     tfsRemote = null;
-                    omittedParentBranch = tfsBranch.Path + ";C" + parentChangesetId;
+                    omittedParentBranch = GetOmittedParentBranch();
                 }
-                else if (mergeChangeset && tfsBranch != null &&
+                else if (ignorableBranch && tfsBranch != null &&
                     string.Equals(Repository.GetConfig(GitTfsConstants.IgnoreNotInitBranches), true.ToString(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     Trace.TraceInformation("warning: skip not initialized branch for path " + tfsBranch.Path);
                     tfsRemote = null;
-                    omittedParentBranch = tfsBranch.Path + ";C" + parentChangesetId;
+                    omittedParentBranch = GetOmittedParentBranch();
                 }
                 else if (tfsBranch == null)
                 {
-                    Trace.TraceInformation("error: branch not found. Verify that all the folders have been converted to branches (or something else :().\n\tpath {0}", tfsPath);
+                    Trace.TraceInformation($"error: branch not found. Verify that all the folders have been converted to branches (or something else :().\n\t{(tfsBranchName != null ? $"path {tfsBranchName}" : $"changeset C{parentChangesetId}")}");
                     tfsRemote = null;
-                    omittedParentBranch = ";C" + parentChangesetId;
+                    omittedParentBranch = GetOmittedParentBranch();
                 }
                 else
                 {
                     tfsRemote = InitTfsRemoteOfChangeset(tfsBranch, parentChangeset.ChangesetId, renameResult);
                     if (tfsRemote == null)
-                        omittedParentBranch = tfsBranch.Path + ";C" + parentChangesetId;
+                        omittedParentBranch = GetOmittedParentBranch();
                 }
+
+                string GetOmittedParentBranch() => $"{(tfsBranch?.Path ?? tfsBranchName)};C{parentChangesetId}";
             }
             return tfsRemote;
         }
@@ -660,7 +722,7 @@ namespace GitTfs.Core
                     return InitTfsBranch(_remoteOptions, tfsBranch.Path);
                 }
 
-                if (branch.IsRenamedBranch)
+                if (branch.IsRenamedBranch || renameResult?.IsProcessingRenameChangeset == true)
                 {
                     try
                     {
@@ -704,7 +766,9 @@ namespace GitTfs.Core
 
         private void quickFetch(ITfsChangeset changeset)
         {
-            var log = CopyTree(MaxCommitHash, changeset);
+            var parentSha = MaxCommitHash;
+            parentSha ??= CommitTheGitIgnoreFile();
+            var log = CopyTree(parentSha, changeset);
             UpdateTfsHead(Commit(log), changeset.Summary.ChangesetId);
             DoGcIfNeeded();
         }

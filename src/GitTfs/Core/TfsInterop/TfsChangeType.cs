@@ -16,6 +16,10 @@
         Branch = 0x0080,
         Merge = 0x0100,
 
-        Lock = 0x0200
+        Lock = 0x0200,
+
+        Rollback = 0x0400,
+        Property = 0x2000,
+        SourceRename = 0x0800,
     }
 }

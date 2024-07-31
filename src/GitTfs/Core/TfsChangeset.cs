@@ -29,10 +29,6 @@ namespace GitTfs.Core
             var remoteRelativeLocalPath = GetPathRelativeToWorkspaceLocalPath(workspace);
             var resolver = new PathResolver(Summary.Remote, remoteRelativeLocalPath, initialTree);
             var sieve = new ChangeSieve(_changeset, resolver);
-            if (sieve.RenameBranchCommmit)
-            {
-                IsRenameChangeset = true;
-            }
             _changeset.Get(workspace, sieve.GetChangesToFetch(), ignorableErrorHandler);
             foreach (var change in sieve.GetChangesToApply())
             {
@@ -82,6 +78,25 @@ namespace GitTfs.Core
         public bool IsMergeChangeset => _changeset == null || _changeset.Changes == null || !_changeset.Changes.Any()
                     ? false
                     : _changeset.Changes.Any(c => c.ChangeType.IncludesOneOf(TfsChangeType.Merge));
+
+        private bool? _isRenameChangeset;
+        /// <summary>
+        /// Is the top-level folder deleted or renamed?
+        /// </summary>
+        public bool IsBranchRenameChangeset
+        {
+            get
+            {
+                if (!_isRenameChangeset.HasValue)
+                {
+                    _isRenameChangeset = _changeset.Changes.Any(c =>
+                        c.Item.ItemType == TfsItemType.Folder
+                            && (c.ChangeType.HasFlag(TfsChangeType.Delete | TfsChangeType.SourceRename) || c.ChangeType.HasFlag(TfsChangeType.Rename))
+                            && string.Equals(c.Item.ServerItem, Summary.Remote.TfsRepositoryPath, StringComparison.Ordinal));
+                }
+                return _isRenameChangeset.Value;
+            }
+        }
 
         public IEnumerable<TfsTreeEntry> GetFullTree()
         {
@@ -232,6 +247,5 @@ namespace GitTfs.Core
         }
 
         public string OmittedParentBranch { get; set; }
-        public bool IsRenameChangeset { get; set; }
     }
 }

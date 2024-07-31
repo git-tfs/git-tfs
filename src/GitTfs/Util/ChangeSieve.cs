@@ -43,25 +43,6 @@ namespace GitTfs.Util
             });
         }
 
-        private bool? _renameBranchCommmit;
-        /// <summary>
-        /// Is the top-level folder deleted or renamed?
-        /// </summary>
-        public bool RenameBranchCommmit
-        {
-            get
-            {
-                if (!_renameBranchCommmit.HasValue)
-                {
-                    _renameBranchCommmit = NamedChanges.Any(c =>
-                        c.Change.Item.ItemType == TfsItemType.Folder
-                            && c.GitPath == string.Empty
-                            && c.Change.ChangeType.IncludesOneOf(TfsChangeType.Delete, TfsChangeType.Rename));
-                }
-                return _renameBranchCommmit.Value;
-            }
-        }
-
         public IEnumerable<IChange> GetChangesToFetch()
         {
             if (DeletesProject)

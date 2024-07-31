@@ -699,7 +699,7 @@ namespace GitTfs.Core
 
         public bool IsPathIgnored(string relativePath) => _repository.Ignore.IsPathIgnored(relativePath);
 
-        public string CommitGitIgnore(string pathToGitIgnoreFile)
+        public string CommitGitIgnore(string pathToGitIgnoreFile, string branchName)
         {
             if (!File.Exists(pathToGitIgnoreFile))
             {
@@ -709,16 +709,16 @@ namespace GitTfs.Core
             gitTreeBuilder.Add(".gitignore", pathToGitIgnoreFile, LibGit2Sharp.Mode.NonExecutableFile);
             var tree = gitTreeBuilder.GetTree();
             var signature = new Signature("git-tfs", "git-tfs@noreply.com", new DateTimeOffset(2000, 1, 1, 0, 0, 0, new TimeSpan(0)));
-            var sha = _repository.ObjectDatabase.CreateCommit(signature, signature, ".gitignore", tree, new Commit[0], false).Sha;
+            var sha = _repository.ObjectDatabase.CreateCommit(signature, signature, $".gitignore\n\ngit-tfs branch: {branchName}", tree, new Commit[0], false).Sha;
             Trace.WriteLine(".gitignore commit created: " + sha);
 
             // Point our tfs remote branch to the .gitignore commit
-            var defaultRef = ShortToTfsRemoteName("default");
-            _repository.Refs.Add(defaultRef, new ObjectId(sha));
+            var branchRef = ShortToTfsRemoteName(branchName);
+            _repository.Refs.Add(branchRef, new ObjectId(sha));
 
             // Also point HEAD to the .gitignore commit, if it isn't already. This
             // ensures a common initial commit for the git-tfs init --gitignore case.
-            if (_repository.Head.CanonicalName != defaultRef)
+            if (!HasRef(_repository.Head.CanonicalName))
                 _repository.Refs.Add(_repository.Head.CanonicalName, new ObjectId(sha));
 
             return sha;

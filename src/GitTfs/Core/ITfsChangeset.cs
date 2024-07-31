@@ -1,4 +1,4 @@
-﻿namespace GitTfs.Core
+namespace GitTfs.Core
 {
     public interface ITfsChangeset
     {
@@ -27,6 +27,6 @@
         /// </summary>
         string OmittedParentBranch { get; set; }
 
-        bool IsRenameChangeset { get; set; }
+        bool IsBranchRenameChangeset { get; }
     }
 }
