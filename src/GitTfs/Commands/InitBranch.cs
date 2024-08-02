@@ -97,8 +97,6 @@ namespace GitTfs.Commands
         {
             fetchResult = null;
 
-            RemoveAlreadyFetchedBranches(creationBranchData, defaultRemote);
-
             Trace.TraceInformation("Branches to Initialize successively :");
             foreach (var branch in creationBranchData)
                 Trace.TraceInformation("-" + branch.TfsBranchPath + " (" + branch.SourceBranchChangesetId + ")");
@@ -127,8 +125,9 @@ namespace GitTfs.Commands
 
                 if (rootBranch.IsRenamedBranch || !NoFetch)
                 {
+                    var remoteExistedBeforeFetch = _globals.Repository.HasRemote(branchTfsRemote.Id);
                     fetchResult = FetchRemote(branchTfsRemote, false, !DontCreateGitBranch && !rootBranch.IsRenamedBranch, fetchResult, rootBranch.TargetBranchChangesetId);
-                    if (fetchResult.IsSuccess && rootBranch.IsRenamedBranch)
+                    if (!remoteExistedBeforeFetch && fetchResult.IsSuccess && rootBranch.IsRenamedBranch)
                         remoteToDelete.Add(branchTfsRemote);
                 }
                 else
@@ -139,22 +138,6 @@ namespace GitTfs.Commands
                 _globals.Repository.DeleteTfsRemote(gitTfsRemote);
             }
             return RemoteCreated = branchTfsRemote;
-        }
-
-        private static void RemoveAlreadyFetchedBranches(IList<RootBranch> creationBranchData, IGitTfsRemote defaultRemote)
-        {
-            for (int i = creationBranchData.Count - 1; i > 0; i--)
-            {
-                var branch = creationBranchData[i];
-                if (defaultRemote.Repository.FindCommitHashByChangesetId(branch.SourceBranchChangesetId) != null)
-                {
-                    for (int j = 0; j < i; j++)
-                    {
-                        creationBranchData.RemoveAt(0);
-                    }
-                    break;
-                }
-            }
         }
 
         private class BranchCreationDatas
@@ -383,7 +366,7 @@ namespace GitTfs.Commands
         /// Indicates whether to stop fetching when encountering a failed merge commit.
         /// </param>
         /// <param name="createBranch">
-        /// If <c>true</c>, create a local Git branch starting from the earliest possible changeset in the given
+        /// If <see langword="true"/>, create a local Git branch starting from the earliest possible changeset in the given
         /// <paramref name="tfsRemote"/>.
         /// </param>
         /// <param name="renameResult"></param>
@@ -397,20 +380,25 @@ namespace GitTfs.Commands
                 var fetchResult = tfsRemote.Fetch(stopOnFailMergeCommit, renameResult: renameResult);
                 Trace.WriteLine("Changesets fetched!");
 
-                if (fetchResult.IsSuccess && createBranch && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
+                if (fetchResult.IsSuccess)
                 {
-                    Trace.WriteLine("Try creating the local branch...");
                     var branchRef = tfsRemote.Id.ToLocalGitRef();
                     if (!_globals.Repository.HasRef(branchRef))
                     {
-                        if (!_globals.Repository.CreateBranch(branchRef, tfsRemote.MaxCommitHash))
-                            Trace.TraceWarning("warning: Fail to create local branch ref file!");
-                        else
-                            Trace.WriteLine("Local branch created!");
+                        if (createBranch && tfsRemote.Id != GitTfsConstants.DefaultRepositoryId)
+                        {
+                            Trace.WriteLine("Try creating the local branch...");
+                            if (!_globals.Repository.CreateBranch(branchRef, tfsRemote.MaxCommitHash))
+                                Trace.TraceWarning("warning: Failed to create local branch!");
+                            else
+                                Trace.WriteLine("Local branch created!");
+                        }
                     }
                     else
                     {
-                        Trace.TraceInformation("info: local branch ref already exists!");
+                        Trace.TraceInformation("info: local branch already exists, updating...");
+                        if (fetchResult.NewChangesetCount != 0)
+                            _globals.Repository.UpdateRef(branchRef, tfsRemote.MaxCommitHash);
                     }
                 }
                 return fetchResult;
