@@ -180,9 +180,7 @@ namespace GitTfs.VsCommon
         {
             VssCredentials vssCred = null;
 
-            string pat = Environment.GetEnvironmentVariable(gitTfsPatEnvironmentVariableName, EnvironmentVariableTarget.User)
-                ?? Environment.GetEnvironmentVariable(gitTfsPatEnvironmentVariableName, EnvironmentVariableTarget.Machine)
-                ?? Environment.GetEnvironmentVariable(gitTfsPatEnvironmentVariableName, EnvironmentVariableTarget.Process);
+            var pat = Environment.GetEnvironmentVariable(gitTfsPatEnvironmentVariableName);
 
             if (!string.IsNullOrWhiteSpace(pat))
             {
