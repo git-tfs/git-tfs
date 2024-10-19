@@ -62,6 +62,6 @@ namespace GitTfs.Core
         bool IsPathIgnored(string relativePath);
         string CommitGitIgnore(string pathToGitIgnoreFile);
         void UseGitIgnore(string pathToGitIgnoreFile);
-        IDictionary<int, string> GetCommitChangeSetPairs();
+        IDictionary<int, List<string>> GetCommitChangeSetPairs(bool withChangesetsOnMultipleBranches);
     }
 }

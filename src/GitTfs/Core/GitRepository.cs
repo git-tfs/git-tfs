@@ -729,19 +729,30 @@ namespace GitTfs.Core
             //prevent libgit2sharp to detect the new .gitignore file
             _repository.Ignore.AddTemporaryRules(File.ReadLines(pathToGitIgnoreFile));
 
-        public IDictionary<int, string> GetCommitChangeSetPairs()
+        public IDictionary<int, List<string>> GetCommitChangeSetPairs(bool withChangesetsOnMultipleBranches)
         {
             var allCommits = _repository.Commits.QueryBy(new CommitFilter());
-            var pairs = new Dictionary<int, string>() ;
+            var pairs = new Dictionary<int, List<string>>() ;
             foreach (var c in allCommits)
             {
                 int changesetId;
                 if (TryParseChangesetId(c.Message, out changesetId))
                 {
-                    if (pairs.TryGetValue(changesetId, out var commitSha))
-                        Trace.TraceWarning("warning: Git commit {0} couldn't be assigned to TFS changeset '{1}' as git commit '{2}' was assigned already. Please correct the export file accordingly if needed", c.Sha, changesetId, commitSha);
+                    if (pairs.TryGetValue(changesetId, out var commitShaList))
+                    {
+                        if (withChangesetsOnMultipleBranches)
+                        {
+                            commitShaList.Add(c.Sha);
+                        }
+                        else
+                        {
+                            Trace.TraceWarning($"warning: Git commit {c.Sha} couldn't be assigned to TFS changeset '{changesetId}' as git commit '{commitShaList.Single()}' was assigned already. Please correct the export file accordingly if needed");
+                        }
+                    }
                     else
-                        pairs.Add(changesetId, c.Sha);
+                    {
+                        pairs.Add(changesetId, new List<string>() { c.Sha });
+                    }
                 }
                 else
                 {
@@ -749,7 +760,7 @@ namespace GitTfs.Core
                     {
                         if (TryParseChangesetId(note.Message, out changesetId))
                         {
-                            pairs.Add(changesetId, c.Sha);
+                            pairs.Add(changesetId, new List<string>() { c.Sha });
                         }
                     }
                 }
