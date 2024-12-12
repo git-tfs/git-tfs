@@ -213,8 +213,7 @@ namespace GitTfs.Commands
             expectedRefName = expectedRefName.Replace("..", string.Empty);
             expectedRefName = expectedRefName.Replace("//", string.Empty);
             expectedRefName = expectedRefName.Replace("/.", "/");
-            expectedRefName = expectedRefName.TrimEnd('.', '/');
-            return expectedRefName.Trim('/');
+            return expectedRefName.Trim('.', '/');
         }
 
         public static string ToGitBranchNameFromTfsRepositoryPath(this string tfsRepositoryPath, bool includeTeamProjectName = false)

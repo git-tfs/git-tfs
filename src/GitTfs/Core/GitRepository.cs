@@ -486,7 +486,7 @@ namespace GitTfs.Core
         public string AssertValidBranchName(string gitBranchName)
         {
             if (!Reference.IsValidName(ShortToLocalName(gitBranchName)))
-                throw new GitTfsException("The name specified for the new git branch is not allowed. Choose another one!");
+                throw new GitTfsException("The name specified for the new git branch ('" + gitBranchName + "') is not allowed. Choose another one!");
             return gitBranchName;
         }
 
