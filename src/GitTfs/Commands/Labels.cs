@@ -87,7 +87,7 @@ namespace GitTfs.Commands
 
                 Trace.WriteLine("LabelId:" + label.Id + "/ChangesetId:" + label.ChangesetId + "/LabelName:" + label.Name + "/Owner:" + label.Owner);
                 Trace.WriteLine("Try to find changeset in git repository...");
-                string sha1TagCommit = _globals.Repository.FindCommitHashByChangesetId(label.ChangesetId);
+                string sha1TagCommit = _globals.Repository.FindCommitHashByChangesetId(string.Empty, label.ChangesetId).SingleOrDefault();
                 if (string.IsNullOrWhiteSpace(sha1TagCommit))
                 {
                     Trace.WriteLine("This label does not match an existing commit...");

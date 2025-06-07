@@ -292,6 +292,7 @@ namespace GitTfs.VsFake
                 {
                     var rootBranch = new RootBranch(
                         firstBranchChangeset.BranchChangesetDatas.RootChangesetId,
+                        firstBranchChangeset.BranchChangesetDatas.ParentBranch,
                         firstBranchChangeset.Id,
                         firstBranchChangeset.BranchChangesetDatas.BranchPath
                     );
@@ -304,7 +305,7 @@ namespace GitTfs.VsFake
                 rootBranches.Reverse();
                 return rootBranches;
             }
-            rootBranches.Add(new RootBranch(-1, tfsPathBranchToCreate));
+            rootBranches.Add(new RootBranch(-1, null, tfsPathBranchToCreate));
             return rootBranches;
         }
 

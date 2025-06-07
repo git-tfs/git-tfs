@@ -42,7 +42,8 @@ namespace GitTfs.Core
                 logEntry.Tree,
                 parents,
                 false);
-            changesetsCache[logEntry.ChangesetId] = commit.Sha;
+            Trace.WriteLine($"New commit for changeset {logEntry.ChangesetId} (remote branch {logEntry.Remote.RemoteRef}) = {commit.Sha}");
+            changesetsCache[(logEntry.ChangesetId, logEntry.Remote.RemoteRef)] = commit.Sha;
             return new GitCommit(commit);
         }
 
@@ -334,12 +335,11 @@ namespace GitTfs.Core
             Trace.WriteLine("Commits visited count:" + alreadyVisitedCommits.Count);
         }
 
-        public TfsChangesetInfo GetTfsChangesetById(string remoteRef, int changesetId)
+        public IReadOnlyList<TfsChangesetInfo> GetTfsChangesetById(string remoteRef, int changesetId)
         {
-            var commit = FindCommitByChangesetId(changesetId, remoteRef);
-            if (commit == null)
-                return null;
-            return TryParseChangesetInfo(commit.Message, commit.Sha);
+            IReadOnlyList<Commit> commitList = FindCommitByChangesetId(changesetId, remoteRef);
+
+            return commitList.Select(x => TryParseChangesetInfo(x.Message, x.Sha)).ToList();
         }
 
         public TfsChangesetInfo GetCurrentTfsCommit()
@@ -519,16 +519,14 @@ namespace GitTfs.Core
             return reference != null;
         }
 
-        private readonly Dictionary<int, string> changesetsCache = new Dictionary<int, string>();
+        private readonly Dictionary<(int changeset, string branch), string> changesetsCache = new Dictionary<(int changeset, string branch), string>();
         private bool cacheIsFull = false;
 
-        public string FindCommitHashByChangesetId(int changesetId)
+        public IReadOnlyList<string> FindCommitHashByChangesetId(string remoteRef, int changesetId)
         {
-            var commit = FindCommitByChangesetId(changesetId);
-            if (commit == null)
-                return null;
+            IReadOnlyList<Commit> commitList = FindCommitByChangesetId(changesetId, remoteRef);
 
-            return commit.Sha;
+            return commitList.Select(x => x.Sha).ToList();
         }
 
         private static readonly Regex tfsIdRegex = new Regex("^git-tfs-id: .*;C([0-9]+)\r?$", RegexOptions.Multiline | RegexOptions.Compiled | RegexOptions.RightToLeft);
@@ -546,76 +544,95 @@ namespace GitTfs.Core
             return false;
         }
 
-        private Commit FindCommitByChangesetId(int changesetId, string remoteRef = null)
+        private IReadOnlyList<Commit> FindCommitByChangesetId(int changesetId, string remoteRef)
         {
-            Trace.WriteLine("Looking for changeset " + changesetId + " in git repository...");
+            Trace.WriteLine($"Looking for changeset {changesetId} (remote branch {remoteRef}) in git repository...");
 
             if (remoteRef == null)
             {
-                string sha;
-                if (changesetsCache.TryGetValue(changesetId, out sha))
-                {
-                    Trace.WriteLine("Changeset " + changesetId + " found at " + sha);
-                    return _repository.Lookup<Commit>(sha);
-                }
-                if (cacheIsFull)
-                {
-                    Trace.WriteLine("Looking for changeset " + changesetId + " in git repository: CacheIsFull, stopped looking.");
-                    return null;
-                }
+                throw new ArgumentNullException(nameof(remoteRef));
+                //string sha;
+                //if (changesetsCache.TryGetValue(changesetId, out sha))
+                //{
+                //    Trace.WriteLine("Changeset " + changesetId + " found at " + sha);
+                //    return new List<Commit>() { _repository.Lookup<Commit>(sha) };
+                //}
+                //if (cacheIsFull)
+                //{
+                //    Trace.WriteLine("Looking for changeset " + changesetId + " in git repository: CacheIsFull, stopped looking.");
+                //    return null;
+                //}
+            }
+            if (changesetsCache.TryGetValue((changesetId, remoteRef), out string sha))
+            {
+                Trace.WriteLine($"Changeset {changesetId} (remote branch {remoteRef}) found at {sha} (Cache hit)");
+                return new List<Commit>() { _repository.Lookup<Commit>(sha) };
             }
 
-            var reachableFromRemoteBranches = new CommitFilter
+            IEnumerable<Branch> query = _repository.Branches.Where(p => p.IsRemote);
+            if (!string.IsNullOrEmpty(remoteRef))
             {
-                IncludeReachableFrom = _repository.Branches.Where(p => p.IsRemote),
-                SortBy = CommitSortStrategies.Time
-            };
-
-            if (remoteRef != null)
-            {
-                var query = _repository.Branches.Where(p => p.IsRemote && p.CanonicalName.EndsWith(remoteRef));
+                query = _repository.Branches.Where(p => p.IsRemote && p.CanonicalName.EndsWith(remoteRef));
                 Trace.WriteLine("Looking for changeset " + changesetId + " in git repository: Adding remotes:");
                 foreach (var reachable in query)
                 {
-                    Trace.WriteLine(reachable.CanonicalName + "reachable from " + remoteRef);
+                    Trace.WriteLine(reachable.CanonicalName + " reachable from " + remoteRef);
                 }
-                reachableFromRemoteBranches.IncludeReachableFrom = query;
             }
-            var commitsFromRemoteBranches = _repository.Commits.QueryBy(reachableFromRemoteBranches);
-
-            Commit commit = null;
-            foreach (var c in commitsFromRemoteBranches)
+            List<Commit> commitList = new List<Commit>();
+            foreach (Branch branch in query)
             {
-                int id;
-                if (TryParseChangesetId(c.Message, out id))
+                var reachableFromRemoteBranches = new CommitFilter
                 {
-                    changesetsCache[id] = c.Sha;
-                    if (id == changesetId)
-                    {
-                        commit = c;
-                        break;
-                    }
-                }
-                else
+                    IncludeReachableFrom = _repository.Branches.Where(x => x.IsRemote && x.CanonicalName == branch.CanonicalName),
+                    SortBy = CommitSortStrategies.Time
+                };
+                var commitsFromRemoteBranches = _repository.Commits.QueryBy(reachableFromRemoteBranches);
+
+                foreach (var c in commitsFromRemoteBranches)
                 {
-                    foreach (var note in c.Notes)
+                    if (TryParseChangesetId(c.Message, out int id))
                     {
-                        if (TryParseChangesetId(note.Message, out id))
+                        changesetsCache[(id, remoteRef)] = c.Sha;
+                        changesetsCache[(id, branch.CanonicalName)] = c.Sha;
+                        if (id == changesetId)
                         {
-                            changesetsCache[id] = c.Sha;
-                            if (id == changesetId)
+                            commitList.Add(c);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        foreach (var note in c.Notes)
+                        {
+                            if (TryParseChangesetId(note.Message, out id))
                             {
-                                commit = c;
-                                break;
+                                changesetsCache[(id, remoteRef)] = c.Sha;
+                                changesetsCache[(id, branch.CanonicalName)] = c.Sha;
+                                if (id == changesetId)
+                                {
+                                    commitList.Add(c);
+                                    break;
+                                }
                             }
                         }
                     }
                 }
             }
-            if (remoteRef == null && commit == null)
+            if (remoteRef == null && commitList.Count == 0)
                 cacheIsFull = true; // repository fully scanned
-            Trace.WriteLine((commit == null) ? " => Commit " + changesetId + " not found!" : " => Commit " + changesetId + " found! hash: " + commit.Sha);
-            return commit;
+            if (commitList.Count == 0)
+            {
+                Trace.WriteLine(" => Commit " + changesetId + " not found!");
+            }
+            else
+            {
+                foreach (Commit commit in commitList)
+                {
+                    Trace.WriteLine(" => Commit " + changesetId + " found! hash: " + commit.Sha);
+                }
+            }
+            return commitList;
         }
 
         public void CreateTag(string name, string sha, string comment, string Owner, string emailOwner, DateTime creationDate)

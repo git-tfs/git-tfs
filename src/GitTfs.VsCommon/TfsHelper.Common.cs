@@ -317,7 +317,7 @@ namespace GitTfs.VsCommon
                 var rootChangesetInChildBranch = rootChangesetMergeInfo.SourceChangeset == rootChangesetInParentBranch ?
                     rootChangesetMergeInfo.TargetChangeset : rootChangesetMergeInfo.SourceChangeset;
 
-                var rootBranch = new RootBranch(rootChangesetInParentBranch, rootChangesetInChildBranch, tfsPathBranchToCreate);
+                var rootBranch = new RootBranch(rootChangesetInParentBranch, tfsPathParentBranch, rootChangesetInChildBranch, tfsPathBranchToCreate);
                 var added = AddNewRootBranch(rootBranches, rootBranch);
 
                 if (added && renameFromBranch != null)

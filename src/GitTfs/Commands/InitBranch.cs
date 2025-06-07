@@ -108,12 +108,12 @@ namespace GitTfs.Commands
             foreach (var rootBranch in creationBranchData)
             {
                 Trace.WriteLine("Processing " + (rootBranch.IsRenamedBranch ? "renamed " : string.Empty) + "branch :"
-                    + rootBranch.TfsBranchPath + " (" + rootBranch.SourceBranchChangesetId + ")");
-                var cbd = new BranchCreationDatas() { RootChangesetId = rootBranch.SourceBranchChangesetId, TfsRepositoryPath = rootBranch.TfsBranchPath };
+                    + rootBranch.TfsBranchPath + " (" + rootBranch.SourceBranchChangesetId + "@" + rootBranch.TfsSourceBranchPath + ")");
+                var cbd = new BranchCreationDatas() { RootChangesetId = rootBranch.SourceBranchChangesetId, TfsRepositoryPath = rootBranch.TfsBranchPath, RootTfsBranch = rootBranch.TfsSourceBranchPath };
                 if (cbd.TfsRepositoryPath == tfsBranchPath)
                     cbd.GitBranchNameExpected = gitBranchNameExpected;
 
-                branchTfsRemote = defaultRemote.InitBranch(_remoteOptions, cbd.TfsRepositoryPath, cbd.RootChangesetId, !NoFetch, cbd.GitBranchNameExpected, fetchResult);
+                branchTfsRemote = defaultRemote.InitBranch(_remoteOptions, cbd.TfsRepositoryPath, cbd.RootChangesetId, !NoFetch, cbd.RootTfsBranch, cbd.GitBranchNameExpected, fetchResult);
                 if (branchTfsRemote == null)
                 {
                     throw new GitTfsException("error: Couldn't fetch parent branch\n");
@@ -146,7 +146,7 @@ namespace GitTfs.Commands
             for (int i = creationBranchData.Count - 1; i > 0; i--)
             {
                 var branch = creationBranchData[i];
-                if (defaultRemote.Repository.FindCommitHashByChangesetId(branch.SourceBranchChangesetId) != null)
+                if (defaultRemote.Repository.FindCommitHashByChangesetId(branch.TfsSourceBranchPath, branch.SourceBranchChangesetId) != null)
                 {
                     for (int j = 0; j < i; j++)
                     {
@@ -162,6 +162,7 @@ namespace GitTfs.Commands
             public string TfsRepositoryPath { get; set; }
             public string GitBranchNameExpected { get; set; }
             public int RootChangesetId { get; set; }
+            public string RootTfsBranch { get; set; }
         }
 
         [DebuggerDisplay("{TfsRepositoryPath} C{RootChangesetId}")]

@@ -67,10 +67,10 @@ namespace GitTfs.Test.Commands
 
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out var gitRepositoryMock, out var trunkGitTfsRemoteMock, out var newBranchRemoteMock, out var tfsHelperMock);
 
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, null)).Returns(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
+            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, null)).Returns(new List<RootBranch>() { new RootBranch(2010, string.Empty, "$/MyProject/MyBranch") });
 
             trunkGitTfsRemoteMock.Name = nameof(trunkGitTfsRemoteMock);
-            trunkGitTfsRemoteMock.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranchRemoteMock.Object).Verifiable();
+            trunkGitTfsRemoteMock.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranchRemoteMock.Object).Verifiable();
             trunkGitTfsRemoteMock.SetupGet(x => x.Tfs).Returns(tfsHelperMock.Object);
 
             gitRepositoryMock.Name = nameof(gitRepositoryMock);
@@ -100,9 +100,9 @@ namespace GitTfs.Test.Commands
 
             trunkGitTfsRemoteMock.Name = nameof(trunkGitTfsRemoteMock);
             trunkGitTfsRemoteMock.Setup(r => r.Fetch(It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<IRenameResult>())).Returns(new GitTfsRemote.FetchResult() { IsSuccess = true });
-            trunkGitTfsRemoteMock.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranchRemoteMock.Object);
+            trunkGitTfsRemoteMock.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranchRemoteMock.Object);
 
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, null)).Returns(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
+            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, null)).Returns(new List<RootBranch>() { new RootBranch(2010, string.Empty, "$/MyProject/MyBranch") });
 
             TfsHelper tfsHelper = new TfsHelper(mocks.Container, null);
             Mock<IGitTfsRemote> gitTfsRemoteMock = new Mock<IGitTfsRemote>().SetupAllProperties();
@@ -153,7 +153,7 @@ namespace GitTfs.Test.Commands
 
             InitMocks4Tests(GIT_BRANCH_TO_INIT, out var gitRepository, out var remote, out var newBranchRemote, out var tfsHelperMock);
 
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, null)).Returns(new List<RootBranch>() { new RootBranch(2010, "$/MyProject/MyBranch") });
+            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch("$/MyProject/MyBranch", -1, null)).Returns(new List<RootBranch>() { new RootBranch(2010, string.Empty, "$/MyProject/MyBranch") });
 
             gitRepository.Setup(x => x.ReadTfsRemote("default")).Returns(remote.Object).Verifiable();
             gitRepository.Setup(x => x.ReadAllTfsRemotes()).Returns(new List<IGitTfsRemote> { remote.Object }).Verifiable();
@@ -194,7 +194,7 @@ namespace GitTfs.Test.Commands
 
             #region Branch1
             var rootChangeSetB1 = 1000;
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch1, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB1, tfsPathBranch1) });
+            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch1, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB1, string.Empty, tfsPathBranch1) });
 
             newBranch1RemoteMock.Name = nameof(newBranch1RemoteMock);
             newBranch1RemoteMock.Setup(r => r.RemoteRef).Returns("refs/remote/tfs/" + GIT_BRANCH_TO_INIT1);//.Verifiable();
@@ -208,7 +208,7 @@ namespace GitTfs.Test.Commands
             newBranch2RemoteMock.SetupGet(r => r.Id).Returns(GIT_BRANCH_TO_INIT2);
 
             var rootChangeSetB2 = 2000;
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch2, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB2, tfsPathBranch2) });
+            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch2, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB2, string.Empty, tfsPathBranch2) });
 
             newBranch2RemoteMock.Name = nameof(newBranch2RemoteMock);
             newBranch2RemoteMock.Setup(r => r.RemoteRef).Returns("refs/remote/tfs/" + GIT_BRANCH_TO_INIT2);//.Verifiable();
@@ -217,8 +217,8 @@ namespace GitTfs.Test.Commands
             #endregion
 
             trunkGitTfsRemote.Setup(r => r.Fetch(It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<IRenameResult>())).Returns(new GitTfsRemote.FetchResult() { IsSuccess = true }).Verifiable();
-            trunkGitTfsRemote.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), tfsPathBranch1, It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranch1RemoteMock.Object);
-            trunkGitTfsRemote.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), tfsPathBranch2, It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranch2RemoteMock.Object);
+            trunkGitTfsRemote.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), tfsPathBranch1, It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranch1RemoteMock.Object);
+            trunkGitTfsRemote.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), tfsPathBranch2, It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranch2RemoteMock.Object);
             trunkGitTfsRemote.Object.MaxChangesetId = 2000; //Simulate fetch already done
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run());
 
@@ -254,7 +254,7 @@ namespace GitTfs.Test.Commands
 
             #region Branch1
             var rootChangeSetB1 = 1000;
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch1, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB1, tfsPathBranch1) });
+            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch1, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB1, string.Empty, tfsPathBranch1) });
 
             newBranch1RemoteMock.Name = nameof(newBranch1RemoteMock);
             newBranch1RemoteMock.Setup(r => r.RemoteRef).Returns("refs/remote/tfs/" + GIT_BRANCH_TO_INIT1);//.Verifiable();
@@ -267,7 +267,7 @@ namespace GitTfs.Test.Commands
             newBranch2RemoteMock.SetupGet(r => r.Id).Returns(GIT_BRANCH_TO_INIT2);
 
             var rootChangeSetB2 = 2000;
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch2, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB2, tfsPathBranch2) });
+            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch2, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB2, string.Empty, tfsPathBranch2) });
 
             newBranch2RemoteMock.Name = nameof(newBranch2RemoteMock);
             newBranch2RemoteMock.Setup(r => r.RemoteRef).Returns("refs/remote/tfs/" + GIT_BRANCH_TO_INIT2);//.Verifiable();
@@ -277,8 +277,8 @@ namespace GitTfs.Test.Commands
 
 
             trunkGitTfsRemote.Setup(r => r.Fetch(It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<IRenameResult>())).Returns(new GitTfsRemote.FetchResult() { IsSuccess = true }).Verifiable();
-            trunkGitTfsRemote.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), tfsPathBranch1, It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranch1RemoteMock.Object);
-            trunkGitTfsRemote.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), tfsPathBranch2, It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranch2RemoteMock.Object);
+            trunkGitTfsRemote.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), tfsPathBranch1, It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranch1RemoteMock.Object);
+            trunkGitTfsRemote.Setup(t => t.InitBranch(It.IsAny<RemoteOptions>(), tfsPathBranch2, It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IRenameResult>())).Returns(newBranch2RemoteMock.Object);
             trunkGitTfsRemote.Object.MaxChangesetId = 2000; //Simulate fetch already done
             Assert.Equal(GitTfsExitCodes.OK, mocks.ClassUnderTest.Run());
 
@@ -321,7 +321,7 @@ namespace GitTfs.Test.Commands
 
             #region Branch1
             var rootChangeSetB1 = 1000;
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch1, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB1, tfsPathBranch1) });
+            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch1, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB1, string.Empty, tfsPathBranch1) });
 
             #endregion
 
@@ -330,7 +330,7 @@ namespace GitTfs.Test.Commands
             newBranch2RemoteMock.SetupGet(r => r.Id).Returns(GIT_BRANCH_TO_INIT2);
 
             var rootChangeSetB2 = 2000;
-            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch2, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB2, tfsPathBranch2) });
+            tfsHelperMock.Setup(t => t.GetRootChangesetForBranch(tfsPathBranch2, -1, null)).Returns(new List<RootBranch>() { new RootBranch(rootChangeSetB2, string.Empty, tfsPathBranch2) });
 
             #endregion
 
