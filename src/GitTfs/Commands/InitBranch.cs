@@ -10,8 +10,8 @@ namespace GitTfs.Commands
     {
         private readonly Globals _globals;
         private readonly Help _helper;
+        private readonly RemoteOptions _remoteOptions;
 
-        private RemoteOptions _remoteOptions;
         public string TfsUsername { get; set; }
         public string TfsPassword { get; set; }
         public string IgnoreRegex { get; set; }
@@ -22,10 +22,11 @@ namespace GitTfs.Commands
 
         public IGitTfsRemote RemoteCreated { get; private set; }
 
-        public InitBranch(Globals globals, Help helper, AuthorsFile authors)
+        public InitBranch(Globals globals, Help helper, AuthorsFile authors, RemoteOptions remoteOptions)
         {
             _globals = globals;
             _helper = helper;
+            _remoteOptions = remoteOptions;
         }
 
         public OptionSet OptionSet => new OptionSet
@@ -350,7 +351,6 @@ namespace GitTfs.Commands
             if (defaultRemote == null)
                 throw new GitTfsException("error: No git-tfs repository found. Please try to clone first...\n");
 
-            _remoteOptions = new RemoteOptions();
             if (!string.IsNullOrWhiteSpace(TfsUsername))
             {
                 _remoteOptions.Username = TfsUsername;
