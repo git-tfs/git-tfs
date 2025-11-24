@@ -657,7 +657,9 @@ namespace GitTfs.Core
                 {
                     Trace.TraceInformation("warning: root commit not found corresponding to changeset " + rootChangesetId);
                     Trace.TraceInformation("=> continuing anyway by creating a branch without parent...");
-                    return InitTfsBranch(_remoteOptions, tfsBranch.Path);
+                    var newBranch = InitTfsBranch(_remoteOptions, tfsBranch.Path);
+                    newBranch.QuickFetch(parentChangesetId, false);
+                    return newBranch;
                 }
 
                 if (branch.IsRenamedBranch)
