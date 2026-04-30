@@ -22,6 +22,10 @@ Prefer the [clone](clone.md) command to initialize and fetch changesets from a T
           --bare                 clone the TFS repository in a bare git repository
           --workspace=VALUE      set tfs workspace to a specific folder (a
                                    shorter path is better!)
+          --gitignore=VALUE      Path toward the .gitignore file which be
+                                   committed and used to ignore files
+          --gitattributes=VALUE  Path to a .gitattributes file to commit as
+                                   the root commit (e.g. for Git LFS tracking)
           --ignore-regex=VALUE   a regex of files to ignore
       -u, --username=VALUE       TFS username
       -p, --password=VALUE       TFS password

@@ -23,6 +23,8 @@ a TFS source tree and fetch all the changesets
 		  --workspace=VALUE      set tfs workspace to a specific folder (a shorter path is better!)
 		  --gitignore=VALUE      Path toward the .gitignore file which be
 								   committed and used to ignore files
+		  --gitattributes=VALUE  Path to a .gitattributes file to commit as
+								   the root commit (e.g. for Git LFS tracking)
 		  --ignore-regex=VALUE   a regex of files to ignore
 		  --except-regex=VALUE   a regex of exceptions to ignore-regex
 	  -u, --username=VALUE       TFS username
@@ -192,6 +194,22 @@ matching one of the regex in the file. You need to give the path toward of an ex
 
 You could download a `.gitignore` file for your language or project from the [github repository](https://github.com/github/gitignore)
  or generate one for multiple languages using [gitignore.io](https://www.gitignore.io/)
+
+### Use a .gitattributes file (e.g. for Git LFS)
+
+To enable Git LFS tracking from the very first commit, you can provide a .gitattributes file using the --gitattributes option.
+The file will be committed as the root commit of the repository, ensuring that binary files are tracked by LFS from the start.
+
+Unlike --gitignore, this option **requires** a path to an existing .gitattributes file:
+
+    git tfs clone http://tfs:8080/tfs/DefaultCollection $/Project1 --gitattributes="c:\path\toward\.gitattributes"
+
+A typical .gitattributes file for LFS might contain:
+
+    *.png filter=lfs diff=lfs merge=lfs -text
+    *.dll filter=lfs diff=lfs merge=lfs -text
+
+Note: Make sure Git LFS is installed (git lfs install) before cloning with this option.
 
 ### Authentication
 

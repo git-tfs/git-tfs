@@ -34,6 +34,7 @@ namespace GitTfs
         public int Run(IList<string> args)
         {
             InitializeGlobals();
+            var lfsFilterRegistration = LibGit2Sharp.GlobalSettings.RegisterFilter(new LFSFilter());
             _globals.CommandLineRun = "git tfs " + string.Join(" ", args);
             var command = ExtractCommand(args);
             var unparsedArgs = ParseOptions(command, args);
@@ -47,6 +48,7 @@ namespace GitTfs
             {
                 _authorsFileHelper.SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
             }
+            LibGit2Sharp.GlobalSettings.DeregisterFilter(lfsFilterRegistration);
             return exitCode;
         }
 
@@ -111,6 +113,23 @@ namespace GitTfs
             else
             {
                 _globals.GitDir = ".git";
+            }
+            if (File.Exists(_globals.GitDir) || Directory.Exists(_globals.GitDir))
+            {
+                if ((File.GetAttributes(_globals.GitDir) & FileAttributes.Directory) != FileAttributes.Directory)
+                {
+                    // ".git" seems to be a redirection in a text file
+                    using (StreamReader sr = new StreamReader(_globals.GitDir))
+                    {
+                        string content = sr.ReadLine();
+                        string gitdirLabel = "gitdir: ";
+                        if (content.StartsWith(gitdirLabel))
+                        {
+                            _globals.GitDir = content.Substring(gitdirLabel.Length).Trim();
+                        }
+                    }
+                }
+                Trace.TraceInformation($"GitDir is '{_globals.GitDir}'");
             }
             _globals.Bootstrapper = _bootstrapper;
         }

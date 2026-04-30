@@ -48,6 +48,8 @@
     <EmbeddedResource Include="Fixtures\vtccds\fd30d6210bb40fd2c9b689f0bf8b2833" />
     <EmbeddedResource Include="Integration\GlobalConfigs\mainDefaultBranch.gitconfig" />
     <EmbeddedResource Include="Integration\GlobalConfigs\standard.gitconfig" />
+    <EmbeddedResource Include="Integration\LfsCandidates\Some_Picture_A.png" />
+    <EmbeddedResource Include="Integration\LfsCandidates\Some_Picture_B.png" />
     <None Include="paket.references" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

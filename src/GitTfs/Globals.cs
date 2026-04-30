@@ -47,6 +47,11 @@ namespace GitTfs
                     var foundRemote = changesetsWithRemote.First().Remote;
                     if (foundRemote.IsDerived)
                     {
+                        var ignoreNotInit = Repository.GetConfig("git-tfs.ignore-not-init-branches");
+                        if (ignoreNotInit == "true")
+                        {
+                            return null;
+                        }
                         Trace.TraceInformation("Bootstraping tfs remote...");
                         foundRemote = Bootstrapper.CreateRemote(changesetsWithRemote.First());
                     }

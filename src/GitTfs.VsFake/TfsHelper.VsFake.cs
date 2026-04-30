@@ -218,7 +218,7 @@ namespace GitTfs.VsFake
                         var outDir = Path.GetDirectoryName(outPath);
                         if (!Directory.Exists(outDir)) Directory.CreateDirectory(outDir);
                         using (var download = change.Item.DownloadFile())
-                            File.WriteAllText(outPath, File.ReadAllText(download.Path));
+                            File.WriteAllBytes(outPath, File.ReadAllBytes(download.Path)); // could be binary file as well (LFS)
                     }
                 }
             }

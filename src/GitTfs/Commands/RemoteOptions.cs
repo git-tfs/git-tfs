@@ -16,6 +16,8 @@ namespace GitTfs.Commands
                         v => { GitIgnorePath = v; UseGitIgnore = true; } },
                     { "no-gitignore", "Do not use .gitignore to ignore files on download from TFS",
                         v => NoGitIgnore = v != null },
+                    { "gitattributes=", "Path to a .gitattributes file to commit as the root commit and use for LFS tracking",
+                        v => GitAttributesPath = v },
                     { "u|username=", "TFS username",
                         v => Username = v },
                     { "p|password=", "TFS password",
@@ -29,6 +31,7 @@ namespace GitTfs.Commands
         public string GitIgnorePath { get; set; }
         public bool UseGitIgnore { get; set; }
         public bool NoGitIgnore { get; set; }
+        public string GitAttributesPath { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public bool NoParallel { get; set; }

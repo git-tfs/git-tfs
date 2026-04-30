@@ -114,6 +114,7 @@ namespace GitTfs.Commands
         private int Run(bool stopOnFailMergeCommit, params string[] args)
         {
             UseTheGitIgnoreFile(_remoteOptions.GitIgnorePath);
+            UseTheGitAttributesFile(_remoteOptions.GitAttributesPath);
 
             if (!FetchAll && BranchStrategy == BranchStrategy.None)
                 _globals.Repository.SetConfig(GitTfsConstants.IgnoreBranches, true);
@@ -138,6 +139,16 @@ namespace GitTfs.Commands
                 return;
             }
             _globals.Repository.UseGitIgnore(pathToGitIgnoreFile);
+        }
+
+        private void UseTheGitAttributesFile(string pathToGitAttributesFile)
+        {
+            if (string.IsNullOrWhiteSpace(pathToGitAttributesFile))
+            {
+                Trace.WriteLine("No .gitattributes file specified to use...");
+                return;
+            }
+            _globals.Repository.UseGitAttributes(pathToGitAttributesFile);
         }
 
         private void FetchRemote(bool stopOnFailMergeCommit, IGitTfsRemote remote)

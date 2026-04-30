@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using GitTfs.Core;
@@ -65,8 +66,23 @@ namespace GitTfs.VsFake
         public TfsChangeType ChangeType { get; set; }
         public TfsItemType ItemType { get; set; }
         public string RepositoryPath { get; set; }
-        public byte[] Content { get; set; }
+
+        // will have to serialize it encoded somehow, to preserve binaries (for git LFS), base64 suits the testing purpose, see OnDeserialized/OnSerializing ...
+        [NonSerialized] public byte[] Content;
+        private string EncodedContent;
         public int? ItemId { get; set; }
+
+        [OnDeserialized()]
+        internal void OnDeserialized(StreamingContext context) {
+            if (EncodedContent != null && EncodedContent.Length > 0)
+                Content = Convert.FromBase64String(EncodedContent);
+        }
+
+        [OnSerializing()]
+        internal void OnSerializing(StreamingContext context) {
+            if (Content != null)
+                EncodedContent = Convert.ToBase64String(Content);
+        }
     }
 
     [Serializable]

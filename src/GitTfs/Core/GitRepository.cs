@@ -396,8 +396,8 @@ namespace GitTfs.Core
 
         public IGitTreeBuilder GetTreeBuilder(string commit)
             => commit == null
-                ? new GitTreeBuilder(_repository.ObjectDatabase)
-                : new GitTreeBuilder(_repository.ObjectDatabase, _repository.Lookup<Commit>(commit).Tree);
+                ? new GitTreeBuilder(_repository.ObjectDatabase, _repository.Info.Path)
+                : new GitTreeBuilder(_repository.ObjectDatabase, _repository.Info.Path, _repository.Lookup<Commit>(commit).Tree);
 
         public string GetCommitMessage(string head, string parentCommitish)
         {
@@ -478,7 +478,7 @@ namespace GitTfs.Core
             if (!destination.Directory.Exists)
                 destination.Directory.Create();
             if ((blob = _repository.Lookup<Blob>(sha)) != null)
-                using (Stream stream = blob.GetContentStream(new FilteringOptions(string.Empty)))
+                using (Stream stream = blob.GetContentStream(new FilteringOptions(outputFile))) // pass the actual file path to the filtering options instead of an empty string, to have registered "smudge" filters being triggered ("lfs" for example)
                 using (var outstream = File.Create(destination.FullName))
                     stream.CopyTo(outstream);
         }
@@ -699,18 +699,26 @@ namespace GitTfs.Core
 
         public bool IsPathIgnored(string relativePath) => _repository.Ignore.IsPathIgnored(relativePath);
 
-        public string CommitGitIgnore(string pathToGitIgnoreFile)
+        public string CommitInitialFiles(string pathToGitIgnoreFile, string pathToGitAttributesFile = null)
         {
-            if (!File.Exists(pathToGitIgnoreFile))
+            if (!string.IsNullOrWhiteSpace(pathToGitIgnoreFile) && !File.Exists(pathToGitIgnoreFile))
             {
                 Trace.TraceWarning("warning: the .gitignore file specified '{0}' does not exist!", pathToGitIgnoreFile);
             }
-            var gitTreeBuilder = new GitTreeBuilder(_repository.ObjectDatabase);
-            gitTreeBuilder.Add(".gitignore", pathToGitIgnoreFile, LibGit2Sharp.Mode.NonExecutableFile);
+            if (!string.IsNullOrWhiteSpace(pathToGitAttributesFile) && !File.Exists(pathToGitAttributesFile))
+            {
+                Trace.TraceWarning("warning: the .gitattributes file specified '{0}' does not exist!", pathToGitAttributesFile);
+            }
+            var gitTreeBuilder = new GitTreeBuilder(_repository.ObjectDatabase, _repository.Info.Path);
+            if (!string.IsNullOrWhiteSpace(pathToGitIgnoreFile) && File.Exists(pathToGitIgnoreFile))
+                gitTreeBuilder.Add(".gitignore", pathToGitIgnoreFile, LibGit2Sharp.Mode.NonExecutableFile);
+            if (!string.IsNullOrWhiteSpace(pathToGitAttributesFile) && File.Exists(pathToGitAttributesFile))
+                gitTreeBuilder.Add(".gitattributes", pathToGitAttributesFile, LibGit2Sharp.Mode.NonExecutableFile);
             var tree = gitTreeBuilder.GetTree();
             var signature = new Signature("git-tfs", "git-tfs@noreply.com", new DateTimeOffset(2000, 1, 1, 0, 0, 0, new TimeSpan(0)));
-            var sha = _repository.ObjectDatabase.CreateCommit(signature, signature, ".gitignore", tree, new Commit[0], false).Sha;
-            Trace.WriteLine(".gitignore commit created: " + sha);
+            var commitMessage = string.Join(", ", new[] { pathToGitIgnoreFile != null ? ".gitignore" : null, pathToGitAttributesFile != null ? ".gitattributes" : null }.Where(s => s != null));
+            var sha = _repository.ObjectDatabase.CreateCommit(signature, signature, commitMessage, tree, new Commit[0], false).Sha;
+            Trace.WriteLine("Initial files commit created: " + sha);
 
             // Point our tfs remote branch to the .gitignore commit
             var defaultRef = ShortToTfsRemoteName("default");
@@ -728,6 +736,16 @@ namespace GitTfs.Core
             //Should add ourself the rules to the temporary rules because committing directly to the git database
             //prevent libgit2sharp to detect the new .gitignore file
             _repository.Ignore.AddTemporaryRules(File.ReadLines(pathToGitIgnoreFile));
+
+        public void UseGitAttributes(string pathToGitAttributesFile)
+        {
+            // Copy .gitattributes content to $GIT_DIR/info/attributes so that libgit2's
+            // filter attribute lookup can find it during direct object-database commits
+            var infoDir = Path.Combine(_repository.Info.Path, "info");
+            if (!Directory.Exists(infoDir))
+                Directory.CreateDirectory(infoDir);
+            File.Copy(pathToGitAttributesFile, Path.Combine(infoDir, "attributes"), true);
+        }
 
         public IDictionary<int, string> GetCommitChangeSetPairs()
         {

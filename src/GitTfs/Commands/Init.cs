@@ -39,8 +39,9 @@ namespace GitTfs.Commands
             DoGitInitDb();
             VerifyGitUserConfig();
             SaveAuthorFileInRepository();
-            CommitTheGitIgnoreFile(_remoteOptions.GitIgnorePath);
+            CommitInitialFiles(_remoteOptions.GitIgnorePath, _remoteOptions.GitAttributesPath);
             UseTheGitIgnoreFile(_remoteOptions.GitIgnorePath);
+            UseTheGitAttributesFile(_remoteOptions.GitAttributesPath);
             GitTfsInit(tfsUrl, tfsRepositoryPath);
             return 0;
         }
@@ -62,14 +63,24 @@ namespace GitTfs.Commands
 
         private void SaveAuthorFileInRepository() => _authorsFileHelper.SaveAuthorFileInRepository(_globals.AuthorsFilePath, _globals.GitDir);
 
-        private void CommitTheGitIgnoreFile(string pathToGitIgnoreFile)
+        private void CommitInitialFiles(string pathToGitIgnoreFile, string pathToGitAttributesFile)
         {
-            if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile))
+            if (string.IsNullOrWhiteSpace(pathToGitIgnoreFile) && string.IsNullOrWhiteSpace(pathToGitAttributesFile))
             {
-                Trace.WriteLine("No .gitignore file specified to commit...");
+                Trace.WriteLine("No .gitignore or .gitattributes file specified to commit...");
                 return;
             }
-            _globals.Repository.CommitGitIgnore(pathToGitIgnoreFile);
+            _globals.Repository.CommitInitialFiles(pathToGitIgnoreFile, pathToGitAttributesFile);
+        }
+
+        private void UseTheGitAttributesFile(string pathToGitAttributesFile)
+        {
+            if (string.IsNullOrWhiteSpace(pathToGitAttributesFile))
+            {
+                Trace.WriteLine("No .gitattributes file specified to use...");
+                return;
+            }
+            _globals.Repository.UseGitAttributes(pathToGitAttributesFile);
         }
 
         private void UseTheGitIgnoreFile(string pathToGitIgnoreFile)

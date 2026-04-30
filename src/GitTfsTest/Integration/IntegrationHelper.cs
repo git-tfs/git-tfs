@@ -72,7 +72,16 @@ namespace GitTfs.Test.Integration
             Console.WriteLine("Repository path:" + fullPath);
             var repoPath = LibGit2Sharp.Repository.Init(fullPath);
             using (var repo = new Repository(repoPath))
+            {
+                // Ensure the initial branch is named "master" regardless of the
+                // user's or system's init.defaultBranch setting, since the tests
+                // reference "master" by name.
+                if (repo.Head.FriendlyName != "master")
+                {
+                    repo.Refs.UpdateTarget("HEAD", "refs/heads/master");
+                }
                 buildIt(new RepoBuilder(repo));
+            }
         }
 
         public class RepoBuilder
@@ -211,6 +220,33 @@ namespace GitTfs.Test.Integration
                 });
                 return this;
             }
+
+            public FakeChangesetBuilder ChangeFromResource(TfsChangeType changeType, TfsItemType itemType, string tfsPath, string tfsWorkdir, string resourcePath, int? itemId = null)
+            {
+                using (var resource = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath))
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        resource.CopyTo(ms);
+                        ScriptedChange sc = new ScriptedChange
+                        {
+                            ChangeType = changeType,
+                            ItemType = itemType,
+                            RepositoryPath = tfsPath,
+                            Content = ms.GetBuffer(),
+                            ItemId = itemId
+                        };
+                        _changeset.Changes.Add(sc);
+                        // used also in AssertFileInWorkspace to check that what we extracted from resources matches the encoded/decoded binary file fetched from fake Vs:
+                        using (FileStream fs = new FileStream(Path.Combine(tfsWorkdir, resourcePath), FileMode.Create))
+                        using (BinaryWriter bw = new BinaryWriter(fs))
+                            bw.Write(sc.Content);
+                    }
+                }
+
+                return this;
+            }
+
         }
 
         #endregion
@@ -335,6 +371,13 @@ namespace GitTfs.Test.Integration
             AssertEqual(contents, actual, "Contents of " + path);
         }
 
+        public void AssertFileInWorkspace(string repodir, string file, byte[] bytesContents)
+        {
+            var path = Path.Combine(Workdir, repodir, file);
+            var actual = File.ReadAllBytes(path);
+            AssertEqual(bytesContents, actual, "Contents of " + path);
+        }
+
         public void AssertFileInIndex(string repodir, string file, string contents)
         {
             var repo = Repository(repodir);
@@ -343,6 +386,21 @@ namespace GitTfs.Test.Integration
             var actual = blob.GetContentText();
             Assert.Equal(contents, actual);
         }
+
+        // could be used for comparing with binaries
+        //
+        //public void AssertFileInIndex(string repodir, string file, byte[] bytesContents)
+        //{
+        //    var repo = Repository(repodir);
+        //    var indexEntry = repo.Index.FirstOrDefault(x => x.Path == file);
+        //    var blob = repo.Lookup<Blob>(indexEntry.Id);
+        //    var actual = blob.GetContentStream();
+        //    using (MemoryStream ms = new MemoryStream())
+        //    {
+        //        actual.CopyTo(ms);
+        //        Assert.Equal(bytesContents, ms.GetBuffer());
+        //    }
+        //}
 
         public void AssertNoFileInWorkspace(string repodir, string file)
         {
