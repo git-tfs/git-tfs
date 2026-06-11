@@ -30,7 +30,9 @@ namespace GitTfs.Test.Core
             }
 
             private ChangeSieve _changeSieve;
-            public ChangeSieve Subject => _changeSieve ?? (_changeSieve = new ChangeSieve(Changeset, new PathResolver(Remote, "", InitialTree)));
+            public ChangeSieve Subject => _changeSieve ?? (_changeSieve = new ChangeSieve(Changeset, new PathResolver(Remote, "", InitialTree), BranchAlreadyHasContent));
+
+            protected virtual bool BranchAlreadyHasContent => false;
 
             private Dictionary<string, GitObject> _initialTree;
             public virtual Dictionary<string, GitObject> InitialTree => _initialTree ?? (_initialTree = new Dictionary<string, GitObject>(StringComparer.InvariantCultureIgnoreCase));
@@ -443,6 +445,105 @@ namespace GitTfs.Test.Core
                     ApplicableChange.Update("file8.txt"),
                     ApplicableChange.Update("file9.txt"),
                     ApplicableChange.Update("file10.txt"));
+        }
+
+        public class RebranchOntoExistingBranch : Base<RebranchOntoExistingBranch.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                protected override bool BranchAlreadyHasContent => true;
+
+                public Fixture()
+                {
+                    // The file is already in the git tree (stale carry-over from a project-delete no-op),
+                    // but the whole project is re-branched, so its content must be re-resolved anyway.
+                    InitialTree.Add("file6.txt", new GitObject() { Path = "file6.txt", Commit = "SHA" });
+
+                    Changeset.Changes = new[] {
+                        /*0*/FakeChange.AddDir("$/Project/", TfsChangeType.Branch), // the project root is re-branched
+                        /*1*/FakeChange.Branch("$/Project/file6.txt"), // include, even though it was there before
+                        /*2*/FakeChange.Branch("$/Project/file7.txt"), // include, because it was not there before
+                    };
+                }
+            }
+
+            [Fact]
+            public void DetectsRootFolderBranch() => Assert.True(Subject.BranchesProject);
+
+            [Fact]
+            public void FetchesRebranchedFiles()
+            {
+                var fetchChanges = Subject.GetChangesToFetch().ToArray();
+                Assert.Contains(Changes[1], fetchChanges);
+                Assert.Contains(Changes[2], fetchChanges);
+            }
+
+            [Fact]
+            public void AppliesRebranchedFiles() => AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Update("file6.txt"),
+                    ApplicableChange.Update("file7.txt"));
+        }
+
+        public class RebranchGateNotTriggeredWithoutRootFolderBranch : Base<RebranchGateNotTriggeredWithoutRootFolderBranch.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                protected override bool BranchAlreadyHasContent => true;
+
+                public Fixture()
+                {
+                    InitialTree.Add("file6.txt", new GitObject() { Path = "file6.txt", Commit = "SHA" });
+
+                    Changeset.Changes = new[] {
+                        /*0*/FakeChange.Branch("$/Project/file6.txt"), // do not include, because it was there before and the project root is not re-branched
+                        /*1*/FakeChange.Branch("$/Project/file7.txt"), // include, because it was not there before
+                    };
+                }
+            }
+
+            [Fact]
+            public void DoesNotFetchBranchedFileAlreadyPresent()
+            {
+                var fetchChanges = Subject.GetChangesToFetch().ToArray();
+                Assert.Single(fetchChanges);
+                Assert.Contains(Changes[1], fetchChanges);
+            }
+
+            [Fact]
+            public void DoesNotApplyBranchedFileAlreadyPresent() => AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Update("file7.txt"));
+        }
+
+        public class RebranchGateNotTriggeredOnFreshBranchInit : Base<RebranchGateNotTriggeredOnFreshBranchInit.Fixture>
+        {
+            public class Fixture : BaseFixture
+            {
+                // BranchAlreadyHasContent stays false: first changeset on a freshly-initialized branch remote.
+
+                public Fixture()
+                {
+                    InitialTree.Add("file6.txt", new GitObject() { Path = "file6.txt", Commit = "SHA" });
+
+                    Changeset.Changes = new[] {
+                        /*0*/FakeChange.AddDir("$/Project/", TfsChangeType.Branch), // the project root is branched...
+                        /*1*/FakeChange.Branch("$/Project/file6.txt"), // ...but do not include: the tree starts at the parent branch's commit, so the content is already correct
+                        /*2*/FakeChange.Branch("$/Project/file7.txt"), // include, because it was not there before
+                    };
+                }
+            }
+
+            [Fact]
+            public void DoesNotFetchBranchedFileAlreadyPresent()
+            {
+                var fetchChanges = Subject.GetChangesToFetch().ToArray();
+                // Changes[1] (branch of file6.txt) is missing
+                Assert.DoesNotContain(Changes[1], fetchChanges);
+                Assert.Contains(Changes[2], fetchChanges);
+            }
+
+            [Fact]
+            public void DoesNotApplyBranchedFileAlreadyPresent() => AssertChanges(Subject.GetChangesToApply(),
+                    ApplicableChange.Update("file7.txt"));
         }
 
         public class WithDeleteMainFolderBranchAndSubItems : Base<WithDeleteMainFolderBranchAndSubItems.Fixture>, IDisposable

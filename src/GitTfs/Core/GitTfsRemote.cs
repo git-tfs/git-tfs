@@ -359,7 +359,7 @@ namespace GitTfs.Core
                     }
                     var parentSha = (renameResult != null && renameResult.IsProcessingRenameChangeset) ? renameResult.LastParentCommitBeforeRename : MaxCommitHash;
                     var isFirstTFSCommitInRepository = (MaxChangesetId == 0);
-                    var log = Apply(parentSha, changeset, objects);
+                    var log = Apply(parentSha, changeset, objects, branchAlreadyHasContent: !isFirstTFSCommitInRepository);
                     if (changeset.IsRenameChangeset && !isFirstTFSCommitInRepository && !firstOnBranch)
                     {
                         if (renameResult == null || !renameResult.IsProcessingRenameChangeset)
@@ -780,17 +780,17 @@ namespace GitTfs.Core
             }
         }
 
-        private LogEntry Apply(string parent, ITfsChangeset changeset, IDictionary<string, GitObject> entries) => Apply(parent, changeset, entries, null);
+        private LogEntry Apply(string parent, ITfsChangeset changeset, IDictionary<string, GitObject> entries, bool branchAlreadyHasContent = false) => Apply(parent, changeset, entries, null, branchAlreadyHasContent);
 
         private LogEntry Apply(string parent, ITfsChangeset changeset, Action<Exception> ignorableErrorHandler) => Apply(parent, changeset, BuildEntryDictionary(), ignorableErrorHandler);
 
-        private LogEntry Apply(string parent, ITfsChangeset changeset, IDictionary<string, GitObject> entries, Action<Exception> ignorableErrorHandler)
+        private LogEntry Apply(string parent, ITfsChangeset changeset, IDictionary<string, GitObject> entries, Action<Exception> ignorableErrorHandler, bool branchAlreadyHasContent = false)
         {
             LogEntry result = null;
             WithWorkspace(changeset.Summary, workspace =>
             {
                 var treeBuilder = workspace.Remote.Repository.GetTreeBuilder(parent);
-                result = changeset.Apply(parent, treeBuilder, workspace, entries, ignorableErrorHandler);
+                result = changeset.Apply(parent, treeBuilder, workspace, entries, ignorableErrorHandler, branchAlreadyHasContent);
                 result.Tree = treeBuilder.GetTree();
             });
             if (!string.IsNullOrEmpty(parent)) result.CommitParents.Add(parent);

@@ -31,10 +31,12 @@ namespace GitTfs.Util
     {
         private readonly PathResolver _resolver;
         private readonly IEnumerable<NamedChange> _namedChanges;
+        private readonly bool _branchAlreadyHasContent;
 
-        public ChangeSieve(IChangeset changeset, PathResolver resolver)
+        public ChangeSieve(IChangeset changeset, PathResolver resolver, bool branchAlreadyHasContent = false)
         {
             _resolver = resolver;
+            _branchAlreadyHasContent = branchAlreadyHasContent;
 
             _namedChanges = changeset.Changes.Select(c => new NamedChange
             {
@@ -126,6 +128,31 @@ namespace GitTfs.Util
             return compartments.Deleted.Concat(compartments.Updated).Concat(compartments.Ignored);
         }
 
+        private bool? _branchesProject;
+        /// <summary>
+        /// Is the top-level project folder being (re)branched in this changeset?
+        /// </summary>
+        public bool BranchesProject
+        {
+            get
+            {
+                if (!_branchesProject.HasValue)
+                {
+                    _branchesProject = NamedChanges.Any(change =>
+                        change.Change.Item.ItemType == TfsItemType.Folder
+                            && change.GitPath == string.Empty
+                            && change.Change.ChangeType.IncludesOneOf(TfsChangeType.Branch));
+                }
+                return _branchesProject.Value;
+            }
+        }
+
+        // A project re-branch onto a branch that already has commits re-establishes the whole
+        // project from a (possibly different) source branch. The current tree may be stale
+        // carry-over from a preceding project-delete no-op (DeletesProject), so do not trust
+        // "path already present" for Branch/Merge-only changes here: resolve their content.
+        private bool ForceResolveBranchAndMergeContent => _branchAlreadyHasContent && BranchesProject;
+
         private bool? _deletesProject;
         private bool DeletesProject
         {
@@ -157,7 +184,7 @@ namespace GitTfs.Util
                 && !IsGitPathInDotGit(change)
                 && !IsGitPathIgnored(change);
 
-        private bool IsIgnorable(NamedChange change) => IgnorableChangeType(change.Change.ChangeType) && _resolver.Contains(change.GitPath);
+        private bool IsIgnorable(NamedChange change) => !ForceResolveBranchAndMergeContent && IgnorableChangeType(change.Change.ChangeType) && _resolver.Contains(change.GitPath);
 
         private bool IgnorableChangeType(TfsChangeType changeType)
         {

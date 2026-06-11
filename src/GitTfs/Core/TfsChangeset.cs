@@ -22,13 +22,13 @@ namespace GitTfs.Core
             BaseChangesetId = _changeset.Changes.Max(c => c.Item.ChangesetId) - 1;
         }
 
-        public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree, Action<Exception> ignorableErrorHandler)
+        public LogEntry Apply(string lastCommit, IGitTreeModifier treeBuilder, ITfsWorkspace workspace, IDictionary<string, GitObject> initialTree, Action<Exception> ignorableErrorHandler, bool branchAlreadyHasContent = false)
         {
             if (initialTree.Empty())
                 Summary.Remote.Repository.GetObjects(lastCommit, initialTree);
             var remoteRelativeLocalPath = GetPathRelativeToWorkspaceLocalPath(workspace);
             var resolver = new PathResolver(Summary.Remote, remoteRelativeLocalPath, initialTree);
-            var sieve = new ChangeSieve(_changeset, resolver);
+            var sieve = new ChangeSieve(_changeset, resolver, branchAlreadyHasContent);
             if (sieve.RenameBranchCommmit)
             {
                 IsRenameChangeset = true;

@@ -2,3 +2,4 @@
 * chore: target .net v4.8 ( #1490 by @pmiossec )
 * chore: Update libgit2sharp to v0.30 ( #1492 by @pmiossec )
 * Fix handling of renamed branches for clone/fetch ( #1493 by @dh2i-sam )
+* fix: stale file content when a project is deleted and re-branched onto the same path ( by @tsvetelin-pavlov )
