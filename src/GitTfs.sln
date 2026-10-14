@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.271
@@ -47,6 +47,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.Vs2019", "GitTfs.Vs2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.Vs2022", "GitTfs.Vs2022\GitTfs.Vs2022.csproj", "{7853F7AB-87E8-4282-8FDE-6A138B73F9B5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitTfs.Vs2026", "GitTfs.Vs2026\GitTfs.Vs2026.csproj", "{C87D2A3B-5521-4A89-906E-1A0ACD26FC26}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AnyCPU = Debug|AnyCPU
@@ -85,6 +87,10 @@ Global
 		{7853F7AB-87E8-4282-8FDE-6A138B73F9B5}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{7853F7AB-87E8-4282-8FDE-6A138B73F9B5}.Release|AnyCPU.ActiveCfg = Release|Any CPU
 		{7853F7AB-87E8-4282-8FDE-6A138B73F9B5}.Release|AnyCPU.Build.0 = Release|Any CPU
+	{C87D2A3B-5521-4A89-906E-1A0ACD26FC26}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
+	{C87D2A3B-5521-4A89-906E-1A0ACD26FC26}.Debug|AnyCPU.Build.0 = Debug|Any CPU
+	{C87D2A3B-5521-4A89-906E-1A0ACD26FC26}.Release|AnyCPU.ActiveCfg = Release|Any CPU
+	{C87D2A3B-5521-4A89-906E-1A0ACD26FC26}.Release|AnyCPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

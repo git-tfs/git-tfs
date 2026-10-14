@@ -542,6 +542,7 @@ namespace GitTfs.VsCommon
         }
 
         private readonly Dictionary<string, Workspace> _workspaces = new Dictionary<string, Workspace>();
+        private readonly HashSet<string> _ownedWorkspaces = new HashSet<string>();
 
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, IEnumerable<Tuple<string, string>> mappings, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
@@ -553,9 +554,10 @@ namespace GitTfs.VsCommon
                 _workspaces.Add(remote.Id, workspace = Retry.Do(() =>
                 {
                     var workingFolders = mappings.Select(x => new WorkingFolder(x.Item1, Path.Combine(localDirectory, x.Item2)));
-                    return GetWorkspace(workingFolders.ToArray());
+                    return GetWorkspace(workingFolders.ToArray(), true);
                 }));
-                Janitor.CleanThisUpWhenWeClose(() => TryToDeleteWorkspace(workspace));
+                if (_ownedWorkspaces.Contains(workspace.Name))
+                    Janitor.CleanThisUpWhenWeClose(() => TryToDeleteWorkspace(workspace));
             }
             var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
                 .With("remote").EqualTo(remote)
@@ -569,7 +571,7 @@ namespace GitTfs.VsCommon
         public void WithWorkspace(string localDirectory, IGitTfsRemote remote, TfsChangesetInfo versionToFetch, Action<ITfsWorkspace> action)
         {
             Trace.WriteLine("Setting up a TFS workspace at " + localDirectory);
-            var workspace = Retry.Do(() => GetWorkspace(new WorkingFolder(remote.TfsRepositoryPath, localDirectory)));
+            var workspace = Retry.Do(() => GetWorkspace(new[] { new WorkingFolder(remote.TfsRepositoryPath, localDirectory) }, true));
             try
             {
                 var tfsWorkspace = _container.With("localDirectory").EqualTo(localDirectory)
@@ -582,38 +584,82 @@ namespace GitTfs.VsCommon
             }
             finally
             {
-                TryToDeleteWorkspace(workspace);
+                if (_ownedWorkspaces.Contains(workspace.Name))
+                    TryToDeleteWorkspace(workspace);
             }
         }
 
-        private Workspace GetWorkspace(params WorkingFolder[] folders)
+        private Workspace GetWorkspace(WorkingFolder[] folders, bool reuseExistingWorkspace = false)
         {
+            if (reuseExistingWorkspace)
+            {
+                var existingWorkspace = TryGetWorkspaceWithSameMappings(folders);
+                if (existingWorkspace != null)
+                    return existingWorkspace;
+            }
+
             var workspace = VersionControl.CreateWorkspace(GenerateWorkspaceName());
+            _ownedWorkspaces.Add(workspace.Name);
             try
             {
                 SetWorkspaceMappingFolders(workspace, folders);
             }
             catch (MappingConflictException e)
             {
+                var conflictingWorkspaces = folders
+                    .Select(folder => VersionControl.TryGetWorkspace(folder.LocalItem))
+                    .Where(existing => existing != null)
+                    .Distinct()
+                    .ToList();
+                if (conflictingWorkspaces.Any(existing => !_ownedWorkspaces.Contains(existing.Name)
+                                                           && !existing.Name.StartsWith("git-tfs-", StringComparison.OrdinalIgnoreCase)))
+                {
+                    TryToDeleteWorkspace(workspace);
+                    _ownedWorkspaces.Remove(workspace.Name);
+                    throw new InvalidOperationException(e.Message + Environment.NewLine
+                        + "The selected workspace folder is already mapped by another TFS workspace. Use that workspace only when its mappings match the requested repository, or choose an unmapped folder.", e);
+                }
+
                 try
                 {
                     foreach (WorkingFolder folder in folders)
                         CleanupWorkspaces(folder.LocalItem);
                     SetWorkspaceMappingFolders(workspace, folders);
                 }
-                catch
+                catch (Exception cleanupException)
                 {
                     TryToDeleteWorkspace(workspace);
-                    throw new GitTfsException(e.Message).WithRecommendation("Run 'git tfs cleanup-workspaces' to remove the workspace.");
+                    _ownedWorkspaces.Remove(workspace.Name);
+                    throw new InvalidOperationException(e.Message + Environment.NewLine
+                        + "The selected workspace folder is already mapped and could not be remapped. Reuse a workspace with matching mappings or choose an unmapped folder.", cleanupException);
                 }
             }
             catch
             {
                 TryToDeleteWorkspace(workspace);
+                _ownedWorkspaces.Remove(workspace.Name);
                 throw;
             }
             return workspace;
         }
+
+        private Workspace TryGetWorkspaceWithSameMappings(WorkingFolder[] folders)
+        {
+            if (folders.Length == 0)
+                return null;
+
+            var workspace = VersionControl.TryGetWorkspace(folders[0].LocalItem);
+            if (workspace == null || workspace.Folders.Length != folders.Length)
+                return null;
+
+            return folders.All(folder => workspace.Folders.Any(existing =>
+                string.Equals(existing.ServerItem, folder.ServerItem, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(NormalizeLocalPath(existing.LocalItem), NormalizeLocalPath(folder.LocalItem), StringComparison.OrdinalIgnoreCase)))
+                ? workspace
+                : null;
+        }
+
+        private static string NormalizeLocalPath(string path) => Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
         private static void SetWorkspaceMappingFolders(Workspace workspace, WorkingFolder[] folders)
         {
@@ -1088,7 +1134,7 @@ namespace GitTfs.VsCommon
                                 });
                 }
 
-                workspace = GetWorkspace(new WorkingFolder(projectPath, gitRepositoryPath));
+                workspace = GetWorkspace(new[] { new WorkingFolder(projectPath, gitRepositoryPath) });
                 if (!Directory.Exists(directoryForBranch))
                     Directory.CreateDirectory(directoryForBranch);
                 workspace.PendAdd(directoryForBranch);

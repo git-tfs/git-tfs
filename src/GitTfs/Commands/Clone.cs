@@ -65,6 +65,7 @@ namespace GitTfs.Commands
                     }
                 }
 
+                _init.ConfigureWorkspacePath();
                 VerifyTfsPathToClone(tfsRepositoryPath);
             }
             catch

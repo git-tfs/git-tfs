@@ -60,6 +60,26 @@ namespace GitTfs.Test.Integration
         }
 
         [FactExceptOnUnix]
+        public void ResumableCloneAppliesWorkspaceOption()
+        {
+            h.SetupFake(r =>
+            {
+                r.Changeset(1, "Project created from template", DateTime.Parse("2012-01-01 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.Folder, "$/MyProject");
+                r.Changeset(2, "First commit", DateTime.Parse("2012-01-02 12:12:12 -05:00"))
+                    .Change(TfsChangeType.Add, TfsItemType.File, "$/MyProject/README", "tldr");
+            });
+
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--resumable", "--up-to=1");
+
+            var workspacePath = Path.Combine(h.Workdir, "short-workspace");
+            h.Run("clone", h.TfsUrl, "$/MyProject", "MyProject", "--resumable", "--workspace=" + workspacePath);
+
+            h.AssertConfig("MyProject", GitTfsConstants.WorkspaceConfigKey, workspacePath);
+            h.AssertFileInWorkspace("MyProject", "README", "tldr");
+        }
+
+        [FactExceptOnUnix]
         public void CloneProjectWithInternationalCharactersInFileNamesAndFolderNames()
         {
             h.SetupFake(r =>

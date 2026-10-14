@@ -1,0 +1,7 @@
+structuremap
+
+group VS2022
+Microsoft.TeamFoundationServer.Client
+Microsoft.TeamFoundationServer.ExtendedClient
+Microsoft.VisualStudio.Setup.Configuration.Interop
+Microsoft.VisualStudio.Settings.15.0
